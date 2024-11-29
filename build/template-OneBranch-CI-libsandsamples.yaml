@@ -55,6 +55,12 @@ steps:
     script: |
       Get-Content "$(SourceDir)NuGet.config"
 
+# Authenticate to the NuGet feed
+- task: NuGetAuthenticate@1
+  displayName: 'Authenticate to NuGet feed'
+  inputs:
+    forceReinstallCredentialProvider: true
+
 # Use the computed SourceDir for workload restore
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore for Desktop and Client projects'
