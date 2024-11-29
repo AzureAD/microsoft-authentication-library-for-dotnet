@@ -48,6 +48,13 @@ steps:
           exit 1
       }
 
+- task: PowerShell@2
+  displayName: 'Output NuGet.config Content'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Get-Content "$(SourceDir)NuGet.config"
+
 # Use the computed SourceDir for workload restore
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore for Desktop and Client projects'
