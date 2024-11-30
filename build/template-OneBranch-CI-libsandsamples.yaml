@@ -61,6 +61,14 @@ steps:
   inputs:
     forceReinstallCredentialProvider: true
 
+# Step to restore workloads
+- task: DotNetCoreCLI@2
+  displayName: 'Restore required workloads'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore --configfile $(SourceDir)NuGet.config --verbosity detailed'
+
 - task: DotNetCoreCLI@2
   displayName: 'Restore all projects with NuGet.config'
   inputs:
