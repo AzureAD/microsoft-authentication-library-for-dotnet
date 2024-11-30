@@ -80,12 +80,15 @@ steps:
       dotnet workload install maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
       dotnet workload install android --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
 
-- task: JavaToolInstaller@0
+- task: PowerShell@2
   displayName: 'Install Java 11 for Build'
   inputs:
-    versionSpec: '11'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: 'PreInstalled'
+    targetType: 'inline'
+    script: |
+      Invoke-WebRequest -Uri https://download.java.net/java/GA/jdk11/13/GPL/openjdk-11.0.2_windows-x64_bin.zip -OutFile java11.zip
+      Expand-Archive -Path java11.zip -DestinationPath $(Build.SourcesDirectory)\jdk11
+      $env:JAVA_HOME = "$(Build.SourcesDirectory)\jdk11"
+      $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
