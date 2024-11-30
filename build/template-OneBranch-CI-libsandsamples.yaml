@@ -80,21 +80,12 @@ steps:
       dotnet workload install maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
       dotnet workload install android --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
 
-- ${{ if eq(parameters.Mode, 'build') }}:
-  - task: PowerShell@2
-    displayName: 'Install Java 11 for Build'
-    inputs:
-      targetType: 'inline'
-      script: |
-        choco install openjdk --version=11.0.2.01 -y
-
-- ${{ if eq(parameters.Mode, 'test') }}:
-  - task: JavaToolInstaller@0
-    displayName: 'Use Java 11 for Test'
-    inputs:
-      versionSpec: 11
-      jdkArchitectureOption: x64
-      jdkSourceOption: PreInstalled
+- task: JavaToolInstaller@0
+  displayName: 'Install Java 11 for Build'
+  inputs:
+    versionSpec: '11'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'PreInstalled'
 
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
