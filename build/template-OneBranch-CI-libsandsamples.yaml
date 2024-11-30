@@ -80,13 +80,6 @@ steps:
       dotnet workload install maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
       dotnet workload install android --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
 
-- task: PowerShell@2
-  displayName: Install Chocolatey
-  inputs:
-    targetType: 'inline'
-    script: |
-      Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))      
-
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
     displayName: 'Install Java 11 for Build'
