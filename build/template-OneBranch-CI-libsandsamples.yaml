@@ -62,12 +62,14 @@ steps:
     forceReinstallCredentialProvider: true
 
 - task: DotNetCoreCLI@2
-  displayName: 'Restore for Microsoft.Identity.Client.Desktop.csproj'
+  displayName: 'Restore all projects with NuGet.config'
   inputs:
     command: restore
-    projects: '$(SourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj'
-    nugetConfigPath: '$(SourceDir)NuGet.config'
-    verbosityRestore: 'detailed'
+    projects: '**/*.csproj'  # Restore all projects
+    feedsToUse: config
+    nugetConfigPath: '$(SourceDir)NuGet.config'  # Path to your NuGet.config
+    includeNuGetOrg: false  # Block access to public feeds
+    arguments: '--verbosity detailed'  # Enable detailed logging
 
 - task: DotNetCoreCLI@2
   displayName: 'Restore for Microsoft.Identity.Client.csproj'
