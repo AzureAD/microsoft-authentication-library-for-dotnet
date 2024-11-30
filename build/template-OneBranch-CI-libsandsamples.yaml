@@ -61,31 +61,16 @@ steps:
   inputs:
     forceReinstallCredentialProvider: true
 
-# Step to restore workloads
 - task: DotNetCoreCLI@2
-  displayName: 'Restore required workloads'
+  displayName: 'Restore required workloads for projects'
   inputs:
     command: 'custom'
     custom: 'workload'
-    arguments: 'restore --configfile $(SourceDir)NuGet.config --verbosity detailed'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Restore all projects with NuGet.config'
-  inputs:
-    command: restore
-    projects: '**/*.csproj'  # Restore all projects
-    feedsToUse: config
-    nugetConfigPath: '$(SourceDir)NuGet.config'  # Path to your NuGet.config
-    includeNuGetOrg: false  # Block access to public feeds
-    arguments: '--verbosity detailed'  # Enable detailed logging
-
-- task: DotNetCoreCLI@2
-  displayName: 'Restore for Microsoft.Identity.Client.csproj'
-  inputs:
-    command: restore
-    projects: '$(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
-    nugetConfigPath: '$(SourceDir)NuGet.config'
-    verbosityRestore: 'detailed'
+    arguments: >
+      restore $(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj
+      restore $(SourceDir)src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj
+      --configfile $(SourceDir)NuGet.config
+      --verbosity detailed
       
 - task: PowerShell@2
   displayName: Install MAUI
