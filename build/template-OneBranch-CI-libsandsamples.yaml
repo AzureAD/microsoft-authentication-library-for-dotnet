@@ -32,16 +32,16 @@ steps:
       $MsalBaseDir = "$(Build.SourcesDirectory)/$(MsalSourceDir)"
       
       # Check if both projects exist under MsalSourceDir
-      $DesktopExists = Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client.Desktop"
+      $BrokerExists = Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client.Broker"
       $ClientExists = Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client"
       
       # Check if both projects exist directly under Build.SourcesDirectory
-      $AltDesktopExists = Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client.Desktop"
+      $AltBrokerExists = Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client.Broker"
       $AltClientExists = Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client"
 
-      if ($DesktopExists -and $ClientExists) {
+      if ($BrokerExists -and $ClientExists) {
           Write-Host "##vso[task.setvariable variable=SourceDir]$MsalBaseDir"
-      } elseif ($AltDesktopExists -and $AltClientExists) {
+      } elseif ($AltBrokerExists -and $AltClientExists) {
           Write-Host "##vso[task.setvariable variable=SourceDir]$(Build.SourcesDirectory)/"
       } else {
           Write-Error "Unable to determine the correct source directory structure."
@@ -57,8 +57,7 @@ steps:
       restore $(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj
       restore $(SourceDir)src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj
       --configfile $(SourceDir)NuGet.config
-      --verbosity detailed
-      
+
 - task: PowerShell@2
   displayName: Install MAUI
   inputs:
