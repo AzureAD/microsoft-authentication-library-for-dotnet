@@ -80,6 +80,7 @@ steps:
       targetType: 'inline'
       script: |
         choco install openjdk --version=11.0.2.01 -y
+        
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: JavaToolInstaller@0
     displayName: 'Use Java 11 for Test'
