@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
                     "client_credentials flow should not receive a refresh token");
 
                 Debug.Assert(
-                    (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity || 
+                    (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity ||
                     requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity),
                     "Managed identity flow should not receive a refresh token");
 
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client
                     }
                 }
 
-                
+
                 account = new Account(
                   homeAccountId,
                   username,
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
-                        var measuredResultDuration = await StopwatchService.MeasureCodeBlockAsync( async () => 
+                        var measuredResultDuration = await StopwatchService.MeasureCodeBlockAsync(async () =>
                         {
                             await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                             await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
@@ -930,18 +930,21 @@ namespace Microsoft.Identity.Client
             // this will either be the home account ID or null, it can never be OBO assertion or tenant ID
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParameters);
 
+            logger.VerbosePii(() => $"[GetAccounts] PartitionKey: {partitionKey}. request.HomeAccountId {requestParameters.HomeAccountId}", () => "");
+
             var refreshTokenCacheItems = Accessor.GetAllRefreshTokens(partitionKey);
             var accountCacheItems = Accessor.GetAllAccounts(partitionKey);
 
             if (filterByClientId)
             {
-                FilterTokensByClientId(refreshTokenCacheItems);
+                refreshTokenCacheItems.FilterWithLogging(item =>
+                    string.Equals(item.ClientId, ClientId, StringComparison.OrdinalIgnoreCase),
+                    logger,
+                    "[GetAccounts] Filtering RTs by clientID",
+                    true);
             }
 
-            if (logger.IsLoggingEnabled(LogLevel.Verbose))
-            {
-                logger.Verbose(() => $"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
-            }
+            logger.Verbose(() => $"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache before env filtering.");
 
             // Multi-cloud support - must filter by environment.
             ISet<string> allEnvironmentsInCache = new HashSet<string>(
@@ -969,14 +972,20 @@ namespace Microsoft.Identity.Client
             // since the authority in request is different from the authority used to get the token
             if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
             {
-                refreshTokenCacheItems.RemoveAll(rt => !instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment));
-                accountCacheItems.RemoveAll(acc => !instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+                refreshTokenCacheItems.FilterWithLogging(
+                    rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment),
+                    logger,
+                    "[GetAccounts] Filtering RTs by environment",
+                    true);
+
+                accountCacheItems.FilterWithLogging(
+                    a => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(a.Environment),
+                    logger,
+                    "[GetAccounts] Filtering accounts by environment",
+                    true);
             }
 
-            if (logger.IsLoggingEnabled(LogLevel.Verbose))
-            {
-                logger.Verbose(() => $"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
-            }
+            logger.Verbose(() => $"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
             foreach (MsalRefreshTokenCacheItem rtItem in refreshTokenCacheItems)
@@ -1047,14 +1056,11 @@ namespace Microsoft.Identity.Client
 
             if (!string.IsNullOrEmpty(requestParameters.HomeAccountId))
             {
-                accounts = accounts.Where(acc => acc.HomeAccountId.Identifier.Equals(
-                    requestParameters.HomeAccountId,
-                    StringComparison.OrdinalIgnoreCase)).ToList();
-
-                if (logger.IsLoggingEnabled(LogLevel.Verbose))
-                {
-                    logger.Verbose(() => $"Filtered by home account id. Remaining accounts {accounts.Count} ");
-                }
+                accounts.FilterWithLogging(
+                     acc => acc.HomeAccountId.Identifier.Equals(requestParameters.HomeAccountId, StringComparison.OrdinalIgnoreCase),
+                     logger,
+                     "[GetAccounts] Filtering by accountID",
+                     true);
             }
 
             return accounts;
@@ -1287,7 +1293,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     RemoveAccountInternal(account, requestParameters.RequestContext);
-                    
+
                     if (IsLegacyAdalCacheEnabled(requestParameters))
                     {
                         CacheFallbackOperations.RemoveAdalUser(
