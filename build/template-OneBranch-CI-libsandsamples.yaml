@@ -72,9 +72,8 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $env:SYSTEM_ACCESSTOKEN = "$(System.AccessToken)"
+        az devops configure --defaults organization=https://identitydivision.visualstudio.com/
         az artifacts universal download `
-          --organization "https://identitydivision.visualstudio.com/" `
           --feed "IDDP_PublicPackages" `
           --name "java11" `
           --version "11.0.24" `
