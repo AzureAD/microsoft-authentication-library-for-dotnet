@@ -87,12 +87,6 @@ steps:
         # Define the Java installation path
         $installerPath = "$(Build.ArtifactStagingDirectory)\Java\jdk-11.0.24_windows-x64_bin.exe"
         $javaInstallPath = "C:\Program Files\Java\jdk-11.0.24"
-
-        # Install Java silently
-        if (!(Test-Path $installerPath)) {
-          Write-Error "Java installer not found at $installerPath"
-          exit 1
-        }
         
         Start-Process $installerPath -ArgumentList "/s" -NoNewWindow -Wait
 
