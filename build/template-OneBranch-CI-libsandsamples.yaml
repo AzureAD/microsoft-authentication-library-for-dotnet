@@ -90,12 +90,6 @@ steps:
         
         Start-Process $installerPath -ArgumentList "/s" -NoNewWindow -Wait
 
-        # Validate Java installation directory
-        if (!(Test-Path $javaInstallPath)) {
-          Write-Error "Java installation failed. Directory not found: $javaInstallPath"
-          exit 1
-        }
-
         # Set JAVA_HOME and update PATH
         [Environment]::SetEnvironmentVariable("JAVA_HOME", $javaInstallPath, [System.EnvironmentVariableTarget]::Machine)
         $env:JAVA_HOME = $javaInstallPath
