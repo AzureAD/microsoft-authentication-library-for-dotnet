@@ -67,17 +67,14 @@ steps:
       dotnet workload install android --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
 
 - ${{ if eq(parameters.Mode, 'build') }}:
-  - task: PowerShell@2
+  - task: UniversalPackages@0
     displayName: 'Download Java 11 from Azure Artifacts'
     inputs:
-      targetType: 'inline'
-      script: |
-        az devops configure --defaults organization=https://identitydivision.visualstudio.com/
-        az artifacts universal download `
-          --feed "IDDP_PublicPackages" `
-          --name "java11" `
-          --version "11.0.24" `
-          --path "$(Build.ArtifactStagingDirectory)\Java"
+      command: download
+      vstsFeed: 'IDDP_PublicPackages'
+      packageName: 'java11'
+      version: '11.0.24'
+      downloadDirectory: '$(Build.ArtifactStagingDirectory)\Java'
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
