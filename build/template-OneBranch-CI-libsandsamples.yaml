@@ -80,17 +80,37 @@ steps:
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
-    displayName: 'Install Java 11'
+    displayName: 'Install and Configure Java 11'
     inputs:
       targetType: 'inline'
       script: |
+        # Define the Java installation path
         $installerPath = "$(Build.ArtifactStagingDirectory)\Java\jdk-11.0.24_windows-x64_bin.exe"
+        $javaInstallPath = "C:\Program Files\Java\jdk-11.0.24"
+
+        # Install Java silently
+        if (!(Test-Path $installerPath)) {
+          Write-Error "Java installer not found at $installerPath"
+          exit 1
+        }
+        
         Start-Process $installerPath -ArgumentList "/s" -NoNewWindow -Wait
 
+        # Validate Java installation directory
+        if (!(Test-Path $javaInstallPath)) {
+          Write-Error "Java installation failed. Directory not found: $javaInstallPath"
+          exit 1
+        }
+
         # Set JAVA_HOME and update PATH
-        $env:JAVA_HOME = "C:\Program Files\Java\jdk-11.0.24"
-        [Environment]::SetEnvironmentVariable("JAVA_HOME", $env:JAVA_HOME, [System.EnvironmentVariableTarget]::Machine)
-        $env:PATH += ";$env:JAVA_HOME\bin"
+        [Environment]::SetEnvironmentVariable("JAVA_HOME", $javaInstallPath, [System.EnvironmentVariableTarget]::Machine)
+        $env:JAVA_HOME = $javaInstallPath
+        $newPath = "$env:JAVA_HOME\bin;$env:PATH"
+        [Environment]::SetEnvironmentVariable("PATH", $newPath, [System.EnvironmentVariableTarget]::Machine)
+        $env:PATH = $newPath
+
+        Write-Host "Java installed successfully at $javaInstallPath"
+        Write-Host "JAVA_HOME set to $env:JAVA_HOME"
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
@@ -98,8 +118,21 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        java -version
-        echo "JAVA_HOME is set to $env:JAVA_HOME"
+        # Validate Java version
+        try {
+          java -version
+        } catch {
+          Write-Error "Java not found in PATH. Ensure JAVA_HOME and PATH are configured correctly."
+          exit 1
+        }
+
+        # Confirm JAVA_HOME
+        if (-not $env:JAVA_HOME) {
+          Write-Error "JAVA_HOME is not set."
+          exit 1
+        }
+
+        Write-Host "JAVA_HOME is set to $env:JAVA_HOME"
         
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: JavaToolInstaller@0
