@@ -67,20 +67,37 @@ steps:
       dotnet workload install android --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
 
 - ${{ if eq(parameters.Mode, 'build') }}:
-  - task: PowerShell@2
-    displayName: Install Chocolatey
+  - task: UniversalPackages@0
+    displayName: 'Download Java 11 Installer from Azure Artifacts'
     inputs:
-      targetType: 'inline'
-      script: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))      
+      command: download
+      vstsFeed: 'IDDP_PublicPackages'  
+      packageName: 'java11'            
+      version: '11.0.24'              
+      downloadDirectory: '$(Build.ArtifactStagingDirectory)'
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
-    displayName: 'Install Java 11 for Build'
+    displayName: 'Install Java 11'
     inputs:
       targetType: 'inline'
       script: |
-        choco install openjdk --version=11.0.2.01 -y
+        $installerPath = "$(Build.ArtifactStagingDirectory)\jdk-11.0.24_windows-x64_bin.exe"
+        Start-Process $installerPath -ArgumentList "/s" -NoNewWindow -Wait
+
+        # Set JAVA_HOME and update PATH
+        $env:JAVA_HOME = "C:\Program Files\Java\jdk-11.0.24"
+        [Environment]::SetEnvironmentVariable("JAVA_HOME", $env:JAVA_HOME, [System.EnvironmentVariableTarget]::Machine)
+        $env:PATH += ";$env:JAVA_HOME\bin"
+
+- ${{ if eq(parameters.Mode, 'build') }}:
+  - task: PowerShell@2
+    displayName: 'Validate Java Installation'
+    inputs:
+      targetType: 'inline'
+      script: |
+        java -version
+        echo "JAVA_HOME is set to $env:JAVA_HOME"
         
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: JavaToolInstaller@0
