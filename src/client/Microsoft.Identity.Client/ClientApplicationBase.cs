@@ -38,8 +38,8 @@ namespace Microsoft.Identity.Client
 
         internal ClientApplicationBase(ApplicationConfiguration config) : base(config)
         {
-            UserTokenCacheInternal = 
-                config.UserTokenCacheInternalForTest ?? 
+            UserTokenCacheInternal =
+                config.UserTokenCacheInternalForTest ??
                 new TokenCache(
                     ServiceBundle,
                     false,
@@ -171,6 +171,15 @@ namespace Microsoft.Identity.Client
         {
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            
+            if (requestContext.Logger.IsLoggingEnabled(LogLevel.Info))
+            {                
+                requestContext.Logger.Info($"==== GetAccounts started - {apiId} ====");
+                requestContext.Logger.InfoPii(
+                    $"Account id filter: {homeAccountIdFilter}",
+                    $"Account id filter: {!string.IsNullOrEmpty(homeAccountIdFilter)}");
+            }
+
             requestContext.ApiEvent = new ApiEvent(correlationId);
             requestContext.ApiEvent.ApiId = apiId;
 
