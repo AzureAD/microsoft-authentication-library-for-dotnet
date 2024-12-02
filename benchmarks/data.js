@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1730493969977,
+  "lastUpdate": 1733157087145,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6614,6 +6614,42 @@ window.BENCHMARK_DATA = {
             "value": 333064,
             "unit": "ns",
             "range": "± 9106.931005558348"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7cadf6011476d266f9675c8b2ae528f644fac020",
+          "message": "Add more logging to GetAccounts by id (#4929)\n\nAdd more verbose logging to cache op",
+          "timestamp": "2024-12-02T16:23:54Z",
+          "tree_id": "ae53da3cc0dbabb5a60b0164996bd6bfde396250",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/7cadf6011476d266f9675c8b2ae528f644fac020"
+        },
+        "date": 1733157083008,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 260759.45833333334,
+            "unit": "ns",
+            "range": "± 6589.975664526993"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 344027.0833333333,
+            "unit": "ns",
+            "range": "± 3213.979223170196"
           }
         ]
       }
