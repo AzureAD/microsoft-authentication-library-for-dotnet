@@ -1,0 +1,7 @@
+Microsoft.Identity.Client.Desktop.DesktopExtensions
+Microsoft.Identity.Client.Desktop.WamExtension
+static Microsoft.Identity.Client.Desktop.DesktopExtensions.WithDesktopFeatures(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.Desktop.DesktopExtensions.WithWindowsDesktopFeatures(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder, Microsoft.Identity.Client.BrokerOptions brokerOptions) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.Desktop.DesktopExtensions.WithWindowsEmbeddedBrowserSupport(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.Desktop.WamExtension.WithBroker(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder, Microsoft.Identity.Client.BrokerOptions brokerOptions) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.Desktop.WamExtension.WithWindowsBroker(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder, bool enableBroker = true) -> Microsoft.Identity.Client.PublicClientApplicationBuilder

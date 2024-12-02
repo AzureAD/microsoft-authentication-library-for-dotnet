@@ -141,7 +141,6 @@ namespace Microsoft.Identity.Client
 #if ANDROID || iOS
         /// <summary>
         /// Brokers (Microsoft Authenticator, Intune Company Portal) enable Single-Sign-On, device identification,
-
         /// and application identification verification. To enable one of these features,
         /// you need to set the WithBroker(bool) parameters to true on Android and iOS. 
         /// On desktop platforms, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions)
