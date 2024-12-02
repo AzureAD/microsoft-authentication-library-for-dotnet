@@ -70,11 +70,13 @@ steps:
   - task: UniversalPackages@0
     displayName: 'Download Java 11 from Azure Artifacts'
     inputs:
-      command: download
-      vstsFeed: 'IDDP_PublicPackages'
-      packageName: 'java11'
-      version: '11.0.24'
-      downloadDirectory: '$(Build.ArtifactStagingDirectory)\Java'
+      command: 'download'                      
+      downloadDirectory: '$(Build.ArtifactStagingDirectory)\Java' 
+      feedsToUse: 'internal'                   
+      vstsFeed: 'IDDP_PublicPackages'          
+      vstsFeedPackage: 'java11'                
+      vstsPackageVersion: '11.0.24'            
+      verbosity: 'Information'                 
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
