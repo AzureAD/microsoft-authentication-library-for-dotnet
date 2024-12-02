@@ -112,17 +112,6 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        # Validate Java installation
-        java -version
-        echo "JAVA_HOME is set to $env:JAVA_HOME"
-
-
-- ${{ if eq(parameters.Mode, 'build') }}:
-  - task: PowerShell@2
-    displayName: 'Validate Java Installation'
-    inputs:
-      targetType: 'inline'
-      script: |
         # Validate Java version
         try {
           java -version
