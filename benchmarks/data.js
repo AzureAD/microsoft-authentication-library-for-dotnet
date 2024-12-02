@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1733157092025,
+  "lastUpdate": 1733157094480,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -33224,6 +33224,66 @@ window.BENCHMARK_DATA = {
             "value": 151692.28,
             "unit": "ns",
             "range": "± 15988.021808690139"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7cadf6011476d266f9675c8b2ae528f644fac020",
+          "message": "Add more logging to GetAccounts by id (#4929)\n\nAdd more verbose logging to cache op",
+          "timestamp": "2024-12-02T16:23:54Z",
+          "tree_id": "ae53da3cc0dbabb5a60b0164996bd6bfde396250",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/7cadf6011476d266f9675c8b2ae528f644fac020"
+        },
+        "date": 1733157093685,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 18160.166558401925,
+            "unit": "ns",
+            "range": "± 66.05102400101889"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29827.56290762765,
+            "unit": "ns",
+            "range": "± 118.99432548625724"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 10225.10451398577,
+            "unit": "ns",
+            "range": "± 74.97790516084294"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 53957.2444132487,
+            "unit": "ns",
+            "range": "± 384.39983166681753"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 39760.53846153846,
+            "unit": "ns",
+            "range": "± 315.8814691685832"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 204460.96,
+            "unit": "ns",
+            "range": "± 23228.327734510254"
           }
         ]
       }
