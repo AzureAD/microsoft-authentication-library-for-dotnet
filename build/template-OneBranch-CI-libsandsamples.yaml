@@ -67,14 +67,18 @@ steps:
       dotnet workload install android --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
 
 - ${{ if eq(parameters.Mode, 'build') }}:
-  - task: UniversalPackages@0
-    displayName: 'Download Java 11 Installer from Azure Artifacts'
+  - task: PowerShell@2
+    displayName: 'Download Java 11 from Azure Artifacts'
     inputs:
-      command: download
-      vstsFeed: 'IDDP_PublicPackages'  
-      packageName: 'java11'            
-      version: '11.0.24'              
-      downloadDirectory: '$(Build.ArtifactStagingDirectory)'
+      targetType: 'inline'
+      script: |
+        $env:SYSTEM_ACCESSTOKEN = "$(System.AccessToken)"
+        az artifacts universal download `
+          --organization "https://identitydivision.visualstudio.com/" `
+          --feed "IDDP_PublicPackages" `
+          --name "java11" `
+          --version "11.0.24" `
+          --path "$(Build.ArtifactStagingDirectory)\Java"
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
@@ -82,7 +86,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $installerPath = "$(Build.ArtifactStagingDirectory)\jdk-11.0.24_windows-x64_bin.exe"
+        $installerPath = "$(Build.ArtifactStagingDirectory)\Java\jdk-11.0.24_windows-x64_bin.exe"
         Start-Process $installerPath -ArgumentList "/s" -NoNewWindow -Wait
 
         # Set JAVA_HOME and update PATH
