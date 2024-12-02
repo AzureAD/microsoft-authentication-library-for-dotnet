@@ -14,9 +14,10 @@ steps:
   inputs:
     version: 6.x
 
-- template: template-restore-build-libsandsamples.yaml
+- template: template-OneBranch-CI-libsandsamples.yaml
   parameters:
-    Solution: 'LibsAndSamples.sln'    
+    Solution: 'LibsAndSamples.sln'
+    Mode: 'test'
 
   # Run All Desktop Tests
 - template: template-run-all-tests.yaml

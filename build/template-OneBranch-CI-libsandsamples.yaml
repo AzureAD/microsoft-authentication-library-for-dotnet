@@ -6,6 +6,7 @@ parameters:
   BuildConfiguration: 'release'
   MsalClientSemVer: '4.60.0-devopsbuild' 
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
+  Mode: 'build' # Default to 'build'
 
 steps:
 
@@ -21,49 +22,82 @@ steps:
   inputs:
     version: 6.x
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore for Desktop project'
+# Compute the source directory based on the parameter MsalSourceDir
+- task: PowerShell@2
+  displayName: 'Compute Source Directory'
   inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+    targetType: 'inline'
+    script: |
+      # Compute base directory
+      $MsalBaseDir = "$(Build.SourcesDirectory)/$(MsalSourceDir)"
+      
+      # Check if both projects exist under MsalSourceDir
+      $BrokerExists = Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client.Broker"
+      $ClientExists = Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client"
+      
+      # Check if both projects exist directly under Build.SourcesDirectory
+      $AltBrokerExists = Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client.Broker"
+      $AltClientExists = Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client"
+
+      if ($BrokerExists -and $ClientExists) {
+          Write-Host "##vso[task.setvariable variable=SourceDir]$MsalBaseDir"
+      } elseif ($AltBrokerExists -and $AltClientExists) {
+          Write-Host "##vso[task.setvariable variable=SourceDir]$(Build.SourcesDirectory)/"
+      } else {
+          Write-Error "Unable to determine the correct source directory structure."
+          exit 1
+      }
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore for Identity.Client'
+  displayName: 'Restore required workloads for projects'
   inputs:
     command: 'custom'
     custom: 'workload'
-    arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+    arguments: >
+      restore $(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj
+      restore $(SourceDir)src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj
+      --configfile $(SourceDir)NuGet.config
 
 - task: PowerShell@2
   displayName: Install MAUI
   inputs:
     targetType: 'inline'
     script: |
-      dotnet workload install maui --source https://api.nuget.org/v3/index.json
-      dotnet workload install android --source https://api.nuget.org/v3/index.json
+      dotnet workload install maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
+      dotnet workload install android --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
 
-- task: PowerShell@2
-  displayName: Install Chocolatey
-  inputs:
-    targetType: 'inline'
-    script: |
-      Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))      
+- ${{ if eq(parameters.Mode, 'build') }}:
+  - task: PowerShell@2
+    displayName: Install Chocolatey
+    inputs:
+      targetType: 'inline'
+      script: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))      
 
-- task: PowerShell@2
-  displayName: Install Java 11
-  inputs:
-    targetType: 'inline'
-    script: |
-      choco install openjdk --version=11.0.2.01 -y
+- ${{ if eq(parameters.Mode, 'build') }}:
+  - task: PowerShell@2
+    displayName: 'Install Java 11 for Build'
+    inputs:
+      targetType: 'inline'
+      script: |
+        choco install openjdk --version=11.0.2.01 -y
+        
+- ${{ if eq(parameters.Mode, 'test') }}:
+  - task: JavaToolInstaller@0
+    displayName: 'Use Java 11 for Test'
+    inputs:
+      versionSpec: 11
+      jdkArchitectureOption: x64
+      jdkSourceOption: PreInstalled
 
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
     script: 'nuget locals all -clear'
 
-- powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
-  displayName: 'Install Android'
+- ${{ if eq(parameters.Mode, 'build') }}:
+  - powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
+    displayName: 'Install Android'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
