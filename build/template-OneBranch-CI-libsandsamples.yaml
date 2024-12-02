@@ -68,28 +68,33 @@ steps:
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: UniversalPackages@0
-    displayName: 'Download Java 11 from Azure Artifacts'
+    displayName: 'Download OpenJDK 11 from Azure Artifacts'
     inputs:
-      command: 'download'                      
-      downloadDirectory: '$(Build.ArtifactStagingDirectory)\Java' 
-      feedsToUse: 'internal'                   
-      vstsFeed: 'IDDP_PublicPackages'          
-      vstsFeedPackage: 'java11'                
-      vstsPackageVersion: '11.0.24'            
-      verbosity: 'Information'                 
+      command: 'download'
+      downloadDirectory: '$(Build.ArtifactStagingDirectory)\Java'
+      feedsToUse: 'internal'
+      vstsFeed: 'IDDP_PublicPackages'
+      vstsFeedPackage: 'openjdk11'
+      vstsPackageVersion: '11.0.2'
+      verbosity: 'Information'
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
-    displayName: 'Install and Configure Java 11'
+    displayName: 'Extract and Configure OpenJDK 11'
     inputs:
       targetType: 'inline'
       script: |
-        # Define the Java installation path
-        $installerPath = "$(Build.ArtifactStagingDirectory)\Java\jdk-11.0.24_windows-x64_bin.exe"
-        $javaInstallPath = "C:\Program Files\Java\jdk-11.0.24"
-        
-        Start-Process $installerPath -ArgumentList "/s" -NoNewWindow -Wait
+        # Define paths
+        $zipPath = "$(Build.ArtifactStagingDirectory)\Java\openjdk-11.0.2_windows-x64_bin.zip"
+        $javaInstallPath = "C:\Program Files\Java\jdk-11.0.2"
 
+        # Extract the ZIP file
+        if (!(Test-Path $zipPath)) {
+          Write-Error "Java ZIP file not found: $zipPath"
+          exit 1
+        }
+        Expand-Archive -Path $zipPath -DestinationPath "C:\Program Files\Java" -Force
+        
         # Set JAVA_HOME and update PATH
         [Environment]::SetEnvironmentVariable("JAVA_HOME", $javaInstallPath, [System.EnvironmentVariableTarget]::Machine)
         $env:JAVA_HOME = $javaInstallPath
@@ -97,8 +102,20 @@ steps:
         [Environment]::SetEnvironmentVariable("PATH", $newPath, [System.EnvironmentVariableTarget]::Machine)
         $env:PATH = $newPath
 
+        # Log success
         Write-Host "Java installed successfully at $javaInstallPath"
         Write-Host "JAVA_HOME set to $env:JAVA_HOME"
+
+- ${{ if eq(parameters.Mode, 'build') }}:
+  - task: PowerShell@2
+    displayName: 'Validate Java Installation'
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Validate Java installation
+        java -version
+        echo "JAVA_HOME is set to $env:JAVA_HOME"
+
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
