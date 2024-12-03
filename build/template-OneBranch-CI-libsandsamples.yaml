@@ -160,3 +160,39 @@ steps:
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
+
+- ${{ if eq(parameters.Mode, 'build') }}:
+  - task: PowerShell@2
+    displayName: 'Cleanup Java Installation'
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Define paths
+        $zipPath = "$(Build.ArtifactStagingDirectory)\Java\openjdk-11.0.2_windows-x64_bin.zip"
+        $javaInstallPath = "C:\Program Files\Java\jdk-11.0.2"
+
+        # Delete the Java ZIP file
+        if (Test-Path $zipPath) {
+          try {
+            Remove-Item -Path $zipPath -Force
+            Write-Host "Deleted Java ZIP file: $zipPath"
+          } catch {
+            Write-Error "Failed to delete Java ZIP file: $zipPath"
+            exit 1
+          }
+        } else {
+          Write-Host "Java ZIP file not found for deletion: $zipPath"
+        }
+
+        # Delete the Java installation directory
+        if (Test-Path $javaInstallPath) {
+          try {
+            Remove-Item -Path $javaInstallPath -Recurse -Force
+            Write-Host "Deleted Java installation directory: $javaInstallPath"
+          } catch {
+            Write-Error "Failed to delete Java installation directory: $javaInstallPath"
+            exit 1
+          }
+        } else {
+          Write-Host "Java installation directory not found for deletion: $javaInstallPath"
+        }
