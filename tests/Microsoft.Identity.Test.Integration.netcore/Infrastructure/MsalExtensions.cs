@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration
                     PopCryptoProvider = new SigningCredentialsToPopCryptoProviderAdapter(popCredentials, assertNotSigned: true)
                 };
 
-            return builder.WithProofOfPossession(popAuthenticationConfiguration);
+            return builder.WithSignedHttpRequestProofOfPossession(popAuthenticationConfiguration);
         }
     }
 

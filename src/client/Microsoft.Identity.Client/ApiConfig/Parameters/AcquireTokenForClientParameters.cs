@@ -12,6 +12,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// </summary>
         public bool ForceRefresh { get; set; }
 
+        /// <summary>
+        /// Determines whether to use mTLS Proof of Possession (PoP).
+        /// </summary>
+        public bool UseMtlsPop { get; set; } = false;
+
         /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)
         {
@@ -20,6 +25,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 var builder = new StringBuilder();
                 builder.AppendLine("=== AcquireTokenForClientParameters ===");
                 builder.AppendLine("SendX5C: " + SendX5C);
+                builder.AppendLine("UseMtlsPop: " + UseMtlsPop);
                 builder.AppendLine("ForceRefresh: " + ForceRefresh);
                 logger.Info(builder.ToString());
             }

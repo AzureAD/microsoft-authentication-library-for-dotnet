@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
-#region ClientCredentials
+        #region ClientCredentials
 
         public IClientCredential ClientCredential { get; internal set; }
 

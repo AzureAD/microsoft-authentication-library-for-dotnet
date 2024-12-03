@@ -231,6 +231,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
                 [OAuth2Parameter.Scope] = AuthenticationRequestParameters.Scope.AsSingleString()
             };
+
             return dict;
         }
 
