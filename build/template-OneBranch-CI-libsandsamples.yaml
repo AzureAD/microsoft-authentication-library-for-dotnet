@@ -72,6 +72,10 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
+        # Debugging: List all JAVA_HOME environment variables
+        Write-Host "Listing all JAVA_HOME related environment variables:"
+        Get-ChildItem env: | Where-Object { $_.Name -like "JAVA_HOME*" } | ForEach-Object { Write-Host "$($_.Name): $($_.Value)" }
+      
         Write-Host "Configuring Java Environment for Build..."
         $env:JAVA_HOME = $env:JAVA_HOME_11_X64
         [Environment]::SetEnvironmentVariable("JAVA_HOME", $env:JAVA_HOME, [System.EnvironmentVariableTarget]::Process)
