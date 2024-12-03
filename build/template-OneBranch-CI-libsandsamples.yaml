@@ -93,7 +93,8 @@ steps:
     displayName: 'Validate Java Installation'
     inputs:
       targetType: 'filePath'
-      filePath: '$(Build.SourcesDirectory)\$(MsalSourceDir)\Build\JavaManager.ps1'
+      filePath: '$(Build.SourcesDirectory)/$(MsalSourceDir)/Build/JavaManager.ps1'
+      arguments: '-Action Validate'
         
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: JavaToolInstaller@0
