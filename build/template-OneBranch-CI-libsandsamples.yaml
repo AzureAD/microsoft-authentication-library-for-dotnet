@@ -84,7 +84,7 @@ steps:
     displayName: 'Install Java'
     inputs:
       targetType: 'filePath'
-      filePath: '$(Build.SourcesDirectory)/$(MsalSourceDir)/JavaManager.ps1'
+      filePath: '$(Build.SourcesDirectory)\$(MsalSourceDir)\Build\JavaManager.ps1'
       arguments: '-Action Install -JavaZipPath "$(Build.ArtifactStagingDirectory)\Java\openjdk-11.0.2_windows-x64_bin.zip" -JavaInstallPath "C:\Program Files\Java\jdk-11.0.2"'
 
 # Validate Java step
@@ -93,7 +93,7 @@ steps:
     displayName: 'Validate Java Installation'
     inputs:
       targetType: 'filePath'
-      filePath: '$(Build.SourcesDirectory)/$(MsalSourceDir)/JavaManager.ps1'
+      filePath: '$(Build.SourcesDirectory)\$(MsalSourceDir)\Build\JavaManager.ps1'
         
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: JavaToolInstaller@0
@@ -134,5 +134,5 @@ steps:
     displayName: 'Cleanup Java Installation'
     inputs:
       targetType: 'filePath'
-      filePath: '$(Build.SourcesDirectory)/$(MsalSourceDir)/JavaManager.ps1'
+      filePath: '$(Build.SourcesDirectory)\$(MsalSourceDir)\Build\JavaManager.ps1'
       arguments: '-Action Cleanup -JavaZipPath "$(Build.ArtifactStagingDirectory)\Java\openjdk-11.0.2_windows-x64_bin.zip" -JavaInstallPath "C:\Program Files\Java\jdk-11.0.2"'
