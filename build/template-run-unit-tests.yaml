@@ -14,7 +14,7 @@ steps:
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
     runInParallel: true
-    codeCoverageEnabled: true
+    codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
@@ -27,7 +27,7 @@ steps:
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
     runInParallel: true
-    codeCoverageEnabled: true
+    codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
 
@@ -41,3 +41,4 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
+    runSettingsFile: 'build\CodeCoverage.runsettings'
