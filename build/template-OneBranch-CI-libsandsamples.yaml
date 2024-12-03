@@ -78,55 +78,22 @@ steps:
       vstsPackageVersion: '11.0.2'
       verbosity: 'Information'
 
+# Install Java step
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
-    displayName: 'Extract and Configure OpenJDK 11'
+    displayName: 'Install Java'
     inputs:
-      targetType: 'inline'
-      script: |
-        # Define paths
-        $zipPath = "$(Build.ArtifactStagingDirectory)\Java\openjdk-11.0.2_windows-x64_bin.zip"
-        $javaInstallPath = "C:\Program Files\Java\jdk-11.0.2"
+      targetType: 'filePath'
+      filePath: './JavaManager.ps1'
+      arguments: '-Action Install -JavaZipPath "$(Build.ArtifactStagingDirectory)\Java\openjdk-11.0.2_windows-x64_bin.zip" -JavaInstallPath "C:\Program Files\Java\jdk-11.0.2"'
 
-        # Extract the ZIP file
-        if (!(Test-Path $zipPath)) {
-          Write-Error "Java ZIP file not found: $zipPath"
-          exit 1
-        }
-        Expand-Archive -Path $zipPath -DestinationPath "C:\Program Files\Java" -Force
-        
-        # Set JAVA_HOME and update PATH
-        [Environment]::SetEnvironmentVariable("JAVA_HOME", $javaInstallPath, [System.EnvironmentVariableTarget]::Machine)
-        $env:JAVA_HOME = $javaInstallPath
-        $newPath = "$env:JAVA_HOME\bin;$env:PATH"
-        [Environment]::SetEnvironmentVariable("PATH", $newPath, [System.EnvironmentVariableTarget]::Machine)
-        $env:PATH = $newPath
-
-        # Log success
-        Write-Host "Java installed successfully at $javaInstallPath"
-        Write-Host "JAVA_HOME set to $env:JAVA_HOME"
-
+# Validate Java step
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
     displayName: 'Validate Java Installation'
     inputs:
-      targetType: 'inline'
-      script: |
-        # Validate Java version
-        try {
-          java -version
-        } catch {
-          Write-Error "Java not found in PATH. Ensure JAVA_HOME and PATH are configured correctly."
-          exit 1
-        }
-
-        # Confirm JAVA_HOME
-        if (-not $env:JAVA_HOME) {
-          Write-Error "JAVA_HOME is not set."
-          exit 1
-        }
-
-        Write-Host "JAVA_HOME is set to $env:JAVA_HOME"
+      targetType: 'filePath'
+      filePath: './JavaManager.ps1'
         
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: JavaToolInstaller@0
@@ -161,38 +128,11 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
+# Cleanup Java step
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
     displayName: 'Cleanup Java Installation'
     inputs:
-      targetType: 'inline'
-      script: |
-        # Define paths
-        $zipPath = "$(Build.ArtifactStagingDirectory)\Java\openjdk-11.0.2_windows-x64_bin.zip"
-        $javaInstallPath = "C:\Program Files\Java\jdk-11.0.2"
-
-        # Delete the Java ZIP file
-        if (Test-Path $zipPath) {
-          try {
-            Remove-Item -Path $zipPath -Force
-            Write-Host "Deleted Java ZIP file: $zipPath"
-          } catch {
-            Write-Error "Failed to delete Java ZIP file: $zipPath"
-            exit 1
-          }
-        } else {
-          Write-Host "Java ZIP file not found for deletion: $zipPath"
-        }
-
-        # Delete the Java installation directory
-        if (Test-Path $javaInstallPath) {
-          try {
-            Remove-Item -Path $javaInstallPath -Recurse -Force
-            Write-Host "Deleted Java installation directory: $javaInstallPath"
-          } catch {
-            Write-Error "Failed to delete Java installation directory: $javaInstallPath"
-            exit 1
-          }
-        } else {
-          Write-Host "Java installation directory not found for deletion: $javaInstallPath"
-        }
+      targetType: 'filePath'
+      filePath: './JavaManager.ps1'
+      arguments: '-Action Cleanup -JavaZipPath "$(Build.ArtifactStagingDirectory)\Java\openjdk-11.0.2_windows-x64_bin.zip" -JavaInstallPath "C:\Program Files\Java\jdk-11.0.2"'
