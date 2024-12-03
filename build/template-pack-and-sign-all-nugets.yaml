@@ -61,8 +61,3 @@ steps:
   inputs:
     script: 'dotnet nuget verify ${{ parameters.NugetPackagesWildcard }}'
   continueOnError: true
-
-- task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-  displayName: 'Get Software Bill Of Materials (SBOM)'
-  inputs:
-       BuildDropPath: '${{ parameters.ArtifactPublishPath }}'
