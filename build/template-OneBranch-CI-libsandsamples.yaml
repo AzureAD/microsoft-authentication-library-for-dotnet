@@ -68,19 +68,17 @@ steps:
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: PowerShell@2
-    displayName: Install Chocolatey
+    displayName: 'Set Java Environment for Java 11'
     inputs:
       targetType: 'inline'
       script: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))      
-
-- ${{ if eq(parameters.Mode, 'build') }}:
-  - task: PowerShell@2
-    displayName: 'Install Java 11 for Build'
-    inputs:
-      targetType: 'inline'
-      script: |
-        choco install openjdk --version=11.0.2.01 -y
+        Write-Host "Configuring Java Environment for Build..."
+        $env:JAVA_HOME = $env:JAVA_HOME_11_X64
+        [Environment]::SetEnvironmentVariable("JAVA_HOME", $env:JAVA_HOME, [System.EnvironmentVariableTarget]::Process)
+        $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+        [Environment]::SetEnvironmentVariable("PATH", $env:PATH, [System.EnvironmentVariableTarget]::Process)
+        Write-Host "Java Home: $env:JAVA_HOME"
+        java -version
         
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: JavaToolInstaller@0
