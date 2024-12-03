@@ -76,7 +76,7 @@ jobs: #Build and stage projects
       coverageType: 'lines'
       treat0of0as100: true
       forceCoverageImprovement: true
-      coverageUpperThreshold: '$(CodeCoverageUpperThreshold)' #default of 90
+      coverageUpperThreshold: '90'
       includePartiallySucceeded: false
       fallbackOnPRTargetBranch: false
       baseDefinitionId: '905' #this is the PR build and it is used as a baseline
