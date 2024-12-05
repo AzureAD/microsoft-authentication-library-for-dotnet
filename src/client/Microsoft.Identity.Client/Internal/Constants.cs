@@ -66,5 +66,22 @@ namespace Microsoft.Identity.Client.Internal
         {
             return $"https://{host}/.well-known/webfinger?rel={DefaultRealm}&resource={resource}";
         }
+
+        #region Telemetry Token Types
+        /// Bearer token type for telemetry.
+        public const string Bearer = "Bearer";
+
+        /// Pop token type for telemetry.
+        public const string Pop = "Pop";
+
+        /// Ssh-cert token type for telemetry.
+        public const string SshCert = "SshCert";
+
+        /// External token type for telemetry.
+        public const string External = "External";
+
+        /// Extension token type for telemetry.
+        public const string Extension = "Extension";
+        #endregion
     }
 }

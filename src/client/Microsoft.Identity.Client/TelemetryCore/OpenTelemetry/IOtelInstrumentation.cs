@@ -35,6 +35,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
-            CacheRefreshReason cacheRefreshReason);
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType);
     }
 }
