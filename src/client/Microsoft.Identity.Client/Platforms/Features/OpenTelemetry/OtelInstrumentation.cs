@@ -197,6 +197,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.TokenSource, tokenSource),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
                         new(TelemetryConstants.CacheLevel, cacheLevel));
+                //Add token Type to new counter?
                 logger.Verbose(() => "[OpenTelemetry] Completed incrementing to success counter.");
             }
         }
