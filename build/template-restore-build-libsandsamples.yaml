@@ -4,7 +4,7 @@
 parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'Release'
-  MsalClientSemVer: '4.0.0-devopsbuild'
+  MsalClientSemVer: '4.60.0-devopsbuild'
 
 steps:
 
