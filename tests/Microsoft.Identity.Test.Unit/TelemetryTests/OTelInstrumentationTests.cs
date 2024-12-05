@@ -273,7 +273,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(4, _exportedMetrics, 4, 0);
+                VerifyMetrics(5, _exportedMetrics, 4, 0);
             }
         }
 
@@ -434,6 +434,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         long totalSuccessfulRequests = 0;
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
@@ -456,6 +457,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.CallerSdkId);
                         expectedTags.Add(TelemetryConstants.CallerSdkVersion);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         long totalFailedRequests = 0;
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
@@ -478,6 +480,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -496,6 +499,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -512,6 +516,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -527,6 +532,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -544,6 +550,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -561,6 +568,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// Extension token type.
         /// Extension = 5
         /// </summary>
-        string TelemetryTokenType { get; }
+        int TelemetryTokenType { get; }
 
         /// <summary>
         /// Prefix for the HTTP header that has the token. E.g. "Bearer" or "POP"

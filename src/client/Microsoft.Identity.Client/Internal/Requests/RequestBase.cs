@@ -142,7 +142,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         apiEvent.ApiId,
                         apiEvent.CallerSdkApiId, 
                         apiEvent.CallerSdkVersion,
-                        cacheRefreshReason);
+                        cacheRefreshReason,
+                        apiEvent.TokenType);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()

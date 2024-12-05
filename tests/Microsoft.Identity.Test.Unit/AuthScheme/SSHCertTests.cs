@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit
                 scheme.GetTokenRequestParams()[OAuth2Parameter.TokenType]);
             Assert.AreEqual("jwk",
                 scheme.GetTokenRequestParams()[OAuth2Parameter.RequestConfirmation]);
-            Assert.AreEqual(Constants.SshCert, scheme.TelemetryTokenType);
+            Assert.AreEqual(3, scheme.TelemetryTokenType);
 
         }
     }

@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        public string TelemetryTokenType { get; set; }
+        public int TelemetryTokenType { get; set; }
 
         /// <summary>
         /// Time, in microseconds, spent in the token creation of the extended token.
