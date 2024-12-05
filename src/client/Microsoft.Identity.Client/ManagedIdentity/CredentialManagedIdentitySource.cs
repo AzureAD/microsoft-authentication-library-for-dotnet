@@ -15,7 +15,7 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal class ImdsManagedIdentitySource : AbstractManagedIdentity
+    internal class CredentialManagedIdentitySource : AbstractManagedIdentity
     {
         // IMDS constants. Docs for IMDS are available here https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
         private static readonly Uri s_imdsEndpoint = new("http://169.254.169.254/metadata/identity/oauth2/token");
@@ -33,10 +33,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private readonly Uri _imdsEndpoint;
 
-        internal ImdsManagedIdentitySource(RequestContext requestContext) : 
-            base(requestContext, ManagedIdentitySource.Imds)
+        internal CredentialManagedIdentitySource(RequestContext requestContext) : 
+            base(requestContext, ManagedIdentitySource.Credential)
         {
-            requestContext.Logger.Info(() => "[Managed Identity] Defaulting to IMDS endpoint for managed identity.");
+            requestContext.Logger.Info(() => "[Managed Identity] Defaulting to Credential endpoint for managed identity.");
 
             if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
 			{
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             	_imdsEndpoint = s_imdsEndpoint;
 			}
 
-            requestContext.Logger.Verbose(() => "[Managed Identity] Creating IMDS managed identity source. Endpoint URI: " + _imdsEndpoint);
+            requestContext.Logger.Verbose(() => "[Managed Identity] Creating Credential managed identity source. Endpoint URI: " + _imdsEndpoint);
         }
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalError.ManagedIdentityRequestFailed,
                     message,
                     null,
-                    ManagedIdentitySource.Imds,
+                    ManagedIdentitySource.Credential,
                     null);
 
                 throw exception;
