@@ -32,4 +32,9 @@
     <PackageReference Include="System.IO.FileSystem.AccessControl" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AdditionalFiles Include="PublicAPI/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI/PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
 </Project>
