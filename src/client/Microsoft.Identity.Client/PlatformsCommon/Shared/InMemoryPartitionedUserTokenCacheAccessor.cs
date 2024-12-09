@@ -223,17 +223,36 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         public virtual List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
+            List<MsalRefreshTokenCacheItem> result;
             var logger = requestlogger ?? _logger;
-            logger.Always($"[Internal cache] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}");
+            logger.AlwaysPii(
+                $"[Internal cache] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}. PartitionKey {partitionKey}",
+                $"[Internal cache] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}. PartitionKey  {!string.IsNullOrEmpty(partitionKey)}");
+
             if (string.IsNullOrEmpty(partitionKey))
             {
-                return RefreshTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                result = RefreshTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                logger.Verbose(() => $"[Internal cache] GetAllRefreshTokens (no partition) found {result.Count} refresh tokens:");
+
             }
             else
             {
                 RefreshTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalRefreshTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalRefreshTokenCacheItem>();
+
+                result = partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalRefreshTokenCacheItem>();
+                if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    logger.Verbose(() => $"[Internal cache] GetAllRefreshTokens (with partition - exists? {partition != null})) found {result.Count} refresh tokens:");
+                    if (RefreshTokenCacheDictionary.Count == 1 && result.Count == 0)
+                    {
+                        logger.VerbosePii(
+                            () => $"[Internal cache] 0 RTs and 1 partition. Partition in cache is {RefreshTokenCacheDictionary.Keys.First()}", 
+                            () => "[Internal cache] 0 RTs and 1 partition] 0 RTs and 1 partition.");
+                    }
+                }
             }
+
+            return result;
         }
 
         /// WARNING: if partitionKey is null, this API is slow as it loads all tokens, not just from 1 partition. 
@@ -255,15 +274,37 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         public virtual List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
+            var logger = requestlogger ?? _logger;
+            List<MsalAccountCacheItem> result;
+
+            logger.AlwaysPii(
+                $"[Internal cache] Total number of cache partitions found while getting accounts: {AccountCacheDictionary.Count}. PartitionKey {partitionKey}",
+                $"[Internal cache] Total number of cache partitions found while getting accounts: {AccountCacheDictionary.Count}. PartitionKey  {!string.IsNullOrEmpty(partitionKey)}");
+
             if (string.IsNullOrEmpty(partitionKey))
             {
-                return AccountCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                result = AccountCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                logger.Verbose(() => $"[Internal cache] GetAllAccounts (no partition) found {result.Count} accounts.");
             }
             else
             {
                 AccountCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccountCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalAccountCacheItem>();
+                result = partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalAccountCacheItem>();
+                
+                if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    logger.Verbose(() => $"[Internal cache] GetAllAccounts (with partition - exists? {partition != null}) found {result.Count} accounts.");
+                    if (AccountCacheDictionary.Count == 1 && result.Count == 0)
+                    {
+                        // get dictionary first key                        
+                        logger.VerbosePii(
+                            () => $"[Internal cache] 0 RTs and 1 partition. Partition in cache is {AccountCacheDictionary.Keys.First()}",
+                            () => "[Internal cache] 0 RTs and 1 partition] 0 RTs and 1 partition.");
+                    }
+                }
             }
+
+            return result;
         }
 
         public virtual List<MsalAppMetadataCacheItem> GetAllAppMetadata()
