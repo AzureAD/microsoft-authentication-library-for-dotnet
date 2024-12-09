@@ -1,0 +1,68 @@
+const Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.LinuxKeyRingDefaultCollection = "default" -> string
+const Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.LinuxKeyRingSessionCollection = "session" -> string
+Microsoft.Identity.Client.Extensions.Msal.CacheChangedEventArgs
+Microsoft.Identity.Client.Extensions.Msal.CacheChangedEventArgs.CacheChangedEventArgs(System.Collections.Generic.IEnumerable<string> added, System.Collections.Generic.IEnumerable<string> removed) -> void
+Microsoft.Identity.Client.Extensions.Msal.CrossPlatLock
+Microsoft.Identity.Client.Extensions.Msal.CrossPlatLock.CrossPlatLock(string lockfilePath, int lockFileRetryDelay = 100, int lockFileRetryCount = 600) -> void
+Microsoft.Identity.Client.Extensions.Msal.CrossPlatLock.Dispose() -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper
+Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.CacheChanged -> System.EventHandler<Microsoft.Identity.Client.Extensions.Msal.CacheChangedEventArgs>
+Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.Clear() -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.LoadUnencryptedTokenCache() -> byte[]
+Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.RegisterCache(Microsoft.Identity.Client.ITokenCache tokenCache) -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.SaveUnencryptedTokenCache(byte[] tokenCache) -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.UnregisterCache(Microsoft.Identity.Client.ITokenCache tokenCache) -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.VerifyPersistence() -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException
+Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException() -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException(string message) -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException(string message, System.Exception innerException) -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
+Microsoft.Identity.Client.Extensions.Msal.SharedUtilities
+Microsoft.Identity.Client.Extensions.Msal.Storage
+Microsoft.Identity.Client.Extensions.Msal.Storage.Clear(bool ignoreExceptions = false) -> void
+Microsoft.Identity.Client.Extensions.Msal.Storage.ReadData() -> byte[]
+Microsoft.Identity.Client.Extensions.Msal.Storage.VerifyPersistence() -> void
+Microsoft.Identity.Client.Extensions.Msal.Storage.WriteData(byte[] data) -> void
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.Authority.get -> string
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.CacheFilePath.get -> string
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.ClientId.get -> string
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.Build() -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.CustomizeLockRetry(int lockRetryDelay, int lockRetryCount) -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.StorageCreationPropertiesBuilder(string cacheFileName, string cacheDirectory) -> void
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.StorageCreationPropertiesBuilder(string cacheFileName, string cacheDirectory, string clientId) -> void
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.WithCacheChangedEvent(string clientId, string authority = "https://login.microsoftonline.com/common") -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.WithLinuxKeyring(string schemaName, string collection, string secretLabel, System.Collections.Generic.KeyValuePair<string, string> attribute1, System.Collections.Generic.KeyValuePair<string, string> attribute2) -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.WithLinuxUnprotectedFile() -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.WithMacKeyChain(string serviceName, string accountName) -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.WithUnprotectedFile() -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
+Microsoft.Identity.Client.Extensions.Msal.TraceSourceLogger
+Microsoft.Identity.Client.Extensions.Msal.TraceSourceLogger.LogError(string message) -> void
+Microsoft.Identity.Client.Extensions.Msal.TraceSourceLogger.LogInformation(string message) -> void
+Microsoft.Identity.Client.Extensions.Msal.TraceSourceLogger.LogWarning(string message) -> void
+Microsoft.Identity.Client.Extensions.Msal.TraceSourceLogger.Source.get -> System.Diagnostics.TraceSource
+Microsoft.Identity.Client.Extensions.Msal.TraceSourceLogger.TraceSourceLogger(System.Diagnostics.TraceSource traceSource) -> void
+readonly Microsoft.Identity.Client.Extensions.Msal.CacheChangedEventArgs.AccountsAdded -> System.Collections.Generic.IEnumerable<string>
+readonly Microsoft.Identity.Client.Extensions.Msal.CacheChangedEventArgs.AccountsRemoved -> System.Collections.Generic.IEnumerable<string>
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.CacheDirectory -> string
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.CacheFileName -> string
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.KeyringAttribute1 -> System.Collections.Generic.KeyValuePair<string, string>
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.KeyringAttribute2 -> System.Collections.Generic.KeyValuePair<string, string>
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.KeyringCollection -> string
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.KeyringSchemaName -> string
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.KeyringSecretLabel -> string
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.LockRetryCount -> int
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.LockRetryDelay -> int
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.MacKeyChainAccountName -> string
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.MacKeyChainServiceName -> string
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.UseLinuxUnencryptedFallback -> bool
+readonly Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.UseUnencryptedFallback -> bool
+static Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.CreateAsync(Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties storageCreationProperties, System.Diagnostics.TraceSource logger = null) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper>
+static Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.UserRootDirectory.get -> string
+static Microsoft.Identity.Client.Extensions.Msal.SharedUtilities.GetUserRootDirectory() -> string
+static Microsoft.Identity.Client.Extensions.Msal.SharedUtilities.IsLinuxPlatform() -> bool
+static Microsoft.Identity.Client.Extensions.Msal.SharedUtilities.IsMacPlatform() -> bool
+static Microsoft.Identity.Client.Extensions.Msal.SharedUtilities.IsWindowsPlatform() -> bool
+static Microsoft.Identity.Client.Extensions.Msal.Storage.Create(Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties creationProperties, System.Diagnostics.TraceSource logger = null) -> Microsoft.Identity.Client.Extensions.Msal.Storage
