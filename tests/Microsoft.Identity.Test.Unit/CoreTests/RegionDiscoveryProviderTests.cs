@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             _apiEvent = new ApiEvent(Guid.NewGuid());
             _apiEvent.ApiId = ApiEvent.ApiIds.AcquireTokenForClient;
             _testRequestContext.ApiEvent = _apiEvent;
-            _regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, true);
+            _regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager, true);
         }
 
         [TestCleanup]
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
             _harness?.Dispose();
-            _regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, true);
+            _regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager, true);
             _httpManager.Dispose();
             base.TestCleanup();
         }
@@ -151,12 +151,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
 
-            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, true);
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager, true);
             InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(
                 new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"centralus.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual($"centralus.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
 
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"centralus.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual($"centralus.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.UserProvidedValid, _testRequestContext.ApiEvent.RegionOutcome);
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"user_region.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual($"user_region.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
             Assert.AreEqual("user_region", _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.UserProvidedInvalid, _testRequestContext.ApiEvent.RegionOutcome);
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"regionwithspaces.{RegionDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual($"regionwithspaces.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
             Assert.AreEqual("regionwithspaces", _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task SuccessfulResponseFromRegionalizedAuthorityAsync()
         {
-            var regionalizedAuthority = new Uri($"https://{TestConstants.Region}.{RegionDiscoveryProvider.PublicEnvForRegional}/common/");
+            var regionalizedAuthority = new Uri($"https://{TestConstants.Region}.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}/common/");
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
@@ -423,9 +423,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { $"{region}.{RegionDiscoveryProvider.PublicEnvForRegional}", "login.microsoftonline.com" },
+                Aliases = new[] { $"{region}.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", "login.microsoftonline.com" },
                 PreferredCache = "login.microsoftonline.com",
-                PreferredNetwork = $"{region}.{RegionDiscoveryProvider.PublicEnvForRegional}"
+                PreferredNetwork = $"{region}.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}"
             };
 
             CollectionAssert.AreEquivalent(expectedEntry.Aliases, entry.Aliases);

@@ -10,12 +10,12 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Region
 {
-    internal class RegionDiscoveryProvider : IRegionDiscoveryProvider
+    internal class RegionAndMtlsDiscoveryProvider : IRegionDiscoveryProvider
     {
         private readonly IRegionManager _regionManager;
         public const string PublicEnvForRegional = "login.microsoft.com";
 
-        public RegionDiscoveryProvider(IHttpManager httpManager, bool clearCache)
+        public RegionAndMtlsDiscoveryProvider(IHttpManager httpManager, bool clearCache)
         {
             _regionManager = new RegionManager(httpManager, shouldClearStaticCache: clearCache);
         }
@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.Region
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             string region = null;
+
             if (requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
                 region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
@@ -30,6 +31,15 @@ namespace Microsoft.Identity.Client.Region
 
             if (string.IsNullOrEmpty(region))
             {
+                if (requestContext.UseMtlsPop)
+                {
+                    requestContext.Logger.Info("[Region discovery] Region discovery failed during mTLS Pop. ");
+
+                    throw new MsalServiceException(
+                        MsalError.RegionRequiredForMtlsPop,
+                        MsalErrorMessage.RegionRequiredForMtlsPopMessage);
+                }
+
                 requestContext.Logger.Info("[Region discovery] Not using a regional authority. ");
                 return null;
             }
@@ -56,7 +66,6 @@ namespace Microsoft.Identity.Client.Region
 
         private static string GetRegionalizedEnvironment(Uri authority, string region, RequestContext requestContext)
         {
-
             string host = authority.Host;
 
             if (KnownMetadataProvider.IsPublicEnvironment(host))
@@ -73,7 +82,13 @@ namespace Microsoft.Identity.Client.Region
             }
 
             requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{host}. ");
-            return $"{region}.{host}";
+
+            // Log the environment being resolved
+            string resolvedEnvironment = $"{region}.{host}";
+            string environmentType = requestContext.UseMtlsPop ? "MTLS with regional environment" : "standard regional environment";
+            requestContext.Logger.Info(() => $"[Region Discovery] Using {environmentType}: {resolvedEnvironment}.");
+
+            return resolvedEnvironment;
         }
     }
 }

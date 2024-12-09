@@ -75,6 +75,18 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Specifies that the certificate provided will be used for PoP tokens with mTLS (Mutual TLS) authentication.
+        /// For more information, refer to the <see href="https://aka.ms/mtls-pop">Proof-of-Posession documentation</see>.
+        /// </summary>
+        /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
+        public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
+        {
+            ValidateUseOfExperimentalFeature();
+            Parameters.UseMtlsPop = true;
+            return this; // Return the builder to allow method chaining
+        }
+
+        /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -103,7 +115,15 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         protected override void Validate()
         {
+            // Skip client credential validation if MTLS PoP is enabled
+            if (Parameters.UseMtlsPop)
+            {
+                // MTLS PoP is explicitly set, so skip client credential validation
+                return;
+            }
+
             base.Validate();
+
             if (Parameters.SendX5C == null)
             {
                 Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;
