@@ -32,7 +32,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             ApiEvent.ApiIds apiId, 
             string callerSdkId,
             string callerSdkVersion,
-            CacheRefreshReason cacheRefreshReason)
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType)
         {
             // No op
         }
@@ -44,7 +45,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             TokenSource tokenSource, 
             CacheRefreshReason cacheRefreshReason, 
             CacheLevel cacheLevel, 
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            int tokenType)
         {
             // No op
         }
