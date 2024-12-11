@@ -45,7 +45,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             TokenSource tokenSource, 
             CacheRefreshReason cacheRefreshReason, 
             CacheLevel cacheLevel, 
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            int tokenType)
         {
             // No op
         }

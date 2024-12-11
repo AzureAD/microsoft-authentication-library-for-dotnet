@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Test.Unit.AuthExtension
 {
     internal class MsalTestAuthenticationOperation : IAuthenticationOperation
     {
-        public int TelemetryTokenType => 5;
+        public int TelemetryTokenType => TelemetryTokenTypeConstants.Extension;
 
         public string AuthorizationHeaderPrefix => "someHeader";
 

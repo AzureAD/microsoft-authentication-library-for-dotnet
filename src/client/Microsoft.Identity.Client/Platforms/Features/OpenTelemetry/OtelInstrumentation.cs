@@ -116,7 +116,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 authResultMetadata.TokenSource,
                 authResultMetadata.CacheRefreshReason,
                 cacheLevel,
-                logger);
+                logger,
+                authResultMetadata.TelemetryTokenType);
 
             if (s_durationTotal.Value.Enabled)
             {
@@ -137,11 +138,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
-                new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+                new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
             }
 
-            // Only log duration in HTTP when token is fetched from IDP
+            // Only log duration in HTTP when token is fetched from IDP.
             if (s_durationInHttp.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
             {
                 s_durationInHttp.Value.Record(authResultMetadata.DurationInHttpInMs,
@@ -161,8 +161,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.ApiId, apiId),
                 new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                 new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
-                new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
-                new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+                new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
             }
 
             if (s_durationInExtensionInMs.Value.Enabled && authResultMetadata.DurationCreatingExtendedTokenInUs > 0)
@@ -184,7 +183,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             TokenSource tokenSource,
             CacheRefreshReason cacheRefreshReason,
             CacheLevel cacheLevel,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            int tokenType)
         {
             if (s_successCounter.Value.Enabled)
             {
@@ -192,11 +192,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty),
-                        new(TelemetryConstants.CallerSdkVersion, callerSdkVersion ?? string.Empty),
+                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + " " + callerSdkVersion ?? string.Empty),
                         new(TelemetryConstants.TokenSource, tokenSource),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
-                        new(TelemetryConstants.CacheLevel, cacheLevel));
+                        new(TelemetryConstants.CacheLevel, cacheLevel),
+                        new(TelemetryConstants.TokenType, tokenType));
                 //Add token Type to new counter?
                 logger.Verbose(() => "[OpenTelemetry] Completed incrementing to success counter.");
             }
@@ -217,8 +217,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ErrorCode, errorCode),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? ""),
-                        new(TelemetryConstants.CallerSdkVersion, callerSdkVersion ?? ""),
+                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + " " + callerSdkVersion ?? string.Empty),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
                         new(TelemetryConstants.TokenType, tokenType));
             }

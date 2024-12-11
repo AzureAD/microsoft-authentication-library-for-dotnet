@@ -430,7 +430,6 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.CallerSdkId);
-                        expectedTags.Add(TelemetryConstants.CallerSdkVersion);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
@@ -455,7 +454,6 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.ErrorCode);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.CallerSdkId);
-                        expectedTags.Add(TelemetryConstants.CallerSdkVersion);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.TokenType);
 
@@ -499,7 +497,6 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
-                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -516,7 +513,6 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
-                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -541,8 +537,8 @@ namespace Microsoft.Identity.Test.Unit
 
                         break;
 
-                    case "MsalDurationExtensionOperation.1B":
-                        Trace.WriteLine("Verify the metrics captured for MsalDurationExtensionOperation.1B histogram.");
+                    case "MsalDurationInExtensionInMs.1B":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationInExtensionInMs.1B histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);
@@ -596,7 +592,6 @@ namespace Microsoft.Identity.Test.Unit
             if (expectCallerSdkDetails)
             {
                 Assert.AreEqual(callerSdkId, tagDictionary[TelemetryConstants.CallerSdkId]);
-                Assert.AreEqual(callerSdkVersion, tagDictionary[TelemetryConstants.CallerSdkVersion]);
             }
 
             foreach (var expectedTag in expectedTags)

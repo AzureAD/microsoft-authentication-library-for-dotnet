@@ -28,7 +28,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             TokenSource tokenSource,
             CacheRefreshReason cacheRefreshReason,
             CacheLevel cacheLevel,
-            ILoggerAdapter logger);
+            ILoggerAdapter logger,
+            int TokenType);
 
         internal void LogFailureMetrics(string platform, 
             string errorCode, 

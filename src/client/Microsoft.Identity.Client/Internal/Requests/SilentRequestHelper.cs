@@ -102,7 +102,8 @@ namespace Microsoft.Identity.Client.Internal
                         TokenSource.IdentityProvider, 
                         CacheRefreshReason.ProactivelyRefreshed, 
                         Cache.CacheLevel.None,
-                        logger);
+                        logger,
+                        apiEvent.TokenType);
                 }
                 catch (MsalServiceException ex)
                 {
