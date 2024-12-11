@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        //[TestMethod]
+        [TestMethod]
         public async Task SNI_MtlsPopFlow_TestAsync()
         {
             // Arrange: Use the public cloud settings for testing
@@ -41,9 +41,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             X509Certificate2 cert = settings.GetCertificate();
 
             // Build Confidential Client Application with SNI certificate at App level
-            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create("e3628006-9c26-43b2-b5e7-07691426b65f")
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create("163ffef9-a313-45b4-ab2f-c7e2f5e0e23e")
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus")
+                .WithAzureRegion("westus3")
                 .WithCertificate(cert, true)  // Configure SNI certificate at App level
                 .WithExperimentalFeatures()
                 .WithTestLogging()
@@ -53,16 +53,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .WithMtlsProofOfPossession()
-                .OnBeforeTokenRequest(async (request) =>
-                {
-                    request.RequestUri = new Uri("https://mtlsauth.microsoft.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c/oauth2/v2.0/token?dc=ESTS-PUB-WUS3-AZ3-FD025-001&certboundtoken=true");
-                })
+                .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice 
+                .WithSendX5C(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
             // Assert: Check that the MTLS PoP token acquisition was successful
             Assert.IsNotNull(authResult, "The authentication result should not be null.");
-            //Assert.AreEqual(Constants.BearerTokenType, authResult.TokenType, "Token type should be MTLS PoP");
+            Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
             Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
 
             // Simulate cache retrieval to verify MTLS configuration is cached properly

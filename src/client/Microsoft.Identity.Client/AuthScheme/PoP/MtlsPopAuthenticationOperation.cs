@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             KeyId = ComputeX5tS256KeyId(_mtlsCert);
         }
 
-        public int TelemetryTokenType => (int)TokenType.Bearer;
+        public int TelemetryTokenType => (int)TokenType.Mtls_Pop;
 
         public string AuthorizationHeaderPrefix => Constants.MtlsPoPAuthHeaderPrefix;
 
