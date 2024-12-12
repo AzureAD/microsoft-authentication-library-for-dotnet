@@ -22,8 +22,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class ClientCredentialsMtlsPopTests
     {
-        private static readonly string[] s_scopes = { "User.Read" };
-        private const string LabAccessConfidentialClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
+        private const string MsiAllowListedAppIdforSNI = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
 
         [TestInitialize]
         public void TestInitialize()
@@ -31,6 +30,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
         }
 
+        [IgnoreOnClassicPipeline]
         [TestMethod]
         public async Task SNI_MtlsPopFlow_TestAsync()
         {
@@ -41,9 +41,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             X509Certificate2 cert = settings.GetCertificate();
 
             // Build Confidential Client Application with SNI certificate at App level
-            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create("163ffef9-a313-45b4-ab2f-c7e2f5e0e23e")
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3")
+                .WithAzureRegion("westus3") //test slice region 
                 .WithCertificate(cert, true)  // Configure SNI certificate at App level
                 .WithExperimentalFeatures()
                 .WithTestLogging()
