@@ -126,6 +126,9 @@ namespace Microsoft.Identity.Client
 
         #region ClientCredentials
 
+        // Indicates if claims or assertions are used within the configuration
+        public bool ClaimsOrAssertionsUsed { get; set; } = false;
+
         public IClientCredential ClientCredential { get; internal set; }
 
         /// <summary>

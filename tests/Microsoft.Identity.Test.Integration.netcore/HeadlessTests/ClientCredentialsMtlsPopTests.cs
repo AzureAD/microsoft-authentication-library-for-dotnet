@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class ClientCredentialsMtlsPopTests
     {
         private const string MsiAllowListedAppIdforSNI = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
+        private const string LabApp = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
 
         [TestInitialize]
         public void TestInitialize()
@@ -30,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        [IgnoreOnClassicPipeline]
+        //[IgnoreOnClassicPipeline]
         [TestMethod]
         public async Task SNI_MtlsPopFlow_TestAsync()
         {
@@ -72,6 +73,42 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Assert: Verify that the token was fetched from cache on the second request
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+        }
+
+        [TestMethod]
+        public async Task SNI_MtlsPopFlow_FailureDueToInvalidConfiguration_TestAsync()
+        {
+            // Arrange: Use the public cloud settings for testing
+            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
+            // Retrieve the certificate from settings
+            X509Certificate2 cert = settings.GetCertificate();
+
+            // Build Confidential Client Application with SNI certificate at App level
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(LabApp)
+                .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca")
+                .WithAzureRegion("westus3") //test slice region 
+                .WithCertificate(cert, true)  // Configure SNI certificate at App level
+                .WithExperimentalFeatures()
+                .WithTestLogging()
+                .Build();
+
+            // Act & Assert
+            MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+            {
+                await confidentialApp
+                    .AcquireTokenForClient(settings.AppScopes)
+                    .WithMtlsProofOfPossession()
+                    .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+            }).ConfigureAwait(false);
+
+            // Verify the exception details
+            Assert.IsNotNull(ex);
+            Assert.AreEqual("invalid_request", ex.ErrorCode);
+            StringAssert.Contains(ex.Message, "AADSTS100032"); 
+            StringAssert.Contains(ex.Message, "AAD Regional does not support Mutual-TLS auth requests using non-subject name issuer certificates");
         }
     }
 }

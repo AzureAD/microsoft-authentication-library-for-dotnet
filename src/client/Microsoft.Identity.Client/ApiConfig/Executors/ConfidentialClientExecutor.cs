@@ -76,44 +76,67 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         }
 
         private void ValidateAndConfigureMtlsPopForAcquireTokenForClient(
-            AcquireTokenForClientParameters clientParameters,
-            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenForClientParameters clientParameters, 
+            AcquireTokenCommonParameters commonParameters, 
             RequestContext requestContext)
         {
-            if (clientParameters.UseMtlsPop)
+            if (!clientParameters.UseMtlsPop)
+                return;
+
+            ValidateClaimsOrAssertionsUse();
+            ValidateAuthorityType();
+            ValidateCertificatePresence();
+            ValidateRegionPresence(requestContext);
+
+            commonParameters.MtlsCertificate = _confidentialClientApplication.Certificate;
+            commonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(_confidentialClientApplication.Certificate);
+            requestContext.ServiceBundle.Config.IsInstanceDiscoveryEnabled = false;
+            requestContext.UseMtlsPop = true;
+        }
+
+        private void ValidateClaimsOrAssertionsUse()
+        {
+            if (_confidentialClientApplication.ServiceBundle.Config.ClaimsOrAssertionsUsed)
             {
-                // Throw if Authority != AAD for MTLS PoP as it is only supported for AAD
-                if (_confidentialClientApplication.AuthorityInfo.AuthorityType != AuthorityType.Aad)
-                {
-                    throw new MsalClientException(
-                        MsalError.InvalidAuthorityType,
-                        MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
-                }
-
-                // Validate that the certificate is not null for MTLS PoP
-                if (_confidentialClientApplication.Certificate == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-                }
-
-                // Validate that a region is specified when MTLS PoP is enabled
-                bool isRegionMissing = string.IsNullOrEmpty(requestContext.ServiceBundle.Config.AzureRegion);
-
-                if (isRegionMissing)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsPopWithoutRegion,
-                        MsalErrorMessage.MtlsPopWithoutRegion);
-                }
-
-                commonParameters.MtlsCertificate = _confidentialClientApplication.Certificate;
-                commonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(_confidentialClientApplication.Certificate);
-                ServiceBundle.Config.IsInstanceDiscoveryEnabled = false;
-                ServiceBundle.Config.ClientCredential = null;              
-                requestContext.UseMtlsPop = true;
+                ThrowMsalClientException(
+                    MsalError.ClaimsOrAssertionsNotAllowedWithMtlsPop,
+                    MsalErrorMessage.ClaimsAssertionsNotAllowedWithMtlsPop);
             }
+        }
+
+        private void ValidateAuthorityType()
+        {
+            if (_confidentialClientApplication.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+            {
+                ThrowMsalClientException(
+                    MsalError.InvalidAuthorityType,
+                    MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
+            }
+        }
+
+        private void ValidateCertificatePresence()
+        {
+            if (_confidentialClientApplication.Certificate == null)
+            {
+                ThrowMsalClientException(
+                    MsalError.MtlsCertificateNotProvided,
+                    MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+            }
+        }
+
+        private void ValidateRegionPresence(RequestContext requestContext)
+        {
+            if (string.IsNullOrEmpty(requestContext.ServiceBundle.Config.AzureRegion))
+            {
+                ThrowMsalClientException(
+                    MsalError.MtlsPopWithoutRegion,
+                    MsalErrorMessage.MtlsPopWithoutRegion);
+            }
+        }
+
+        private static void ThrowMsalClientException(string errorCode, string errorMessage)
+        {
+            throw new MsalClientException(errorCode, errorMessage);
         }
 
         public async Task<AuthenticationResult> ExecuteAsync(
