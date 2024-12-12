@@ -78,14 +78,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .WithTestLogging()
                 .Build();
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -107,7 +106,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithClientSecret(settings.GetSecret())
                 .WithTestLogging()
                 .WithAuthority(settings.Authority).Build();
@@ -117,7 +115,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Getting a PoP token");
             AuthenticationResult result = await cca
                 .AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -155,7 +153,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
 
             var cca = ConfidentialClientApplicationBuilder.Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithTestLogging()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret()).Build();
@@ -163,7 +160,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var result = await cca
                 .AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig1)
+                .WithSignedHttpRequestProofOfPossession(popConfig1)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -177,7 +174,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // recreate the pca to ensure that the silent call is served from the cache, i.e. the key remains stable
             cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
@@ -186,7 +182,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             result = await cca
                 .AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig1)
+                .WithSignedHttpRequestProofOfPossession(popConfig1)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -202,7 +198,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Call some other Uri - the same pop assertion can be reused, i.e. no need to call Evo
             result = await cca
                 .AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig2)
+                .WithSignedHttpRequestProofOfPossession(popConfig2)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -223,7 +219,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .WithTestLogging()
@@ -234,7 +229,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.HttpMethod = HttpMethod.Get;
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -260,7 +255,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .Build();
@@ -271,7 +265,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.HttpMethod = HttpMethod.Get;
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -298,7 +292,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .Build();
@@ -309,7 +302,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.HttpMethod = HttpMethod.Get;
 
             var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -329,7 +322,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .Build();
@@ -345,7 +337,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             };
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -380,7 +372,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 req, "pop");
 
             var result2 = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-             .WithProofOfPossession(popConfig)
+             .WithSignedHttpRequestProofOfPossession(popConfig)
              .ExecuteAsync(CancellationToken.None)
              .ConfigureAwait(false);
             Assert.AreEqual(
@@ -395,7 +387,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .Build();
@@ -406,7 +397,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.HttpMethod = HttpMethod.Post;
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -527,7 +518,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .Build();
@@ -553,7 +543,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             };
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -580,7 +570,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .Build();
@@ -606,7 +595,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             };
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -643,7 +632,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             };
 
             var resultWithNonce = await confidentialApp.AcquireTokenForClient(new[] { "https://graph.microsoft.com/.default" })
-                .WithProofOfPossession(popConfigWithNonce)
+                .WithSignedHttpRequestProofOfPossession(popConfigWithNonce)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -668,7 +657,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
                 .Build();
@@ -681,7 +669,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Act
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPossession(popConfig)
+                .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 

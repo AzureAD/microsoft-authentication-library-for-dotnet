@@ -87,7 +87,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
         }
 
-
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
@@ -502,7 +501,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                   { "x5t", Base64UrlHelpers.Encode(certificate.GetCertHash())},
                 };
             }
-
 
             var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
             var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
