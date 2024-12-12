@@ -21,6 +21,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string CloudShell = "Cloud Shell";
 
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            // Reset the static cache to ensure tests start fresh
+            ManagedIdentityClient.ResetManagedIdentitySourceCache();
+        }
+
         [DataTestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
