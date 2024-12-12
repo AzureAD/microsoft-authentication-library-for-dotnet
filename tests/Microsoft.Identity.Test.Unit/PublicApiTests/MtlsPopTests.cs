@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -82,6 +83,49 @@ namespace Microsoft.Identity.Test.Unit
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        public async Task MtlsPopWithoutCertificateWithClientClaimsAsync()
+        {
+            var ipAddress = new Dictionary<string, string>
+                                    {
+                                        { "client_ip", "192.168.1.2" }
+                                    };
+
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                            .Create(TestConstants.ClientId)
+                            .WithClientClaims(s_testCertificate, ipAddress)
+                            .WithExperimentalFeatures()
+                            .Build();
+
+            // Expecting an exception because MTLS PoP requires a certificate to sign the claims
+            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+                app.AcquireTokenForClient(TestConstants.s_scope)
+                   .WithMtlsProofOfPossession() // Enables MTLS PoP
+                   .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.ClaimsOrAssertionsNotAllowedWithMtlsPop, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        public async Task MtlsPopWithoutCertificateWithClientAssertionAsync()
+        {
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                            .Create(TestConstants.ClientId)
+                            .WithClientAssertion(() => { return TestConstants.DefaultClientAssertion; })
+                            .WithExperimentalFeatures()
+                            .Build();
+
+            // Expecting an exception because MTLS PoP requires a certificate to sign the claims
+            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+                app.AcquireTokenForClient(TestConstants.s_scope)
+                   .WithMtlsProofOfPossession() // Enables MTLS PoP
+                   .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.ClaimsOrAssertionsNotAllowedWithMtlsPop, ex.ErrorCode);
         }
 
         [TestMethod]
