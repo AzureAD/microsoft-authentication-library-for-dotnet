@@ -192,12 +192,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + " " + callerSdkVersion ?? string.Empty),
+                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
                         new(TelemetryConstants.TokenSource, tokenSource),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
                         new(TelemetryConstants.CacheLevel, cacheLevel),
                         new(TelemetryConstants.TokenType, tokenType));
-                //Add token Type to new counter?
                 logger.Verbose(() => "[OpenTelemetry] Completed incrementing to success counter.");
             }
         }
@@ -217,7 +216,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ErrorCode, errorCode),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + " " + callerSdkVersion ?? string.Empty),
+                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
                         new(TelemetryConstants.TokenType, tokenType));
             }

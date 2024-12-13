@@ -14,10 +14,10 @@ namespace Microsoft.Identity.Client.Internal
         /// Ssh-cert token type for telemetry.
         public const int SshCert = 3;
 
-        /// External token type for telemetry.
+        /// External token type for telemetry. 
         public const int External = 4;
 
-        /// Extension token type for telemetry.
+        /// Extension token type for telemetry. This is used for custom token types added to MSAL as extensions through IAuthenticationOperation.
         public const int Extension = 5;
     }
 }
