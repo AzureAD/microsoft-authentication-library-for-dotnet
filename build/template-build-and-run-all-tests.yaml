@@ -69,8 +69,9 @@ jobs: #Build and stage projects
   - template: template-desktop-unit-and-automation.yaml
 
   - task: BuildQualityChecks@9
+    condition: ne(variables['Build.SourceBranch'], 'refs/heads/main') #gate should not run on main branch
     inputs:
-      checkCoverage: true
+      checkCoverage: '$(CodeCoverageGateEnabled)'
       coverageFailOption: 'build'
       coverageType: 'lines'
       treat0of0as100: true
