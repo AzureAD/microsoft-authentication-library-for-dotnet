@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Represents the token type used for client telemetry only.
-        /// It is seperate from the other token types as it is set locally rather than coming from the server.
+        /// It is separate from the other token types as it is set locally rather than coming from the server.
         /// </summary>
         public int TelemetryTokenType { get; set; }
 
