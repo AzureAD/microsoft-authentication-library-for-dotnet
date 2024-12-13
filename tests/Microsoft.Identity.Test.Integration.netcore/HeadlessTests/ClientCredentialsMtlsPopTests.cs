@@ -31,9 +31,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        //[IgnoreOnClassicPipeline]
         [TestMethod]
-        public async Task SNI_MtlsPopFlow_TestAsync()
+        [DataRow("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c", DisplayName = "Standard Authority")]
+        [DataRow("https://mtlsauth.microsoft.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c", DisplayName = "MTLS Authority")]
+        public async Task Sni_Gets_Pop_Token_Successfully_TestAsync(string authority)
         {
             // Arrange: Use the public cloud settings for testing
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
@@ -43,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Build Confidential Client Application with SNI certificate at App level
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAuthority(authority)
                 .WithAzureRegion("westus3") //test slice region 
                 .WithCertificate(cert, true)  // Configure SNI certificate at App level
                 .WithExperimentalFeatures()
