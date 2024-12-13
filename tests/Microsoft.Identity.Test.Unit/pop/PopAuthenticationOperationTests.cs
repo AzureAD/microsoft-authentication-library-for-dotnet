@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Assert
                 Assert.AreEqual("PoP", authenticationScheme.AuthorizationHeaderPrefix);
-                Assert.AreEqual(2, authenticationScheme.TelemetryTokenType);
+                Assert.AreEqual(TelemetryTokenTypeConstants.pop, authenticationScheme.TelemetryTokenType);
                 Assert.AreEqual(JWT, authenticationScheme.KeyId);
                 Assert.AreEqual(2, tokenParams.Count);
                 Assert.AreEqual("pop", tokenParams["token_type"]);
