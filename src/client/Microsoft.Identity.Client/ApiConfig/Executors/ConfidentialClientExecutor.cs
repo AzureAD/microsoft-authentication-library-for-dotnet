@@ -91,6 +91,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             commonParameters.MtlsCertificate = _confidentialClientApplication.Certificate;
             commonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(_confidentialClientApplication.Certificate);
             requestContext.ServiceBundle.Config.IsInstanceDiscoveryEnabled = false;
+            ServiceBundle.Config.ClientCredential = null;
             requestContext.UseMtlsPop = true;
         }
 
