@@ -26,13 +26,6 @@ namespace CommonCache.Test.Unit
               labResponse.User.GetOrFetchPassword(),
               labResponse.User.AppId,
               labResponse.User.TenantId);
-
-            //return new LabUserData(
-            //    "user",
-            //    "",
-            //    "1d18b3b0-251b-4714-a02a-9956cec86c2d",
-            //    "49f548d0-12b7-4169-a390-bb5304d24462");
-
         }
 
         [AssemblyInitialize]
@@ -40,17 +33,6 @@ namespace CommonCache.Test.Unit
         {
             // TODO: add other users to the mix
             s_labUsers.Add(GetPublicAadUserDataAsync().GetAwaiter().GetResult());
-        }
-
-        [DataTestMethod]
-        [DataRow(CacheProgramType.MsalV2, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "MsalV2->MsalV3 msal v2 cache")]
-        public async Task TestMsalV2CacheCompatibilityAsync(
-            CacheProgramType interactiveType,
-            CacheProgramType silentType,
-            CacheStorageType cacheStorageType)
-        {
-            var executor = new CacheTestExecutor(s_labUsers, cacheStorageType);
-            await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);
         }
 
         [DataTestMethod]

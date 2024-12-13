@@ -38,8 +38,8 @@ namespace Microsoft.Identity.Test.Unit
         {
 #if NETFRAMEWORK
             Trace.WriteLine("Framework: .NET FX");
-#elif NET6_0
-            Trace.WriteLine("Framework: .NET 6");
+#elif NET
+            Trace.WriteLine("Framework: .NET ");
 #endif
             Trace.WriteLine("Test started " + TestContext.TestName);
             TestCommon.ResetInternalStaticCaches();
