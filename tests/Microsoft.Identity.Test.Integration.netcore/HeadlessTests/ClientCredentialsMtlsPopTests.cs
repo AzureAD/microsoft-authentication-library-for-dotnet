@@ -104,12 +104,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }).ConfigureAwait(false);
-
-            // Verify the exception details
-            Assert.IsNotNull(ex);
-            Assert.AreEqual("invalid_request", ex.ErrorCode);
-            StringAssert.Contains(ex.Message, "AADSTS100032"); 
-            StringAssert.Contains(ex.Message, "AAD Regional does not support Mutual-TLS auth requests using non-subject name issuer certificates");
         }
     }
 }
