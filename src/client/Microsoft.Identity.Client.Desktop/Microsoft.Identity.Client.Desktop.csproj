@@ -51,11 +51,9 @@
     <PackageReference Include="Microsoft.Web.WebView2" />
     <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <AdditionalFiles Include="PublicAPI/PublicAPI.Shipped.txt" />
-    <AdditionalFiles Include="PublicAPI/PublicAPI.Unshipped.txt" />
+    
+    <!-- This package is being built against netcore3.1, which causes this analyzer to produce errors in MSAL netcore3.1, even though MSAL isn't built against that-->
+    <PackageReference Remove="Microsoft.CodeAnalysis.PublicApiAnalyzers" />
   </ItemGroup>
 
 </Project>
