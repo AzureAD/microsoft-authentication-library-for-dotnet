@@ -7,11 +7,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public class LabUserNotFoundException : Exception
     {
-        public UserQuery Parameters { get; set; }
-
-        public LabUserNotFoundException(UserQuery parameters, string message):base(message)
+       
+        public LabUserNotFoundException(string message)
+            : base(message)
         {
-            Parameters = parameters;
+        }
+
+        public LabUserNotFoundException(string message, Exception innerException)
+            : base(message, innerException)
+        {
         }
     }
 }

@@ -18,10 +18,4 @@
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="data.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>

@@ -32,11 +32,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             string authority;
             //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
-            {
-                FederationProvider = FederationProvider.CIAMCUD,
-                SignInAudience = SignInAudience.AzureAdMyOrg
-            }).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetCiamUserAync().ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/
             authority = string.Format("https://{0}.ciamlogin.com/", labResponse.User.LabName);
@@ -87,12 +83,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             string authority;
             //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
-            {
-                FederationProvider = FederationProvider.CIAMCUD,
-                SignInAudience = SignInAudience.AzureAdMyOrg
-            }).ConfigureAwait(false);
-
+            var labResponse = await LabUserHelper.GetCiamUserAync().ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/
             authority = string.Format("https://{0}.ciamlogin.com/", labResponse.User.LabName);
@@ -117,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Acquire tokens
             var msalConfidentialClientBuilder = ConfidentialClientApplicationBuilder
                 .Create(appId)
-                .WithCertificate(CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName))
+                .WithCertificate(CertificateFinder.FindCertificateByName(TestConstants.AutomationTestCertName))
                 .WithExperimentalFeatures();
 
             if (authority.Contains(Constants.CiamAuthorityHostSuffix))
@@ -157,11 +148,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string ciamWebApi = "634de702-3173-4a71-b336-a4fab786a479";
 
             //Get lab details
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
-            {
-                FederationProvider = FederationProvider.CIAMCUD,
-                SignInAudience = SignInAudience.AzureAdMyOrg
-            }).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetCiamUserAync().ConfigureAwait(false);
 
             //Acquire tokens
             var msalPublicClient = PublicClientApplicationBuilder
@@ -184,7 +171,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Acquire tokens for OBO
             var msalConfidentialClient = ConfidentialClientApplicationBuilder
                 .Create(ciamWebApi)
-                .WithCertificate(CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName))
+                .WithCertificate(CertificateFinder.FindCertificateByName(TestConstants.AutomationTestCertName))
                 .WithAuthority(authorityCud, false)
                 .WithRedirectUri(_ciamRedirectUri)
                 .BuildConcrete();

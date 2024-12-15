@@ -86,9 +86,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private async Task<TokenCredential> GetKeyVaultCredentialAsync()
         {
-            var accessToken = await LabAuthenticationHelper.GetLabAccessTokenAsync(
-                "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/",
-                new[] { "https://vault.azure.net/.default" }).ConfigureAwait(false);
+            var accessToken = await LabAuthenticationHelper.GetKeyVaultAccessToken().ConfigureAwait(false);
             return DelegatedTokenCredential.Create((_, __) => accessToken);
         }
 
