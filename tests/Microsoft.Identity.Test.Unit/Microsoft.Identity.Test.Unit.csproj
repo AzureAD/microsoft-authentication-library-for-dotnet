@@ -70,6 +70,7 @@
 
   <ItemGroup>
     <Folder Include="CacheExtension\" />
+    <Folder Include="Helpers\" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>

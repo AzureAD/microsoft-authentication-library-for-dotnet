@@ -770,7 +770,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static X509Certificate2 GetCertificate()
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            X509Certificate2 cert = CertificateFinder.FindCertificateByName(TestConstants.AutomationTestCertName);
             
             if (cert == null)
             {

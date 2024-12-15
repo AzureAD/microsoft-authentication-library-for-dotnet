@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Azure;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -24,7 +25,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             s_labService = new LabServiceApi();
         }
 
-        public static async Task<LabResponse> GetLabUserDataAsync(UserQuery query)
+        internal static async Task<LabResponse> GetLabUserDataAsync(UserQuery query)
         {
             if (s_userCache.ContainsKey(query))
             {
@@ -35,7 +36,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             var response = await s_labService.GetLabResponseFromApiAsync(query).ConfigureAwait(false);
             if (response == null)
             {
-                throw new LabUserNotFoundException(query, "Found no users for the given query.");
+                throw new LabUserNotFoundException("Found no users for the given query: " + query);
             }
 
             bool added = s_userCache.TryAdd(query, response);
@@ -111,6 +112,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
+        /// <summary>
+        /// Gets a user for which you know the UPN.
+        /// </summary>
         public static Task<LabResponse> GetSpecificUserAsync(string upn)
         {
             return GetLabUserDataAsync(new UserQuery() { Upn = upn });
@@ -121,6 +125,17 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             var response = GetLabUserDataAsync(UserQuery.ArlingtonUserQuery);
             response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
             return response;
+        }
+
+        public static Task<LabResponse> GetCiamUserAync()
+        {
+            var query = new UserQuery()
+            {
+                FederationProvider = FederationProvider.CIAMCUD,
+                SignInAudience = SignInAudience.AzureAdMyOrg
+            };
+
+            return GetLabUserDataAsync(query);
         }
 
         public static Task<LabResponse> GetArlingtonADFSUserAsync()

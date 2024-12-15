@@ -15,16 +15,25 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     /// <summary>
     /// Wrapper for new lab service API
     /// </summary>
-    public class LabServiceApi
+    public class LabServiceApi 
     {
-        private string _labAccessAppId;
         private AccessToken? _labApiAccessToken;
         private AccessToken? _msiHelperApiAccessToken;
 
         public LabServiceApi()
         {
-            KeyVaultSecretsProvider _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
-            _labAccessAppId = _keyVaultSecretsProvider.GetSecretByName("LabVaultAppID").Value;
+        }
+
+        public async Task<string> GetMSIHelperServiceTokenAsync()
+        {
+            if (_msiHelperApiAccessToken == null)
+            {
+                _msiHelperApiAccessToken = await LabAuthenticationHelper
+                    .GetAccessTokenForLabAPIAsync()
+                    .ConfigureAwait(false);
+            }
+
+            return _msiHelperApiAccessToken.Value.Token;
         }
 
         /// <summary>
@@ -33,14 +42,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
         /// <returns>Users that match the given query parameters.</returns>
 
-        public async Task<LabResponse> GetLabResponseFromApiAsync(UserQuery query)
+        internal async Task<LabResponse> GetLabResponseFromApiAsync(UserQuery query)
         {
             //Fetch user
             string result = await RunQueryAsync(query).ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(result))
             {
-                throw new LabUserNotFoundException(query, "No lab user with specified parameters exists");
+                throw new LabUserNotFoundException(
+                    "No lab user with specified parameters exists: " + query.ToString());
             }
 
             return CreateLabResponseFromResultStringAsync(result).Result;
@@ -52,10 +62,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             var user = userResponses[0];
 
-            var appResponse = await GetLabResponseAsync(LabApiConstants.LabAppEndpoint + user.AppId).ConfigureAwait(false);
+            var appResponse = await GetLabResponseAsync(InternalConstants.LabAppEndpoint + user.AppId).ConfigureAwait(false);
             LabApp[] labApps = JsonConvert.DeserializeObject<LabApp[]>(appResponse);
 
-            var labInfoResponse = await GetLabResponseAsync(LabApiConstants.LabInfoEndpoint + user.LabName).ConfigureAwait(false);
+            var labInfoResponse = await GetLabResponseAsync(InternalConstants.LabInfoEndpoint + user.LabName).ConfigureAwait(false);
             Lab[] labs = JsonConvert.DeserializeObject<Lab[]>(labInfoResponse);
 
             user.TenantId = labs[0].TenantId;
@@ -78,67 +88,67 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 //Required parameters will be set to default if not supplied by the test code
 
                 queryDict.Add(
-                    LabApiConstants.MultiFactorAuthentication, 
+                    InternalConstants.MultiFactorAuthentication, 
                     query.MFA != null ? 
                         query.MFA.ToString() : 
                         MFA.None.ToString());
 
                 queryDict.Add(
-                    LabApiConstants.ProtectionPolicy, 
+                    InternalConstants.ProtectionPolicy, 
                     query.ProtectionPolicy != null ? 
                         query.ProtectionPolicy.ToString() : 
                         ProtectionPolicy.None.ToString());
 
                 if (query.UserType != null)
                 {
-                    queryDict.Add(LabApiConstants.UserType, query.UserType.ToString());
+                    queryDict.Add(InternalConstants.UserType, query.UserType.ToString());
                 }
 
                 if (query.HomeDomain != null)
                 {
-                    queryDict.Add(LabApiConstants.HomeDomain, query.HomeDomain.ToString());
+                    queryDict.Add(InternalConstants.HomeDomain, query.HomeDomain.ToString());
                 }
 
                 if (query.HomeUPN != null)
                 {
-                    queryDict.Add(LabApiConstants.HomeUPN, query.HomeUPN.ToString());
+                    queryDict.Add(InternalConstants.HomeUPN, query.HomeUPN.ToString());
                 }
 
                 if (query.B2CIdentityProvider != null)
                 {
-                    queryDict.Add(LabApiConstants.B2CProvider, query.B2CIdentityProvider.ToString());
+                    queryDict.Add(InternalConstants.B2CProvider, query.B2CIdentityProvider.ToString());
                 }
 
                 if (query.FederationProvider != null)
                 {
-                    queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
+                    queryDict.Add(InternalConstants.FederationProvider, query.FederationProvider.ToString());
                 }
 
                 if (query.AzureEnvironment != null)
                 {
-                    queryDict.Add(LabApiConstants.AzureEnvironment, query.AzureEnvironment.ToString());
+                    queryDict.Add(InternalConstants.AzureEnvironment, query.AzureEnvironment.ToString());
                 }
 
                 if (query.SignInAudience != null)
                 {
-                    queryDict.Add(LabApiConstants.SignInAudience, query.SignInAudience.ToString());
+                    queryDict.Add(InternalConstants.SignInAudience, query.SignInAudience.ToString());
                 }
 
                 if (query.AppPlatform != null)
                 {
-                    queryDict.Add(LabApiConstants.AppPlatform, query.AppPlatform.ToString());
+                    queryDict.Add(InternalConstants.AppPlatform, query.AppPlatform.ToString());
                 }
 
                 if (query.PublicClient != null)
                 {
-                    queryDict.Add(LabApiConstants.PublicClient, query.PublicClient.ToString());
+                    queryDict.Add(InternalConstants.PublicClient, query.PublicClient.ToString());
                 }
 
-                return SendLabRequestAsync(LabApiConstants.LabEndPoint, queryDict);
+                return SendLabRequestAsync(InternalConstants.LabEndPoint, queryDict);
             }
             else
             {
-                return SendLabRequestAsync(LabApiConstants.LabEndPoint + "/" + query.Upn, queryDict);
+                return SendLabRequestAsync(InternalConstants.LabEndPoint + "/" + query.Upn, queryDict);
             }
         }
 
@@ -159,7 +169,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         internal async Task<string> GetLabResponseAsync(string address)
         {
             if (_labApiAccessToken == null)
-                _labApiAccessToken = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId).ConfigureAwait(false);
+                _labApiAccessToken = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync().ConfigureAwait(false);
 
             using (HttpClient httpClient = new HttpClient())
             {
@@ -168,27 +178,17 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
 
-        public async Task<string> GetUserSecretAsync(string lab)
+        internal async Task<string> GetUserSecretAsync(string lab)
         {
             Dictionary<string, string> queryDict = new Dictionary<string, string>
             {
                 { "secret", lab }
             };
 
-            string result = await SendLabRequestAsync(LabApiConstants.LabUserCredentialEndpoint, queryDict).ConfigureAwait(false);
+            string result = await SendLabRequestAsync(InternalConstants.LabUserCredentialEndpoint, queryDict).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<LabCredentialResponse>(result).Secret;
         }
 
-        public async Task<string> GetMSIHelperServiceTokenAsync()
-        {
-            if (_msiHelperApiAccessToken == null)
-            {
-                _msiHelperApiAccessToken = await LabAuthenticationHelper
-                    .GetAccessTokenForLabAPIAsync(_labAccessAppId)
-                    .ConfigureAwait(false);
-            }
-
-            return _msiHelperApiAccessToken.Value.Token;
-        }
+        
     }
 }

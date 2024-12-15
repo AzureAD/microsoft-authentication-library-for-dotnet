@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Microsoft.Identity.Test.LabInfrastructure
+namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
-    internal static class CertificateHelper
-    {
+    public static class CertificateFinder
+    {       
         /// <summary>
         /// Try and locate a certificate matching the given <paramref name="subjectName"/> by searching in
         /// the <see cref="StoreName.My"/> store subjectName for all available <see cref="StoreLocation"/>s.
@@ -46,7 +48,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 X509Certificate2Collection collection = store.Certificates.Find(X509FindType.FindBySubjectName, certName, validateCerts);
 
                 X509Certificate2 certToUse = null;
-                
+
                 // select the "freshest" certificate
                 foreach (X509Certificate2 cert in collection)
                 {
@@ -60,5 +62,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             }
         }
+    }
+
+    public enum KnownTestCertType
+    {
+        RSA,
+        ECD
     }
 }

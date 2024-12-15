@@ -44,14 +44,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         MSA,
     }
 
-    public enum MFA
+    internal enum MFA
     {
         None,
         MfaOnAll,
         AutoMfaOnAll
     }
 
-    public enum ProtectionPolicy
+    internal enum ProtectionPolicy
     {
         None,
         CA,
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         MAMSPO
     }
 
-    public enum HomeDomain //Must add ".com" to end for lab query
+    internal enum HomeDomain //Must add ".com" to end for lab query
     {
         None,
         MsidLab2,
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         MsidLab4
     }
 
-    public enum HomeUPN //Must replace "_" with "@" add ".com" to end for lab query
+    internal enum HomeUPN //Must replace "_" with "@" add ".com" to end for lab query
     {
         None,
         GidLab_Msidlab2,
@@ -89,20 +89,20 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         azureusgovernment
     }
 
-    public enum SignInAudience
+    internal enum SignInAudience
     {
         AzureAdMyOrg,
         AzureAdMultipleOrgs,
         AzureAdAndPersonalMicrosoftAccount
     }
 
-    public enum AppPlatform
+    internal enum AppPlatform
     {
         web,
         spa
     }
 
-    public enum PublicClient
+    internal enum PublicClient
     {
         yes,
         no

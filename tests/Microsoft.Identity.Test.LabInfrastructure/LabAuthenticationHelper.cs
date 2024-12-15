@@ -10,41 +10,35 @@ using Azure.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
-    public static class LabAuthenticationHelper
+    internal static class LabAuthenticationHelper
     {
-        public const string LabAccessConfidentialClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
-        public const string LabScope = "https://request.msidlab.com/.default";
-        public const string LabClientInstance = "https://login.microsoftonline.com/";
-        public const string LabClientTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
-
-        public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId)
+        public static async Task<AccessToken> GetAccessTokenForLabAPIAsync()
         {
-            string[] scopes = new string[] { LabScope };
+            string[] scopes = [LabApiConstants.LabScope];
 
             return await GetLabAccessTokenAsync(
-                LabClientInstance + LabClientTenantId, 
-                scopes,  
-                labAccessClientId).ConfigureAwait(false);
+                LabApiConstants.LabClientInstance + LabApiConstants.LabClientTenantId, 
+                scopes).ConfigureAwait(false);
         }
 
-        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes)
+        public static async Task<AccessToken> GetKeyVaultAccessToken()
         {
-            return await GetLabAccessTokenAsync(
-                authority,
-                scopes,
-                String.Empty).ConfigureAwait(false);
+            var accessToken = await GetLabAccessTokenAsync(
+              "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+              new[] { "https://vault.azure.net/.default" }).ConfigureAwait(false);
+
+            return accessToken;
         }
 
-        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes, string clientId)
+        private static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes)
         {
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
             X509Certificate2 cert;
-
-            var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
 
             cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
             if (cert == null)
@@ -54,7 +48,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
 
             confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(clientIdForCertAuth)
+                .Create(LabApiConstants.LabClientId)
                 .WithAuthority(new Uri(authority), true)
                 .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                 .WithCertificate(cert, true)
@@ -70,10 +64,4 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         }
     }
 
-    public enum LabAccessAuthenticationType
-    {
-        ClientCertificate,
-        ClientSecret,
-        UserCredential
-    }
 }
