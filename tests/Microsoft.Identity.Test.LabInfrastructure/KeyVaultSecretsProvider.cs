@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string MsalTeam = "https://buildautomation.vault.azure.net/";
     }
 
-    public class KeyVaultSecretsProvider : IDisposable
+    public class KeyVaultSecretsProvider
     {
         private CertificateClient _certificateClient;
         private SecretClient _secretClient;
@@ -58,41 +58,20 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </remarks>
         public KeyVaultSecretsProvider(string keyVaultAddress = KeyVaultInstance.MSIDLab)
         {
-            var credentials = GetKeyVaultCredentialAsync().GetAwaiter().GetResult();
+            var credential = LabAuthenticationHelper.GetTokenCredential();
             var keyVaultAddressUri = new Uri(keyVaultAddress);
-            _certificateClient = new CertificateClient(keyVaultAddressUri, credentials);
-            _secretClient = new SecretClient(keyVaultAddressUri, credentials);
-        }
-
-        ~KeyVaultSecretsProvider()
-        {
-            Dispose();
+            _certificateClient = new CertificateClient(keyVaultAddressUri, credential);
+            _secretClient = new SecretClient(keyVaultAddressUri, credential);
         }
       
         public KeyVaultSecret GetSecretByName(string secretName)
         {
             return _secretClient.GetSecret(secretName).Value;
         }
-
-        public KeyVaultSecret GetSecretByName(string secretName, string secretVersion)
-        {
-            return _secretClient.GetSecret(secretName, secretVersion).Value;
-        }
-
+        
         public async Task<X509Certificate2> GetCertificateWithPrivateMaterialAsync(string certName)
         {
             return await _certificateClient.DownloadCertificateAsync(certName).ConfigureAwait(false);
-        }
-
-        private async Task<TokenCredential> GetKeyVaultCredentialAsync()
-        {
-            var accessToken = await LabAuthenticationHelper.GetKeyVaultAccessToken().ConfigureAwait(false);
-            return DelegatedTokenCredential.Create((_, __) => accessToken);
-        }
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-        }
+        }       
     }
 }

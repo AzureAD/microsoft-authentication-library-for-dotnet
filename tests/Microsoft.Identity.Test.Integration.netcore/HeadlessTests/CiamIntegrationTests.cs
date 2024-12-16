@@ -199,11 +199,5 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.Cache, resultObo.AuthenticationResultMetadata.TokenSource);
         }
-
-        private string GetCiamSecret()
-        {
-            KeyVaultSecretsProvider provider = new KeyVaultSecretsProvider();
-            return provider.GetSecretByName("msidlabciam2-cc").Value;
-        }
     }
 }
