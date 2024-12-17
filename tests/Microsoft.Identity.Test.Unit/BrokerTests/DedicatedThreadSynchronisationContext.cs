@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if SUPPORTS_BROKER
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -82,5 +81,3 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
     }
 }
-
-#endif

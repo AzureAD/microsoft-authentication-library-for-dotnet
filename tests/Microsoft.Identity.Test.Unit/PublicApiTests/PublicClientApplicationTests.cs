@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Advanced;
-#if NET6_0
+#if NET6_0_OR_GREATER
 using Microsoft.Identity.Client.Broker;
 #endif
 using Microsoft.Identity.Client.Instance;

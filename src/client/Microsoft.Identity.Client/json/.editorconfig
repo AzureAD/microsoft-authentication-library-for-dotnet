@@ -26,3 +26,5 @@ dotnet_diagnostic.CS0108.severity = none
 
 # IDE0036: Order modifiers
 dotnet_diagnostic.IDE0036.severity = none
+
+dotnet_diagnostic.VSTHRD200.severity = none

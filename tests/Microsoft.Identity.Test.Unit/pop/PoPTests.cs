@@ -557,7 +557,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             byte[] signature = provider.Sign(payload);
 
             // Assert
-#if NET6_0
+#if NET
             using (RSA rsa = RSA.Create())
 #else
             using (RSA rsa = RSA.Create("RSAPSS"))
@@ -627,7 +627,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
 
             // Act and Assert
-#if NET6_0
+#if NET
             using (RSA rsa = RSA.Create())
 #else
             using (RSA rsa = RSA.Create("RSAPSS"))
