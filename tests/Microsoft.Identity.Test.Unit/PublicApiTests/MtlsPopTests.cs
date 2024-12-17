@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -452,6 +453,70 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage, ex.Message);
                 }
             }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_ValidateExpectedUrlAsync()
+        {
+            string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                // Arrange
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = $"https://eastus.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType : "mtls_pop"),
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3" },
+                            { OAuth2Parameter.Scope, TestConstants.s_scope.AsSingleString() },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
+                            { "token_type", "mtls_pop" }
+                        },
+                        UnExpectedPostData = new Dictionary<string, string>
+                        {
+                            { "client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer" },
+                            { "client_assertion", "eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCIsIng1dCNTMjU2IjoiSnBmTm1PM1lpR2pHQ1pWY..." }
+                        }
+                    };
+
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority(authorityUrl)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                 .WithCertificate(s_testCertificate)
+                                 .WithExperimentalFeatures(true)
+                                 .Build();
+
+                    // Act
+                    var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    // Assert
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                    Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+                }
+            }
+        }
+
+        private static HttpResponseMessage CreateResponse(
+            string tokenType,
+            string token = "header.payload.signature",
+            string expiresIn = "3599")
+        {
+            return MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token, expiresIn, tokenType);
         }
     }
 }
