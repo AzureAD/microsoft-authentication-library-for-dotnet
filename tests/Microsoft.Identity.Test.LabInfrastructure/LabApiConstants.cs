@@ -3,7 +3,15 @@
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
-    public class LabApiConstants
+    public static class LabApiConstants
+    {
+        public const string LabClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
+        public const string LabScope = "https://request.msidlab.com/.default";
+        public const string LabClientInstance = "https://login.microsoftonline.com/";
+        public const string LabClientTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+    }
+
+    internal static class InternalConstants
     {
         // constants for Lab api
         public const string MobileDeviceManagementWithConditionalAccess = "mdmca";

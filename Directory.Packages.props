@@ -40,8 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Packages for the tests -->
-    <PackageVersion Include="Azure.Security.KeyVault.Certificates" Version="4.6.0" />
-    <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.6.0" />
+    <PackageVersion Include="Azure.Security.KeyVault.Certificates" Version="4.7.0" />
+    <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.7.0" />
+    <PackageVersion Include="Azure.Identity" Version="1.13.1" />
+    <PackageVersion Include="Azure.Identity.Broker" Version="1.2.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.6" />
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.6" />
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
