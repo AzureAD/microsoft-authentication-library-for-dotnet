@@ -516,7 +516,7 @@ namespace Microsoft.Identity.Client
                     throw new ArgumentNullException(nameof(requestContext.ServiceBundle.Config.Authority.AuthorityInfo));
                 }
 
-                // Apply any specific MTLS handling based on `RequestContext`
+                // Apply any specific mTLS handling based on `RequestContext`
                 configAuthorityInfo = GetMtlsAdjustedAuthorityInfo(requestContext, configAuthorityInfo);
 
                 ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
@@ -547,7 +547,7 @@ namespace Microsoft.Identity.Client
 
                         bool isMultiCloudSupported = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
 
-                        bool useMtlsEnvironment = requestContext != null && requestContext.UseMtlsPop;
+                        bool useMtlsEnvironment = requestContext != null && requestContext.ShouldUseMtlsPop();
 
                         bool updateEnvironment = isMultiCloudSupported || useMtlsEnvironment;
 
@@ -557,7 +557,7 @@ namespace Microsoft.Identity.Client
                             {
                                 if (useMtlsEnvironment)
                                 {
-                                    // Use the MTLS-specific authority creation
+                                    // Use the mTLS specific authority creation
                                     return CreateAuthorityForMtlsWithTenant(
                                         configAuthorityInfo,
                                         account?.HomeAccountId?.TenantId);
@@ -573,7 +573,7 @@ namespace Microsoft.Identity.Client
                             }
                             else
                             {
-                                // Default non-MTLS environment authority creation
+                                // Default non-mTLS environment authority creation
                                 return CreateAuthorityWithTenant(
                                     configAuthority,
                                     account?.HomeAccountId?.TenantId,
@@ -759,11 +759,11 @@ namespace Microsoft.Identity.Client
                         Host = mtlsHost
                     }.Uri;
 
-                    // Return the updated configAuthorityInfo with the new MTLS authority URI
+                    // Return the updated configAuthorityInfo with the new mTLS authority URI
                     return new AuthorityInfo(configAuthorityInfo.AuthorityType, mtlsAuthorityUri, false);
                 }
 
-                // Return original configAuthorityInfo if no MTLS handling is applied
+                // Return original configAuthorityInfo if no mTLS handling is applied
                 return configAuthorityInfo;
             }
         }

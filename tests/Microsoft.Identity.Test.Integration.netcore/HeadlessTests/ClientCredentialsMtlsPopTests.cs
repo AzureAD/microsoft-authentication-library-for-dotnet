@@ -64,6 +64,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult, "The authentication result should not be null.");
             Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
             Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
+            // Assert the certificate used in the result is the same as the one provided
+            Assert.IsNotNull(authResult.MtlsCertificate, "MTLS certificate in the authentication result should not be null.");
+            Assert.AreEqual(cert.Thumbprint, authResult.MtlsCertificate.Thumbprint, "The certificate used should match the one provided in the test setup.");
 
             // Simulate cache retrieval to verify MTLS configuration is cached properly
             authResult = await confidentialApp
@@ -74,10 +77,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Assert: Verify that the token was fetched from cache on the second request
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+            // Assert the certificate used in the result is the same as the one provided
+            Assert.IsNotNull(authResult.MtlsCertificate, "MTLS certificate in the authentication result should not be null.");
+            Assert.AreEqual(cert.Thumbprint, authResult.MtlsCertificate.Thumbprint, "The certificate used should match the one provided in the test setup.");
         }
 
         [TestMethod]
-        public async Task SNI_MtlsPopFlow_FailureDueToInvalidConfiguration_TestAsync()
+        public async Task AADRegionalDoesNotSupportNonSubjectNameIssuerCertificates_TestAsync()
         {
             // Arrange: Use the public cloud settings for testing
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
@@ -104,6 +110,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }).ConfigureAwait(false);
+
+            // Assert high-level error code
+            Assert.AreEqual("invalid_request", ex.ErrorCode, "Error code does not match the expected value.");
+
+            // Assert specific details in the error message
+            StringAssert.Contains(
+                ex.Message,
+                "AADSTS100032: AAD Regional does not support Mutual-TLS auth requests using non-subject name issuer certificates.",
+                "Error message does not contain the expected description."
+            );
         }
     }
 }
