@@ -26,12 +26,20 @@ namespace Microsoft.Identity.Client.Internal
 
         public CancellationToken UserCancellationToken { get; }
 
+        // Add the UseMtlsPop property
+        internal bool UseMtlsPop { get; set; }
+
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, CancellationToken cancellationToken = default)
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
             Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
-        }       
+        }
+
+        internal bool ShouldUseMtlsPop()
+        {
+            return UseMtlsPop;
+        }
     }
 }

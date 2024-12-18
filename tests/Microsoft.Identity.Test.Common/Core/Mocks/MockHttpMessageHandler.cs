@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public IDictionary<string, string> ExpectedPostData { get; set; }
         public IDictionary<string, string> ExpectedRequestHeaders { get; set; }
         public IList<string> UnexpectedRequestHeaders { get; set; }
+        public IDictionary<string, string> UnExpectedPostData { get; set; }
         public HttpMethod ExpectedMethod { get; set; }
 
         public Exception ExceptionToThrow { get; set; }
@@ -66,6 +67,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ValidateQueryParams(uri);
 
             ValidatePostDataAsync(request);
+
+            ValidateNotExpectedPostData();
 
             ValidateHeaders(request);
 
@@ -111,6 +114,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         Assert.AreEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                 }
+            }
+        }
+
+        private void ValidateNotExpectedPostData()
+        {
+            if (UnExpectedPostData != null)
+            {
+                List<string> unexpectedKeysFound = new List<string>();
+
+                // Check each key in the unexpected post data dictionary
+                foreach (var key in UnExpectedPostData.Keys)
+                {
+                    if (ActualRequestPostData.ContainsKey(key))
+                    {
+                        unexpectedKeysFound.Add(key);
+                    }
+                }
+
+                // Assert that no unexpected keys were found, reporting all violations at once
+                Assert.IsTrue(unexpectedKeysFound.Count == 0, $"Did not expect to find post data keys: {string.Join(", ", unexpectedKeysFound)}");
             }
         }
 

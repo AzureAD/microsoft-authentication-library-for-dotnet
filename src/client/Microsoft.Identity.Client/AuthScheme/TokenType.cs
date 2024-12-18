@@ -32,6 +32,12 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// Extension token type.
         /// Extension = 5
         /// </summary>
-        Extension = 5
+        Extension = 5,
+
+        /// <summary>
+        /// MTLS Pop token type.
+        /// MTLS_Pop = 6
+        /// </summary>
+        Mtls_Pop = 6
     }
 }

@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public AuthorityInfo AuthorityInfo => AuthorityManager.Authority.AuthorityInfo;
 
-        public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;        
+        public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
         #endregion
 

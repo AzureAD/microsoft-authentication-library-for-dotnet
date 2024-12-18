@@ -59,7 +59,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -72,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -93,7 +92,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 // no HTTP method binding, but custom nonce
@@ -106,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -131,7 +129,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -143,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -407,7 +404,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
                 var testTimeService = new TestTimeService();
                 PoPCryptoProviderFactory.TimeService = testTimeService;
@@ -423,7 +419,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Trace.WriteLine("1. AcquireTokenForClient ");
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -450,7 +446,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Trace.WriteLine("1. AcquireTokenForClient again, after time passes - expect POP key rotation");
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                    .WithTenantId(TestConstants.Utid)
-                   .WithProofOfPossession(popConfig)
+                   .WithSignedHttpRequestProofOfPossession(popConfig)
                    .ExecuteAsync()
                    .ConfigureAwait(false);
 
@@ -584,7 +580,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -600,7 +595,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -653,7 +648,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                   .WithClientSecret(TestConstants.ClientSecret)
                                                                   .WithHttpManager(httpManager)
-                                                                  .WithExperimentalFeatures(true)
                                                                   .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -666,7 +660,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
