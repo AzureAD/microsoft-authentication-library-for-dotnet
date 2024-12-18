@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Internal
         public CancellationToken UserCancellationToken { get; }
 
         // Add the UseMtlsPop property
-        public bool UseMtlsPop { get; set; }
+        internal bool UseMtlsPop { get; set; }
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, CancellationToken cancellationToken = default)
         {
@@ -35,6 +35,11 @@ namespace Microsoft.Identity.Client.Internal
             Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
+        }
+
+        internal bool ShouldUseMtlsPop()
+        {
+            return UseMtlsPop;
         }
     }
 }

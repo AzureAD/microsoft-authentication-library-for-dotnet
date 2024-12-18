@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (string.IsNullOrEmpty(region))
             {
-                if (requestContext.UseMtlsPop)
+                if (requestContext.ShouldUseMtlsPop())
                 {
                     requestContext.Logger.Info("[Region discovery] Region discovery failed during mTLS Pop. ");
 
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Region
 
             // Log the environment being resolved
             string resolvedEnvironment = $"{region}.{host}";
-            string environmentType = requestContext.UseMtlsPop ? "MTLS with regional environment" : "standard regional environment";
+            string environmentType = requestContext.ShouldUseMtlsPop() ? "mTLS with regional environment" : "standard regional environment";
             requestContext.Logger.Info(() => $"[Region Discovery] Using {environmentType}: {resolvedEnvironment}.");
 
             return resolvedEnvironment;

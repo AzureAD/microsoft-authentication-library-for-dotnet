@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            // Validate And Configure Mtls Pop
+            // Validate and Configure mTLS Pop
             ValidateAndConfigureMtlsPopForAcquireTokenForClient(clientParameters, commonParameters, requestContext);
 
             AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(

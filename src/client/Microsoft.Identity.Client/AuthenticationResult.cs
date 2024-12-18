@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         /// <param name="claimsPrincipal">Claims from the ID token</param>
         /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizationCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code. See https://aka.ms/msal-net/spa-auth-code</param>
         /// <param name="additionalResponseParameters">Other properties from the token response.</param>
-        /// <param name="mtlsCertificate">MTLS certificate used in the token acquisition, if any. For MTLS Pop you may need to use this while calling the target resource</param>
+        /// <param name="mtlsCertificate">mTLS certificate used in the token acquisition, if any. For mTLS Pop you may need to use this while calling the target resource</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -320,7 +320,7 @@ namespace Microsoft.Identity.Client
         public AuthenticationResultMetadata AuthenticationResultMetadata { get; }
 
         /// <summary>
-        /// Exposes the MTLS certificate used for authentication, if applicable.
+        /// Exposes the mTLS certificate used for authentication, if applicable.
         /// </summary>
         public X509Certificate2 MtlsCertificate { get; internal set; }
 

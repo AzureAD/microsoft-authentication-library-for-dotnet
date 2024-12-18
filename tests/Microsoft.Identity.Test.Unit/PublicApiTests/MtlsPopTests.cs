@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit
                             .WithExperimentalFeatures()
                             .Build();
 
-            // Set WithMtlsProofOfPossession on the request without specifying a region
+            // Set WithMtlsProofOfPossession on the request without specifying an authority
             MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
