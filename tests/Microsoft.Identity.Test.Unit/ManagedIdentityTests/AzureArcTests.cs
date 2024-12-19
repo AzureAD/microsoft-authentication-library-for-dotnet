@@ -23,6 +23,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string AzureArc = "Azure Arc";
 
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            // Reset the static cache to ensure tests start fresh
+            ManagedIdentityClient.ResetManagedIdentitySourceCache();
+        }
+
         [DataTestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
