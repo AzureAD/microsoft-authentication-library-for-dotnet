@@ -142,7 +142,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         apiEvent.ApiId,
                         apiEvent.CallerSdkApiId, 
                         apiEvent.CallerSdkVersion,
-                        cacheRefreshReason);
+                        cacheRefreshReason,
+                        apiEvent.TokenType);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()
@@ -245,7 +246,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
 
             apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
-            apiEvent.TokenType = (TokenType)AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
+            apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();
 
             UpdateCallerSdkDetails(apiEvent);

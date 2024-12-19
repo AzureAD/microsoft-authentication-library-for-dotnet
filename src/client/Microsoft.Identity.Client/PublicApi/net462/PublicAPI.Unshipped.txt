@@ -1,0 +1,1 @@
+Microsoft.Identity.Client.AuthenticationResultMetadata.TelemetryTokenType.get -> int
