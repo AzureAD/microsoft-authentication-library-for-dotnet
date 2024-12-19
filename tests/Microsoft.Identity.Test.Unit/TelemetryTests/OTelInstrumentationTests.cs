@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(4, _exportedMetrics, 4, 0);
+                VerifyMetrics(5, _exportedMetrics, 4, 0);
             }
         }
 
@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(4, _exportedMetrics, 4, 0);
+                VerifyMetrics(5, _exportedMetrics, 4, 0);
             }
         }
 
@@ -323,7 +323,7 @@ namespace Microsoft.Identity.Test.Unit
                 Thread.Sleep(1000);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(3, _exportedMetrics, 3, 1);
+                VerifyMetrics(4, _exportedMetrics, 3, 1);
             }
         }
 

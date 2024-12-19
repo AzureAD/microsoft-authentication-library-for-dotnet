@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
             }
 
-            if (s_durationInExtensionInMs.Value.Enabled && authResultMetadata.DurationCreatingExtendedTokenInUs > 0)
+            if (s_durationInExtensionInMs.Value.Enabled)
             {
                 s_durationInExtensionInMs.Value.Record(authResultMetadata.DurationCreatingExtendedTokenInUs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
