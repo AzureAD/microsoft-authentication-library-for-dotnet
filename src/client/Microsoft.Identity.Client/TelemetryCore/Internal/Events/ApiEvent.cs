@@ -123,12 +123,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public long DurationInCacheInMs { get; set; }
 
-        public TokenType? TokenType { get; set; }
-
-        public string TokenTypeString
-        {
-            get => TokenType.HasValue ? TokenType.Value.ToString("D") : null;
-        }
+        public int TokenType { get; set; }
 
         public AssertionType AssertionType { get; set; }
 
