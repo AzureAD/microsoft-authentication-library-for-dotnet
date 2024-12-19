@@ -17,10 +17,7 @@ namespace Microsoft.Identity.Client.Internal
         /// Token type for legacy AT POP
         public const int AtPop = 4;
 
-        /// External token type for telemetry.
-        public const int External = 5;
-
         /// Extension token type for telemetry. This is used for custom token types added to MSAL as extensions through IAuthenticationOperation.
-        public const int Extension = 6;
+        public const int Extension = 5;
     }
 }

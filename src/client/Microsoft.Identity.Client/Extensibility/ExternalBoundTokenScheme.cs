@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Extensibility
             _tokenType = expectedTokenTypeFromEsts;
         }
 
-        public int TelemetryTokenType => TelemetryTokenTypeConstants.External;
+        public int TelemetryTokenType => TelemetryTokenTypeConstants.AtPop;
 
         public string AuthorizationHeaderPrefix => _tokenType;
 
