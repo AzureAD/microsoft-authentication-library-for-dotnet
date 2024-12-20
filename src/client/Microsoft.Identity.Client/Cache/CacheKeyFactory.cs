@@ -20,6 +20,8 @@ namespace Microsoft.Identity.Client.Cache
     {
         public static string GetKeyFromRequest(AuthenticationRequestParameters requestParameters)
         {
+            System.Thread.Sleep(1000);
+            
             if (GetOboOrAppKey(requestParameters, out string key))
             {
                 return key;
