@@ -33,7 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Analyzers and dev packages -->
-    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.12.19" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" PrivateAssets="All" />
@@ -81,5 +81,8 @@
     <PackageVersion Include="System.Threading.Thread" Version="4.3.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="System.Windows.Forms" Version="4.0.0" />
+    <PackageVersion Include="CommandLineParser" Version="2.8.0" />
+    <PackageVersion Include="System.Formats.Asn1" Version="9.0.0"/>
+
   </ItemGroup>
 </Project>

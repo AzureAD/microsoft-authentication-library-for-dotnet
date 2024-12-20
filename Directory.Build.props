@@ -8,7 +8,7 @@
     <DelaySign>false</DelaySign>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <!-- Projects must set these individually -->
+    <!-- Projects must set this individually -->
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

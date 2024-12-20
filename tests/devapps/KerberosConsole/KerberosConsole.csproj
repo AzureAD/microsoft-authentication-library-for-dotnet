@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kerberos.NET" Version="4.6.64" />
+    <PackageReference Include="Kerberos.NET" Version="4.*" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="9.*" />
   </ItemGroup>
 
   <ItemGroup>
