@@ -2,22 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Broker;
-using Microsoft.Identity.Test.Unit;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Azure.Identity;
 using System.Runtime.InteropServices;
-using System.Linq;
 using Azure.Identity.Broker;
 using System.Diagnostics;
-using System.Collections.Generic;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
