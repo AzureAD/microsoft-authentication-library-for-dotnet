@@ -5,8 +5,17 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public static class LabApiConstants
     {
-        public const string LabClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
+        //public const string LabClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
+        //public const string LabScope = "https://request.msidlab.com/.default";
+
+        // IdentityLabsOneAccess
+        //public const string LabClientId = "00bedee1-0e09-4a8d-81a0-0679c5a64a83";
+        //public const string LabScope = "https://request.msidlab.com/.default";
+
+
+        public const string LabClientId = "5741af7e-6c00-4ed9-b589-73366d58a430";
         public const string LabScope = "https://request.msidlab.com/.default";
+
         public const string LabClientInstance = "https://login.microsoftonline.com/";
         public const string LabClientTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
     }
