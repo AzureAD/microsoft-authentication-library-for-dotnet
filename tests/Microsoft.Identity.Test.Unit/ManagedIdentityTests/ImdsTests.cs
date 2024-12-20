@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
 
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, "http://169.254.169.254");
+                SetEnvironmentVariables(ManagedIdentitySource.Credential, "http://169.254.169.254");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
@@ -35,16 +35,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(ManagedIdentityTests.ImdsEndpoint, ManagedIdentityTests.Resource, MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySource.Imds, statusCode: HttpStatusCode.BadRequest);
+                    ManagedIdentitySource.Credential, statusCode: HttpStatusCode.BadRequest);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Imds.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.IsTrue(ex.Message.Contains(ImdsManagedIdentitySource.IdentityUnavailableError), $"The error message is not as expected. Error message: {ex.Message}. Expected message: {ImdsManagedIdentitySource.IdentityUnavailableError}");
+                Assert.IsTrue(ex.Message.Contains(CredentialManagedIdentitySource.IdentityUnavailableError), $"The error message is not as expected. Error message: {ex.Message}. Expected message: {CredentialManagedIdentitySource.IdentityUnavailableError}");
             }
         }
     }
