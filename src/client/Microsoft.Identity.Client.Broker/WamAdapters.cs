@@ -362,7 +362,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = (long)(DateTime.SpecifyKind(authResult.ExpiresOn, DateTimeKind.Utc) - DateTimeOffset.UtcNow).TotalSeconds,
                     ClientInfo = authResult.Account.ClientInfo,
-                    TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix: authenticationRequestParameters.AuthenticationScheme.AuthorizationHeaderPrefix,
+                    TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : (authenticationRequestParameters.AuthenticationScheme.AccessTokenType),
                     WamAccountId = authResult.Account.AccountId,
                     TokenSource = TokenSource.Broker
                 };
