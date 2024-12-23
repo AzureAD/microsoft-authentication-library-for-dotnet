@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("3", result.TokenType);
+            Assert.AreEqual("SshCert", result.TokenType);
         }
 
         [IgnoreOnOneBranch]
