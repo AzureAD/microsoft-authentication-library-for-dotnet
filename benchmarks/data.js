@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1735042019483,
+  "lastUpdate": 1735042021381,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -15084,6 +15084,54 @@ window.BENCHMARK_DATA = {
             "value": 127259.5611508018,
             "unit": "ns",
             "range": "± 2771.8764189663916"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2ad7d8db3fbccbf731d2486012bf5c437f6e8295",
+          "message": "Updating extension telemetry (#4996)\n\n* Updating extension telemetry\r\n\r\n* Refactroing\r\nRemoving TokenType and replacing the values with string\r\n\r\n* Updating PR to revert new histogram logic.\r\n\r\n* TODO\r\n\r\n* Refactoring.\r\nAddressing Feedback\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Addressing PR Feedback\r\n\r\n* Update\r\n\r\n* Resolving test issues\r\n\r\n* Removing External\r\n\r\n* update\r\n\r\n* Updating WAM header\r\n\r\n* Resolving WAM test issues\r\n\r\n* Fixing test\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-12-24T04:00:07-08:00",
+          "tree_id": "8a975f4fef3159440d47b5eaa9d8c35b29dd099d",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/2ad7d8db3fbccbf731d2486012bf5c437f6e8295"
+        },
+        "date": 1735042020940,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12543.680061848958,
+            "unit": "ns",
+            "range": "± 74.44845254742944"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 122076.07643636067,
+            "unit": "ns",
+            "range": "± 269.93871440624036"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23434.504891531808,
+            "unit": "ns",
+            "range": "± 59.142532770599985"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 123420.92513020833,
+            "unit": "ns",
+            "range": "± 2132.7247165222375"
           }
         ]
       }
