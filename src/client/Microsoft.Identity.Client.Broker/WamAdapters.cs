@@ -362,7 +362,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = (long)(DateTime.SpecifyKind(authResult.ExpiresOn, DateTimeKind.Utc) - DateTimeOffset.UtcNow).TotalSeconds,
                     ClientInfo = authResult.Account.ClientInfo,
-                    TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : (authenticationRequestParameters.AuthenticationScheme.AccessTokenType),
+                    TokenType = authResult.IsPopAuthorization ? 
+                                                                Constants.PoPAuthHeaderPrefix :
+                                                                (authenticationRequestParameters.AuthenticationScheme.AccessTokenType == "ssh-cert" ?
+                                                                    Constants.SshCertAuthHeaderPrefix :
+                                                                    authenticationRequestParameters.AuthenticationScheme.AuthorizationHeaderPrefix),
                     WamAccountId = authResult.Account.AccountId,
                     TokenSource = TokenSource.Broker
                 };

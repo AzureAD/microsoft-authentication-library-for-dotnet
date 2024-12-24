@@ -56,11 +56,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             if (isPop)
             {
-                Assert.AreEqual(TestConstants.Pop.ToLower(), result.TokenType);
+                Assert.AreEqual(TestConstants.Pop, result.TokenType);
             }
             else
             {
-                Assert.AreEqual(TestConstants.Bearer.ToLower(), result.TokenType);
+                Assert.AreEqual(TestConstants.Bearer, result.TokenType);
             }
 
             Assert.AreEqual(tokenSource, result.AuthenticationResultMetadata.TokenSource);
