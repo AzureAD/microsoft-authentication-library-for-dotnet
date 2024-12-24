@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1733836844190,
+  "lastUpdate": 1735042019483,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6686,6 +6686,42 @@ window.BENCHMARK_DATA = {
             "value": 341486.3076923077,
             "unit": "ns",
             "range": "± 3567.685463168322"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2ad7d8db3fbccbf731d2486012bf5c437f6e8295",
+          "message": "Updating extension telemetry (#4996)\n\n* Updating extension telemetry\r\n\r\n* Refactroing\r\nRemoving TokenType and replacing the values with string\r\n\r\n* Updating PR to revert new histogram logic.\r\n\r\n* TODO\r\n\r\n* Refactoring.\r\nAddressing Feedback\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Addressing PR Feedback\r\n\r\n* Update\r\n\r\n* Resolving test issues\r\n\r\n* Removing External\r\n\r\n* update\r\n\r\n* Updating WAM header\r\n\r\n* Resolving WAM test issues\r\n\r\n* Fixing test\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-12-24T04:00:07-08:00",
+          "tree_id": "8a975f4fef3159440d47b5eaa9d8c35b29dd099d",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/2ad7d8db3fbccbf731d2486012bf5c437f6e8295"
+        },
+        "date": 1735042015977,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 251438.34745762713,
+            "unit": "ns",
+            "range": "± 11105.567351579457"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 329596.71794871794,
+            "unit": "ns",
+            "range": "± 11467.083185656877"
           }
         ]
       }
