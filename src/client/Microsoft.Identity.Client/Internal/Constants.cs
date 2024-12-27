@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string MtlsPoPAuthHeaderPrefix = "mtls_pop";
         public const string RequestConfirmation = "req_cnf";
         public const string BearerAuthHeaderPrefix = "Bearer";
+        public const string SshCertAuthHeaderPrefix = "SshCert";
 
         public const string ManagedIdentityClientId = "client_id";
         public const string ManagedIdentityObjectId = "object_id";
