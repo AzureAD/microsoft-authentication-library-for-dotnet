@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit
                    .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.ClaimsOrAssertionsNotAllowedWithMtlsPop, ex.ErrorCode);
+            Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit
                    .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.ClaimsOrAssertionsNotAllowedWithMtlsPop, ex.ErrorCode);
+            Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -217,8 +217,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [DataTestMethod]
         [DataRow("https://login.microsoftonline.com", "Public Cloud")]
-        [DataRow("https://login.microsoftonline.us", "Azure Government")]
-        [DataRow("https://login.partner.microsoftonline.cn", "Azure China")]
+        [DataRow("https://mtlsauth.microsoft.com", "MTLS Public Cloud")]
         public async Task AcquireTokenForClient_WithMtlsProofOfPossession_SuccessAsync(string authorityUrl, string cloudType)
         {
             const string region = "eastus";
@@ -227,13 +226,8 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", region);
 
-                // Set the expected mTLS endpoint based on the cloud type
-                string globalEndpoint = authorityUrl.Contains("microsoftonline.com")
-                    ? "mtlsauth.microsoft.com"
-                    : authorityUrl.Contains("microsoftonline.us")
-                        ? "mtlsauth.microsoftonline.us"
-                        : "mtlsauth.partner.microsoftonline.cn";
-
+                // Set the expected mTLS endpoint for public cloud
+                string globalEndpoint = "mtlsauth.microsoft.com";
                 string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
 
                 using (var httpManager = new MockHttpManager())
@@ -507,6 +501,69 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.IsNotNull(result.AccessToken);
                     Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                     Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+                }
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("login.microsoftonline.com", "mtlsauth.microsoft.com")]
+        [DataRow("mtlsauth.microsoft.com", "mtlsauth.microsoft.com")]
+        [DataRow("mtlsauth.microsoftonline.us", "mtlsauth.microsoftonline.us")]
+        [DataRow("mtlsauth.partner.microsoftonline.cn", "mtlsauth.partner.microsoftonline.cn")]
+        public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
+        {
+            // Append the input environment to create the authority URL
+            string authorityUrl = $"https://{inputEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = $"https://{EastUsRegion}.{expectedEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop")
+                    };
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                                        .Create(TestConstants.ClientId)
+                                        .WithAuthority(authorityUrl)
+                                        .WithHttpManager(harness.HttpManager)
+                                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                        .WithCertificate(s_testCertificate)
+                                        .WithExperimentalFeatures(true)
+                                        .Build();
+
+                    AuthenticationResult result = await app
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
+                    Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                    // Verify that the full token endpoint URL was used correctly
+                    string expectedTokenEndpoint = $"https://{EastUsRegion}.{expectedEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token";
+                    Assert.AreEqual(expectedTokenEndpoint, tokenHttpCallHandler.ExpectedUrl);
+
+                    // Second token acquisition - should retrieve from cache
+                    AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", secondResult.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, secondResult.TokenType);
+                    Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(EastUsRegion, result.ApiEvent.RegionUsed);
+                    Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                    Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+                    Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
                 }
             }
         }

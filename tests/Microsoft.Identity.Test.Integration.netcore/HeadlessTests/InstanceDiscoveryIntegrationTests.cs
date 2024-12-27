@@ -149,8 +149,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 }
             }
 
-            IDictionary<string, InstanceDiscoveryMetadataEntry> expectedMetadata =
-                KnownMetadataProvider.GetAllEntriesForTest();
+            IDictionary<string, InstanceDiscoveryMetadataEntry> expectedMetadata = 
+                KnownMetadataProvider.GetAllEntriesForTest(includeMtlsEntries: false);
 
             CoreAssert.AssertDictionariesAreEqual(
                 expectedMetadata,

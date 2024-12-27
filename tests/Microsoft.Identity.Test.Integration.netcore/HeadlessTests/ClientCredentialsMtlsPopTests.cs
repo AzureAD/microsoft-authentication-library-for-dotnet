@@ -1,19 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
-using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -80,46 +74,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Assert the certificate used in the result is the same as the one provided
             Assert.IsNotNull(authResult.MtlsCertificate, "MTLS certificate in the authentication result should not be null.");
             Assert.AreEqual(cert.Thumbprint, authResult.MtlsCertificate.Thumbprint, "The certificate used should match the one provided in the test setup.");
-        }
-
-        [TestMethod]
-        public async Task AADRegionalDoesNotSupportNonSubjectNameIssuerCertificates_TestAsync()
-        {
-            // Arrange: Use the public cloud settings for testing
-            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-
-            // Retrieve the certificate from settings
-            X509Certificate2 cert = settings.GetCertificate();
-
-            // Build Confidential Client Application with SNI certificate at App level
-            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(LabApp)
-                .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca")
-                .WithAzureRegion("westus3") //test slice region 
-                .WithCertificate(cert, true)  // Configure SNI certificate at App level
-                .WithExperimentalFeatures()
-                .WithTestLogging()
-                .Build();
-
-            // Act & Assert
-            MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-            {
-                await confidentialApp
-                    .AcquireTokenForClient(settings.AppScopes)
-                    .WithMtlsProofOfPossession()
-                    .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice")
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-            }).ConfigureAwait(false);
-
-            // Assert high-level error code
-            Assert.AreEqual("invalid_request", ex.ErrorCode, "Error code does not match the expected value.");
-
-            // Assert specific details in the error message
-            StringAssert.Contains(
-                ex.Message,
-                "AADSTS100032: AAD Regional does not support Mutual-TLS auth requests using non-subject name issuer certificates.",
-                "Error message does not contain the expected description."
-            );
         }
     }
 }

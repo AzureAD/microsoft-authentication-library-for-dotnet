@@ -57,9 +57,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            // Validate and Configure mTLS Pop
-            ValidateAndConfigureMtlsPopForAcquireTokenForClient(clientParameters, commonParameters, requestContext);
-
             AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
@@ -73,71 +70,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 clientParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        private void ValidateAndConfigureMtlsPopForAcquireTokenForClient(
-            AcquireTokenForClientParameters clientParameters, 
-            AcquireTokenCommonParameters commonParameters, 
-            RequestContext requestContext)
-        {
-            if (!clientParameters.UseMtlsPop)
-                return;
-
-            ValidateClaimsOrAssertionsUse();
-            ValidateAuthorityType();
-            ValidateCertificatePresence();
-            ValidateRegionPresence(requestContext);
-
-            commonParameters.MtlsCertificate = _confidentialClientApplication.Certificate;
-            commonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(_confidentialClientApplication.Certificate);
-            requestContext.ServiceBundle.Config.IsInstanceDiscoveryEnabled = false;
-            ServiceBundle.Config.ClientCredential = null;
-            requestContext.UseMtlsPop = true;
-        }
-
-        private void ValidateClaimsOrAssertionsUse()
-        {
-            if (_confidentialClientApplication.ServiceBundle.Config.ClaimsOrAssertionsUsed)
-            {
-                ThrowMsalClientException(
-                    MsalError.ClaimsOrAssertionsNotAllowedWithMtlsPop,
-                    MsalErrorMessage.ClaimsAssertionsNotAllowedWithMtlsPop);
-            }
-        }
-
-        private void ValidateAuthorityType()
-        {
-            if (_confidentialClientApplication.AuthorityInfo.AuthorityType != AuthorityType.Aad)
-            {
-                ThrowMsalClientException(
-                    MsalError.InvalidAuthorityType,
-                    MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
-            }
-        }
-
-        private void ValidateCertificatePresence()
-        {
-            if (_confidentialClientApplication.Certificate == null)
-            {
-                ThrowMsalClientException(
-                    MsalError.MtlsCertificateNotProvided,
-                    MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-            }
-        }
-
-        private void ValidateRegionPresence(RequestContext requestContext)
-        {
-            if (string.IsNullOrEmpty(requestContext.ServiceBundle.Config.AzureRegion))
-            {
-                ThrowMsalClientException(
-                    MsalError.MtlsPopWithoutRegion,
-                    MsalErrorMessage.MtlsPopWithoutRegion);
-            }
-        }
-
-        private static void ThrowMsalClientException(string errorCode, string errorMessage)
-        {
-            throw new MsalClientException(errorCode, errorMessage);
         }
 
         public async Task<AuthenticationResult> ExecuteAsync(

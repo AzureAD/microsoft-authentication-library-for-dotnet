@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -23,13 +24,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         public Task AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client, 
-            ILoggerAdapter logger, 
+            OAuth2Client oAuth2Client,
+            AuthenticationRequestParameters requestParameters,
             ICryptographyManager cryptographyManager, 
-            string clientId, 
             string tokenEndpoint, 
-            bool sendX5C,
-            bool useSha2,
             CancellationToken cancellationToken)
         {
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientSecret, Secret);

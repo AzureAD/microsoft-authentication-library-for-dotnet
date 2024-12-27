@@ -1167,11 +1167,5 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation:</para> Ensure that the AzureRegion configuration is set when using mTLS PoP as it requires a regional endpoint.
         /// </summary>
         public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
-
-        /// <summary>
-        /// <para>What happened?</para> Claims cannot be used with mTLS Proof of Possession (mTLS PoP).
-        /// <para>Mitigation:</para> Do not include claims in the token request when using mTLS PoP.
-        /// </summary>
-        public const string ClaimsOrAssertionsNotAllowedWithMtlsPop = "claims_or_assertions__not_allowed_with_mtls_pop";
     }
 }

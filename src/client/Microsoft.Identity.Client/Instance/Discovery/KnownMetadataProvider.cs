@@ -17,6 +17,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         private static readonly ISet<string> s_knownEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private static readonly ISet<string> s_knownPublicEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ISet<string> s_mtlsEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         static KnownMetadataProvider()
         {
@@ -34,6 +35,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 foreach (string alias in entry.Aliases)
                 {
                     s_knownPublicEnvironments.Add(alias);
+                }
+            }
+
+            void AddToMtlsEnvironment(InstanceDiscoveryMetadataEntry entry)
+            {
+                foreach (string alias in entry.Aliases)
+                {
+                    s_mtlsEnvironments.Add(alias);
                 }
             }
 
@@ -79,6 +88,27 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 PreferredCache = "login.windows-ppe.net"
             };
 
+            InstanceDiscoveryMetadataEntry mtlsPublicCloudEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "mtlsauth.microsoft.com" },
+                PreferredNetwork = "mtlsauth.microsoft.com",
+                PreferredCache = "mtlsauth.microsoft.com"
+            };
+
+            InstanceDiscoveryMetadataEntry mtlsUsGovCloudEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "mtlsauth.microsoftonline.us"},
+                PreferredNetwork = "mtlsauth.microsoftonline.us",
+                PreferredCache = "mtlsauth.microsoftonline.us"
+            };
+
+            InstanceDiscoveryMetadataEntry mtlsChinaCloudCloudEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "mtlsauth.partner.microsoftonline.cn" },
+                PreferredNetwork = "mtlsauth.partner.microsoftonline.cn",
+                PreferredCache = "mtlsauth.partner.microsoftonline.cn"
+            };
+
             AddToKnownCache(publicCloudEntry);
             AddToKnownCache(cloudEntryChina);
             AddToKnownCache(cloudEntryGermany);
@@ -86,6 +116,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             AddToKnownCache(usCloudEntry);
             AddToKnownCache(ppeCloudEntry);
             AddToPublicEnvironment(publicCloudEntry);
+            AddToKnownCache(mtlsPublicCloudEntry);
+            AddToKnownCache(mtlsUsGovCloudEntry);
+            AddToKnownCache(mtlsChinaCloudCloudEntry);
+            AddToMtlsEnvironment(mtlsPublicCloudEntry);
+            AddToMtlsEnvironment(mtlsUsGovCloudEntry);
+            AddToMtlsEnvironment(mtlsChinaCloudCloudEntry);
         }
 
         public static bool IsPublicEnvironment(string environment)
@@ -108,7 +144,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             if (canUseProvider)
             {
                 s_knownEntries.TryGetValue(environment, out InstanceDiscoveryMetadataEntry entry);
-                logger.Verbose(()=>$"[Instance Discovery] Tried to use known metadata provider for {environment}. Success? {entry != null}. ");
+                logger.Verbose(() => $"[Instance Discovery] Tried to use known metadata provider for {environment}. Success? {entry != null}. ");
 
                 return entry;
             }
@@ -136,9 +172,18 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return false;
         }
 
-        public static IDictionary<string, InstanceDiscoveryMetadataEntry> GetAllEntriesForTest()
+        public static IDictionary<string, InstanceDiscoveryMetadataEntry> GetAllEntriesForTest(bool includeMtlsEntries = true)
         {
-            return s_knownEntries;
+            if (includeMtlsEntries)
+            {
+                return s_knownEntries;
+            }
+
+            // Filter out MTLS entries
+            return s_knownEntries
+                .Where(entry => !s_mtlsEnvironments.Contains(entry.Key))
+                .ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.OrdinalIgnoreCase);
         }
+
     }
 }

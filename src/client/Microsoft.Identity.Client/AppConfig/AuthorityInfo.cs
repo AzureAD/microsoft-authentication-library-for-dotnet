@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
                 case AuthorityType.Generic:
                     CanonicalAuthority = authorityUri;
                     break;
-                    
+
                 case AuthorityType.B2C:
                     string[] pathSegments = GetPathSegments(authorityUri.AbsolutePath);
 
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
             CanonicalAuthority = canonicalAuthority;
             AuthorityType = authorityType;
             UserRealmUriPrefix = userRealmUriPrefix;
-            ValidateAuthority = validateAuthority;            
+            ValidateAuthority = validateAuthority;
         }
 
         public string Host => CanonicalAuthority.Host;
@@ -126,10 +126,10 @@ namespace Microsoft.Identity.Client
         /// B2C doesn't allow multi-tenancy scenarios, but the authority itself is tenanted. 
         /// For CIAM, we allow multi-tenancy scenarios, and expect the STS to fail.
         /// </summary>
-        internal bool CanBeTenanted => 
-            AuthorityType == AuthorityType.Aad  ||
+        internal bool CanBeTenanted =>
+            AuthorityType == AuthorityType.Aad ||
             AuthorityType == AuthorityType.Dsts ||
-            AuthorityType == AuthorityType.B2C  ||
+            AuthorityType == AuthorityType.B2C ||
             AuthorityType == AuthorityType.Ciam;
 
         internal bool IsClientInfoSupported =>
@@ -327,12 +327,12 @@ namespace Microsoft.Identity.Client
                 case AuthorityType.Dsts:
                     return new DstsAuthority(this);
 
-                case AuthorityType.Ciam: 
+                case AuthorityType.Ciam:
                     return new CiamAuthority(this);
 
                 case AuthorityType.Generic:
                     return new GenericAuthority(this);
-                
+
                 default:
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
@@ -477,7 +477,7 @@ namespace Microsoft.Identity.Client
                     case AuthorityType.B2C:
                     case AuthorityType.Dsts:
                     case AuthorityType.Ciam:
-                    case AuthorityType.Generic:                        
+                    case AuthorityType.Generic:
                         return new NullAuthorityValidator();
                     default:
                         throw new InvalidOperationException("Invalid AuthorityType");
@@ -508,16 +508,13 @@ namespace Microsoft.Identity.Client
                 AuthorityInfo requestAuthorityInfo,
                 IAccount account = null)
             {
-                Authority configAuthority = requestContext.ServiceBundle.Config.Authority;
-                AuthorityInfo configAuthorityInfo = configAuthority.AuthorityInfo;
+                var configAuthority = requestContext.ServiceBundle.Config.Authority;
+                var configAuthorityInfo = configAuthority.AuthorityInfo;
 
                 if (configAuthorityInfo == null)
                 {
                     throw new ArgumentNullException(nameof(requestContext.ServiceBundle.Config.Authority.AuthorityInfo));
                 }
-
-                // Apply any specific mTLS handling based on `RequestContext`
-                configAuthorityInfo = GetMtlsAdjustedAuthorityInfo(requestContext, configAuthorityInfo);
 
                 ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
 
@@ -545,40 +542,19 @@ namespace Microsoft.Identity.Client
 
                     case AuthorityType.Aad:
 
-                        bool isMultiCloudSupported = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
-
-                        bool useMtlsEnvironment = requestContext != null && requestContext.ShouldUseMtlsPop();
-
-                        bool updateEnvironment = isMultiCloudSupported || useMtlsEnvironment;
+                        bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
 
                         if (requestAuthorityInfo == null)
                         {
-                            if (updateEnvironment)
-                            {
-                                if (useMtlsEnvironment)
-                                {
-                                    // Use the mTLS specific authority creation
-                                    return CreateAuthorityForMtlsWithTenant(
-                                        configAuthorityInfo,
-                                        account?.HomeAccountId?.TenantId);
-                                }
-                                else
-                                {
-                                    // Use the environment update with standard authority creation
-                                    return CreateAuthorityWithTenant(
-                                        CreateAuthorityWithEnvironment(configAuthorityInfo, account?.Environment),
-                                        account?.HomeAccountId?.TenantId,
-                                        forceSpecifiedTenant: false);
-                                }
-                            }
-                            else
-                            {
-                                // Default non-mTLS environment authority creation
-                                return CreateAuthorityWithTenant(
+                            return updateEnvironment ?
+                                CreateAuthorityWithTenant(
+                                    CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
+                                    account?.HomeAccountId?.TenantId,
+                                    forceSpecifiedTenant: false) :
+                                CreateAuthorityWithTenant(
                                     configAuthority,
                                     account?.HomeAccountId?.TenantId,
                                     forceSpecifiedTenant: false);
-                            }
                         }
 
                         // In case the authority is defined only at the request level
@@ -591,7 +567,7 @@ namespace Microsoft.Identity.Client
                         var requestAuthority = updateEnvironment ?
                             new AadAuthority(CreateAuthorityWithEnvironment(requestAuthorityInfo, account?.Environment).AuthorityInfo) :
                             new AadAuthority(requestAuthorityInfo);
-                        if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant() || 
+                        if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant() ||
                             requestAuthority.IsOrganizationsTenantWithMsaPassthroughEnabled(requestContext.ServiceBundle.Config.IsBrokerEnabled && requestContext.ServiceBundle.Config.BrokerOptions != null && requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough, account?.HomeAccountId?.TenantId))
                         {
                             return requestAuthority;
@@ -600,13 +576,13 @@ namespace Microsoft.Identity.Client
                         return updateEnvironment ?
                                 CreateAuthorityWithTenant(
                                     CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
-                                    account?.HomeAccountId?.TenantId, 
+                                    account?.HomeAccountId?.TenantId,
                                     forceSpecifiedTenant: false) :
                                 CreateAuthorityWithTenant(
-                                    configAuthority, 
+                                    configAuthority,
                                     account?.HomeAccountId?.TenantId,
                                     forceSpecifiedTenant: false);
-                    
+
                     default:
                         throw new MsalClientException(
                             MsalError.InvalidAuthorityType,
@@ -615,7 +591,7 @@ namespace Microsoft.Identity.Client
             }
 
             internal static Authority CreateAuthorityWithTenant(Authority authority, string tenantId, bool forceSpecifiedTenant)
-            {                
+            {
                 string tenantedAuthority = authority.GetTenantedAuthority(tenantId, forceSpecifiedTenant);
 
                 return Authority.CreateAuthority(tenantedAuthority, authority.AuthorityInfo.ValidateAuthority);
@@ -629,19 +605,6 @@ namespace Microsoft.Identity.Client
                 };
 
                 return Authority.CreateAuthority(uriBuilder.Uri.AbsoluteUri, authorityInfo.ValidateAuthority);
-            }
-
-            internal static Authority CreateAuthorityForMtlsWithTenant(AuthorityInfo authorityInfo, string tenantId)
-            {
-                // Construct the authority URI using the canonical authority and append the tenant ID
-                var uriBuilder = new UriBuilder(authorityInfo.CanonicalAuthority)
-                {
-                    Path = $"{authorityInfo.CanonicalAuthority.AbsolutePath}/{tenantId}/"
-                };
-
-                string tenantedAuthority = uriBuilder.Uri.AbsoluteUri;
-
-                return Authority.CreateAuthority(tenantedAuthority, false);
             }
 
             private static void ValidateTypeMismatch(AuthorityInfo configAuthorityInfo, AuthorityInfo requestAuthorityInfo)
@@ -672,7 +635,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     // Do not try to be smart here, let the STS figure it out
-                    if ( requestAuthorityInfo.AuthorityType == AuthorityType.Ciam || 
+                    if (requestAuthorityInfo.AuthorityType == AuthorityType.Ciam ||
                         requestAuthorityInfo.AuthorityType == AuthorityType.Generic)
                     {
                         return;
@@ -715,56 +678,6 @@ namespace Microsoft.Identity.Client
                 var result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.Authority.AuthorityInfo, requestContext).ConfigureAwait(false);
 
                 return result.Aliases.Any(alias => alias.Equals(requestAuthorityInfo.Host));
-            }
-
-            private static AuthorityInfo GetMtlsAdjustedAuthorityInfo(RequestContext requestContext, AuthorityInfo configAuthorityInfo)
-            {
-                bool useMtlsPop = requestContext != null && requestContext.UseMtlsPop;
-                string authorityPath = configAuthorityInfo.CanonicalAuthority.AbsolutePath;
-                string authorityHost = configAuthorityInfo.Host;
-
-                // Check if the authority tenant is "common", meaning no specific authority was provided by the user
-                if (useMtlsPop && authorityPath.Contains("/common", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new MsalClientException(
-                        MsalError.AuthorityHostMismatch,
-                        MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage);
-                }
-
-                // Select the appropriate mTLS endpoint based on the cloud environment
-                if (useMtlsPop)
-                {
-                    string mtlsHost;
-                    if (authorityHost.Equals("login.microsoftonline.com", StringComparison.OrdinalIgnoreCase))
-                    {
-                        mtlsHost = "mtlsauth.microsoft.com"; // Public cloud
-                    }
-                    else if (authorityHost.Equals("login.microsoftonline.us", StringComparison.OrdinalIgnoreCase))
-                    {
-                        mtlsHost = "mtlsauth.microsoftonline.us"; // US Government cloud
-                    }
-                    else if (authorityHost.Equals("login.partner.microsoftonline.cn", StringComparison.OrdinalIgnoreCase))
-                    {
-                        mtlsHost = "mtlsauth.partner.microsoftonline.cn"; // China cloud
-                    }
-                    else
-                    {
-                        // If the authority is unknown or unsupported for mTLS, return the original configAuthorityInfo
-                        return configAuthorityInfo;
-                    }
-
-                    // Create a new URI with the modified mTLS host, preserving the tenant ID from the original authority
-                    Uri mtlsAuthorityUri = new UriBuilder(configAuthorityInfo.CanonicalAuthority)
-                    {
-                        Host = mtlsHost
-                    }.Uri;
-
-                    // Return the updated configAuthorityInfo with the new mTLS authority URI
-                    return new AuthorityInfo(configAuthorityInfo.AuthorityType, mtlsAuthorityUri, false);
-                }
-
-                // Return original configAuthorityInfo if no mTLS handling is applied
-                return configAuthorityInfo;
             }
         }
     }

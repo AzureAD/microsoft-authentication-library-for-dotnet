@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
@@ -26,8 +27,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public CancellationToken UserCancellationToken { get; }
 
-        // Add the UseMtlsPop property
-        internal bool UseMtlsPop { get; set; }
+        public X509Certificate2 MtlsCertificate { get; set; }
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, CancellationToken cancellationToken = default)
         {
@@ -35,11 +35,6 @@ namespace Microsoft.Identity.Client.Internal
             Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
-        }
-
-        internal bool ShouldUseMtlsPop()
-        {
-            return UseMtlsPop;
         }
     }
 }

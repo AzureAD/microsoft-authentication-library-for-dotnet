@@ -169,7 +169,6 @@ namespace Microsoft.Identity.Client
             }
 
             Config.ClientCredential = new CertificateAndClaimsClientCredential(certificate, claimsToSign, mergeWithDefaultClaims);
-            Config.ClaimsOrAssertionsUsed = true;
             Config.SendX5C = sendX5C;
             return this;
         }
@@ -210,7 +209,6 @@ namespace Microsoft.Identity.Client
             }
 
             Config.ClientCredential = new SignedAssertionClientCredential(signedClientAssertion);
-            Config.ClaimsOrAssertionsUsed = true;
             return this;
         }
 
@@ -235,7 +233,6 @@ namespace Microsoft.Identity.Client
             };
 
             Config.ClientCredential = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
-            Config.ClaimsOrAssertionsUsed = true;
             return this;
         }
 
@@ -255,7 +252,6 @@ namespace Microsoft.Identity.Client
             }
 
             Config.ClientCredential = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
-            Config.ClaimsOrAssertionsUsed = true;
             return this;
         }
 
@@ -274,7 +270,6 @@ namespace Microsoft.Identity.Client
             }
 
             Config.ClientCredential = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
-            Config.ClaimsOrAssertionsUsed = true;
             return this;
         }
 
