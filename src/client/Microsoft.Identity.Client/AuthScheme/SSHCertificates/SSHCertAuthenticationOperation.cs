@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
         }
 
         public int TelemetryTokenType => TelemetryTokenTypeConstants.SshCert;
-
+            
         public string AuthorizationHeaderPrefix =>
             throw new MsalClientException(
                 MsalError.SSHCertUsedAsHttpHeader,
