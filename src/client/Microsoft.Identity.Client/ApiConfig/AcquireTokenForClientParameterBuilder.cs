@@ -4,10 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -82,8 +86,20 @@ namespace Microsoft.Identity.Client
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
         {
             ValidateUseOfExperimentalFeature();
-            Parameters.UseMtlsPop = true;
-            return this; // Return the builder to allow method chaining
+
+            if (ServiceBundle.Config.ClientCredential is not CertificateClientCredential certificateCredential)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsCertificateNotProvided,
+                    MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+            }
+            else
+            {
+                CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
+                CommonParameters.MtlsCertificate = certificateCredential.Certificate;
+            }
+
+            return this;
         }
 
         /// <summary>
@@ -115,11 +131,31 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         protected override void Validate()
         {
-            // Skip client credential validation if mTLS PoP is enabled
-            if (Parameters.UseMtlsPop)
+            if (CommonParameters.MtlsCertificate != null)
             {
-                // mTLS PoP is explicitly set, so skip client credential validation
-                return;
+                string authorityUri = ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri;
+
+                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidAuthorityType,
+                        MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
+                }
+
+                if (string.IsNullOrEmpty(ServiceBundle.Config.AzureRegion))
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsPopWithoutRegion,
+                        MsalErrorMessage.MtlsPopWithoutRegion);
+                }
+
+                // Check if the authority tenant is "common", meaning no specific authority was provided by the user
+                if (authorityUri.Contains("/common", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new MsalClientException(
+                        MsalError.AuthorityHostMismatch,
+                        MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage);
+                }
             }
 
             base.Validate();

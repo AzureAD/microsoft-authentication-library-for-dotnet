@@ -45,6 +45,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             AuthorityManager = new AuthorityManager(RequestContext, initialAuthority);
 
+            // Propagate MtlsCertificate to RequestContext
+            RequestContext.MtlsCertificate = commonParameters.MtlsCertificate;
+
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ??
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
