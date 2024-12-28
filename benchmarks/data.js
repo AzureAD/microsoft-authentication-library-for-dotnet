@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1735042025148,
+  "lastUpdate": 1735420559130,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6722,6 +6722,42 @@ window.BENCHMARK_DATA = {
             "value": 329596.71794871794,
             "unit": "ns",
             "range": "± 11467.083185656877"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "05455a5aca21f2453e223ed15390a481a3342cea",
+          "message": "Fix for #4860 - ignore tenant id for authorities that do not support … (#5027)\n\nFix for #4860 - ignore tenant id for authorities that do not support tenants",
+          "timestamp": "2024-12-28T21:08:40Z",
+          "tree_id": "2ad37f9b42ef758c735a189105a0fffbd5b2fa46",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/05455a5aca21f2453e223ed15390a481a3342cea"
+        },
+        "date": 1735420554666,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 242863.1923076923,
+            "unit": "ns",
+            "range": "± 4032.1341616364775"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 339788.86666666664,
+            "unit": "ns",
+            "range": "± 4345.5125764840395"
           }
         ]
       }
