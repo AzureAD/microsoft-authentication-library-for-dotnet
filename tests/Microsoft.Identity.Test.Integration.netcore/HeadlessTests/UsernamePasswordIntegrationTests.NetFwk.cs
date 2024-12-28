@@ -110,12 +110,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
 
             var user = labResponse.User;
-
+            Uri authorityUri = new Uri(Adfs2019LabConstants.Authority);
+            
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(Adfs2019LabConstants.PublicClientId)
-                .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                .WithAuthority(authorityUri)
                 .WithTestLogging()
                 .Build();
+
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()

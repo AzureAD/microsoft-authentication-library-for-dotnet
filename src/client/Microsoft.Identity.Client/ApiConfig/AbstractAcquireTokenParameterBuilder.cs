@@ -296,8 +296,13 @@ namespace Microsoft.Identity.Client
             }
 
             var authorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), false);
-            var authority = Authority.CreateAuthority(authorityInfo);
-            return WithTenantId(authority.TenantId);
+            if (authorityInfo.CanBeTenanted)
+            {
+                var authority = Authority.CreateAuthority(authorityInfo);
+                return WithTenantId(authority.TenantId);
+            }
+
+            return this as T;
         }
 
         /// <summary>

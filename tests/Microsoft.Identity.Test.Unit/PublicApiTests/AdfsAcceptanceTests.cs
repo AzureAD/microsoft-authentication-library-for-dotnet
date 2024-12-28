@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -12,6 +13,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class AdfsAcceptanceTests : TestBase
     {
+        private const string AdfsScope = "https://arm.asz/.default";
+
         // Possible authorities copied from: https://msazure.visualstudio.com/One/_search?action=contents&text=CanAcquireToken_UsingRefreshToken&type=code&lp=code-Project&filters=ProjectFilters%7BOne%7DRepositoryFilters%7BAzureStack-Services-Graph%7D&pageSize=25&result=DefaultCollection/One/AzureStack-Services-Graph/GBmain//src/Identity.Web.Tests/MsalTests.cs
         [DataTestMethod]
         [DataRow("https://localhost:3001/adfs")]
@@ -29,6 +32,37 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task AdfsAuthorityVariants_WithAuthority_Async(string authority)
         {
             await RunAuthCodeFlowAsync(authority, useWithAdfsAuthority: false).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenByUsernamePasswordAsync()
+        {
+            Uri authorityUri = new Uri("https://localhost:3001/adfs");
+            using (var httpManager = new MockHttpManager())
+            {
+                var builder = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(authorityUri)
+                    .WithHttpManager(httpManager)
+                    .WithInstanceDiscovery(false)
+                    .WithRedirectUri(TestConstants.RedirectUri);
+
+                var app = builder.Build();
+
+                AddAdfsWithTenantIdMockHandler(httpManager);
+
+                var result = await app.AcquireTokenByUsernamePassword(
+                    TestConstants.s_scope,
+                    TestConstants.Username,
+                    TestConstants.DefaultPassword)
+                    .WithTenantIdFromAuthority(authorityUri)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                var account = await app.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
+
+                AssertAdfsResult(result, account);
+            }
         }
 
         private static async Task RunAuthCodeFlowAsync(string authority, bool useWithAdfsAuthority)
@@ -52,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AddAdfsWithTenantIdMockHandler(httpManager);
 
-                var result = await app.AcquireTokenByAuthorizationCode(new[] { "https://arm.asz/.default" }, "authcode")
+                var result = await app.AcquireTokenByAuthorizationCode(new[] { AdfsScope }, "authcode")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -60,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AssertAdfsResult(result, account);
 
-                var result2 = await app.AcquireTokenSilent(new[] { "https://arm.asz/.default" }, account)
+                var result2 = await app.AcquireTokenSilent(new[] { AdfsScope }, account)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
