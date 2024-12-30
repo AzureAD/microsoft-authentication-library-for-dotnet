@@ -504,15 +504,15 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [DataTestMethod]
-        //[DataRow("login.partner.microsoftonline.cn", "login.partner.microsoftonline.cn")]
+        [DataRow("login.partner.microsoftonline.cn", "login.partner.microsoftonline.cn")]
         [DataRow("login.chinacloudapi.cn", "login.partner.microsoftonline.cn")]
-        //[DataRow("login.microsoftonline.us", "login.microsoftonline.us")]
-        //[DataRow("login.usgovcloudapi.net", "login.microsoftonline.us")]
-        //[DataRow("login-us.microsoftonline.com", "login-us.microsoftonline.com")]
-        //[DataRow("login.windows.net", "login.microsoft.com")]
-        //[DataRow("login.microsoft.com", "login.microsoft.com")]
-        //[DataRow("sts.windows.net", "login.microsoft.com")]
-        //[DataRow("login.microsoftonline.com", "login.microsoft.com")]
+        [DataRow("login.microsoftonline.us", "login.microsoftonline.us")]
+        [DataRow("login.usgovcloudapi.net", "login.microsoftonline.us")]
+        [DataRow("login-us.microsoftonline.com", "login-us.microsoftonline.com")]
+        [DataRow("login.windows.net", "login.microsoft.com")]
+        [DataRow("login.microsoft.com", "login.microsoft.com")]
+        [DataRow("sts.windows.net", "login.microsoft.com")]
+        [DataRow("login.microsoftonline.com", "login.microsoft.com")]
         public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
         {
             try

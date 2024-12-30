@@ -375,10 +375,11 @@ namespace NetCoreTestApp
 
                         case 15: //acquire token with cert over MTLS SNI + MTLS 
 
-                            var cca1 = CreateCcaForMtlsPop("eastus", s_confidentialClientCertificate);
+                            var cca1 = CreateCcaForMtlsPop("westus3", s_confidentialClientCertificate);
 
                             var resultX1 = await cca1.AcquireTokenForClient(GraphAppScope)
                                 .WithMtlsProofOfPossession()
+                                .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice
                                 .ExecuteAsync()
                                 .ConfigureAwait(false);
 
@@ -431,8 +432,8 @@ namespace NetCoreTestApp
         private static IConfidentialClientApplication CreateCcaForMtlsPop(string region, X509Certificate2 certificate = null)
         {
             ConfidentialClientApplicationBuilder ccaBuilder = ConfidentialClientApplicationBuilder
-                .Create("c6a1a188-95c6-4589-9030-7ec66bed1589")
-                .WithTenantId("72f988bf-86f1-41af-91ab-2d7cd011db47")
+                .Create("163ffef9-a313-45b4-ab2f-c7e2f5e0e23e")
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion(region);
 
             // Use WithCertificate if a certificate is provided; otherwise, use WithClientSecret.
