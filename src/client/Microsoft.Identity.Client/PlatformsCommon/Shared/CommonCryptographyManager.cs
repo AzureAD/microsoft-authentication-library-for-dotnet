@@ -14,9 +14,6 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
 
-#if ANDROID && !MAUI
-    [global::Android.Runtime.Preserve(AllMembers = true)]
-#endif
     [Preserve(AllMembers = true)]
     internal class CommonCryptographyManager : ICryptographyManager
     {

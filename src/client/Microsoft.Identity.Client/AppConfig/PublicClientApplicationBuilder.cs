@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
         /// <remarks>On desktop (.NET, .NET Framework) install the NuGet package Microsoft.Identity.Client.Broker and call .WithBroker(BrokerOptions).
-        /// This is not needed for MAUI apps.</remarks>
+        /// This is not needed for mobile (MAUI) apps.</remarks>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
             Config.IsBrokerEnabled = enableBroker;

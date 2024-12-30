@@ -13,11 +13,7 @@ using Uri = System.Uri;
 
 namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
 {
-#if MAUI
     [Preserve(AllMembers = true)]
-#else
-    [global::Android.Runtime.Preserve(AllMembers = true)]
-#endif
     internal class SystemWebUI : WebviewBase
     {
         private readonly CoreUIParent _parent;
