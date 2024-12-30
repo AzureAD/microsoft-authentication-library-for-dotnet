@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task CcaFociAsync()
+        public async Task NoFociForCca()
         {
             // Arrange
             using (_harness = CreateTestHarness())
@@ -93,6 +93,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Assert
                 Assert.IsNull(appCAccount);
+
+                // Act
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                    () => appC.AcquireTokenSilent(TestConstants.s_scope, appAAccount).ExecuteAsync()).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
             }
         }
 
