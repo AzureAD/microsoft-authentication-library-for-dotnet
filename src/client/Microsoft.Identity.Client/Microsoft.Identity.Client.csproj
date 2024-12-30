@@ -14,7 +14,7 @@
     <TargetFrameworkNet8Ios>net8.0-ios</TargetFrameworkNet8Ios>
   </PropertyGroup>
 
-  <!-- net6.0 (MAUI) -->
+  <!-- net8.0 (MAUI) -->
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet8Ios)' or '$(TargetFramework)' == '$(TargetFrameworkNet8Android)'">
     <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet8Ios)'">14.2</SupportedOSPlatformVersion>
