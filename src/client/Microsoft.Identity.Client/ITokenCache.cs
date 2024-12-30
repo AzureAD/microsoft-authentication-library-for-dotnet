@@ -46,8 +46,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-token-cache-serialization.
         /// If you need async/task-based callbacks, please use SetAfterAccessAsync instead.
         /// </summary>
-        /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
-        /// member of the cache is <c>true</c></param>
+        /// <param name="afterAccess">Delegate set in order to handle the cache serialization</param>
         /// <remarks>In the case where the delegate is used to serialize the cache entirely (not just a row), it might
         /// want to call <see cref="ITokenCacheSerializer.SerializeMsalV3()"/></remarks>
 #if !SUPPORTS_CUSTOM_CACHE
@@ -89,8 +88,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-token-cache-serialization.
         /// This provides the same functionality as SetAfterAccess but it provides for an async/task-based callback.
         /// </summary>
-        /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
-        /// member of the cache is <c>true</c></param>
+        /// <param name="afterAccess">Delegate set in order to handle the cache serialization </param>
         /// <remarks>In the case where the delegate is used to serialize the cache entirely (not just a row), it might
         /// want to call <see cref="ITokenCacheSerializer.SerializeMsalV3()"/></remarks>
 #if !SUPPORTS_CUSTOM_CACHE

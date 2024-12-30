@@ -35,8 +35,6 @@ namespace Microsoft.Identity.Client
         internal const int ExpirationTooLongInDays = 10 * 365;
 
         private readonly IFeatureFlags _featureFlags;
-        private volatile bool _hasStateChanged;
-
         internal ITokenCacheAccessor Accessor { get; set; }
 
         internal IServiceBundle ServiceBundle { get; }
