@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworkNetDesktop48>net48</TargetFrameworkNetDesktop48>
-    <TargetFrameworkNet>net6.0</TargetFrameworkNet>
+    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
 
     <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
     <IsPackable>false</IsPackable>

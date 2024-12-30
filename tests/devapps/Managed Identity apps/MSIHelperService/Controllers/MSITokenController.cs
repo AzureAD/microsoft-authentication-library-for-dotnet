@@ -15,7 +15,7 @@ namespace MSIHelperService.Controllers
     public class MSITokenController : ControllerBase
     {
         private readonly ILogger _logger;
-        private readonly IHttpClientFactory? _httpClientFactory;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
         /// GetMSITokenController ctor

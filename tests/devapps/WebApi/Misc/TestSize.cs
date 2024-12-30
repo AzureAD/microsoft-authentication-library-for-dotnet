@@ -2,11 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace WebApi.Misc
@@ -39,14 +38,7 @@ namespace WebApi.Misc
             {
                 try
                 {
-                    using (Stream s = new MemoryStream())
-                    {
-                        BinaryFormatter formatter = new BinaryFormatter();
-#pragma warning disable SYSLIB0011 // Type or member is obsolete
-                        formatter.Serialize(s, thevalue);
-#pragma warning restore SYSLIB0011 // Type or member is obsolete
-                        returnval = (int)s.Length;
-                    }
+                    returnval = JsonSerializer.SerializeToUtf8Bytes(thevalue).Length;
                 }
                 catch { }
             }

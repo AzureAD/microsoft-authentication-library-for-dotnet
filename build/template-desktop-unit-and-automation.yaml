@@ -1,8 +1,8 @@
 steps:
 - task: UseDotNet@2
-  displayName: 'Use the latest .NET 6'
+  displayName: 'Use the latest .NET 8'
   inputs:
-    version: 6.x
+    version: 8.x
 
 - task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
