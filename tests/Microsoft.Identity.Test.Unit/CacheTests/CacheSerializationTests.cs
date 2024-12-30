@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             StorageJsonKeys.FamilyId
         };
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         private static readonly JsonDocumentOptions _documentOptions = new JsonDocumentOptions
         {
             AllowTrailingCommas = true
@@ -556,7 +556,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await (tokenCache as ITokenCacheInternal).OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             var finalJson = JsonNode.Parse(Encoding.UTF8.GetString(cache), documentOptions: _documentOptions).AsObject();
 
             var originalJson = JsonNode.Parse(jsonContent, documentOptions: _documentOptions).AsObject();
@@ -580,7 +580,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string actualJson = new UTF8Encoding().GetString(bytes);
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             Assert.IsTrue(DeepEquals(
                 JsonNode.Parse(actualJson, documentOptions: _documentOptions).AsObject(),
                 JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
@@ -596,7 +596,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // serialize again to detect errors that come from deserialization
             byte[] bytes2 = s2.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             Assert.IsTrue(DeepEquals(
                     JsonNode.Parse(actualJson2, documentOptions: _documentOptions).AsObject(),
                 JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
@@ -656,7 +656,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // serialize again to detect errors that come from deserialization
             byte[] bytes2 = s1.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             Assert.IsTrue(DeepEquals(
                 JsonNode.Parse(actualJson2, documentOptions: _documentOptions).AsObject(),
                 JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
@@ -958,7 +958,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             CoreAssert.AssertDictionariesAreEqual(expected.WamAccountIds, actual.WamAccountIds, StringComparer.Ordinal);
         }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         private bool DeepEquals(JsonNode a, JsonNode b)
         {
             if (a == null && b == null)

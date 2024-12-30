@@ -392,7 +392,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //process the response
             if (!string.IsNullOrEmpty(environmentVariableResponse))
             {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 environmentVariables = System.Text.Json.JsonSerializer.Deserialize
                     <Dictionary<string, string>>(environmentVariableResponse);
 #else

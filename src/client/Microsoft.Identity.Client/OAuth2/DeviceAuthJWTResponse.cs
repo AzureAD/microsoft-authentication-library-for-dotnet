@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net6;
+using Microsoft.Identity.Client.Platforms.net8;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 using System.Text.Json.Serialization;
 #else
