@@ -58,9 +58,6 @@ namespace Microsoft.Identity.Client
 
         async Task ITokenCacheInternal.OnBeforeWriteAsync(TokenCacheNotificationArgs args)
         {
-#pragma warning disable CS0618 // Type or member is obsolete, but preserve old behavior until it is deleted
-            HasStateChanged = true;
-#pragma warning restore CS0618 // Type or member is obsolete
             args.HasStateChanged = true;
             BeforeWrite?.Invoke(args);
 

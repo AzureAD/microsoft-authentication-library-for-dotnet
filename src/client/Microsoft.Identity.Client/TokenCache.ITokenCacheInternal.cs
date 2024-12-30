@@ -171,10 +171,6 @@ namespace Microsoft.Identity.Client
 
             try
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                HasStateChanged = true;
-#pragma warning restore CS0618 // Type or member is obsolete
-
                 try
                 {
                     if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
@@ -275,10 +271,6 @@ namespace Microsoft.Identity.Client
 
                         LogCacheContents(requestParams);
                     }
-
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
                 }
 
                 return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
@@ -1245,10 +1237,6 @@ namespace Microsoft.Identity.Client
             }
             finally
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-
                 _semaphoreSlim.Release();
             }
 
@@ -1330,10 +1318,6 @@ namespace Microsoft.Identity.Client
             }
             finally
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-
                 _semaphoreSlim.Release();
             }
         }
