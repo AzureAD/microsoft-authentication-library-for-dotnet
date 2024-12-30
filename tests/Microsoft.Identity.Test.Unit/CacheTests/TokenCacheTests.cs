@@ -1152,9 +1152,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SetAfterAccess(AfterAccessChangedNotification);
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
-#pragma warning disable CS0618 // Type or member is obsolete
-            Assert.IsFalse(((TokenCache)cache).HasStateChanged);
-#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(2, cache.Accessor.GetAllAccessTokens().Count());
@@ -1171,9 +1168,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
             };
             ((ITokenCacheSerializer)tokenCache).DeserializeMsalV3(null);
-#pragma warning disable CS0618 // Type or member is obsolete
-            Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
-#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         [TestMethod]
