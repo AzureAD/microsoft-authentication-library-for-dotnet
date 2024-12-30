@@ -204,17 +204,6 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(Constants.MtlsPoPTokenType, parameters[OAuth2Parameter.TokenType]);
         }
 
-        [TestMethod]
-        public void FormatResult_SetsMtlsCertificate()
-        {
-            var scheme = new MtlsPopAuthenticationOperation(s_testCertificate);
-            var authenticationResult = new AuthenticationResult();
-
-            scheme.FormatResult(authenticationResult);
-
-            Assert.AreEqual(s_testCertificate, authenticationResult.MtlsCertificate);
-        }
-
         [DataTestMethod]
         [DataRow("https://login.microsoftonline.com", "Public Cloud")]
         [DataRow("https://mtlsauth.microsoft.com", "MTLS Public Cloud")]

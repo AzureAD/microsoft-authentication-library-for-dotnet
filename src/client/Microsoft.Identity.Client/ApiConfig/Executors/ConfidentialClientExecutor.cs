@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         public async Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByUsernamePasswordParameters userNamePasswordParameters,
+            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
             RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
@@ -144,12 +144,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
             
-            requestParams.SendX5C = userNamePasswordParameters.SendX5C ?? false;
+            requestParams.SendX5C = usernamePasswordParameters.SendX5C ?? false;
 
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,
                 requestParams,
-                userNamePasswordParameters);
+                usernamePasswordParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }

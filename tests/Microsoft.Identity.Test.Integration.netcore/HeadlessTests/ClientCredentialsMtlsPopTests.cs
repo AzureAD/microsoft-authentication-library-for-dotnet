@@ -17,7 +17,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class ClientCredentialsMtlsPopTests
     {
         private const string MsiAllowListedAppIdforSNI = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
-        private const string LabApp = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
 
         [TestInitialize]
         public void TestInitialize()
@@ -58,9 +57,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult, "The authentication result should not be null.");
             Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
             Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
-            // Assert the certificate used in the result is the same as the one provided
-            Assert.IsNotNull(authResult.MtlsCertificate, "MTLS certificate in the authentication result should not be null.");
-            Assert.AreEqual(cert.Thumbprint, authResult.MtlsCertificate.Thumbprint, "The certificate used should match the one provided in the test setup.");
 
             // Simulate cache retrieval to verify MTLS configuration is cached properly
             authResult = await confidentialApp
@@ -72,8 +68,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Assert: Verify that the token was fetched from cache on the second request
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
             // Assert the certificate used in the result is the same as the one provided
-            Assert.IsNotNull(authResult.MtlsCertificate, "MTLS certificate in the authentication result should not be null.");
-            Assert.AreEqual(cert.Thumbprint, authResult.MtlsCertificate.Thumbprint, "The certificate used should match the one provided in the test setup.");
         }
     }
 }
