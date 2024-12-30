@@ -35,7 +35,7 @@ steps:
   displayName: 'Run unit tests (.NET 6)'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net6.0\Microsoft.Identity.Test.Unit.dll'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net8.0\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
     runInParallel: true
     codeCoverageEnabled: true
