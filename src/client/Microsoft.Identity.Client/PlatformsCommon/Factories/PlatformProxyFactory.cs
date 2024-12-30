@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
             var finalLogger = logger ?? LoggerHelper.NullLogger;
 
 #if NET_CORE
-            return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);
+            return new Microsoft.Identity.Client.Platforms.netstandard.NetCorePlatformProxy(finalLogger);
 #elif ANDROID
             return new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy(finalLogger);
 #elif iOS

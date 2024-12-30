@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Serialization;
-using Microsoft.Identity.Client.Platforms.net8;
+using Microsoft.Identity.Client.Platforms.net;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
 using Microsoft.Identity.Json;

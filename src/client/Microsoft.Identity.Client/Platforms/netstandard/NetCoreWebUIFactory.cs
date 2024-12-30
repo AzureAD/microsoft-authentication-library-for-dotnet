@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
+namespace Microsoft.Identity.Client.Platforms.netstandard
 {
     internal class NetCoreWebUIFactory : IWebUIFactory
     {

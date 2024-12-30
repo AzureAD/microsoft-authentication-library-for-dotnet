@@ -3,7 +3,7 @@
 
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net8;
+using Microsoft.Identity.Client.Platforms.net;
 #else
 using Microsoft.Identity.Json;
 #endif

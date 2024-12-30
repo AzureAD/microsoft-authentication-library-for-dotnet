@@ -970,10 +970,6 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>If you want to use the System web browser (for instance to get SSO with the browser), notify the end
         /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. For a list of supported browsers with
         /// custom tab support, please see https://aka.ms/msal-net-system-browsers.
-        /// Otherwise you can use <see cref="UIParent.IsSystemWebviewAvailable"/> to check if a browser with custom tabs is available on the device
-        /// and require the library to use the embedded web view if there is no such browser available by setting the boolean to <c>true</c> in the following
-        /// constructor: <see cref="UIParent.UIParent(Android.App.Activity, bool)"/>
-        /// <para>For more details</para> See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
         public const string AndroidActivityNotFound = "android_activity_not_found";
 
