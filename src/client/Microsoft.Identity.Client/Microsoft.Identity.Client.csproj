@@ -89,6 +89,9 @@
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
     <None Include="$(PathToMsalSources)\..\..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="Platforms\net8\JsonObjectAttribute.cs" />
+    <None Include="Platforms\net8\JsonStringConverter.cs" />
+    <None Include="Platforms\net8\MsalJsonSerializerContext.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
@@ -103,7 +106,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet8)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
+    <Compile Include="$(PathToMsalSources)\Platforms\net8\**\*.cs" LinkBase="Platforms\net6" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />

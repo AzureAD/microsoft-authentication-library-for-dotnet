@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class RetryPolicyTests : TestBase
     {
 // This test is expensive, as it has to wait 1 second - run it only on latest .NET
-#if NET6_0_OR_GREATER 
+#if NET8_0_OR_GREATER 
         [TestMethod]        
         public async Task RetryPolicyAsync()
         {
