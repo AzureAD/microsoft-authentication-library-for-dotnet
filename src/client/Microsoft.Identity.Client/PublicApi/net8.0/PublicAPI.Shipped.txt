@@ -1,6 +1,4 @@
 abstract Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.ExecuteAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
-abstract Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.OnClosingUrl() -> void
-abstract Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.OnNavigationCanceled(int statusCode) -> void
 const Microsoft.Identity.Client.ConfidentialClientApplication.AttemptRegionDiscovery = "TryAutoDetect" -> string
 const Microsoft.Identity.Client.MsalError.AccessDenied = "access_denied" -> string
 const Microsoft.Identity.Client.MsalError.AccessingWsMetadataExchangeFailed = "accessing_ws_metadata_exchange_failed" -> string
@@ -242,9 +240,8 @@ Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithAccount(Mi
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithEmbeddedWebViewOptions(Microsoft.Identity.Client.EmbeddedWebViewOptions options) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(System.Collections.Generic.IEnumerable<string> extraScopesToConsent) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithLoginHint(string loginHint) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(nint window) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object parent) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
-Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(System.IntPtr window) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
-Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(System.Windows.Forms.IWin32Window window) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithPrompt(Microsoft.Identity.Client.Prompt prompt) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithProofOfPossession(string nonce, System.Net.Http.HttpMethod httpMethod, System.Uri requestUri) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(Microsoft.Identity.Client.SystemWebViewOptions options) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
@@ -366,6 +363,8 @@ Microsoft.Identity.Client.AuthenticationResultMetadata.RegionDetails.get -> Micr
 Microsoft.Identity.Client.AuthenticationResultMetadata.RegionDetails.set -> void
 Microsoft.Identity.Client.AuthenticationResultMetadata.Telemetry.get -> string
 Microsoft.Identity.Client.AuthenticationResultMetadata.Telemetry.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.TelemetryTokenType.get -> int
+Microsoft.Identity.Client.AuthenticationResultMetadata.TelemetryTokenType.set -> void
 Microsoft.Identity.Client.AuthenticationResultMetadata.TokenEndpoint.get -> string
 Microsoft.Identity.Client.AuthenticationResultMetadata.TokenEndpoint.set -> void
 Microsoft.Identity.Client.AuthenticationResultMetadata.TokenSource.get -> Microsoft.Identity.Client.TokenSource
@@ -845,31 +844,6 @@ Microsoft.Identity.Client.MsalUiRequiredException.MsalUiRequiredException(string
 Microsoft.Identity.Client.OsCapabilitiesExtensions
 Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential
 Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential.Credential() -> void
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs.Flags.get -> int
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs.Headers.get -> string
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs.PostData.get -> byte[]
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs.TargetFrameName.get -> string
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs.Url.get -> string
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs.WebBrowserActiveXInstance.get -> object
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs.WebBrowserBeforeNavigateEventArgs(string url, byte[] postData, string headers, int flags, string targetFrameName, object webBrowserActiveXInstance) -> void
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserNavigateErrorEventArgs
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserNavigateErrorEventArgs.StatusCode.get -> int
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserNavigateErrorEventArgs.TargetFrameName.get -> string
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserNavigateErrorEventArgs.Url.get -> string
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserNavigateErrorEventArgs.WebBrowserActiveXInstance.get -> object
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserNavigateErrorEventArgs.WebBrowserNavigateErrorEventArgs(string url, string targetFrameName, int statusCode, object webBrowserActiveXInstance) -> void
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialog
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialog.ShowBrowser(System.Threading.CancellationToken cancellationToken) -> void
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialog.WindowsFormsWebAuthenticationDialog(object ownerWindow, Microsoft.Identity.Client.EmbeddedWebViewOptions embeddedWebViewOptions) -> void
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.CreateExceptionForAuthenticationUiFailed(int statusCode) -> Microsoft.Identity.Client.MsalClientException
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.InvokeHandlingOwnerWindow(System.Action action) -> void
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.InvokeOnly(System.Action action) -> void
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.ownerWindow.get -> System.Windows.Forms.IWin32Window
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.ownerWindow.set -> void
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.WebBrowser.get -> System.Windows.Forms.WebBrowser
-Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.WindowsFormsWebAuthenticationDialogBase(object ownerWindow) -> void
 Microsoft.Identity.Client.Prompt
 Microsoft.Identity.Client.Prompt.Prompt() -> void
 Microsoft.Identity.Client.PublicClientApplication
@@ -916,9 +890,8 @@ Microsoft.Identity.Client.PublicClientApplicationBuilder.WithIosKeychainSecurity
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithKerberosTicketClaim(string servicePrincipalName, Microsoft.Identity.Client.Kerberos.KerberosTicketContainer ticketContainer) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithMultiCloudSupport(bool enableMultiCloudSupport) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithOidcAuthority(string authorityUri) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithParentActivityOrWindow(System.Func<nint> windowFunc) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithParentActivityOrWindow(System.Func<object> parentActivityOrWindowFunc) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
-Microsoft.Identity.Client.PublicClientApplicationBuilder.WithParentActivityOrWindow(System.Func<System.IntPtr> windowFunc) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
-Microsoft.Identity.Client.PublicClientApplicationBuilder.WithParentActivityOrWindow(System.Func<System.Windows.Forms.IWin32Window> windowFunc) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithWindowsBrokerOptions(Microsoft.Identity.Client.WindowsBrokerOptions options) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationExtensions
 Microsoft.Identity.Client.PublicClientApplicationOptions
@@ -1079,11 +1052,6 @@ override Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ToString(
 override Microsoft.Identity.Client.MsalException.ToString() -> string
 override Microsoft.Identity.Client.MsalManagedIdentityException.UpdateIsRetryable() -> void
 override Microsoft.Identity.Client.MsalServiceException.ToString() -> string
-override Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialog.OnAuthenticate(System.Threading.CancellationToken cancellationToken) -> void
-override Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialog.OnClosingUrl() -> void
-override Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialog.OnNavigationCanceled(int inputStatusCode) -> void
-override Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialog.WebBrowserBeforeNavigateHandler(object sender, Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs e) -> void
-override Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.Dispose(bool disposing) -> void
 override Microsoft.Identity.Client.Prompt.Equals(object obj) -> bool
 override Microsoft.Identity.Client.Prompt.GetHashCode() -> int
 static Microsoft.Identity.Client.AccountExtensions.GetTenantProfiles(this Microsoft.Identity.Client.IAccount account) -> System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.TenantProfile>
@@ -1164,11 +1132,7 @@ static Microsoft.Identity.Client.WwwAuthenticateParameters.GetClaimChallengeFrom
 static readonly Microsoft.Identity.Client.Prompt.Consent -> Microsoft.Identity.Client.Prompt
 static readonly Microsoft.Identity.Client.Prompt.Create -> Microsoft.Identity.Client.Prompt
 static readonly Microsoft.Identity.Client.Prompt.ForceLogin -> Microsoft.Identity.Client.Prompt
-static readonly Microsoft.Identity.Client.Prompt.Never -> Microsoft.Identity.Client.Prompt
 static readonly Microsoft.Identity.Client.Prompt.NoPrompt -> Microsoft.Identity.Client.Prompt
 static readonly Microsoft.Identity.Client.Prompt.SelectAccount -> Microsoft.Identity.Client.Prompt
 virtual Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.Validate() -> void
 virtual Microsoft.Identity.Client.MsalServiceException.UpdateIsRetryable() -> void
-virtual Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.OnAuthenticate(System.Threading.CancellationToken cancellationToken) -> void
-virtual Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.WebBrowserBeforeNavigateHandler(object sender, Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs e) -> void
-virtual Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.WebBrowserNavigateErrorHandler(object sender, Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserNavigateErrorEventArgs e) -> void

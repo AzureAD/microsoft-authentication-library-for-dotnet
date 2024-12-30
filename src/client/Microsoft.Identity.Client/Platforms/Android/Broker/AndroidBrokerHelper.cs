@@ -353,8 +353,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private List<X509Certificate2> ReadCertDataForBrokerApp(string brokerPackageName)
         {
-#pragma warning disable CS0618 // Type or member is obsolete https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854
-
             PackageInfo packageInfo = _androidContext.PackageManager.GetPackageInfo(brokerPackageName,
                 PackageInfoFlags.Signatures);
             if (packageInfo == null)
@@ -375,7 +373,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 x509Certificate = new X509Certificate2(rawCert);
                 certificates.Add(x509Certificate);
             }
-#pragma warning restore CS0618 // Type or member is obsolete
 
             return certificates;
         }

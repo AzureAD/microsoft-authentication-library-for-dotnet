@@ -11,19 +11,19 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_MTLS;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">
     <DefineConstants>$(DefineConstants);ANDROID;SUPPORTS_BROKER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_BROKER;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">
     <DefineConstants>$(DefineConstants);iOS;SUPPORTS_BROKER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Ios)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' or '$(TargetFramework)' == '$(TargetFrameworkNetIos)'">
     <DefineConstants>$(DefineConstants);MOBILE</DefineConstants>
   </PropertyGroup>
 </Project>

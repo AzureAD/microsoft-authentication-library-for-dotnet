@@ -28,3 +28,6 @@ dotnet_diagnostic.CS0108.severity = none
 dotnet_diagnostic.IDE0036.severity = none
 
 dotnet_diagnostic.VSTHRD200.severity = none
+
+dotnet_diagnostic.SYSLIB0050.severity = none
+dotnet_diagnostic.SYSLIB0051.severity = none

@@ -10,6 +10,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Webkit;
 using Android.Widget;
+using Java.Lang;
 using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
@@ -89,7 +90,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
             }
 
-            [Obsolete] // because parent is obsolete
+            [Deprecated]
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
                 Uri uri = new Uri(url);
@@ -132,7 +133,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     return true;
                 }
 
-                if (!url.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase) && 
+                if (!url.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase) &&
                     !uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
                 {
                     UriBuilder errorUri = new UriBuilder(_callback)
@@ -148,6 +149,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 }
 
                 return false;
+            }
+
+            public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
+            {
+                string url = request.Url.ToString();
+                return ShouldOverrideUrlLoading(view, url);
             }
 
             private void OpenLinkInBrowser(string url, Activity activity)
