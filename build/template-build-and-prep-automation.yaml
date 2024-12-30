@@ -78,7 +78,7 @@ steps:
         #dev apps to check
         $AppsToCheck = @('MSIX\WPF\bin\Release\', 
                          'MSIX\WPF.Package\bin\AnyCPU\Release\WPF\', 
-                         'NetCoreWinFormsWam\bin\Release\net6.0-windows10.0.17763.0\', 
+                         'NetCoreWinFormsWam\bin\Release\net8.0-windows10.0.17763.0\', 
                          'NetDesktopWpf\bin\Release\', 
                          'NetFrameworkWam\bin\Release\',                        
                          'WAMClassLibrary\bin\Release\',
