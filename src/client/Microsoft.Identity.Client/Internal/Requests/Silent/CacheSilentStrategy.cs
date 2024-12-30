@@ -174,12 +174,16 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)
         {
-            if (!ServiceBundle.PlatformProxy.GetFeatureFlags().IsFociEnabled)
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+
+            // FOCI is only supported on public client desktop apps
+            if (!(ServiceBundle.PlatformProxy.GetFeatureFlags().IsFociEnabled &&
+                ServiceBundle.Config.IsPublicClient))
             {
+                logger.Verbose(() =>
+                    "[FOCI] Skip FOCI on confidential client and on mobile apps");
                 return null;
             }
-
-            var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             // If the app was just added to the family, the app metadata will reflect this
             // after the first RT exchanged.
@@ -239,7 +243,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             var msalRefreshTokenItem = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
             if (msalRefreshTokenItem == null)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Verbose(()=>"No Refresh Token was found in the cache. ");
+                AuthenticationRequestParameters.RequestContext.Logger.Warning(
+                    "No Refresh Token was found in the cache. ");
 
                 throw new MsalUiRequiredException(
                     MsalError.NoTokensFoundError,

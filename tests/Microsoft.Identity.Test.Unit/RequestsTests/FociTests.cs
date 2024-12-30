@@ -69,6 +69,33 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        [TestMethod]
+        public async Task CcaFociAsync()
+        {
+            // Arrange
+            using (_harness = CreateTestHarness())
+            {
+                InitApps();
+
+                var appC = ConfidentialClientApplicationBuilder
+                    .Create("other_client_id")
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .BuildConcrete();
+
+                ConfigureCacheSerialization(appC);
+
+                // Act
+                await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
+                var appAAccount= (await _appA.GetAccountsAsync().ConfigureAwait(false)).Single();
+                var appCAccount = await appC.GetAccountAsync(appAAccount.HomeAccountId.Identifier).ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNull(appCAccount);
+            }
+        }
+
         /// <summary>
         /// A is part of the family, B is not. B fails gracefully trying to get a token silently
         /// </summary>
@@ -375,15 +402,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             ConfigureCacheSerialization(_appB);
         }
 
-        private void ConfigureCacheSerialization(IPublicClientApplication pca)
+        private void ConfigureCacheSerialization(IClientApplicationBase app)
         {
-            pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
+            app.UserTokenCache.SetBeforeAccess(notificationArgs =>
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(_inMemoryCache);
                 notificationArgs.TokenCache.DeserializeMsalV3(bytes);
             });
 
-            pca.UserTokenCache.SetAfterAccess(notificationArgs =>
+            app.UserTokenCache.SetAfterAccess(notificationArgs =>
             {
                 if (notificationArgs.HasStateChanged)
                 {
