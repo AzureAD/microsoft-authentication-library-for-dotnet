@@ -22,13 +22,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public string DisplayName { get; set; }
 
         [JsonProperty("mfa")]
-        public MFA Mfa { get; set; }
+        internal MFA Mfa { get; set; }
 
         [JsonProperty("protectionpolicy")]
-        public ProtectionPolicy ProtectionPolicy { get; set; }
+        internal ProtectionPolicy ProtectionPolicy { get; set; }
 
         [JsonProperty("homedomain")]
-        public HomeDomain HomeDomain { get; set; }
+        internal HomeDomain HomeDomain { get; set; }
 
         [JsonProperty("homeupn")]
         public string HomeUPN { get; set; }

@@ -17,12 +17,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
     public class PoPValidator
     {
         // This endpoint is hosted in the MSID Lab and is able to verify any pop token bound to an HTTP request
-        private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
         private static HttpClient s_httpClient = new HttpClient();
-        private static Lazy<string> s_popValidationEndpointLazy = new Lazy<string>(
-            () => LabUserHelper.KeyVaultSecretsProviderMsal.GetSecretByName(
-                "automation-pop-validation-endpoint",
-                "841fc7c2ccdd48d7a9ef727e4ae84325").Value);
 
         /// <summary>
         /// This calls a special endpoint that validates any POP token against a configurable HTTP request.
