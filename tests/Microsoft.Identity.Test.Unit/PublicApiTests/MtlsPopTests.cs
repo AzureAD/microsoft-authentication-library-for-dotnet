@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit
                    .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.MissingAuthority, ex.ErrorCode);
+            Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -485,8 +485,8 @@ namespace Microsoft.Identity.Test.Unit
                             .ConfigureAwait(false))
                         .ConfigureAwait(false);
 
-                    Assert.AreEqual(MsalError.MissingAuthority, ex.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage, ex.Message);
+                    Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage, ex.Message);
                 }
             }
         }

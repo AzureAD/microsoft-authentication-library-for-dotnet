@@ -433,7 +433,7 @@ namespace Microsoft.Identity.Client
         public const string MtlsPopWithoutRegion = "mTLS Proof of Possession requires a region to be specified. Please set AzureRegion in the configuration at the application level.";
         public const string MtlsCertificateNotProvidedMessage = "mTLS Proof of Possession requires a certificate to be configured. Please provide a certificate at the application level using the .WithCertificate() instead of passing an assertion. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsInvalidAuthorityTypeMessage = "mTLS PoP is only supported for AAD authority type. See https://aka.ms/msal-net-pop for details.";
-        public const string MtlsCommonAuthorityNotAllowedMessage = "mTLS authentication requires a specific authority. Please provide an authority instead of using the default 'common'. See https://aka.ms/msal-net-authority-override for details.";
+        public const string MtlsNonTenantedAuthorityNotAllowedMessage = "mTLS authentication requires a tenanted authority. Using 'common', 'organizations', or similar non-tenanted authorities is not allowed. Please provide an authority with a specific tenant ID (e.g., 'https://login.microsoftonline.com/{tenantId}'). See https://aka.ms/msal-net-pop for details.";
         public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. mTLS Proof-of-Possession requires a region to be specified, as there is no global endpoint for mTLS. See https://aka.ms/msal-net-pop for details.";
     }
 }

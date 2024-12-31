@@ -142,12 +142,11 @@ namespace Microsoft.Identity.Client
                         MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
                 }
 
-                // Check if the authority tenant is "common", meaning no specific authority was provided by the user
                 if (authorityUri.Contains("/common", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new MsalClientException(
-                        MsalError.MissingAuthority,
-                        MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage);
+                        MsalError.MissingTenantedAuthority,
+                        MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
                 }
 
                 if (string.IsNullOrEmpty(ServiceBundle.Config.AzureRegion))
