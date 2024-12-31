@@ -133,13 +133,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
           "\"Bearer\",\"client_id\":\"client_id\"}";
         }
 
-        public static string GetMsiImdsSuccessfulResponse()
+        public static string GetMsiErrorBadJson()
         {
-            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(1));
-            return
-          "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"client_id\":\"client-id\"," +
-          "\"expires_in\":\"12345\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\"," +
-          "\"ext_expires_in\":\"12345\",\"token_type\":\"Bearer\"}";
+            string successResponse = GetMsiSuccessfulResponse();
+            return successResponse.Replace("{", "|");
         }
 
         public static string GetMsiErrorResponse(ManagedIdentitySource source)
