@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         }
                     });
 
-                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
                 var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
                 var wsTrustResponse = await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext)
                                                    .ConfigureAwait(false);
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
             {
                 harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: uri);
 
-                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
                 try
                 {
                     var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         }
                     });
 
-                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
                 try
                 {
                     var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         }
                     });
 
-                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
 
                 var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
 

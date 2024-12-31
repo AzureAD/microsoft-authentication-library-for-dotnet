@@ -92,6 +92,15 @@ namespace Microsoft.Identity.Client.Region
                 host = preferredNetworkEnv;
             }
 
+            if (requestContext.MtlsCertificate != null)
+            {
+                // Modify the host to replace "login" with "mtlsauth" for mTLS scenarios
+                if (host.StartsWith("login"))
+                {
+                    host = "mtlsauth" + host.Substring("login".Length);
+                }
+            }
+
             requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{host}. ");
             return $"{region}.{host}";
         }

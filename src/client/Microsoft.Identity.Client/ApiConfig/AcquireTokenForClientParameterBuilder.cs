@@ -142,19 +142,19 @@ namespace Microsoft.Identity.Client
                         MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
                 }
 
+                // Check if the authority tenant is "common", meaning no specific authority was provided by the user
+                if (authorityUri.Contains("/common", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new MsalClientException(
+                        MsalError.MissingAuthority,
+                        MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage);
+                }
+
                 if (string.IsNullOrEmpty(ServiceBundle.Config.AzureRegion))
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopWithoutRegion,
                         MsalErrorMessage.MtlsPopWithoutRegion);
-                }
-
-                // Check if the authority tenant is "common", meaning no specific authority was provided by the user
-                if (authorityUri.Contains("/common", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new MsalClientException(
-                        MsalError.AuthorityHostMismatch,
-                        MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage);
                 }
             }
 

@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
     {
         private readonly NetCoreWebUIFactory _webUIFactory = new NetCoreWebUIFactory();
         private readonly CoreUIParent _parent = new CoreUIParent();
-        private readonly RequestContext _requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
+        private readonly RequestContext _requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
 
         [TestMethod]
         public void NetCoreFactory_DefaultEmbedded()

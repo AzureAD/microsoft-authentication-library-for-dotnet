@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -135,7 +136,7 @@ namespace Microsoft.Identity.Client
         public async Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
         {
             Guid correlationId = Guid.NewGuid();
-            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            RequestContext requestContext = CreateRequestContext(correlationId, null, cancellationToken);
             requestContext.ApiEvent = new ApiEvent(correlationId);
             requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
 
@@ -170,7 +171,7 @@ namespace Microsoft.Identity.Client
         private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter, CancellationToken cancellationToken)
         {
             Guid correlationId = Guid.NewGuid();
-            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            RequestContext requestContext = CreateRequestContext(correlationId, null, cancellationToken);
             
             if (requestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {                
@@ -259,7 +260,7 @@ namespace Microsoft.Identity.Client
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                 AuthorityInfo,
                 allEnvs,
-                CreateRequestContext(Guid.NewGuid(), cancellationToken)).ConfigureAwait(false);
+                CreateRequestContext(Guid.NewGuid(), null, cancellationToken)).ConfigureAwait(false);
 
             brokerAccounts = brokerAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 
@@ -294,9 +295,9 @@ namespace Microsoft.Identity.Client
         // This implementation should ONLY be called for cases where we aren't participating in
         // MATS telemetry but still need a requestcontext/logger, such as "GetAccounts()".
         // For service calls, the request context should be created in the **Executor classes as part of request execution.
-        internal RequestContext CreateRequestContext(Guid correlationId, CancellationToken cancellationToken)
+        internal RequestContext CreateRequestContext(Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken cancellationToken)
         {
-            return new RequestContext(ServiceBundle, correlationId, cancellationToken);
+            return new RequestContext(ServiceBundle, correlationId, mtlsCertificate, cancellationToken);
         }
 
         #endregion

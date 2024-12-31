@@ -146,6 +146,10 @@ const Microsoft.Identity.Client.MsalError.WebView2LoaderNotFound = "webview2load
 const Microsoft.Identity.Client.MsalError.WebView2NotInstalled = "webview2_runtime_not_installed" -> string
 const Microsoft.Identity.Client.MsalError.WebviewUnavailable = "no_system_webview" -> string
 const Microsoft.Identity.Client.MsalError.WsTrustEndpointNotFoundInMetadataDocument = "wstrust_endpoint_not_found" -> string
+const Microsoft.Identity.Client.MsalError.MissingAuthority = "missing_authority" -> string
+const Microsoft.Identity.Client.MsalError.MtlsCertificateNotProvided = "mtls_certificate_not_provided" -> string
+const Microsoft.Identity.Client.MsalError.MtlsPopWithoutRegion = "mtls_pop_without_region" -> string
+const Microsoft.Identity.Client.MsalError.RegionRequiredForMtlsPop = "region_required_for_mtls_pop" -> string
 const Microsoft.Identity.Client.MsalException.BrokerErrorCode = "BrokerErrorCode" -> string
 const Microsoft.Identity.Client.MsalException.BrokerErrorContext = "BrokerErrorContext" -> string
 const Microsoft.Identity.Client.MsalException.BrokerErrorStatus = "BrokerErrorStatus" -> string
@@ -199,12 +203,14 @@ Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithLegacyCacheCompatibi
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithRedirectUri(string redirectUri) -> T
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithTelemetry(Microsoft.Identity.Client.ITelemetryConfig telemetryConfig) -> T
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithTenantId(string tenantId) -> T
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithSignedHttpRequestProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
 Microsoft.Identity.Client.AbstractClientAppBaseAcquireTokenParameterBuilder<T>
 Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>
 Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
 Microsoft.Identity.Client.AbstractManagedIdentityAcquireTokenParameterBuilder<T>
 Microsoft.Identity.Client.AbstractManagedIdentityAcquireTokenParameterBuilder<T>.AbstractManagedIdentityAcquireTokenParameterBuilder() -> void
 Microsoft.Identity.Client.AbstractPublicClientAcquireTokenParameterBuilder<T>
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession() -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.AccountExtensions
 Microsoft.Identity.Client.AccountId
 Microsoft.Identity.Client.AccountId.AccountId(string adfsIdentifier) -> void
@@ -226,7 +232,6 @@ Microsoft.Identity.Client.AcquireTokenByRefreshTokenParameterBuilder.WithSendX5C
 Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder
 Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
 Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder.WithFederationMetadata(string federationMetadata) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
-Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder.WithProofOfPossession(string nonce, System.Net.Http.HttpMethod httpMethod, System.Uri requestUri) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAzureRegion(bool useAzureRegion) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder

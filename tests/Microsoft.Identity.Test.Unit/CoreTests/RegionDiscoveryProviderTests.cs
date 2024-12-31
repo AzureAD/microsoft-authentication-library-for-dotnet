@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             _testRequestContext = new RequestContext(
                 _harness.ServiceBundle,
                 Guid.NewGuid(),
+                null,
                 _userCancellationTokenSource.Token);
             _apiEvent = new ApiEvent(Guid.NewGuid());
             _apiEvent.ApiId = ApiEvent.ApiIds.AcquireTokenForClient;

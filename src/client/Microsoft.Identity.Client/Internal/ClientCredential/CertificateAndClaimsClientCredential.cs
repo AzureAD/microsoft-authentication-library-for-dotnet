@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string clientId = requestParameters.AppConfig.ClientId;
 
             // Log the incoming request parameters for diagnostic purposes
-            requestParameters.RequestContext.Logger.Verbose(() => $"Adding confidential client parameters for clientId: {clientId} at endpoint: {tokenEndpoint}");
+            requestParameters.RequestContext.Logger.Verbose(() => $"Building assertion from certificate with clientId: {clientId} at endpoint: {tokenEndpoint}");
 
             if (requestParameters.MtlsCertificate == null)
             {

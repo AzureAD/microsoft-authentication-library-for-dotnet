@@ -25,9 +25,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [DataRow("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c", DisplayName = "Standard Authority")]
-        [DataRow("https://mtlsauth.microsoft.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c", DisplayName = "MTLS Authority")]
-        public async Task Sni_Gets_Pop_Token_Successfully_TestAsync(string authority)
+        public async Task Sni_Gets_Pop_Token_Successfully_TestAsync()
         {
             // Arrange: Use the public cloud settings for testing
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
@@ -37,9 +35,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Build Confidential Client Application with SNI certificate at App level
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority(authority)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3") //test slice region 
-                .WithCertificate(cert, true)  // Configure SNI certificate at App level
+                .WithCertificate(cert, true)  
                 .WithExperimentalFeatures()
                 .WithTestLogging()
                 .Build();
@@ -49,7 +47,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .AcquireTokenForClient(settings.AppScopes)
                 .WithMtlsProofOfPossession()
                 .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice 
-                .WithSendX5C(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -67,7 +64,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Assert: Verify that the token was fetched from cache on the second request
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
-            // Assert the certificate used in the result is the same as the one provided
         }
     }
 }

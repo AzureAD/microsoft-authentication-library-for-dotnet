@@ -138,6 +138,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                                 .Create(TestConstants.ClientId)
+                                .WithAuthority(TestConstants.AuthorityTenant)
                                 .WithCertificate(s_testCertificate)
                                 .WithExperimentalFeatures()
                                 .Build();
@@ -154,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPopWithoutAuthorityAsync()
+        public async Task MtlsPopWithoutTenantIdAsync()
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
@@ -165,9 +166,11 @@ namespace Microsoft.Identity.Test.Unit
             // Set WithMtlsProofOfPossession on the request without specifying an authority
             MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
-                   .WithMtlsProofOfPossession() // Enables MTLS PoP
+                   .WithMtlsProofOfPossession()
                    .ExecuteAsync())
                 .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.MissingAuthority, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -204,10 +207,8 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(Constants.MtlsPoPTokenType, parameters[OAuth2Parameter.TokenType]);
         }
 
-        [DataTestMethod]
-        [DataRow("https://login.microsoftonline.com", "Public Cloud")]
-        [DataRow("https://mtlsauth.microsoft.com", "MTLS Public Cloud")]
-        public async Task AcquireTokenForClient_WithMtlsProofOfPossession_SuccessAsync(string authorityUrl, string cloudType)
+        [TestMethod]
+        public async Task AcquireTokenForClient_WithMtlsProofOfPossession_SuccessAsync()
         {
             const string region = "eastus";
 
@@ -227,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit
 
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithCertificate(s_testCertificate)
-                        .WithAuthority($"{authorityUrl}/123456-1234-2345-1234561234")
+                        .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                         .WithExperimentalFeatures()
                         .WithHttpManager(httpManager)
@@ -241,7 +242,59 @@ namespace Microsoft.Identity.Test.Unit
 
                     Assert.AreEqual("header.payload.signature", result.AccessToken);
                     Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
-                    Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed, $"Expected region for {cloudType}");
+                    Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+
+                    // Second token acquisition - should retrieve from cache
+                    AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", secondResult.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, secondResult.TokenType);
+                    Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireMtlsPopTokenForClientWithTenantId_SuccessAsync()
+        {
+            const string region = "eastus";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                // Set the expected mTLS endpoint for public cloud
+                string globalEndpoint = "mtlsauth.microsoft.com";
+                string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    // Set up mock handler with expected token endpoint URL
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithCertificate(s_testCertificate)
+                        .WithTenantId("123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithExperimentalFeatures()
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    // First token acquisition - should hit the identity provider
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                     Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
 
                     // Second token acquisition - should retrieve from cache
@@ -432,7 +485,7 @@ namespace Microsoft.Identity.Test.Unit
                             .ConfigureAwait(false))
                         .ConfigureAwait(false);
 
-                    Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.ErrorCode);
+                    Assert.AreEqual(MsalError.MissingAuthority, ex.ErrorCode);
                     Assert.AreEqual(MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage, ex.Message);
                 }
             }
@@ -496,9 +549,10 @@ namespace Microsoft.Identity.Test.Unit
 
         [DataTestMethod]
         [DataRow("login.microsoftonline.com", "mtlsauth.microsoft.com")]
-        [DataRow("mtlsauth.microsoft.com", "mtlsauth.microsoft.com")]
-        [DataRow("mtlsauth.microsoftonline.us", "mtlsauth.microsoftonline.us")]
-        [DataRow("mtlsauth.partner.microsoftonline.cn", "mtlsauth.partner.microsoftonline.cn")]
+        [DataRow("login.microsoftonline.us", "mtlsauth.microsoftonline.us")]
+        [DataRow("login.usgovcloudapi.net", "mtlsauth.microsoftonline.us")]
+        [DataRow("login.partner.microsoftonline.cn", "mtlsauth.partner.microsoftonline.cn")]
+        [DataRow("login.chinacloudapi.cn", "mtlsauth.partner.microsoftonline.cn")]
         public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
         {
             // Append the input environment to create the authority URL

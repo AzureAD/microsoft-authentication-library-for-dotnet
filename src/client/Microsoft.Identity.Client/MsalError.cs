@@ -162,6 +162,14 @@ namespace Microsoft.Identity.Client
         public const string InvalidAuthorityType = "invalid_authority_type";
 
         /// <summary>
+        /// Missing authority.
+        /// MSAL.NET requires an authority for mTLS to be specified when the application is built, but none was provided.
+        /// <para>Mitigation</para>
+        /// Ensure that an authority is specified during the application configuration.
+        /// </summary>
+        public const string MissingAuthority = "missing_authority";
+
+        /// <summary>
         /// The client is unauthorized to access resource.
         /// This commonly happens when Mobile App Management (MAM) policies are enabled. MSAL will throw an exception in that case with <c>protection_policy_required</c> sub-error.
         /// <para>Mitigation</para>

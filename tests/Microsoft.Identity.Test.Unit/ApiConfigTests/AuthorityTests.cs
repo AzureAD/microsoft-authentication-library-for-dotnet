@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _harness = base.CreateTestHarness();
             _testRequestContext = new RequestContext(
                 _harness.ServiceBundle,
-                Guid.NewGuid());
+                Guid.NewGuid(),
+                null);
         }
 
         [TestCleanup]
