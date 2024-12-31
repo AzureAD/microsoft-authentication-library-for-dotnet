@@ -5,7 +5,6 @@ const Microsoft.Identity.Client.MsalError.AccessingWsMetadataExchangeFailed = "a
 const Microsoft.Identity.Client.MsalError.AccessTokenTypeMissing = "token_type_missing" -> string
 const Microsoft.Identity.Client.MsalError.ActivityRequired = "activity_required" -> string
 const Microsoft.Identity.Client.MsalError.AdfsNotSupportedWithBroker = "adfs_not_supported_with_broker" -> string
-const Microsoft.Identity.Client.MsalError.AndroidActivityNotFound = "android_activity_not_found" -> string
 const Microsoft.Identity.Client.MsalError.AndroidBrokerOperationFailed = "android_broker_operation_failed" -> string
 const Microsoft.Identity.Client.MsalError.AndroidBrokerSignatureVerificationFailed = "broker_signature_verification_failed" -> string
 const Microsoft.Identity.Client.MsalError.AuthenticationCanceledError = "authentication_canceled" -> string
@@ -43,7 +42,6 @@ const Microsoft.Identity.Client.MsalError.EncodedTokenTooLong = "encoded_token_t
 const Microsoft.Identity.Client.MsalError.ExactlyOneScopeExpected = "exactly_one_scope_expected" -> string
 const Microsoft.Identity.Client.MsalError.ExperimentalFeature = "experimental_feature" -> string
 const Microsoft.Identity.Client.MsalError.FailedToAcquireTokenSilentlyFromBroker = "failed_to_acquire_token_silently_from_broker" -> string
-const Microsoft.Identity.Client.MsalError.FailedToCreateSharedPreference = "shared_preference_creation_failed" -> string
 const Microsoft.Identity.Client.MsalError.FailedToGetBrokerResponse = "failed_to_get_broker_response" -> string
 const Microsoft.Identity.Client.MsalError.FailedToRefreshToken = "failed_to_refresh_token" -> string
 const Microsoft.Identity.Client.MsalError.FederatedServiceReturnedError = "federated_service_returned_error" -> string
@@ -129,7 +127,6 @@ const Microsoft.Identity.Client.MsalError.UnknownError = "unknown_error" -> stri
 const Microsoft.Identity.Client.MsalError.UnknownManagedIdentityError = "unknown_managed_identity_error" -> string
 const Microsoft.Identity.Client.MsalError.UnknownUser = "unknown_user" -> string
 const Microsoft.Identity.Client.MsalError.UnknownUserType = "unknown_user_type" -> string
-const Microsoft.Identity.Client.MsalError.UnresolvableIntentError = "unresolvable_intent" -> string
 const Microsoft.Identity.Client.MsalError.UpnRequired = "upn_required" -> string
 const Microsoft.Identity.Client.MsalError.UserAssertionNullError = "user_assertion_null" -> string
 const Microsoft.Identity.Client.MsalError.UserAssignedManagedIdentityNotConfigurableAtRuntime = "user_assigned_managed_identity_not_configurable_at_runtime" -> string
@@ -243,7 +240,7 @@ Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithAccount(Mi
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithEmbeddedWebViewOptions(Microsoft.Identity.Client.EmbeddedWebViewOptions options) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(System.Collections.Generic.IEnumerable<string> extraScopesToConsent) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithLoginHint(string loginHint) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
-Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(Android.App.Activity activity) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(nint window) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object parent) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithPrompt(Microsoft.Identity.Client.Prompt prompt) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithProofOfPossession(string nonce, System.Net.Http.HttpMethod httpMethod, System.Uri requestUri) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
@@ -316,7 +313,6 @@ Microsoft.Identity.Client.AssertionRequestOptions.ClientID.get -> string
 Microsoft.Identity.Client.AssertionRequestOptions.ClientID.set -> void
 Microsoft.Identity.Client.AssertionRequestOptions.TokenEndpoint.get -> string
 Microsoft.Identity.Client.AssertionRequestOptions.TokenEndpoint.set -> void
-Microsoft.Identity.Client.AuthenticationContinuationHelper
 Microsoft.Identity.Client.AuthenticationHeaderParser
 Microsoft.Identity.Client.AuthenticationHeaderParser.AuthenticationHeaderParser() -> void
 Microsoft.Identity.Client.AuthenticationHeaderParser.AuthenticationInfoParameters.get -> Microsoft.Identity.Client.AuthenticationInfoParameters
@@ -422,8 +418,6 @@ Microsoft.Identity.Client.BrokerOptions.OperatingSystems.None = 0 -> Microsoft.I
 Microsoft.Identity.Client.BrokerOptions.OperatingSystems.Windows = 1 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
 Microsoft.Identity.Client.BrokerOptions.Title.get -> string
 Microsoft.Identity.Client.BrokerOptions.Title.set -> void
-Microsoft.Identity.Client.BrowserTabActivity
-Microsoft.Identity.Client.BrowserTabActivity.BrowserTabActivity() -> void
 Microsoft.Identity.Client.Cache.CacheData
 Microsoft.Identity.Client.Cache.CacheData.AdalV3State.get -> byte[]
 Microsoft.Identity.Client.Cache.CacheData.AdalV3State.set -> void
@@ -754,6 +748,8 @@ Microsoft.Identity.Client.MsalUiRequiredException.MsalUiRequiredException(string
 Microsoft.Identity.Client.MsalUiRequiredException.MsalUiRequiredException(string errorCode, string errorMessage, System.Exception innerException) -> void
 Microsoft.Identity.Client.MsalUiRequiredException.MsalUiRequiredException(string errorCode, string errorMessage, System.Exception innerException, Microsoft.Identity.Client.UiRequiredExceptionClassification classification) -> void
 Microsoft.Identity.Client.OsCapabilitiesExtensions
+Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential
+Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential.Credential() -> void
 Microsoft.Identity.Client.Prompt
 Microsoft.Identity.Client.Prompt.Prompt() -> void
 Microsoft.Identity.Client.PublicClientApplication
@@ -776,7 +772,7 @@ Microsoft.Identity.Client.PublicClientApplicationBuilder.WithIosKeychainSecurity
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithKerberosTicketClaim(string servicePrincipalName, Microsoft.Identity.Client.Kerberos.KerberosTicketContainer ticketContainer) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithMultiCloudSupport(bool enableMultiCloudSupport) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithOidcAuthority(string authorityUri) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
-Microsoft.Identity.Client.PublicClientApplicationBuilder.WithParentActivityOrWindow(System.Func<Android.App.Activity> activityFunc) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithParentActivityOrWindow(System.Func<nint> windowFunc) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithParentActivityOrWindow(System.Func<object> parentActivityOrWindowFunc) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationBuilder.WithWindowsBrokerOptions(Microsoft.Identity.Client.WindowsBrokerOptions options) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 Microsoft.Identity.Client.PublicClientApplicationExtensions
@@ -794,20 +790,6 @@ Microsoft.Identity.Client.RegionDetails.AutoDetectionError.get -> string
 Microsoft.Identity.Client.RegionDetails.RegionDetails(Microsoft.Identity.Client.Region.RegionOutcome regionOutcome, string regionUsed, string autoDetectionError) -> void
 Microsoft.Identity.Client.RegionDetails.RegionOutcome.get -> Microsoft.Identity.Client.Region.RegionOutcome
 Microsoft.Identity.Client.RegionDetails.RegionUsed.get -> string
-Microsoft.Identity.Client.Resource
-Microsoft.Identity.Client.Resource.Attribute
-Microsoft.Identity.Client.Resource.Color
-Microsoft.Identity.Client.Resource.Dimension
-Microsoft.Identity.Client.Resource.Drawable
-Microsoft.Identity.Client.Resource.Id
-Microsoft.Identity.Client.Resource.Integer
-Microsoft.Identity.Client.Resource.Layout
-Microsoft.Identity.Client.Resource.Menu
-Microsoft.Identity.Client.Resource.Resource() -> void
-Microsoft.Identity.Client.Resource.String
-Microsoft.Identity.Client.Resource.Style
-Microsoft.Identity.Client.Resource.Styleable
-Microsoft.Identity.Client.Resource.Xml
 Microsoft.Identity.Client.SSHCertificates.SSHExtensions
 Microsoft.Identity.Client.SystemWebViewOptions
 Microsoft.Identity.Client.SystemWebViewOptions.BrowserRedirectError.get -> System.Uri
@@ -890,6 +872,7 @@ Microsoft.Identity.Client.UserAssertion.Assertion.get -> string
 Microsoft.Identity.Client.UserAssertion.AssertionType.get -> string
 Microsoft.Identity.Client.UserAssertion.UserAssertion(string assertion, string assertionType) -> void
 Microsoft.Identity.Client.UserAssertion.UserAssertion(string jwtBearerToken) -> void
+Microsoft.Identity.Client.Utils.Windows.WindowsNativeUtils
 Microsoft.Identity.Client.WindowsBrokerOptions
 Microsoft.Identity.Client.WindowsBrokerOptions.HeaderText.get -> string
 Microsoft.Identity.Client.WindowsBrokerOptions.HeaderText.set -> void
@@ -921,7 +904,6 @@ override Microsoft.Identity.Client.AbstractPublicClientAcquireTokenParameterBuil
 override Microsoft.Identity.Client.AccountId.Equals(object obj) -> bool
 override Microsoft.Identity.Client.AccountId.GetHashCode() -> int
 override Microsoft.Identity.Client.AccountId.ToString() -> string
-override Microsoft.Identity.Client.BrowserTabActivity.OnCreate(Android.OS.Bundle savedInstanceState) -> void
 override Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ToString() -> string
 override Microsoft.Identity.Client.MsalException.ToString() -> string
 override Microsoft.Identity.Client.MsalManagedIdentityException.UpdateIsRetryable() -> void
@@ -934,7 +916,6 @@ static Microsoft.Identity.Client.AppConfig.ManagedIdentityId.SystemAssigned.get 
 static Microsoft.Identity.Client.AppConfig.ManagedIdentityId.WithUserAssignedClientId(string clientId) -> Microsoft.Identity.Client.AppConfig.ManagedIdentityId
 static Microsoft.Identity.Client.AppConfig.ManagedIdentityId.WithUserAssignedObjectId(string objectId) -> Microsoft.Identity.Client.AppConfig.ManagedIdentityId
 static Microsoft.Identity.Client.AppConfig.ManagedIdentityId.WithUserAssignedResourceId(string resourceId) -> Microsoft.Identity.Client.AppConfig.ManagedIdentityId
-static Microsoft.Identity.Client.AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(int requestCode, Android.App.Result resultCode, Android.Content.Intent data) -> void
 static Microsoft.Identity.Client.AuthenticationHeaderParser.ParseAuthenticationHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders) -> Microsoft.Identity.Client.AuthenticationHeaderParser
 static Microsoft.Identity.Client.AuthenticationHeaderParser.ParseAuthenticationHeadersAsync(string resourceUri, System.Net.Http.HttpClient httpClient, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationHeaderParser>
 static Microsoft.Identity.Client.AuthenticationHeaderParser.ParseAuthenticationHeadersAsync(string resourceUri, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationHeaderParser>
@@ -968,229 +949,20 @@ static Microsoft.Identity.Client.OsCapabilitiesExtensions.GetCertificate(this Mi
 static Microsoft.Identity.Client.OsCapabilitiesExtensions.IsEmbeddedWebViewAvailable(this Microsoft.Identity.Client.IPublicClientApplication publicClientApplication) -> bool
 static Microsoft.Identity.Client.OsCapabilitiesExtensions.IsSystemWebViewAvailable(this Microsoft.Identity.Client.IPublicClientApplication publicClientApplication) -> bool
 static Microsoft.Identity.Client.OsCapabilitiesExtensions.IsUserInteractive(this Microsoft.Identity.Client.IPublicClientApplication publicClientApplication) -> bool
+static Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential.Current() -> Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential
 static Microsoft.Identity.Client.Prompt.operator !=(Microsoft.Identity.Client.Prompt x, Microsoft.Identity.Client.Prompt y) -> bool
 static Microsoft.Identity.Client.Prompt.operator ==(Microsoft.Identity.Client.Prompt x, Microsoft.Identity.Client.Prompt y) -> bool
 static Microsoft.Identity.Client.PublicClientApplication.OperatingSystemAccount.get -> Microsoft.Identity.Client.IAccount
 static Microsoft.Identity.Client.PublicClientApplicationBuilder.Create(string clientId) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 static Microsoft.Identity.Client.PublicClientApplicationBuilder.CreateWithApplicationOptions(Microsoft.Identity.Client.PublicClientApplicationOptions options) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
 static Microsoft.Identity.Client.PublicClientApplicationExtensions.IsProofOfPossessionSupportedByClient(this Microsoft.Identity.Client.IPublicClientApplication app) -> bool
-static Microsoft.Identity.Client.Resource.Attribute.alpha -> int
-static Microsoft.Identity.Client.Resource.Attribute.font -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontProviderAuthority -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontProviderCerts -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontProviderFetchStrategy -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontProviderFetchTimeout -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontProviderPackage -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontProviderQuery -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontProviderSystemFontFamily -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontStyle -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontVariationSettings -> int
-static Microsoft.Identity.Client.Resource.Attribute.fontWeight -> int
-static Microsoft.Identity.Client.Resource.Attribute.lStar -> int
-static Microsoft.Identity.Client.Resource.Attribute.nestedScrollViewStyle -> int
-static Microsoft.Identity.Client.Resource.Attribute.queryPatterns -> int
-static Microsoft.Identity.Client.Resource.Attribute.shortcutMatchRequired -> int
-static Microsoft.Identity.Client.Resource.Attribute.ttcIndex -> int
-static Microsoft.Identity.Client.Resource.Color.androidx_core_ripple_material_light -> int
-static Microsoft.Identity.Client.Resource.Color.androidx_core_secondary_text_default_material_light -> int
-static Microsoft.Identity.Client.Resource.Color.browser_actions_bg_grey -> int
-static Microsoft.Identity.Client.Resource.Color.browser_actions_divider_color -> int
-static Microsoft.Identity.Client.Resource.Color.browser_actions_text_color -> int
-static Microsoft.Identity.Client.Resource.Color.browser_actions_title_color -> int
-static Microsoft.Identity.Client.Resource.Color.notification_action_color_filter -> int
-static Microsoft.Identity.Client.Resource.Color.notification_icon_bg_color -> int
-static Microsoft.Identity.Client.Resource.Dimension.browser_actions_context_menu_max_width -> int
-static Microsoft.Identity.Client.Resource.Dimension.browser_actions_context_menu_min_padding -> int
-static Microsoft.Identity.Client.Resource.Dimension.compat_button_inset_horizontal_material -> int
-static Microsoft.Identity.Client.Resource.Dimension.compat_button_inset_vertical_material -> int
-static Microsoft.Identity.Client.Resource.Dimension.compat_button_padding_horizontal_material -> int
-static Microsoft.Identity.Client.Resource.Dimension.compat_button_padding_vertical_material -> int
-static Microsoft.Identity.Client.Resource.Dimension.compat_control_corner_material -> int
-static Microsoft.Identity.Client.Resource.Dimension.compat_notification_large_icon_max_height -> int
-static Microsoft.Identity.Client.Resource.Dimension.compat_notification_large_icon_max_width -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_action_icon_size -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_action_text_size -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_big_circle_margin -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_content_margin_start -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_large_icon_height -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_large_icon_width -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_main_column_padding_top -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_media_narrow_margin -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_right_icon_size -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_right_side_padding_top -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_small_icon_background_padding -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_small_icon_size_as_large -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_subtext_size -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_top_pad -> int
-static Microsoft.Identity.Client.Resource.Dimension.notification_top_pad_large_text -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_action_background -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_bg -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_bg_low -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_bg_low_normal -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_bg_low_pressed -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_bg_normal -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_bg_normal_pressed -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_icon_background -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_template_icon_bg -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_template_icon_low_bg -> int
-static Microsoft.Identity.Client.Resource.Drawable.notification_tile_bg -> int
-static Microsoft.Identity.Client.Resource.Drawable.notify_panel_notification_icon_bg -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_action_clickable_span -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_0 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_1 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_10 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_11 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_12 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_13 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_14 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_15 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_16 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_17 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_18 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_19 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_2 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_20 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_21 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_22 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_23 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_24 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_25 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_26 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_27 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_28 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_29 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_3 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_30 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_31 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_4 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_5 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_6 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_7 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_8 -> int
-static Microsoft.Identity.Client.Resource.Id.accessibility_custom_action_9 -> int
-static Microsoft.Identity.Client.Resource.Id.actions -> int
-static Microsoft.Identity.Client.Resource.Id.action_container -> int
-static Microsoft.Identity.Client.Resource.Id.action_divider -> int
-static Microsoft.Identity.Client.Resource.Id.action_image -> int
-static Microsoft.Identity.Client.Resource.Id.action_text -> int
-static Microsoft.Identity.Client.Resource.Id.async -> int
-static Microsoft.Identity.Client.Resource.Id.blocking -> int
-static Microsoft.Identity.Client.Resource.Id.browser_actions_header_text -> int
-static Microsoft.Identity.Client.Resource.Id.browser_actions_menu_items -> int
-static Microsoft.Identity.Client.Resource.Id.browser_actions_menu_item_icon -> int
-static Microsoft.Identity.Client.Resource.Id.browser_actions_menu_item_text -> int
-static Microsoft.Identity.Client.Resource.Id.browser_actions_menu_view -> int
-static Microsoft.Identity.Client.Resource.Id.chronometer -> int
-static Microsoft.Identity.Client.Resource.Id.dialog_button -> int
-static Microsoft.Identity.Client.Resource.Id.forever -> int
-static Microsoft.Identity.Client.Resource.Id.icon -> int
-static Microsoft.Identity.Client.Resource.Id.icon_group -> int
-static Microsoft.Identity.Client.Resource.Id.info -> int
-static Microsoft.Identity.Client.Resource.Id.italic -> int
-static Microsoft.Identity.Client.Resource.Id.item1 -> int
-static Microsoft.Identity.Client.Resource.Id.item2 -> int
-static Microsoft.Identity.Client.Resource.Id.item3 -> int
-static Microsoft.Identity.Client.Resource.Id.item4 -> int
-static Microsoft.Identity.Client.Resource.Id.line1 -> int
-static Microsoft.Identity.Client.Resource.Id.line3 -> int
-static Microsoft.Identity.Client.Resource.Id.normal -> int
-static Microsoft.Identity.Client.Resource.Id.notification_background -> int
-static Microsoft.Identity.Client.Resource.Id.notification_main_column -> int
-static Microsoft.Identity.Client.Resource.Id.notification_main_column_container -> int
-static Microsoft.Identity.Client.Resource.Id.right_icon -> int
-static Microsoft.Identity.Client.Resource.Id.right_side -> int
-static Microsoft.Identity.Client.Resource.Id.tag_accessibility_actions -> int
-static Microsoft.Identity.Client.Resource.Id.tag_accessibility_clickable_spans -> int
-static Microsoft.Identity.Client.Resource.Id.tag_accessibility_heading -> int
-static Microsoft.Identity.Client.Resource.Id.tag_accessibility_pane_title -> int
-static Microsoft.Identity.Client.Resource.Id.tag_on_apply_window_listener -> int
-static Microsoft.Identity.Client.Resource.Id.tag_on_receive_content_listener -> int
-static Microsoft.Identity.Client.Resource.Id.tag_on_receive_content_mime_types -> int
-static Microsoft.Identity.Client.Resource.Id.tag_screen_reader_focusable -> int
-static Microsoft.Identity.Client.Resource.Id.tag_state_description -> int
-static Microsoft.Identity.Client.Resource.Id.tag_transition_group -> int
-static Microsoft.Identity.Client.Resource.Id.tag_unhandled_key_event_manager -> int
-static Microsoft.Identity.Client.Resource.Id.tag_unhandled_key_listeners -> int
-static Microsoft.Identity.Client.Resource.Id.tag_window_insets_animation_callback -> int
-static Microsoft.Identity.Client.Resource.Id.text -> int
-static Microsoft.Identity.Client.Resource.Id.text2 -> int
-static Microsoft.Identity.Client.Resource.Id.time -> int
-static Microsoft.Identity.Client.Resource.Id.title -> int
-static Microsoft.Identity.Client.Resource.Id.view_tree_lifecycle_owner -> int
-static Microsoft.Identity.Client.Resource.Integer.status_bar_notification_info_maxnum -> int
-static Microsoft.Identity.Client.Resource.Layout.browser_actions_context_menu_page -> int
-static Microsoft.Identity.Client.Resource.Layout.browser_actions_context_menu_row -> int
-static Microsoft.Identity.Client.Resource.Layout.custom_dialog -> int
-static Microsoft.Identity.Client.Resource.Layout.notification_action -> int
-static Microsoft.Identity.Client.Resource.Layout.notification_action_tombstone -> int
-static Microsoft.Identity.Client.Resource.Layout.notification_template_custom_big -> int
-static Microsoft.Identity.Client.Resource.Layout.notification_template_icon_group -> int
-static Microsoft.Identity.Client.Resource.Layout.notification_template_part_chronometer -> int
-static Microsoft.Identity.Client.Resource.Layout.notification_template_part_time -> int
-static Microsoft.Identity.Client.Resource.Menu.example_menu -> int
-static Microsoft.Identity.Client.Resource.Menu.example_menu2 -> int
-static Microsoft.Identity.Client.Resource.String.copy_toast_msg -> int
-static Microsoft.Identity.Client.Resource.String.fallback_menu_item_copy_link -> int
-static Microsoft.Identity.Client.Resource.String.fallback_menu_item_open_in_browser -> int
-static Microsoft.Identity.Client.Resource.String.fallback_menu_item_share_link -> int
-static Microsoft.Identity.Client.Resource.String.status_bar_notification_info_overflow -> int
-static Microsoft.Identity.Client.Resource.Style.TextAppearance_Compat_Notification -> int
-static Microsoft.Identity.Client.Resource.Style.TextAppearance_Compat_Notification_Info -> int
-static Microsoft.Identity.Client.Resource.Style.TextAppearance_Compat_Notification_Line2 -> int
-static Microsoft.Identity.Client.Resource.Style.TextAppearance_Compat_Notification_Time -> int
-static Microsoft.Identity.Client.Resource.Style.TextAppearance_Compat_Notification_Title -> int
-static Microsoft.Identity.Client.Resource.Style.Widget_Compat_NotificationActionContainer -> int
-static Microsoft.Identity.Client.Resource.Style.Widget_Compat_NotificationActionText -> int
-static Microsoft.Identity.Client.Resource.Styleable.Capability -> int[]
-static Microsoft.Identity.Client.Resource.Styleable.Capability_queryPatterns -> int
-static Microsoft.Identity.Client.Resource.Styleable.Capability_shortcutMatchRequired -> int
-static Microsoft.Identity.Client.Resource.Styleable.ColorStateListItem -> int[]
-static Microsoft.Identity.Client.Resource.Styleable.ColorStateListItem_alpha -> int
-static Microsoft.Identity.Client.Resource.Styleable.ColorStateListItem_android_alpha -> int
-static Microsoft.Identity.Client.Resource.Styleable.ColorStateListItem_android_color -> int
-static Microsoft.Identity.Client.Resource.Styleable.ColorStateListItem_android_lStar -> int
-static Microsoft.Identity.Client.Resource.Styleable.ColorStateListItem_lStar -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamily -> int[]
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont -> int[]
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_android_font -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_android_fontStyle -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_android_fontVariationSettings -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_android_fontWeight -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_android_ttcIndex -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_font -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_fontStyle -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_fontVariationSettings -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_fontWeight -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamilyFont_ttcIndex -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamily_fontProviderAuthority -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamily_fontProviderCerts -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamily_fontProviderFetchStrategy -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamily_fontProviderFetchTimeout -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamily_fontProviderPackage -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamily_fontProviderQuery -> int
-static Microsoft.Identity.Client.Resource.Styleable.FontFamily_fontProviderSystemFontFamily -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor -> int[]
-static Microsoft.Identity.Client.Resource.Styleable.GradientColorItem -> int[]
-static Microsoft.Identity.Client.Resource.Styleable.GradientColorItem_android_color -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColorItem_android_offset -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_centerColor -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_centerX -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_centerY -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_endColor -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_endX -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_endY -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_gradientRadius -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_startColor -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_startX -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_startY -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_tileMode -> int
-static Microsoft.Identity.Client.Resource.Styleable.GradientColor_android_type -> int
-static Microsoft.Identity.Client.Resource.Xml.image_share_filepaths -> int
 static Microsoft.Identity.Client.SSHCertificates.SSHExtensions.WithSSHCertificateAuthenticationScheme(this Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder builder, string publicKeyJwk, string keyId) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 static Microsoft.Identity.Client.SSHCertificates.SSHExtensions.WithSSHCertificateAuthenticationScheme(this Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder builder, string publicKeyJwk, string keyId) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
 static Microsoft.Identity.Client.SystemWebViewOptions.OpenWithChromeEdgeBrowserAsync(System.Uri uri) -> System.Threading.Tasks.Task
 static Microsoft.Identity.Client.SystemWebViewOptions.OpenWithEdgeBrowserAsync(System.Uri uri) -> System.Threading.Tasks.Task
 static Microsoft.Identity.Client.TokenCacheExtensions.SetCacheOptions(this Microsoft.Identity.Client.ITokenCache tokenCache, Microsoft.Identity.Client.CacheOptions options) -> void
+static Microsoft.Identity.Client.Utils.Windows.WindowsNativeUtils.InitializeProcessSecurity() -> void
+static Microsoft.Identity.Client.Utils.Windows.WindowsNativeUtils.IsElevatedUser() -> bool
 static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders) -> System.Collections.Generic.IReadOnlyList<Microsoft.Identity.Client.WwwAuthenticateParameters>
 static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders, string scheme) -> Microsoft.Identity.Client.WwwAuthenticateParameters
 static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(string resourceUri, string scheme, System.Net.Http.HttpClient httpClient, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.WwwAuthenticateParameters>

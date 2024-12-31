@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Advanced;
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using Microsoft.Identity.Client.Broker;
 #endif
 using Microsoft.Identity.Client.Instance;
@@ -1048,7 +1048,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             if (enableBroker)
             {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 pcaBuilder.WithBroker(
                     new BrokerOptions(
                         BrokerOptions.OperatingSystems.Windows));

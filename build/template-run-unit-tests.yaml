@@ -7,7 +7,7 @@ parameters:
 steps:
 
 - task: VSTest@2
-  displayName: 'Run unit tests (.NET FX)'
+  displayName: 'Run unit tests NetFwk (vanilla CI)'
   condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
   inputs:
     testSelector: 'testAssemblies'
@@ -20,7 +20,7 @@ steps:
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
 
 - task: VSTest@2
-  displayName: 'Run unit tests (.NET FX) on OneBranch'
+  displayName: 'Run unit tests NetFwk on OneBranch'
   condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
   inputs:
     testSelector: 'testAssemblies'
@@ -32,10 +32,10 @@ steps:
     minimumExpectedTests: '1'
 
 - task: VSTest@2
-  displayName: 'Run unit tests (.NET 6)'
+  displayName: 'Run unit tests .NET '
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net6.0\Microsoft.Identity.Test.Unit.dll'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net8.0\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
     runInParallel: true
     codeCoverageEnabled: true

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Platforms.netcore;
 
 namespace Microsoft.Identity.Client.Platforms.netstandard
 {

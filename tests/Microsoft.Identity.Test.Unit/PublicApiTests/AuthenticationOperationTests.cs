@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
-#if !NET6_0
+#if !NET8_0
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 #endif
 using Microsoft.Identity.Client.Cache.Items;

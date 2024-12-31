@@ -83,7 +83,7 @@ namespace NetDesktopWinForms
             AuthMethod status;
             string result = string.Empty;
 
-            cbxUseWam.Invoke((MethodInvoker)delegate
+            cbxUseWam.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 result = cbxUseWam.Text;
             });
@@ -263,7 +263,7 @@ namespace NetDesktopWinForms
         {
             string[] result = null;
 
-            cbxScopes.Invoke((MethodInvoker)delegate
+            cbxScopes.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 if (!string.IsNullOrWhiteSpace(cbxScopes.Text))
                     result = cbxScopes.Text.Split(' ');
@@ -276,7 +276,7 @@ namespace NetDesktopWinForms
         {
             string clientId = null;
 
-            clientIdCbx.Invoke((MethodInvoker)delegate
+            clientIdCbx.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 clientId = (this.clientIdCbx.SelectedItem as ClientEntry)?.Id ?? this.clientIdCbx.Text;
             });
@@ -287,7 +287,7 @@ namespace NetDesktopWinForms
         private string GetAuthority()
         {
             string result = null;
-            authorityCbx.Invoke((MethodInvoker)delegate
+            authorityCbx.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 result = authorityCbx.Text;
             });
@@ -322,7 +322,7 @@ namespace NetDesktopWinForms
 
         private void Log(string message)
         {
-            resultTbx.Invoke((MethodInvoker)delegate
+            resultTbx.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 resultTbx.AppendText(message + Environment.NewLine);
             });
@@ -424,7 +424,7 @@ namespace NetDesktopWinForms
         private string GetLoginHint()
         {
             string loginHint = null;
-            loginHintTxt.Invoke((MethodInvoker)delegate
+            loginHintTxt.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 loginHint = loginHintTxt.Text;
             });
@@ -435,7 +435,7 @@ namespace NetDesktopWinForms
         private IAccount GetAccount()
         {
             IAccount acc = null;
-            cbxAccount.Invoke((MethodInvoker)delegate
+            cbxAccount.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 if (cbxAccount.SelectedIndex <= 0)
                     return;
@@ -454,7 +454,7 @@ namespace NetDesktopWinForms
         private bool IsMsaPassthroughConfigured()
         {
             bool msa = false;
-            cbxMsaPt.Invoke((MethodInvoker)delegate
+            cbxMsaPt.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 msa = cbxMsaPt.Checked;
             });
@@ -466,7 +466,7 @@ namespace NetDesktopWinForms
         {
 
             string prompt = null;
-            promptCbx.Invoke((MethodInvoker)delegate
+            promptCbx.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 prompt = promptCbx.Text;
             });
@@ -614,12 +614,12 @@ namespace NetDesktopWinForms
             string username = null;
             string password = null;
 
-            UsernameTxt.Invoke((MethodInvoker)delegate
+            UsernameTxt.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 username = UsernameTxt.Text;
             });
 
-            PasswordTxt.Invoke((MethodInvoker)delegate
+            PasswordTxt.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 password = PasswordTxt.Text;
             });
@@ -789,7 +789,7 @@ namespace NetDesktopWinForms
                         GetScopes(),
                         dcr =>
                         {
-                            BeginInvoke(new MethodInvoker(() => resultTbx.Text = dcr.Message));
+                            BeginInvoke(new System.Windows.Forms.MethodInvoker(() => resultTbx.Text = dcr.Message));
                             return Task.FromResult(0);
                         })
                     .ExecuteAsync(cancellationTokenSource.Token)
