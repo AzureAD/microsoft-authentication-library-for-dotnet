@@ -611,6 +611,56 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        public async Task AcquireTokenForClient_WithMtlsPop_NonStandardCloudAsync()
+        {
+            string nonStandardAuthority = "https://login.myLocalAAD.com/123456-1234-2345-1234561234";
+            string expectedRegionPrefix = "eastus";
+            string mtlsSubdomain = "mtlsauth";
+
+            string expectedTokenEndpoint = $"https://{expectedRegionPrefix}.{mtlsSubdomain}.mylocalaad.com/123456-1234-2345-1234561234/oauth2/v2.0/token";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = expectedTokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop")
+                    };
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                                    .Create(TestConstants.ClientId)
+                                    .WithAuthority(nonStandardAuthority)
+                                    .WithHttpManager(harness.HttpManager)
+                                    .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                    .WithCertificate(s_testCertificate)
+                                    .WithInstanceDiscovery(false)
+                                    .WithExperimentalFeatures(true)
+                                    .Build();
+
+                    AuthenticationResult result = await app
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    // Assert
+                    Assert.IsNotNull(result);
+                    Assert.AreEqual("header.payload.signature", result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(expectedRegionPrefix, result.ApiEvent.RegionUsed);
+                    Assert.AreEqual(expectedTokenEndpoint, tokenHttpCallHandler.ExpectedUrl);
+                    Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+                }
+            }
+        }
+
         private static HttpResponseMessage CreateResponse(
             string tokenType,
             string token = "header.payload.signature",
