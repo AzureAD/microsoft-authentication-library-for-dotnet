@@ -1,1 +1,5 @@
-Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder.WithProofOfPossession(string nonce, System.Net.Http.HttpMethod httpMethod, System.Uri requestUri) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession() -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+const Microsoft.Identity.Client.MsalError.MissingTenantedAuthority = "missing_tenanted_authority" -> string
+const Microsoft.Identity.Client.MsalError.MtlsCertificateNotProvided = "mtls_certificate_not_provided" -> string
+const Microsoft.Identity.Client.MsalError.MtlsPopWithoutRegion = "mtls_pop_without_region" -> string
+const Microsoft.Identity.Client.MsalError.RegionRequiredForMtlsPop = "region_required_for_mtls_pop" -> string
