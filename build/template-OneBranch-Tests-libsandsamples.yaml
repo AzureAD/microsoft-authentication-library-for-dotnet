@@ -9,11 +9,6 @@ parameters:
 
 steps:
 
-- task: UseDotNet@2
-  displayName: 'Use the latest .NET 6'
-  inputs:
-    version: 6.x
-
 - template: template-OneBranch-CI-libsandsamples.yaml
   parameters:
     Solution: 'LibsAndSamples.sln'
