@@ -29,13 +29,6 @@ steps:
     script: |
       dotnet nuget locals all --clear 
       dotnet workload install android ios macos maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
-
-- task: JavaToolInstaller@0
-  displayName: 'Use Java 11'
-  inputs:
-    versionSpec: 11
-    jdkArchitectureOption: x64
-    jdkSourceOption: PreInstalled
     
 - task: VSBuild@1
   displayName: 'NuGet restore'
