@@ -362,8 +362,6 @@ Microsoft.Identity.Client.AuthenticationResultMetadata.RegionDetails.get -> Micr
 Microsoft.Identity.Client.AuthenticationResultMetadata.RegionDetails.set -> void
 Microsoft.Identity.Client.AuthenticationResultMetadata.Telemetry.get -> string
 Microsoft.Identity.Client.AuthenticationResultMetadata.Telemetry.set -> void
-Microsoft.Identity.Client.AuthenticationResultMetadata.TelemetryTokenType.get -> int
-Microsoft.Identity.Client.AuthenticationResultMetadata.TelemetryTokenType.set -> void
 Microsoft.Identity.Client.AuthenticationResultMetadata.TokenEndpoint.get -> string
 Microsoft.Identity.Client.AuthenticationResultMetadata.TokenEndpoint.set -> void
 Microsoft.Identity.Client.AuthenticationResultMetadata.TokenSource.get -> Microsoft.Identity.Client.TokenSource

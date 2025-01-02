@@ -572,8 +572,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                     var ui = Substitute.For<IWebUI>();
                     ui.UpdateRedirectUri(Arg.Any<Uri>()).Returns(new Uri("http://localhost:1234"));
-                    ui.AcquireAuthorizationAsync(null, null, null, default).ThrowsForAnyArgs(
-                        new MsalClientException("user_cancelled"));
+                    ui.AcquireAuthorizationAsync(null, null, null, default).ReturnsForAnyArgs(
+                        Task.FromException(new MsalClientException("user_cancelled")));
                     _app.ServiceBundle.ConfigureMockWebUI(ui);
 
                     var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>

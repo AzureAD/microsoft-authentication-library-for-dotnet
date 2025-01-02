@@ -34,7 +34,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             s_viewController = null;
             InvokeOnMainThread(() =>
             {
+#pragma warning disable CA1422 // Validate platform compatibility
                 UIWindow window = UIApplication.SharedApplication.KeyWindow;
+#pragma warning restore CA1422 // Validate platform compatibility
                 s_viewController = CoreUIParent.FindCurrentViewController(window.RootViewController);
             });
 
@@ -59,6 +61,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             {
                 if (UIDevice.CurrentDevice.CheckSystemVersion(12, 0))
                 {
+#pragma warning disable CA1422 // Validate platform compatibility
                     asWebAuthenticationSession = new AuthenticationServices.ASWebAuthenticationSession(new NSUrl(authorizationUri.AbsoluteUri),
                         redirectUri.Scheme, (callbackUrl, error) =>
                         {
@@ -71,6 +74,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                                 ContinueAuthentication(callbackUrl.ToString(), RequestContext.Logger);
                             }
                         });
+#pragma warning restore CA1422 // Validate platform compatibility
 
                     asWebAuthenticationSession.BeginInvokeOnMainThread(() =>
                     {
