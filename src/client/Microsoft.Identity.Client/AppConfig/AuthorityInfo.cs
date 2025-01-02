@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
                 case AuthorityType.Generic:
                     CanonicalAuthority = authorityUri;
                     break;
-                    
+
                 case AuthorityType.B2C:
                     string[] pathSegments = GetPathSegments(authorityUri.AbsolutePath);
 
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
             CanonicalAuthority = canonicalAuthority;
             AuthorityType = authorityType;
             UserRealmUriPrefix = userRealmUriPrefix;
-            ValidateAuthority = validateAuthority;            
+            ValidateAuthority = validateAuthority;
         }
 
         public string Host => CanonicalAuthority.Host;
@@ -126,10 +126,10 @@ namespace Microsoft.Identity.Client
         /// B2C doesn't allow multi-tenancy scenarios, but the authority itself is tenanted. 
         /// For CIAM, we allow multi-tenancy scenarios, and expect the STS to fail.
         /// </summary>
-        internal bool CanBeTenanted => 
-            AuthorityType == AuthorityType.Aad  ||
+        internal bool CanBeTenanted =>
+            AuthorityType == AuthorityType.Aad ||
             AuthorityType == AuthorityType.Dsts ||
-            AuthorityType == AuthorityType.B2C  ||
+            AuthorityType == AuthorityType.B2C ||
             AuthorityType == AuthorityType.Ciam;
 
         internal bool IsClientInfoSupported =>
@@ -327,12 +327,12 @@ namespace Microsoft.Identity.Client
                 case AuthorityType.Dsts:
                     return new DstsAuthority(this);
 
-                case AuthorityType.Ciam: 
+                case AuthorityType.Ciam:
                     return new CiamAuthority(this);
 
                 case AuthorityType.Generic:
                     return new GenericAuthority(this);
-                
+
                 default:
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
@@ -477,7 +477,7 @@ namespace Microsoft.Identity.Client
                     case AuthorityType.B2C:
                     case AuthorityType.Dsts:
                     case AuthorityType.Ciam:
-                    case AuthorityType.Generic:                        
+                    case AuthorityType.Generic:
                         return new NullAuthorityValidator();
                     default:
                         throw new InvalidOperationException("Invalid AuthorityType");
@@ -549,11 +549,11 @@ namespace Microsoft.Identity.Client
                             return updateEnvironment ?
                                 CreateAuthorityWithTenant(
                                     CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
-                                    account?.HomeAccountId?.TenantId, 
+                                    account?.HomeAccountId?.TenantId,
                                     forceSpecifiedTenant: false) :
                                 CreateAuthorityWithTenant(
-                                    configAuthority, 
-                                    account?.HomeAccountId?.TenantId, 
+                                    configAuthority,
+                                    account?.HomeAccountId?.TenantId,
                                     forceSpecifiedTenant: false);
                         }
 
@@ -567,7 +567,7 @@ namespace Microsoft.Identity.Client
                         var requestAuthority = updateEnvironment ?
                             new AadAuthority(CreateAuthorityWithEnvironment(requestAuthorityInfo, account?.Environment).AuthorityInfo) :
                             new AadAuthority(requestAuthorityInfo);
-                        if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant() || 
+                        if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant() ||
                             requestAuthority.IsOrganizationsTenantWithMsaPassthroughEnabled(requestContext.ServiceBundle.Config.IsBrokerEnabled && requestContext.ServiceBundle.Config.BrokerOptions != null && requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough, account?.HomeAccountId?.TenantId))
                         {
                             return requestAuthority;
@@ -576,13 +576,13 @@ namespace Microsoft.Identity.Client
                         return updateEnvironment ?
                                 CreateAuthorityWithTenant(
                                     CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
-                                    account?.HomeAccountId?.TenantId, 
+                                    account?.HomeAccountId?.TenantId,
                                     forceSpecifiedTenant: false) :
                                 CreateAuthorityWithTenant(
-                                    configAuthority, 
+                                    configAuthority,
                                     account?.HomeAccountId?.TenantId,
                                     forceSpecifiedTenant: false);
-                    
+
                     default:
                         throw new MsalClientException(
                             MsalError.InvalidAuthorityType,
@@ -591,7 +591,7 @@ namespace Microsoft.Identity.Client
             }
 
             internal static Authority CreateAuthorityWithTenant(Authority authority, string tenantId, bool forceSpecifiedTenant)
-            {                
+            {
                 string tenantedAuthority = authority.GetTenantedAuthority(tenantId, forceSpecifiedTenant);
 
                 return Authority.CreateAuthority(tenantedAuthority, authority.AuthorityInfo.ValidateAuthority);
@@ -635,7 +635,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     // Do not try to be smart here, let the STS figure it out
-                    if ( requestAuthorityInfo.AuthorityType == AuthorityType.Ciam || 
+                    if (requestAuthorityInfo.AuthorityType == AuthorityType.Ciam ||
                         requestAuthorityInfo.AuthorityType == AuthorityType.Generic)
                     {
                         return;

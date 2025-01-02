@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var legacyCachePersistence = Substitute.For<ILegacyCachePersistence>();
                 mockHttpManager.AddInstanceDiscoveryMockHandler();
                 var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(mockHttpManager, isLegacyCacheEnabled: enableLegacyCacheCompatibility);
-                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
                 var response = TestConstants.CreateMsalTokenResponse();
 
                 ITokenCacheInternal cache = new TokenCache(serviceBundle, false, legacyCachePersistence);                
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
                     mockHttpManager,
                     isMultiCloudSupportEnabled: multiCloudSupportEnabled);
-                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
                 var response = TestConstants.CreateMsalTokenResponse();
 
                 ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
@@ -1179,7 +1179,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
-            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                 serviceBundle,
                 authority: Authority.CreateAuthority(TestConstants.AuthorityUtidTenant),
@@ -1234,7 +1234,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
-            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                  serviceBundle,
                  authority: Authority.CreateAuthority(TestConstants.AuthorityUtidTenant),
@@ -1300,7 +1300,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // creating IDToken with empty tenantID and displayableID/PreferredUserName for B2C scenario
                 MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
-                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
 
                 var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                   harness.ServiceBundle,

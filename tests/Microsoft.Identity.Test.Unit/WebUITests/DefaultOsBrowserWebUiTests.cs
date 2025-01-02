@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public async Task HttpListenerException_Cancellation_Async()
         {
             var webUI = CreateTestWebUI();
-            var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
+            var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
 
             CancellationTokenSource cts = new CancellationTokenSource();
             _tcpInterceptor.When(x => x.ListenToSingleRequestAndRespondAsync(
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             };
 
             var webUI = CreateTestWebUI(options);
-            var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
+            var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
             var responseUri = new Uri(TestAuthorizationResponseUri);
 
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             string responseUriString = TestAuthorizationResponseUri)
         {
             // Arrange
-            var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
+            var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
             var responseUri = new Uri(responseUriString);
 
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(

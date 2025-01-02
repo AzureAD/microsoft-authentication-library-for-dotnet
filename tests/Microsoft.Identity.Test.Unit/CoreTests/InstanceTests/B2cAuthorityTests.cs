@@ -49,7 +49,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             var _harness = base.CreateTestHarness();
             var _testRequestContext = new RequestContext(
                 _harness.ServiceBundle,
-                Guid.NewGuid());
+                Guid.NewGuid(), 
+                null);
 
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);

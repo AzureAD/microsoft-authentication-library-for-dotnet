@@ -20,13 +20,13 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
     {
         private readonly CoreUIParent _parent = new CoreUIParent();
         private readonly RequestContext _requestContextAad =
-            new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
+            new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
 
         private readonly RequestContext _requestContextB2C =
-            new RequestContext(TestCommon.CreateDefaultB2CServiceBundle(), Guid.NewGuid());
+            new RequestContext(TestCommon.CreateDefaultB2CServiceBundle(), Guid.NewGuid(), null);
 
         private readonly RequestContext _requestContextAdfs =
-          new RequestContext(TestCommon.CreateDefaultAdfsServiceBundle(), Guid.NewGuid());
+          new RequestContext(TestCommon.CreateDefaultAdfsServiceBundle(), Guid.NewGuid(), null);
 
         [TestMethod]
 #if ONEBRANCH_BUILD

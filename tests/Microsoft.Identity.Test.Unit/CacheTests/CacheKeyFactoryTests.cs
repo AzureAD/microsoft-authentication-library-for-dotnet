@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var appTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: true);
-            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid(), null);
             var authority = Authority.CreateAuthority("https://login.microsoft.com/managed_identity", true);
             requestContext.ServiceBundle.Config.Authority = authority;
             requestContext.ServiceBundle.Config.ClientId = Constants.ManagedIdentityDefaultClientId;
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var appTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: true);
-            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid(), null);
             var authority = Authority.CreateAuthority(TestConstants.ADFSAuthority, true);
 
             requestContext.ServiceBundle.Config.Authority = authority;
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var appTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: true);
-            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid(), null);
             var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var appTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: true);
-            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid(), null);
             var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var userTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: false);
-            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid(), null);
             var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var userTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: false);
-            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid(), null);
             var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {

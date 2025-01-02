@@ -259,8 +259,10 @@ namespace Microsoft.Identity.Client
 
         public const string AuthorityDoesNotHaveTwoSegments =
             "Authority should be in the form <host>/<audience>, for example https://login.microsoftonline.com/common. ";
+        
         public const string DstsAuthorityDoesNotHaveThreeSegments =
             "Authority should be in the form <host>/<audience>/<tenantID>, for example https://login.microsoftonline.com/dsts/<tenantid>. ";
+        
         public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant GUID. ";
 
         public const string CustomWebUiReturnedInvalidUri = "ICustomWebUi returned an invalid URI - it is empty or has no query. ";
@@ -428,5 +430,10 @@ namespace Microsoft.Identity.Client
         public const string SetCiamAuthorityAtRequestLevelNotSupported = "Setting the CIAM authority (ex. \"{tenantName}.ciamlogin.com\") at the request level is not supported. The CIAM authority must be set during application creation";
         public const string ClaimsChallenge = "The returned error contains a claims challenge. For additional info on how to handle claims related to multifactor authentication, Conditional Access, and incremental consent, see https://aka.ms/msal-conditional-access-claims. If you are using the On-Behalf-Of flow, see https://aka.ms/msal-conditional-access-claims-obo for details.";
         public const string CryptographicError = "A cryptographic exception occurred. Possible cause: the certificate has been disposed. See inner exception for full details.";
+        public const string MtlsPopWithoutRegion = "mTLS Proof of Possession requires a region to be specified. Please set AzureRegion in the configuration at the application level.";
+        public const string MtlsCertificateNotProvidedMessage = "mTLS Proof of Possession requires a certificate to be configured. Please provide a certificate at the application level using the .WithCertificate() instead of passing an assertion. See https://aka.ms/msal-net-pop for details.";
+        public const string MtlsInvalidAuthorityTypeMessage = "mTLS PoP is only supported for AAD authority type. See https://aka.ms/msal-net-pop for details.";
+        public const string MtlsNonTenantedAuthorityNotAllowedMessage = "mTLS authentication requires a tenanted authority. Using 'common', 'organizations', or similar non-tenanted authorities is not allowed. Please provide an authority with a specific tenant ID (e.g., 'https://login.microsoftonline.com/{tenantId}'). See https://aka.ms/msal-net-pop for details.";
+        public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. mTLS Proof-of-Possession requires a region to be specified, as there is no global endpoint for mTLS. See https://aka.ms/msal-net-pop for details.";
     }
 }

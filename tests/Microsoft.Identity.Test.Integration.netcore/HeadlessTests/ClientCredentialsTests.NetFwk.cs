@@ -503,7 +503,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 };
             }
 
-
             var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
             var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
             string token = Base64UrlHelpers.Encode(headerBytes) + "." + Base64UrlHelpers.Encode(claimsBytes);

@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Common
             };
 
             authority ??= Authority.CreateAuthority(TestConstants.AuthorityTestTenant);
-            requestContext ??= new RequestContext(serviceBundle, Guid.NewGuid())
+            requestContext ??= new RequestContext(serviceBundle, Guid.NewGuid(), commonParameters.MtlsCertificate)
             {
                 ApiEvent = new Client.TelemetryCore.Internal.Events.ApiEvent(Guid.NewGuid())
             };

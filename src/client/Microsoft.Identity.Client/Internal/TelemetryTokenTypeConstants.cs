@@ -19,5 +19,7 @@ namespace Microsoft.Identity.Client.Internal
 
         /// Extension token type for telemetry. This is used for custom token types added to MSAL as extensions through IAuthenticationOperation.
         public const int Extension = 5;
+
+        public const int MtlsPop = 6;
     }
 }

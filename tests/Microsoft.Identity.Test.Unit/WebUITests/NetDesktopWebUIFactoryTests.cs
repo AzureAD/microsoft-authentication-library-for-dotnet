@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
     {
         private readonly NetDesktopWebUIFactory _webUIFactory = new NetDesktopWebUIFactory();
         private readonly CoreUIParent _parent = new CoreUIParent();
-        private readonly RequestContext _requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
+        private readonly RequestContext _requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
 
         [TestMethod]
         public void NetFxFactory_DefaultEmbedded()

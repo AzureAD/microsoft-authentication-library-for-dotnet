@@ -752,7 +752,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", telemetryCategories[2].Split(',')[1]); // is_legacy_cache_enabled
 
-            Assert.AreEqual(TelemetryTokenTypeConstants.Bearer.ToString(), telemetryCategories[2].Split(',')[2]);
+            Assert.AreEqual(TelemetryTokenTypeConstants.Bearer.ToString("D"), telemetryCategories[2].Split(',')[2]);
 
             Assert.AreEqual(callerSdkId, telemetryCategories[2].Split(',')[3]);
 

@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             Guid correlationId,
             string tokenType = "Bearer",
-            AuthenticationResultMetadata authenticationResultMetadata = null, 
+            AuthenticationResultMetadata authenticationResultMetadata = null,
             ClaimsPrincipal claimsPrincipal = null,
             string spaAuthCode = null,
             IReadOnlyDictionary<string, string> additionalResponseParameters = null)

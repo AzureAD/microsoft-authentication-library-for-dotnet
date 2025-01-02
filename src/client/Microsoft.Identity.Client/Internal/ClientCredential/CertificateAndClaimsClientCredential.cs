@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -38,26 +39,40 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         public Task AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client, 
-            ILoggerAdapter logger, 
+            OAuth2Client oAuth2Client,
+            AuthenticationRequestParameters requestParameters, 
             ICryptographyManager cryptographyManager, 
-            string clientId, 
-            string tokenEndpoint, 
-            bool sendX5C, 
-            bool useSha2AndPss,
+            string tokenEndpoint,
             CancellationToken cancellationToken)
         {
-            var jwtToken = new JsonWebToken(
+            string clientId = requestParameters.AppConfig.ClientId;
+
+            // Log the incoming request parameters for diagnostic purposes
+            requestParameters.RequestContext.Logger.Verbose(() => $"Building assertion from certificate with clientId: {clientId} at endpoint: {tokenEndpoint}");
+
+            if (requestParameters.MtlsCertificate == null)
+            {
+                requestParameters.RequestContext.Logger.Verbose(() => "Proceeding with JWT token creation and adding client assertion.");
+
+                bool useSha2 = requestParameters.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported;
+
+                var jwtToken = new JsonWebToken(
                 cryptographyManager,
                 clientId,
                 tokenEndpoint,
                 _claimsToSign,
                 _appendDefaultClaims);
 
-            string assertion = jwtToken.Sign(Certificate, sendX5C, useSha2AndPss);
+                string assertion = jwtToken.Sign(Certificate, requestParameters.SendX5C, useSha2);
 
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
+            }
+            else
+            {
+                // Log that MTLS PoP is required and JWT token creation is skipped
+                requestParameters.RequestContext.Logger.Verbose(() => "MTLS PoP Client credential request. Skipping client assertion.");
+            }
 
             return Task.CompletedTask;
         }
