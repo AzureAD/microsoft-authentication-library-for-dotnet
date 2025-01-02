@@ -1,3 +1,28 @@
+4.67.0
+==========
+### New Features
+- MSAL.NET now supports acquiring token for Client Credentials flow with a Subject Name Issuer (SNI) certificate over Mutual TLS (mTLS) for first-party applications. See [Issue #4986](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4986)
+- General availability of the new `WithSignedHttpRequestProofOfPossession` API for Signed HTTP Requests, enhancing security and compliance in token handling. See [Issue #4986](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4986)
+- Bumped NET SDK from net6 to net8, aligning MSAL.NET with the latest .NET standards and features. See [Feature Request #5025](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5025)
+- Removed TokenType from authentication result metadata to streamline token handling processes. See [Issue #4996](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4996)
+- Public API analyzer integrated to enhance API compliance and stability. See [Feature Request #4931](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4931)
+
+### Bug Fixes
+- Improved AcquireTokenSilent logging and handling of Family of Client IDs (FOCI). Enhanced diagnostic capabilities and more accurate state representation. See [Bug #4988](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4988)
+- Fixed issues where DurationTotalInMs in AuthenticationResultMetadata differed from Stopwatch measurements, ensuring more accurate timing metrics. See [Bug #4895](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4895)
+- Resolved incorrect computation of OTel durations in L1 cache and during the creation of POP tokens. See [Bug #5036](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5036)
+- Addressed an issue where `AbstractAcquireTokenParameterBuilder<T>.WithAdfsAuthority` threw exceptions when the tenant ID was null and the authority host URI ended in /adfs. See [Bug #4860](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4860)
+
+### Engineering Tasks
+- Removed usage of Chocolatey and Java 11 from Official Builds to streamline and modernize build environments. See [Task #5010](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5010)
+- Removed public API analyzer from the desktop project to align with new development protocols. See [Issue #5018](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5018)
+- Updated extension telemetry to improve diagnostics and performance insights. See [Updating #4996](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4996)
+- Enhanced code coverage configurations to increase test robustness and coverage metrics. See [Update #4983](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4983)
+- Added detailed logging for the GetAccounts by ID process to enhance traceability and issue resolution. See [Add #4929](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4929)
+
+### Deprecated
+- Removed MSAL v3 migration aids to streamline the library and focus on current versions. See [Remove #4987](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4987)
+
 4.66.2
 ==========
 ### Bug Fixes
