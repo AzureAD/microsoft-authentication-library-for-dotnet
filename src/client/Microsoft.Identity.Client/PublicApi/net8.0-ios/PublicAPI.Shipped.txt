@@ -206,13 +206,12 @@ Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithLegacyCacheCompatibi
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithRedirectUri(string redirectUri) -> T
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithTelemetry(Microsoft.Identity.Client.ITelemetryConfig telemetryConfig) -> T
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithTenantId(string tenantId) -> T
-Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithSignedHttpRequestProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
 Microsoft.Identity.Client.AbstractClientAppBaseAcquireTokenParameterBuilder<T>
 Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
 Microsoft.Identity.Client.AbstractManagedIdentityAcquireTokenParameterBuilder<T>
 Microsoft.Identity.Client.AbstractManagedIdentityAcquireTokenParameterBuilder<T>.AbstractManagedIdentityAcquireTokenParameterBuilder() -> void
 Microsoft.Identity.Client.AbstractPublicClientAcquireTokenParameterBuilder<T>
-Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
 Microsoft.Identity.Client.AccountExtensions
 Microsoft.Identity.Client.AccountId
 Microsoft.Identity.Client.AccountId.AccountId(string adfsIdentifier) -> void

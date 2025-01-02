@@ -1,3 +1,4 @@
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithSignedHttpRequestProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession() -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 const Microsoft.Identity.Client.MsalError.MissingTenantedAuthority = "missing_tenanted_authority" -> string
 const Microsoft.Identity.Client.MsalError.MtlsCertificateNotProvided = "mtls_certificate_not_provided" -> string

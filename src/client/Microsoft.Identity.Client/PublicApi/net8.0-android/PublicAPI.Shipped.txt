@@ -177,7 +177,6 @@ Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithExtraQuery
 Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithScopes(System.Collections.Generic.IEnumerable<string> scopes) -> T
 Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithTenantId(string tenantId) -> T
 Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithTenantIdFromAuthority(System.Uri authorityUri) -> T
-Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithSignedHttpRequestProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAdfsAuthority(string authorityUri, bool validateAuthority = true) -> T
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAuthority(Microsoft.Identity.Client.AadAuthorityAudience authorityAudience, bool validateAuthority = true) -> T
