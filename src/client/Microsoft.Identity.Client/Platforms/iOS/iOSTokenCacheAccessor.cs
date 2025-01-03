@@ -43,12 +43,14 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private string GetTeamId()
         {
+#pragma warning disable CA1422 // Validate platform compatibility
             var queryRecord = new SecRecord(SecKind.GenericPassword)
             {
                 Service = "",
                 Account = TeamIdKey,
                 Accessible = SecAccessible.Always
             };
+#pragma warning restore CA1422 // Validate platform compatibility
 
             SecRecord match = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);
 

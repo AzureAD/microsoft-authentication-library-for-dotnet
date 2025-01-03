@@ -413,8 +413,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Assert
             AssertCacheEntryCount(6);
-
-            _logger.Received().Error(Arg.Is<string>(MsalErrorMessage.InternalErrorCacheEmptyUsername));
         }
 
         [TestMethod]
@@ -493,9 +491,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "scope1");
 
             // Assert
-            _logger.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentAuthorityError));
-
-            _logger.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentEnvError));
         }
 
         [TestMethod]

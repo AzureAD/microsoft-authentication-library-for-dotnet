@@ -41,8 +41,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 };
                 requestUrlString = httpsUrlBuilder.Uri.AbsoluteUri;
 
+#pragma warning disable CA1422 // Validate platform compatibility
                 DispatchQueue.MainQueue.DispatchAsync(
                     () => UIApplication.SharedApplication.OpenUrl(new NSUrl(requestUrlString)));
+#pragma warning restore CA1422 // Validate platform compatibility
                 _authenticationAgentUIViewController.DismissViewController(true, null);
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;

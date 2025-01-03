@@ -869,8 +869,10 @@ namespace Microsoft.Identity.Json.Serialization
 
             WriteObjectStart(writer, value, contract, member, collectionContract, containerProperty);
 
+#pragma warning disable SYSLIB0050 // Type or member is obsolete
             SerializationInfo serializationInfo = new SerializationInfo(contract.UnderlyingType, new FormatterConverter());
             value.GetObjectData(serializationInfo, Serializer._context);
+#pragma warning restore SYSLIB0050 // Type or member is obsolete
 
             foreach (SerializationEntry serializationEntry in serializationInfo)
             {

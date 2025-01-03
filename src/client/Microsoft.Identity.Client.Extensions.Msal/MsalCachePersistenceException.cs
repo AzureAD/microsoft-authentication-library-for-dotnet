@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
+        [Obsolete]
         protected MsalCachePersistenceException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }

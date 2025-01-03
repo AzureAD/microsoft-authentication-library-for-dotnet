@@ -77,7 +77,9 @@ namespace Microsoft.Identity.Json
         /// <exception cref="ArgumentNullException">The <paramref name="info"/> parameter is <c>null</c>.</exception>
         /// <exception cref="SerializationException">The class name is <c>null</c> or <see cref="Exception.HResult"/> is zero (0).</exception>
         public JsonException(SerializationInfo info, StreamingContext context)
+#pragma warning disable SYSLIB0051 // Type or member is obsolete
             : base(info, context)
+#pragma warning restore SYSLIB0051 // Type or member is obsolete
         {
         }
 #endif

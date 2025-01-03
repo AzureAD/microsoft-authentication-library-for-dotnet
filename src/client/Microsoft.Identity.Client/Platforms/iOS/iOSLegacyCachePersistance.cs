@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             try
             {
                 SecStatusCode res;
+#pragma warning disable CA1422 // Validate platform compatibility
                 var rec = new SecRecord(SecKind.GenericPassword)
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
@@ -48,6 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     Comment = NAME + " Cache",
                     Description = "Storage for cache"
                 };
+#pragma warning restore CA1422 // Validate platform compatibility
 
                 if (_keychainGroup != null)
                 {
@@ -73,6 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             try
             {
+#pragma warning disable CA1422 // Validate platform compatibility
                 var s = new SecRecord(SecKind.GenericPassword)
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
@@ -83,6 +86,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     Comment = NAME + " Cache",
                     Description = "Storage for cache"
                 };
+#pragma warning restore CA1422 // Validate platform compatibility
 
                 if (_keychainGroup != null)
                 {

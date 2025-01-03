@@ -27,10 +27,6 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
-    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
   </ItemGroup>

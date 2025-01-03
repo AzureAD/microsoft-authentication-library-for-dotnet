@@ -10,7 +10,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
     {
         public UIWindow GetPresentationAnchor(ASWebAuthenticationSession session)
         {
+#pragma warning disable CA1422 // Validate platform compatibility
             return UIApplication.SharedApplication.KeyWindow;
+#pragma warning restore CA1422 // Validate platform compatibility
         }
     }
 }

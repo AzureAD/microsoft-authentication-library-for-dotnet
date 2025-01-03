@@ -8,7 +8,9 @@ using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json.Serialization
 {
+#pragma warning disable SYSLIB0050 // Type or member is obsolete
     internal class FormatterConverter : IFormatterConverter
+#pragma warning restore SYSLIB0050 // Type or member is obsolete
     {
         public object Convert(object value, Type type)
         {

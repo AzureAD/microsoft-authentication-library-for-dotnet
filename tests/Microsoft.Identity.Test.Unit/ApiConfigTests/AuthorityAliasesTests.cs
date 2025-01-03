@@ -29,111 +29,111 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             // make sure that for all network calls "preferred_cache" environment is used
             // (it is taken from metadata in instance discovery response),
             // except very first network call - instance discovery
-
-            using var harness = CreateTestHarness();
-
-            var httpManager = harness.HttpManager;
-            var authorityUri = new Uri(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "https://{0}/common",
-                    TestConstants.ProductionNotPrefEnvironmentAlias));
-
-            httpManager.AddInstanceDiscoveryMockHandler(authorityUri.AbsoluteUri);
-
-            PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                        .WithAuthority(authorityUri, validateAuthority: true)
-                                                                        .WithHttpManager(httpManager)
-                                                                        .WithDebugLoggingCallback()
-                                                                        .BuildConcrete();
-
-            InMemoryTokenCache cache = new InMemoryTokenCache();
-            cache.Bind(app.UserTokenCache);
-
-            app.ServiceBundle.ConfigureMockWebUI(
-                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"),
-                null,
-                TestConstants.ProductionPrefNetworkEnvironment);
-
-            // mock token request
-            httpManager.AddMockHandler(new MockHttpMessageHandler
+            using (var harness = CreateTestHarness())
             {
-                ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/oauth2/v2.0/token",
-                    TestConstants.ProductionPrefNetworkEnvironment),
-                ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
-            });
+                var httpManager = harness.HttpManager;
+                var authorityUri = new Uri(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "https://{0}/common",
+                        TestConstants.ProductionNotPrefEnvironmentAlias));
 
-            AuthenticationResult result = await app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+                httpManager.AddInstanceDiscoveryMockHandler(authorityUri.AbsoluteUri);
 
-            // make sure that all cache entities are stored with "preferred_cache" environment
-            // (it is taken from metadata in instance discovery response)
-            ValidateCacheEntitiesEnvironment(app.UserTokenCacheInternal, TestConstants.ProductionPrefCacheEnvironment);
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(authorityUri, validateAuthority: true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .WithDebugLoggingCallback()
+                                                                            .BuildConcrete();
 
-            // silent request targeting at, should return at from cache for any environment alias
-            foreach (var envAlias in TestConstants.s_prodEnvAliases)
-            {
-                var app2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                         .WithAuthority($"https://{envAlias}/common", validateAuthority: true)
-                                                         .WithHttpManager(httpManager)
-                                                         .WithDebugLoggingCallback()
-                                                         .BuildConcrete();
+                InMemoryTokenCache cache = new InMemoryTokenCache();
+                cache.Bind(app.UserTokenCache);
 
-                cache.Bind(app2.UserTokenCache);
+                app.ServiceBundle.ConfigureMockWebUI(
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"),
+                    null,
+                    TestConstants.ProductionPrefNetworkEnvironment);
 
-                IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
-                result = await app2.AcquireTokenSilent(TestConstants.s_scope, accounts.First())
-                                   .WithTenantId(TestConstants.Utid)
-                                   .WithForceRefresh(false)
-                                   .ExecuteAsync(CancellationToken.None)
-                                   .ConfigureAwait(false);
+                // mock token request
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/oauth2/v2.0/token",
+                        TestConstants.ProductionPrefNetworkEnvironment),
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                });
 
-                Assert.IsNotNull(result);
-            }
+                AuthenticationResult result = await app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
 
-            // silent request targeting rt should find rt in cache for authority with any environment alias
-            foreach (var envAlias in TestConstants.s_prodEnvAliases)
-            {
-                result = null;
+                // make sure that all cache entities are stored with "preferred_cache" environment
+                // (it is taken from metadata in instance discovery response)
+                ValidateCacheEntitiesEnvironment(app.UserTokenCacheInternal, TestConstants.ProductionPrefCacheEnvironment);
 
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/v2.0/token",
-                            TestConstants.ProductionPrefNetworkEnvironment, TestConstants.Utid),
-                        ExpectedMethod = HttpMethod.Post,
-                        ExpectedPostData = new Dictionary<string, string>
+                // silent request targeting at, should return at from cache for any environment alias
+                foreach (var envAlias in TestConstants.s_prodEnvAliases)
+                {
+                    var app2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                             .WithAuthority($"https://{envAlias}/common", validateAuthority: true)
+                                                             .WithHttpManager(httpManager)
+                                                             .WithDebugLoggingCallback()
+                                                             .BuildConcrete();
+
+                    cache.Bind(app2.UserTokenCache);
+
+                    IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+                    result = await app2.AcquireTokenSilent(TestConstants.s_scope, accounts.First())
+                                       .WithTenantId(TestConstants.Utid)
+                                       .WithForceRefresh(false)
+                                       .ExecuteAsync(CancellationToken.None)
+                                       .ConfigureAwait(false);
+
+                    Assert.IsNotNull(result);
+                }
+
+                // silent request targeting rt should find rt in cache for authority with any environment alias
+                foreach (var envAlias in TestConstants.s_prodEnvAliases)
+                {
+                    result = null;
+
+                    httpManager.AddMockHandler(
+                        new MockHttpMessageHandler
                         {
+                            ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/v2.0/token",
+                                TestConstants.ProductionPrefNetworkEnvironment, TestConstants.Utid),
+                            ExpectedMethod = HttpMethod.Post,
+                            ExpectedPostData = new Dictionary<string, string>
+                            {
                             { "grant_type", "refresh_token" }
-                        },
-                        // return not retriable status code
-                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
-                    });
+                            },
+                            // return not retriable status code
+                            ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
+                        });
 
-                try
-                {
-                    var app3 = PublicClientApplicationBuilder
-                           .Create(TestConstants.ClientId)
-                                 .WithAuthority($"https://{envAlias}/common", true)
-                                 .WithHttpManager(httpManager)
-                                 .WithDebugLoggingCallback()
-                                 .BuildConcrete();
+                    try
+                    {
+                        var app3 = PublicClientApplicationBuilder
+                               .Create(TestConstants.ClientId)
+                                     .WithAuthority($"https://{envAlias}/common", true)
+                                     .WithHttpManager(httpManager)
+                                     .WithDebugLoggingCallback()
+                                     .BuildConcrete();
 
-                    cache.Bind(app3.UserTokenCache);
+                        cache.Bind(app3.UserTokenCache);
 
-                    result = await app3
-                        .AcquireTokenSilent(
-                            TestConstants.s_scopeForAnotherResource,
-                            (await app.GetAccountsAsync().ConfigureAwait(false)).First())
-                        .WithTenantId(TestConstants.Utid)
-                        .WithForceRefresh(false)
-                        .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                        result = await app3
+                            .AcquireTokenSilent(
+                                TestConstants.s_scopeForAnotherResource,
+                                (await app.GetAccountsAsync().ConfigureAwait(false)).First())
+                            .WithTenantId(TestConstants.Utid)
+                            .WithForceRefresh(false)
+                            .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                    }
+                    catch (MsalUiRequiredException)
+                    {
+                    }
+
+                    Assert.IsNull(result);
                 }
-                catch (MsalUiRequiredException)
-                {
-                }
-
-                Assert.IsNull(result);
             }
         }
 

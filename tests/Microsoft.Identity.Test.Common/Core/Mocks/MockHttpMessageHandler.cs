@@ -38,8 +38,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpRequestHeaders ActualRequestHeaders { get; private set; }
         public X509Certificate2 ExpectedMtlsBindingCertificate { get; set; }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+
             ActualRequestMessage = request;
 
             if (ExceptionToThrow != null)
@@ -66,7 +67,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             ValidateQueryParams(uri);
 
-            ValidatePostDataAsync(request);
+            await ValidatePostDataAsync(request).ConfigureAwait(false);
 
             ValidateNotExpectedPostData();
 
@@ -74,7 +75,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             AdditionalRequestValidation?.Invoke(request);
 
-            return new TaskFactory().StartNew(() => ResponseMessage, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return ResponseMessage;
         }
 
         private void ValidateQueryParams(Uri uri)

@@ -31,7 +31,7 @@ namespace MSIHelperService.AzureFunction // Name space is not required while upd
 
             string? name = req.Query["variableName"];
 
-            log.LogInformation("Querystring value for variableName is : ", name);
+            log.LogInformation("Querystring value for variableName is : {variableName}", name);
 
             if (string.IsNullOrEmpty(name))
             {
@@ -46,7 +46,7 @@ namespace MSIHelperService.AzureFunction // Name space is not required while upd
             else
             {
                 string? responseMessage = Environment.GetEnvironmentVariable(name);
-                log.LogInformation("Returning Environment Variable Based on the variable name : ", name);
+                log.LogInformation("Returning Environment Variable Based on the variable name : {variableName}", name);
                 return new OkObjectResult(responseMessage);
             }
         }
