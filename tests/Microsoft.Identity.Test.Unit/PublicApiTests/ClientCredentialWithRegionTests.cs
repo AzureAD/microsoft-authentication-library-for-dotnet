@@ -276,7 +276,6 @@ namespace Microsoft.Identity.Test.Unit
                      httpManager,
                      ConfidentialClientApplication.AttemptRegionDiscovery);
 
-
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync(CancellationToken.None)
@@ -597,8 +596,10 @@ namespace Microsoft.Identity.Test.Unit
         public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
         {
             using (new EnvVariableContext())
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 var tokenHttpCallHandler = new MockHttpMessageHandler()
                 {
                     ExpectedUrl = $"https://{EastUsRegion}.{expectedEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
@@ -642,8 +643,10 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test with a user configured region.")]
         public async Task UserRegion_DiscoveryHappensOnce_Async()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
@@ -681,8 +684,9 @@ namespace Microsoft.Identity.Test.Unit
         // Test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2514
         public async Task AuthorityValidationHappensOnNonRegionalAuthorityAsync()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
                 var handler = new MockHttpMessageHandler()
                 {
                     ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
@@ -720,8 +724,10 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test when region is configured with custom metadata")]
         public void RegionConfiguredWithCustomInstanceDiscoveryThrowsException()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
@@ -736,8 +742,10 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test when region is configured with custom metadata uri")]
         public void RegionConfiguredWithCustomInstanceDiscoveryUriThrowsException()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
@@ -800,8 +808,10 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public async Task RegionFallbackToGlobal_WhenImdsFailsAndNoEnvVarSet()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 httpManager.AddRegionDiscoveryMockHandlerNotFound();
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(false));
@@ -825,8 +835,10 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void RegionDiscoveryThrowsException_WhenCustomMetadataAndRegionDiscoveryEnabled()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
