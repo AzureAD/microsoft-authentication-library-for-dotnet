@@ -48,8 +48,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 throw ExceptionToThrow;
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             var uri = request.RequestUri;
 
             if (!string.IsNullOrEmpty(ExpectedUrl))
@@ -76,6 +74,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ValidateHeaders(request);
 
             AdditionalRequestValidation?.Invoke(request);
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             return ResponseMessage;
         }
