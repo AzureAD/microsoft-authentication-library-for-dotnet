@@ -622,11 +622,13 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     cts.Cancel(true);
                     CancellationToken token = cts.Token;
 
-                    var operationCanceledException = await AssertException.TaskThrowsAsync<TaskCanceledException>(() =>
+                    var operationCanceledException = await AssertException.TaskThrowsAsync<OperationCanceledException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
-                        .ExecuteAsync(token))
+                        .ExecuteAsync(token), 
+                        allowDerived: true) // do not catch TaskCanceledException
+
                         .ConfigureAwait(false);
 
                     break;
