@@ -55,6 +55,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #endif
         }
 
+        public static bool IsDarwin()
+        {
+            string OSDescription = RuntimeInformation.OSDescription;
+            return OSDescription.Contains("Darwin", StringComparison.OrdinalIgnoreCase);
+        }
+
         /// <summary>
         /// Checks if the OS supports WAM (Web Account Manager)
         /// WAM Supported OS's are Windows 10 and above for Client, Windows 2019 and above for Server
