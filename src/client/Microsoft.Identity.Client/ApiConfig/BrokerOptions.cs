@@ -29,6 +29,10 @@ namespace Microsoft.Identity.Client
             /// Use broker on Windows OS
             /// </summary>
             Windows = 0b_0000_0001,  // 1
+            /// <summary>
+            /// Use broker on Mac OS
+            /// </summary>
+            Mac = 0b_0000_0010,  // 10
         }
 
         /// <summary>
@@ -79,6 +83,11 @@ namespace Microsoft.Identity.Client
         internal bool IsBrokerEnabledOnCurrentOs()
         {
             if (EnabledOn.HasFlag(OperatingSystems.Windows) && DesktopOsHelper.IsWindows())
+            {
+                return true;
+            }
+
+            if (EnabledOn.HasFlag(OperatingSystems.Mac) && DesktopOsHelper.IsDarwin())
             {
                 return true;
             }

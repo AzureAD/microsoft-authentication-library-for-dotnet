@@ -100,7 +100,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 s_lazyCore.Value.EnablePii(_logger.PiiLoggingEnabled);
             }
 
-            _parentHandle = GetParentWindow(uiParent);
+            if (DesktopOsHelper.IsWindows())
+            {
+                _parentHandle = GetParentWindow(uiParent);
+            }
+            else
+            {
+                // TODO:ADO 3055958 Parent window handle support on mac
+                _parentHandle = (IntPtr)1;
+            }
 
             // Broker options cannot be null
             _wamOptions = appConfig.BrokerOptions;
@@ -130,7 +138,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             //need to provide a handle
-            if (_parentHandle == IntPtr.Zero)
+            if (DesktopOsHelper.IsWindows() && _parentHandle == IntPtr.Zero)
             {
                 throw new MsalClientException(
                     "window_handle_required",
@@ -586,7 +594,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
         public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
-            if (!DesktopOsHelper.IsWin10OrServerEquivalent())
+            if (!DesktopOsHelper.IsWin10OrServerEquivalent() && !DesktopOsHelper.IsDarwin())
             {
                 _logger?.Warning("[RuntimeBroker] Not a supported operating system. WAM broker is not available. ");
                 return false;
