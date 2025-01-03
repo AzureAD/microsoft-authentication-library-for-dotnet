@@ -6,8 +6,8 @@
 - Public API analyzer integrated to enhance API compliance and stability. See [Feature Request #4931](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4931)
 
 ### Bug Fixes
-- Improved AcquireTokenSilent logging and handling of Family of Client IDs (FOCI). Enhanced diagnostic capabilities and more accurate state representation. See [Bug #4988](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4988)
-- Fixed issues where DurationTotalInMs in AuthenticationResultMetadata differed from Stopwatch measurements, ensuring more accurate timing metrics. See [Bug #4895](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4895)
+- Improved AcquireTokenSilent logging and handling of Family of Client IDs (FOCI). See [Bug #4988](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4988)
+- Fixed issues where DurationTotalInMs in AuthenticationResultMetadata differed from Stopwatch measurements. See [Bug #4895](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4895)
 - Resolved incorrect computation of OTel durations in L1 cache and during the creation of POP tokens. See [Bug #5036](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5036)
 - Addressed an issue where `AbstractAcquireTokenParameterBuilder<T>.WithAdfsAuthority` threw exceptions when the tenant ID was null and the authority host URI ended in /adfs. See [Bug #4860](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4860)
 
