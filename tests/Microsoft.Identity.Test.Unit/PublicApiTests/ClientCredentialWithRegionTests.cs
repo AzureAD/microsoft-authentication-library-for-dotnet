@@ -22,35 +22,32 @@ namespace Microsoft.Identity.Test.Unit
     {
         public const string EastUsRegion = "eastus";
 
-        [TestCleanup]
-        public override void TestCleanup()
-        {
-            Environment.SetEnvironmentVariable("REGION_NAME", null);
-        }
-
         [TestMethod]
         // regression for #2837
         public async Task AuthorityOverrideAndRegionalAsync()
         {
-            const string region = "eastus";
-            Environment.SetEnvironmentVariable("REGION_NAME", region);
+            using (new EnvVariableContext())
+            {
+                const string region = "eastus";
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
 
-            var app = ConfidentialClientApplicationBuilder
-                             .Create(TestConstants.ClientId)
-                             .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                             .WithClientSecret(TestConstants.ClientSecret)
-                             .Build();
+                var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                app
-                .AcquireTokenForClient(TestConstants.s_scope)
-                .WithAuthority("https://login.microsoft.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                    app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority("https://login.microsoft.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
 #pragma warning restore CS0618 // Type or member is obsolete
-                    .ExecuteAsync())
-                .ConfigureAwait(false);
+                        .ExecuteAsync())
+                    .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.RegionalAndAuthorityOverride, ex.ErrorCode);
+                Assert.AreEqual(MsalError.RegionalAndAuthorityOverride, ex.ErrorCode);
+            }
         }
 
         [TestMethod]
@@ -58,10 +55,12 @@ namespace Microsoft.Identity.Test.Unit
         public async Task TenantIdOverrideAndRegionalAsync()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (new EnvVariableContext())
+            using (var harness = base.CreateTestHarness())
             {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
                 var tokenHttpCallHandler = new MockHttpMessageHandler()
                 {
                     // Asserts
@@ -98,14 +97,15 @@ namespace Microsoft.Identity.Test.Unit
         {
             const string region = "centralus";
 
-            using (var httpManager = new MockHttpManager())
+            using (new EnvVariableContext())
+            using (var harness = base.CreateTestHarness())
             {
-                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                harness.HttpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
 
                 IConfidentialClientApplication app = CreateCca(
-                    httpManager,
+                    harness.HttpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery);
-                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
 
                 // try again, with force refresh, region should be from cache
-                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
                 result = await app
                   .AcquireTokenForClient(TestConstants.s_scope)
                   .WithForceRefresh(true)
@@ -157,10 +157,10 @@ namespace Microsoft.Identity.Test.Unit
 
                 // try again, create a new app, result should still be from cache 
                 IConfidentialClientApplication app2 = CreateCca(
-                    httpManager,
+                    harness.HttpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery);
 
-                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
                 result = await app2
                   .AcquireTokenForClient(TestConstants.s_scope)
                   .ExecuteAsync(CancellationToken.None)
@@ -181,8 +181,9 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Tokens between regional and non-regional are interchangeable.")]
         public async Task TokensAreInterchangable_Regional_To_NonRegional_Async()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
                 httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
@@ -231,36 +232,31 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test when region is received from environment variable")]
         public async Task FetchRegionFromEnvironmentAsync()
         {
-            using (var httpManager = new MockHttpManager())
+            using (new EnvVariableContext())
+            using (var harness = base.CreateTestHarness())
             {
-                try
-                {
-                    Environment.SetEnvironmentVariable("REGION_NAME", TestConstants.Region);
-                    IConfidentialClientApplication app = CreateCca(
-                        httpManager,
-                        ConfidentialClientApplication.AttemptRegionDiscovery);
+                var httpManager = harness.HttpManager;
+                Environment.SetEnvironmentVariable("REGION_NAME", TestConstants.Region);
+                IConfidentialClientApplication app = CreateCca(
+                    httpManager,
+                    ConfidentialClientApplication.AttemptRegionDiscovery);
 
-                    httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
-                    AuthenticationResult result = await app
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
-                    Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
-                    Assert.AreEqual(TestConstants.Region, result.ApiEvent.AutoDetectedRegion);
-                    Assert.AreEqual(RegionAutodetectionSource.EnvVariable, result.ApiEvent.RegionAutodetectionSource);
-                    Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
-                    Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
-                    Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                    Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
-                    Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.AutoDetectedRegion);
+                Assert.AreEqual(RegionAutodetectionSource.EnvVariable, result.ApiEvent.RegionAutodetectionSource);
+                Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+                Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+                Assert.IsNotNull(result.AccessToken);
 
-                }
-                finally
-                {
-                    Environment.SetEnvironmentVariable("REGION_NAME", null);
-                }
             }
         }
 
@@ -268,8 +264,10 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test when the region could not be fetched -> fallback to global.")]
         public async Task RegionFallbackToGlobalAsync()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 httpManager.AddRegionDiscoveryMockHandlerNotFound();
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(false));
@@ -278,28 +276,23 @@ namespace Microsoft.Identity.Test.Unit
                      httpManager,
                      ConfidentialClientApplication.AttemptRegionDiscovery);
 
-                try
-                {
-                    AuthenticationResult result = await app
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
 
-                    Assert.IsNotNull(result.AccessToken);
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
-                    Assert.AreEqual(null, result.ApiEvent.RegionUsed);
-                    Assert.IsNull(result.ApiEvent.AutoDetectedRegion);
-                    Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, result.ApiEvent.RegionAutodetectionSource);
-                    Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.ApiEvent.RegionOutcome);
-                    Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
-                    Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                    Assert.IsTrue(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError
-                        .Contains(TestConstants.RegionDiscoveryIMDSCallFailedMessage));
-                }
-                catch (MsalServiceException)
-                {
-                    Assert.Fail("Fallback to global failed.");
-                }
+                Assert.IsNotNull(result.AccessToken);
+
+                Assert.AreEqual(null, result.ApiEvent.RegionUsed);
+                Assert.IsNull(result.ApiEvent.AutoDetectedRegion);
+                Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, result.ApiEvent.RegionAutodetectionSource);
+                Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.ApiEvent.RegionOutcome);
+                Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+                Assert.IsTrue(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError
+                    .Contains(TestConstants.RegionDiscoveryIMDSCallFailedMessage));
+
             }
         }
 
@@ -307,8 +300,10 @@ namespace Microsoft.Identity.Test.Unit
         public async Task MsalForceRegionIsSet_RegionIsUsed()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 Environment.SetEnvironmentVariable(
                     ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, TestConstants.Region);
 
@@ -339,8 +334,10 @@ namespace Microsoft.Identity.Test.Unit
         public async Task MsalForceRegionIsSet_WithRegionIsSet_WithRegionWins()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 // this will be ignored, in favor of TestConstants.Region
                 Environment.SetEnvironmentVariable(
                     ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "someOtherRegion");
@@ -373,8 +370,10 @@ namespace Microsoft.Identity.Test.Unit
         public async Task MsalForceRegionIsSet_WithRegionIsSetToOptOut_NoRegionIsUsed()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 Environment.SetEnvironmentVariable(
                     ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, TestConstants.Region);
 
@@ -422,8 +421,10 @@ namespace Microsoft.Identity.Test.Unit
             const string imdsError = "IMDS call failed with exception";
             const string autoDiscoveryError = "Auto-discovery failed in the past. Not trying again. IMDS call failed";
 
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
+
                 httpManager.AddRegionDiscoveryMockHandlerNotFound();
 
                 var discoveryHandler = MockHelpers.CreateInstanceDiscoveryMockHandler(
@@ -489,86 +490,13 @@ namespace Microsoft.Identity.Test.Unit
         // regression: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686
         public async Task OtherCloud_WithValidation_Async(bool validateAuthority, bool authorityIsValid)
         {
-            try
+
+            using (new EnvVariableContext())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
                 Environment.SetEnvironmentVariable("REGION_NAME", "eastus");
 
-                await RunPpeTestAsync(validateAuthority, authorityIsValid).ConfigureAwait(false);
-
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("REGION_NAME", null);
-            }
-
-        }
-
-        [DataTestMethod]
-        [DataRow("login.partner.microsoftonline.cn", "login.partner.microsoftonline.cn")]
-        [DataRow("login.chinacloudapi.cn", "login.partner.microsoftonline.cn")]
-        [DataRow("login.microsoftonline.us", "login.microsoftonline.us")]
-        [DataRow("login.usgovcloudapi.net", "login.microsoftonline.us")]
-        [DataRow("login-us.microsoftonline.com", "login-us.microsoftonline.com")]
-        [DataRow("login.windows.net", "login.microsoft.com")]
-        [DataRow("login.microsoft.com", "login.microsoft.com")]
-        [DataRow("sts.windows.net", "login.microsoft.com")]
-        [DataRow("login.microsoftonline.com", "login.microsoft.com")]
-        public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
-        {
-            try
-            {
-                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
-
-                using (var harness = new MockHttpAndServiceBundle())
-                {
-                    var tokenHttpCallHandler = new MockHttpMessageHandler()
-                    {
-                        ExpectedUrl = $"https://{EastUsRegion}.{expectedEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = CreateResponse(true)
-                    };
-                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
-
-                    var app = ConfidentialClientApplicationBuilder
-                                     .Create(TestConstants.ClientId)
-                                     .WithAuthority($"https://{inputEnv}/common", true)
-                                     .WithHttpManager(harness.HttpManager)
-                                     .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                                     .WithClientSecret(TestConstants.ClientSecret)
-                                     .Build();
-
-                    AuthenticationResult result = await app
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithTenantId($"17b189bc-2b81-4ec5-aa51-3e628cbc931b")
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
-
-                    Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
-                    Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                    result = await app
-                       .AcquireTokenForClient(TestConstants.s_scope)
-                       .WithTenantId($"17b189bc-2b81-4ec5-aa51-3e628cbc931b")
-                       .ExecuteAsync()
-                       .ConfigureAwait(false);
-
-                    Assert.AreEqual(EastUsRegion, result.ApiEvent.RegionUsed);
-                    Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
-                    Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                    Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                    Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
-                }
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("REGION_NAME", null);
-            }
-        }
-
-        private static async Task RunPpeTestAsync(bool validateAuthority, bool authorityIsValid)
-        {
-            using (var harness = new MockHttpAndServiceBundle())
-            {
                 MockHttpMessageHandler discoveryHandler;
                 if (authorityIsValid)
                 {
@@ -652,6 +580,61 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                     Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
                 }
+            }
+
+        }
+
+        [DataTestMethod]
+        [DataRow("login.partner.microsoftonline.cn", "login.partner.microsoftonline.cn")]
+        [DataRow("login.chinacloudapi.cn", "login.partner.microsoftonline.cn")]
+        [DataRow("login.microsoftonline.us", "login.microsoftonline.us")]
+        [DataRow("login.usgovcloudapi.net", "login.microsoftonline.us")]
+        [DataRow("login-us.microsoftonline.com", "login-us.microsoftonline.com")]
+        [DataRow("login.windows.net", "login.microsoft.com")]
+        [DataRow("login.microsoft.com", "login.microsoft.com")]
+        [DataRow("sts.windows.net", "login.microsoft.com")]
+        [DataRow("login.microsoftonline.com", "login.microsoft.com")]
+        public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
+        {
+            using (new EnvVariableContext())
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                var tokenHttpCallHandler = new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = $"https://{EastUsRegion}.{expectedEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = CreateResponse(true)
+                };
+                harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority($"https://{inputEnv}/common", true)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
+
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithTenantId($"17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("eastus", result.ApiEvent.RegionUsed);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await app
+                   .AcquireTokenForClient(TestConstants.s_scope)
+                   .WithTenantId($"17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                   .ExecuteAsync()
+                   .ConfigureAwait(false);
+
+                Assert.AreEqual(EastUsRegion, result.ApiEvent.RegionUsed);
+                Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+                Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
             }
         }
 
