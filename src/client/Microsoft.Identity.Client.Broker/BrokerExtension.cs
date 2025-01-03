@@ -80,6 +80,15 @@ namespace Microsoft.Identity.Client.Broker
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
             }
+            else if (DesktopOsHelper.IsDarwin())
+            {
+                 builder.Config.BrokerCreatorFunc =
+                     (uiParent, appConfig, logger) =>
+                     {
+                         logger.Info("[Runtime] macOS supports broker.");
+                         return new RuntimeBroker(uiParent, appConfig, logger);
+                     };
+            }
             else
             {
                 builder.Config.BrokerCreatorFunc =
