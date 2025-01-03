@@ -598,6 +598,8 @@ namespace Microsoft.Identity.Test.Unit
             using (new EnvVariableContext())
             using (var harness = base.CreateTestHarness())
             {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
                 var tokenHttpCallHandler = new MockHttpMessageHandler()
                 {
                     ExpectedUrl = $"https://{EastUsRegion}.{expectedEnv}/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
