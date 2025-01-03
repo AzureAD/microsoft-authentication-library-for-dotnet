@@ -114,6 +114,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)
                                 .WithClientSecret("some-secret")
+                                .WithExperimentalFeatures(true)
                                 .BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);

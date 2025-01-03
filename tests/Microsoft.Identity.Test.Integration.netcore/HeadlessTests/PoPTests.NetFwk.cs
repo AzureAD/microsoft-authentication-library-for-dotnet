@@ -80,6 +80,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
 
@@ -107,6 +108,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .WithAuthority(settings.Authority).Build();
             ConfigureInMemoryCache(cca);
@@ -155,7 +157,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = ConfidentialClientApplicationBuilder.Create(settings.ClientId)
                 .WithTestLogging()
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret()).Build();
+                .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
+                .Build();
             ConfigureInMemoryCache(cca);
 
             var result = await cca
@@ -176,6 +180,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                 .Build();
             ConfigureInMemoryCache(cca);
@@ -221,6 +226,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
 
@@ -257,6 +263,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .Build();
 
             //RSA provider
@@ -294,6 +301,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .Build();
 
             //RSA provider
@@ -324,6 +332,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .Build();
 
             // Create an RSA key Wilson style (SigningCredentials)
@@ -389,6 +398,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .Build();
 
             //ECD Provider
@@ -520,6 +530,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .Build();
 
             // Create a new InMemoryCryptoProvider and get its JWK
@@ -572,6 +583,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .Build();
 
             // Create a new InMemoryCryptoProvider and get its JWK
@@ -659,6 +671,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
+                .WithExperimentalFeatures(true)
                 .Build();
 
             var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl))
