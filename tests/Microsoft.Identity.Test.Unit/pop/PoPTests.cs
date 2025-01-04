@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithExperimentalFeatures(true)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
@@ -91,6 +92,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithExperimentalFeatures(true)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
@@ -128,6 +130,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithExperimentalFeatures(true)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
@@ -403,6 +406,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithExperimentalFeatures(true)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
                 var testTimeService = new TestTimeService();
@@ -579,6 +583,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithExperimentalFeatures(true)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
@@ -647,6 +652,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             {
                 ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                   .WithClientSecret(TestConstants.ClientSecret)
+                                                                  .WithExperimentalFeatures(true)
                                                                   .WithHttpManager(httpManager)
                                                                   .BuildConcrete();
 
