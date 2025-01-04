@@ -105,6 +105,8 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public T WithSignedHttpRequestProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
+            ValidateUseOfExperimentalFeature();
+
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
             CommonParameters.AuthenticationOperation = new PopAuthenticationOperation(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
