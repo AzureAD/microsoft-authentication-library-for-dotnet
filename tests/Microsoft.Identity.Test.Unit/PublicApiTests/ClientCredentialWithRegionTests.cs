@@ -527,7 +527,11 @@ namespace Microsoft.Identity.Test.Unit
                     harness.HttpManager.AddMockHandler(discoveryHandler);
                 }
 
-                harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+                if (authorityIsValid || !validateAuthority)
+                {
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+                }
+
                 var app = ConfidentialClientApplicationBuilder
                                  .Create(TestConstants.ClientId)
                                  .WithAuthority("https://" + TestConstants.PpeOrgEnvironment + "/common", validateAuthority)//login.windows-ppe.org is not known to MSAL or AAD
