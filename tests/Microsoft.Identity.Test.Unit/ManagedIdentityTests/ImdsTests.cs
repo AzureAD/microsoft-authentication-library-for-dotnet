@@ -17,12 +17,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ImdsTests : TestBase
     {
-        [TestMethod]
-        public async Task ImdsBadRequestTestAsync()
+        [DataTestMethod]
+        [DataRow(HttpStatusCode.BadRequest, ImdsManagedIdentitySource.IdentityUnavailableError, 1, DisplayName = "BadRequest - Identity Unavailable")]
+        [DataRow(HttpStatusCode.BadGateway, ImdsManagedIdentitySource.GatewayError, 1, DisplayName = "BadGateway - Gateway Error")]
+        [DataRow(HttpStatusCode.GatewayTimeout, ImdsManagedIdentitySource.GatewayError, 4, DisplayName = "GatewayTimeout - Gateway Error Retries")]
+        public async Task ImdsErrorHandlingTestAsync(HttpStatusCode statusCode, string expectedErrorSubstring, int expectedAttempts)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
-
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, "http://169.254.169.254");
 
@@ -34,9 +36,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                httpManager.AddManagedIdentityMockHandler(ManagedIdentityTests.ImdsEndpoint, ManagedIdentityTests.Resource, MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySource.Imds, statusCode: HttpStatusCode.BadRequest);
+                // Adding multiple mock handlers to simulate retries for GatewayTimeout
+                for (int i = 0; i < expectedAttempts; i++)
+                {
+                    httpManager.AddManagedIdentityMockHandler(ManagedIdentityTests.ImdsEndpoint, ManagedIdentityTests.Resource,
+                        MockHelpers.GetMsiImdsErrorResponse(), ManagedIdentitySource.Imds, statusCode: statusCode);
+                }
 
+                // Expecting a MsalServiceException indicating an error
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
@@ -44,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ManagedIdentitySource.Imds.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.IsTrue(ex.Message.Contains(ImdsManagedIdentitySource.IdentityUnavailableError), $"The error message is not as expected. Error message: {ex.Message}. Expected message: {ImdsManagedIdentitySource.IdentityUnavailableError}");
+                Assert.IsTrue(ex.Message.Contains(expectedErrorSubstring), $"The error message is not as expected. Error message: {ex.Message}. Expected message should contain: {expectedErrorSubstring}");
             }
         }
     }
