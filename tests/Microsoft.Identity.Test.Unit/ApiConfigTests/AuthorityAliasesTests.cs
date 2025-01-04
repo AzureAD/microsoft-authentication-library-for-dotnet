@@ -90,12 +90,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                     Assert.IsNotNull(result);
                 }
 
-                // silent request targeting rt should find rt in cache for authority with any environment alias
-                foreach (var envAlias in TestConstants.s_prodEnvAliases)
-                {
-                    result = null;
-
-                    httpManager.AddMockHandler(
+                httpManager.AddMockHandler(
                         new MockHttpMessageHandler
                         {
                             ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/v2.0/token",
@@ -108,6 +103,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                             // return not retriable status code
                             ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
                         });
+
+                // silent request targeting rt should find rt in cache for authority with any environment alias
+                foreach (var envAlias in TestConstants.s_prodEnvAliases)
+                {
+                    result = null;
 
                     try
                     {
