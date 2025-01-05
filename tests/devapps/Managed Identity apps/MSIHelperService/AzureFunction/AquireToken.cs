@@ -32,7 +32,7 @@ namespace MSIHelperService.AzureFunction
 
             try
             {
-                log.LogInformation("uri : ", uri);
+                log.LogInformation("uri: {uri}", uri);
 
                 //set the http get method and the required headers for a web app
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);

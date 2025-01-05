@@ -32,7 +32,9 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Json.Serialization
 {
+#pragma warning disable SYSLIB0050 // Type or member is obsolete
     internal class JsonFormatterConverter : IFormatterConverter
+#pragma warning restore SYSLIB0050 // Type or member is obsolete
     {
         private readonly JsonSerializerInternalReader _reader;
         private readonly JsonISerializableContract _contract;
