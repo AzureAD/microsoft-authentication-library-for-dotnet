@@ -10,9 +10,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class MachineLearningManagedIdentitySource : AbstractManagedIdentity
     {
-        // MSI Constants. Docs for MSI are available here https://docs.microsoft.com/azure/app-service/overview-managed-identity
         private const string MachineLearningMsiApiVersion = "2017-09-01";
-        private const string SecretHeaderName = "Secret";
+        private const string SecretHeaderName = "secret";
 
         private readonly Uri _endpoint;
         private readonly string _secret;
