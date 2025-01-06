@@ -433,6 +433,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("api-version", "2019-07-01-preview");
                     expectedQueryParams.Add("resource", resource);
                     break;
+                case ManagedIdentitySource.MachineLearning:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedRequestHeaders.Add("Secret", "secret");
+                    expectedQueryParams.Add("api-version", "2017-09-01");
+                    expectedQueryParams.Add("resource", resource);
+                    break;
             }
 
             if (managedIdentitySourceType != ManagedIdentitySource.CloudShell)

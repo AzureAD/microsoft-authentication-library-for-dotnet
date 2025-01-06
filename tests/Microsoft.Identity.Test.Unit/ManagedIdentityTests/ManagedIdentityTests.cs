@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string Resource = "https://management.azure.com";
         internal const string ResourceDefaultSuffix = "https://management.azure.com/.default";
         internal const string AppServiceEndpoint = "http://127.0.0.1:41564/msi/token";
+        internal const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
         internal const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
         internal const string AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         internal const string CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
@@ -45,6 +46,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, ManagedIdentitySource.AzureArc, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
         public void GetManagedIdentityTests(
             string endpoint,
             ManagedIdentitySource managedIdentitySource, 
@@ -70,6 +72,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(CloudShellEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
         [DataRow(ServiceFabricEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
+        [DataRow(MachineLearningEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityHappyPathAsync(
             string endpoint,
             string scope,
@@ -119,6 +123,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId .ResourceId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
         public async Task ManagedIdentityUserAssignedHappyPathAsync(
             string endpoint,
             ManagedIdentitySource managedIdentitySource,
@@ -165,6 +172,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityDifferentScopesTestAsync(
             string endpoint,
             string scope,
@@ -225,6 +233,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityForceRefreshTestAsync(
             string endpoint,
             string scope,
@@ -285,6 +294,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityWithClaimsAndCapabilitiesTestAsync(
             string endpoint,
             string scope,
@@ -346,6 +356,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityWithClaimsTestAsync(
             string endpoint,
             string scope,
@@ -417,6 +428,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow("user.read", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
         [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
         [DataRow("s", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow("user.read", ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
+        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
+        [DataRow("s", ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
         public async Task ManagedIdentityTestWrongScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -524,6 +538,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
         [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
         [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
         public async Task ManagedIdentityErrorResponseNoPayloadTestAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -565,6 +580,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
         [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
         [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
         public async Task ManagedIdentityNullResponseAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -604,6 +620,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
         [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
         [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
         public async Task ManagedIdentityUnreachableNetworkAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -643,6 +660,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint, HttpStatusCode.NotFound)]
         public async Task ManagedIdentityTestRetryAsync(ManagedIdentitySource managedIdentitySource, string endpoint, HttpStatusCode statusCode)
         {
             using (new EnvVariableContext())
