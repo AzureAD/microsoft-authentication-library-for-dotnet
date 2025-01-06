@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw exception;
             }
 
-            logger.Info($"[Managed Identity] Environment variables validation passed for machine learning managed identity. Endpoint URI: {endpointUri}. Creating Machine learning managed identity.");
+            logger.Info($"[Managed Identity] Environment variables validation passed for machine learning managed identity. Endpoint URI: {endpointUri}. Creating machine learning managed identity.");
             return true;
         }
 
