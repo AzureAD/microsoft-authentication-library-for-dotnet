@@ -57,8 +57,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public static bool IsDarwin()
         {
+#if MAC
             string OSDescription = RuntimeInformation.OSDescription;
             return OSDescription.Contains("Darwin", StringComparison.OrdinalIgnoreCase);
+#else
+            return false;
+#endif
         }
 
         /// <summary>
