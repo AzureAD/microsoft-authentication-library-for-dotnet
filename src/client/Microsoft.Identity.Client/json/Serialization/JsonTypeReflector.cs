@@ -396,10 +396,12 @@ namespace Microsoft.Identity.Json.Serialization
             // no inheritance
             return (ReflectionUtils.GetAttribute<NonSerializedAttribute>(provider, false) != null);
 #else
+#pragma warning disable SYSLIB0050 // Type or member is obsolete
             if (provider is FieldInfo fieldInfo && (fieldInfo.Attributes & FieldAttributes.NotSerialized) == FieldAttributes.NotSerialized)
             {
                 return true;
             }
+#pragma warning restore SYSLIB0050 // Type or member is obsolete
 
             return false;
 #endif
@@ -413,10 +415,12 @@ namespace Microsoft.Identity.Json.Serialization
             // no inheritance
             return (ReflectionUtils.GetAttribute<SerializableAttribute>(provider, false) != null);
 #else
+#pragma warning disable SYSLIB0050 // Type or member is obsolete
             if (provider is Type type && (type.GetTypeInfo().Attributes & TypeAttributes.Serializable) == TypeAttributes.Serializable)
             {
                 return true;
             }
+#pragma warning restore SYSLIB0050 // Type or member is obsolete
 
             return false;
 #endif

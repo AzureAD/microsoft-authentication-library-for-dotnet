@@ -1743,7 +1743,9 @@ namespace Microsoft.Identity.Json.Serialization
                 TraceWriter.Trace(TraceLevel.Info, JsonPosition.FormatMessage(reader as IJsonLineInfo, reader.Path, "Deserializing {0} using ISerializable constructor.".FormatWith(CultureInfo.InvariantCulture, contract.UnderlyingType)), null);
             }
 
+#pragma warning disable SYSLIB0050 // Type or member is obsolete
             SerializationInfo serializationInfo = new SerializationInfo(contract.UnderlyingType, new JsonFormatterConverter(this, contract, member));
+#pragma warning restore SYSLIB0050 // Type or member is obsolete
 
             bool finished = false;
             do
