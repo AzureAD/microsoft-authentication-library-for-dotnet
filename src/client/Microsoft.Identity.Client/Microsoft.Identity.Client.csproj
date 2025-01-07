@@ -146,13 +146,13 @@
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <PackageReference Include="System.Security.SecureString" />
+    <PackageReference Update="System.Security.SecureString" />
     <PackageReference Include="Xamarin.AndroidX.Browser" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <PackageReference Include="System.Security.SecureString" />
+    <PackageReference Update="System.Security.SecureString" />
   </ItemGroup>
 
   <ItemGroup>
