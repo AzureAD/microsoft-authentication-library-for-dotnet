@@ -668,5 +668,73 @@ namespace Microsoft.Identity.Test.Unit
         {
             return MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token, expiresIn, tokenType);
         }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_WithMtlsPop_Dsts_SuccessAsync()
+        {
+            string authorityUrl = TestConstants.DstsAuthorityTenanted;
+
+            // Modify the endpoint based on the authorityUrl
+            string expectedTokenEndpoint = $"{authorityUrl}oauth2/v2.0/token";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                // Set up mock handler with expected token endpoint URL
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = expectedTokenEndpoint,
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop")
+                });
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithCertificate(s_testCertificate)
+                    .WithAuthority(authorityUrl)
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // First token acquisition - should hit the identity provider
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+
+                // Second token acquisition - should retrieve from cache
+                AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("header.payload.signature", secondResult.AccessToken);
+                Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, secondResult.TokenType);
+                Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPopDstsCommonAuthorityFailsAsync()
+        {
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                            .Create(TestConstants.ClientId)
+                            .WithAuthority(TestConstants.DstsAuthorityCommon)
+                            .WithCertificate(s_testCertificate)
+                            .WithExperimentalFeatures()
+                            .Build();
+
+            // Set WithMtlsProofOfPossession on the request without specifying an authority
+            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                app.AcquireTokenForClient(TestConstants.s_scope)
+                   .WithMtlsProofOfPossession()
+                   .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
+        }
     }
 }
