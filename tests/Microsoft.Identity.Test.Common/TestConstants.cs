@@ -112,6 +112,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
         public const string DstsAuthorityTenanted = DstsAuthorityTenantless + TenantId + "/";
         public const string DstsAuthorityCommon = DstsAuthorityTenantless + Common + "/";
+        public const string DstsAuthorityMtlsTenantless = "https://mtls.some.url.dsts.core.azure-test.net/dstsv2/";
+        public const string DstsAuthorityMtlsTenanted = DstsAuthorityMtlsTenantless + TenantId + "/";
 
         public const string GenericAuthority = "https://demo.duendesoftware.com";
 
