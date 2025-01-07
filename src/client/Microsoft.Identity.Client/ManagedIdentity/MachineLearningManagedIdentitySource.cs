@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
-            
+
+            request.Headers.Add("Metadata", "true");
             request.Headers.Add(SecretHeaderName, _secret);
             request.QueryParameters["api-version"] = MachineLearningMsiApiVersion;
             request.QueryParameters["resource"] = resource;

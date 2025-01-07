@@ -436,6 +436,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 case ManagedIdentitySource.MachineLearning:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedRequestHeaders.Add("secret", "secret");
+                    expectedRequestHeaders.Add("Metadata", "true");
                     expectedQueryParams.Add("api-version", "2017-09-01");
                     expectedQueryParams.Add("resource", resource);
                     break;
