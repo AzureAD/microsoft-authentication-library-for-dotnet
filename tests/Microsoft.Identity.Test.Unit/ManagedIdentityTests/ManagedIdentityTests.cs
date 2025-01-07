@@ -1129,5 +1129,62 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityJsonParseFailure, ex.Message);
             }
         }
+
+        [DataTestMethod]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.Imds, ImdsEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
+        public async Task ManagedIdentityRequestTokensForDifferentScopesTestAsync(
+            string initialResource, 
+            string newResource, 
+            ManagedIdentitySource source, 
+            string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(source, endpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // Mock handler for the initial resource request
+                httpManager.AddManagedIdentityMockHandler(endpoint, initialResource,
+                    MockHelpers.GetMsiSuccessfulResponse(), source);
+
+                // Request token for initial resource
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(initialResource).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Mock handler for the new resource request
+                httpManager.AddManagedIdentityMockHandler(endpoint, newResource,
+                    MockHelpers.GetMsiSuccessfulResponse(), source);
+
+                // Request token for new resource
+                result = await mi.AcquireTokenForManagedIdentity(newResource).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Request token again for the same initial resource to check cache usage
+                result = await mi.AcquireTokenForManagedIdentity(initialResource).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                // Request token again for the new resource to check cache usage
+                result = await mi.AcquireTokenForManagedIdentity(newResource).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
     }
 }
