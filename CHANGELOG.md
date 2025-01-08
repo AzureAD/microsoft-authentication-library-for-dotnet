@@ -7,9 +7,10 @@
 
 ### Bug Fixes
 - Improved AcquireTokenSilent logging and handling of Family of Client IDs (FOCI). See [Bug #4988](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4988)
-- Fixed issues where DurationTotalInMs in AuthenticationResultMetadata differed from Stopwatch measurements. See [Bug #4895](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4895)
+- Fixed issues where DurationTotalInMs in `AuthenticationResultMetadata` differed from Stopwatch measurements. See [Bug #4895](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4895)
 - Resolved incorrect computation of OTel durations in L1 cache and during the creation of POP tokens. See [Bug #5036](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5036)
 - Addressed an issue where `AbstractAcquireTokenParameterBuilder<T>.WithAdfsAuthority` threw exceptions when the tenant ID was null and the authority host URI ended in /adfs. See [Bug #4860](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4860)
+- Fixed a parsing issue in Managed Identity to align with Azure.Identity's behavior for handling invalid JSON responses. See [Bug #5016](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5016)
 
 ### Deprecated
 - Removed MSAL v3 migration aids. See [Remove #4987](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4987)
