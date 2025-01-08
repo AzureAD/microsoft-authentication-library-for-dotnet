@@ -135,7 +135,8 @@ namespace Microsoft.Identity.Client
             {
                 string authorityUri = ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri;
 
-                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad && 
+                    ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Dsts)
                 {
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
@@ -149,7 +150,9 @@ namespace Microsoft.Identity.Client
                         MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
                 }
 
-                if (string.IsNullOrEmpty(ServiceBundle.Config.AzureRegion))
+                // Check for Azure region only if the authority is AAD
+                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
+                    string.IsNullOrEmpty(ServiceBundle.Config.AzureRegion))
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopWithoutRegion,
