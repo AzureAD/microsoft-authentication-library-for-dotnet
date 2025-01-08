@@ -28,7 +28,7 @@ public partial class MainPage : ContentPage
 		
 		builder = builder.WithLogging(SampleLogging);
 
-		builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Mac)
+		builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.OSX)
 			{
 				ListOperatingSystemAccounts = false,
 				MsaPassthrough = false,
