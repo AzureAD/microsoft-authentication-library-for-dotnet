@@ -984,3 +984,10 @@ static readonly Microsoft.Identity.Client.Prompt.NoPrompt -> Microsoft.Identity.
 static readonly Microsoft.Identity.Client.Prompt.SelectAccount -> Microsoft.Identity.Client.Prompt
 virtual Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.Validate() -> void
 virtual Microsoft.Identity.Client.MsalServiceException.UpdateIsRetryable() -> void
+const Microsoft.Identity.Client.MsalError.ManagedIdentityResponseParseFailure = "managed_identity_response_parse_failure" -> string
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithSignedHttpRequestProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession() -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+const Microsoft.Identity.Client.MsalError.MissingTenantedAuthority = "missing_tenanted_authority" -> string
+const Microsoft.Identity.Client.MsalError.MtlsCertificateNotProvided = "mtls_certificate_not_provided" -> string
+const Microsoft.Identity.Client.MsalError.MtlsPopWithoutRegion = "mtls_pop_without_region" -> string
+const Microsoft.Identity.Client.MsalError.RegionRequiredForMtlsPop = "region_required_for_mtls_pop" -> string
