@@ -6,7 +6,6 @@ parameters:
   BuildConfiguration: 'release'
   MsalClientSemVer: '4.60.0-devopsbuild' 
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
-  Mode: 'build' # Default to 'build'
 
 steps:
 
