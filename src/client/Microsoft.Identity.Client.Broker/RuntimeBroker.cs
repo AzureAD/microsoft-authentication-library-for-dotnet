@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         private readonly ILoggerAdapter _logger;
         private readonly IntPtr _parentHandle = IntPtr.Zero;
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
-        private readonly BrokerOptions _wamOptions;
+        private readonly BrokerOptions _brokerOptions;
         private static Exception s_initException;
 
         private static Dictionary<NativeInterop.LogLevel, LogLevel> LogLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             }
 
             // Broker options cannot be null
-            _wamOptions = appConfig.BrokerOptions;
+            _brokerOptions = appConfig.BrokerOptions;
         }
 
         private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 using (var authParams = WamAdapters.GetCommonAuthParameters(
                     authenticationRequestParameters,
-                    _wamOptions,
+                    _brokerOptions,
                     _logger))
                 {
                     using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
-                _wamOptions,
+                _brokerOptions,
                 _logger))
             {
                 //Login Hint
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
-                _wamOptions,
+                _brokerOptions,
                 _logger))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInAsync(
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
-                _wamOptions,
+                _brokerOptions,
                 _logger))
             {
                 using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -354,7 +354,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
-                _wamOptions,
+                _brokerOptions,
                 _logger))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
@@ -399,7 +399,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
-                _wamOptions,
+                _brokerOptions,
                 _logger))
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
@@ -485,7 +485,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            if (!_wamOptions.ListOperatingSystemAccounts)
+            if (_brokerOptions.EnabledOn == BrokerOptions.OperatingSystems.Windows && !_brokerOptions.ListOperatingSystemAccounts)
             {
                 _logger.Info("[RuntimeBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
                 return Array.Empty<IAccount>();

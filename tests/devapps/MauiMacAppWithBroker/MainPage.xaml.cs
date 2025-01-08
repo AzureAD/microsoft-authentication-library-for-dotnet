@@ -1,6 +1,6 @@
 ﻿namespace MauiMacAppWithBroker;
 
-
+using Microsoft.Maui.Controls;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
 using System;
@@ -8,19 +8,26 @@ using System.Runtime.InteropServices;
 
 public partial class MainPage : ContentPage
 {
-	int count = 0;
+	private bool inUse = false;
 
 	public MainPage()
 	{
 		InitializeComponent();
 	}
 
-	private async void OnCounterClicked(object sender, EventArgs e)
+	private async void OnACIACSClicked(object sender, EventArgs e)
 	{
+		
+		if (inUse)
+		{
+			await Application.Current.MainPage.DisplayAlert("Warning", "Please wait until previous operation finished", "OK").ConfigureAwait(false);
+			return;
+		}
+		inUse = true;
 
-		SemanticScreenReader.Announce(CounterBtn.Text);
+		SemanticScreenReader.Announce(CACIACSBtn.Text);
 
-		var builder = PublicClientApplicationBuilder
+        PublicClientApplicationBuilder builder = PublicClientApplicationBuilder
 			.Create("04b07795-8ddb-461a-bbee-02f9e1bf7b46")
 			.WithRedirectUri("msauth.com.msauth.unsignedapp://auth")
 			.WithClientCapabilities(new[] { "cp1" })
@@ -28,39 +35,65 @@ public partial class MainPage : ContentPage
 		
 		builder = builder.WithLogging(SampleLogging);
 
-		builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Mac)
+		builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.OSX)
 			{
 				ListOperatingSystemAccounts = false,
 				MsaPassthrough = false,
 				Title = "MSAL Dev App .NET FX"
 			}
 		);
-		
-		var pca = builder.Build();
 
-		LogCallback logCallback = null;
-		LogLevel level;
+        IPublicClientApplication pca = builder.Build();
+
+        AcquireTokenInteractiveParameterBuilder interactiveBuilder = pca.AcquireTokenInteractive(new string[]{"https://graph.microsoft.com/.default"});
 
 		
-		RunAtiAsync(pca);
+		AuthenticationResult result = await interactiveBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+		IAccount account = result.Account;
+
+        AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(new string[]{"https://graph.microsoft.com/.default"}, account);
+
+		result = await silentBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+		
+
+		inUse = false;
 	}
 
-	private async Task<AuthenticationResult> RunAtiAsync(IPublicClientApplication pca)
+	private async void OnGetAllAccountsClicked(object sender, EventArgs e)
 	{
-		var builder = pca.AcquireTokenInteractive(new string[]{"https://graph.microsoft.com/.default"});
-
-		builder.WithUseEmbeddedWebView(true)
-		//.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
-		//.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
-		.WithEmbeddedWebViewOptions(
-		new EmbeddedWebViewOptions()
+		if (inUse)
 		{
-			Title = "Hello world",
-		});
+			await Application.Current.MainPage.DisplayAlert("Warning", "Please wait until previous operation finished", "OK").ConfigureAwait(false);
+			return;
+		}
+		inUse = true;
 
-		AuthenticationResult result = await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-		return result;
+		PublicClientApplicationBuilder builder = PublicClientApplicationBuilder
+			.Create("04b07795-8ddb-461a-bbee-02f9e1bf7b46")
+			.WithRedirectUri("msauth.com.msauth.unsignedapp://auth")
+			.WithClientCapabilities(new[] { "cp1" })
+			.WithAuthority("https://login.microsoftonline.com/common");
+		
+		builder = builder.WithLogging(SampleLogging);
+
+		builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.OSX)
+			{
+				ListOperatingSystemAccounts = false,
+				MsaPassthrough = false,
+				Title = "MSAL Dev App .NET FX"
+			}
+		);
+        IPublicClientApplication pca = builder.Build();
+
+        System.Runtime.CompilerServices.ConfiguredTaskAwaitable<IEnumerable<IAccount>> accounts = pca.GetAccountsAsync().ConfigureAwait(false);
+		IEnumerable<IAccount> result = await accounts;
+		IAccount[] array = result.ToArray();
+		
+
+		inUse = false;
 	}
+
 
 	private static void SampleLogging(LogLevel level, string message, bool containsPii)
 	{

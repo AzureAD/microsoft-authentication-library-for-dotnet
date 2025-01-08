@@ -25,10 +25,17 @@
                 SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
 
             <Button
-                x:Name="CounterBtn"
-                Text="ACI" 
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
+                x:Name="CACIACSBtn"
+                Text="ACI and ACS" 
+                SemanticProperties.Hint="Acquire credential interactively and then silently via mac broker"
+                Clicked="OnACIACSClicked"
+                HorizontalOptions="Fill" />
+
+            <Button
+                x:Name="GetAllAccountsBtn"
+                Text="Get all accounts" 
+                SemanticProperties.Hint="Get all accounts via mac broker"
+                Clicked="OnGetAllAccountsClicked"
                 HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>
