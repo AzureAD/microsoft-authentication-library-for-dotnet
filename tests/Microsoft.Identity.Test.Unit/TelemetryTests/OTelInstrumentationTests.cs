@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit
                 await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics, 2, 2);
+                VerifyMetrics(6, _exportedMetrics, 2, 2);
             }
         }
 
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(4, _exportedMetrics, 4, 0);
+                VerifyMetrics(5, _exportedMetrics, 4, 0);
             }
         }
 
@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(4, _exportedMetrics, 4, 0);
+                VerifyMetrics(5, _exportedMetrics, 4, 0);
             }
         }
 
@@ -273,7 +273,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(4, _exportedMetrics, 4, 0);
+                VerifyMetrics(5, _exportedMetrics, 4, 0);
             }
         }
 
@@ -323,7 +323,7 @@ namespace Microsoft.Identity.Test.Unit
                 Thread.Sleep(1000);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(3, _exportedMetrics, 3, 1);
+                VerifyMetrics(4, _exportedMetrics, 3, 1);
             }
         }
 
@@ -430,10 +430,10 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.CallerSdkId);
-                        expectedTags.Add(TelemetryConstants.CallerSdkVersion);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         long totalSuccessfulRequests = 0;
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
@@ -454,8 +454,8 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.ErrorCode);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.CallerSdkId);
-                        expectedTags.Add(TelemetryConstants.CallerSdkVersion);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         long totalFailedRequests = 0;
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
@@ -478,6 +478,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -527,6 +528,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -544,6 +546,7 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
@@ -552,6 +555,23 @@ namespace Microsoft.Identity.Test.Unit
 
                         break;
 
+                    case "MsalDurationBearerOperation.1B":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationBearerOperation.1B histogram.");
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenSource);
+                        expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.TokenType);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, expectedTags);
+                        }
+
+                        break;
                     default:
                         Assert.Fail("Unexpected metrics logged.");
                         break;
@@ -572,7 +592,6 @@ namespace Microsoft.Identity.Test.Unit
             if (expectCallerSdkDetails)
             {
                 Assert.AreEqual(callerSdkId, tagDictionary[TelemetryConstants.CallerSdkId]);
-                Assert.AreEqual(callerSdkVersion, tagDictionary[TelemetryConstants.CallerSdkVersion]);
             }
 
             foreach (var expectedTag in expectedTags)

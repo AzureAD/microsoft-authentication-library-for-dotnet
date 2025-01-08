@@ -15,15 +15,17 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public static class LabAuthenticationHelper
     {
-        private const string LabAccessConfidentialClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
-        private const string LabAccessPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
-        
+        public const string LabAccessConfidentialClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
+        public const string LabScope = "https://request.msidlab.com/.default";
+        public const string LabClientInstance = "https://login.microsoftonline.com/";
+        public const string LabClientTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+
         public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId)
         {
-            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
+            string[] scopes = new string[] { LabScope };
 
             return await GetLabAccessTokenAsync(
-                "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/", 
+                LabClientInstance + LabClientTenantId, 
                 scopes,  
                 labAccessClientId).ConfigureAwait(false);
         }

@@ -33,9 +33,10 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Analyzers and dev packages -->
-    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.12.19" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <!-- Packages for the tests -->
@@ -55,8 +56,8 @@
     <PackageVersion Include="MSTest.TestAdapter" Version="3.1.1" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.1.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageVersion Include="NSubstitute" Version="4.4.0" />
-    <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.15" />
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
     <PackageVersion Include="NuGet.Versioning" Version="6.8.0" />
     <PackageVersion Include="NUnit" Version="3.13.3" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
@@ -78,5 +79,8 @@
     <PackageVersion Include="System.Threading.Thread" Version="4.3.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="System.Windows.Forms" Version="4.0.0" />
+    <PackageVersion Include="CommandLineParser" Version="2.8.0" />
+    <PackageVersion Include="System.Formats.Asn1" Version="9.0.0"/>
+
   </ItemGroup>
 </Project>

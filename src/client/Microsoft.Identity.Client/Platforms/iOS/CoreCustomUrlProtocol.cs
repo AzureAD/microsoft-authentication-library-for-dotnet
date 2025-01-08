@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
 
         [Export("canonicalRequestForRequest:")]
-        public new static NSUrlRequest GetCanonicalRequest(NSUrlRequest request)
+        public static new NSUrlRequest GetCanonicalRequest(NSUrlRequest request)
         {
             return request;
         }
@@ -45,7 +45,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest)Request.MutableCopy();
             SetProperty(new NSString("YES"), "ADURLProtocol", mutableRequest);
+#pragma warning disable CA1422 // Validate platform compatibility
             connection = new NSUrlConnection(mutableRequest, new CoreCustomConnectionDelegate(this), true);
+#pragma warning restore CA1422 // Validate platform compatibility
         }
 
         public override void StopLoading()

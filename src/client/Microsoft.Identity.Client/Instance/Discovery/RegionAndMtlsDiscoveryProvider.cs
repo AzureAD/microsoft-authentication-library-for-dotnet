@@ -10,12 +10,13 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Region
 {
-    internal class RegionDiscoveryProvider : IRegionDiscoveryProvider
+    internal class RegionAndMtlsDiscoveryProvider : IRegionDiscoveryProvider
     {
         private readonly IRegionManager _regionManager;
         public const string PublicEnvForRegional = "login.microsoft.com";
+        public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
-        public RegionDiscoveryProvider(IHttpManager httpManager, bool clearCache)
+        public RegionAndMtlsDiscoveryProvider(IHttpManager httpManager, bool clearCache)
         {
             _regionManager = new RegionManager(httpManager, shouldClearStaticCache: clearCache);
         }
@@ -23,6 +24,8 @@ namespace Microsoft.Identity.Client.Region
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             string region = null;
+            bool isMtlsEnabled = requestContext.MtlsCertificate != null;
+
             if (requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
                 region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
@@ -30,6 +33,15 @@ namespace Microsoft.Identity.Client.Region
 
             if (string.IsNullOrEmpty(region))
             {
+                if (isMtlsEnabled)
+                {
+                    requestContext.Logger.Info("[Region discovery] Region discovery failed during mTLS Pop. ");
+
+                    throw new MsalServiceException(
+                        MsalError.RegionRequiredForMtlsPop,
+                        MsalErrorMessage.RegionRequiredForMtlsPopMessage);
+                }
+
                 requestContext.Logger.Info("[Region discovery] Not using a regional authority. ");
                 return null;
             }
@@ -61,8 +73,16 @@ namespace Microsoft.Identity.Client.Region
 
             if (KnownMetadataProvider.IsPublicEnvironment(host))
             {
-                requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{PublicEnvForRegional}. ");
-                return $"{region}.{PublicEnvForRegional}";
+                if (requestContext.MtlsCertificate != null)
+                {
+                    requestContext.Logger.Info(() => $"[Region discovery] Using MTLS regional environment: {region}.{PublicEnvForRegionalMtlsAuth}");
+                    return $"{region}.{PublicEnvForRegionalMtlsAuth}";
+                }
+                else
+                {
+                    requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{PublicEnvForRegional}. ");
+                    return $"{region}.{PublicEnvForRegional}";
+                }
             }
 
             // Regional business rule - use the PreferredNetwork value for public and sovereign clouds
@@ -70,6 +90,15 @@ namespace Microsoft.Identity.Client.Region
             if (KnownMetadataProvider.TryGetKnownEnviromentPreferredNetwork(host, out var preferredNetworkEnv))
             {
                 host = preferredNetworkEnv;
+            }
+
+            if (requestContext.MtlsCertificate != null)
+            {
+                // Modify the host to replace "login" with "mtlsauth" for mTLS scenarios
+                if (host.StartsWith("login"))
+                {
+                    host = "mtlsauth" + host.Substring("login".Length);
+                }
             }
 
             requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{host}. ");

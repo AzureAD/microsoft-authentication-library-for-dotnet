@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         public RequestContext RequestContext { get; internal set; }
         public CoreUIParent CoreUIParent { get; set; }
 
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(
+        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri,
             Uri redirectUri,
             RequestContext requestContext,
@@ -46,7 +46,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             UIViewController viewController = null;
             InvokeOnMainThread(() =>
             {
+#pragma warning disable CA1422 // Validate platform compatibility
                 UIWindow window = UIApplication.SharedApplication.KeyWindow;
+#pragma warning restore CA1422 // Validate platform compatibility
                 viewController = CoreUIParent.FindCurrentViewController(window.RootViewController);
             });
 

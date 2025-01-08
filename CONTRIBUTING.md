@@ -137,7 +137,7 @@ Have a feature request for MSAL? Complete a [Feature request](https://github.com
 ### Visual Studio
 
 Use the latest Visual Studio. It will guide you on the components needed to be installed. 
-For MAUI, edit the .csproj and enable the MAUI targets.
+For MAUI, edit the .csproj and enable the mobile targets.
 
 ### Package
 

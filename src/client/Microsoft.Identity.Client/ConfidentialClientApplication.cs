@@ -23,7 +23,6 @@ namespace Microsoft.Identity.Client
     public sealed partial class ConfidentialClientApplication
         : ClientApplicationBase,
             IConfidentialClientApplication,
-            IConfidentialClientApplicationWithCertificate,
             IByRefreshToken,
             ILongRunningWebApi,
             IByUsernameAndPassword
@@ -139,7 +138,7 @@ namespace Microsoft.Identity.Client
             }
 
             Guid correlationId = Guid.NewGuid();
-            RequestContext requestContext = base.CreateRequestContext(correlationId, cancellationToken);
+            RequestContext requestContext = base.CreateRequestContext(correlationId, null, cancellationToken);
             requestContext.ApiEvent = new ApiEvent(correlationId);
             requestContext.ApiEvent.ApiId = ApiIds.RemoveOboTokens;
 

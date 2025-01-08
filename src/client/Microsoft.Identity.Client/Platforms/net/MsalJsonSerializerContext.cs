@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
 
-namespace Microsoft.Identity.Client.Platforms.net6
+namespace Microsoft.Identity.Client.Platforms.net
 {
     /// <summary>
     /// This class specifies metadata for System.Text.Json source generation.

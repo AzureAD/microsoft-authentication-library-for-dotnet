@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private long ValidateSuccessMetrics(MeterProvider meterProvider, List<Metric> exportedMetrics)
         {
-            Assert.AreEqual(4, exportedMetrics.Count);
+            Assert.AreEqual(5, exportedMetrics.Count);
 
             foreach (var metric in exportedMetrics)
             {

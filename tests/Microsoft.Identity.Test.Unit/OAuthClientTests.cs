@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Test.Unit
                     () => client.ExecuteRequestAsync<OAuth2ResponseBase>(
                         requestUri,
                         HttpMethod.Post,
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid())),
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null)),
                     allowDerived: true)
                     .ConfigureAwait(false);
 

@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var legacyCachePersistence = Substitute.For<ILegacyCachePersistence>();
                 mockHttpManager.AddInstanceDiscoveryMockHandler();
                 var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(mockHttpManager, isLegacyCacheEnabled: enableLegacyCacheCompatibility);
-                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
                 var response = TestConstants.CreateMsalTokenResponse();
 
                 ITokenCacheInternal cache = new TokenCache(serviceBundle, false, legacyCachePersistence);                
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
                     mockHttpManager,
                     isMultiCloudSupportEnabled: multiCloudSupportEnabled);
-                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
                 var response = TestConstants.CreateMsalTokenResponse();
 
                 ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
@@ -1152,9 +1152,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SetAfterAccess(AfterAccessChangedNotification);
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
-#pragma warning disable CS0618 // Type or member is obsolete
-            Assert.IsFalse(((TokenCache)cache).HasStateChanged);
-#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(2, cache.Accessor.GetAllAccessTokens().Count());
@@ -1171,9 +1168,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
             };
             ((ITokenCacheSerializer)tokenCache).DeserializeMsalV3(null);
-#pragma warning disable CS0618 // Type or member is obsolete
-            Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
-#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         [TestMethod]
@@ -1185,7 +1179,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
-            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                 serviceBundle,
                 authority: Authority.CreateAuthority(TestConstants.AuthorityUtidTenant),
@@ -1240,7 +1234,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
-            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                  serviceBundle,
                  authority: Authority.CreateAuthority(TestConstants.AuthorityUtidTenant),
@@ -1306,7 +1300,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // creating IDToken with empty tenantID and displayableID/PreferredUserName for B2C scenario
                 MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
-                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
 
                 var requestParams = TestCommon.CreateAuthenticationRequestParameters(
                   harness.ServiceBundle,

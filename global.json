@@ -1,5 +1,6 @@
 {
-	"msbuild-sdks": {
-		"MSBuild.Sdk.Extras": "3.0.44"
-	}
+    "sdk": {
+        "version": "8.0.404",
+        "rollForward": "latestFeature"
+    }
 }

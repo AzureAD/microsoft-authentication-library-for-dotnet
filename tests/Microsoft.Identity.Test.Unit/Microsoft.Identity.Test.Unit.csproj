@@ -2,9 +2,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworkNetDesktop48>net48</TargetFrameworkNetDesktop48>
-    <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
+    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet6)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
@@ -43,6 +43,7 @@
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" />
     <PackageReference Include="Selenium.WebDriver" />
+    <PackageReference Include="System.Formats.Asn1" />
 
     <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
@@ -70,7 +71,7 @@
   <ItemGroup>
     <Folder Include="CacheExtension\" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
 

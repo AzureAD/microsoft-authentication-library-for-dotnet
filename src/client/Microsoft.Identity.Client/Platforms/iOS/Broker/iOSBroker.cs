@@ -178,6 +178,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return brokerRequest;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1422:Validate platform compatibility", Justification = "<Pending>")]
         public void HandleInstallUrl(string appLink)
         {
             DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(appLink)));
@@ -219,7 +220,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 () => iOSBrokerConstants.BrokerPayloadPii + paramsAsQuery,
                 () => iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
 
-            DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
+            DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url, new UIApplicationOpenUrlOptions(), null));
 
             using (_logger.LogBlockDuration("waiting for broker response"))
             {

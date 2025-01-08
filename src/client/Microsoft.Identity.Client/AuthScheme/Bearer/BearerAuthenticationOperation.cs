@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.Bearer
@@ -11,7 +12,7 @@ namespace Microsoft.Identity.Client.AuthScheme.Bearer
     {
         internal const string BearerTokenType = "bearer";
 
-        public int TelemetryTokenType => (int)TokenType.Bearer;
+        public int TelemetryTokenType => TelemetryTokenTypeConstants.Bearer;
 
         public string AuthorizationHeaderPrefix => "Bearer";
 

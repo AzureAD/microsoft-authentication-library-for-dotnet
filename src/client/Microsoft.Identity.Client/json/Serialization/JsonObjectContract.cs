@@ -192,7 +192,9 @@ namespace Microsoft.Identity.Json.Serialization
                 throw new JsonException("Insufficient permissions. Creating an uninitialized '{0}' type requires full trust.".FormatWith(CultureInfo.InvariantCulture, NonNullableUnderlyingType));
             }
 
+#pragma warning disable SYSLIB0050 // Type or member is obsolete
             return FormatterServices.GetUninitializedObject(NonNullableUnderlyingType);
+#pragma warning restore SYSLIB0050 // Type or member is obsolete
         }
 #endif
     }

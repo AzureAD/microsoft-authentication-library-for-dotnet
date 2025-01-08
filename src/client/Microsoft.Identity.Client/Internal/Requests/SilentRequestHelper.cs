@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal
             Func<Task<AuthenticationResult>> fetchAction,
             ILoggerAdapter logger, 
             IServiceBundle serviceBundle, 
-            ApiEvent.ApiIds apiId, 
+            ApiEvent apiEvent, 
             string callerSdkId, 
             string callerSdkVersion)
         {
@@ -96,13 +96,14 @@ namespace Microsoft.Identity.Client.Internal
                     var authResult = await fetchAction().ConfigureAwait(false);
                     serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        apiId,
+                        apiEvent.ApiId,
                         callerSdkId,
                         callerSdkVersion,
                         TokenSource.IdentityProvider, 
                         CacheRefreshReason.ProactivelyRefreshed, 
                         Cache.CacheLevel.None,
-                        logger);
+                        logger,
+                        apiEvent.TokenType);
                 }
                 catch (MsalServiceException ex)
                 {
@@ -119,10 +120,11 @@ namespace Microsoft.Identity.Client.Internal
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.ErrorCode,
-                        apiId,
+                        apiEvent.ApiId,
                         callerSdkId,
                         callerSdkVersion,
-                        CacheRefreshReason.ProactivelyRefreshed);
+                        CacheRefreshReason.ProactivelyRefreshed,
+                        apiEvent.TokenType);
                 }
                 catch (OperationCanceledException ex)
                 {
@@ -130,10 +132,11 @@ namespace Microsoft.Identity.Client.Internal
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
-                        apiId,
+                        apiEvent.ApiId,
                         callerSdkId, 
                         callerSdkVersion, 
-                        CacheRefreshReason.ProactivelyRefreshed);
+                        CacheRefreshReason.ProactivelyRefreshed,
+                        apiEvent.TokenType);
                 }
                 catch (Exception ex)
                 {
@@ -141,10 +144,11 @@ namespace Microsoft.Identity.Client.Internal
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
-                        apiId,
+                        apiEvent.ApiId,
                         callerSdkId, 
                         callerSdkVersion, 
-                        CacheRefreshReason.ProactivelyRefreshed);
+                        CacheRefreshReason.ProactivelyRefreshed,
+                        apiEvent.TokenType);
                 }
             });
         }

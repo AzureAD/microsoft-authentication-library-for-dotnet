@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             Guid correlationId,
             string tokenType = "Bearer",
-            AuthenticationResultMetadata authenticationResultMetadata = null, 
+            AuthenticationResultMetadata authenticationResultMetadata = null,
             ClaimsPrincipal claimsPrincipal = null,
             string spaAuthCode = null,
             IReadOnlyDictionary<string, string> additionalResponseParameters = null)
@@ -196,10 +196,8 @@ namespace Microsoft.Identity.Client
                 authenticationScheme.FormatResult(this);
             });
 
-            if (authenticationScheme.TelemetryTokenType == 5)
-            {
-                AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
-            }
+            AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
+            AuthenticationResultMetadata.TelemetryTokenType = authenticationScheme.TelemetryTokenType;
         }
 
         //Default constructor for testing
@@ -299,7 +297,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>
         /// Not all parameters are added here, only the ones that MSAL doesn't interpret itself and only scalars.
-        /// Not supported on mobile frameworks (e.g. net6-android or net6-ios)
+        /// Not supported on mobile frameworks (e.g. net8-android or net8-ios)
         /// </remarks>
         public IReadOnlyDictionary<string, string> AdditionalResponseParameters { get; }
 

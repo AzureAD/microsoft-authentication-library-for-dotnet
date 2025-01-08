@@ -4,10 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -75,6 +79,30 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Specifies that the certificate provided will be used for PoP tokens with mTLS (Mutual TLS) authentication.
+        /// For more information, refer to the <see href="https://aka.ms/mtls-pop">Proof-of-Possession documentation</see>.
+        /// </summary>
+        /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
+        public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
+        {
+            ValidateUseOfExperimentalFeature();
+
+            if (ServiceBundle.Config.ClientCredential is not CertificateClientCredential certificateCredential)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsCertificateNotProvided,
+                    MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+            }
+            else
+            {
+                CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
+                CommonParameters.MtlsCertificate = certificateCredential.Certificate;
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -103,7 +131,37 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         protected override void Validate()
         {
+            if (CommonParameters.MtlsCertificate != null)
+            {
+                string authorityUri = ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri;
+
+                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad && 
+                    ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Dsts)
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidAuthorityType,
+                        MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
+                }
+
+                if (authorityUri.Contains("/common", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new MsalClientException(
+                        MsalError.MissingTenantedAuthority,
+                        MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
+                }
+
+                // Check for Azure region only if the authority is AAD
+                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
+                    string.IsNullOrEmpty(ServiceBundle.Config.AzureRegion))
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsPopWithoutRegion,
+                        MsalErrorMessage.MtlsPopWithoutRegion);
+                }
+            }
+
             base.Validate();
+
             if (Parameters.SendX5C == null)
             {
                 Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;

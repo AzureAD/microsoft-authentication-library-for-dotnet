@@ -162,6 +162,15 @@ namespace Microsoft.Identity.Client
         public const string InvalidAuthorityType = "invalid_authority_type";
 
         /// <summary>
+        /// Missing Tenanted Authority.
+        /// MSAL.NET requires a tenanted authority (i.e., an authority with a tenant ID) for mTLS to be specified when the application is built, but none was provided.
+        /// <para>Mitigation</para>
+        /// Ensure that a tenanted authority, which includes a specific tenant ID, is specified during the application configuration. 
+        /// For example, use "https://login.microsoftonline.com/{tenantId}" or a similar URL structure.
+        /// </summary>
+        public const string MissingTenantedAuthority = "missing_tenanted_authority";
+
+        /// <summary>
         /// The client is unauthorized to access resource.
         /// This commonly happens when Mobile App Management (MAM) policies are enabled. MSAL will throw an exception in that case with <c>protection_policy_required</c> sub-error.
         /// <para>Mitigation</para>
@@ -970,10 +979,6 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>If you want to use the System web browser (for instance to get SSO with the browser), notify the end
         /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. For a list of supported browsers with
         /// custom tab support, please see https://aka.ms/msal-net-system-browsers.
-        /// Otherwise you can use <see cref="UIParent.IsSystemWebviewAvailable"/> to check if a browser with custom tabs is available on the device
-        /// and require the library to use the embedded web view if there is no such browser available by setting the boolean to <c>true</c> in the following
-        /// constructor: <see cref="UIParent.UIParent(Android.App.Activity, bool)"/>
-        /// <para>For more details</para> See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
         public const string AndroidActivityNotFound = "android_activity_not_found";
 
@@ -1106,6 +1111,11 @@ namespace Microsoft.Identity.Client
         public const string ManagedIdentityRequestFailed = "managed_identity_request_failed";
 
         /// <summary>
+        /// Managed Identity error response was received.
+        /// </summary>
+        public const string ManagedIdentityResponseParseFailure = "managed_identity_response_parse_failure";
+
+        /// <summary>
         /// Managed Identity endpoint is not reachable.
         /// </summary>
         public const string ManagedIdentityUnreachableNetwork = "managed_identity_unreachable_network";
@@ -1149,5 +1159,23 @@ namespace Microsoft.Identity.Client
         /// A cryptographic exception occurred when trying to use the provided certificate
         /// </summary>
         public const string CryptographicError = "cryptographic_error";
+
+        /// <summary>
+        /// <para>What happened?</para>mTLS Proof of Possession (mTLS PoP) is configured but a region was not specified.
+        /// <para>Mitigation</para>Ensure that the AzureRegion configuration is set when using mTLS PoP as it requires a regional endpoint.
+        /// </summary>
+        public const string MtlsPopWithoutRegion = "mtls_pop_without_region";
+
+        /// <summary>
+        /// <para>What happened?</para> mTLS Proof of Possession (mTLS PoP) is configured but a certificate was not provided.
+        /// <para>Mitigation</para> Ensure that a valid certificate is provided in the configuration when using mTLS PoP as it is required for secure authentication.
+        /// </summary>
+        public const string MtlsCertificateNotProvided = "mtls_certificate_not_provided";
+
+        /// <summary>
+        /// <para>What happened?</para> mTLS Proof of Possession (mTLS PoP) requires a specific Azure region to be specified.
+        /// <para>Mitigation:</para> Ensure that the AzureRegion configuration is set when using mTLS PoP as it requires a regional endpoint.
+        /// </summary>
+        public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
     }
 }

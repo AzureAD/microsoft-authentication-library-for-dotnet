@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6</TargetFrameworks>
+    <TargetFrameworks>net8</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
@@ -36,6 +36,7 @@
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="StrongNamer" />
+    <PackageReference Include="System.Formats.Asn1" />
   </ItemGroup>
 
   <ItemGroup>

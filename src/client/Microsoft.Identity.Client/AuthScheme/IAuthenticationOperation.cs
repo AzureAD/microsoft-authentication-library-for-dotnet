@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         string AuthorizationHeaderPrefix { get; }
 
         /// <summary>
-        /// Extra parameters that are added to the request to the /token endpoint. 
+        /// Extra parameters that are added to the request to the /token endpoint.
         /// </summary>
         /// <returns>Name and values of params</returns>
         IReadOnlyDictionary<string, string> GetTokenRequestParams();

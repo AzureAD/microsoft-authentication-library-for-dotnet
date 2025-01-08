@@ -5,7 +5,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Microsoft.Identity.Client.Platforms.net6
+namespace Microsoft.Identity.Client.Platforms.net
 {
     internal class JsonStringConverter : JsonConverter<string>
     {

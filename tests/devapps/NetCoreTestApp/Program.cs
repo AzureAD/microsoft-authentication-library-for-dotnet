@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -31,6 +32,9 @@ namespace NetCoreTestApp
 
         // App secret for app above 
         private static string s_confidentialClientSecret;
+
+        // App certificate for app above 
+        private static X509Certificate2 s_confidentialClientCertificate;
 
         private static string s_ccaAuthority;
 
@@ -62,6 +66,7 @@ namespace NetCoreTestApp
             s_clientIdForConfidentialApp = ccaSettings.ClientId;
             s_ccaAuthority = ccaSettings.Authority;
             s_confidentialClientSecret = ccaSettings.GetSecret();
+            s_confidentialClientCertificate = ccaSettings.GetCertificate();
 
             var pca = CreatePca();
             RunConsoleAppLogicAsync(pca).Wait();
@@ -152,6 +157,7 @@ namespace NetCoreTestApp
                        12. Acquire Token Interactive with Broker
                        13. Acquire Token using Managed Identity (VM)
                        14. Acquire Token using Managed Identity (VM) - multiple requests in parallel
+                       15. Acquire Confidential Client Token over MTLS SNI + MTLS
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -367,6 +373,20 @@ namespace NetCoreTestApp
 
                             break;
 
+                        case 15: //acquire token with cert over MTLS SNI + MTLS 
+
+                            var cca1 = CreateCcaForMtlsPop("westus3", s_confidentialClientCertificate);
+
+                            var resultX1 = await cca1.AcquireTokenForClient(GraphAppScope)
+                                .WithMtlsProofOfPossession()
+                                .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice
+                                .ExecuteAsync()
+                                .ConfigureAwait(false);
+
+                            Console.WriteLine("Got a token");
+                            Console.WriteLine("Finished");
+                            break;
+
                         case 0:
                             return;
 
@@ -385,19 +405,56 @@ namespace NetCoreTestApp
             }
         }
 
-        private static IConfidentialClientApplication CreateCca()
+        private static IConfidentialClientApplication CreateCca(X509Certificate2 certificate = null)
         {
-            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+            ConfidentialClientApplicationBuilder ccaBuilder = ConfidentialClientApplicationBuilder
                 .Create(s_clientIdForConfidentialApp)
-                .WithAuthority(s_ccaAuthority)
-                .WithClientSecret(s_confidentialClientSecret)
-                .Build();
+                .WithAuthority(s_ccaAuthority);
 
-            //cca.AppTokenCache.SetBeforeAccess((t) => { });
+            // Use WithCertificate if a certificate is provided; otherwise, use WithClientSecret.
+            if (certificate != null)
+            {
+                ccaBuilder = ccaBuilder.WithCertificate(certificate);
+            }
+            else
+            {
+                ccaBuilder = ccaBuilder.WithClientSecret(s_confidentialClientSecret);
+            }
 
-            //cca.AcquireTokenForClient(new[] "12345-123321-1111/default");
+            IConfidentialClientApplication ccapp = ccaBuilder.Build();
 
-            return cca;
+            // Optionally set cache settings or other configurations if needed
+            // cca.AppTokenCache.SetBeforeAccess((t) => { });
+
+            return ccapp;
+        }
+
+        private static IConfidentialClientApplication CreateCcaForMtlsPop(string region, X509Certificate2 certificate = null)
+        {
+            ConfidentialClientApplicationBuilder ccaBuilder = ConfidentialClientApplicationBuilder
+                .Create("163ffef9-a313-45b4-ab2f-c7e2f5e0e23e")
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion(region);
+
+            // Use WithCertificate if a certificate is provided; otherwise, use WithClientSecret.
+            if (certificate != null)
+            {
+                ccaBuilder = ccaBuilder.WithCertificate(certificate, true);
+
+                //Add Experimental feature for MTLS PoP
+                ccaBuilder = ccaBuilder.WithExperimentalFeatures();
+            }
+            else
+            {
+                ccaBuilder = ccaBuilder.WithClientSecret(s_confidentialClientSecret);
+            }
+
+            IConfidentialClientApplication ccapp = ccaBuilder.Build();
+
+            // Optionally set cache settings or other configurations if needed
+            // cca.AppTokenCache.SetBeforeAccess((t) => { });
+
+            return ccapp;
         }
 
         private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)

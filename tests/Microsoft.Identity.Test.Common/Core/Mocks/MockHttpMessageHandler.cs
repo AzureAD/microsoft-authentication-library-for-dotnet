@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public IDictionary<string, string> ExpectedPostData { get; set; }
         public IDictionary<string, string> ExpectedRequestHeaders { get; set; }
         public IList<string> UnexpectedRequestHeaders { get; set; }
+        public IDictionary<string, string> UnExpectedPostData { get; set; }
         public HttpMethod ExpectedMethod { get; set; }
 
         public Exception ExceptionToThrow { get; set; }
@@ -37,8 +38,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpRequestHeaders ActualRequestHeaders { get; private set; }
         public X509Certificate2 ExpectedMtlsBindingCertificate { get; set; }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+
             ActualRequestMessage = request;
 
             if (ExceptionToThrow != null)
@@ -65,13 +67,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             ValidateQueryParams(uri);
 
-            ValidatePostDataAsync(request);
+            await ValidatePostDataAsync(request).ConfigureAwait(false);
+
+            ValidateNotExpectedPostData();
 
             ValidateHeaders(request);
 
             AdditionalRequestValidation?.Invoke(request);
 
-            return new TaskFactory().StartNew(() => ResponseMessage, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return ResponseMessage;
         }
 
         private void ValidateQueryParams(Uri uri)
@@ -111,6 +117,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         Assert.AreEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                 }
+            }
+        }
+
+        private void ValidateNotExpectedPostData()
+        {
+            if (UnExpectedPostData != null)
+            {
+                List<string> unexpectedKeysFound = new List<string>();
+
+                // Check each key in the unexpected post data dictionary
+                foreach (var key in UnExpectedPostData.Keys)
+                {
+                    if (ActualRequestPostData.ContainsKey(key))
+                    {
+                        unexpectedKeysFound.Add(key);
+                    }
+                }
+
+                // Assert that no unexpected keys were found, reporting all violations at once
+                Assert.IsTrue(unexpectedKeysFound.Count == 0, $"Did not expect to find post data keys: {string.Join(", ", unexpectedKeysFound)}");
             }
         }
 

@@ -90,7 +90,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             }
 
             [Obsolete] // because parent is obsolete
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
+#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
             {
                 Uri uri = new Uri(url);
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))

@@ -17,18 +17,21 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
     [TestClass]
     public class ExperimentalFeatureTests
     {
+        private static readonly string[] s_scopes = ["scope"];
 #if NETFRAMEWORK
         [TestMethod]
         public async Task ExperimentalFeatureExceptionAsync()
         {
-            var cca = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString()).WithClientSecret("some-secret").Build();
+            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                .Create(Guid.NewGuid().ToString())
+                .WithCertificate(CertHelper.GetOrCreateTestCert()).Build();
+
             MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => cca.AcquireTokenForClient(new[] { "scope" }).WithProofOfPossession(null).ExecuteAsync())
+                () => cca.AcquireTokenForClient(s_scopes).WithMtlsProofOfPossession().ExecuteAsync())
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.ExperimentalFeature, ex.ErrorCode);
         }
 #endif
-
     }
 }

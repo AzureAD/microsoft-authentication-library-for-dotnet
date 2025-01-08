@@ -135,15 +135,11 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
-                bool useSha2 = _requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported;
                 await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
-                    _requestParams.RequestContext.Logger,
+                    _requestParams,
                     _serviceBundle.PlatformProxy.CryptographyManager,
-                    _requestParams.AppConfig.ClientId,
                     tokenEndpoint,
-                    _requestParams.SendX5C,
-                    useSha2,
                     cancellationToken).ConfigureAwait(false);
 
                 _requestParams.RequestContext.Logger.Verbose(

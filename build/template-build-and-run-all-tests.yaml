@@ -67,3 +67,19 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-desktop-unit-and-automation.yaml
+
+  - task: BuildQualityChecks@9
+    condition: ne(variables['Build.SourceBranch'], 'refs/heads/main') #gate should not run on main branch
+    inputs:
+      checkCoverage: '$(CodeCoverageGateEnabled)'
+      coverageFailOption: 'build'
+      coverageType: 'lines'
+      allowCoverageVariance: true 
+      coverageVariance: 1 # Specify by how much the current amount of covered or uncovered code (depending on the parameter *Use Uncovered Elements*) may deviate from the previous value before the policy fails. Please be aware that the code coverage may slowly but steadily decrease from build to build if you allow a code coverage variance. Thus, you should keep this value as low as possible.
+      treat0of0as100: true
+      forceCoverageImprovement: true
+      coverageUpperThreshold: '90'
+      includePartiallySucceeded: false
+      fallbackOnPRTargetBranch: false
+      baseDefinitionId: '905' #this is the PR build and it is used as a baseline
+      baseBranchRef: 'main'

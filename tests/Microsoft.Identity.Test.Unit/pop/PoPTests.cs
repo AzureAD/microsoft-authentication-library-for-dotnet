@@ -14,7 +14,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
-#if !NET6_0
+#if !NET8_0
 using Microsoft.Identity.Client.Broker;
 #endif
 
@@ -58,8 +58,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
                                                               .WithExperimentalFeatures(true)
+                                                              .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -92,8 +92,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
                                                               .WithExperimentalFeatures(true)
+                                                              .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
                 // no HTTP method binding, but custom nonce
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -130,8 +130,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
                                                               .WithExperimentalFeatures(true)
+                                                              .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
         }
 
-#if !NET6_0
+#if !NET8_0
         [TestMethod]
         public async Task POP_WithMissingNonceForPCA_Async()
         {
@@ -406,8 +406,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
                                                               .WithExperimentalFeatures(true)
+                                                              .WithHttpManager(httpManager)
                                                               .BuildConcrete();
                 var testTimeService = new TestTimeService();
                 PoPCryptoProviderFactory.TimeService = testTimeService;
@@ -423,7 +423,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Trace.WriteLine("1. AcquireTokenForClient ");
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -450,7 +450,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Trace.WriteLine("1. AcquireTokenForClient again, after time passes - expect POP key rotation");
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                    .WithTenantId(TestConstants.Utid)
-                   .WithProofOfPossession(popConfig)
+                   .WithSignedHttpRequestProofOfPossession(popConfig)
                    .ExecuteAsync()
                    .ConfigureAwait(false);
 
@@ -557,7 +557,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             byte[] signature = provider.Sign(payload);
 
             // Assert
-#if NET6_0
+#if NET
             using (RSA rsa = RSA.Create())
 #else
             using (RSA rsa = RSA.Create("RSAPSS"))
@@ -583,8 +583,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
                                                               .WithExperimentalFeatures(true)
+                                                              .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -600,7 +600,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -627,7 +627,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
 
             // Act and Assert
-#if NET6_0
+#if NET
             using (RSA rsa = RSA.Create())
 #else
             using (RSA rsa = RSA.Create("RSAPSS"))
@@ -652,8 +652,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
             {
                 ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                   .WithClientSecret(TestConstants.ClientSecret)
-                                                                  .WithHttpManager(httpManager)
                                                                   .WithExperimentalFeatures(true)
+                                                                  .WithHttpManager(httpManager)
                                                                   .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -666,7 +666,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

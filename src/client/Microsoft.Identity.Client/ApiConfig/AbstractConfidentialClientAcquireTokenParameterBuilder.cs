@@ -2,12 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
@@ -47,11 +44,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <exception cref="MsalClientException"></exception>
         protected override void Validate()
-        {            
+        {
             // Confidential client must have a credential
             if (ServiceBundle?.Config.ClientCredential == null &&
                 CommonParameters.OnBeforeTokenRequestHandler == null &&
-                ServiceBundle?.Config.AppTokenProvider == null
+                ServiceBundle?.Config.AppTokenProvider == null 
                 )
             {
                 throw new MsalClientException(
@@ -73,13 +70,40 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder.</returns>
         /// <remarks>
         /// <list type="bullet">
-        /// <item><description>An Authentication header is automatically added to the request.</description></item>
         /// <item><description>The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters).</description></item>
         /// <item><description>MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</description></item>
         /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
         /// </list>
         /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
+        [Obsolete("WithProofOfPossession is deprecated. Use WithSignedHttpRequestProofOfPossession for SHR Proof-of-Possession functionality. " +
+          "For more details and to learn about other Proof-of-Possession MSAL supports, see the MSAL documentation: https://aka.ms/msal-net-pop")]
         public T WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
+
+            CommonParameters.AuthenticationOperation = new PopAuthenticationOperation(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+
+            return this as T;
+        }
+
+        /// <summary>
+        /// Modifies the request to acquire a Signed HTTP Request (SHR) Proof-of-Possession (PoP) token, rather than a Bearer.
+        /// SHR PoP tokens are bound to the HTTP request and to a cryptographic key, which MSAL manages on Windows.
+       /// SHR PoP tokens are different from mTLS PoP tokens, which are used for Mutual TLS (mTLS) authentication. See <see href="https://aka.ms/mtls-pop"/> for details.
+        /// </summary>
+        /// <param name="popAuthenticationConfiguration">Configuration properties used to construct a Proof-of-Possession request.</param>
+        /// <returns>The builder.</returns>
+        /// <remarks>
+        /// <list type="bullet">
+        /// <item><description>The SHR PoP token is bound to the HTTP request, specifically to the HTTP method (for example, `GET` or `POST`) and to the URI path and query, excluding query parameters.</description></item>
+        /// <item><description>MSAL creates, reads, and stores a key in memory that will be cycled every 8 hours.</description></item>
+        /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
+        /// </list>
+        /// </remarks>
+        public T WithSignedHttpRequestProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
             ValidateUseOfExperimentalFeature();
 

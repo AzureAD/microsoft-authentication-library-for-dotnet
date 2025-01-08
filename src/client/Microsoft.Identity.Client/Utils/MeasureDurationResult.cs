@@ -18,8 +18,8 @@ namespace Microsoft.Identity.Client.Utils
         public MeasureDurationResult(TResult result, long ticks)
         {
             Result = result;
-            Milliseconds = (long)(ticks / s_tickFrequency / TimeSpan.TicksPerMillisecond);
-            Microseconds = (long)(ticks * s_tickFrequency / TicksPerMicrosecond % 1000);
+            Milliseconds = (long)(ticks * s_tickFrequency / TimeSpan.TicksPerMillisecond);
+            Microseconds = (long)(ticks * s_tickFrequency / TicksPerMicrosecond);
             Ticks = ticks;
         }
 
@@ -51,8 +51,8 @@ namespace Microsoft.Identity.Client.Utils
 
         public MeasureDurationResult(long ticks)
         {
-            Milliseconds = (long)(ticks * s_tickFrequency / TimeSpan.TicksPerMillisecond % 1000);
-            Microseconds = (long)(ticks * s_tickFrequency / TicksPerMicrosecond % 1000);
+            Milliseconds = (long)(ticks * s_tickFrequency / TimeSpan.TicksPerMillisecond);
+            Microseconds = (long)(ticks * s_tickFrequency / TicksPerMicrosecond);
             Ticks = ticks;
         }
 

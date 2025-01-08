@@ -1,0 +1,982 @@
+abstract Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.ExecuteAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
+const Microsoft.Identity.Client.ConfidentialClientApplication.AttemptRegionDiscovery = "TryAutoDetect" -> string
+const Microsoft.Identity.Client.MsalError.AccessDenied = "access_denied" -> string
+const Microsoft.Identity.Client.MsalError.AccessingWsMetadataExchangeFailed = "accessing_ws_metadata_exchange_failed" -> string
+const Microsoft.Identity.Client.MsalError.AccessTokenTypeMissing = "token_type_missing" -> string
+const Microsoft.Identity.Client.MsalError.ActivityRequired = "activity_required" -> string
+const Microsoft.Identity.Client.MsalError.AdfsNotSupportedWithBroker = "adfs_not_supported_with_broker" -> string
+const Microsoft.Identity.Client.MsalError.AndroidBrokerOperationFailed = "android_broker_operation_failed" -> string
+const Microsoft.Identity.Client.MsalError.AndroidBrokerSignatureVerificationFailed = "broker_signature_verification_failed" -> string
+const Microsoft.Identity.Client.MsalError.AuthenticationCanceledError = "authentication_canceled" -> string
+const Microsoft.Identity.Client.MsalError.AuthenticationFailed = "authentication_failed" -> string
+const Microsoft.Identity.Client.MsalError.AuthenticationUiFailed = "authentication_ui_failed" -> string
+const Microsoft.Identity.Client.MsalError.AuthenticationUiFailedError = "authentication_ui_failed" -> string
+const Microsoft.Identity.Client.MsalError.AuthorityHostMismatch = "authority_host_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.AuthorityTenantSpecifiedTwice = "authority_tenant_specified_twice" -> string
+const Microsoft.Identity.Client.MsalError.AuthorityTypeMismatch = "authority_type_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.AuthorityValidationFailed = "authority_validation_failed" -> string
+const Microsoft.Identity.Client.MsalError.B2CAuthorityHostMismatch = "B2C_authority_host_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.BrokerApplicationRequired = "broker_application_required" -> string
+const Microsoft.Identity.Client.MsalError.BrokerDoesNotSupportPop = "broker_does_not_support_pop" -> string
+const Microsoft.Identity.Client.MsalError.BrokerNonceMismatch = "broker_nonce_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.BrokerRequiredForPop = "broker_required_for_pop" -> string
+const Microsoft.Identity.Client.MsalError.BrokerResponseHashMismatch = "broker_response_hash_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.BrokerResponseReturnedError = "broker_response_returned_error" -> string
+const Microsoft.Identity.Client.MsalError.CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed" -> string
+const Microsoft.Identity.Client.MsalError.CannotInvokeBroker = "cannot_invoke_broker" -> string
+const Microsoft.Identity.Client.MsalError.CertificateNotRsa = "certificate_not_rsa" -> string
+const Microsoft.Identity.Client.MsalError.CertWithoutPrivateKey = "cert_without_private_key" -> string
+const Microsoft.Identity.Client.MsalError.ClientCredentialAuthenticationTypeMustBeDefined = "Client_Credentials_Required_In_Confidential_Client_Application" -> string
+const Microsoft.Identity.Client.MsalError.ClientCredentialAuthenticationTypesAreMutuallyExclusive = "Client_Credential_Authentication_Types_Are_Mutually_Exclusive" -> string
+const Microsoft.Identity.Client.MsalError.CodeExpired = "code_expired" -> string
+const Microsoft.Identity.Client.MsalError.CombinedUserAppCacheNotSupported = "combined_user_app_cache_not_supported" -> string
+const Microsoft.Identity.Client.MsalError.CryptographicError = "cryptographic_error" -> string
+const Microsoft.Identity.Client.MsalError.CurrentBrokerAccount = "current_broker_account" -> string
+const Microsoft.Identity.Client.MsalError.CustomMetadataInstanceOrUri = "custom_metadata_instance_or_uri" -> string
+const Microsoft.Identity.Client.MsalError.CustomWebUiRedirectUriMismatch = "custom_webui_invalid_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.CustomWebUiReturnedInvalidUri = "custom_webui_returned_invalid_uri" -> string
+const Microsoft.Identity.Client.MsalError.DefaultRedirectUriIsInvalid = "redirect_uri_validation_failed" -> string
+const Microsoft.Identity.Client.MsalError.DeviceCertificateNotFound = "device_certificate_not_found" -> string
+const Microsoft.Identity.Client.MsalError.DuplicateQueryParameterError = "duplicate_query_parameter" -> string
+const Microsoft.Identity.Client.MsalError.EncodedTokenTooLong = "encoded_token_too_long" -> string
+const Microsoft.Identity.Client.MsalError.ExactlyOneScopeExpected = "exactly_one_scope_expected" -> string
+const Microsoft.Identity.Client.MsalError.ExperimentalFeature = "experimental_feature" -> string
+const Microsoft.Identity.Client.MsalError.FailedToAcquireTokenSilentlyFromBroker = "failed_to_acquire_token_silently_from_broker" -> string
+const Microsoft.Identity.Client.MsalError.FailedToGetBrokerResponse = "failed_to_get_broker_response" -> string
+const Microsoft.Identity.Client.MsalError.FailedToRefreshToken = "failed_to_refresh_token" -> string
+const Microsoft.Identity.Client.MsalError.FederatedServiceReturnedError = "federated_service_returned_error" -> string
+const Microsoft.Identity.Client.MsalError.GetUserNameFailed = "get_user_name_failed" -> string
+const Microsoft.Identity.Client.MsalError.HttpListenerError = "http_listener_error" -> string
+const Microsoft.Identity.Client.MsalError.HttpStatusCodeNotOk = "http_status_not_200" -> string
+const Microsoft.Identity.Client.MsalError.HttpStatusNotFound = "not_found" -> string
+const Microsoft.Identity.Client.MsalError.InitializeProcessSecurityError = "initialize_process_security_error" -> string
+const Microsoft.Identity.Client.MsalError.IntegratedWindowsAuthenticationFailed = "integrated_windows_authentication_failed" -> string
+const Microsoft.Identity.Client.MsalError.IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user" -> string
+const Microsoft.Identity.Client.MsalError.InteractionRequired = "interaction_required" -> string
+const Microsoft.Identity.Client.MsalError.InternalError = "internal_error" -> string
+const Microsoft.Identity.Client.MsalError.InvalidAdalCacheMultipleRTs = "invalid_adal_cache" -> string
+const Microsoft.Identity.Client.MsalError.InvalidAuthority = "invalid_authority" -> string
+const Microsoft.Identity.Client.MsalError.InvalidAuthorityType = "invalid_authority_type" -> string
+const Microsoft.Identity.Client.MsalError.InvalidAuthorizationUri = "invalid_authorization_uri" -> string
+const Microsoft.Identity.Client.MsalError.InvalidClient = "invalid_client" -> string
+const Microsoft.Identity.Client.MsalError.InvalidGrantError = "invalid_grant" -> string
+const Microsoft.Identity.Client.MsalError.InvalidInstance = "invalid_instance" -> string
+const Microsoft.Identity.Client.MsalError.InvalidJsonClaimsFormat = "invalid_json_claims_format" -> string
+const Microsoft.Identity.Client.MsalError.InvalidJwtError = "invalid_jwt" -> string
+const Microsoft.Identity.Client.MsalError.InvalidManagedIdentityEndpoint = "invalid_managed_identity_endpoint" -> string
+const Microsoft.Identity.Client.MsalError.InvalidManagedIdentityResponse = "invalid_managed_identity_response" -> string
+const Microsoft.Identity.Client.MsalError.InvalidOwnerWindowType = "invalid_owner_window_type" -> string
+const Microsoft.Identity.Client.MsalError.InvalidRequest = "invalid_request" -> string
+const Microsoft.Identity.Client.MsalError.InvalidTokenProviderResponseValue = "invalid_token_provider_response_value" -> string
+const Microsoft.Identity.Client.MsalError.InvalidUserInstanceMetadata = "invalid-custom-instance-metadata" -> string
+const Microsoft.Identity.Client.MsalError.JsonParseError = "json_parse_failed" -> string
+const Microsoft.Identity.Client.MsalError.LinuxXdgOpen = "linux_xdg_open_failed" -> string
+const Microsoft.Identity.Client.MsalError.LoopbackRedirectUri = "loopback_redirect_uri" -> string
+const Microsoft.Identity.Client.MsalError.LoopbackResponseUriMismatch = "loopback_response_uri_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.ManagedIdentityRequestFailed = "managed_identity_request_failed" -> string
+const Microsoft.Identity.Client.MsalError.ManagedIdentityUnreachableNetwork = "managed_identity_unreachable_network" -> string
+const Microsoft.Identity.Client.MsalError.MissingFederationMetadataUrl = "missing_federation_metadata_url" -> string
+const Microsoft.Identity.Client.MsalError.MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint" -> string
+const Microsoft.Identity.Client.MsalError.MultipleAccountsForLoginHint = "multiple_accounts_for_login_hint" -> string
+const Microsoft.Identity.Client.MsalError.MultipleTokensMatchedError = "multiple_matching_tokens_detected" -> string
+const Microsoft.Identity.Client.MsalError.NetworkNotAvailableError = "network_not_available" -> string
+const Microsoft.Identity.Client.MsalError.NoAccountForLoginHint = "no_account_for_login_hint" -> string
+const Microsoft.Identity.Client.MsalError.NoAndroidBrokerAccountFound = "no_broker_account_found" -> string
+const Microsoft.Identity.Client.MsalError.NoAndroidBrokerInstalledOnDevice = "No_Broker_Installed_On_Device" -> string
+const Microsoft.Identity.Client.MsalError.NoClientId = "no_client_id" -> string
+const Microsoft.Identity.Client.MsalError.NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca" -> string
+const Microsoft.Identity.Client.MsalError.NonHttpsRedirectNotSupported = "non_https_redirect_failed" -> string
+const Microsoft.Identity.Client.MsalError.NonParsableOAuthError = "non_parsable_oauth_error" -> string
+const Microsoft.Identity.Client.MsalError.NoPromptFailedError = "no_prompt_failed" -> string
+const Microsoft.Identity.Client.MsalError.NoRedirectUri = "no_redirect_uri" -> string
+const Microsoft.Identity.Client.MsalError.NoTokensFoundError = "no_tokens_found" -> string
+const Microsoft.Identity.Client.MsalError.NoUsernameOrAccountIDProvidedForSilentAndroidBrokerAuthentication = "no_username_or_accountid_provided_for_silent_android_broker_authentication" -> string
+const Microsoft.Identity.Client.MsalError.NullIntentReturnedFromAndroidBroker = "null_intent_returned_from_broker" -> string
+const Microsoft.Identity.Client.MsalError.OboCacheKeyNotInCacheError = "obo_cache_key_not_in_cache_error" -> string
+const Microsoft.Identity.Client.MsalError.ParsingWsMetadataExchangeFailed = "parsing_ws_metadata_exchange_failed" -> string
+const Microsoft.Identity.Client.MsalError.ParsingWsTrustResponseFailed = "parsing_wstrust_response_failed" -> string
+const Microsoft.Identity.Client.MsalError.PasswordRequiredForManagedUserError = "password_required_for_managed_user" -> string
+const Microsoft.Identity.Client.MsalError.PlatformNotSupported = "platform_not_supported" -> string
+const Microsoft.Identity.Client.MsalError.RedirectUriValidationFailed = "redirect_uri_validation_failed" -> string
+const Microsoft.Identity.Client.MsalError.RegionalAndAuthorityOverride = "authority_override_regional" -> string
+const Microsoft.Identity.Client.MsalError.RegionalAuthorityValidation = "regional_authority_validation" -> string
+const Microsoft.Identity.Client.MsalError.RegionDiscoveryFailed = "region_discovery_failed" -> string
+const Microsoft.Identity.Client.MsalError.RegionDiscoveryNotEnabled = "region_discovery_unavailable" -> string
+const Microsoft.Identity.Client.MsalError.RegionDiscoveryWithCustomInstanceMetadata = "region_discovery_with_custom_instance_metadata" -> string
+const Microsoft.Identity.Client.MsalError.RequestThrottled = "request_throttled" -> string
+const Microsoft.Identity.Client.MsalError.RequestTimeout = "request_timeout" -> string
+const Microsoft.Identity.Client.MsalError.RopcDoesNotSupportMsaAccounts = "ropc_not_supported_for_msa" -> string
+const Microsoft.Identity.Client.MsalError.ScopesRequired = "scopes_required_client_credentials" -> string
+const Microsoft.Identity.Client.MsalError.ServiceNotAvailable = "service_not_available" -> string
+const Microsoft.Identity.Client.MsalError.SetCiamAuthorityAtRequestLevelNotSupported = "set_ciam_authority_at_request_level_not_supported" -> string
+const Microsoft.Identity.Client.MsalError.SSHCertUsedAsHttpHeader = "ssh_cert_used_as_http_header" -> string
+const Microsoft.Identity.Client.MsalError.StateMismatchError = "state_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.StaticCacheWithExternalSerialization = "static_cache_with_external_serialization" -> string
+const Microsoft.Identity.Client.MsalError.SystemWebviewOptionsNotApplicable = "embedded_webview_not_compatible_default_browser" -> string
+const Microsoft.Identity.Client.MsalError.TelemetryConfigOrTelemetryCallback = "telemetry_config_or_telemetry_callback" -> string
+const Microsoft.Identity.Client.MsalError.TenantDiscoveryFailedError = "tenant_discovery_failed" -> string
+const Microsoft.Identity.Client.MsalError.TenantOverrideNonAad = "tenant_override_non_aad" -> string
+const Microsoft.Identity.Client.MsalError.TokenCacheNullError = "token_cache_null" -> string
+const Microsoft.Identity.Client.MsalError.TokenTypeMismatch = "token_type_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.UapCannotFindDomainUser = "user_information_access_failed" -> string
+const Microsoft.Identity.Client.MsalError.UapCannotFindUpn = "uap_cannot_find_upn" -> string
+const Microsoft.Identity.Client.MsalError.UnableToParseAuthenticationHeader = "unable_to_parse_authentication_header" -> string
+const Microsoft.Identity.Client.MsalError.UnauthorizedClient = "unauthorized_client" -> string
+const Microsoft.Identity.Client.MsalError.UnknownBrokerError = "unknown_broker_error" -> string
+const Microsoft.Identity.Client.MsalError.UnknownError = "unknown_error" -> string
+const Microsoft.Identity.Client.MsalError.UnknownManagedIdentityError = "unknown_managed_identity_error" -> string
+const Microsoft.Identity.Client.MsalError.UnknownUser = "unknown_user" -> string
+const Microsoft.Identity.Client.MsalError.UnknownUserType = "unknown_user_type" -> string
+const Microsoft.Identity.Client.MsalError.UpnRequired = "upn_required" -> string
+const Microsoft.Identity.Client.MsalError.UserAssertionNullError = "user_assertion_null" -> string
+const Microsoft.Identity.Client.MsalError.UserAssignedManagedIdentityNotConfigurableAtRuntime = "user_assigned_managed_identity_not_configurable_at_runtime" -> string
+const Microsoft.Identity.Client.MsalError.UserAssignedManagedIdentityNotSupported = "user_assigned_managed_identity_not_supported" -> string
+const Microsoft.Identity.Client.MsalError.UserMismatch = "user_mismatch" -> string
+const Microsoft.Identity.Client.MsalError.UserNullError = "user_null" -> string
+const Microsoft.Identity.Client.MsalError.UserRealmDiscoveryFailed = "user_realm_discovery_failed" -> string
+const Microsoft.Identity.Client.MsalError.ValidateAuthorityOrCustomMetadata = "validate_authority_or_custom_instance_metadata" -> string
+const Microsoft.Identity.Client.MsalError.WABError = "wab_error" -> string
+const Microsoft.Identity.Client.MsalError.WamFailedToSignout = "wam_failed_to_signout" -> string
+const Microsoft.Identity.Client.MsalError.WamInteractiveError = "wam_interactive_error" -> string
+const Microsoft.Identity.Client.MsalError.WamNoB2C = "wam_no_b2c" -> string
+const Microsoft.Identity.Client.MsalError.WamPickerError = "wam_interactive_picker_error" -> string
+const Microsoft.Identity.Client.MsalError.WamScopesRequired = "scopes_required_wam" -> string
+const Microsoft.Identity.Client.MsalError.WamUiThread = "wam_ui_thread_only" -> string
+const Microsoft.Identity.Client.MsalError.WebView2LoaderNotFound = "webview2loader_not_found" -> string
+const Microsoft.Identity.Client.MsalError.WebView2NotInstalled = "webview2_runtime_not_installed" -> string
+const Microsoft.Identity.Client.MsalError.WebviewUnavailable = "no_system_webview" -> string
+const Microsoft.Identity.Client.MsalError.WsTrustEndpointNotFoundInMetadataDocument = "wstrust_endpoint_not_found" -> string
+const Microsoft.Identity.Client.MsalException.BrokerErrorCode = "BrokerErrorCode" -> string
+const Microsoft.Identity.Client.MsalException.BrokerErrorContext = "BrokerErrorContext" -> string
+const Microsoft.Identity.Client.MsalException.BrokerErrorStatus = "BrokerErrorStatus" -> string
+const Microsoft.Identity.Client.MsalException.BrokerErrorTag = "BrokerErrorTag" -> string
+const Microsoft.Identity.Client.MsalException.BrokerTelemetry = "BrokerTelemetry" -> string
+const Microsoft.Identity.Client.MsalException.ManagedIdentitySource = "ManagedIdentitySource" -> string
+Microsoft.Identity.Client.AadAuthorityAudience
+Microsoft.Identity.Client.AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount = 2 -> Microsoft.Identity.Client.AadAuthorityAudience
+Microsoft.Identity.Client.AadAuthorityAudience.AzureAdMultipleOrgs = 3 -> Microsoft.Identity.Client.AadAuthorityAudience
+Microsoft.Identity.Client.AadAuthorityAudience.AzureAdMyOrg = 1 -> Microsoft.Identity.Client.AadAuthorityAudience
+Microsoft.Identity.Client.AadAuthorityAudience.None = 0 -> Microsoft.Identity.Client.AadAuthorityAudience
+Microsoft.Identity.Client.AadAuthorityAudience.PersonalMicrosoftAccount = 4 -> Microsoft.Identity.Client.AadAuthorityAudience
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.AbstractAcquireTokenParameterBuilder() -> void
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAdfsAuthority(string authorityUri, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(Microsoft.Identity.Client.AadAuthorityAudience authorityAudience, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(Microsoft.Identity.Client.AzureCloudInstance azureCloudInstance, Microsoft.Identity.Client.AadAuthorityAudience authorityAudience, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(Microsoft.Identity.Client.AzureCloudInstance azureCloudInstance, string tenant, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(Microsoft.Identity.Client.AzureCloudInstance azureCloudInstance, System.Guid tenantId, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(string authorityUri, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(string cloudInstanceUri, string tenant, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(string cloudInstanceUri, System.Guid tenantId, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithB2CAuthority(string authorityUri) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithClaims(string claims) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithExtraQueryParameters(string extraQueryParameters) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithScopes(System.Collections.Generic.IEnumerable<string> scopes) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithTenantId(string tenantId) -> T
+Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithTenantIdFromAuthority(System.Uri authorityUri) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAdfsAuthority(string authorityUri, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAuthority(Microsoft.Identity.Client.AadAuthorityAudience authorityAudience, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAuthority(Microsoft.Identity.Client.AzureCloudInstance azureCloudInstance, Microsoft.Identity.Client.AadAuthorityAudience authorityAudience, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAuthority(Microsoft.Identity.Client.AzureCloudInstance azureCloudInstance, string tenant, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAuthority(Microsoft.Identity.Client.AzureCloudInstance azureCloudInstance, System.Guid tenantId, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAuthority(string authorityUri, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAuthority(string cloudInstanceUri, string tenant, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAuthority(string cloudInstanceUri, System.Guid tenantId, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithAuthority(System.Uri authorityUri, bool validateAuthority = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithB2CAuthority(string authorityUri) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithCacheOptions(Microsoft.Identity.Client.CacheOptions options) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithClientCapabilities(System.Collections.Generic.IEnumerable<string> clientCapabilities) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithClientId(string clientId) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithExtraQueryParameters(string extraQueryParameters) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, string> extraQueryParameters) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithInstanceDicoveryMetadata(string instanceDiscoveryJson) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithInstanceDicoveryMetadata(System.Uri instanceDiscoveryUri) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithInstanceDiscovery(bool enableInstanceDiscovery) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithInstanceDiscoveryMetadata(string instanceDiscoveryJson) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithInstanceDiscoveryMetadata(System.Uri instanceDiscoveryUri) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithLegacyCacheCompatibility(bool enableLegacyCacheCompatibility = true) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithRedirectUri(string redirectUri) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithTelemetry(Microsoft.Identity.Client.ITelemetryConfig telemetryConfig) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithTenantId(string tenantId) -> T
+Microsoft.Identity.Client.AbstractClientAppBaseAcquireTokenParameterBuilder<T>
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
+Microsoft.Identity.Client.AbstractManagedIdentityAcquireTokenParameterBuilder<T>
+Microsoft.Identity.Client.AbstractManagedIdentityAcquireTokenParameterBuilder<T>.AbstractManagedIdentityAcquireTokenParameterBuilder() -> void
+Microsoft.Identity.Client.AbstractPublicClientAcquireTokenParameterBuilder<T>
+Microsoft.Identity.Client.AccountExtensions
+Microsoft.Identity.Client.AccountId
+Microsoft.Identity.Client.AccountId.AccountId(string adfsIdentifier) -> void
+Microsoft.Identity.Client.AccountId.AccountId(string identifier, string objectId, string tenantId) -> void
+Microsoft.Identity.Client.AccountId.Identifier.get -> string
+Microsoft.Identity.Client.AccountId.ObjectId.get -> string
+Microsoft.Identity.Client.AccountId.TenantId.get -> string
+Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder.WithCcsRoutingHint(string userName) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder.WithCcsRoutingHint(string userObjectIdentifier, string tenantIdentifier) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder.WithPkceCodeVerifier(string pkceCodeVerifier) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder.WithSpaAuthorizationCode(bool requestSpaAuthorizationCode = true) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder.WithFederationMetadata(string federationMetadata) -> Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder.WithUsername(string username) -> Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByRefreshTokenParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByRefreshTokenParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenByRefreshTokenParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder.WithFederationMetadata(string federationMetadata) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder.WithProofOfPossession(string nonce, System.Net.Http.HttpMethod httpMethod, System.Uri requestUri) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAzureRegion(bool useAzureRegion) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithClaims(string claims) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithAccount(Microsoft.Identity.Client.IAccount account) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithEmbeddedWebViewOptions(Microsoft.Identity.Client.EmbeddedWebViewOptions options) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(System.Collections.Generic.IEnumerable<string> extraScopesToConsent) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithLoginHint(string loginHint) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object parent) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(System.IntPtr window) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithPrompt(Microsoft.Identity.Client.Prompt prompt) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithProofOfPossession(string nonce, System.Net.Http.HttpMethod httpMethod, System.Uri requestUri) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(Microsoft.Identity.Client.SystemWebViewOptions options) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool useEmbeddedWebView) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder.WithCcsRoutingHint(string userName) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder.WithCcsRoutingHint(string userObjectIdentifier, string tenantIdentifier) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder.WithProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder.WithProofOfPossession(string nonce, System.Net.Http.HttpMethod httpMethod, System.Uri requestUri) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.AcquireTokenWithDeviceCodeParameterBuilder
+Microsoft.Identity.Client.AcquireTokenWithDeviceCodeParameterBuilder.WithDeviceCodeResultCallback(System.Func<Microsoft.Identity.Client.DeviceCodeResult, System.Threading.Tasks.Task> deviceCodeResultCallback) -> Microsoft.Identity.Client.AcquireTokenWithDeviceCodeParameterBuilder
+Microsoft.Identity.Client.Advanced.AcquireTokenParameterBuilderExtensions
+Microsoft.Identity.Client.AppConfig.ManagedIdentityId
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.HttpHost.get -> string
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.HttpHost.set -> void
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.HttpMethod.get -> System.Net.Http.HttpMethod
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.HttpMethod.set -> void
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.HttpPath.get -> string
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.HttpPath.set -> void
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.Nonce.get -> string
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.Nonce.set -> void
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.PoPAuthenticationConfiguration() -> void
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.PoPAuthenticationConfiguration(System.Net.Http.HttpRequestMessage httpRequestMessage) -> void
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.PoPAuthenticationConfiguration(System.Uri requestUri) -> void
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.PopCryptoProvider.get -> Microsoft.Identity.Client.AuthScheme.PoP.IPoPCryptoProvider
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.PopCryptoProvider.set -> void
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.SignHttpRequest.get -> bool
+Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.SignHttpRequest.set -> void
+Microsoft.Identity.Client.ApplicationBase
+Microsoft.Identity.Client.ApplicationOptions
+Microsoft.Identity.Client.ApplicationOptions.AadAuthorityAudience.get -> Microsoft.Identity.Client.AadAuthorityAudience
+Microsoft.Identity.Client.ApplicationOptions.AadAuthorityAudience.set -> void
+Microsoft.Identity.Client.ApplicationOptions.ApplicationOptions() -> void
+Microsoft.Identity.Client.ApplicationOptions.AzureCloudInstance.get -> Microsoft.Identity.Client.AzureCloudInstance
+Microsoft.Identity.Client.ApplicationOptions.AzureCloudInstance.set -> void
+Microsoft.Identity.Client.ApplicationOptions.ClientCapabilities.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.ApplicationOptions.ClientCapabilities.set -> void
+Microsoft.Identity.Client.ApplicationOptions.ClientId.get -> string
+Microsoft.Identity.Client.ApplicationOptions.ClientId.set -> void
+Microsoft.Identity.Client.ApplicationOptions.ClientName.get -> string
+Microsoft.Identity.Client.ApplicationOptions.ClientName.set -> void
+Microsoft.Identity.Client.ApplicationOptions.ClientVersion.get -> string
+Microsoft.Identity.Client.ApplicationOptions.ClientVersion.set -> void
+Microsoft.Identity.Client.ApplicationOptions.Instance.get -> string
+Microsoft.Identity.Client.ApplicationOptions.Instance.set -> void
+Microsoft.Identity.Client.ApplicationOptions.KerberosServicePrincipalName.get -> string
+Microsoft.Identity.Client.ApplicationOptions.KerberosServicePrincipalName.set -> void
+Microsoft.Identity.Client.ApplicationOptions.LegacyCacheCompatibilityEnabled.get -> bool
+Microsoft.Identity.Client.ApplicationOptions.LegacyCacheCompatibilityEnabled.set -> void
+Microsoft.Identity.Client.ApplicationOptions.RedirectUri.get -> string
+Microsoft.Identity.Client.ApplicationOptions.RedirectUri.set -> void
+Microsoft.Identity.Client.ApplicationOptions.TenantId.get -> string
+Microsoft.Identity.Client.ApplicationOptions.TenantId.set -> void
+Microsoft.Identity.Client.ApplicationOptions.TicketContainer.get -> Microsoft.Identity.Client.Kerberos.KerberosTicketContainer
+Microsoft.Identity.Client.ApplicationOptions.TicketContainer.set -> void
+Microsoft.Identity.Client.AssertionRequestOptions
+Microsoft.Identity.Client.AssertionRequestOptions.AssertionRequestOptions() -> void
+Microsoft.Identity.Client.AssertionRequestOptions.CancellationToken.get -> System.Threading.CancellationToken
+Microsoft.Identity.Client.AssertionRequestOptions.CancellationToken.set -> void
+Microsoft.Identity.Client.AssertionRequestOptions.Claims.get -> string
+Microsoft.Identity.Client.AssertionRequestOptions.Claims.set -> void
+Microsoft.Identity.Client.AssertionRequestOptions.ClientID.get -> string
+Microsoft.Identity.Client.AssertionRequestOptions.ClientID.set -> void
+Microsoft.Identity.Client.AssertionRequestOptions.TokenEndpoint.get -> string
+Microsoft.Identity.Client.AssertionRequestOptions.TokenEndpoint.set -> void
+Microsoft.Identity.Client.AuthenticationHeaderParser
+Microsoft.Identity.Client.AuthenticationHeaderParser.AuthenticationHeaderParser() -> void
+Microsoft.Identity.Client.AuthenticationHeaderParser.AuthenticationInfoParameters.get -> Microsoft.Identity.Client.AuthenticationInfoParameters
+Microsoft.Identity.Client.AuthenticationHeaderParser.PopNonce.get -> string
+Microsoft.Identity.Client.AuthenticationHeaderParser.WwwAuthenticateParameters.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Identity.Client.WwwAuthenticateParameters>
+Microsoft.Identity.Client.AuthenticationInfoParameters
+Microsoft.Identity.Client.AuthenticationInfoParameters.AuthenticationInfoParameters() -> void
+Microsoft.Identity.Client.AuthenticationInfoParameters.NextNonce.get -> string
+Microsoft.Identity.Client.AuthenticationInfoParameters.this[string key].get -> string
+Microsoft.Identity.Client.AuthenticationResult
+Microsoft.Identity.Client.AuthenticationResult.AccessToken.get -> string
+Microsoft.Identity.Client.AuthenticationResult.AccessToken.set -> void
+Microsoft.Identity.Client.AuthenticationResult.Account.get -> Microsoft.Identity.Client.IAccount
+Microsoft.Identity.Client.AuthenticationResult.AdditionalResponseParameters.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>
+Microsoft.Identity.Client.AuthenticationResult.AuthenticationResult(string accessToken, bool isExtendedLifeTimeToken, string uniqueId, System.DateTimeOffset expiresOn, System.DateTimeOffset extendedExpiresOn, string tenantId, Microsoft.Identity.Client.IAccount account, string idToken, System.Collections.Generic.IEnumerable<string> scopes, System.Guid correlationId, Microsoft.Identity.Client.AuthenticationResultMetadata authenticationResultMetadata, string tokenType = "Bearer") -> void
+Microsoft.Identity.Client.AuthenticationResult.AuthenticationResult(string accessToken, bool isExtendedLifeTimeToken, string uniqueId, System.DateTimeOffset expiresOn, System.DateTimeOffset extendedExpiresOn, string tenantId, Microsoft.Identity.Client.IAccount account, string idToken, System.Collections.Generic.IEnumerable<string> scopes, System.Guid correlationId, string tokenType = "Bearer", Microsoft.Identity.Client.AuthenticationResultMetadata authenticationResultMetadata = null, System.Security.Claims.ClaimsPrincipal claimsPrincipal = null, string spaAuthCode = null, System.Collections.Generic.IReadOnlyDictionary<string, string> additionalResponseParameters = null) -> void
+Microsoft.Identity.Client.AuthenticationResult.AuthenticationResultMetadata.get -> Microsoft.Identity.Client.AuthenticationResultMetadata
+Microsoft.Identity.Client.AuthenticationResult.ClaimsPrincipal.get -> System.Security.Claims.ClaimsPrincipal
+Microsoft.Identity.Client.AuthenticationResult.CorrelationId.get -> System.Guid
+Microsoft.Identity.Client.AuthenticationResult.CreateAuthorizationHeader() -> string
+Microsoft.Identity.Client.AuthenticationResult.ExpiresOn.get -> System.DateTimeOffset
+Microsoft.Identity.Client.AuthenticationResult.ExtendedExpiresOn.get -> System.DateTimeOffset
+Microsoft.Identity.Client.AuthenticationResult.IdToken.get -> string
+Microsoft.Identity.Client.AuthenticationResult.IsExtendedLifeTimeToken.get -> bool
+Microsoft.Identity.Client.AuthenticationResult.Scopes.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.AuthenticationResult.SpaAuthCode.get -> string
+Microsoft.Identity.Client.AuthenticationResult.TenantId.get -> string
+Microsoft.Identity.Client.AuthenticationResult.TokenType.get -> string
+Microsoft.Identity.Client.AuthenticationResult.UniqueId.get -> string
+Microsoft.Identity.Client.AuthenticationResultMetadata
+Microsoft.Identity.Client.AuthenticationResultMetadata.AuthenticationResultMetadata(Microsoft.Identity.Client.TokenSource tokenSource) -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.CacheLevel.get -> Microsoft.Identity.Client.Cache.CacheLevel
+Microsoft.Identity.Client.AuthenticationResultMetadata.CacheLevel.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.CacheRefreshReason.get -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.AuthenticationResultMetadata.CacheRefreshReason.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs.get -> long
+Microsoft.Identity.Client.AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.DurationInCacheInMs.get -> long
+Microsoft.Identity.Client.AuthenticationResultMetadata.DurationInCacheInMs.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.DurationInHttpInMs.get -> long
+Microsoft.Identity.Client.AuthenticationResultMetadata.DurationInHttpInMs.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.DurationTotalInMs.get -> long
+Microsoft.Identity.Client.AuthenticationResultMetadata.DurationTotalInMs.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.RefreshOn.get -> System.DateTimeOffset?
+Microsoft.Identity.Client.AuthenticationResultMetadata.RefreshOn.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.RegionDetails.get -> Microsoft.Identity.Client.RegionDetails
+Microsoft.Identity.Client.AuthenticationResultMetadata.RegionDetails.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.Telemetry.get -> string
+Microsoft.Identity.Client.AuthenticationResultMetadata.Telemetry.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.TokenEndpoint.get -> string
+Microsoft.Identity.Client.AuthenticationResultMetadata.TokenEndpoint.set -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.TokenSource.get -> Microsoft.Identity.Client.TokenSource
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation.AccessTokenType.get -> string
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation.AuthorizationHeaderPrefix.get -> string
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation.FormatResult(Microsoft.Identity.Client.AuthenticationResult authenticationResult) -> void
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation.GetTokenRequestParams() -> System.Collections.Generic.IReadOnlyDictionary<string, string>
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation.KeyId.get -> string
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation.TelemetryTokenType.get -> int
+Microsoft.Identity.Client.AuthScheme.PoP.IPoPCryptoProvider
+Microsoft.Identity.Client.AuthScheme.PoP.IPoPCryptoProvider.CannonicalPublicKeyJwk.get -> string
+Microsoft.Identity.Client.AuthScheme.PoP.IPoPCryptoProvider.CryptographicAlgorithm.get -> string
+Microsoft.Identity.Client.AuthScheme.PoP.IPoPCryptoProvider.Sign(byte[] data) -> byte[]
+Microsoft.Identity.Client.AzureCloudInstance
+Microsoft.Identity.Client.AzureCloudInstance.AzureChina = 2 -> Microsoft.Identity.Client.AzureCloudInstance
+Microsoft.Identity.Client.AzureCloudInstance.AzureGermany = 3 -> Microsoft.Identity.Client.AzureCloudInstance
+Microsoft.Identity.Client.AzureCloudInstance.AzurePublic = 1 -> Microsoft.Identity.Client.AzureCloudInstance
+Microsoft.Identity.Client.AzureCloudInstance.AzureUsGovernment = 4 -> Microsoft.Identity.Client.AzureCloudInstance
+Microsoft.Identity.Client.AzureCloudInstance.None = 0 -> Microsoft.Identity.Client.AzureCloudInstance
+Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>
+Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.BaseAbstractAcquireTokenParameterBuilder() -> void
+Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.ExecuteAsync() -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
+Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.WithCorrelationId(System.Guid correlationId) -> T
+Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.Dictionary<string, string> extraQueryParameters) -> T
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithClientName(string clientName) -> T
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithClientVersion(string clientVersion) -> T
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithDebugLoggingCallback(Microsoft.Identity.Client.LogLevel logLevel = Microsoft.Identity.Client.LogLevel.Info, bool enablePiiLogging = false, bool withDefaultPlatformLoggingEnabled = false) -> T
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithExperimentalFeatures(bool enableExperimentalFeatures = true) -> T
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithHttpClientFactory(Microsoft.Identity.Client.IMsalHttpClientFactory httpClientFactory) -> T
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithHttpClientFactory(Microsoft.Identity.Client.IMsalHttpClientFactory httpClientFactory, bool retryOnceOn5xx) -> T
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithLogging(Microsoft.Identity.Client.LogCallback loggingCallback, Microsoft.Identity.Client.LogLevel? logLevel = null, bool? enablePiiLogging = null, bool? enableDefaultPlatformLogging = null) -> T
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithLogging(Microsoft.IdentityModel.Abstractions.IIdentityLogger identityLogger, bool enablePiiLogging = false) -> T
+Microsoft.Identity.Client.BaseApplicationOptions
+Microsoft.Identity.Client.BaseApplicationOptions.BaseApplicationOptions() -> void
+Microsoft.Identity.Client.BaseApplicationOptions.EnablePiiLogging.get -> bool
+Microsoft.Identity.Client.BaseApplicationOptions.EnablePiiLogging.set -> void
+Microsoft.Identity.Client.BaseApplicationOptions.IsDefaultPlatformLoggingEnabled.get -> bool
+Microsoft.Identity.Client.BaseApplicationOptions.IsDefaultPlatformLoggingEnabled.set -> void
+Microsoft.Identity.Client.BaseApplicationOptions.LogLevel.get -> Microsoft.Identity.Client.LogLevel
+Microsoft.Identity.Client.BaseApplicationOptions.LogLevel.set -> void
+Microsoft.Identity.Client.BrokerOptions
+Microsoft.Identity.Client.BrokerOptions.BrokerOptions(Microsoft.Identity.Client.BrokerOptions.OperatingSystems enabledOn) -> void
+Microsoft.Identity.Client.BrokerOptions.EnabledOn.get -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+Microsoft.Identity.Client.BrokerOptions.ListOperatingSystemAccounts.get -> bool
+Microsoft.Identity.Client.BrokerOptions.ListOperatingSystemAccounts.set -> void
+Microsoft.Identity.Client.BrokerOptions.MsaPassthrough.get -> bool
+Microsoft.Identity.Client.BrokerOptions.MsaPassthrough.set -> void
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems.None = 0 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems.Windows = 1 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+Microsoft.Identity.Client.BrokerOptions.Title.get -> string
+Microsoft.Identity.Client.BrokerOptions.Title.set -> void
+Microsoft.Identity.Client.Cache.CacheData
+Microsoft.Identity.Client.Cache.CacheData.AdalV3State.get -> byte[]
+Microsoft.Identity.Client.Cache.CacheData.AdalV3State.set -> void
+Microsoft.Identity.Client.Cache.CacheData.CacheData() -> void
+Microsoft.Identity.Client.Cache.CacheData.UnifiedState.get -> byte[]
+Microsoft.Identity.Client.Cache.CacheData.UnifiedState.set -> void
+Microsoft.Identity.Client.Cache.CacheLevel
+Microsoft.Identity.Client.Cache.CacheLevel.L1Cache = 2 -> Microsoft.Identity.Client.Cache.CacheLevel
+Microsoft.Identity.Client.Cache.CacheLevel.L2Cache = 3 -> Microsoft.Identity.Client.Cache.CacheLevel
+Microsoft.Identity.Client.Cache.CacheLevel.None = 0 -> Microsoft.Identity.Client.Cache.CacheLevel
+Microsoft.Identity.Client.Cache.CacheLevel.Unknown = 1 -> Microsoft.Identity.Client.Cache.CacheLevel
+Microsoft.Identity.Client.CacheOptions
+Microsoft.Identity.Client.CacheOptions.CacheOptions() -> void
+Microsoft.Identity.Client.CacheOptions.CacheOptions(bool useSharedCache) -> void
+Microsoft.Identity.Client.CacheOptions.UseSharedCache.get -> bool
+Microsoft.Identity.Client.CacheOptions.UseSharedCache.set -> void
+Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.CacheRefreshReason.Expired = 3 -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.CacheRefreshReason.ForceRefreshOrClaims = 1 -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.CacheRefreshReason.NoCachedAccessToken = 2 -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.CacheRefreshReason.NotApplicable = 0 -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.CacheRefreshReason.ProactivelyRefreshed = 4 -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.ClientApplicationBase
+Microsoft.Identity.Client.ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable<string> scopes, Microsoft.Identity.Client.IAccount account) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable<string> scopes, string loginHint) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.ClientApplicationBase.AppConfig.get -> Microsoft.Identity.Client.IAppConfig
+Microsoft.Identity.Client.ClientApplicationBase.Authority.get -> string
+Microsoft.Identity.Client.ClientApplicationBase.GetAccountAsync(string accountId) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.IAccount>
+Microsoft.Identity.Client.ClientApplicationBase.GetAccountAsync(string accountId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.IAccount>
+Microsoft.Identity.Client.ClientApplicationBase.GetAccountsAsync() -> System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.IAccount>>
+Microsoft.Identity.Client.ClientApplicationBase.GetAccountsAsync(string userFlow) -> System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.IAccount>>
+Microsoft.Identity.Client.ClientApplicationBase.GetAccountsAsync(string userFlow, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.IAccount>>
+Microsoft.Identity.Client.ClientApplicationBase.GetAccountsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.IAccount>>
+Microsoft.Identity.Client.ClientApplicationBase.RemoveAsync(Microsoft.Identity.Client.IAccount account) -> System.Threading.Tasks.Task
+Microsoft.Identity.Client.ClientApplicationBase.RemoveAsync(Microsoft.Identity.Client.IAccount account, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
+Microsoft.Identity.Client.ClientApplicationBase.UserTokenCache.get -> Microsoft.Identity.Client.ITokenCache
+Microsoft.Identity.Client.ConfidentialClientApplication
+Microsoft.Identity.Client.ConfidentialClientApplication.AcquireTokenByAuthorizationCode(System.Collections.Generic.IEnumerable<string> scopes, string authorizationCode) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.ConfidentialClientApplication.AcquireTokenForClient(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.ConfidentialClientApplication.AcquireTokenInLongRunningProcess(System.Collections.Generic.IEnumerable<string> scopes, string longRunningProcessSessionKey) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.ConfidentialClientApplication.AcquireTokenOnBehalfOf(System.Collections.Generic.IEnumerable<string> scopes, Microsoft.Identity.Client.UserAssertion userAssertion) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.ConfidentialClientApplication.AppTokenCache.get -> Microsoft.Identity.Client.ITokenCache
+Microsoft.Identity.Client.ConfidentialClientApplication.Certificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.ConfidentialClientApplication.GetAuthorizationRequestUrl(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.ConfidentialClientApplication.InitiateLongRunningProcessInWebApi(System.Collections.Generic.IEnumerable<string> scopes, string userToken, ref string longRunningProcessSessionKey) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.ConfidentialClientApplication.StopLongRunningProcessInWebApiAsync(string longRunningProcessSessionKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.Build() -> Microsoft.Identity.Client.IConfidentialClientApplication
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithAzureRegion(string azureRegion = "TryAutoDetect") -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithCacheSynchronization(bool enableCacheSynchronization) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, bool sendX5C) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAssertion(string signedClientAssertion) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAssertion(System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.Tasks.Task<string>> clientAssertionAsyncDelegate) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAssertion(System.Func<string> clientAssertionDelegate) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAssertion(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string>> clientAssertionAsyncDelegate) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientClaims(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, System.Collections.Generic.IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true, bool sendX5C = false) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientClaims(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, System.Collections.Generic.IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientSecret(string clientSecret) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithGenericAuthority(string authorityUri) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithOidcAuthority(string authorityUri) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithTelemetryClient(params Microsoft.IdentityModel.Abstractions.ITelemetryClient[] telemetryClients) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationOptions
+Microsoft.Identity.Client.ConfidentialClientApplicationOptions.AzureRegion.get -> string
+Microsoft.Identity.Client.ConfidentialClientApplicationOptions.AzureRegion.set -> void
+Microsoft.Identity.Client.ConfidentialClientApplicationOptions.ClientSecret.get -> string
+Microsoft.Identity.Client.ConfidentialClientApplicationOptions.ClientSecret.set -> void
+Microsoft.Identity.Client.ConfidentialClientApplicationOptions.ConfidentialClientApplicationOptions() -> void
+Microsoft.Identity.Client.ConfidentialClientApplicationOptions.EnableCacheSynchronization.get -> bool
+Microsoft.Identity.Client.ConfidentialClientApplicationOptions.EnableCacheSynchronization.set -> void
+Microsoft.Identity.Client.DeviceCodeResult
+Microsoft.Identity.Client.DeviceCodeResult.ClientId.get -> string
+Microsoft.Identity.Client.DeviceCodeResult.DeviceCode.get -> string
+Microsoft.Identity.Client.DeviceCodeResult.ExpiresOn.get -> System.DateTimeOffset
+Microsoft.Identity.Client.DeviceCodeResult.Interval.get -> long
+Microsoft.Identity.Client.DeviceCodeResult.Message.get -> string
+Microsoft.Identity.Client.DeviceCodeResult.Scopes.get -> System.Collections.Generic.IReadOnlyCollection<string>
+Microsoft.Identity.Client.DeviceCodeResult.UserCode.get -> string
+Microsoft.Identity.Client.DeviceCodeResult.VerificationUrl.get -> string
+Microsoft.Identity.Client.EmbeddedWebViewOptions
+Microsoft.Identity.Client.EmbeddedWebViewOptions.EmbeddedWebViewOptions() -> void
+Microsoft.Identity.Client.EmbeddedWebViewOptions.Title.get -> string
+Microsoft.Identity.Client.EmbeddedWebViewOptions.Title.set -> void
+Microsoft.Identity.Client.EmbeddedWebViewOptions.WebView2BrowserExecutableFolder.get -> string
+Microsoft.Identity.Client.EmbeddedWebViewOptions.WebView2BrowserExecutableFolder.set -> void
+Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension
+Microsoft.Identity.Client.Extensibility.AcquireTokenForClientBuilderExtensions
+Microsoft.Identity.Client.Extensibility.AcquireTokenInteractiveParameterBuilderExtensions
+Microsoft.Identity.Client.Extensibility.AcquireTokenOnBehalfOfParameterBuilderExtensions
+Microsoft.Identity.Client.Extensibility.AppTokenProviderParameters
+Microsoft.Identity.Client.Extensibility.AppTokenProviderParameters.AppTokenProviderParameters() -> void
+Microsoft.Identity.Client.Extensibility.AppTokenProviderParameters.CancellationToken.get -> System.Threading.CancellationToken
+Microsoft.Identity.Client.Extensibility.AppTokenProviderParameters.Claims.get -> string
+Microsoft.Identity.Client.Extensibility.AppTokenProviderParameters.CorrelationId.get -> string
+Microsoft.Identity.Client.Extensibility.AppTokenProviderParameters.Scopes.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.Extensibility.AppTokenProviderParameters.TenantId.get -> string
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult.AccessToken.get -> string
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult.AccessToken.set -> void
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult.AppTokenProviderResult() -> void
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult.ExpiresInSeconds.get -> long
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult.ExpiresInSeconds.set -> void
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult.RefreshInSeconds.get -> long?
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult.RefreshInSeconds.set -> void
+Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions
+Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationExtensions
+Microsoft.Identity.Client.Extensibility.ICustomWebUi
+Microsoft.Identity.Client.Extensibility.ICustomWebUi.AcquireAuthorizationCodeAsync(System.Uri authorizationUri, System.Uri redirectUri, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Uri>
+Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension
+Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension.AdditionalCacheParameters.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension.AdditionalCacheParameters.set -> void
+Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension.AuthenticationOperation.get -> Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation
+Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension.AuthenticationOperation.set -> void
+Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension.MsalAuthenticationExtension() -> void
+Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension.OnBeforeTokenRequestHandler.get -> System.Func<Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData, System.Threading.Tasks.Task>
+Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension.OnBeforeTokenRequestHandler.set -> void
+Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData
+Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData.BodyParameters.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData.CancellationToken.get -> System.Threading.CancellationToken
+Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData.Headers.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData.OnBeforeTokenRequestData(System.Collections.Generic.IDictionary<string, string> bodyParameters, System.Collections.Generic.IDictionary<string, string> headers, System.Uri requestUri, System.Threading.CancellationToken cancellationToken) -> void
+Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData.RequestUri.get -> System.Uri
+Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData.RequestUri.set -> void
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder.ExecuteAsync() -> System.Threading.Tasks.Task<System.Uri>
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder.ExecuteAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Uri>
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder.WithAccount(Microsoft.Identity.Client.IAccount account) -> Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder.WithCcsRoutingHint(string userObjectIdentifier, string tenantIdentifier) -> Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(System.Collections.Generic.IEnumerable<string> extraScopesToConsent) -> Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string loginHint) -> Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder.WithPkce(out string codeVerifier) -> Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder.WithPrompt(Microsoft.Identity.Client.Prompt prompt) -> Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string redirectUri) -> Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.IAccount
+Microsoft.Identity.Client.IAccount.Environment.get -> string
+Microsoft.Identity.Client.IAccount.HomeAccountId.get -> Microsoft.Identity.Client.AccountId
+Microsoft.Identity.Client.IAccount.Username.get -> string
+Microsoft.Identity.Client.IAppConfig
+Microsoft.Identity.Client.IAppConfig.ClientCapabilities.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.IAppConfig.ClientCredentialCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.IAppConfig.ClientId.get -> string
+Microsoft.Identity.Client.IAppConfig.ClientName.get -> string
+Microsoft.Identity.Client.IAppConfig.ClientSecret.get -> string
+Microsoft.Identity.Client.IAppConfig.ClientVersion.get -> string
+Microsoft.Identity.Client.IAppConfig.EnablePiiLogging.get -> bool
+Microsoft.Identity.Client.IAppConfig.ExperimentalFeaturesEnabled.get -> bool
+Microsoft.Identity.Client.IAppConfig.ExtraQueryParameters.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.IAppConfig.HttpClientFactory.get -> Microsoft.Identity.Client.IMsalHttpClientFactory
+Microsoft.Identity.Client.IAppConfig.IsBrokerEnabled.get -> bool
+Microsoft.Identity.Client.IAppConfig.IsDefaultPlatformLoggingEnabled.get -> bool
+Microsoft.Identity.Client.IAppConfig.LegacyCacheCompatibilityEnabled.get -> bool
+Microsoft.Identity.Client.IAppConfig.LoggingCallback.get -> Microsoft.Identity.Client.LogCallback
+Microsoft.Identity.Client.IAppConfig.LogLevel.get -> Microsoft.Identity.Client.LogLevel
+Microsoft.Identity.Client.IAppConfig.ParentActivityOrWindowFunc.get -> System.Func<object>
+Microsoft.Identity.Client.IAppConfig.RedirectUri.get -> string
+Microsoft.Identity.Client.IAppConfig.TelemetryConfig.get -> Microsoft.Identity.Client.ITelemetryConfig
+Microsoft.Identity.Client.IAppConfig.TenantId.get -> string
+Microsoft.Identity.Client.IApplicationBase
+Microsoft.Identity.Client.IByRefreshToken
+Microsoft.Identity.Client.IByRefreshToken.AcquireTokenByRefreshToken(System.Collections.Generic.IEnumerable<string> scopes, string refreshToken) -> Microsoft.Identity.Client.AcquireTokenByRefreshTokenParameterBuilder
+Microsoft.Identity.Client.IByUsernameAndPassword
+Microsoft.Identity.Client.IByUsernameAndPassword.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, string password) -> Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder
+Microsoft.Identity.Client.IClientApplicationBase
+Microsoft.Identity.Client.IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable<string> scopes, Microsoft.Identity.Client.IAccount account) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable<string> scopes, string loginHint) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.IClientApplicationBase.AppConfig.get -> Microsoft.Identity.Client.IAppConfig
+Microsoft.Identity.Client.IClientApplicationBase.Authority.get -> string
+Microsoft.Identity.Client.IClientApplicationBase.GetAccountAsync(string identifier) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.IAccount>
+Microsoft.Identity.Client.IClientApplicationBase.GetAccountsAsync() -> System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.IAccount>>
+Microsoft.Identity.Client.IClientApplicationBase.GetAccountsAsync(string userFlow) -> System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.IAccount>>
+Microsoft.Identity.Client.IClientApplicationBase.RemoveAsync(Microsoft.Identity.Client.IAccount account) -> System.Threading.Tasks.Task
+Microsoft.Identity.Client.IClientApplicationBase.UserTokenCache.get -> Microsoft.Identity.Client.ITokenCache
+Microsoft.Identity.Client.IConfidentialClientApplication
+Microsoft.Identity.Client.IConfidentialClientApplication.AcquireTokenByAuthorizationCode(System.Collections.Generic.IEnumerable<string> scopes, string authorizationCode) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.IConfidentialClientApplication.AcquireTokenForClient(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.IConfidentialClientApplication.AcquireTokenOnBehalfOf(System.Collections.Generic.IEnumerable<string> scopes, Microsoft.Identity.Client.UserAssertion userAssertion) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.IConfidentialClientApplication.AcquireTokenSilent(System.Collections.Generic.IEnumerable<string> scopes, string loginHint) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.IConfidentialClientApplication.AppTokenCache.get -> Microsoft.Identity.Client.ITokenCache
+Microsoft.Identity.Client.IConfidentialClientApplication.GetAccountsAsync() -> System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.IAccount>>
+Microsoft.Identity.Client.IConfidentialClientApplication.GetAuthorizationRequestUrl(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.GetAuthorizationRequestUrlParameterBuilder
+Microsoft.Identity.Client.ILongRunningWebApi
+Microsoft.Identity.Client.ILongRunningWebApi.AcquireTokenInLongRunningProcess(System.Collections.Generic.IEnumerable<string> scopes, string longRunningProcessSessionKey) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.ILongRunningWebApi.InitiateLongRunningProcessInWebApi(System.Collections.Generic.IEnumerable<string> scopes, string userToken, ref string longRunningProcessSessionKey) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.IManagedIdentityApplication
+Microsoft.Identity.Client.IManagedIdentityApplication.AcquireTokenForManagedIdentity(string resource) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.IMsalHttpClientFactory
+Microsoft.Identity.Client.IMsalHttpClientFactory.GetHttpClient() -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException.AccountUserId.get -> string
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException.AccountUserId.set -> void
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException.AuthorityUrl.get -> string
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException.AuthorityUrl.set -> void
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException.IntuneAppProtectionPolicyRequiredException(string errorCode, string errorMessage) -> void
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException.TenantId.get -> string
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException.TenantId.set -> void
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException.Upn.get -> string
+Microsoft.Identity.Client.IntuneAppProtectionPolicyRequiredException.Upn.set -> void
+Microsoft.Identity.Client.IPublicClientApplication
+Microsoft.Identity.Client.IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder
+Microsoft.Identity.Client.IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, string password) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+Microsoft.Identity.Client.IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, System.Security.SecureString password) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+Microsoft.Identity.Client.IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.IPublicClientApplication.AcquireTokenWithDeviceCode(System.Collections.Generic.IEnumerable<string> scopes, System.Func<Microsoft.Identity.Client.DeviceCodeResult, System.Threading.Tasks.Task> deviceCodeResultCallback) -> Microsoft.Identity.Client.AcquireTokenWithDeviceCodeParameterBuilder
+Microsoft.Identity.Client.IPublicClientApplication.IsSystemWebViewAvailable.get -> bool
+Microsoft.Identity.Client.ITelemetryConfig
+Microsoft.Identity.Client.ITelemetryConfig.AudienceType.get -> Microsoft.Identity.Client.TelemetryAudienceType
+Microsoft.Identity.Client.ITelemetryConfig.DispatchAction.get -> System.Action<Microsoft.Identity.Client.ITelemetryEventPayload>
+Microsoft.Identity.Client.ITelemetryConfig.SessionId.get -> string
+Microsoft.Identity.Client.ITelemetryEventPayload
+Microsoft.Identity.Client.ITelemetryEventPayload.BoolValues.get -> System.Collections.Generic.IReadOnlyDictionary<string, bool>
+Microsoft.Identity.Client.ITelemetryEventPayload.Int64Values.get -> System.Collections.Generic.IReadOnlyDictionary<string, long>
+Microsoft.Identity.Client.ITelemetryEventPayload.IntValues.get -> System.Collections.Generic.IReadOnlyDictionary<string, int>
+Microsoft.Identity.Client.ITelemetryEventPayload.Name.get -> string
+Microsoft.Identity.Client.ITelemetryEventPayload.StringValues.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>
+Microsoft.Identity.Client.ITelemetryEventPayload.ToJsonString() -> string
+Microsoft.Identity.Client.ITokenCache
+Microsoft.Identity.Client.ITokenCache.SetAfterAccess(Microsoft.Identity.Client.TokenCacheCallback afterAccess) -> void
+Microsoft.Identity.Client.ITokenCache.SetAfterAccessAsync(System.Func<Microsoft.Identity.Client.TokenCacheNotificationArgs, System.Threading.Tasks.Task> afterAccess) -> void
+Microsoft.Identity.Client.ITokenCache.SetBeforeAccess(Microsoft.Identity.Client.TokenCacheCallback beforeAccess) -> void
+Microsoft.Identity.Client.ITokenCache.SetBeforeAccessAsync(System.Func<Microsoft.Identity.Client.TokenCacheNotificationArgs, System.Threading.Tasks.Task> beforeAccess) -> void
+Microsoft.Identity.Client.ITokenCache.SetBeforeWrite(Microsoft.Identity.Client.TokenCacheCallback beforeWrite) -> void
+Microsoft.Identity.Client.ITokenCache.SetBeforeWriteAsync(System.Func<Microsoft.Identity.Client.TokenCacheNotificationArgs, System.Threading.Tasks.Task> beforeWrite) -> void
+Microsoft.Identity.Client.ITokenCacheSerializer
+Microsoft.Identity.Client.ITokenCacheSerializer.DeserializeAdalV3(byte[] adalV3State) -> void
+Microsoft.Identity.Client.ITokenCacheSerializer.DeserializeMsalV2(byte[] msalV2State) -> void
+Microsoft.Identity.Client.ITokenCacheSerializer.DeserializeMsalV3(byte[] msalV3State, bool shouldClearExistingCache = false) -> void
+Microsoft.Identity.Client.ITokenCacheSerializer.SerializeAdalV3() -> byte[]
+Microsoft.Identity.Client.ITokenCacheSerializer.SerializeMsalV2() -> byte[]
+Microsoft.Identity.Client.ITokenCacheSerializer.SerializeMsalV3() -> byte[]
+Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.Aes128CtsHmacSha196 = 17 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.Aes256CtsHmacSha196 = 18 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.DecCbcCrc = 1 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.DesCbcMd5 = 3 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.None = 0 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ClientKey.get -> string
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ClientKey.set -> void
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ClientName.get -> string
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ClientName.set -> void
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ErrorMessage.get -> string
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ErrorMessage.set -> void
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KerberosMessageBuffer.get -> string
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KerberosMessageBuffer.set -> void
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KerberosSupplementalTicket() -> void
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KerberosSupplementalTicket(string errorMessage) -> void
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KeyType.get -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KeyType.set -> void
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.Realm.get -> string
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.Realm.set -> void
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ServicePrincipalName.get -> string
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ServicePrincipalName.set -> void
+Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager
+Microsoft.Identity.Client.Kerberos.KerberosTicketContainer
+Microsoft.Identity.Client.Kerberos.KerberosTicketContainer.AccessToken = 1 -> Microsoft.Identity.Client.Kerberos.KerberosTicketContainer
+Microsoft.Identity.Client.Kerberos.KerberosTicketContainer.IdToken = 0 -> Microsoft.Identity.Client.Kerberos.KerberosTicketContainer
+Microsoft.Identity.Client.LogCallback
+Microsoft.Identity.Client.LogLevel
+Microsoft.Identity.Client.LogLevel.Always = -1 -> Microsoft.Identity.Client.LogLevel
+Microsoft.Identity.Client.LogLevel.Error = 0 -> Microsoft.Identity.Client.LogLevel
+Microsoft.Identity.Client.LogLevel.Info = 2 -> Microsoft.Identity.Client.LogLevel
+Microsoft.Identity.Client.LogLevel.Verbose = 3 -> Microsoft.Identity.Client.LogLevel
+Microsoft.Identity.Client.LogLevel.Warning = 1 -> Microsoft.Identity.Client.LogLevel
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.AppService = 2 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.AzureArc = 3 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.CloudShell = 4 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.DefaultToImds = 6 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.Imds = 1 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.None = 0 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ServiceFabric = 5 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentityApplication
+Microsoft.Identity.Client.ManagedIdentityApplication.AcquireTokenForManagedIdentity(string resource) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.Build() -> Microsoft.Identity.Client.IManagedIdentityApplication
+Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithClientCapabilities(System.Collections.Generic.IEnumerable<string> clientCapabilities) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithTelemetryClient(params Microsoft.IdentityModel.Abstractions.ITelemetryClient[] telemetryClients) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+Microsoft.Identity.Client.Metrics
+Microsoft.Identity.Client.MsalClaimsChallengeException
+Microsoft.Identity.Client.MsalClaimsChallengeException.MsalClaimsChallengeException(string errorCode, string errorMessage) -> void
+Microsoft.Identity.Client.MsalClaimsChallengeException.MsalClaimsChallengeException(string errorCode, string errorMessage, System.Exception innerException) -> void
+Microsoft.Identity.Client.MsalClaimsChallengeException.MsalClaimsChallengeException(string errorCode, string errorMessage, System.Exception innerException, Microsoft.Identity.Client.UiRequiredExceptionClassification classification) -> void
+Microsoft.Identity.Client.MsalClientException
+Microsoft.Identity.Client.MsalClientException.MsalClientException(string errorCode) -> void
+Microsoft.Identity.Client.MsalClientException.MsalClientException(string errorCode, string errorMessage) -> void
+Microsoft.Identity.Client.MsalClientException.MsalClientException(string errorCode, string errorMessage, System.Exception innerException) -> void
+Microsoft.Identity.Client.MsalError
+Microsoft.Identity.Client.MsalException
+Microsoft.Identity.Client.MsalException.AdditionalExceptionData.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>
+Microsoft.Identity.Client.MsalException.AdditionalExceptionData.set -> void
+Microsoft.Identity.Client.MsalException.CorrelationId.get -> string
+Microsoft.Identity.Client.MsalException.CorrelationId.set -> void
+Microsoft.Identity.Client.MsalException.ErrorCode.get -> string
+Microsoft.Identity.Client.MsalException.IsRetryable.get -> bool
+Microsoft.Identity.Client.MsalException.IsRetryable.set -> void
+Microsoft.Identity.Client.MsalException.MsalException() -> void
+Microsoft.Identity.Client.MsalException.MsalException(string errorCode) -> void
+Microsoft.Identity.Client.MsalException.MsalException(string errorCode, string errorMessage) -> void
+Microsoft.Identity.Client.MsalException.MsalException(string errorCode, string errorMessage, System.Exception innerException) -> void
+Microsoft.Identity.Client.MsalException.ToJsonString() -> string
+Microsoft.Identity.Client.MsalManagedIdentityException
+Microsoft.Identity.Client.MsalManagedIdentityException.ManagedIdentitySource.get -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.MsalManagedIdentityException.MsalManagedIdentityException(string errorCode, string errorMessage, Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> void
+Microsoft.Identity.Client.MsalManagedIdentityException.MsalManagedIdentityException(string errorCode, string errorMessage, Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source, int statusCode) -> void
+Microsoft.Identity.Client.MsalManagedIdentityException.MsalManagedIdentityException(string errorCode, string errorMessage, System.Exception innerException, Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> void
+Microsoft.Identity.Client.MsalManagedIdentityException.MsalManagedIdentityException(string errorCode, string errorMessage, System.Exception innerException, Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source, int statusCode) -> void
+Microsoft.Identity.Client.MsalServiceException
+Microsoft.Identity.Client.MsalServiceException.Claims.get -> string
+Microsoft.Identity.Client.MsalServiceException.Headers.get -> System.Net.Http.Headers.HttpResponseHeaders
+Microsoft.Identity.Client.MsalServiceException.Headers.set -> void
+Microsoft.Identity.Client.MsalServiceException.MsalServiceException(string errorCode, string errorMessage) -> void
+Microsoft.Identity.Client.MsalServiceException.MsalServiceException(string errorCode, string errorMessage, int statusCode) -> void
+Microsoft.Identity.Client.MsalServiceException.MsalServiceException(string errorCode, string errorMessage, int statusCode, string claims, System.Exception innerException) -> void
+Microsoft.Identity.Client.MsalServiceException.MsalServiceException(string errorCode, string errorMessage, int statusCode, System.Exception innerException) -> void
+Microsoft.Identity.Client.MsalServiceException.MsalServiceException(string errorCode, string errorMessage, System.Exception innerException) -> void
+Microsoft.Identity.Client.MsalServiceException.ResponseBody.get -> string
+Microsoft.Identity.Client.MsalServiceException.ResponseBody.set -> void
+Microsoft.Identity.Client.MsalServiceException.StatusCode.get -> int
+Microsoft.Identity.Client.MsalThrottledServiceException
+Microsoft.Identity.Client.MsalThrottledServiceException.MsalThrottledServiceException(Microsoft.Identity.Client.MsalServiceException originalException) -> void
+Microsoft.Identity.Client.MsalThrottledServiceException.OriginalServiceException.get -> Microsoft.Identity.Client.MsalServiceException
+Microsoft.Identity.Client.MsalThrottledUiRequiredException
+Microsoft.Identity.Client.MsalThrottledUiRequiredException.MsalThrottledUiRequiredException(Microsoft.Identity.Client.MsalUiRequiredException originalException) -> void
+Microsoft.Identity.Client.MsalThrottledUiRequiredException.OriginalServiceException.get -> Microsoft.Identity.Client.MsalUiRequiredException
+Microsoft.Identity.Client.MsalUiRequiredException
+Microsoft.Identity.Client.MsalUiRequiredException.Classification.get -> Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.MsalUiRequiredException.MsalUiRequiredException(string errorCode, string errorMessage) -> void
+Microsoft.Identity.Client.MsalUiRequiredException.MsalUiRequiredException(string errorCode, string errorMessage, System.Exception innerException) -> void
+Microsoft.Identity.Client.MsalUiRequiredException.MsalUiRequiredException(string errorCode, string errorMessage, System.Exception innerException, Microsoft.Identity.Client.UiRequiredExceptionClassification classification) -> void
+Microsoft.Identity.Client.OsCapabilitiesExtensions
+Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential
+Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential.Credential() -> void
+Microsoft.Identity.Client.Prompt
+Microsoft.Identity.Client.Prompt.Prompt() -> void
+Microsoft.Identity.Client.PublicClientApplication
+Microsoft.Identity.Client.PublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder
+Microsoft.Identity.Client.PublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, string password) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+Microsoft.Identity.Client.PublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, System.Security.SecureString password) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+Microsoft.Identity.Client.PublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+Microsoft.Identity.Client.PublicClientApplication.AcquireTokenWithDeviceCode(System.Collections.Generic.IEnumerable<string> scopes, System.Func<Microsoft.Identity.Client.DeviceCodeResult, System.Threading.Tasks.Task> deviceCodeResultCallback) -> Microsoft.Identity.Client.AcquireTokenWithDeviceCodeParameterBuilder
+Microsoft.Identity.Client.PublicClientApplication.IsBrokerAvailable() -> bool
+Microsoft.Identity.Client.PublicClientApplication.IsEmbeddedWebViewAvailable() -> bool
+Microsoft.Identity.Client.PublicClientApplication.IsProofOfPossessionSupportedByClient() -> bool
+Microsoft.Identity.Client.PublicClientApplication.IsSystemWebViewAvailable.get -> bool
+Microsoft.Identity.Client.PublicClientApplication.IsUserInteractive() -> bool
+Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.Build() -> Microsoft.Identity.Client.IPublicClientApplication
+Microsoft.Identity.Client.PublicClientApplicationBuilder.IsBrokerAvailable() -> bool
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithBroker(bool enableBroker = true) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithDefaultRedirectUri() -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithIosKeychainSecurityGroup(string keychainSecurityGroup) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithKerberosTicketClaim(string servicePrincipalName, Microsoft.Identity.Client.Kerberos.KerberosTicketContainer ticketContainer) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithMultiCloudSupport(bool enableMultiCloudSupport) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithOidcAuthority(string authorityUri) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithParentActivityOrWindow(System.Func<object> parentActivityOrWindowFunc) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithParentActivityOrWindow(System.Func<System.IntPtr> windowFunc) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationBuilder.WithWindowsBrokerOptions(Microsoft.Identity.Client.WindowsBrokerOptions options) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+Microsoft.Identity.Client.PublicClientApplicationExtensions
+Microsoft.Identity.Client.PublicClientApplicationOptions
+Microsoft.Identity.Client.PublicClientApplicationOptions.PublicClientApplicationOptions() -> void
+Microsoft.Identity.Client.Region.RegionOutcome
+Microsoft.Identity.Client.Region.RegionOutcome.AutodetectSuccess = 4 -> Microsoft.Identity.Client.Region.RegionOutcome
+Microsoft.Identity.Client.Region.RegionOutcome.FallbackToGlobal = 5 -> Microsoft.Identity.Client.Region.RegionOutcome
+Microsoft.Identity.Client.Region.RegionOutcome.None = 0 -> Microsoft.Identity.Client.Region.RegionOutcome
+Microsoft.Identity.Client.Region.RegionOutcome.UserProvidedAutodetectionFailed = 2 -> Microsoft.Identity.Client.Region.RegionOutcome
+Microsoft.Identity.Client.Region.RegionOutcome.UserProvidedInvalid = 3 -> Microsoft.Identity.Client.Region.RegionOutcome
+Microsoft.Identity.Client.Region.RegionOutcome.UserProvidedValid = 1 -> Microsoft.Identity.Client.Region.RegionOutcome
+Microsoft.Identity.Client.RegionDetails
+Microsoft.Identity.Client.RegionDetails.AutoDetectionError.get -> string
+Microsoft.Identity.Client.RegionDetails.RegionDetails(Microsoft.Identity.Client.Region.RegionOutcome regionOutcome, string regionUsed, string autoDetectionError) -> void
+Microsoft.Identity.Client.RegionDetails.RegionOutcome.get -> Microsoft.Identity.Client.Region.RegionOutcome
+Microsoft.Identity.Client.RegionDetails.RegionUsed.get -> string
+Microsoft.Identity.Client.SSHCertificates.SSHExtensions
+Microsoft.Identity.Client.SystemWebViewOptions
+Microsoft.Identity.Client.SystemWebViewOptions.BrowserRedirectError.get -> System.Uri
+Microsoft.Identity.Client.SystemWebViewOptions.BrowserRedirectError.set -> void
+Microsoft.Identity.Client.SystemWebViewOptions.BrowserRedirectSuccess.get -> System.Uri
+Microsoft.Identity.Client.SystemWebViewOptions.BrowserRedirectSuccess.set -> void
+Microsoft.Identity.Client.SystemWebViewOptions.HtmlMessageError.get -> string
+Microsoft.Identity.Client.SystemWebViewOptions.HtmlMessageError.set -> void
+Microsoft.Identity.Client.SystemWebViewOptions.HtmlMessageSuccess.get -> string
+Microsoft.Identity.Client.SystemWebViewOptions.HtmlMessageSuccess.set -> void
+Microsoft.Identity.Client.SystemWebViewOptions.iOSHidePrivacyPrompt.get -> bool
+Microsoft.Identity.Client.SystemWebViewOptions.iOSHidePrivacyPrompt.set -> void
+Microsoft.Identity.Client.SystemWebViewOptions.OpenBrowserAsync.get -> System.Func<System.Uri, System.Threading.Tasks.Task>
+Microsoft.Identity.Client.SystemWebViewOptions.OpenBrowserAsync.set -> void
+Microsoft.Identity.Client.SystemWebViewOptions.SystemWebViewOptions() -> void
+Microsoft.Identity.Client.TelemetryAudienceType
+Microsoft.Identity.Client.TelemetryAudienceType.PreProduction = 0 -> Microsoft.Identity.Client.TelemetryAudienceType
+Microsoft.Identity.Client.TelemetryAudienceType.Production = 1 -> Microsoft.Identity.Client.TelemetryAudienceType
+Microsoft.Identity.Client.TelemetryCore.TelemetryClient.TelemetryData
+Microsoft.Identity.Client.TelemetryCore.TelemetryClient.TelemetryData.CacheLevel.get -> Microsoft.Identity.Client.Cache.CacheLevel
+Microsoft.Identity.Client.TelemetryCore.TelemetryClient.TelemetryData.CacheLevel.set -> void
+Microsoft.Identity.Client.TelemetryCore.TelemetryClient.TelemetryData.TelemetryData() -> void
+Microsoft.Identity.Client.TenantProfile
+Microsoft.Identity.Client.TenantProfile.ClaimsPrincipal.get -> System.Security.Claims.ClaimsPrincipal
+Microsoft.Identity.Client.TenantProfile.IsHomeTenant.get -> bool
+Microsoft.Identity.Client.TenantProfile.Oid.get -> string
+Microsoft.Identity.Client.TenantProfile.TenantId.get -> string
+Microsoft.Identity.Client.TokenCache
+Microsoft.Identity.Client.TokenCache.SetAfterAccess(Microsoft.Identity.Client.TokenCacheCallback afterAccess) -> void
+Microsoft.Identity.Client.TokenCache.SetAfterAccessAsync(System.Func<Microsoft.Identity.Client.TokenCacheNotificationArgs, System.Threading.Tasks.Task> afterAccess) -> void
+Microsoft.Identity.Client.TokenCache.SetBeforeAccess(Microsoft.Identity.Client.TokenCacheCallback beforeAccess) -> void
+Microsoft.Identity.Client.TokenCache.SetBeforeAccessAsync(System.Func<Microsoft.Identity.Client.TokenCacheNotificationArgs, System.Threading.Tasks.Task> beforeAccess) -> void
+Microsoft.Identity.Client.TokenCache.SetBeforeWrite(Microsoft.Identity.Client.TokenCacheCallback beforeWrite) -> void
+Microsoft.Identity.Client.TokenCache.SetBeforeWriteAsync(System.Func<Microsoft.Identity.Client.TokenCacheNotificationArgs, System.Threading.Tasks.Task> beforeWrite) -> void
+Microsoft.Identity.Client.TokenCache.SetIosKeychainSecurityGroup(string securityGroup) -> void
+Microsoft.Identity.Client.TokenCache.TokenCache() -> void
+Microsoft.Identity.Client.TokenCacheCallback
+Microsoft.Identity.Client.TokenCacheExtensions
+Microsoft.Identity.Client.TokenCacheNotificationArgs
+Microsoft.Identity.Client.TokenCacheNotificationArgs.Account.get -> Microsoft.Identity.Client.IAccount
+Microsoft.Identity.Client.TokenCacheNotificationArgs.CancellationToken.get -> System.Threading.CancellationToken
+Microsoft.Identity.Client.TokenCacheNotificationArgs.ClientId.get -> string
+Microsoft.Identity.Client.TokenCacheNotificationArgs.CorrelationId.get -> System.Guid
+Microsoft.Identity.Client.TokenCacheNotificationArgs.HasStateChanged.get -> bool
+Microsoft.Identity.Client.TokenCacheNotificationArgs.HasTokens.get -> bool
+Microsoft.Identity.Client.TokenCacheNotificationArgs.IdentityLogger.get -> Microsoft.IdentityModel.Abstractions.IIdentityLogger
+Microsoft.Identity.Client.TokenCacheNotificationArgs.IsApplicationCache.get -> bool
+Microsoft.Identity.Client.TokenCacheNotificationArgs.PiiLoggingEnabled.get -> bool
+Microsoft.Identity.Client.TokenCacheNotificationArgs.RequestScopes.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.TokenCacheNotificationArgs.RequestTenantId.get -> string
+Microsoft.Identity.Client.TokenCacheNotificationArgs.SuggestedCacheExpiry.get -> System.DateTimeOffset?
+Microsoft.Identity.Client.TokenCacheNotificationArgs.SuggestedCacheKey.get -> string
+Microsoft.Identity.Client.TokenCacheNotificationArgs.TelemetryData.get -> Microsoft.Identity.Client.TelemetryCore.TelemetryClient.TelemetryData
+Microsoft.Identity.Client.TokenCacheNotificationArgs.TokenCache.get -> Microsoft.Identity.Client.ITokenCacheSerializer
+Microsoft.Identity.Client.TokenCacheNotificationArgs.TokenCacheNotificationArgs(Microsoft.Identity.Client.ITokenCacheSerializer tokenCache, string clientId, Microsoft.Identity.Client.IAccount account, bool hasStateChanged, bool isApplicationCache, string suggestedCacheKey, bool hasTokens, System.DateTimeOffset? suggestedCacheExpiry, System.Threading.CancellationToken cancellationToken) -> void
+Microsoft.Identity.Client.TokenCacheNotificationArgs.TokenCacheNotificationArgs(Microsoft.Identity.Client.ITokenCacheSerializer tokenCache, string clientId, Microsoft.Identity.Client.IAccount account, bool hasStateChanged, bool isApplicationCache, string suggestedCacheKey, bool hasTokens, System.DateTimeOffset? suggestedCacheExpiry, System.Threading.CancellationToken cancellationToken, System.Guid correlationId) -> void
+Microsoft.Identity.Client.TokenCacheNotificationArgs.TokenCacheNotificationArgs(Microsoft.Identity.Client.ITokenCacheSerializer tokenCache, string clientId, Microsoft.Identity.Client.IAccount account, bool hasStateChanged, bool isApplicationCache, string suggestedCacheKey, bool hasTokens, System.DateTimeOffset? suggestedCacheExpiry, System.Threading.CancellationToken cancellationToken, System.Guid correlationId, System.Collections.Generic.IEnumerable<string> requestScopes, string requestTenantId) -> void
+Microsoft.Identity.Client.TokenCacheNotificationArgs.TokenCacheNotificationArgs(Microsoft.Identity.Client.ITokenCacheSerializer tokenCache, string clientId, Microsoft.Identity.Client.IAccount account, bool hasStateChanged, bool isApplicationCache, string suggestedCacheKey, bool hasTokens, System.DateTimeOffset? suggestedCacheExpiry, System.Threading.CancellationToken cancellationToken, System.Guid correlationId, System.Collections.Generic.IEnumerable<string> requestScopes, string requestTenantId, Microsoft.IdentityModel.Abstractions.IIdentityLogger identityLogger, bool piiLoggingEnabled, Microsoft.Identity.Client.TelemetryCore.TelemetryClient.TelemetryData telemetryData = null) -> void
+Microsoft.Identity.Client.TokenSource
+Microsoft.Identity.Client.TokenSource.Broker = 2 -> Microsoft.Identity.Client.TokenSource
+Microsoft.Identity.Client.TokenSource.Cache = 1 -> Microsoft.Identity.Client.TokenSource
+Microsoft.Identity.Client.TokenSource.IdentityProvider = 0 -> Microsoft.Identity.Client.TokenSource
+Microsoft.Identity.Client.TraceTelemetryConfig
+Microsoft.Identity.Client.TraceTelemetryConfig.AllowedScopes.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.TraceTelemetryConfig.AudienceType.get -> Microsoft.Identity.Client.TelemetryAudienceType
+Microsoft.Identity.Client.TraceTelemetryConfig.DispatchAction.get -> System.Action<Microsoft.Identity.Client.ITelemetryEventPayload>
+Microsoft.Identity.Client.TraceTelemetryConfig.SessionId.get -> string
+Microsoft.Identity.Client.TraceTelemetryConfig.TraceTelemetryConfig() -> void
+Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.UiRequiredExceptionClassification.AcquireTokenSilentFailed = 7 -> Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.UiRequiredExceptionClassification.AdditionalAction = 3 -> Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.UiRequiredExceptionClassification.BasicAction = 2 -> Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.UiRequiredExceptionClassification.ConsentRequired = 4 -> Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.UiRequiredExceptionClassification.MessageOnly = 1 -> Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.UiRequiredExceptionClassification.None = 0 -> Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.UiRequiredExceptionClassification.PromptNeverFailed = 6 -> Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.UiRequiredExceptionClassification.UserPasswordExpired = 5 -> Microsoft.Identity.Client.UiRequiredExceptionClassification
+Microsoft.Identity.Client.UserAssertion
+Microsoft.Identity.Client.UserAssertion.Assertion.get -> string
+Microsoft.Identity.Client.UserAssertion.AssertionType.get -> string
+Microsoft.Identity.Client.UserAssertion.UserAssertion(string assertion, string assertionType) -> void
+Microsoft.Identity.Client.UserAssertion.UserAssertion(string jwtBearerToken) -> void
+Microsoft.Identity.Client.Utils.Windows.WindowsNativeUtils
+Microsoft.Identity.Client.WindowsBrokerOptions
+Microsoft.Identity.Client.WindowsBrokerOptions.HeaderText.get -> string
+Microsoft.Identity.Client.WindowsBrokerOptions.HeaderText.set -> void
+Microsoft.Identity.Client.WindowsBrokerOptions.ListWindowsWorkAndSchoolAccounts.get -> bool
+Microsoft.Identity.Client.WindowsBrokerOptions.ListWindowsWorkAndSchoolAccounts.set -> void
+Microsoft.Identity.Client.WindowsBrokerOptions.MsaPassthrough.get -> bool
+Microsoft.Identity.Client.WindowsBrokerOptions.MsaPassthrough.set -> void
+Microsoft.Identity.Client.WindowsBrokerOptions.WindowsBrokerOptions() -> void
+Microsoft.Identity.Client.WwwAuthenticateParameters
+Microsoft.Identity.Client.WwwAuthenticateParameters.AuthenticationScheme.get -> string
+Microsoft.Identity.Client.WwwAuthenticateParameters.Authority.get -> string
+Microsoft.Identity.Client.WwwAuthenticateParameters.Authority.set -> void
+Microsoft.Identity.Client.WwwAuthenticateParameters.Claims.get -> string
+Microsoft.Identity.Client.WwwAuthenticateParameters.Claims.set -> void
+Microsoft.Identity.Client.WwwAuthenticateParameters.Error.get -> string
+Microsoft.Identity.Client.WwwAuthenticateParameters.Error.set -> void
+Microsoft.Identity.Client.WwwAuthenticateParameters.GetTenantId() -> string
+Microsoft.Identity.Client.WwwAuthenticateParameters.Nonce.get -> string
+Microsoft.Identity.Client.WwwAuthenticateParameters.Resource.get -> string
+Microsoft.Identity.Client.WwwAuthenticateParameters.Resource.set -> void
+Microsoft.Identity.Client.WwwAuthenticateParameters.Scopes.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.WwwAuthenticateParameters.Scopes.set -> void
+Microsoft.Identity.Client.WwwAuthenticateParameters.this[string key].get -> string
+Microsoft.Identity.Client.WwwAuthenticateParameters.WwwAuthenticateParameters() -> void
+override Microsoft.Identity.Client.AbstractClientAppBaseAcquireTokenParameterBuilder<T>.ExecuteAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
+override Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.ExecuteAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
+override Microsoft.Identity.Client.AbstractManagedIdentityAcquireTokenParameterBuilder<T>.ExecuteAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
+override Microsoft.Identity.Client.AbstractPublicClientAcquireTokenParameterBuilder<T>.ExecuteAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
+override Microsoft.Identity.Client.AccountId.Equals(object obj) -> bool
+override Microsoft.Identity.Client.AccountId.GetHashCode() -> int
+override Microsoft.Identity.Client.AccountId.ToString() -> string
+override Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ToString() -> string
+override Microsoft.Identity.Client.MsalException.ToString() -> string
+override Microsoft.Identity.Client.MsalManagedIdentityException.UpdateIsRetryable() -> void
+override Microsoft.Identity.Client.MsalServiceException.ToString() -> string
+override Microsoft.Identity.Client.Prompt.Equals(object obj) -> bool
+override Microsoft.Identity.Client.Prompt.GetHashCode() -> int
+static Microsoft.Identity.Client.AccountExtensions.GetTenantProfiles(this Microsoft.Identity.Client.IAccount account) -> System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.TenantProfile>
+static Microsoft.Identity.Client.Advanced.AcquireTokenParameterBuilderExtensions.WithExtraHttpHeaders<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IDictionary<string, string> extraHttpHeaders) -> T
+static Microsoft.Identity.Client.AppConfig.ManagedIdentityId.SystemAssigned.get -> Microsoft.Identity.Client.AppConfig.ManagedIdentityId
+static Microsoft.Identity.Client.AppConfig.ManagedIdentityId.WithUserAssignedClientId(string clientId) -> Microsoft.Identity.Client.AppConfig.ManagedIdentityId
+static Microsoft.Identity.Client.AppConfig.ManagedIdentityId.WithUserAssignedObjectId(string objectId) -> Microsoft.Identity.Client.AppConfig.ManagedIdentityId
+static Microsoft.Identity.Client.AppConfig.ManagedIdentityId.WithUserAssignedResourceId(string resourceId) -> Microsoft.Identity.Client.AppConfig.ManagedIdentityId
+static Microsoft.Identity.Client.AuthenticationHeaderParser.ParseAuthenticationHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders) -> Microsoft.Identity.Client.AuthenticationHeaderParser
+static Microsoft.Identity.Client.AuthenticationHeaderParser.ParseAuthenticationHeadersAsync(string resourceUri, System.Net.Http.HttpClient httpClient, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationHeaderParser>
+static Microsoft.Identity.Client.AuthenticationHeaderParser.ParseAuthenticationHeadersAsync(string resourceUri, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationHeaderParser>
+static Microsoft.Identity.Client.AuthenticationInfoParameters.CreateFromResponseHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders) -> Microsoft.Identity.Client.AuthenticationInfoParameters
+static Microsoft.Identity.Client.CacheOptions.EnableSharedCacheOptions.get -> Microsoft.Identity.Client.CacheOptions
+static Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.Create(string clientId) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(Microsoft.Identity.Client.ConfidentialClientApplicationOptions options) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.OnBeforeTokenRequest<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Func<Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData, System.Threading.Tasks.Task> onBeforeTokenRequestHandler) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithAdditionalCacheParameters<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IEnumerable<string> cacheParameters) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithAuthenticationExtension<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension authenticationExtension) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithProofOfPosessionKeyId<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, string keyId, string expectedTokenTypeFromAad = "Bearer") -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
+static Microsoft.Identity.Client.Extensibility.AcquireTokenForClientBuilderExtensions.WithProofOfPosessionKeyId(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, string keyId, string expectedTokenTypeFromAad = "Bearer") -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+static Microsoft.Identity.Client.Extensibility.AcquireTokenInteractiveParameterBuilderExtensions.WithCustomWebUi(this Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder builder, Microsoft.Identity.Client.Extensibility.ICustomWebUi customWebUi) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+static Microsoft.Identity.Client.Extensibility.AcquireTokenOnBehalfOfParameterBuilderExtensions.WithSearchInCacheForLongRunningProcess(this Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder builder, bool searchInCache = true) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithAppTokenProvider(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.Extensibility.AppTokenProviderParameters, System.Threading.Tasks.Task<Microsoft.Identity.Client.Extensibility.AppTokenProviderResult>> appTokenProvider) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationExtensions.StopLongRunningProcessInWebApiAsync(this Microsoft.Identity.Client.ILongRunningWebApi clientApp, string longRunningProcessSessionKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
+static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.FromIdToken(string idToken) -> Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket
+static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName) -> byte[]
+static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName, long logonId) -> byte[]
+static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.GetKrbCred(Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket ticket) -> byte[]
+static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.SaveToWindowsTicketCache(Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket ticket) -> void
+static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.SaveToWindowsTicketCache(Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket ticket, long logonId) -> void
+static Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySource() -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+static Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.Create(Microsoft.Identity.Client.AppConfig.ManagedIdentityId managedIdentityId) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+static Microsoft.Identity.Client.Metrics.TotalAccessTokensFromBroker.get -> long
+static Microsoft.Identity.Client.Metrics.TotalAccessTokensFromCache.get -> long
+static Microsoft.Identity.Client.Metrics.TotalAccessTokensFromIdP.get -> long
+static Microsoft.Identity.Client.Metrics.TotalDurationInMs.get -> long
+static Microsoft.Identity.Client.MsalException.FromJsonString(string json) -> Microsoft.Identity.Client.MsalException
+static Microsoft.Identity.Client.OsCapabilitiesExtensions.GetCertificate(this Microsoft.Identity.Client.IConfidentialClientApplication confidentialClientApplication) -> System.Security.Cryptography.X509Certificates.X509Certificate2
+static Microsoft.Identity.Client.OsCapabilitiesExtensions.IsEmbeddedWebViewAvailable(this Microsoft.Identity.Client.IPublicClientApplication publicClientApplication) -> bool
+static Microsoft.Identity.Client.OsCapabilitiesExtensions.IsSystemWebViewAvailable(this Microsoft.Identity.Client.IPublicClientApplication publicClientApplication) -> bool
+static Microsoft.Identity.Client.OsCapabilitiesExtensions.IsUserInteractive(this Microsoft.Identity.Client.IPublicClientApplication publicClientApplication) -> bool
+static Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential.Current() -> Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.Credential
+static Microsoft.Identity.Client.Prompt.operator !=(Microsoft.Identity.Client.Prompt x, Microsoft.Identity.Client.Prompt y) -> bool
+static Microsoft.Identity.Client.Prompt.operator ==(Microsoft.Identity.Client.Prompt x, Microsoft.Identity.Client.Prompt y) -> bool
+static Microsoft.Identity.Client.PublicClientApplication.OperatingSystemAccount.get -> Microsoft.Identity.Client.IAccount
+static Microsoft.Identity.Client.PublicClientApplicationBuilder.Create(string clientId) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.PublicClientApplicationBuilder.CreateWithApplicationOptions(Microsoft.Identity.Client.PublicClientApplicationOptions options) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.PublicClientApplicationExtensions.IsProofOfPossessionSupportedByClient(this Microsoft.Identity.Client.IPublicClientApplication app) -> bool
+static Microsoft.Identity.Client.SSHCertificates.SSHExtensions.WithSSHCertificateAuthenticationScheme(this Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder builder, string publicKeyJwk, string keyId) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
+static Microsoft.Identity.Client.SSHCertificates.SSHExtensions.WithSSHCertificateAuthenticationScheme(this Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder builder, string publicKeyJwk, string keyId) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+static Microsoft.Identity.Client.SystemWebViewOptions.OpenWithChromeEdgeBrowserAsync(System.Uri uri) -> System.Threading.Tasks.Task
+static Microsoft.Identity.Client.SystemWebViewOptions.OpenWithEdgeBrowserAsync(System.Uri uri) -> System.Threading.Tasks.Task
+static Microsoft.Identity.Client.TokenCacheExtensions.SetCacheOptions(this Microsoft.Identity.Client.ITokenCache tokenCache, Microsoft.Identity.Client.CacheOptions options) -> void
+static Microsoft.Identity.Client.Utils.Windows.WindowsNativeUtils.InitializeProcessSecurity() -> void
+static Microsoft.Identity.Client.Utils.Windows.WindowsNativeUtils.IsElevatedUser() -> bool
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders) -> System.Collections.Generic.IReadOnlyList<Microsoft.Identity.Client.WwwAuthenticateParameters>
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders, string scheme) -> Microsoft.Identity.Client.WwwAuthenticateParameters
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(string resourceUri, string scheme, System.Net.Http.HttpClient httpClient, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.WwwAuthenticateParameters>
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(string resourceUri, string scheme, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.WwwAuthenticateParameters>
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(string resourceUri, System.Net.Http.HttpClient httpClient, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Microsoft.Identity.Client.WwwAuthenticateParameters>>
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(string resourceUri, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Microsoft.Identity.Client.WwwAuthenticateParameters>>
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromResourceResponseAsync(string resourceUri) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.WwwAuthenticateParameters>
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromResourceResponseAsync(string resourceUri, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.WwwAuthenticateParameters>
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromResourceResponseAsync(System.Net.Http.HttpClient httpClient, string resourceUri, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.WwwAuthenticateParameters>
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromResponseHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders, string scheme = "Bearer") -> Microsoft.Identity.Client.WwwAuthenticateParameters
+static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue) -> Microsoft.Identity.Client.WwwAuthenticateParameters
+static Microsoft.Identity.Client.WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders, string scheme = "Bearer") -> string
+static readonly Microsoft.Identity.Client.Prompt.Consent -> Microsoft.Identity.Client.Prompt
+static readonly Microsoft.Identity.Client.Prompt.Create -> Microsoft.Identity.Client.Prompt
+static readonly Microsoft.Identity.Client.Prompt.ForceLogin -> Microsoft.Identity.Client.Prompt
+static readonly Microsoft.Identity.Client.Prompt.NoPrompt -> Microsoft.Identity.Client.Prompt
+static readonly Microsoft.Identity.Client.Prompt.SelectAccount -> Microsoft.Identity.Client.Prompt
+virtual Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.Validate() -> void
+virtual Microsoft.Identity.Client.MsalServiceException.UpdateIsRetryable() -> void
