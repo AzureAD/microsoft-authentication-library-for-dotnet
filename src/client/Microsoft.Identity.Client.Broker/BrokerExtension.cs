@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Broker
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
             }
-            else if (DesktopOsHelper.IsDarwin())
+            else if (DesktopOsHelper.IsMac())
             {
                  builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>

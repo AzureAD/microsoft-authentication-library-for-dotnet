@@ -594,7 +594,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
         public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
-            if (!DesktopOsHelper.IsWin10OrServerEquivalent() && !DesktopOsHelper.IsDarwin())
+            if (!DesktopOsHelper.IsWin10OrServerEquivalent() && !DesktopOsHelper.IsMac())
             {
                 _logger?.Warning("[RuntimeBroker] Not a supported operating system. WAM broker is not available. ");
                 return false;

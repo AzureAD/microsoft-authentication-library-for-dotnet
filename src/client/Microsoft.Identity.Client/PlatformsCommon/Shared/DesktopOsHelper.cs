@@ -44,20 +44,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public static bool IsMac()
         {
-#if MAC
-            return true;
-#elif NETFRAMEWORK
-            return Environment.OSVersion.Platform == PlatformID.MacOSX;
-#elif !__MOBILE__ 
-            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-#else
-            return false;
-#endif
-        }
-
-        public static bool IsDarwin()
-        {
-#if MAC
+#if NET8_0_OR_GREATER
             string OSDescription = RuntimeInformation.OSDescription;
             return OSDescription.Contains("Darwin", StringComparison.OrdinalIgnoreCase);
 #else
