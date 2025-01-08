@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
                 return true;
             }
 
-            if (EnabledOn.HasFlag(OperatingSystems.Mac) && DesktopOsHelper.IsDarwin())
+            if (EnabledOn.HasFlag(OperatingSystems.Mac) && DesktopOsHelper.IsMac())
             {
                 return true;
             }
