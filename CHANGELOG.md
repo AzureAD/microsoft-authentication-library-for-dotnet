@@ -1,3 +1,8 @@
+4.67.1
+==========
+### Bug Fixes
+- Added support for Azure Machine Learning (Azure ML) Managed Identity (MSI) to address missing functionality for token acquisition in Azure Machine Learning environments. See [Bug #4984](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4984)
+
 4.67.0
 ==========
 ### New Features
