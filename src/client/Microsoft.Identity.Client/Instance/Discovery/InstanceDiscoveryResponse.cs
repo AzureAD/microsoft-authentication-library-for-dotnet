@@ -2,16 +2,11 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.OAuth2;
-#if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net;
+using Microsoft.Identity.Client.Platforms.Json;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal sealed class InstanceDiscoveryResponse : OAuth2ResponseBase
     {

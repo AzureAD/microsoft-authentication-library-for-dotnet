@@ -9,12 +9,8 @@ using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 using JObject = System.Text.Json.Nodes.JsonObject;
-#else
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -57,11 +53,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 #if !MOBILE
         private IDictionary<string, string> AcquireCacheParametersFromResponse(
                                                     IEnumerable<string> persistedCacheParameters,
-#if SUPPORTS_SYSTEM_TEXT_JSON
                                                     Dictionary<string, JsonElement> extraDataFromResponse)
-#else
-                                                    Dictionary<string, JToken> extraDataFromResponse)
-#endif
         {
             if (persistedCacheParameters == null || !persistedCacheParameters.Any())
             {
@@ -70,17 +62,11 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             var cacheParameters = extraDataFromResponse?
                                     .Where(x => persistedCacheParameters.Contains(x.Key, StringComparer.InvariantCultureIgnoreCase))
-#if SUPPORTS_SYSTEM_TEXT_JSON
                                     .ToDictionary(x => x.Key, x => x.Value.ToString());
-#else
-                                    //Avoid formatting arrays because it adds new lines after every element
-                                    .ToDictionary(x => x.Key, x => x.Value.Type == JTokenType.Array || x.Value.Type == JTokenType.Object ?
-                                                                                    x.Value.ToString(Json.Formatting.None) :
-                                                                                    x.Value.ToString());
-#endif
             return cacheParameters;
         }
 #endif
+
         internal /* for test */ MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,

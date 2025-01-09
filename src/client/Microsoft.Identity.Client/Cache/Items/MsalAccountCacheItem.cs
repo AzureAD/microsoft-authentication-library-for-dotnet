@@ -10,12 +10,9 @@ using System.Text;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
-#else
-using Microsoft.Identity.Json.Linq;
-#endif
+
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -236,7 +233,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.AccountSource, AccountSource);
             if (WamAccountIds != null && WamAccountIds.Any())
             {
-#if SUPPORTS_SYSTEM_TEXT_JSON
                 var obj = new JsonObject();
 
                 foreach (KeyValuePair<string, string> accId in WamAccountIds)
@@ -245,9 +241,6 @@ namespace Microsoft.Identity.Client.Cache.Items
                 }
 
                 json[StorageJsonKeys.WamAccountIds] = obj;
-#else
-                json[StorageJsonKeys.WamAccountIds] = JObject.FromObject(WamAccountIds);
-#endif
             }
 
             return json;

@@ -5,17 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net;
+using Microsoft.Identity.Client.Platforms.Json;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 using System.Text.Json.Serialization;
-#else
-using Microsoft.Identity.Json;
-#endif
+
 
 namespace Microsoft.Identity.Client.OAuth2
 {
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class DeviceAuthHeader
     {
@@ -37,7 +33,6 @@ namespace Microsoft.Identity.Client.OAuth2
         public string Alg { get; private set; }
     }
 
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class DeviceAuthPayload
     {
@@ -51,9 +46,7 @@ namespace Microsoft.Identity.Client.OAuth2
         }
 
         [JsonProperty("iat")]
-#if SUPPORTS_SYSTEM_TEXT_JSON
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-#endif
         public long Iat { get; set; }
 
         [JsonProperty("aud")]

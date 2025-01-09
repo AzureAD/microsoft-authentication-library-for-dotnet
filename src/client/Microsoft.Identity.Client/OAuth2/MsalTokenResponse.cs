@@ -11,16 +11,11 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Serialization;
 using System.Text.Json;
-using Microsoft.Identity.Client.Platforms.net;
+using Microsoft.Identity.Client.Platforms.Json;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -51,7 +46,6 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string SpaCode = "spa_code";
     }
 
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase
     {
@@ -68,13 +62,8 @@ namespace Microsoft.Identity.Client.OAuth2
 #if !__MOBILE__
         // All properties not explicitly defined are added to this dictionary
         // See JSON overflow https://learn.microsoft.com/dotnet/standard/serialization/system-text-json/handle-overflow?pivots=dotnet-7-0
-#if SUPPORTS_SYSTEM_TEXT_JSON
         [JsonExtensionData]
         public Dictionary<string, JsonElement> ExtensionData { get; set; }
-#else
-        [JsonExtensionData]
-        public Dictionary<string, JToken> ExtensionData { get; set; }
-#endif
 #endif
         // Exposes only scalar properties from ExtensionData
         public IReadOnlyDictionary<string, string> CreateExtensionDataStringMap()
@@ -89,7 +78,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
             Dictionary<string, string> stringExtensionData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
             foreach (KeyValuePair<string, JsonElement> item in ExtensionData)
             {
                 if (item.Value.ValueKind != JsonValueKind.Undefined ||
@@ -98,27 +86,6 @@ namespace Microsoft.Identity.Client.OAuth2
                     stringExtensionData.Add(item.Key, item.Value.ToString());
                 }
             }
-#else
-            foreach (KeyValuePair<string, JToken> item in ExtensionData)
-            {
-                if (item.Value.Type == JTokenType.String ||
-                   item.Value.Type == JTokenType.Uri ||
-                   item.Value.Type == JTokenType.Boolean ||
-                   item.Value.Type == JTokenType.Date ||
-                   item.Value.Type == JTokenType.Float ||
-                   item.Value.Type == JTokenType.Guid ||
-                   item.Value.Type == JTokenType.Integer ||
-                   item.Value.Type == JTokenType.TimeSpan ||
-                   item.Value.Type == JTokenType.Null)
-                {
-                    stringExtensionData.Add(item.Key, item.Value.ToString());
-                }
-                else if (item.Value.Type == JTokenType.Array || item.Value.Type == JTokenType.Object)
-                {
-                    stringExtensionData.Add(item.Key, item.Value.ToString(Formatting.None));
-                }
-            }
-#endif
             return stringExtensionData;
 #endif
         }
@@ -142,20 +109,14 @@ namespace Microsoft.Identity.Client.OAuth2
         public string IdToken { get; set; }
 
         [JsonProperty(TokenResponseClaim.ExpiresIn)]
-#if SUPPORTS_SYSTEM_TEXT_JSON
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-#endif
         public long ExpiresIn { get; set; }
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-#endif
         [JsonProperty(TokenResponseClaim.ExtendedExpiresIn)]
         public long ExtendedExpiresIn { get; set; }
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-#endif
         [JsonProperty(TokenResponseClaim.RefreshIn)]
         public long? RefreshIn { get; set; }
 
@@ -193,15 +154,11 @@ namespace Microsoft.Identity.Client.OAuth2
                 if (metadataOriginal != null)
                 {
                     string brokerMetadataJson = Uri.UnescapeDataString(metadataOriginal);
-#if SUPPORTS_SYSTEM_TEXT_JSON
                     metadataDictionary = new Dictionary<string, string>();
                     foreach (var item in JsonDocument.Parse(brokerMetadataJson).RootElement.EnumerateObject())
                     {
                         metadataDictionary.Add(item.Name, item.Value.GetString());
                     }
-#else
-                    metadataDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(brokerMetadataJson);
-#endif
                 }
 
                 string homeAcctId = null;

@@ -1,12 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net;
+using Microsoft.Identity.Client.Platforms.Json;
 using JsonProperty = System.Text.Json.Serialization.JsonIncludeAttribute;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -14,7 +10,6 @@ namespace Microsoft.Identity.Client.Cache
     /// Contains the results of an ADAL token acquisition. Access Tokens from ADAL are not compatible 
     /// with MSAL, only Refresh Tokens are.
     /// </summary>
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal sealed class AdalResult
     {

@@ -1,12 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net;
+using Microsoft.Identity.Client.Platforms.Json;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -20,7 +16,6 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string CorrelationId = "correlation_id";
     }
 
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class OAuth2ResponseBase
     {
