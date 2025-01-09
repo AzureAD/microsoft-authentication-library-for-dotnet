@@ -993,3 +993,4 @@ const Microsoft.Identity.Client.MsalError.MissingTenantedAuthority = "missing_te
 const Microsoft.Identity.Client.MsalError.MtlsCertificateNotProvided = "mtls_certificate_not_provided" -> string
 const Microsoft.Identity.Client.MsalError.MtlsPopWithoutRegion = "mtls_pop_without_region" -> string
 const Microsoft.Identity.Client.MsalError.RegionRequiredForMtlsPop = "region_required_for_mtls_pop" -> string
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.MachineLearning = 7 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
