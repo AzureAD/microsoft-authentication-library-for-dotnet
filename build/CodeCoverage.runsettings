@@ -24,8 +24,9 @@ Included items must then not match any entries in the exclude list to remain inc
                             </Include>
                             <Exclude><!-- Exclude all test-related files -->
                                 <ModulePath>.*\\test\\.*</ModulePath>
-                                <ModulePath>.*Test\.dll</ModulePath>
-                                <ModulePath>.*Test\.exe</ModulePath>
+                                <ModulePath>.*\\.Tests?\\.dll$</ModulePath>
+                                <ModulePath>.*\\.Tests?\\.exe$</ModulePath>
+                                <ModulePath>.*\\nunit3\\.testadapter\\.dll$</ModulePath>
                             </Exclude>
                         </ModulePaths>
                         <Sources>
