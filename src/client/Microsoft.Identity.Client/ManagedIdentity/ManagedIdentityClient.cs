@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.MachineLearning => MachineLearningManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
                 _ => new ImdsManagedIdentitySource(requestContext)
@@ -57,11 +58,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string identityServerThumbprint = EnvironmentVariables.IdentityServerThumbprint;
             string msiSecret = EnvironmentVariables.IdentityHeader;
             string msiEndpoint = EnvironmentVariables.MsiEndpoint;
+            string msiSecretMachineLearning = EnvironmentVariables.MsiSecret;
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
             string podIdentityEndpoint = EnvironmentVariables.PodIdentityEndpoint;
 
-            
-            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
+            if (!string.IsNullOrEmpty(msiSecretMachineLearning) && !string.IsNullOrEmpty(msiEndpoint))
+            {
+                return ManagedIdentitySource.MachineLearning;
+            }
+            else if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
             {
                 if (!string.IsNullOrEmpty(identityServerThumbprint))
                 {
