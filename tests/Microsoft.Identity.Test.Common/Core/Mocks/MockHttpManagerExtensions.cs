@@ -393,7 +393,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             httpManager.AddMockHandler(httpMessageHandler);
         }
-
             
         private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySource managedIdentitySourceType, string resource)
         {

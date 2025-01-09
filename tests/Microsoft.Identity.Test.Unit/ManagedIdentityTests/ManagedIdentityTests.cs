@@ -1186,5 +1186,120 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
+
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySource.AppService)]
+        [DataRow(ManagedIdentitySource.Imds)]
+        [DataRow(ManagedIdentitySource.AzureArc)]
+        [DataRow(ManagedIdentitySource.CloudShell)]
+        [DataRow(ManagedIdentitySource.ServiceFabric)]
+        [DataRow(ManagedIdentitySource.MachineLearning)]
+        public async Task UnsupportedManagedIdentitySource_ThrowsExceptionDuringTokenAcquisitionAsync(
+            ManagedIdentitySource managedIdentitySource)
+        {
+            string UnsupportedEndpoint = "unsupported://endpoint";
+
+            using (new EnvVariableContext())
+            {
+                // Set unsupported environment variable
+                SetEnvironmentVariables(managedIdentitySource, UnsupportedEndpoint);
+
+                // Create the Managed Identity Application
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+
+                // Build the application
+                var mi = miBuilder.Build();
+
+                // Attempt to acquire a token and verify an exception is thrown
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
+                        .ExecuteAsync()
+                        .ConfigureAwait(false)).ConfigureAwait(false);
+
+                // Verify the exception details
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task MixedUserAndSystemAssignedManagedIdentityTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                // User-assigned identity client ID
+                string UserAssignedClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
+                string SystemAssignedClientId = "system_assigned_managed_identity";
+
+                // Create a builder for user-assigned identity
+                var userAssignedBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(UserAssignedClientId))
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                userAssignedBuilder.Config.AccessorOptions = null;
+
+                var userAssignedMI = userAssignedBuilder.BuildConcrete();
+
+                // Record token cache access for user-assigned identity
+                var userAssignedCacheRecorder = userAssignedMI.AppTokenCacheInternal.RecordAccess();
+
+                // Mock handler for user-assigned token
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.AppService,
+                    userAssignedId: UserAssignedClientId,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId);
+
+                var userAssignedResult = await userAssignedMI.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(userAssignedResult);
+                Assert.AreEqual(TokenSource.IdentityProvider, userAssignedResult.AuthenticationResultMetadata.TokenSource);
+
+                // Verify user-assigned cache entries
+                userAssignedCacheRecorder.AssertAccessCounts(1, 1);
+
+                // Create a builder for system-assigned identity
+                var systemAssignedBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                systemAssignedBuilder.Config.AccessorOptions = null;
+
+                var systemAssignedMI = systemAssignedBuilder.BuildConcrete();
+
+                // Record token cache access for system-assigned identity
+                var systemAssignedCacheRecorder = systemAssignedMI.AppTokenCacheInternal.RecordAccess();
+
+                // Mock handler for system-assigned token
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.AppService);
+
+                var systemAssignedResult = await systemAssignedMI.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(systemAssignedResult);
+                Assert.AreEqual(TokenSource.IdentityProvider, systemAssignedResult.AuthenticationResultMetadata.TokenSource);
+
+                // Verify system-assigned cache entries
+                systemAssignedCacheRecorder.AssertAccessCounts(1, 1);
+
+                // Ensure the cache contains correct entries for both identities
+                var userAssignedTokens = userAssignedMI.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
+                var systemAssignedTokens = systemAssignedMI.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
+
+                Assert.AreEqual(1, userAssignedTokens.Count, "User-assigned cache entry missing.");
+                Assert.AreEqual(1, systemAssignedTokens.Count, "System-assigned cache entry missing.");
+
+                // Verify the ClientId for each cached entry
+                Assert.AreEqual(UserAssignedClientId, userAssignedTokens[0].ClientId, "User-assigned ClientId mismatch in cache.");
+                Assert.AreEqual(SystemAssignedClientId, systemAssignedTokens[0].ClientId, "System-assigned ClientId mismatch in cache.");
+            }
+        }
     }
 }
