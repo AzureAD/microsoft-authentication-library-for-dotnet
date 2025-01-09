@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
@@ -350,14 +349,16 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             return;
                         }
 
-                        dynamic errorResult = JObject.Parse(helloRequestResult.GetString(BrokerConstants.BrokerResultV2));
+                        string errorResponse = helloRequestResult.GetString(BrokerConstants.BrokerResultV2);
                         string errorCode = null;
                         string errorDescription = null;
 
-                        if (!string.IsNullOrEmpty(errorResult))
+                        if (!string.IsNullOrEmpty(errorResponse))
                         {
-                            errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-                            string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                            // serialize the error response to get the error code and error message withouth dynamic
+                            var errorResult = JsonHelper.DeserializeFromJson<BrokerErrorResponse>(errorResponse);
+                            errorCode = errorResult.BrokerErrorCode;
+                            string errorMessage = errorResult.BrokerErrorMessage;
                             errorDescription = $"[Android broker] An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
                         }
                         else
