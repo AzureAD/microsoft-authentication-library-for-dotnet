@@ -1,3 +1,25 @@
+4.67.1
+==========
+### Bug Fixes
+- Added support for Azure Machine Learning (Azure ML) Managed Identity (MSI) to address missing functionality for token acquisition in Azure Machine Learning environments. See [Bug #4984](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4984)
+
+4.67.0
+==========
+### New Features
+- MSAL.NET now supports acquiring token for Client Credentials flow with a Subject Name Issuer (SNI) certificate over Mutual TLS (mTLS) for first-party applications. See [Issue #4986](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4986)
+- Bumped NET SDK from net6 to net8, aligning MSAL.NET with the latest .NET standards and features. See [Feature Request #5025](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5025)
+- Public API analyzer integrated to enhance API compliance and stability. See [Feature Request #4931](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4931)
+
+### Bug Fixes
+- Improved AcquireTokenSilent logging and handling of Family of Client IDs (FOCI). See [Bug #4988](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4988)
+- Fixed issues where DurationTotalInMs in `AuthenticationResultMetadata` differed from Stopwatch measurements. See [Bug #4895](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4895)
+- Resolved incorrect computation of OTel durations in L1 cache and during the creation of POP tokens. See [Bug #5036](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5036)
+- Addressed an issue where `AbstractAcquireTokenParameterBuilder<T>.WithAdfsAuthority` threw exceptions when the tenant ID was null and the authority host URI ended in /adfs. See [Bug #4860](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4860)
+- Fixed a parsing issue in Managed Identity to align with Azure.Identity's behavior for handling invalid JSON responses. See [Bug #5016](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5016)
+
+### Deprecated
+- Removed MSAL v3 migration aids. See [Remove #4987](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4987)
+
 4.66.2
 ==========
 ### Bug Fixes

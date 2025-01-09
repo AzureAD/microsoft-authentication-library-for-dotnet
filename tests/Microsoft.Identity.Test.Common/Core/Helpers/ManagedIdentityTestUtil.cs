@@ -59,6 +59,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
                     Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", thumbprint);
                     break;
+                case ManagedIdentitySource.MachineLearning:
+                    Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
+                    Environment.SetEnvironmentVariable("MSI_SECRET", secret);
+                    break;
             }
         }
 
