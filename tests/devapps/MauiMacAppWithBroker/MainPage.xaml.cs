@@ -17,6 +17,10 @@ public partial class MainPage : ContentPage
 
 	private async void OnCounterClicked(object sender, EventArgs e)
 	{
+		// {
+		// 	if (sender is Button button)
+		// 		button.IsEnabled = false;
+		// }
 
 		SemanticScreenReader.Announce(CounterBtn.Text);
 
@@ -38,28 +42,26 @@ public partial class MainPage : ContentPage
 		
 		var pca = builder.Build();
 
-		LogCallback logCallback = null;
-		LogLevel level;
+		var interactiveBuilder = pca.AcquireTokenInteractive(new string[]{"https://graph.microsoft.com/.default"});
 
 		
-		RunAtiAsync(pca);
+		AuthenticationResult result = await interactiveBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+		IAccount account = result.Account;
+
+		var silentBuilder = pca.AcquireTokenSilent(new string[]{"https://graph.microsoft.com/.default"}, account);
+
+		result = await silentBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+		
+		// {
+		// 	if (sender is Button button)
+		// 		button.IsEnabled = true;
+		// }
 	}
 
-	private async Task<AuthenticationResult> RunAtiAsync(IPublicClientApplication pca)
+	private async void OnGetAllAccountsClicked(object sender, EventArgs e)
 	{
-		var builder = pca.AcquireTokenInteractive(new string[]{"https://graph.microsoft.com/.default"});
-
-		builder.WithUseEmbeddedWebView(true)
-		//.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
-		//.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
-		.WithEmbeddedWebViewOptions(
-		new EmbeddedWebViewOptions()
-		{
-			Title = "Hello world",
-		});
-
-		AuthenticationResult result = await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-		return result;
+		
 	}
 
 	private static void SampleLogging(LogLevel level, string message, bool containsPii)

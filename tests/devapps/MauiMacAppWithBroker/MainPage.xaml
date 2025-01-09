@@ -26,7 +26,14 @@
 
             <Button
                 x:Name="CounterBtn"
-                Text="ACI" 
+                Text="ACI and ACS" 
+                SemanticProperties.Hint="Counts the number of times you click"
+                Clicked="OnCounterClicked"
+                HorizontalOptions="Fill" />
+
+            <Button
+                x:Name="GetAllAccounts"
+                Text="Get all accounts" 
                 SemanticProperties.Hint="Counts the number of times you click"
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Fill" />
