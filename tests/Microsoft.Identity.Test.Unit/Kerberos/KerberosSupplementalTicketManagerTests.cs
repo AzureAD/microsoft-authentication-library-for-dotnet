@@ -2,12 +2,10 @@
 // Licensed under the MIT License.
 
 #if NETFRAMEWORK
-using System.Linq;
 using Microsoft.Identity.Client.Kerberos;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text.Json;
 
 namespace Microsoft.Identity.Test.Unit.Kerberos
 {
@@ -22,17 +20,17 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         /// <summary>
         /// Service principal name for testing.
         /// </summary>
-        private static readonly string _testServicePrincipalName = "HTTP/prod.aadkreberos.msal.com";
+        private const string TestServicePrincipalName = "HTTP/prod.aadkreberos.msal.com";
 
         /// <summary>
         /// Username within the ID token.
         /// </summary>
-        private static readonly string _testClientName = "localAdmin@aadktest.onmicrosoft.com";
+        private const string TestClientName = "localAdmin@aadktest.onmicrosoft.com";
 
         /// <summary>
         /// Sample ID Token without Kerbero Service Ticket.
         /// </summary>
-        private static readonly string _testIdToken =
+        private const string TestIdToken =
             "eyJ0eXAiOiJKV1QiLCJyaCI6IjAuQWdBQXI0R0lRckdhczBDQldEWVJOWV9fYUlLMElWSlJKck5NbXRqQW1uamszcDRzQU5NLiIsImFsZyI6IlJTMjU2"
             + "Iiwia2lkIjoibk9vM1pEck9EWEVLMWpLV2hYc2xIUl9LWEVnIn0.eyJhdWQiOiI1MjIxYjQ4Mi0yNjUxLTRjYjMtOWFkOC1jMDlhNzhlNGRlOWUiLCJp"
             + "c3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNDI4ODgxYWYtOWFiMS00MGIzLTgxNTgtMzYxMTM1OGZmZjY4L3YyLjAiLCJpYXQi"
@@ -48,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         /// <summary>
         /// Sample ID token sample with Kerberos Service Ticket.
         /// </summary>
-        private static readonly string _testIdTokenWithKerberosTicketClaim =
+        private const string TestIdTokenWithKerberosTicketClaim =
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyJ9.eyJhdWQiOiI1MjIxYjQ4Mi0yNjUxLTRj"
             + "YjMtOWFkOC1jMDlhNzhlNGRlOWUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNDI4ODgxYWYtOWFiMS00MGIzLTgxNTgtMz"
             + "YxMTM1OGZmZjY4L3YyLjAiLCJpYXQiOjE2MTk4MTg1MTgsIm5iZiI6MTYxOTgxODUxOCwiZXhwIjoxNjE5ODIyNDE4LCJhaW8iOiJBVFFBeS84VEFBQUFP"
@@ -99,19 +97,19 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         [TestMethod]
         public void FromIdToken_WithKerberosTicket()
         {
-            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(_testIdTokenWithKerberosTicketClaim);
+            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(TestIdTokenWithKerberosTicketClaim);
 
             Assert.IsNotNull(ticket);
             Assert.IsTrue(string.IsNullOrEmpty(ticket.ErrorMessage));
             Assert.IsFalse(string.IsNullOrEmpty(ticket.KerberosMessageBuffer));
-            Assert.AreEqual(_testServicePrincipalName, ticket.ServicePrincipalName, "Service principal name is not matched.");
-            Assert.AreEqual(_testClientName, ticket.ClientName, "Client name is not matched.");
+            Assert.AreEqual(TestServicePrincipalName, ticket.ServicePrincipalName, "Service principal name is not matched.");
+            Assert.AreEqual(TestClientName, ticket.ClientName, "Client name is not matched.");
         }
 
         [TestMethod]
         public void FromIdToken_WithoutKerberosTicket()
         {
-            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(_testIdToken);
+            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(TestIdToken);
 
             Assert.IsNull(ticket);
         }
@@ -119,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         [TestMethod]
         public void GetKrbCred()
         {
-            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(_testIdTokenWithKerberosTicketClaim);
+            KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(TestIdTokenWithKerberosTicketClaim);
             byte[] krbCred = KerberosSupplementalTicketManager.GetKrbCred(ticket);
 
             Assert.IsNotNull(krbCred);
@@ -128,53 +126,41 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
         [TestMethod]
         public void GetKerberosTicketClaim_IdToken()
         {
+            // {id_token: { "xms_as_rep":{"essential":"false","value":"HTTP/prod.aadkreberos.msal.com"} } }
             string kerberosClaim
-                = KerberosSupplementalTicketManager.GetKerberosTicketClaim(_testServicePrincipalName, KerberosTicketContainer.IdToken);
+                = KerberosSupplementalTicketManager.GetKerberosTicketClaim(TestServicePrincipalName, KerberosTicketContainer.IdToken);
 
-            Assert.IsFalse(string.IsNullOrEmpty(kerberosClaim));
-            JsonHelper.DeserializeFromJson<JObject>(kerberosClaim);
+            using (JsonDocument document = JsonDocument.Parse(kerberosClaim))
+            {
+                JsonElement root = document.RootElement;
 
-            JObject claim = JObject.Parse(kerberosClaim);
-            Assert.IsNotNull(claim);
-
-            Assert.IsTrue(claim.ContainsKey("id_token"));
-            JToken idToken = claim.GetValue("id_token");
-            
-            
-            Assert.IsNotNull(idToken);
-            
-            
-            CheckKerberosClaim(idToken);
+                Assert.IsTrue(root.TryGetProperty("id_token", out JsonElement idToken), "id_token property is missing.");
+                CheckKerberosClaimContent(idToken);
+            }
         }
 
         [TestMethod]
         public void GetKerberosTicketClaim_AccessToken()
         {
             string kerberosClaim
-                = KerberosSupplementalTicketManager.GetKerberosTicketClaim(_testServicePrincipalName, KerberosTicketContainer.AccessToken);
+                = KerberosSupplementalTicketManager.GetKerberosTicketClaim(TestServicePrincipalName, KerberosTicketContainer.AccessToken);
 
-            Assert.IsFalse(string.IsNullOrEmpty(kerberosClaim));
+            using (JsonDocument document = JsonDocument.Parse(kerberosClaim))
+            {
+                JsonElement root = document.RootElement;
 
-            JObject claim = JObject.Parse(kerberosClaim);
-            Assert.IsNotNull(claim);
-
-            Assert.IsTrue(claim.ContainsKey("access_token"));
-            JToken accessToken = claim.GetValue("access_token");
-            Assert.IsNotNull(accessToken);
-
-            CheckKerberosClaim(accessToken);
+                Assert.IsTrue(root.TryGetProperty("access_token", out JsonElement accessToken), "access_token property is missing.");
+                CheckKerberosClaimContent(accessToken);
+            }
         }
 
-        private void CheckKerberosClaim(JToken claim)
-        {            
-            JToken asRep = claim["xms_as_rep"];
-            Assert.IsNotNull(asRep);
-
-            Assert.AreEqual("false", asRep["essential"].Value<string>(), 
-                "essential field is not matched.");
-            
-            Assert.AreEqual(_testServicePrincipalName, asRep["value"].Value<string>(),
-                "Service principal name is not matched.");
+        private static void CheckKerberosClaimContent(JsonElement idToken)
+        {
+            Assert.IsTrue(idToken.TryGetProperty("xms_as_rep", out JsonElement xmsAsRep), "xms_as_rep property is missing.");
+            Assert.IsTrue(xmsAsRep.TryGetProperty("essential", out JsonElement essential), "essential property is missing.");
+            Assert.AreEqual("false", essential.GetString(), "essential value is not matched.");
+            Assert.IsTrue(xmsAsRep.TryGetProperty("value", out JsonElement value), "value property is missing.");
+            Assert.AreEqual(TestServicePrincipalName, value.GetString(), "value is not matched.");
         }
     }
 }

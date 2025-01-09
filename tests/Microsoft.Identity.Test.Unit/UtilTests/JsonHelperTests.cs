@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
@@ -164,6 +165,31 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Assert.AreEqual("eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0", response.ClientInfo);
 
         }
-    }
 
+        [DataTestMethod]
+        [DataRow("{\"name\":\"John\", \"age\":30}", "{\"age\":40, \"city\":\"New York\"}", "{\"name\":\"John\", \"age\":40, \"city\":\"New York\"}")]        
+        [DataRow("{\"numbers\":[1, 2, 3]}", "{\"numbers\":[4, 5, 6]}", "{\"numbers\":[1, 2, 3, 4, 5, 6]}")]
+        [DataRow("{\"value\":10}", "{\"value\":20}", "{\"value\":20}")]
+        [DataRow("{}", "{\"name\":\"John\", \"age\":30}", "{\"name\":\"John\", \"age\":30}")]
+        [DataRow("{\"name\":\"John\", \"age\":null}", "{\"age\":30, \"city\":null}", "{\"name\":\"John\", \"age\":30, \"city\":null}")]
+        [DataRow("{\"person\":{\"name\":\"John\", \"age\":30}}", "{\"person\":{\"age\":40, \"city\":\"New York\"}}", "{\"person\":{\"name\":\"John\", \"age\":40, \"city\":\"New York\"}}")]
+        [DataRow("{\"array\":[{\"id\":1}, {\"id\":2}]}", "{\"array\":[{\"id\":3}, {\"id\":4}]}", "{\"array\":[{\"id\":1}, {\"id\":2}, {\"id\":3}, {\"id\":4}]}")]
+        [DataRow("{\"mixed\":{\"array\":[1, 2], \"object\":{\"key\":\"value\"}}}", "{\"mixed\":{\"array\":[3, 4], \"object\":{\"key2\":\"value2\"}}}", "{\"mixed\":{\"array\":[1, 2, 3, 4], \"object\":{\"key\":\"value\", \"key2\":\"value2\"}}}")]
+        [DataRow("{\"nested\":{\"level1\":{\"level2\":{\"level3\":\"value\"}}}}", "{\"nested\":{\"level1\":{\"level2\":{\"level3\":\"newValue\", \"level4\":\"anotherValue\"}}}}", "{\"nested\":{\"level1\":{\"level2\":{\"level3\":\"newValue\", \"level4\":\"anotherValue\"}}}}")]
+        [DataRow("{\"boolean\":true}", "{\"boolean\":false}", "{\"boolean\":false}")]
+        [DataRow("{\"nullValue\":null}", "{\"nullValue\":\"notNull\"}", "{\"nullValue\":\"notNull\"}")]
+        public void Merge_JsonStrings_ShouldMergeCorrectly(string originalJsonStr, string newContentStr, string expectedJsonStr)
+        {
+            // Arrange
+            var originalJson = JsonNode.Parse(originalJsonStr).AsObject();
+            var newContent = JsonNode.Parse(newContentStr).AsObject();
+            var expectedJson = JsonNode.Parse(expectedJsonStr).AsObject();
+
+            // Act
+            JsonObject result = JsonHelper.Merge(originalJson, newContent);
+
+            // Assert
+            JsonTestUtils.AssertJsonDeepEquals(expectedJsonStr, result.ToJsonString());
+        }
+    }
 }

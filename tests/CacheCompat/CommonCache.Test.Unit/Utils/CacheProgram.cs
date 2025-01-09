@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
-using Microsoft.Identity.Json;
+using Newtonsoft.Json;
 
 namespace CommonCache.Test.Unit.Utils
 {

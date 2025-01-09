@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             const string Message = "Please add a [Preserve(AllMembers=true)] attribute to each serializable object to avoid the Xamarin Linker removing this type. Type missing this: ";
             var serializableTypes = typeof(PublicClientApplication).Assembly.GetTypes()
                 .Where(
-                    t => t.GetCustomAttributes(typeof(JsonObjectAttribute), true).Any());
+                    t => t.GetCustomAttributes(typeof(JsonObject), true).Any());
 
             foreach (var serializableType in serializableTypes)
             {
