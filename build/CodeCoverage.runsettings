@@ -26,11 +26,12 @@ Included items must then not match any entries in the exclude list to remain inc
                                 <ModulePath>.*\\test\\.*</ModulePath>
                                 <ModulePath>.*Test\.dll</ModulePath>
                                 <ModulePath>.*Test\.exe</ModulePath>
-                                <ModulePath>.*nunit3.testadapter.dll$</ModulePath>
-                                <ModulePath>.*commoncache.test.common.dll$</ModulePath>
-                                <ModulePath>.*commoncache.test.msaljava.exe$</ModulePath>
-                                <ModulePath>.*commoncache.test.msalv3.exe$</ModulePath>
-                                <ModulePath>.*microsoft.identity.test.labinfrastructure.dll$</ModulePath>
+                                <ModulePath>.*[\\/]commoncache\.test\.common\.dll$</ModulePath>
+                                <ModulePath>.*[\\/]commoncache\.test\.msaljava\.exe$</ModulePath>
+                                <ModulePath>.*[\\/]commoncache\.test\.msalv3\.exe$</ModulePath>
+                                <ModulePath>.*[\\/]commoncache\.test\.unit\.dll$</ModulePath>
+                                <ModulePath>.*[\\/]nunit3\.testadapter\.dll$</ModulePath>
+                                <ModulePath>.*[\\/]microsoft\.identity\.test\.labinfrastructure\.dll$</ModulePath>
                             </Exclude>
                         </ModulePaths>
                         <Sources>
