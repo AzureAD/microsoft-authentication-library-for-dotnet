@@ -422,7 +422,6 @@ Microsoft.Identity.Client.BrokerOptions.MsaPassthrough.set -> void
 Microsoft.Identity.Client.BrokerOptions.OperatingSystems
 Microsoft.Identity.Client.BrokerOptions.OperatingSystems.None = 0 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
 Microsoft.Identity.Client.BrokerOptions.OperatingSystems.Windows = 1 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
-Microsoft.Identity.Client.BrokerOptions.OperatingSystems.OSX = 2 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
 Microsoft.Identity.Client.BrokerOptions.Title.get -> string
 Microsoft.Identity.Client.BrokerOptions.Title.set -> void
 Microsoft.Identity.Client.Cache.CacheData
