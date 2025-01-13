@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Broker
                 builder.Config.BrokerCreatorFunc =
                    (uiParent, appConfig, logger) =>
                    {
-                       logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. Runtime broker or SsoPolicy support is not available.");
+                       logger.Info("[RuntimeBroker] not available in current platform.");
                        return new NullBroker(logger);
                    };
             }

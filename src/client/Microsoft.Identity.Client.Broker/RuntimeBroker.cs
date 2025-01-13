@@ -107,6 +107,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             else
             {
                 // TODO:ADO 3055958 Parent window handle support on mac
+                // Without setting parent window on macOS, the mac broker UI will show up in the middle
+                // of the screen, and keep in the foreground until UI dismissed.
+                // Technically, macOS broker only accept an objc pointer as window handle, currently we
+                // do not know how to get such kind of pointer in MAUI. The solution is still unclear.
                 _parentHandle = (IntPtr)1;
             }
 
