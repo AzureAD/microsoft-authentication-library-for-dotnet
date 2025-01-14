@@ -66,6 +66,21 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
         }
 
+        public static void SetUpgradeScenarioEnvironmentVariables(ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint")
+        {
+            // Use the common method to set base environment variables
+            SetEnvironmentVariables(managedIdentitySource, endpoint, secret, thumbprint);
+
+            // Add upgrade-specific variables where needed
+            switch (managedIdentitySource)
+            {
+                case ManagedIdentitySource.AppService:
+                    Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
+                    Environment.SetEnvironmentVariable("MSI_SECRET", secret);
+                    break;
+            }
+        }
+
         /// <summary>
         /// Create the MIA with the http proxy
         /// </summary>

@@ -20,6 +20,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class AppServiceTests : TestBase
     {
         private const string AppService = "App Service";
+        internal const string AppServiceEndpoint = "http://127.0.0.1:41564/msi/token";
+        internal const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
+        internal const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
+        internal const string AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
+        internal const string CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
+        internal const string ServiceFabricEndpoint = "https://localhost:2377/metadata/identity/oauth2/token";
 
         [TestMethod]
         public async Task AppServiceInvalidEndpointAsync()
@@ -45,6 +51,28 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
                 Assert.AreEqual(ManagedIdentitySource.AppService.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", "127.0.0.1:41564/msi/token", AppService), ex.Message);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
+        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, ManagedIdentitySource.DefaultToImds)]
+        [DataRow(null, ManagedIdentitySource.Imds, ManagedIdentitySource.DefaultToImds)]
+        [DataRow(AzureArcEndpoint, ManagedIdentitySource.AzureArc, ManagedIdentitySource.AzureArc)]
+        [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell, ManagedIdentitySource.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
+        public void TestAppServiceUpgradeScenario(
+            string endpoint,
+            ManagedIdentitySource managedIdentitySource,
+            ManagedIdentitySource expectedManagedIdentitySource)
+        {
+            using (new EnvVariableContext())
+            {
+                SetUpgradeScenarioEnvironmentVariables(managedIdentitySource, endpoint);
+
+                Assert.AreEqual(expectedManagedIdentitySource, ManagedIdentityApplication.GetManagedIdentitySource());
             }
         }
     }
