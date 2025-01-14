@@ -22,10 +22,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string AppService = "App Service";
         internal const string AppServiceEndpoint = "http://127.0.0.1:41564/msi/token";
         internal const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
-        internal const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
-        internal const string AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
-        internal const string CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
-        internal const string ServiceFabricEndpoint = "https://localhost:2377/metadata/identity/oauth2/token";
 
         [TestMethod]
         public async Task AppServiceInvalidEndpointAsync()
