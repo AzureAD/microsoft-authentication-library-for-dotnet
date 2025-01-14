@@ -62,11 +62,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
             string podIdentityEndpoint = EnvironmentVariables.PodIdentityEndpoint;
 
-            if (!string.IsNullOrEmpty(msiSecretMachineLearning) && !string.IsNullOrEmpty(msiEndpoint))
-            {
-                return ManagedIdentitySource.MachineLearning;
-            }
-            else if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
+            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
             {
                 if (!string.IsNullOrEmpty(identityServerThumbprint))
                 {
@@ -76,6 +72,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     return ManagedIdentitySource.AppService;
                 }
+            }
+            else if (!string.IsNullOrEmpty(msiSecretMachineLearning) && !string.IsNullOrEmpty(msiEndpoint))
+            {
+                return ManagedIdentitySource.MachineLearning;
             }
             else if (!string.IsNullOrEmpty(msiEndpoint))
             {
