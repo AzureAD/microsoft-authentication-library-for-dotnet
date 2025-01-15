@@ -47,16 +47,16 @@ namespace WAMClassLibrary
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             var accountToLogin = accounts.FirstOrDefault();
 
-            // try
-            // {
-            //     var authResult = await pca.AcquireTokenSilent(new[] { "user.read" }, accountToLogin)
-            //                           .ExecuteAsync().ConfigureAwait(false);
-            // }
-            // catch (MsalUiRequiredException ex)
-            // {
-            //     Console.WriteLine(ex.Message);
-            //     Console.WriteLine(ex.ErrorCode);
-            // }
+            try
+            {
+                var authResult = await pca.AcquireTokenSilent(new[] { "user.read" }, accountToLogin)
+                                      .ExecuteAsync().ConfigureAwait(false);
+            }
+            catch (MsalUiRequiredException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ErrorCode);
+            }
 
             try
             {
