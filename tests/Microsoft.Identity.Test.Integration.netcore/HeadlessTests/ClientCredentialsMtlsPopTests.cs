@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        //[TestMethod]
+        [TestMethod]
         public async Task Sni_Gets_Pop_Token_Successfully_TestAsync()
         {
             // Arrange: Use the public cloud settings for testing
