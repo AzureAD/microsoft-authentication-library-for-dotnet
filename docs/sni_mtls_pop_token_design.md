@@ -126,6 +126,65 @@ When implementing this feature, ensure both client-side and server-side telemetr
 
 This telemetry will aid in diagnosing issues and optimizing performance.
 
+## Task List
+
+### [EPIC 3127989](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3127989) - Public Preview - SDK support for MTLS-POP tokens for SN/I certificates
+
+<details>
+<summary>Features</summary>
+
+- **[3127991](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3127991)** Public Preview - SDK support for MTLS-POP tokens for SN/I certificates (MSAL .NET)
+
+  <details>
+  <summary>Product Backlog</summary>
+
+  - **[3128002](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128002)** Add support for MTLS-POP tokens for SN/I certificates
+  - **[3128009](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128009)** Add Unit tests for MTLS-POP tokens for SN/I Certificates
+  - **[3128017](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128017)** Add client-side telemetry for MTLS-POP tokens for SN/I Certificates
+  - **[3128015](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128015)** Add Integration tests for MTLS-POP tokens for SN/I Certificates
+
+  </details>
+
+- **[3127992](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3127992)** Public Preview - SDK support for MTLS-POP tokens for SN/I certificates (MSAL JAVA)
+
+  <details>
+  <summary>Product Backlog</summary>
+
+  - **[3128048](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128048)** Add support for MTLS-POP tokens for SN/I certificates
+  - **[3128052](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128052)** Add Unit tests for MTLS-POP tokens for SN/I Certificates
+  - **[3128055](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128055)** Add client-side telemetry for MTLS-POP tokens for SN/I Certificates
+  - **[3128054](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128054)** Add Integration tests for MTLS-POP tokens for SN/I Certificates
+
+  </details>
+
+- **[3127993](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3127993)** Public Preview - SDK support for MTLS-POP tokens for SN/I certificates (MSAL NODE)
+
+  <details>
+  <summary>Product Backlog</summary>
+
+  - **[3128059](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128059)** Add support for MTLS-POP tokens for SN/I certificates
+  - **[3128060](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128060)** Add Unit tests for MTLS-POP tokens for SN/I Certificates
+  - **[3128057](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128057)** Add client-side telemetry for MTLS-POP tokens for SN/I Certificates
+  - **[3128058](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128058)** Add Integration tests for MTLS-POP tokens for SN/I Certificates
+
+  </details>
+
+- **[3127994](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3127994)** Public Preview - SDK support for MTLS-POP tokens for SN/I certificates (MSAL PYTHON)
+
+  <details>
+  <summary>Product Backlog</summary>
+
+  - **[3128065](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128065)** Add support for MTLS-POP tokens for SN/I certificates
+  - **[3128066](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128066)** Add Unit tests for MTLS-POP tokens for SN/I Certificates
+  - **[3128061](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128061)** Add client-side telemetry for MTLS-POP tokens for SN/I Certificates
+  - **[3128064](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128064)** Add Integration tests for MTLS-POP tokens for SN/I Certificates
+
+  </details>
+
+- **[3128075](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3128075)** Public Preview - SDK support for MTLS-POP tokens for SN/I certificates in DSTS (MSAL .NET)
+
+</details>
+
 ## Appendix: References
 
 - **[RFC 8705: Mutual TLS](https://tools.ietf.org/html/rfc8705)**
