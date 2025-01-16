@@ -20,6 +20,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class AppServiceTests : TestBase
     {
         private const string AppService = "App Service";
+        internal const string AppServiceEndpoint = "http://127.0.0.1:41564/msi/token";
+        internal const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
 
         [TestMethod]
         public async Task AppServiceInvalidEndpointAsync()
@@ -45,6 +47,24 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
                 Assert.AreEqual(ManagedIdentitySource.AppService.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", "127.0.0.1:41564/msi/token", AppService), ex.Message);
+            }
+        }
+
+        // Regression test for Bug ID #5077 - ManagedIdentityCredential authentication failed 
+        [DataTestMethod]
+        [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
+        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
+        public void TestAppServiceUpgradeScenario(
+            string endpoint,
+            ManagedIdentitySource managedIdentitySource,
+            ManagedIdentitySource expectedManagedIdentitySource)
+        {
+            using (new EnvVariableContext())
+            {
+                SetUpgradeScenarioEnvironmentVariables(managedIdentitySource, endpoint);
+
+                Assert.AreEqual(expectedManagedIdentitySource, ManagedIdentityApplication.GetManagedIdentitySource());
             }
         }
     }
