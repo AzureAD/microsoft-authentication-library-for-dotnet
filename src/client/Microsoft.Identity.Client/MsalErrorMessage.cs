@@ -189,7 +189,8 @@ namespace Microsoft.Identity.Client
         public const string PlatformNotSupported = "Platform Not Supported";
 
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1} ";
-        public const string ParsingWsTrustResponseFailedErrorTemplate = "Federated service at {0} parse error: Body {1} ";
+        public const string ParsingWsTrustResponseFailedErrorTemplate = "Federated service at {0} parse error. Enable logging with PII to see more details. See https://aka.ms/msal-net-logging.";
+
         public const string UnknownUserType = "Unknown User Type";
         public const string ParsingWsTrustResponseFailedDueToConfiguration = "There was an error parsing the WS-Trust response from the endpoint. " +
             "\nThis may occur if there are issues with your ADFS configuration. See https://aka.ms/msal-net-iwa-troubleshooting for more details." +
