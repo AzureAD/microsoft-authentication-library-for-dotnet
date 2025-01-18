@@ -17,6 +17,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)' or '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">14.2</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">21.0</SupportedOSPlatformVersion>
+    <NoWarn>$(NoWarn);CS3009;</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
