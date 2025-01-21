@@ -40,39 +40,52 @@ Bearer tokens are vulnerable to theft. Proof-of-Possession (PoP) tokens mitigate
 - Grant Type will be `ClientCredentials`.
 - Request **should not** contain `client_assertion_type` or `client_assertion`.
 
-### Implementation Details
+### MTLS Endpoint Usage
 
-#### Developer Guidance for `WithMtlsProofOfPossession()`
+The mTLS PoP flow relies on tenanted endpoints with support for regional configurations. The behavior varies based on the cloud environment:
 
-##### Certificate Validation
+#### Public Cloud
 
-- Ensure the certificate provided has a private key as part of the ClientCredential configuration.
-- If a certificate is missing, MSAL will throw `MsalClientException` with the error `MsalError.MtlsCertificateNotProvided`.
+The base endpoint for public clouds is:
 
-##### Authority Type Validation
+`https://{region}.mtlsauth.microsoft.com/{tenant_id}`
 
-- Flow is applicable only to AAD and DSTS authorities.
-- Unsupported authority types (e.g., B2C) will result in `MsalClientException` with the error `MsalError.InvalidAuthorityType`.
+Example: Specifying the `westus` region results in:
 
-##### Authority URL Validation
+`https://eastus.mtlsauth.microsoft.com/{tenant_id}`
 
-- Avoid using `/common` in the authority URL. Use a tenanted authority instead.
-- If `/common` is used, MSAL will throw `MsalClientException` with the error `MsalError.MissingTenantedAuthority`.
+#### Sovereign Clouds
 
-##### Azure Region Validation
+For sovereign clouds, the base endpoint is adjusted for the cloud-specific environment. For instance:
 
-- Specify the Azure region when using `WithMtlsProofOfPossession()`.
-- If the region is missing, MSAL will throw `MsalClientException` with the error `MsalError.MtlsPopWithoutRegion`.
-- Region is not required if the authority is DSTS.
+- Azure Government: `https://{region}.mtlsauth.microsoftonline.us/{tenant_id}`
+- Azure China: `https://{region}.mtlsauth.partner.microsoftonline.cn/{tenant_id}`
 
-##### Grant Type Validation
+Note: In MSAL .NET, this functionality is implemented in the [RegionAndMtlsDiscoveryProvider class](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/src/client/Microsoft.Identity.Client/Instance/Discovery/RegionAndMtlsDiscoveryProvider.cs). Developers can refer to its unit [tests](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/eb39be7b002b38d7c2885078c4e506160014e458/tests/Microsoft.Identity.Test.Unit/PublicApiTests/MtlsPopTests.cs#L556) to gain further clarity on the logic and expected behavior.
 
-- Ensure the grant type is `ClientCredentials`.
-- Do not include `client_assertion` or `client_assertion_type` parameters in the request.
+Note: App developers create an MSAL Confidential Client Application (CCA) object with a certificate, which is used both to authenticate the app and to initiate the HTTP mTLS connection to the regional ESTS endpoint. ESTS validates the certificate during the mTLS handshake and also uses it as the authentication certificate to issue the token.
 
-##### `SendX5C` Setting
+#### Sample usage in MSAL .NET
 
-- Scenario is supported only when `X5C` is sent along with the certificate.
+```csharp
+string clientId = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
+string authority = "https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c";
+string[] scopes = new string[] { "https://graph.microsoft.com/.default" };
+
+X509Certificate2 certificate = GetCertificateFromStore("Use The Lab Auth Cert");
+
+IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(clientId)
+    .WithAuthority(authority)
+    .WithAzureRegion("westus")
+    .WithCertificate(certificate, true)
+    .WithExperimentalFeatures(true)
+    .Build();
+
+AuthenticationResult result = await app.AcquireTokenForClient(scopes).WithMtlsProofOfPossession()
+    .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice 
+    .WithSendX5C(true)
+    .ExecuteAsync();
+```
 
 ## Tests to Validate mTLS PoP Tokens
 
@@ -81,18 +94,25 @@ Bearer tokens are vulnerable to theft. Proof-of-Possession (PoP) tokens mitigate
 - Verify that `MsalClientException` is thrown when no certificate is provided.
 - Ensure that the correct exception message (`MsalErrorMessage.MtlsCertificateNotProvidedMessage`) is returned.
 - Ensure that the certificate has a private key when used in the `WithCertificate()` method.
+- Ensure X5C is sent along with the certificate. 
 
 ### Authority Tests
 
 - Test with a valid tenanted authority URL (e.g., `https://login.microsoftonline.com/tenant_id`).
-- Ensure an exception (`MsalError.MissingTenantedAuthority`) is thrown for `/common` authority usage.
-- Verify that unsupported authority types (e.g., B2C) throw `MsalError.InvalidAuthorityType`.
+- Ensure an exception (`MsalError.MissingTenantedAuthority`) is thrown for `/common` or `/organizations` authority usage.
+- Flow is applicable only to AAD and DSTS authorities. Verify that unsupported authority types (e.g., B2C) throw `MsalError.InvalidAuthorityType`.
 
 ### Region Validation Tests
 
 - Ensure `MsalClientException` is thrown when no region is set and `WithMtlsProofOfPossession()` is called.
 - Validate successful token acquisition with a specified region.
 - Test auto-detected region functionality and confirm the expected region is used.
+- Region is not required if the authority is DSTS.
+
+### Grant Type Validation
+
+- Ensure the grant type is `ClientCredentials`.
+- Do not include `client_assertion` or `client_assertion_type` parameters in the request.
 
 ### Token Acquisition Tests
 
@@ -188,5 +208,5 @@ This telemetry will aid in diagnosing issues and optimizing performance.
 ## Appendix: References
 
 - **[RFC 8705: Mutual TLS](https://tools.ietf.org/html/rfc8705)**
-- **[API specifications](https://identitydivision.visualstudio.com/DevEx/_git/MiseDocumentation?path=/articles/using-mise/how-to-use-mtls-pop.md&version=GBmain)**
+- **[MTLS API specifications / MISE Doc](https://identitydivision.visualstudio.com/DevEx/_git/MiseDocumentation?path=/articles/using-mise/how-to-use-mtls-pop.md&version=GBmain)**
 - **MSAL .NET Integration tests** *(Uses LabAuth Certificate)*
