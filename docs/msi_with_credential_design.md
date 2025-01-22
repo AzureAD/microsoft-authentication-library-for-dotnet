@@ -206,6 +206,16 @@ try {
 }
 ```
 
+## Summary of New APIs
+
+| API Name                         | Purpose                                                   |
+|----------------------------------|-----------------------------------------------------------|
+| `WithProofOfPossession()`        | Requests a PoP token instead of a default Bearer token.   |
+| `WithClientCapabilities()`       | Allows client capabilities                                |
+| `WithClaims()`                   | Allows passing of claims (bypasses cache).                |
+| `GetBindingCertificate()`        | Helper method to get the binding certificate.             |
+| `GetManagedIdentitySourceAsync()`| Helper method to get the managed identity source.         |
+
 ## Related Documents
 
 - **[SLC Design Document](https://microsoft.sharepoint.com/:w:/t/AzureMSI/EURnTEtFXPlDngpYhCUioqUBvbSUWEX7vZjP0nm8bxUsQA?e=Ejok1n&wdLOR=cE6820299-49AF-4D7A-B7F7-F58D65C232B6)**
