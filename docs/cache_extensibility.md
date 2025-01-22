@@ -86,7 +86,7 @@ Example:
       "cached_at": "1553819803",
       "expires_on": "1553823402",
       "key1": "val1",  // new!
-      "key2": "val2",  // new!
+      "key2": "val2",  // new! }
     }
 }
 ```
