@@ -87,7 +87,8 @@ Example:
       "expires_on": "1553823402",
       "key1": "val1",  // new!
       "key2": "val2",  // new!
-    },
+    }
+}
 ```
 
 Note: in case the values contain reserved JSON characters, use standard JSON escape rules to serialize.
