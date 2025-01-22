@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides detailed guidance for SDK developers to implement MSI V2 `/credential` endpoint support. It focuses on the **token acquisition process**, ensuring seamless interactions with Managed Identity Resource Providers (MIRRPs) on **Azure Virtual Machines (VMs) and Virtual Machine Scale Sets (VMSS)**.
+This document provides detailed guidance for SDK developers to implement MSI V2 `/credential` endpoint support. It focuses on the **token acquisition process**, ensuring seamless interactions with Managed Identity Resource Providers (MIRPs) on **Azure Virtual Machines (VMs) and Virtual Machine Scale Sets (VMSS)**.
 
 ## Goals
 
