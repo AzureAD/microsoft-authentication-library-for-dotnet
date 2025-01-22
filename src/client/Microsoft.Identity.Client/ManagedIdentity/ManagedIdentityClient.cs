@@ -60,29 +60,35 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string msiEndpoint = EnvironmentVariables.MsiEndpoint;
             string msiSecretMachineLearning = EnvironmentVariables.MsiSecret;
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
-            string podIdentityEndpoint = EnvironmentVariables.PodIdentityEndpoint;
+
+            logger?.Info("[Managed Identity] Detecting managed identity source...");
 
             if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
             {
                 if (!string.IsNullOrEmpty(identityServerThumbprint))
                 {
+                    logger?.Info("[Managed Identity] Service Fabric detected.");
                     return ManagedIdentitySource.ServiceFabric;
                 }
                 else
                 {
+                    logger?.Info("[Managed Identity] App Service detected.");
                     return ManagedIdentitySource.AppService;
                 }
             }
             else if (!string.IsNullOrEmpty(msiSecretMachineLearning) && !string.IsNullOrEmpty(msiEndpoint))
             {
+                logger?.Info("[Managed Identity] Machine Learning detected.");
                 return ManagedIdentitySource.MachineLearning;
             }
             else if (!string.IsNullOrEmpty(msiEndpoint))
             {
+                logger?.Info("[Managed Identity] Cloud Shell detected.");
                 return ManagedIdentitySource.CloudShell;
             }
             else if (ValidateAzureArcEnvironment(identityEndpoint, imdsEndpoint, logger))
             {
+                logger?.Info("[Managed Identity] Azure Arc detected.");
                 return ManagedIdentitySource.AzureArc;
             }
             else
@@ -94,6 +100,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // Method to return true if a file exists and is not empty to validate the Azure arc environment.
         private static bool ValidateAzureArcEnvironment(string identityEndpoint, string imdsEndpoint, ILoggerAdapter logger)
         {
+            logger?.Info("[Managed Identity] Checked for sources: Service Fabric, App Service, Machine Learning, and Cloud Shell. " +
+                "They are not available.");
+
             if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(imdsEndpoint))
             {
                 logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through environment variables.");
@@ -110,10 +119,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through file detection.");
                 return true;
             } 
-            else
-            {
-                logger?.Warning("[Managed Identity] Azure Arc managed identity cannot be configured on a platform other than Windows and Linux.");
-            }
             
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
