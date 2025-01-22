@@ -256,23 +256,29 @@ namespace Microsoft.Identity.Client.OAuth2
                 exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.NonParsableOAuthError,
                     MsalErrorMessage.NonParsableOAuthError,
-                    response);
+                    response,
+                    null,
+                    requestContext);
             }
             catch (Exception ex)
             {
-
                 exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.UnknownError,
                     response.Body,
                     response,
-                    ex);
+                    ex,
+                    requestContext);
             }
 
+            bool isCodeNotFound = response.StatusCode == HttpStatusCode.NotFound;
+
             exceptionToThrow ??= MsalServiceExceptionFactory.FromHttpResponse(
-                    response.StatusCode == HttpStatusCode.NotFound
-                        ? MsalError.HttpStatusNotFound
+                    isCodeNotFound
+                        ? MsalError.HttpStatusNotFound 
                         : MsalError.HttpStatusCodeNotOk,
-                    httpErrorCodeMessage,
+                   isCodeNotFound
+                        ? httpErrorCodeMessage + " Authority used: " + requestContext.ApiEvent.TokenEndpoint.Split('?')[0]
+                        : httpErrorCodeMessage,
                     response);
 
             if (shouldLogAsError)

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -23,7 +24,8 @@ namespace Microsoft.Identity.Client
           string errorCode,
           string errorMessage,
           HttpResponse httpResponse,
-          Exception innerException = null)
+          Exception innerException = null,
+          RequestContext context = null)
         {
             MsalServiceException ex = null;
             OAuth2ResponseBase oAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
@@ -39,7 +41,7 @@ namespace Microsoft.Identity.Client
                 else  
                 {  
                     errorMessageToUse  = errorMessage;  
-                }  
+                }
 
                 if (oAuth2Response.Claims == null)
                 {
@@ -51,6 +53,7 @@ namespace Microsoft.Identity.Client
                     errorMessageToUse += " " + MsalErrorMessage.ClaimsChallenge;
                     ex = new MsalClaimsChallengeException(errorCode, errorMessageToUse, innerException);
                 }
+
             }
 
             if (string.Equals(oAuth2Response?.Error, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
@@ -61,7 +64,11 @@ namespace Microsoft.Identity.Client
                     innerException);
             }
 
-            ex ??= new MsalServiceException(errorCode, errorMessage, innerException);
+            ex ??= new MsalServiceException(errorCode,
+                httpResponse.StatusCode == HttpStatusCode.NotFound
+                        ? errorMessage + " Authority used: " + context.ApiEvent.TokenEndpoint.Split('?')[0]
+                        : errorMessage,
+                innerException);
 
             SetHttpExceptionData(ex, httpResponse);
 

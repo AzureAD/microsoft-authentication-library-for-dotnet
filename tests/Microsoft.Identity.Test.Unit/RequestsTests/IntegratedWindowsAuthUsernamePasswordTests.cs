@@ -415,7 +415,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-
         [TestMethod]
         [DeploymentItem(@"Resources\TestMex.xml")]
         [DeploymentItem(@"Resources\WsTrustResponse.xml")]
