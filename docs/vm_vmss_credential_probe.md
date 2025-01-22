@@ -58,7 +58,7 @@ Content-Type: text/plain; charset=utf-8
 ---
 
 ## 5. Document Purpose
-This document provides a **step-by-step breakdown** of the **MSI V2 authentication probe**, ensuring:
+This document provides a **step-by-step breakdown** of the **[MSI V2 authentication probe](https://microsoft.sharepoint.com/:w:/t/AzureMSI/EUOAjN2q-hBNptrwi1ZolLgBsAYYmm_qRKXsoY62D2oiAg?e=hSAVOl)**, ensuring:
 - **Correct detection of the `/credential` endpoint.**
 - **Proper handling of IMDS restarts and failures.**
 - **Secure token acquisition for accessing Azure resources.**
