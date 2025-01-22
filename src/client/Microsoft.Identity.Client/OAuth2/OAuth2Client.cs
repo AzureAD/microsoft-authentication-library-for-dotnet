@@ -270,16 +270,14 @@ namespace Microsoft.Identity.Client.OAuth2
                     requestContext);
             }
 
-            bool isCodeNotFound = response.StatusCode == HttpStatusCode.NotFound;
-
             exceptionToThrow ??= MsalServiceExceptionFactory.FromHttpResponse(
-                    isCodeNotFound
-                        ? MsalError.HttpStatusNotFound 
+                    response.StatusCode == HttpStatusCode.NotFound
+                        ? MsalError.HttpStatusNotFound
                         : MsalError.HttpStatusCodeNotOk,
-                   isCodeNotFound
-                        ? httpErrorCodeMessage + " Authority used: " + requestContext.ApiEvent.TokenEndpoint.Split('?')[0]
-                        : httpErrorCodeMessage,
-                    response);
+                    httpErrorCodeMessage,
+                    response,
+                    null,
+                    requestContext);
 
             if (shouldLogAsError)
             {

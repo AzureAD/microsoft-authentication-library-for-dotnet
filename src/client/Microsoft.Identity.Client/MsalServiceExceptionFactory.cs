@@ -53,7 +53,6 @@ namespace Microsoft.Identity.Client
                     errorMessageToUse += " " + MsalErrorMessage.ClaimsChallenge;
                     ex = new MsalClaimsChallengeException(errorCode, errorMessageToUse, innerException);
                 }
-
             }
 
             if (string.Equals(oAuth2Response?.Error, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
@@ -65,8 +64,8 @@ namespace Microsoft.Identity.Client
             }
 
             ex ??= new MsalServiceException(errorCode,
-                httpResponse.StatusCode == HttpStatusCode.NotFound
-                        ? errorMessage + " Authority used: " + context.ApiEvent.TokenEndpoint.Split('?')[0]
+                httpResponse.StatusCode == HttpStatusCode.NotFound && context != null
+                        ? errorMessage + " Authority used: " + context.ServiceBundle.Config.Authority?.AuthorityInfo?.CanonicalAuthority?.AbsoluteUri?.Split('?')[0]
                         : errorMessage,
                 innerException);
 

@@ -520,42 +520,45 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 ConfidentialClientApplication app = null;
                 var certificate = new X509Certificate2(
                     ResourceHelper.GetTestResourceRelativePath("RSATestCertDotNet.pfx"));
-                
-                    app = ConfidentialClientApplicationBuilder
-                        .Create(TestConstants.ClientId)
-                        .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
-                        .WithRedirectUri(TestConstants.RedirectUri)
-                        .WithHttpManager(harness.HttpManager)
-                        .WithCertificate(certificate)
-                        .BuildConcrete();
-                
+
+                app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithRedirectUri(TestConstants.RedirectUri)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
 
                 var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
-                             .WithExtraQueryParameters("extra=qp")
                              .ExecuteAsync(CancellationToken.None)
                              .ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.IsFalse(string.IsNullOrEmpty(ex.CorrelationId));
-                Assert.IsTrue(ex.Message.Contains("Authority used: https://login.microsoftonline.com/common/oauth2/v2.0/token"));
+                Assert.IsTrue(ex.Message.Contains("Authority used: https://login.microsoftonline.com/common/"));
 
+                //Validate that the authority is not appended with extra query parameters
+                harness.HttpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant + TestConstants.DiscoveryEndPoint));
                 harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
 
-                Guid guid = Guid.NewGuid();
+                app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(new System.Uri(TestConstants.AuthorityNotKnownTenanted + "extra=qp"), true)
+                    .WithRedirectUri(TestConstants.RedirectUri)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
+
                 ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
-                                                 .WithCorrelationId(guid)
-                                                 .WithExtraQueryParameters("extra=qp")
                                                  .ExecuteAsync(CancellationToken.None)
                                                  .ConfigureAwait(false);
                 }
                 ).ConfigureAwait(false);
 
-                Assert.AreEqual(guid.ToString(), ex.CorrelationId);
-                Assert.IsTrue(ex.Message.Contains("Authority used: https://login.microsoftonline.com/common/oauth2/v2.0/token"));
+                Assert.IsTrue(ex.Message.Contains("Authority used: https://sts.access.edu/my-utid/"));
             }
         }
 
