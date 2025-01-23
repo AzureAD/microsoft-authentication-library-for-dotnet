@@ -523,7 +523,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
                 app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
@@ -540,11 +540,13 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
                 //Validate that the authority is not appended with extra query parameters
                 harness.HttpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant + TestConstants.DiscoveryEndPoint));
+                Environment.SetEnvironmentVariable("REGION_NAME", TestConstants.Region);
                 harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
 
                 app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithAuthority(new System.Uri(TestConstants.AuthorityNotKnownTenanted + "extra=qp"), true)
+                    .WithAuthority(new Uri(TestConstants.AuthorityNotKnownTenanted + "extra=qp"), true)
+                    .WithAzureRegion(TestConstants.Region)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
@@ -555,10 +557,10 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                                                  .ExecuteAsync(CancellationToken.None)
                                                  .ConfigureAwait(false);
-                }
-                ).ConfigureAwait(false);
+                }).ConfigureAwait(false);
 
                 Assert.IsTrue(ex.Message.Contains("Authority used: https://sts.access.edu/my-utid/"));
+                Assert.IsTrue(ex.Message.Contains($"Region Used: {TestConstants.Region}"));
             }
         }
 

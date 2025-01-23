@@ -63,11 +63,7 @@ namespace Microsoft.Identity.Client
                     innerException);
             }
 
-            ex ??= new MsalServiceException(errorCode,
-                httpResponse.StatusCode == HttpStatusCode.NotFound && context != null
-                        ? errorMessage + " Authority used: " + context.ServiceBundle.Config.Authority?.AuthorityInfo?.CanonicalAuthority?.AbsoluteUri?.Split('?')[0]
-                        : errorMessage,
-                innerException);
+            ex ??= new MsalServiceException(errorCode, GetErrorMessage(errorMessage, httpResponse, context), innerException);
 
             SetHttpExceptionData(ex, httpResponse);
 
@@ -77,6 +73,21 @@ namespace Microsoft.Identity.Client
             ex.ErrorCodes = oAuth2Response?.ErrorCodes;
 
             return ex;
+        }
+
+        private static string GetErrorMessage(string errorMessage, HttpResponse httpResponse, RequestContext context)
+        {
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound && context != null)
+            {
+                errorMessage += "\nAuthority used: " + context.ServiceBundle.Config.Authority?.AuthorityInfo?.CanonicalAuthority?.AbsoluteUri?.Split('?')[0];
+                
+                if(context.ServiceBundle.Config.AzureRegion != null)
+                {
+                    errorMessage += "\nRegion Used: " + context.ServiceBundle.Config.AzureRegion;
+                }
+            }
+
+            return errorMessage;
         }
 
         private static bool IsThrottled(OAuth2ResponseBase oAuth2Response)
