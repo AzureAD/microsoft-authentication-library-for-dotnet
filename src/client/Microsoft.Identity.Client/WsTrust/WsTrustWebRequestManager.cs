@@ -151,11 +151,12 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (System.Xml.XmlException ex)
             {
+                requestContext.Logger.ErrorPii("Error parsing WS-Trust response: \n" + resp.Body, "Error parsing WS-Trust response. ");
+
                 string message = string.Format(
                         CultureInfo.CurrentCulture,
                         MsalErrorMessage.ParsingWsTrustResponseFailedErrorTemplate,
-                        wsTrustEndpoint.Uri,
-                        resp.Body);
+                        wsTrustEndpoint.Uri);
 
                 throw new MsalClientException(
                     MsalError.ParsingWsTrustResponseFailed, message, ex);

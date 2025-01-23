@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         {
             const string body = "Non-Parsable";
             const string uri = "https://some/address/usernamemixed";
-            string expectedMessage = string.Format(CultureInfo.CurrentCulture, MsalErrorMessage.ParsingWsTrustResponseFailedErrorTemplate, uri, body);
+            string expectedMessage = string.Format(CultureInfo.CurrentCulture, MsalErrorMessage.ParsingWsTrustResponseFailedErrorTemplate, uri);
 
             var endpoint = new WsTrustEndpoint(new Uri(uri), WsTrustVersion.WsTrust13);
 
