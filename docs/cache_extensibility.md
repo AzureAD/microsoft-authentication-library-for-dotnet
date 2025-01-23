@@ -48,7 +48,7 @@ After executing the AcquireToken instruction, MSAL shall associate the token wit
 
 #### Higher level APIs
 
-Do no expose this logic in higher level APIs.
+Do not expose this logic in higher level APIs.
 
 ## Token Schema changes
 
