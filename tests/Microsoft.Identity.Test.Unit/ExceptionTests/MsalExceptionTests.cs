@@ -539,8 +539,10 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 Assert.IsTrue(ex.Message.Contains("Authority used: https://login.microsoftonline.com/common/"));
 
                 //Validate that the authority is not appended with extra query parameters
-                harness.HttpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant + TestConstants.DiscoveryEndPoint));
+                //Validate that the region is also captured
                 Environment.SetEnvironmentVariable("REGION_NAME", TestConstants.Region);
+
+                harness.HttpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant + TestConstants.DiscoveryEndPoint));
                 harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
 
                 app = ConfidentialClientApplicationBuilder
