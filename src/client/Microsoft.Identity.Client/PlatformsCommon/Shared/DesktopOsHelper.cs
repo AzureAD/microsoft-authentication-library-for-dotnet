@@ -20,6 +20,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static Lazy<string> s_winVersionLazy = new Lazy<string>(
             GetWindowsVersionStringInternal);
 
+        private static Lazy<bool> s_wslEnvLazy = new Lazy<bool>(IsWslEnv);
+
         public static bool IsWindows()
         {
 
@@ -56,7 +58,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #endif
         }
 
-        public static bool IsRunningOnWsl()
+        public static bool IsWslEnv()
         {
             if (IsLinux()) {
                 var versionInfo = File.ReadAllText("/proc/version");
@@ -103,6 +105,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
             return RuntimeInformation.OSDescription;
 #endif
+        }
+
+        public static bool IsRunningOnWsl()
+        {
+            return s_wslEnvLazy.Value;
         }
 
         public static string GetWindowsVersionString()
