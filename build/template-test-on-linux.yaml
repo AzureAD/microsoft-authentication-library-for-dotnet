@@ -11,14 +11,6 @@ steps:
   inputs:
     version: 8.x
 
-- task: VSTest@2
-  displayName: 'Run unit tests .NET '
-  inputs:
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net8.0\Microsoft.Identity.Test.Unit.dll'
-    searchFolder: '$(System.DefaultWorkingDirectory)'
-    runInParallel: true
-    codeCoverageEnabled: true
-    failOnMinTestsNotRun: true
-    minimumExpectedTests: '1'
-    runSettingsFile: 'build\CodeCoverage.runsettings'
+# VSTest@2 is supported only on Windows 
+- script: dotnet test **/Microsoft.Identity.Test.Unit/bin/**/net8.0/Microsoft.Identity.Test.Unit.dll' --configuration Release --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
+  displayName: 'Run unit tests .NET'
