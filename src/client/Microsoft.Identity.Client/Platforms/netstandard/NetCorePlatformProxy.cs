@@ -242,7 +242,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard
             ProcessStartInfo psi = new ProcessStartInfo(openToolPath, url)
             {
                 RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardError = true,
+                UseShellExecute = false
             };
 
             Process.Start(psi);
