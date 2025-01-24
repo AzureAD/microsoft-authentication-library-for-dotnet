@@ -12,5 +12,6 @@ steps:
     version: 8.x
 
 # VSTest@2 is supported only on Windows 
-- script: dotnet test **/Microsoft.Identity.Test.Unit/bin/**/net8.0/Microsoft.Identity.Test.Unit.dll' --configuration Release --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
+- script: |
+    dotnet test **/Microsoft.Identity.Test.Unit/bin/**/net8.0/Microsoft.Identity.Test.Unit.dll --configuration Release --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
   displayName: 'Run unit tests .NET'
