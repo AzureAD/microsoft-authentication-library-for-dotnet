@@ -61,6 +61,16 @@ For sovereign clouds, the base endpoint is adjusted for the cloud-specific envir
 - Azure Government: `https://{region}.mtlsauth.microsoftonline.us/{tenant_id}`
 - Azure China: `https://{region}.mtlsauth.partner.microsoftonline.cn/{tenant_id}`
 
+#### DSTS Cloud
+
+DSTS does not use regions. The standard DSTS endpoint format is:
+
+Azure DSTS: https://dsts.core.azure-test.net/{tenant_id}
+
+#### Non-Standard Clouds
+
+For non-standard clouds, the endpoint is formed by adding `{region}.mtlsauth` to the authority URL
+
 Note: In MSAL .NET, this functionality is implemented in the [RegionAndMtlsDiscoveryProvider class](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/src/client/Microsoft.Identity.Client/Instance/Discovery/RegionAndMtlsDiscoveryProvider.cs). Developers can refer to its unit [tests](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/eb39be7b002b38d7c2885078c4e506160014e458/tests/Microsoft.Identity.Test.Unit/PublicApiTests/MtlsPopTests.cs#L556) to gain further clarity on the logic and expected behavior.
 
 Note: App developers create an MSAL Confidential Client Application (CCA) object with a certificate, which is used both to authenticate the app and to initiate the HTTP mTLS connection to the regional ESTS endpoint. ESTS validates the certificate during the mTLS handshake and also uses it as the authentication certificate to issue the token.
