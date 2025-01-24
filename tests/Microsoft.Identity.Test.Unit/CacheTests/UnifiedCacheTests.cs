@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
-                var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid());
+                var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid(), null);
 
                 var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
                     requestContext, null).Result;

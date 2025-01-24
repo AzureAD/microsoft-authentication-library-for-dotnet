@@ -74,8 +74,9 @@ jobs: #Build and stage projects
       checkCoverage: '$(CodeCoverageGateEnabled)'
       coverageFailOption: 'build'
       coverageType: 'lines'
+      allowCoverageVariance: false 
+      coverageVariance: 0.01 # Specify by how much the current amount of covered or uncovered code (depending on the parameter *Use Uncovered Elements*) may deviate from the previous value before the policy fails. Please be aware that the code coverage may slowly but steadily decrease from build to build if you allow a code coverage variance. Thus, you should keep this value as low as possible.
       treat0of0as100: true
-      forceCoverageImprovement: true
       coverageUpperThreshold: '90'
       includePartiallySucceeded: false
       fallbackOnPRTargetBranch: false

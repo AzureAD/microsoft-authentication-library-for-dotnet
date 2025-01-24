@@ -14,7 +14,6 @@ namespace Microsoft.Identity.Client.Utils
     /// Singleton timer used to measure the duration tasks.
     /// </summary>
     internal static class StopwatchService
-
     {
         /// <summary>
         /// Singleton stopwatch.
@@ -85,7 +84,6 @@ namespace Microsoft.Identity.Client.Utils
             await task.ConfigureAwait(false);
 
             return new MeasureDurationResult(Watch.ElapsedTicks - startTicks);
-            ;
         }
 
         /// <summary>

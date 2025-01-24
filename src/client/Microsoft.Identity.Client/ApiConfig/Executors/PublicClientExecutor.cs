@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             AuthenticationRequestParameters requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,

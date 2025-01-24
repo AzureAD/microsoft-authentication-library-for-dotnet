@@ -3,7 +3,7 @@
 
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.Platforms.netcore
+namespace Microsoft.Identity.Client.Platforms.netstandard
 {
     internal class NetCoreFeatureFlags : IFeatureFlags
     {

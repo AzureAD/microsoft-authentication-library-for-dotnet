@@ -171,10 +171,6 @@ namespace Microsoft.Identity.Client
 
             try
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                HasStateChanged = true;
-#pragma warning restore CS0618 // Type or member is obsolete
-
                 try
                 {
                     if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
@@ -275,10 +271,6 @@ namespace Microsoft.Identity.Client
 
                         LogCacheContents(requestParams);
                     }
-
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
                 }
 
                 return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
@@ -909,7 +901,7 @@ namespace Microsoft.Identity.Client
             // version of MSAL which did not record app metadata.
             if (appMetadata == null)
             {
-                logger.Warning("No app metadata found. Returning unknown. ");
+                logger.Verbose(() => "No app metadata found. Returning unknown. ");
                 return null;
             }
 
@@ -925,7 +917,9 @@ namespace Microsoft.Identity.Client
         {
             var logger = requestParameters.RequestContext.Logger;
             var environment = requestParameters.AuthorityInfo.Host;
-            bool filterByClientId = !_featureFlags.IsFociEnabled;
+
+            // FOCI is only enabled on public client desktop apps
+            bool filterByClientId = !(requestParameters.AppConfig.IsPublicClient && _featureFlags.IsFociEnabled);
 
             // this will either be the home account ID or null, it can never be OBO assertion or tenant ID
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParameters);
@@ -1245,10 +1239,6 @@ namespace Microsoft.Identity.Client
             }
             finally
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-
                 _semaphoreSlim.Release();
             }
 
@@ -1330,10 +1320,6 @@ namespace Microsoft.Identity.Client
             }
             finally
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-
                 _semaphoreSlim.Release();
             }
         }

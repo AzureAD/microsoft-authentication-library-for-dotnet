@@ -189,7 +189,8 @@ namespace Microsoft.Identity.Client
         public const string PlatformNotSupported = "Platform Not Supported";
 
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1} ";
-        public const string ParsingWsTrustResponseFailedErrorTemplate = "Federated service at {0} parse error: Body {1} ";
+        public const string ParsingWsTrustResponseFailedErrorTemplate = "Federated service at {0} parse error. Enable logging with PII to see more details. See https://aka.ms/msal-net-logging.";
+
         public const string UnknownUserType = "Unknown User Type";
         public const string ParsingWsTrustResponseFailedDueToConfiguration = "There was an error parsing the WS-Trust response from the endpoint. " +
             "\nThis may occur if there are issues with your ADFS configuration. See https://aka.ms/msal-net-iwa-troubleshooting for more details." +
@@ -259,8 +260,10 @@ namespace Microsoft.Identity.Client
 
         public const string AuthorityDoesNotHaveTwoSegments =
             "Authority should be in the form <host>/<audience>, for example https://login.microsoftonline.com/common. ";
+        
         public const string DstsAuthorityDoesNotHaveThreeSegments =
             "Authority should be in the form <host>/<audience>/<tenantID>, for example https://login.microsoftonline.com/dsts/<tenantid>. ";
+        
         public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant GUID. ";
 
         public const string CustomWebUiReturnedInvalidUri = "ICustomWebUi returned an invalid URI - it is empty or has no query. ";
@@ -412,6 +415,7 @@ namespace Microsoft.Identity.Client
 
         public const string ManagedIdentityNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
         public const string ManagedIdentityInvalidResponse = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
+        public const string ManagedIdentityJsonParseFailure = "[Managed Identity] MSI returned 200 OK, but the response could not be parsed.";
         public const string ManagedIdentityUnexpectedResponse = "[Managed Identity] Unexpected exception occurred when parsing the response. See the inner exception for details.";
         public const string ManagedIdentityExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope must be passed.";
         public const string ManagedIdentityUnexpectedErrorResponse = "[Managed Identity] The error response was either empty or could not be parsed.";
@@ -428,5 +432,10 @@ namespace Microsoft.Identity.Client
         public const string SetCiamAuthorityAtRequestLevelNotSupported = "Setting the CIAM authority (ex. \"{tenantName}.ciamlogin.com\") at the request level is not supported. The CIAM authority must be set during application creation";
         public const string ClaimsChallenge = "The returned error contains a claims challenge. For additional info on how to handle claims related to multifactor authentication, Conditional Access, and incremental consent, see https://aka.ms/msal-conditional-access-claims. If you are using the On-Behalf-Of flow, see https://aka.ms/msal-conditional-access-claims-obo for details.";
         public const string CryptographicError = "A cryptographic exception occurred. Possible cause: the certificate has been disposed. See inner exception for full details.";
+        public const string MtlsPopWithoutRegion = "mTLS Proof of Possession requires a region to be specified. Please set AzureRegion in the configuration at the application level.";
+        public const string MtlsCertificateNotProvidedMessage = "mTLS Proof of Possession requires a certificate to be configured. Please provide a certificate at the application level using the .WithCertificate() instead of passing an assertion. See https://aka.ms/msal-net-pop for details.";
+        public const string MtlsInvalidAuthorityTypeMessage = "mTLS PoP is only supported for AAD authority type. See https://aka.ms/msal-net-pop for details.";
+        public const string MtlsNonTenantedAuthorityNotAllowedMessage = "mTLS authentication requires a tenanted authority. Using 'common', 'organizations', or similar non-tenanted authorities is not allowed. Please provide an authority with a specific tenant ID (e.g., 'https://login.microsoftonline.com/{tenantId}'). See https://aka.ms/msal-net-pop for details.";
+        public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. mTLS Proof-of-Possession requires a region to be specified, as there is no global endpoint for mTLS. See https://aka.ms/msal-net-pop for details.";
     }
 }

@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             if (canUseProvider)
             {
                 s_knownEntries.TryGetValue(environment, out InstanceDiscoveryMetadataEntry entry);
-                logger.Verbose(()=>$"[Instance Discovery] Tried to use known metadata provider for {environment}. Success? {entry != null}. ");
+                logger.Verbose(() => $"[Instance Discovery] Tried to use known metadata provider for {environment}. Success? {entry != null}. ");
 
                 return entry;
             }

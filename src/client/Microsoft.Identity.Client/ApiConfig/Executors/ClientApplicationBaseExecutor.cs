@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
                 commonParameters,
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByRefreshTokenParameters refreshTokenParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
             if (commonParameters.Scopes == null || !commonParameters.Scopes.Any())
             {
                 commonParameters.Scopes = new SortedSet<string>

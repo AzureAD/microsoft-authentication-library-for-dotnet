@@ -393,7 +393,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             httpManager.AddMockHandler(httpMessageHandler);
         }
-
             
         private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySource managedIdentitySourceType, string resource)
         {
@@ -431,6 +430,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedRequestHeaders.Add("secret", "secret");
                     expectedQueryParams.Add("api-version", "2019-07-01-preview");
+                    expectedQueryParams.Add("resource", resource);
+                    break;
+                case ManagedIdentitySource.MachineLearning:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedRequestHeaders.Add("secret", "secret");
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    expectedQueryParams.Add("api-version", "2017-09-01");
                     expectedQueryParams.Add("resource", resource);
                     break;
             }

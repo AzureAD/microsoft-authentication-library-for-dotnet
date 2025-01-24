@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                             return GetAccessTokenAsync(tokenSource.Token, logger);
-                        }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent.ApiId,
+                        }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId, 
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
                     }
@@ -231,6 +231,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
                 [OAuth2Parameter.Scope] = AuthenticationRequestParameters.Scope.AsSingleString()
             };
+
             return dict;
         }
 

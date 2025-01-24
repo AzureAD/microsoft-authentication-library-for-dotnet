@@ -26,13 +26,13 @@ namespace MSIHelperService.AzureFunction
         /// <returns></returns>
         public static async Task<IActionResult> Run(HttpRequest req, ILogger log)
         {
-            string uri = req.Query["uri"];
-            string identity_header = req.Query["header"];
+            string? uri = req.Query["uri"];
+            string? identity_header = req.Query["header"];
             var managedIdentityAuthenticationHeader = "X-IDENTITY-HEADER";
 
             try
             {
-                log.LogInformation("uri : ", uri);
+                log.LogInformation("uri: {uri}", uri);
 
                 //set the http get method and the required headers for a web app
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);

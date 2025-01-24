@@ -59,6 +59,45 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
                     Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", thumbprint);
                     break;
+                case ManagedIdentitySource.MachineLearning:
+                    Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
+                    Environment.SetEnvironmentVariable("MSI_SECRET", secret);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Sets environment variables for testing upgrade scenarios.
+        /// This method mimics a scenario where older environment variables
+        /// (e.g., MSI_ENDPOINT and MSI_SECRET) from previous versions of
+        /// App Service (2017) still exist after an upgrade to newer versions (2019).
+        /// It ensures that MSAL's Managed Identity source detection can correctly
+        /// handle both legacy and new variables.
+        /// </summary>
+        /// <param name="managedIdentitySource">
+        /// The type of managed identity source being tested (e.g., AppService, MachineLearning).
+        /// </param>
+        /// <param name="endpoint">
+        /// The endpoint URL to be set as part of the environment variables.
+        /// </param>
+        /// <param name="secret">
+        /// Optional: The secret value to be set (default is "secret").
+        /// </param>
+        /// <param name="thumbprint">
+        /// Optional: The certificate thumbprint to be set (default is "thumbprint").
+        /// </param>
+        internal static void SetUpgradeScenarioEnvironmentVariables(ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint")
+        {
+            // Use the common method to set base environment variables
+            SetEnvironmentVariables(managedIdentitySource, endpoint, secret, thumbprint);
+
+            // Add upgrade-specific variables where needed
+            switch (managedIdentitySource)
+            {
+                case ManagedIdentitySource.AppService:
+                    Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
+                    Environment.SetEnvironmentVariable("MSI_SECRET", secret);
+                    break;
             }
         }
 

@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.Internal
             {
                 if (useSha2)
                 {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
                     thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
 #else

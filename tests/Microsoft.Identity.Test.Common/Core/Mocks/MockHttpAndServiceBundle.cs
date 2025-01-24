@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
 
             var authorityObj = Authority.CreateAuthority(authority, validateAuthority);
-            var requestContext = new RequestContext(ServiceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(ServiceBundle, Guid.NewGuid(), commonParameters.MtlsCertificate);
             AuthenticationRequestParameters authenticationRequestParameters =
                 new AuthenticationRequestParameters(
                     ServiceBundle,

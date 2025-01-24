@@ -31,11 +31,7 @@ using System.Linq;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
-#if MAUI
     [Preserve(AllMembers = true)]
-#else
-    [global::Android.Runtime.Preserve(AllMembers = true)]
-#endif
     internal class AndroidBrokerHelper
     {
         private const string RedirectUriScheme = "msauth";
@@ -214,6 +210,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return string.Empty;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1422:Validate platform compatibility", Justification = "<Pending>")]
         private string GetCurrentSignatureForPackage(string packageName)
         {
             try
@@ -351,6 +348,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1422:Validate platform compatibility", Justification = "<Pending>")]
         private List<X509Certificate2> ReadCertDataForBrokerApp(string brokerPackageName)
         {
 #pragma warning disable CS0618 // Type or member is obsolete https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854

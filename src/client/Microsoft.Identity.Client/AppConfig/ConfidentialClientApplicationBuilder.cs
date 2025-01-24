@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(signedClientAssertion));
             }
 
-            Config.ClientCredential = new SignedAssertionClientCredential(signedClientAssertion);            
+            Config.ClientCredential = new SignedAssertionClientCredential(signedClientAssertion);
             return this;
         }
 

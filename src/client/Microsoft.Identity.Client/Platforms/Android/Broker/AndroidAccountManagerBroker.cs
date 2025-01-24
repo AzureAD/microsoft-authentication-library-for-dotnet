@@ -27,11 +27,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
-#if MAUI
     [Preserve(AllMembers = true)]
-#else
-    [AndroidNative.Runtime.Preserve(AllMembers = true)]
-#endif
     internal class AndroidAccountManagerBroker : IBroker
     {
         private long AccountManagerTimeoutSeconds { get; } = 5 * 60;
@@ -155,7 +151,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 _logger.Info("[Android broker] Android account manager didn't return any results for interactive broker request. ");
             }
 
+#pragma warning disable CA1422 // Validate platform compatibility
             Intent interactiveIntent = (Intent)accountManagerResult?.GetParcelable(AccountManager.KeyIntent);
+#pragma warning restore CA1422 // Validate platform compatibility
 
             // Validate that the intent was created successfully.
             if (interactiveIntent != null)

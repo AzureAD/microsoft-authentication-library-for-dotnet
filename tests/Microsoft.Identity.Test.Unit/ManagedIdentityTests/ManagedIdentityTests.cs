@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string Resource = "https://management.azure.com";
         internal const string ResourceDefaultSuffix = "https://management.azure.com/.default";
         internal const string AppServiceEndpoint = "http://127.0.0.1:41564/msi/token";
+        internal const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
         internal const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
         internal const string AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         internal const string CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
@@ -45,6 +46,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, ManagedIdentitySource.AzureArc, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
         public void GetManagedIdentityTests(
             string endpoint,
             ManagedIdentitySource managedIdentitySource, 
@@ -70,6 +72,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(CloudShellEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
         [DataRow(ServiceFabricEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
+        [DataRow(MachineLearningEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityHappyPathAsync(
             string endpoint,
             string scope,
@@ -119,6 +123,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId .ResourceId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
         public async Task ManagedIdentityUserAssignedHappyPathAsync(
             string endpoint,
             ManagedIdentitySource managedIdentitySource,
@@ -165,6 +172,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityDifferentScopesTestAsync(
             string endpoint,
             string scope,
@@ -225,6 +233,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityForceRefreshTestAsync(
             string endpoint,
             string scope,
@@ -285,6 +294,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityWithClaimsAndCapabilitiesTestAsync(
             string endpoint,
             string scope,
@@ -346,6 +356,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
         public async Task ManagedIdentityWithClaimsTestAsync(
             string endpoint,
             string scope,
@@ -417,6 +428,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow("user.read", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
         [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
         [DataRow("s", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow("user.read", ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
+        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
+        [DataRow("s", ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
         public async Task ManagedIdentityTestWrongScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -524,6 +538,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
         [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
         [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
         public async Task ManagedIdentityErrorResponseNoPayloadTestAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -565,6 +580,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
         [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
         [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
         public async Task ManagedIdentityNullResponseAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -604,6 +620,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
         [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
         [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
         public async Task ManagedIdentityUnreachableNetworkAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -643,6 +660,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint, HttpStatusCode.NotFound)]
         public async Task ManagedIdentityTestRetryAsync(ManagedIdentitySource managedIdentitySource, string endpoint, HttpStatusCode statusCode)
         {
             using (new EnvVariableContext())
@@ -1072,6 +1090,216 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 () => app.AcquireTokenForManagedIdentity(Resource)
                         .WithForceRefresh(true)
                         .ExecuteAsync(tokenSource.Token)).ConfigureAwait(false);
+        }
+
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
+        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        public async Task InvalidJsonResponseHandling(ManagedIdentitySource managedIdentitySource, string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var miBuilder = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                     endpoint,
+                     "scope",
+                     MockHelpers.GetMsiErrorBadJson(),
+                     managedIdentitySource);
+
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity("scope")
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(MsalError.ManagedIdentityResponseParseFailure, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityJsonParseFailure, ex.Message);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.Imds, ImdsEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
+        public async Task ManagedIdentityRequestTokensForDifferentScopesTestAsync(
+            string initialResource, 
+            string newResource, 
+            ManagedIdentitySource source, 
+            string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(source, endpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // Mock handler for the initial resource request
+                httpManager.AddManagedIdentityMockHandler(endpoint, initialResource,
+                    MockHelpers.GetMsiSuccessfulResponse(), source);
+
+                // Request token for initial resource
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(initialResource).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Mock handler for the new resource request
+                httpManager.AddManagedIdentityMockHandler(endpoint, newResource,
+                    MockHelpers.GetMsiSuccessfulResponse(), source);
+
+                // Request token for new resource
+                result = await mi.AcquireTokenForManagedIdentity(newResource).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Request token again for the same initial resource to check cache usage
+                result = await mi.AcquireTokenForManagedIdentity(initialResource).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                // Request token again for the new resource to check cache usage
+                result = await mi.AcquireTokenForManagedIdentity(newResource).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySource.AppService)]
+        [DataRow(ManagedIdentitySource.Imds)]
+        [DataRow(ManagedIdentitySource.AzureArc)]
+        [DataRow(ManagedIdentitySource.CloudShell)]
+        [DataRow(ManagedIdentitySource.ServiceFabric)]
+        [DataRow(ManagedIdentitySource.MachineLearning)]
+        public async Task UnsupportedManagedIdentitySource_ThrowsExceptionDuringTokenAcquisitionAsync(
+            ManagedIdentitySource managedIdentitySource)
+        {
+            string UnsupportedEndpoint = "unsupported://endpoint";
+
+            using (new EnvVariableContext())
+            {
+                // Set unsupported environment variable
+                SetEnvironmentVariables(managedIdentitySource, UnsupportedEndpoint);
+
+                // Create the Managed Identity Application
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+
+                // Build the application
+                var mi = miBuilder.Build();
+
+                // Attempt to acquire a token and verify an exception is thrown
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
+                        .ExecuteAsync()
+                        .ConfigureAwait(false)).ConfigureAwait(false);
+
+                // Verify the exception details
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task MixedUserAndSystemAssignedManagedIdentityTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                // User-assigned identity client ID
+                string UserAssignedClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
+                string SystemAssignedClientId = "system_assigned_managed_identity";
+
+                // Create a builder for user-assigned identity
+                var userAssignedBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(UserAssignedClientId))
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                userAssignedBuilder.Config.AccessorOptions = null;
+
+                var userAssignedMI = userAssignedBuilder.BuildConcrete();
+
+                // Record token cache access for user-assigned identity
+                var userAssignedCacheRecorder = userAssignedMI.AppTokenCacheInternal.RecordAccess();
+
+                // Mock handler for user-assigned token
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.AppService,
+                    userAssignedId: UserAssignedClientId,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId);
+
+                var userAssignedResult = await userAssignedMI.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(userAssignedResult);
+                Assert.AreEqual(TokenSource.IdentityProvider, userAssignedResult.AuthenticationResultMetadata.TokenSource);
+
+                // Verify user-assigned cache entries
+                userAssignedCacheRecorder.AssertAccessCounts(1, 1);
+
+                // Create a builder for system-assigned identity
+                var systemAssignedBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                systemAssignedBuilder.Config.AccessorOptions = null;
+
+                var systemAssignedMI = systemAssignedBuilder.BuildConcrete();
+
+                // Record token cache access for system-assigned identity
+                var systemAssignedCacheRecorder = systemAssignedMI.AppTokenCacheInternal.RecordAccess();
+
+                // Mock handler for system-assigned token
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.AppService);
+
+                var systemAssignedResult = await systemAssignedMI.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(systemAssignedResult);
+                Assert.AreEqual(TokenSource.IdentityProvider, systemAssignedResult.AuthenticationResultMetadata.TokenSource);
+
+                // Verify system-assigned cache entries
+                systemAssignedCacheRecorder.AssertAccessCounts(1, 1);
+
+                // Ensure the cache contains correct entries for both identities
+                var userAssignedTokens = userAssignedMI.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
+                var systemAssignedTokens = systemAssignedMI.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
+
+                Assert.AreEqual(1, userAssignedTokens.Count, "User-assigned cache entry missing.");
+                Assert.AreEqual(1, systemAssignedTokens.Count, "System-assigned cache entry missing.");
+
+                // Verify the ClientId for each cached entry
+                Assert.AreEqual(UserAssignedClientId, userAssignedTokens[0].ClientId, "User-assigned ClientId mismatch in cache.");
+                Assert.AreEqual(SystemAssignedClientId, systemAssignedTokens[0].ClientId, "System-assigned ClientId mismatch in cache.");
+            }
         }
     }
 }

@@ -13,11 +13,7 @@ using Uri = System.Uri;
 
 namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
 {
-#if MAUI
     [Preserve(AllMembers = true)]
-#else
-    [global::Android.Runtime.Preserve(AllMembers = true)]
-#endif
     internal class SystemWebUI : WebviewBase
     {
         private readonly CoreUIParent _parent;
@@ -29,7 +25,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
 
         public RequestContext RequestContext { get; set; }
 
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(
+        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri,
             Uri redirectUri,
             RequestContext requestContext,

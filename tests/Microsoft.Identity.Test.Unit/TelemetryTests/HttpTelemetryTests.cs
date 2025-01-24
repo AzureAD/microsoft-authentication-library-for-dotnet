@@ -29,6 +29,7 @@ using NSubstitute.ExceptionExtensions;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
@@ -373,16 +374,16 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 var cca = CreateConfidentialClientApp();
 
                 await cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { 
+                    .WithExtraQueryParameters(new Dictionary<string, string> {
                         { "caller-sdk-id", "testApiId" },
                         { "caller-sdk-ver", "testSdkVersion"} })
                     .ExecuteAsync().ConfigureAwait(false);
 
                 AssertCurrentTelemetry(
-                    requestHandler.ActualRequestMessage, 
-                    ApiIds.AcquireTokenForClient, 
+                    requestHandler.ActualRequestMessage,
+                    ApiIds.AcquireTokenForClient,
                     CacheRefreshReason.NoCachedAccessToken,
-                    callerSdkId: "testApiId", 
+                    callerSdkId: "testApiId",
                     callerSdkVersion: "testSdkVersion");
             }
         }
@@ -429,6 +430,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 .WithClientVersion("testSdkVersion")
                 .WithAuthority(TestConstants.AuthorityCommonTenant)
                 .WithHttpManager(_harness.HttpManager)
+                .WithLogging((a, b, c) => { })
                 .BuildConcrete();
 
                 await cca.AcquireTokenForClient(TestConstants.s_scope)
@@ -440,6 +442,34 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     CacheRefreshReason.NoCachedAccessToken,
                     callerSdkId: "testApiId",
                     callerSdkVersion: "testSdkVersion");
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientNameVersionNotInHeaders()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithClientName("testApiId")
+                .WithClientVersion("testSdkVersion")
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithHttpManager(_harness.HttpManager)
+                .WithLogging((a, b, c) => { })
+                .BuildConcrete();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                requestHandler.ActualRequestHeaders.TryGetValues(OAuth2Header.AppName, out var appName);
+                requestHandler.ActualRequestHeaders.TryGetValues(OAuth2Header.AppVer, out var appVer);
+
+                Assert.IsNull(appName);
+                Assert.IsNull(appVer);
             }
         }
 
@@ -542,8 +572,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                     var ui = Substitute.For<IWebUI>();
                     ui.UpdateRedirectUri(Arg.Any<Uri>()).Returns(new Uri("http://localhost:1234"));
-                    ui.AcquireAuthorizationAsync(null, null, null, default).ThrowsForAnyArgs(
-                        new MsalClientException("user_cancelled"));
+                    ui.AcquireAuthorizationAsync(null, null, null, default).ReturnsForAnyArgs(
+                        Task.FromException<AuthorizationResult>(new MsalClientException("user_cancelled")));
                     _app.ServiceBundle.ConfigureMockWebUI(ui);
 
                     var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
@@ -592,11 +622,13 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     cts.Cancel(true);
                     CancellationToken token = cts.Token;
 
-                    var operationCanceledException = await AssertException.TaskThrowsAsync<TaskCanceledException>(() =>
+                    var operationCanceledException = await AssertException.TaskThrowsAsync<OperationCanceledException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
-                        .ExecuteAsync(token))
+                        .ExecuteAsync(token), 
+                        allowDerived: true) // do not catch TaskCanceledException
+
                         .ConfigureAwait(false);
 
                     break;
@@ -698,8 +730,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             ApiIds apiId,
             CacheRefreshReason cacheInfo,
             bool isCacheSerialized = false,
-            bool isLegacyCacheEnabled = true, 
-            string callerSdkId = "", 
+            bool isLegacyCacheEnabled = true,
+            string callerSdkId = "",
             string callerSdkVersion = "")
         {
             string[] telemetryCategories = requestMessage.Headers.GetValues(
@@ -722,11 +754,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", telemetryCategories[2].Split(',')[1]); // is_legacy_cache_enabled
 
-            Assert.AreEqual(TokenType.Bearer.ToString("D"), telemetryCategories[2].Split(',')[2]);
+            Assert.AreEqual(TelemetryTokenTypeConstants.Bearer.ToString("D"), telemetryCategories[2].Split(',')[2]);
 
             Assert.AreEqual(callerSdkId, telemetryCategories[2].Split(',')[3]);
 
             Assert.AreEqual(callerSdkVersion, telemetryCategories[2].Split(',')[4]);
-        }    
+        }
     }
 }

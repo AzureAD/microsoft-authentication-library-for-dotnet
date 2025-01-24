@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
-#if !NET6_0
+#if !NET8_0
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 #endif
 using Microsoft.Identity.Client.Cache.Items;
@@ -166,8 +166,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             authScheme.AuthorizationHeaderPrefix.Returns("BearToken");
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
-            // When FormatResult is called, change the AccessToken property 
-            authScheme.WhenForAnyArgs(x => x.FormatResult(default)).Do(x => x[0] = "enhanced_secret_" + ((AuthenticationResult)x[0]).AccessToken);
 
             using (var httpManager = new MockHttpManager())
             {

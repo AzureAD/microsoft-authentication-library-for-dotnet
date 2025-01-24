@@ -6,7 +6,6 @@ parameters:
   BuildConfiguration: 'release'
   MsalClientSemVer: '4.60.0-devopsbuild' 
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
-  Mode: 'build' # Default to 'build'
 
 steps:
 
@@ -18,9 +17,9 @@ steps:
     
 # Use the latest .NET SDK
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 6.x'
+  displayName: 'Use .Net Core sdk 8.x'
   inputs:
-    version: 6.x
+    version: 8.x
 
 # Compute the source directory based on the parameter MsalSourceDir
 - task: PowerShell@2
@@ -66,38 +65,10 @@ steps:
       dotnet workload install maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
       dotnet workload install android --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
 
-- ${{ if eq(parameters.Mode, 'build') }}:
-  - task: PowerShell@2
-    displayName: Install Chocolatey
-    inputs:
-      targetType: 'inline'
-      script: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))      
-
-- ${{ if eq(parameters.Mode, 'build') }}:
-  - task: PowerShell@2
-    displayName: 'Install Java 11 for Build'
-    inputs:
-      targetType: 'inline'
-      script: |
-        choco install openjdk --version=11.0.2.01 -y
-        
-- ${{ if eq(parameters.Mode, 'test') }}:
-  - task: JavaToolInstaller@0
-    displayName: 'Use Java 11 for Test'
-    inputs:
-      versionSpec: 11
-      jdkArchitectureOption: x64
-      jdkSourceOption: PreInstalled
-
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
     script: 'nuget locals all -clear'
-
-- ${{ if eq(parameters.Mode, 'build') }}:
-  - powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
-    displayName: 'Install Android'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'

@@ -221,17 +221,7 @@ namespace Microsoft.Identity.Client.OAuth2
         private void AddCommonHeaders(RequestContext requestContext)
         {
             _headers.Add(OAuth2Header.CorrelationId, requestContext.CorrelationId.ToString());
-            _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
-
-            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName))
-            {
-                _headers.Add(OAuth2Header.AppName, requestContext.Logger.ClientName);
-            }
-
-            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
-            {
-                _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
-            }
+            _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");            
         }
 
         public static T CreateResponse<T>(HttpResponse response, RequestContext requestContext)

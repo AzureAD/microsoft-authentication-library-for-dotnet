@@ -15,7 +15,7 @@ namespace MSIHelperService.Controllers
     public class EnvironmentVariablesController : ControllerBase
     {
         private readonly ILogger _logger;
-        private readonly IHttpClientFactory? _httpClientFactory;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
         /// GetEnvironmentVariablesController ctor

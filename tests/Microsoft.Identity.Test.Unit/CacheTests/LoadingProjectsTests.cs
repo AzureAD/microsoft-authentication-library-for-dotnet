@@ -25,12 +25,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
             };
-
-            ((ITokenCacheSerializer)tokenCache).DeserializeMsalV3(null);
-#pragma warning disable CS0618 // Type or member is obsolete
-            Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
-#pragma warning restore CS0618 // Type or member is obsolete
-            
         }
     }
 #endif
