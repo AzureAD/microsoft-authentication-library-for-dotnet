@@ -9,9 +9,7 @@ steps:
 - task: UseDotNet@2
   displayName: 'Use the latest .NET 8'
   inputs:
-    packageType: 'sdk'
-    version: '8.x' # Specify the .NET SDK version you need
-    installationPath: $(Agent.ToolsDirectory)/dotnet
+    version: 8.x
 
 - task: VSTest@2
   displayName: 'Run unit tests .NET '
