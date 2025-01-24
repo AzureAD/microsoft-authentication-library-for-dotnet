@@ -1,0 +1,26 @@
+# template-test-on-linux.yaml
+# Run all unit tests across the LibsAndSamples.sln project on Linux platform
+
+parameters:
+  BuildConfiguration: 'Release'
+
+steps:
+
+- task: UseDotNet@2
+  displayName: 'Use the latest .NET 8'
+  inputs:
+    packageType: 'sdk'
+    version: '8.x' # Specify the .NET SDK version you need
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- task: VSTest@2
+  displayName: 'Run unit tests .NET '
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net8.0\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
+    codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
+    runSettingsFile: 'build\CodeCoverage.runsettings'

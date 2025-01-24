@@ -82,3 +82,19 @@ jobs: #Build and stage projects
       fallbackOnPRTargetBranch: false
       baseDefinitionId: '905' #this is the PR build and it is used as a baseline
       baseBranchRef: 'main'
+
+- job: 'Run Unit Tests on Linux'
+  #strategy:
+  #  parallel: 5
+  dependsOn:
+  - 'BuildAndStageProjects'
+  pool:
+      vmImage: 'ubuntu-22.04'
+      demands:
+      - msbuild
+  variables:
+      runCodesignValidationInjection: false
+      Codeql.SkipTaskAutoInjection: true
+
+  steps:
+  - template: template-test-on-linux.yaml
