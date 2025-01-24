@@ -73,8 +73,7 @@ steps:
         #runtime path with file name
         $runtimes = @('runtimes\win-x64\native\msalruntime.dll', 
                       'runtimes\win-x86\native\msalruntime_x86.dll', 
-                      'runtimes\win-arm64\native\msalruntime_arm64.dll',
-                      'runtimes\linux-x64\native\libmsalruntime.so');
+                      'runtimes\win-arm64\native\msalruntime_arm64.dll');
 
         #dev apps to check
         $AppsToCheck = @('MSIX\WPF\bin\Release\', 
