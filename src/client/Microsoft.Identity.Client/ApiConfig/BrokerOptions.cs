@@ -33,10 +33,6 @@ namespace Microsoft.Identity.Client
             /// Use broker on Linux
             /// </summary>
             Linux = 0b_0000_0010,  // 2
-            /// <summary>
-            /// Use broker on WSL
-            /// </summary>
-            WSL = 0b_0000_0011,  // 3
         }
 
         /// <summary>
