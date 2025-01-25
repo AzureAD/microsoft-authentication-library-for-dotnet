@@ -11,12 +11,11 @@ steps:
   inputs:
     version: 8.x
 
-- task: DownloadBuildArtifacts@0
+- task: DownloadPipelineArtifact@0
   displayName: Download Artifacts from Windows Build
   inputs:
     artifactName: drop
-    itemPattern: 'drop/**'
-    downloadPath: $(System.DefaultWorkingDirectory)
+    downloadPath: $(System.DefaultWorkingDirectory)/drop
 
 # VSTest@2 is supported only on Windows 
 - script: |
