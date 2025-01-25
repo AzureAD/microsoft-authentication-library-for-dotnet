@@ -12,13 +12,15 @@ steps:
     version: 8.x
 
 - task: DownloadBuildArtifacts@0
-  displayName: Download Build Artifacts
+  displayName: Download Artifacts from Windows Build
   inputs:
     artifactName: drop
     itemPattern: 'drop/**'
-    downloadPath: $(Build.artifactstagingdirectory)
+    downloadPath: $(System.DefaultWorkingDirectory)
 
 # VSTest@2 is supported only on Windows 
 - script: |
+    ls '$(System.DefaultWorkingDirectory)'
+    ls '$(System.DefaultWorkingDirectory)/drop/'
     dotnet test **/Microsoft.Identity.Test.Unit/bin/**/net8.0/Microsoft.Identity.Test.Unit.dll --configuration Release --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
   displayName: 'Run unit tests .NET'
