@@ -11,6 +11,13 @@ steps:
   inputs:
     version: 8.x
 
+- task: DownloadBuildArtifacts@0
+  displayName: Download Build Artifacts
+  inputs:
+    artifactName: drop
+    itemPattern: 'drop/**'
+    downloadPath: $(Build.artifactstagingdirectory)
+
 # VSTest@2 is supported only on Windows 
 - script: |
     dotnet test **/Microsoft.Identity.Test.Unit/bin/**/net8.0/Microsoft.Identity.Test.Unit.dll --configuration Release --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
