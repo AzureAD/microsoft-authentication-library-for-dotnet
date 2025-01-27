@@ -6,6 +6,8 @@ parameters:
 
 steps:
 
+- template: template-install-keyvault-secrets.yaml
+
 - task: UseDotNet@2
   displayName: 'Use the latest .NET 8'
   inputs:
@@ -50,4 +52,4 @@ steps:
     ls '$(System.DefaultWorkingDirectory)'
     # ls '$(System.DefaultWorkingDirectory)/drop/'
     dotnet test **/Microsoft.Identity.Test.Integration.netcore/bin/**/net8*/Microsoft.Identity.Test.Integration.NetCore.dll --configuration Debug --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
-  displayName: 'Run unit tests .NET'
+  displayName: 'Run Integration tests .NET'
