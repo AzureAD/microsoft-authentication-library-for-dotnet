@@ -37,6 +37,7 @@ steps:
     solution: 'tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
     msbuildArguments: '/t:restore'
     configuration: ${{ parameters.BuildConfiguration }}'
+    msBuildVersion: '17.0'
 
 # - task: DownloadPipelineArtifact@0
 #   displayName: Download Artifacts from Windows Build
