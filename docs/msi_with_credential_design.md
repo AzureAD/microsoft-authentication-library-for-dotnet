@@ -69,11 +69,11 @@ If identified, MSAL will use the appropriate legacy MSI endpoint for that resour
 
 This section outlines the necessary steps to acquire an access token using the MSI V2 `/credential` endpoint. 
 
-### 1. Check for an Existing Certificate
-- Search for a valid self-signed certificate in `Cert:\LocalMachine\My`.
+### 1. Check for an Existing (Platform) Certificate
+- Search for a specific certificate (`devicecert.mtlsauth.local`) in `Cert:\LocalMachine\My`.
 - If found, extract its thumbprint and use it for authentication.
 
-### 2. Generate a New Certificate (if not found)
+### 2. Generate a New Certificate (if specific certificate is not found)
 - Create a new self-signed certificate with a 90-day validity.
 - Ensure the certificate has:
   - Subject name `CN=mtls-auth` (name not final).
@@ -210,11 +210,12 @@ try {
 
 | API Name                         | Purpose                                                   |
 |----------------------------------|-----------------------------------------------------------|
-| `WithProofOfPossession()`        | Requests a PoP token instead of a default Bearer token.   |
 | `WithClientCapabilities()`       | Allows client capabilities                                |
 | `WithClaims()`                   | Allows passing of claims (bypasses cache).                |
 | `GetBindingCertificate()`        | Helper method to get the binding certificate.             |
 | `GetManagedIdentitySourceAsync()`| Helper method to get the managed identity source.         |
+| `WithProofOfPossession()`        | Requests a PoP token instead of a default Bearer token.   |
+
 
 ## Related Documents
 
