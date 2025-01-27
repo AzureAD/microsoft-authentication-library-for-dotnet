@@ -4,6 +4,8 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public static class CertificateHelper
@@ -39,24 +41,36 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             // Don't validate certs, since the test root isn't installed.
             const bool validateCerts = false;
-
             using (var store = new X509Store(name, location))
             {
-                store.Open(OpenFlags.ReadOnly);
-                X509Certificate2Collection collection = store.Certificates.Find(X509FindType.FindBySubjectName, certName, validateCerts);
-
-                X509Certificate2 certToUse = null;
-                
-                // select the "freshest" certificate
-                foreach (X509Certificate2 cert in collection)
+                // Unix LocalMachine X509Store is limited to the Root and CertificateAuthority stores
+                if (DesktopOsHelper.IsWindows())
                 {
-                    if (certToUse == null || cert.NotBefore > certToUse.NotBefore)
-                    {
-                        certToUse = cert;
-                    }
-                }
+                    store.Open(OpenFlags.ReadOnly);
+                    X509Certificate2Collection collection = store.Certificates.Find(X509FindType.FindBySubjectName, certName, validateCerts);
 
-                return certToUse;
+                    X509Certificate2 certToUse = null;
+                    
+                    // select the "freshest" certificate
+                    foreach (X509Certificate2 cert in collection)
+                    {
+                        if (certToUse == null || cert.NotBefore > certToUse.NotBefore)
+                        {
+                            certToUse = cert;
+                        }
+                    }
+
+                    return certToUse;
+                } else if (DesktopOsHelper.IsLinux())
+                {
+                    var certPasswrod = Environment.GetEnvironmentVariable("CERTIFICATE_PASSWORD");
+                    var cert = new X509Certificate2(location, certPasswrod);
+                    return cert;
+                }
+                else
+                {
+                    throw new PlatformNotSupportedException("This platform is not supported");
+                }
 
             }
         }
