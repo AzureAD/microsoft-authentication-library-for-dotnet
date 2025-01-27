@@ -10,7 +10,7 @@
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
 
     <Platforms>AnyCPU;x64</Platforms>
-  
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
 </PropertyGroup>
 
   <ItemGroup>
