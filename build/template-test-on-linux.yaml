@@ -31,13 +31,19 @@ steps:
     custom: 'workload'
     arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
-- task: MSBuild@1
-  displayName: 'NuGet restore Unit Test'
+- task: DotNetCoreCLI@2
+  displayName: 'Build Unit Test'
   inputs:
-    solution: 'tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
-    msbuildArguments: '/t:restore'
-    configuration: ${{ parameters.BuildConfiguration }}'
-    msBuildVersion: '17.0'
+    command: 'build'
+    projects: './tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
+
+# - task: MSBuild@1
+#   displayName: 'NuGet restore Unit Test'
+#   inputs:
+#     solution: 'tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
+#     msbuildArguments: '/t:restore'
+#     configuration: ${{ parameters.BuildConfiguration }}'
+#     msBuildVersion: '17.0'
 
 # - task: DownloadPipelineArtifact@0
 #   displayName: Download Artifacts from Windows Build
