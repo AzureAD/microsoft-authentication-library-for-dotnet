@@ -29,7 +29,7 @@ steps:
     command: 'build'
     projects: |
       # ./tests/Microsoft.Identity.Test.Common/Microsoft.Identity.Test.Common.csproj
-      ./tests/Microsoft.Identity.Test.Integration.NetCore/Microsoft.Identity.Test.Integration.NetCore.csproj
+      ./tests/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj
 
 # - task: MSBuild@1
 #   displayName: 'NuGet restore Unit Test'
@@ -49,5 +49,5 @@ steps:
 - script: |
     ls '$(System.DefaultWorkingDirectory)'
     # ls '$(System.DefaultWorkingDirectory)/drop/'
-    dotnet test **/Microsoft.Identity.Test.Integration.NetCore/bin/**/net8.0/Microsoft.Identity.Test.Integration.NetCore.dll --configuration Release --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
+    dotnet test **/Microsoft.Identity.Test.Integration.netcore/bin/**/net8.0/Microsoft.Identity.Test.Integration.NetCore.dll --configuration Release --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
   displayName: 'Run unit tests .NET'
