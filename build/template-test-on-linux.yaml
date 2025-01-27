@@ -16,14 +16,6 @@ steps:
   inputs:
     script: 'nuget locals all -clear'
 
-#Restore workload with the .NET Core CLI task
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore for Desktop project'
-  inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
-
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore'
   inputs:
@@ -35,7 +27,7 @@ steps:
   displayName: 'Build Unit Test'
   inputs:
     command: 'build'
-    projects: './tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
+    projects: './tests/Microsoft.Identity.Test.Common/Microsoft.Identity.Test.Common.csproj'
 
 # - task: MSBuild@1
 #   displayName: 'NuGet restore Unit Test'
@@ -55,5 +47,5 @@ steps:
 - script: |
     ls '$(System.DefaultWorkingDirectory)'
     ls '$(System.DefaultWorkingDirectory)/drop/'
-    dotnet test **/Microsoft.Identity.Test.Unit/bin/**/net8.0/Microsoft.Identity.Test.Unit.dll --configuration Release --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
+    dotnet test **/Microsoft.Identity.Test.Common/bin/**/net8.0/Microsoft.Identity.Test.Common.dll --configuration Release --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
   displayName: 'Run unit tests .NET'
