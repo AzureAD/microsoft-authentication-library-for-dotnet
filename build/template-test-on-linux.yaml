@@ -32,9 +32,9 @@ steps:
     arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
 - task: MSBuild@1
-  displayName: 'NuGet restore LibsAndSamples.sln'
+  displayName: 'NuGet restore Unit Test'
   inputs:
-    solution: 'LibsAndSamples.sln'
+    solution: 'tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
     msbuildArguments: '/t:restore'
     configuration: ${{ parameters.BuildConfiguration }}'
 
