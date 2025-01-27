@@ -11,11 +11,38 @@ steps:
   inputs:
     version: 8.x
 
-- task: DownloadPipelineArtifact@0
-  displayName: Download Artifacts from Windows Build
+- task: CmdLine@2
+  displayName: 'Clear local NuGet cache'
   inputs:
-    artifactName: drop
-    downloadPath: $(System.DefaultWorkingDirectory)/drop
+    script: 'nuget locals all -clear'
+
+#Restore workload with the .NET Core CLI task
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore for Desktop project'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+
+- task: MSBuild@1
+  displayName: 'NuGet restore LibsAndSamples.sln'
+  inputs:
+    solution: 'LibsAndSamples.sln'
+    msbuildArguments: '/t:restore'
+    configuration: ${{ parameters.BuildConfiguration }}'
+
+# - task: DownloadPipelineArtifact@0
+#   displayName: Download Artifacts from Windows Build
+#   inputs:
+#     artifactName: drop
+#     downloadPath: $(System.DefaultWorkingDirectory)/drop
 
 # VSTest@2 is supported only on Windows 
 - script: |
