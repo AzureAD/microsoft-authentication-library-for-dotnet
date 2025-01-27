@@ -81,7 +81,12 @@ namespace Microsoft.Identity.Client
             {
                 errorMessage += "\nAuthority used: " + context.ServiceBundle.Config.Authority?.AuthorityInfo?.CanonicalAuthority?.AbsoluteUri?.Split('?')[0];
                 
-                if(!context.ServiceBundle.Config.AzureRegion.IsNullOrEmpty())
+                if (!context.ApiEvent.TokenEndpoint.IsNullOrEmpty())
+                {
+                    errorMessage += "\nToken Endpoint: " + context.ApiEvent?.TokenEndpoint;
+                }
+
+                if (!context.ServiceBundle.Config.AzureRegion.IsNullOrEmpty())
                 {
                     errorMessage += "\nRegion Used: " + context.ServiceBundle.Config.AzureRegion;
                 }
