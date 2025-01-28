@@ -118,6 +118,7 @@ namespace Microsoft.Identity.Client
         public bool DisableInternalRetries { get; internal set; } = false;
 
         public bool IsManagedIdentity { get; }
+        public bool UseMtlsPop { get; internal set; } = false;
         public bool IsConfidentialClient { get; }
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
         public string CertificateIdToAssociateWithToken { get; set; }

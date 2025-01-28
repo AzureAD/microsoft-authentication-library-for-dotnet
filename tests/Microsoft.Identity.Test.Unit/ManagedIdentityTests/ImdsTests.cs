@@ -3,10 +3,12 @@
 
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,6 +19,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ImdsTests : TestBase
     {
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [DataTestMethod]
         [DataRow(HttpStatusCode.BadRequest, ImdsManagedIdentitySource.IdentityUnavailableError, 1, DisplayName = "BadRequest - Identity Unavailable")]
         [DataRow(HttpStatusCode.BadGateway, ImdsManagedIdentitySource.GatewayError, 1, DisplayName = "BadGateway - Gateway Error")]
@@ -35,6 +43,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
+
+                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
+                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
+                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
+                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
 
                 // Adding multiple mock handlers to simulate retries for GatewayTimeout
                 for (int i = 0; i < expectedAttempts; i++)

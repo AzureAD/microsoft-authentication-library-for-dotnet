@@ -1,1 +1,4 @@
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithProofOfPossession() -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.Credential = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+static Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
 Microsoft.Identity.Client.BrokerOptions.OperatingSystems.OSX = 4 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems

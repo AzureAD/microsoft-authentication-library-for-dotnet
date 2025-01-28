@@ -582,5 +582,22 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 TokenSource = TokenSource.Broker
             };
         }
+
+        public static void AddCredentialEndpointNotFoundHandlers(
+            ManagedIdentitySource managedIdentitySource,
+            MockHttpManager httpManager,
+            string endpoint = "",
+            int count = 4)
+        {
+            if (managedIdentitySource != ManagedIdentitySource.Imds)
+            {
+                return; // Only add handlers for IMDS
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: endpoint);
+            }
+        }
     }
 }

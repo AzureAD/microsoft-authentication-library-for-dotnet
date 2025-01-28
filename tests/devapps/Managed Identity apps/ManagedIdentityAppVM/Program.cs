@@ -7,7 +7,9 @@ using Microsoft.IdentityModel.Abstractions;
 
 IIdentityLogger identityLogger = new IdentityLogger();
 
-IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures()
                 .WithLogging(identityLogger, true)
                 .Build();
 
@@ -20,8 +22,10 @@ do
     try
     {
         var result = await mi.AcquireTokenForManagedIdentity(scope)
+            .WithProofOfPossession()
             .ExecuteAsync().ConfigureAwait(false);
 
+        Console.WriteLine(result.AccessToken);
         Console.WriteLine("Success");
         Console.ReadLine();
     }
