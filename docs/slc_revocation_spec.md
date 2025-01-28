@@ -10,7 +10,7 @@ In the MSI v2 authentication flow, MSAL first obtains a credential from IMDS and
 
 - **Revoked Token Scenario:** The token issued by an SLC has been revoked. In this case, Entra ID considers the SLC as invalid.
 
-- **Revoked MSI Certificate Scenario:** The MSI certificate used to sign the SLC was revoked. All the SLCs signed by that certificate becomes invalid.
+- **Unspecified Credential Issue Scenario:** When eSTS returns an invalid_client error without a suberror code, MSAL treats it as an unspecified credential issue.
 
 - **Claims Challenge Scenario:** An API rejects an access token due to insufficient claims, requiring MSAL to retrieve a new token with the necessary claims.
 
@@ -19,7 +19,7 @@ In the MSI v2 authentication flow, MSAL first obtains a credential from IMDS and
 | Scenario                         | eSTS/Resource Response                                                                                 |
 |----------------------------------|--------------------------------------------------------------------------------------------------------|
 | Revoked Token                    | `{ "error": "invalid_client", "suberror": "revoked_token" }`                                           |
-| Revoked MSI Certificate          | `{ "error": "invalid_client" }`                                                                        |
+| Unspecified Credential Issue     | `{ "error": "invalid_client" }`                                                                        |
 
 ## **Resource Token Rejection Scenario**
 
