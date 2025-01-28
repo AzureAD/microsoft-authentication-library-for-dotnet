@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -39,39 +38,34 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <returns><see cref="X509Certificate2"/> with <paramref subjectName="certName"/>, or null if no matching certificate was found</returns>
         public static X509Certificate2 FindCertificateByName(string certName, StoreLocation location, StoreName name)
         {
+            // Unix LocalMachine X509Store is limited to the Root and CertificateAuthority stores
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                var certPasswrod = Environment.GetEnvironmentVariable("CERTIFICATE_PASSWORD");
+                var cert = new X509Certificate2(location, certPasswrod);
+                return cert;
+            }
             // Don't validate certs, since the test root isn't installed.
             const bool validateCerts = false;
             using (var store = new X509Store(name, location))
             {
-                // Unix LocalMachine X509Store is limited to the Root and CertificateAuthority stores
-                if (DesktopOsHelper.IsWindows())
-                {
-                    store.Open(OpenFlags.ReadOnly);
-                    X509Certificate2Collection collection = store.Certificates.Find(X509FindType.FindBySubjectName, certName, validateCerts);
+                store.Open(OpenFlags.ReadOnly);
+                X509Certificate2Collection collection = store.Certificates.Find(X509FindType.FindBySubjectName, certName, validateCerts);
 
-                    X509Certificate2 certToUse = null;
-                    
-                    // select the "freshest" certificate
-                    foreach (X509Certificate2 cert in collection)
+                X509Certificate2 certToUse = null;
+                
+                // select the "freshest" certificate
+                foreach (X509Certificate2 cert in collection)
+                {
+                    if (certToUse == null || cert.NotBefore > certToUse.NotBefore)
                     {
-                        if (certToUse == null || cert.NotBefore > certToUse.NotBefore)
-                        {
-                            certToUse = cert;
-                        }
+                        certToUse = cert;
                     }
-
-                    return certToUse;
-                } else if (DesktopOsHelper.IsLinux())
-                {
-                    var certPasswrod = Environment.GetEnvironmentVariable("CERTIFICATE_PASSWORD");
-                    var cert = new X509Certificate2(location, certPasswrod);
-                    return cert;
-                }
-                else
-                {
-                    throw new PlatformNotSupportedException("This platform is not supported");
                 }
 
+                return certToUse;
+                
+            
             }
         }
     }
