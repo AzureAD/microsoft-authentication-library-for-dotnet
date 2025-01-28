@@ -31,7 +31,8 @@ if [ $PACKAGE_MANAGER == 'apt' ]; then
         libx11-dev \
         dbus-x11 \
         x11-xserver-utils \
-        libp11-kit-dev
+        libp11-kit-dev \
+        libwebkit2gtk-4.0-dev
 fi
 
 echo "Installing JavaBroker"
