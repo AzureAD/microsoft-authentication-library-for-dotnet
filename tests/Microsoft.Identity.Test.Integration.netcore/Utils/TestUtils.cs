@@ -1,5 +1,5 @@
 using System;
-using Microsoft.Identity.Client.Extensions.Msal;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Test.Integration.Utils
 {
@@ -8,14 +8,12 @@ namespace Microsoft.Identity.Test.Integration.Utils
         /// <summary>
         /// Get the handle of the foreground window for Windows
         /// </summary>
-#if WINDOWS
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
-#endif
+
         /// <summary>
         /// Get the handle of the console window for Linux
         /// </summary>
-#if LINUX
         [DllImport("libX11")]
         private static extern IntPtr XOpenDisplay(string display);
 
@@ -24,29 +22,29 @@ namespace Microsoft.Identity.Test.Integration.Utils
 
         [DllImport("libX11")]
         private static extern IntPtr XDefaultRootWindow(IntPtr display);
-#endif
+
         /// <summary>
         /// Get window handle on xplat
         /// </summary>
         public static IntPtr GetWindowHandle()
         {
-            #if WINDOWS
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
                 return GetForegroundWindow();
-            #elif LINUX
-                try
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                IntPtr display = XOpenDisplay(null);
+                if (display == IntPtr.Zero)
                 {
-                    return XRootWindow(XOpenDisplay(null), 0);
+                    throw new Exception("Unable to open X display");
                 }
-                catch (System.Exception ex)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(ex.ToString());
-                    Console.ResetColor();
-                    return IntPtr.Zero;
-                }
-            #else
-                throw new PlatformNotSupportedException("Cannot get window handle on this platform.");
-            #endif
+                return XDefaultRootWindow(display);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException("This platform is not supported.");
+            }
         }
 
     }
