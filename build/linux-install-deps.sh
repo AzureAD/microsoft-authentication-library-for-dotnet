@@ -48,5 +48,4 @@ fi
 echo "Installing latest published JavaBroker package"
 $PKGINSTALL_CMD $BROKER_PACKAGE_NAME
 
-xhost +SI:localuser:microsoft-identity-broker
 exit 0
