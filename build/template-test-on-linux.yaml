@@ -8,6 +8,13 @@ steps:
 
 - template: template-install-keyvault-secrets.yaml
 
+- task: Bash@3
+  displayName: Install broker and depenencies
+  inputs:
+    targetType: filePath
+    filePath: build/linux-install-deps.sh
+  condition: succeededOrFailed()
+
 - task: UseDotNet@2
   displayName: 'Use the latest .NET 8'
   inputs:
