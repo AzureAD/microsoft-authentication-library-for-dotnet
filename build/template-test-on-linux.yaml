@@ -167,7 +167,7 @@ steps:
 - script: |
     ls '$(System.DefaultWorkingDirectory)'
     # ls '$(System.DefaultWorkingDirectory)/drop/'
-    dotnet test **/Microsoft.Identity.Test.Integration.netcore/bin/**/net8*/Microsoft.Identity.Test.Integration.NetCore.dll --configuration Debug --settings build/CodeCoverage.runsettings
+    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj --settings build/CodeCoverage.runsettings -l "console;verbosity=detailed" --blame-crash
   displayName: 'Run Integration tests .NET'
   env:
     CERTIFICATE_LOCATION: $(generateLabCert.certDir)
