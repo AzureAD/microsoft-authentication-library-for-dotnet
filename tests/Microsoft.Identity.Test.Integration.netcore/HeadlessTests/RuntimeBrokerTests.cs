@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         //SSH User impersonation scope required for this test
         private string[] _SSH_scopes = new[] { "https://pas.windows.net/CheckMyAccess/Linux/user_impersonation" };
 
+        private BrokerOptions _brokerOption = TestUtils.GetPlatformBroker();
+
         private string CreateJwk()
         {
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
@@ -68,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
             IPublicClientApplication pca = pcaBuilder
-                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+                .WithBroker(_brokerOption)
                 .Build();
 
             // Act
@@ -103,7 +105,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .WithBroker(_brokerOption)
                .Build();
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
@@ -142,7 +144,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .WithBroker(_brokerOption)
                .Build();
 
             MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
@@ -174,7 +176,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
             IPublicClientApplication pca = pcaBuilder
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .WithBroker(_brokerOption)
                .Build();
 
             // Act
@@ -206,7 +208,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .WithBroker(_brokerOption)
                .Build();
 
             // Acquire token using username password
@@ -254,7 +256,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             .WithTestLogging()
             .WithAuthority(labResponse.Lab.Authority, "organizations")
             .WithParentActivityOrWindow(windowHandleProvider)
-            .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+            .WithBroker(_brokerOption)
             .Build();
 
             string jwk = CreateJwk();
@@ -295,7 +297,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .WithBroker(_brokerOption)
                .Build();
 
             // Acquire token using username password
@@ -350,7 +352,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(testLogger, enablePiiLogging: true)
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .WithBroker(_brokerOption)
                .Build();
 
             // Acquire token using username password
@@ -436,7 +438,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("43dfbb29-3683-4673-a66f-baba91798bd2")
                .WithAuthority("https://login.microsoftonline.com/organizations")
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .WithBroker(_brokerOption)
                .Build();
 
             // Act
@@ -467,7 +469,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .WithBroker(_brokerOption)
                .Build();
 
             // Acquire token using username password with POP on a valid resource
@@ -502,7 +504,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .WithBroker(_brokerOption)
                .Build();
 
             // Acquire token using username password with POP on a resource not in the CA policy

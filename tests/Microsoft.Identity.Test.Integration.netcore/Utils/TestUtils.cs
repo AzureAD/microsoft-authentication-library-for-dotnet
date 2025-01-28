@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Test.Integration.Utils
 {
@@ -35,6 +36,21 @@ namespace Microsoft.Identity.Test.Integration.Utils
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return XRootWindow(XOpenDisplay(null), 0);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException("This platform is not supported.");
+            }
+        }
+
+        public static BrokerOptions GetPlatformBroker() {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return new BrokerOptions(BrokerOptions.OperatingSystems.Linux);
             }
             else
             {
