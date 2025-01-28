@@ -8,12 +8,14 @@ namespace Microsoft.Identity.Test.Integration.Utils
         /// <summary>
         /// Get the handle of the foreground window for Windows
         /// </summary>
+#if WINDOWS
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
-
-        // <summary>
+#endif
+        /// <summary>
         /// Get the handle of the console window for Linux
         /// </summary>
+#if LINUX
         [DllImport("libX11")]
         private static extern IntPtr XOpenDisplay(string display);
 
@@ -22,32 +24,29 @@ namespace Microsoft.Identity.Test.Integration.Utils
 
         [DllImport("libX11")]
         private static extern IntPtr XDefaultRootWindow(IntPtr display);
-
+#endif
         /// <summary>
         /// Get window handle on xplat
         /// </summary>
         public static IntPtr GetWindowHandle()
         {
-            if (SharedUtilities.IsWindowsPlatform())
-            {
+            #if WINDOWS
                 return GetForegroundWindow();
-            }
-            else if (SharedUtilities.IsLinuxPlatform())
-            {
-                try {
+            #elif LINUX
+                try
+                {
                     return XRootWindow(XOpenDisplay(null), 0);
-                } catch (System.Exception ex)
+                }
+                catch (System.Exception ex)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(ex.ToString());
                     Console.ResetColor();
+                    return IntPtr.Zero;
                 }
-                return IntPtr.Zero;
-            }
-            else
-            {
+            #else
                 throw new PlatformNotSupportedException("Cannot get window handle on this platform.");
-            }
+            #endif
         }
 
     }
