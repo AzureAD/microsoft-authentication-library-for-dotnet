@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Integration.Utils
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return return XRootWindow(XOpenDisplay(null), 0);
+                return XRootWindow(XOpenDisplay(null), 0);
             }
             else
             {
