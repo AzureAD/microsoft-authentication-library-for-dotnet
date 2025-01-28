@@ -36,18 +36,18 @@ if [ $PACKAGE_MANAGER == 'apt' ]; then
         libwebkit2gtk-4.0-dev
 fi
 
-echo "Installing JavaBroker"
-LINUX_VERSION=$(sed -r -n -e 's/^VERSION_ID="?([^"]+)"?/\1/p' /etc/os-release)
-LINUX_VERSION_MAIN=$(echo $LINUX_VERSION | sed 's/\([0-9]*\)\..*/\1/')
+# echo "Installing JavaBroker"
+# LINUX_VERSION=$(sed -r -n -e 's/^VERSION_ID="?([^"]+)"?/\1/p' /etc/os-release)
+# LINUX_VERSION_MAIN=$(echo $LINUX_VERSION | sed 's/\([0-9]*\)\..*/\1/')
 
-if [ -f '/usr/bin/apt' ]; then
-    curl https://packages.microsoft.com/config/ubuntu/$LINUX_VERSION/prod.list | sudo sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
-else
-    $PKGINSTALL_CMD yum-utils
-    yum-config-manager --add-repo=https://packages.microsoft.com/config/rhel/$LINUX_VERSION_MAIN/prod.repo
-    rpm --import http://packages.microsoft.com/keys/microsoft.asc
-fi
-echo "Installing latest published JavaBroker package"
-$PKGINSTALL_CMD $BROKER_PACKAGE_NAME
+# if [ -f '/usr/bin/apt' ]; then
+#     curl https://packages.microsoft.com/config/ubuntu/$LINUX_VERSION/prod.list | sudo sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+# else
+#     $PKGINSTALL_CMD yum-utils
+#     yum-config-manager --add-repo=https://packages.microsoft.com/config/rhel/$LINUX_VERSION_MAIN/prod.repo
+#     rpm --import http://packages.microsoft.com/keys/microsoft.asc
+# fi
+# echo "Installing latest published JavaBroker package"
+# $PKGINSTALL_CMD $BROKER_PACKAGE_NAME
 
 exit 0

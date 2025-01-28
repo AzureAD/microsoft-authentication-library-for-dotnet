@@ -120,7 +120,7 @@ steps:
 
       code .
       dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
-      xhost +SI:localuser
+      # xhost +SI:localuser
   env:
     DBUS_SESSION_BUS_ADDRESS: $(SetDbusSession.dbusSessionAddress)
 
