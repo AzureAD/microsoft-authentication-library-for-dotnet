@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public IDictionary<string, string> BodyParameters { get; }
 
         public IDictionary<string, string> QueryParameters { get; }
+        public string Content { get; set; }
 
         public ManagedIdentityRequest(HttpMethod method, Uri endpoint)
         {
@@ -38,6 +39,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             uriBuilder.AppendQueryParameters(QueryParameters);
 
             return uriBuilder.Uri;
+        }
+
+        public HttpContent CreateHttpContent()
+        {
+            if (!string.IsNullOrEmpty(Content))
+            {
+                return new StringContent(Content, Encoding.UTF8, "application/json");
+            }
+
+            if (BodyParameters.Count > 0)
+            {
+                var formData = new FormUrlEncodedContent(BodyParameters);
+                return formData;
+            }
+
+            return null; // No body content
         }
     }
 }

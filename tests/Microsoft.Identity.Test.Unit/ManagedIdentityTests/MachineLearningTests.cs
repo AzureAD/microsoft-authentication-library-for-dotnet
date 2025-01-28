@@ -21,6 +21,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string MachineLearning = "Machine learning";
 
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [TestMethod]
         public async Task MachineLearningTestsInvalidEndpointAsync()
         {
