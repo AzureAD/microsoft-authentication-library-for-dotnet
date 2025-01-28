@@ -2,7 +2,7 @@
 
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
-
+apt install sudo
 # This script must be run elevated. Adding a sudo wrapper if needed.
 if [ "$UID" -ne 0 ]; then
     exec sudo "$0" "$@"
