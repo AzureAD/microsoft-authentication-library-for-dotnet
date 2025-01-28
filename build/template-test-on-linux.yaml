@@ -54,4 +54,5 @@ steps:
     dotnet test **/Microsoft.Identity.Test.Integration.netcore/bin/**/net8*/Microsoft.Identity.Test.Integration.NetCore.dll --configuration Debug --collect:"XPlat Code Coverage" --settings build/CodeCoverage.runsettings
   displayName: 'Run Integration tests .NET'
   env:
+    CERTIFICATE_LOCATION: $(generateLabCert.certDir)
     CERTIFICATE_PASSWORD: $(generateLabCert.certPass)

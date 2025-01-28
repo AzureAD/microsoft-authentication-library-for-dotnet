@@ -42,7 +42,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 var certPasswrod = Environment.GetEnvironmentVariable("CERTIFICATE_PASSWORD");
-                var cert = new X509Certificate2(location, certPasswrod);
+                var certLocation = Environment.GetEnvironmentVariable("CERTIFICATE_LOCATION");
+                var cert = new X509Certificate2(certLocation, certPasswrod);
                 return cert;
             }
             // Don't validate certs, since the test root isn't installed.
