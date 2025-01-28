@@ -11,9 +11,10 @@ steps:
 - task: Bash@3
   displayName: Install broker and depenencies
   inputs:
-    targetType: filePath
-    filePath: build/linux-install-deps.sh
-  condition: succeededOrFailed()
+    targetType: 'inline'
+    script: |
+      chmod +x ./build/linux-install-deps.sh
+      ./build/linux-install-deps.sh
 
 - task: UseDotNet@2
   displayName: 'Use the latest .NET 8'
