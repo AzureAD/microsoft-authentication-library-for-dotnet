@@ -30,10 +30,10 @@ if [ $PACKAGE_MANAGER == 'apt' ]; then
     $PKGINSTALL_CMD \
         libx11-dev \
         dbus-x11 \
+        libsystemd0 \
         x11-xserver-utils \
         libp11-kit-dev \
-        libwebkit2gtk-4.0-dev \
-        xvfb
+        libwebkit2gtk-4.0-dev
 fi
 
 echo "Installing JavaBroker"

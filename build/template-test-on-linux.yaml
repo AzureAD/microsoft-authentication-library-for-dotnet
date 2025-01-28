@@ -25,20 +25,7 @@ steps:
       echo "Setting DBUS_SESSION_BUS_ADDRESS"
       # ensure that /var/lib/dbus/machine-id exists and has the uuid in it
       sudo dbus-uuidgen --ensure
-      # Java broker end to end test needs the Dbus session to be user session address
-      if [ ${{ parameters.testType }} == 'end2end-broker' ]; then
-          # sudo usermod -aG dbus -u ${UID}
-          DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${UID}/bus"
-          # enable session lingering for the user
-          sudo loginctl enable-linger ${USER}
-          # enable and start dbus service
-          sudo systemctl enable dbus.service
-          sudo systemctl start dbus.service
-          # make sure per-user instance of systemd is running
-          /usr/bin/dbus-daemon --session --address=systemd: --nofork --print-address --nopidfile --systemd-activation --syslog-only
-      else
-          eval `dbus-launch --sh-syntax`
-      fi
+      eval `dbus-launch --sh-syntax`
       echo "dbus-launch finished"
 
       echo "##vso[task.setvariable variable=dbusSessionAddress;isOutput=true]$DBUS_SESSION_BUS_ADDRESS"
@@ -120,7 +107,7 @@ steps:
           rm -f packages.microsoft.gpg
           sudo apt update
           sudo apt install code
-          export DISPLAY=:0
+          export DISPLAY=:99
       elif [ -f '/usr/bin/yum' ]; then
           # install packages for GUI test
           sudo yum -y install xorg-x11-server-Xvfb mesa-libEGL-devel glx-utils mesa-dri-drivers xorg-x11-server-utils
@@ -133,7 +120,7 @@ steps:
 
       code .
       dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
-      xhost +SI:localuser:microsoft-identity-broker
+      xhost +SI:localuser
   env:
     DBUS_SESSION_BUS_ADDRESS: $(SetDbusSession.dbusSessionAddress)
 

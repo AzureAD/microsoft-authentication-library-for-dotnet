@@ -34,12 +34,7 @@ namespace Microsoft.Identity.Test.Integration.Utils
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                IntPtr display = XOpenDisplay(null);
-                if (display == IntPtr.Zero)
-                {
-                    throw new Exception("Unable to open X display");
-                }
-                return XDefaultRootWindow(display);
+                return return XRootWindow(XOpenDisplay(null), 0);
             }
             else
             {
