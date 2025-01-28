@@ -79,7 +79,7 @@ Example:
       "home_account_id": "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4",
       "environment": "login.microsoftonline.de",     
       "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
-      "secret": "eyJ..",
+      "secret": "omitted",
       "credential_type": "atext", // new!
       "realm": "469fdeb4-d4fd-4fde-991e-308a78e4bea4",
       "target": "https://graph.cloudapi.de/62e90394-69f5-4237-9190-012177145e10 https://graph.cloudapi.de/.default",      
