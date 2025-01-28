@@ -26,6 +26,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.Utils;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -35,9 +36,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
     [TestClass]
     public class RuntimeBrokerTests
     {
-        [DllImport("user32.dll")]
-        static extern IntPtr GetForegroundWindow();
-
         //This client id is for Azure CLI which is one of the only 2 clients that have PreAuth to use ssh cert feature
         string _SSH_ClientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
         //SSH User impersonation scope required for this test
@@ -200,7 +198,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             string[] scopes = { "User.Read" };
             string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
-            IntPtr intPtr = GetForegroundWindow();
+            IntPtr intPtr = TestUtils.GetWindowHandle();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
@@ -247,7 +245,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamWithSSHCertificateAuthenticationSchemeAsync()
         {
-            IntPtr intPtr = GetForegroundWindow();
+            IntPtr intPtr = TestUtils.GetWindowHandle();
             Func<IntPtr> windowHandleProvider = () => intPtr;
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
@@ -290,7 +288,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             string[] scopes = { "User.Read" };
             string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
-            IntPtr intPtr = GetForegroundWindow();
+            IntPtr intPtr = TestUtils.GetWindowHandle();
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
@@ -341,7 +339,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             string[] scopes = { "User.Read" };
             string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
-            IntPtr intPtr = GetForegroundWindow();
+            IntPtr intPtr = TestUtils.GetWindowHandle();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
@@ -394,7 +392,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             string[] scopes = { "User.Read" };
             string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
-            IntPtr intPtr = GetForegroundWindow();
+            IntPtr intPtr = TestUtils.GetWindowHandle();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
@@ -430,7 +428,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
         {
-            IntPtr intPtr = GetForegroundWindow();
+            IntPtr intPtr = TestUtils.GetWindowHandle();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
@@ -461,7 +459,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             string[] scopes = { "https://msidlab4.sharepoint.com/user.read" };
 
-            IntPtr intPtr = GetForegroundWindow();
+            IntPtr intPtr = TestUtils.GetWindowHandle();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
@@ -496,7 +494,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             string[] scopes = { "user.read" };
 
-            IntPtr intPtr = GetForegroundWindow();
+            IntPtr intPtr = TestUtils.GetWindowHandle();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
