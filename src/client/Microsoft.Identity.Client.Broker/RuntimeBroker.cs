@@ -96,7 +96,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ApplicationConfiguration appConfig,
             ILoggerAdapter logger)
         {
-
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             
             if (_logger.PiiLoggingEnabled)

@@ -75,17 +75,6 @@ steps:
   env:
     DBUS_SESSION_BUS_ADDRESS: $(SetDbusSession.dbusSessionAddress)
 
-# - task: Bash@3
-#   displayName: Copy named semaphores
-#   inputs:
-#     targetType: inline
-#     script: |
-#       echo "Copying shm"
-#       mkdir -p $(Build.Repository.LocalPath)/_systemLogs/shm_start 2>/dev/null
-#       sudo cp -r /dev/shm/* $(Build.Repository.LocalPath)/_systemLogs/shm_start 2>/dev/null
-#       sudo rm -r /dev/shm/* 2>/dev/null
-#       exit 0
-
 - task: Bash@3
   displayName: Start Xvfb server and launch GUI
   inputs:
@@ -156,21 +145,6 @@ steps:
       # ./tests/Microsoft.Identity.Test.Common/Microsoft.Identity.Test.Common.csproj
       ./tests/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj
 
-# - task: MSBuild@1
-#   displayName: 'NuGet restore Unit Test'
-#   inputs:
-#     solution: 'tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
-#     msbuildArguments: '/t:restore'
-#     configuration: ${{ parameters.BuildConfiguration }}'
-#     msBuildVersion: '17.0'
-
-# - task: DownloadPipelineArtifact@0
-#   displayName: Download Artifacts from Windows Build
-#   inputs:
-#     artifactName: drop
-#     downloadPath: $(System.DefaultWorkingDirectory)/drop
-
-# VSTest@2 is supported only on Windows 
 - script: |
     ls '$(System.DefaultWorkingDirectory)'
     # ls '$(System.DefaultWorkingDirectory)/drop/'
