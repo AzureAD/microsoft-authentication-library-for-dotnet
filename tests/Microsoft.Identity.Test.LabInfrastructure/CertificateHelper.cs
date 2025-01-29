@@ -3,6 +3,7 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -37,9 +38,16 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <returns><see cref="X509Certificate2"/> with <paramref subjectName="certName"/>, or null if no matching certificate was found</returns>
         public static X509Certificate2 FindCertificateByName(string certName, StoreLocation location, StoreName name)
         {
+            // Unix LocalMachine X509Store is limited to the Root and CertificateAuthority stores
+            if (SharedUtilities.IsLinuxPlatform())
+            {
+                var certPasswrod = Environment.GetEnvironmentVariable("CERTIFICATE_PASSWORD");
+                var certLocation = Environment.GetEnvironmentVariable("CERTIFICATE_LOCATION");
+                var cert = new X509Certificate2(certLocation, certPasswrod);
+                return cert;
+            }
             // Don't validate certs, since the test root isn't installed.
             const bool validateCerts = false;
-
             using (var store = new X509Store(name, location))
             {
                 store.Open(OpenFlags.ReadOnly);
@@ -57,7 +65,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 }
 
                 return certToUse;
-
+                
+            
             }
         }
     }

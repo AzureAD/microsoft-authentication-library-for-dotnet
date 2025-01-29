@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
         }
 
+        [IgnoreOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task Sni_Gets_Pop_Token_Successfully_TestAsync()
         {

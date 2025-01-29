@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client
             if (EnabledOn.HasFlag(OperatingSystems.Windows) && DesktopOsHelper.IsWindows())
             {
                 return true;
-            } else if (DesktopOsHelper.IsLinux()) {
+            } else if (EnabledOn.HasFlag(OperatingSystems.Linux) && DesktopOsHelper.IsLinux()) {
                 return true;
             }
 

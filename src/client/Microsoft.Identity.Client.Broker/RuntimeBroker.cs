@@ -39,7 +39,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             { NativeInterop.LogLevel.Fatal, LogLevel.Error },
         };
 
-        public bool IsPopSupported => true;
+        /// <summary>
+        /// Pop is supported on Windows only
+        /// </summary>
+        public bool IsPopSupported => DesktopOsHelper.IsWindows();
 
         /// <summary>
         /// Being a C API, MSAL runtime uses a "global init" and "global shutdown" approach. 
@@ -93,8 +96,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ApplicationConfiguration appConfig,
             ILoggerAdapter logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            
             if (_logger.PiiLoggingEnabled)
             {
                 s_lazyCore.Value.EnablePii(_logger.PiiLoggingEnabled);
