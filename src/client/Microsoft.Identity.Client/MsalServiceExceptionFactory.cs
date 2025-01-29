@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
                 sb.Append("\nAuthority used: ")
                   .Append(context.ServiceBundle.Config.Authority?.AuthorityInfo?.CanonicalAuthority?.AbsoluteUri?.Split('?')[0]);
 
-                if (!context.ApiEvent.TokenEndpoint.IsNullOrEmpty())
+                if (context.ApiEvent != null && !context.ApiEvent.TokenEndpoint.IsNullOrEmpty())
                 {
                     sb.Append("\nToken Endpoint: ")
                       .Append(context.ApiEvent?.TokenEndpoint);
