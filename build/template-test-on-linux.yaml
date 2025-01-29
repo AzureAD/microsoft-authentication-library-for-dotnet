@@ -25,7 +25,14 @@ steps:
       echo "Setting DBUS_SESSION_BUS_ADDRESS"
       # ensure that /var/lib/dbus/machine-id exists and has the uuid in it
       sudo dbus-uuidgen --ensure
-      eval `dbus-launch --sh-syntax`
+      DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${UID}/bus"
+      # enable session lingering for the user
+      sudo loginctl enable-linger ${USER}
+      # enable and start dbus service
+      sudo systemctl enable dbus.service
+      sudo systemctl start dbus.service
+      # make sure per-user instance of systemd is running
+      /usr/bin/dbus-daemon --session --address=systemd: --nofork --print-address --nopidfile --systemd-activation --syslog-only
       echo "dbus-launch finished"
 
       echo "##vso[task.setvariable variable=dbusSessionAddress;isOutput=true]$DBUS_SESSION_BUS_ADDRESS"
