@@ -454,7 +454,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);
-                StringAssert.Contains("requestedScopes is NULL or EMPTY", exLinux.AdditionalExceptionData[MsalException.BrokerErrorContext]);
+                StringAssert.Contains(exLinux.AdditionalExceptionData[MsalException.BrokerErrorContext], "requestedScopes is NULL or EMPTY");
             } else {
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
