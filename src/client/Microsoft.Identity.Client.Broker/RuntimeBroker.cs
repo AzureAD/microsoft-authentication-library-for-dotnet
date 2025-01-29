@@ -97,14 +97,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ILoggerAdapter logger)
         {
 
-            _logger = logger ?? throw new ArgumentNullException("123212312321");
-            if (s_lazyCore.Value == null)
-            {
-                throw new MsalClientException(
-                    "wam_runtime_init_failed",
-                    "MSAL runtime initialization failed. See https://aka.ms/msal-net-wam#troubleshooting",
-                    s_initException);
-            }
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             
             if (_logger.PiiLoggingEnabled)
             {
