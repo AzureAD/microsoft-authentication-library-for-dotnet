@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ConfigureAwait(false);
 
             if (SharedUtilities.IsLinuxPlatform()) {
-                Assert.Contains("illegal_argument_exception", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]);
+                StringAssert.Contains("illegal_argument_exception", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]);
             } else {
                 Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
                 Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
