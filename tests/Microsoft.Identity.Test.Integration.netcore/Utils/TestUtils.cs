@@ -36,7 +36,16 @@ namespace Microsoft.Identity.Test.Integration.Utils
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 try {
-                    return XRootWindow(XOpenDisplay(null), 0);
+                    IntPtr display = XOpenDisplay(null);
+                    if (display == IntPtr.Zero)
+                    {
+                        Console.WriteLine("No X display available. Running in headless mode.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("X display is available.");
+                    }
+                    return display;
                 } catch (System.Exception ex)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
