@@ -565,6 +565,23 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 Assert.IsTrue(ex.Message.Contains("Authority used: https://sts.access.edu/my-utid/"));
                 Assert.IsTrue(ex.Message.Contains("Token Endpoint: https://centralus.sts.access.edu/my-utid/oauth2/v2.0/token"));
                 Assert.IsTrue(ex.Message.Contains($"Region Used: {TestConstants.Region}"));
+
+                //harness.HttpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant + TestConstants.DiscoveryEndPoint));
+                harness.HttpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
+                harness.HttpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
+
+                //Ensure non 404 error codes do not trigger message
+                ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                {
+                    await app.AcquireTokenForClient(TestConstants.s_scope)
+                                                 .WithForceRefresh(true)
+                                                 .ExecuteAsync(CancellationToken.None)
+                                                 .ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                Assert.IsFalse(ex.Message.Contains("Authority used:"));
+                Assert.IsFalse(ex.Message.Contains("Token Endpoint:"));
+                Assert.IsFalse(ex.Message.Contains($"Region Used:"));
             }
         }
 

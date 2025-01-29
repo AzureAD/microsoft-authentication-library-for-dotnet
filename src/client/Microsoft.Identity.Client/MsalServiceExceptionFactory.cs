@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -77,22 +78,28 @@ namespace Microsoft.Identity.Client
 
         private static string GetErrorMessage(string errorMessage, HttpResponse httpResponse, RequestContext context)
         {
+            // Using StringBuilder for more efficient string concatenation
+            var sb = new StringBuilder(errorMessage);
+
             if (httpResponse.StatusCode == HttpStatusCode.NotFound && context != null)
             {
-                errorMessage += "\nAuthority used: " + context.ServiceBundle.Config.Authority?.AuthorityInfo?.CanonicalAuthority?.AbsoluteUri?.Split('?')[0];
-                
+                sb.Append("\nAuthority used: ")
+                  .Append(context.ServiceBundle.Config.Authority?.AuthorityInfo?.CanonicalAuthority?.AbsoluteUri?.Split('?')[0]);
+
                 if (!context.ApiEvent.TokenEndpoint.IsNullOrEmpty())
                 {
-                    errorMessage += "\nToken Endpoint: " + context.ApiEvent?.TokenEndpoint;
+                    sb.Append("\nToken Endpoint: ")
+                      .Append(context.ApiEvent?.TokenEndpoint);
                 }
 
                 if (!context.ServiceBundle.Config.AzureRegion.IsNullOrEmpty())
                 {
-                    errorMessage += "\nRegion Used: " + context.ServiceBundle.Config.AzureRegion;
+                    sb.Append("\nRegion Used: ")
+                      .Append(context.ServiceBundle.Config.AzureRegion);
                 }
             }
 
-            return errorMessage;
+            return sb.ToString();
         }
 
         private static bool IsThrottled(OAuth2ResponseBase oAuth2Response)
