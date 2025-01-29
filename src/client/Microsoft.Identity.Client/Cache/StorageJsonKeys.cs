@@ -39,5 +39,7 @@ namespace Microsoft.Identity.Client.Cache
         // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
         // this is here for back compatibility
         public const string ExtendedExpiresOn_MsalCompat = "ext_expires_on";
+
+        public const string AdditionalCacheKeyComponents = "additional_cache_key_components";
     }
 }

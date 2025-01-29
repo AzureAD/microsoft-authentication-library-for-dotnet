@@ -2,14 +2,19 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json.Nodes;
 using System.Text.Json;
 using JObject = System.Text.Json.Nodes.JsonObject;
 #else
@@ -31,7 +36,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string homeAccountId,
             string keyId = null,
             string oboCacheKey = null,
-            IEnumerable<string> persistedCacheParameters = null)
+            IEnumerable<string> persistedCacheParameters = null,
+            IDictionary<string, string> cacheKeyComponents = null)
             : this(
                 scopes: ScopeHelper.OrderScopesAlphabetically(response.Scope), // order scopes to avoid cache duplication. This is not in the hot path.
                 cachedAt: DateTimeOffset.UtcNow,
@@ -48,6 +54,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+            AdditionalCacheKeyComponents = cacheKeyComponents?.OrderBy(kvp => kvp.Key).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 #if !MOBILE
             PersistedCacheParameters = AcquireCacheParametersFromResponse(persistedCacheParameters, response.ExtensionData);
 #endif
@@ -95,7 +102,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = null,
             DateTimeOffset? refreshOn = null,
             string tokenType = StorageJsonValues.TokenTypeBearer,
-            string oboCacheKey = null)
+            string oboCacheKey = null,
+            Dictionary<string, string> cacheKeyComponents = null)
             : this(scopes, cachedAt, expiresOn, extendedExpiresOn, refreshOn, tenantId, keyId, tokenType)
         {
             Environment = preferredCacheEnv;
@@ -104,6 +112,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = rawClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+            AdditionalCacheKeyComponents = cacheKeyComponents?.OrderBy(kvp => kvp.Key).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             InitCacheKey();
         }
@@ -153,7 +162,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                KeyId,
                RefreshOn,
                TokenType,
-               OboCacheKey);
+               OboCacheKey,
+               AdditionalCacheKeyComponents);
 
             return newAtItem;
         }
@@ -170,6 +180,18 @@ namespace Microsoft.Identity.Client.Cache.Items
                 _credentialDescriptor = StorageJsonValues.CredentialTypeAccessTokenWithAuthScheme;
             }
 
+            if (AdditionalCacheKeyComponents != null)
+            {
+                if (_extraKeyParts != null)
+                {
+                    _extraKeyParts.Concat(new[] { ComputeKeyFromComponents() });
+                }
+                else
+                {
+                    _extraKeyParts = new[] { ComputeKeyFromComponents() };
+                }
+            }
+
             CacheKey = MsalCacheKeys.GetCredentialKey(
                 HomeAccountId,
                 Environment,
@@ -180,6 +202,22 @@ namespace Microsoft.Identity.Client.Cache.Items
                 _extraKeyParts);
 
             iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
+        }
+
+        private string ComputeKeyFromComponents()
+        {
+            StringBuilder stringBuilder = new();
+
+            foreach (var component in AdditionalCacheKeyComponents)
+            {
+                stringBuilder.Append(component.Key);
+                stringBuilder.Append(component.Value);
+            }
+
+            using (SHA256 hash = SHA256.Create())
+            {
+                return hash.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString())).ToString();
+            }
         }
 
         internal string ToLogString(bool piiEnabled = false)
@@ -246,6 +284,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string CacheKey { get; private set; }
 
+        internal Dictionary<string, string> AdditionalCacheKeyComponents { get; private set; }
+
         /// <summary>
         /// Additional parameters that were requested in the token request and are stored in the cache.
         /// These are acquired from the response and are stored in the cache for later use.
@@ -284,6 +324,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId);
             string tokenType = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer;
             string scopes = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target);
+            var additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.AdditionalCacheKeyComponents);
 
             var item = new MsalAccessTokenCacheItem(
                 scopes: scopes,
@@ -295,6 +336,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 keyId: keyId,
                 tokenType: tokenType);
 
+            item.AdditionalCacheKeyComponents = (Dictionary<string, string>)additionalCacheKeyComponents;
             item.OboCacheKey = oboCacheKey;
             item.PopulateFieldsFromJObject(j);
 
@@ -324,6 +366,24 @@ namespace Microsoft.Identity.Client.Cache.Items
             // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compatibility
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn_MsalCompat, extExpiresUnixTimestamp);
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            var obj = new JsonObject();
+
+            foreach (KeyValuePair<string, string> accId in AdditionalCacheKeyComponents)
+            {
+                obj[accId.Key] = accId.Value;
+            }
+
+            SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, obj);
+#else
+            SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, JObject.FromObject(AdditionalCacheKeyComponents));
+#endif
+            //SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, AdditionalCacheKeyComponents);
+
+            //foreach (var component in AdditionalCacheKeyComponents)
+            //{
+            //    SetItemIfValueNotNull(json, component.Key, component.Value);
+            //}
 
             return json;
         }
