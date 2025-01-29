@@ -174,7 +174,7 @@ steps:
 - script: |
     ls '$(System.DefaultWorkingDirectory)'
     # ls '$(System.DefaultWorkingDirectory)/drop/'
-    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj --settings build/CodeCoverage.runsettings --filter FullyQualifiedName~Microsoft.Identity.Test.Integration.Broker.WamUsernamePasswordRequestAsync -l "console;verbosity=detailed" --blame-crash
+    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj --settings build/CodeCoverage.runsettings --filter FullyQualifiedName~Microsoft.Identity.Test.Integration.Broker.RuntimeBrokerTests.WamUsernamePasswordRequestAsync -l "console;verbosity=detailed" --blame-crash
   displayName: 'Run Integration tests .NET'
   env:
     CERTIFICATE_LOCATION: $(generateLabCert.certDir)
