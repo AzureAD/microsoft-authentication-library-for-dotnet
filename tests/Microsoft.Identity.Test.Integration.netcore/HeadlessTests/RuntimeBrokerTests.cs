@@ -18,6 +18,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.SSHCertificates;
 using Microsoft.Identity.Client.UI;
@@ -155,11 +156,15 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
-            Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
-            Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
-            Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
-            Assert.IsNotNull(ex.AdditionalExceptionData[MsalException.BrokerTelemetry]);
+            if (SharedUtilities.IsLinuxPlatform()) {
+                Assert.Contains("illegal_argument_exception", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]);
+            } else {
+                Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
+                Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
+                Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
+                Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
+                Assert.IsNotNull(ex.AdditionalExceptionData[MsalException.BrokerTelemetry]);
+            }
         }
 
         [IgnoreOnOneBranch]

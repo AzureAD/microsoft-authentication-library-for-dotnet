@@ -35,7 +35,15 @@ namespace Microsoft.Identity.Test.Integration.Utils
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return XRootWindow(XOpenDisplay(null), 0);
+                try {
+                    return XRootWindow(XOpenDisplay(null), 0);
+                } catch (System.Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(ex.ToString());
+                    Console.ResetColor();
+                }
+                return IntPtr.Zero;
             }
             else
             {
