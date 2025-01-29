@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
@@ -27,6 +28,26 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 #else
             return base.Execute(testMethod);
 #endif
+        }
+    }
+
+    internal class IgnoreOnLinuxAttribute : TestMethodAttribute
+    {
+        public override TestResult[] Execute(ITestMethod testMethod)
+        {
+            if (SharedUtilities.IsLinuxPlatform()) {
+                return new[]
+                {
+                    new TestResult
+                    {
+                        Outcome = UnitTestOutcome.Inconclusive,
+                        TestFailureException = new AssertInconclusiveException(
+                            $"Skipped on Linux")
+                    }
+                };
+            } else {
+                return base.Execute(testMethod);
+            }
         }
     }
 }

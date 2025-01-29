@@ -249,6 +249,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ConfigureAwait(false);
         }
 
+        [IgnoreOnLinux] // SSH Certs are not supported on Linux
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamWithSSHCertificateAuthenticationSchemeAsync()
@@ -392,6 +393,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
+        [IgnoreOnLinux] // List Windows Work and School accounts is not supported on Linux
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
@@ -446,16 +448,23 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithBroker(_brokerOption)
                .Build();
-
             // Act
-            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+            if (SharedUtilities.IsLinuxPlatform()) {
+                var exLinux = await AssertException.TaskThrowsAsync<MsalServiceException>(
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);
-
-            Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                StringAssert.Contains("requestedScopes is NULL or EMPTY", exLinux.AdditionalExceptionData[MsalException.BrokerErrorContext]);
+            } else {
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                 () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
+                        .ExecuteAsync())
+                        .ConfigureAwait(false);
+                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+            }
         }
 
+        [IgnoreOnLinux] // POP is not supported on Linux     
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
@@ -490,6 +499,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(popUser, result.Account.Username);
         }
 
+        [IgnoreOnLinux] // POP are not supported on Linux  
         [IgnoreOnOneBranch]
         [TestMethod]
         [ExpectedException(typeof(MsalUiRequiredException))]
