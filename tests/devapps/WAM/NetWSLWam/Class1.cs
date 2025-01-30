@@ -36,7 +36,11 @@ namespace WAMClassLibrary
             var pca = PublicClientApplicationBuilder.Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                           .WithAuthority("https://login.microsoftonline.com/common")
                           .WithDefaultRedirectUri()
-                          .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Linux))
+                          .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Linux){
+                            ListOperatingSystemAccounts = true,
+                            MsaPassthrough = true,
+                            Title = "MSAL WSL Test App"
+                          })
                           .WithParentActivityOrWindow(consoleWindowHandleProvider)
                           .WithLogging((x, y, z) => Console.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                           .Build();
