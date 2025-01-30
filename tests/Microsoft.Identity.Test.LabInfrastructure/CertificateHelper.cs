@@ -65,8 +65,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 }
 
                 return certToUse;
-                
-            
+
             }
         }
     }
