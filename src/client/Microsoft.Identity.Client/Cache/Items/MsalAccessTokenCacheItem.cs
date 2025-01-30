@@ -216,7 +216,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             using (SHA256 hash = SHA256.Create())
             {
-                return hash.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString())).ToString();
+                var hashBytes = hash.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
+                return Base64UrlHelpers.Encode(hashBytes);
             }
         }
 
@@ -336,7 +337,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 keyId: keyId,
                 tokenType: tokenType);
 
-            item.AdditionalCacheKeyComponents = (Dictionary<string, string>)additionalCacheKeyComponents;
+            item.AdditionalCacheKeyComponents = (Dictionary<string, string>)additionalCacheKeyComponents?? null;
             item.OboCacheKey = oboCacheKey;
             item.PopulateFieldsFromJObject(j);
 

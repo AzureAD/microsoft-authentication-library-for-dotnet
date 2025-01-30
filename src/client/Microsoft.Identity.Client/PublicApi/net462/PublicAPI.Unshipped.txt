@@ -1,1 +1,0 @@
-Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithAdditionalCacheKeyComponents(System.Collections.Generic.IDictionary<string, string> cacheKeyComponents) -> T

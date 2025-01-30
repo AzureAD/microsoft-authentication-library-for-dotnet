@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -111,26 +112,6 @@ namespace Microsoft.Identity.Client
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
             CommonParameters.AuthenticationOperation = new PopAuthenticationOperation(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
-
-            return this as T;
-        }
-
-        /// <summary>
-        /// Specifies additional cache key components to use when caching and retrieving tokens.
-        /// </summary>
-        /// <param name="cacheKeyComponents">The list of additional cache key components.</param>
-        /// <returns>The builder.</returns>
-        /// <remarks>
-        /// <list type="bullet">
-        /// <item><description>This api can be used to associate certificate key identifiers along with other keys with a particular token.</description></item>
-        /// <item><description>In order for the tokens to be succsesfully retrieved from the cache, all components used to cache the token must be provided.</description></item>
-        /// </list>
-        /// </remarks>
-        public T WithAdditionalCacheKeyComponents(IDictionary<string, string> cacheKeyComponents)
-        {
-            ValidateUseOfExperimentalFeature();
-
-            CommonParameters.CacheKeyComponents = cacheKeyComponents ?? throw new ArgumentNullException(nameof(cacheKeyComponents));
 
             return this as T;
         }

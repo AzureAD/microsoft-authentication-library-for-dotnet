@@ -154,7 +154,6 @@ namespace Microsoft.Identity.Client
                     }
                 }
 
-
                 account = new Account(
                   homeAccountId,
                   username,
@@ -473,6 +472,7 @@ namespace Microsoft.Identity.Client
             FilterTokensByScopes(accessTokens, requestParams);
             accessTokens = await FilterTokensByEnvironmentAsync(accessTokens, requestParams).ConfigureAwait(false);
             FilterTokensByClientId(accessTokens);
+            FilterTokensByAdditionalKeyComponents(accessTokens, requestParams);
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
@@ -495,6 +495,23 @@ namespace Microsoft.Identity.Client
             requestParams.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
 
             return msalAccessTokenCacheItem;
+        }
+
+        private void FilterTokensByAdditionalKeyComponents(List<MsalAccessTokenCacheItem> accessTokens, AuthenticationRequestParameters requestParams)
+        {
+            if (requestParams.CacheKeyComponents != null)
+            {
+                accessTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents != null &&
+                    CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.CacheKeyComponents),
+                    requestParams.RequestContext.Logger,
+                    "Filtering by additional key components");
+
+                if (accessTokens.Count == 0)
+                {
+                    requestParams.RequestContext.Logger.Verbose(() => "No tokens found that match the provided key components. ");
+                }
+            }
         }
 
         private static void FilterTokensByScopes(

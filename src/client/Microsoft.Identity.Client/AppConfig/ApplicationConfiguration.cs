@@ -160,6 +160,8 @@ namespace Microsoft.Identity.Client
                 return null;
             }
         }
+
+        public IDictionary<string, string> CacheKeyComponents { get; internal set; }
 #endregion
 
 #region Region

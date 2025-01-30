@@ -327,7 +327,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
-                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
 
                 // make sure user token cache is empty
@@ -344,7 +344,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // call AcquireTokenForClientAsync again to get result back from the cache
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
-                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
 
                 // make sure user token cache is empty
