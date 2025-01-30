@@ -31,7 +31,12 @@ if [ $PACKAGE_MANAGER == 'apt' ]; then
         libx11-dev \
         dbus-x11 \
         libsystemd0 \
+        gnome-keyring \
+        libsecret-tools \
+        libsecret-1-dev \
+        xdg-utils \
         x11-xserver-utils \
+        xorg \
         libp11-kit-dev \
         libwebkit2gtk-4.0-dev
 fi

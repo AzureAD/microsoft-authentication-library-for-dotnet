@@ -15,13 +15,13 @@ namespace Microsoft.Identity.Test.Integration.Utils
         /// <summary>
         /// Get the handle of the console window for Linux
         /// </summary>
-        [DllImport("libX11")]
+        [DllImport("libX11.so.6")]
         private static extern IntPtr XOpenDisplay(string display);
 
-        [DllImport("libX11")]
+        [DllImport("libX11.so.6")]
         private static extern IntPtr XRootWindow(IntPtr display, int screen);
 
-        [DllImport("libX11")]
+        [DllImport("libX11.so.6")]
         private static extern IntPtr XDefaultRootWindow(IntPtr display);
 
         /// <summary>
