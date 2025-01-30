@@ -133,12 +133,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             //need to provide a handle
-            if (_parentHandle == IntPtr.Zero)
-            {
-                throw new MsalClientException(
-                    "window_handle_required",
-                    "A window handle must be configured. See https://aka.ms/msal-net-wam#parent-window-handles");
-            }
+            // if (_parentHandle == IntPtr.Zero)
+            // {
+            //     throw new MsalClientException(
+            //         "window_handle_required",
+            //         "A window handle must be configured. See https://aka.ms/msal-net-wam#parent-window-handles");
+            // }
 
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
