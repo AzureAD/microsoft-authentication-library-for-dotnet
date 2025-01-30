@@ -30,24 +30,4 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 #endif
         }
     }
-
-    internal class IgnoreOnLinuxAttribute : TestMethodAttribute
-    {
-        public override TestResult[] Execute(ITestMethod testMethod)
-        {
-            if (SharedUtilities.IsLinuxPlatform()) {
-                return new[]
-                {
-                    new TestResult
-                    {
-                        Outcome = UnitTestOutcome.Inconclusive,
-                        TestFailureException = new AssertInconclusiveException(
-                            $"Skipped on Linux")
-                    }
-                };
-            } else {
-                return base.Execute(testMethod);
-            }
-        }
-    }
 }

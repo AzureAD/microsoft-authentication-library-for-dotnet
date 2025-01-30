@@ -55,12 +55,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();           
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [RunOn(TargetFrameworks.NetCore)]
         public async Task PoP_MultipleKeys_Async()
         {
             await MultipleKeys_Async().ConfigureAwait(false);
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [RunOn(TargetFrameworks.NetCore)]
         public async Task PoP_BearerAndPoP_CanCoexist_Async()
         {
@@ -68,6 +70,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await BearerAndPoP_CanCoexist_Async().ConfigureAwait(false);
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task HappyPath_Async()
         {            
@@ -217,6 +220,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result);
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [RunOn(TargetFrameworks.NetCore)]
         public async Task PopTestWithConfigObjectAsync()
         {
@@ -254,6 +258,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task PopTestWithRSAAsync()
         {
@@ -291,6 +296,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_PopTestWithRSAAsync()
         {
@@ -323,6 +329,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task PopTest_ExternalWilsonSigning_Async()
         {
@@ -388,7 +395,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 TokenSource.Cache,
                 result2.AuthenticationResultMetadata.TokenSource);
         }
-
+        
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task PopTestWithECDAsync()
         {
@@ -427,6 +435,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result);
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task NewPOP_WithKeyIdOnly_Async()
         {
@@ -520,6 +529,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task InMemoryCryptoProvider_AlgIsPS256()
         {
@@ -662,6 +672,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(responseWithPopToken.IsSuccessStatusCode, "The response should be successful with the PoP token");
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task PoPToken_ShouldHaveCorrectAlgorithm_PS256_Async()
         {
@@ -700,6 +711,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
 #if NET_CORE
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [IgnoreOnOneBranch]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
@@ -755,6 +767,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                 .Create(TestConstants.ClientId);
 
             pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
+
+            app = pcaBuilder.Build();
+
+            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
+
+            // POP is not supported on Linux
+            pcaBuilder = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId);
+
+            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Linux));
 
             app = pcaBuilder.Build();
 

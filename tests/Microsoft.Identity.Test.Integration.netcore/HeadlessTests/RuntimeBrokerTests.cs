@@ -91,6 +91,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
@@ -249,7 +250,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ConfigureAwait(false);
         }
 
-        [IgnoreOnLinux] // SSH Certs are not supported on Linux
+        [DoNotRunOnLinux] // SSH Certs are not supported on Linux
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamWithSSHCertificateAuthenticationSchemeAsync()
@@ -393,7 +394,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
-        [IgnoreOnLinux] // List Windows Work and School accounts is not supported on Linux
+        [DoNotRunOnLinux] // List Windows Work and School accounts is not supported on Linux
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
@@ -464,7 +465,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [IgnoreOnLinux] // POP is not supported on Linux     
+        [DoNotRunOnLinux] // POP is not supported on Linux     
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
@@ -499,7 +500,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(popUser, result.Account.Username);
         }
 
-        [IgnoreOnLinux] // POP are not supported on Linux  
+        [DoNotRunOnLinux] // POP are not supported on Linux  
         [IgnoreOnOneBranch]
         [TestMethod]
         [ExpectedException(typeof(MsalUiRequiredException))]
