@@ -98,7 +98,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
-            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
             //Arrange & Act
             //Test for nonce in WWW-Authenticate header
@@ -125,7 +124,11 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     requestUri)
                 .ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
+            MsalAssert.AssertAuthResult(
+                result, 
+                TokenSource.Broker, 
+                labResponse.Lab.TenantId,
+                scopes, true);
 
             PoPValidator.VerifyPoPToken(
                 labResponse.App.AppId,
@@ -133,6 +136,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 HttpMethod.Get,
                 result);
         }
+    
 
         [IgnoreOnOneBranch]
         [TestMethod]
@@ -203,8 +207,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordRequestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            string[] scopes = { "User.Read" };
-            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
+            string[] scopes = { "User.Read" };            
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
             Assert.IsNotNull(intPtr);
@@ -221,7 +224,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token using username password
             var result = await pca.AcquireTokenInteractive(scopes).WithLoginHint(labResponse.User.Upn).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -234,7 +237,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Remove Account
@@ -296,7 +299,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
-            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
             Func<IntPtr> windowHandleProvider = () => intPtr;
@@ -318,7 +320,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             string ropcToken = result.AccessToken;
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -347,7 +349,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
-            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
 
@@ -366,7 +367,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -382,7 +383,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -401,7 +402,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
-            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
 
@@ -420,7 +420,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts

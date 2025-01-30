@@ -717,7 +717,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
-            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
             WamLoggerValidator wastestLogger = new WamLoggerValidator();
 
@@ -738,7 +737,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
                 .ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes, true);
 
             Assert.IsTrue(wastestLogger.HasLogged);
 
