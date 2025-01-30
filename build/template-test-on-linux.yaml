@@ -103,6 +103,7 @@ steps:
           rm -f packages.microsoft.gpg
           sudo apt update
           sudo apt install code
+          Xvfb :99 -screen 0 1920x1080x24 &
           export DISPLAY=:99
       elif [ -f '/usr/bin/yum' ]; then
           # install packages for GUI test
