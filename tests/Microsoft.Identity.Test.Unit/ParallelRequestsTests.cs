@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute.Core;
 
@@ -39,6 +40,45 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             base.TestInitialize();
             _inMemoryCache = "{}";
+        }
+
+        // regression test for  https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5108
+        [TestMethod]
+        public async Task ExtraQP()
+        {
+            Dictionary<string, string> extraQp = new()
+              {
+                  { "key1", "1" },
+                  { "key2", "2" }
+              };
+
+            // Arrange
+            const int NumberOfRequests = 20;
+
+            ParallelRequestMockHanler httpManager = new ParallelRequestMockHanler();
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityUtidTenant, true)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(httpManager)
+                .Build();
+
+            var tasks = new List<Task<AuthenticationResult>>();
+
+            Parallel.ForEach(Enumerable.Range(0, NumberOfRequests), i =>
+            {
+                var task = cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQp)
+                    .ExecuteAsync();
+                tasks.Add(task);
+            });
+
+            // Wait for all tasks to complete
+            AuthenticationResult[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(NumberOfRequests-2, results.Length);
         }
 
         [TestMethod]
@@ -226,99 +266,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 _beforeWriteCalls++;
             });
-        }
-    }
-
-    /// <summary>
-    /// This custom HttpManager does the following: 
-    /// - provides a standard response for discovery calls
-    /// - responds with valid tokens based on a naming convention (uid = "uid" + rtSecret, upn = "user_" + rtSecret)
-    /// </summary>
-    internal class ParallelRequestMockHanler : IHttpManager
-    {
-        public long LastRequestDurationInMs => 50;
-
-        public Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
-        {
-            Assert.Fail("Only instance discovery is supported");
-            return Task.FromResult<HttpResponse>(null);
-        }
-
-        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
-
-            if (endpoint.AbsoluteUri.Equals("https://login.microsoftonline.com/my-utid/oauth2/v2.0/token"))
-            {
-                bodyParameters.TryGetValue(OAuth2Parameter.RefreshToken, out string rtSecret);
-
-                return new HttpResponse()
-                {
-                    Body = GetTokenResponseForRt(rtSecret),
-                    StatusCode = System.Net.HttpStatusCode.OK
-                };
-            }
-
-            Assert.Fail("Only refresh flow is supported");
-            return null;
-        }
-
-        public async Task<HttpResponse> SendRequestAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            HttpContent body,
-            HttpMethod method,
-            ILoggerAdapter logger,
-            bool doNotThrow,
-            X509Certificate2 mtlsCertificate,
-            HttpClient customHttpClient,
-            CancellationToken cancellationToken, 
-            int retryCount = 0)
-        {
-            // simulate delay and also add complexity due to thread context switch
-            await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
-
-            if (HttpMethod.Get == method &&
-                endpoint.AbsoluteUri.StartsWith("https://login.microsoftonline.com/common/discovery/instance?api-version=1.1"))
-            {
-                return new HttpResponse()
-                {
-                    Body = TestConstants.DiscoveryJsonResponse,
-                    StatusCode = System.Net.HttpStatusCode.OK
-                };
-            }
-
-            if (HttpMethod.Post == method &&
-                endpoint.AbsoluteUri.Equals("https://login.microsoftonline.com/my-utid/oauth2/v2.0/token"))
-            {
-                var bodyString = (body as FormUrlEncodedContent).ReadAsStringAsync().GetAwaiter().GetResult();
-                var bodyDict = bodyString.Replace("?", "").Split('&').ToDictionary(x => x.Split('=')[0], x => x.Split('=')[1]);
-
-                bodyDict.TryGetValue(OAuth2Parameter.RefreshToken, out string rtSecret);
-
-                return new HttpResponse()
-                {
-                    Body = GetTokenResponseForRt(rtSecret),
-                    StatusCode = System.Net.HttpStatusCode.OK
-                };
-            }
-
-            Assert.Fail("Test issue - this HttpRequest is not mocked");
-            return null;
-        }
-
-        private string GetTokenResponseForRt(string rtSecret)
-        {
-            if (int.TryParse(rtSecret, out int i))
-            {
-                var upn = ParallelRequestsTests.GetUpn(i);
-                var uid = ParallelRequestsTests.GetUid(i);
-                HttpResponseMessage response = MockHelpers.CreateSuccessTokenResponseMessageWithUid(uid, TestConstants.Utid, upn);
-                return response.Content.ReadAsStringAsync().Result;
-            }
-
-            Assert.Fail("Expecting the rt secret to be a number, to be able to craft a response");
-            return null;
         }
     }
 }
