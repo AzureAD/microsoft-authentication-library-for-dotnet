@@ -68,7 +68,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-
             ClaimsAndClientCapabilities = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
                 _commonParameters.Claims,
                 _serviceBundle.Config.ClientCapabilities);
