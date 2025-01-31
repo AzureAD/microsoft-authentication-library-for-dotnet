@@ -16,6 +16,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Extensions.Msal;
 #if NET_CORE
 using Microsoft.Identity.Client.Broker;
 #endif
@@ -752,43 +753,30 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public void CheckPopRuntimeBrokerSupportTest()
         {
             //Broker enabled
-            var pcaBuilder = PublicClientApplicationBuilder
-                                            .Create(TestConstants.ClientId);
+            if (SharedUtilities.IsWindowsPlatform()) {
+                CheckPopSupport(new BrokerOptions(BrokerOptions.OperatingSystems.Windows), true);
+            }
 
-            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+            //Broker disabled
+            CheckPopSupport(new BrokerOptions(BrokerOptions.OperatingSystems.None), false);
+
+            // POP is not supported on Linux
+            if (SharedUtilities.IsLinuxPlatform()) {
+                CheckPopSupport(new BrokerOptions(BrokerOptions.OperatingSystems.Linux), false);
+            }
+        }
+#endif
+        private static void CheckPopSupport(BrokerOptions brokerOptions, bool isPopSupported)
+        {
+            var pcaBuilder = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId);
+
+            pcaBuilder = pcaBuilder.WithBroker(brokerOptions);
 
             IPublicClientApplication app = pcaBuilder.Build();
 
-            Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
-
-            //Broker disabled
-            pcaBuilder = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId);
-
-            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
-
-            app = pcaBuilder.Build();
-
-            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
-
-            // POP is not supported on Linux
-            pcaBuilder = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId);
-
-            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Linux));
-
-            app = pcaBuilder.Build();
-
-            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
-
-            //Broker not configured
-            app = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .Build();
-
-            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
+            Assert.AreEqual(expected, app.IsProofOfPossessionSupportedByClient());
         }
-#endif
 
         private static X509Certificate2 GetCertificate()
         {
