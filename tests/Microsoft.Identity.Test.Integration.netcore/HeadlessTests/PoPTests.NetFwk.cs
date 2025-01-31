@@ -765,7 +765,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 CheckPopSupport(new BrokerOptions(BrokerOptions.OperatingSystems.Linux), false);
             }
         }
-#endif
+        
         private static void CheckPopSupport(BrokerOptions brokerOptions, bool isPopSupported)
         {
             var pcaBuilder = PublicClientApplicationBuilder
@@ -777,6 +777,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual(isPopSupported, app.IsProofOfPossessionSupportedByClient());
         }
+#endif
 
         private static X509Certificate2 GetCertificate()
         {
