@@ -52,7 +52,10 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Assert.IsNotNull(result.IdToken);
             Assert.IsNotNull(result.Account);
             Assert.IsNotNull(result.Account.Username);
-            Assert.IsTrue(scopes.All(result.Scopes.Contains));
+            Assert.IsTrue(
+                scopes.All(result.Scopes.Contains),
+                $"Scope mismatch. Expecting: {string.Join(", ", scopes)} " +
+                $"Actual: {string.Join(", ", result.Scopes)}");
 
             if (isPop)
             {
