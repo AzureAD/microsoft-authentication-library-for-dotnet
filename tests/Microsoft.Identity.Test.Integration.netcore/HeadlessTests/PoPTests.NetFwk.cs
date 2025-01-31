@@ -775,7 +775,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IPublicClientApplication app = pcaBuilder.Build();
 
-            Assert.AreEqual(expected, app.IsProofOfPossessionSupportedByClient());
+            Assert.AreEqual(isPopSupported, app.IsProofOfPossessionSupportedByClient());
         }
 
         private static X509Certificate2 GetCertificate()
