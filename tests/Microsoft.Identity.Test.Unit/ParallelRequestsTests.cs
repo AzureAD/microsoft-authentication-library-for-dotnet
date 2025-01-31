@@ -66,19 +66,23 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             var tasks = new List<Task<AuthenticationResult>>();
 
-            Parallel.ForEach(Enumerable.Range(0, NumberOfRequests), i =>
+            for (int i = 0; i < NumberOfRequests; i++)
             {
-                var task = cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(extraQp)
-                    .ExecuteAsync();
-                tasks.Add(task);
-            });
+                tasks.Add(Task.Run(async () =>
+                {
+                    return await cca.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithExtraQueryParameters(extraQp)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                }));
+            }
 
             // Wait for all tasks to complete
             AuthenticationResult[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
             // Assert
-            Assert.AreEqual(NumberOfRequests-2, results.Length);
+            Assert.AreEqual(NumberOfRequests, results.Length);
         }
 
         [TestMethod]
