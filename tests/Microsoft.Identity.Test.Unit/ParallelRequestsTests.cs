@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange
             const int NumberOfRequests = 20;
 
-            ParallelRequestMockHanler httpManager = new ParallelRequestMockHanler();
+            ParallelRequestMockHandler httpManager = new ParallelRequestMockHandler();
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             const int NumberOfRequests = 10;
 
             // The typical HttpMockHandler used by other tests can't deal with parallel request
-            ParallelRequestMockHanler httpManager = new ParallelRequestMockHanler();
+            ParallelRequestMockHandler httpManager = new ParallelRequestMockHandler();
 
             PublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)

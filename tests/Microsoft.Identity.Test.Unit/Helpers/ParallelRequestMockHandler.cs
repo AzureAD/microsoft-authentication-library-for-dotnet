@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
     /// - provides a standard response for discovery calls
     /// - responds with valid tokens based on a naming convention (uid = "uid" + rtSecret, upn = "user_" + rtSecret)
     /// </summary>
-    internal class ParallelRequestMockHanler : IHttpManager
+    internal class ParallelRequestMockHandler : IHttpManager
     {
         public long LastRequestDurationInMs => 50;
 

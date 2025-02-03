@@ -48,9 +48,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // it is important to copy the values from the config to the request, so that the request can be modified
             // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5108 
-            ExtraQueryParameters = new Dictionary<string, string>(
-                serviceBundle.Config.ExtraQueryParameters ??
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+            if (serviceBundle.Config.ExtraQueryParameters is null)
+            {
+                ExtraQueryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+            else
+            {
+                ExtraQueryParameters = new Dictionary<string, string>(
+                    serviceBundle.Config.ExtraQueryParameters, 
+                    StringComparer.OrdinalIgnoreCase);
+            }
 
             // Copy in call-specific query parameters.
             if (commonParameters.ExtraQueryParameters != null)
