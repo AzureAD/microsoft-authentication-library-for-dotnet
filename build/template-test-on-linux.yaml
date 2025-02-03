@@ -148,7 +148,7 @@ steps:
 
 - script: |
     ls '$(System.DefaultWorkingDirectory)'
-    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj --settings build/CodeCoverage.runsettings -l "console;verbosity=detailed" --filter FullyQualifiedName~Microsoft.Identity.Test.Integration.Broker.RuntimeBrokerTests.WamUsernamePasswordRequestAsync
+    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj --settings build/CodeCoverage.runsettings --filter FullyQualifiedName~Microsoft.Identity.Test.Integration.Broker.RuntimeBrokerTests.WamUsernamePasswordRequestAsync -l "console;verbosity=detailed"
   displayName: 'Run Integration tests .NET'
   env:
     CERTIFICATE_LOCATION: $(generateLabCert.certDir)

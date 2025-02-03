@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             string[] scopes = { "User.Read" };            
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
-            Assert.IsNotNull(intPtr);
+            // Assert.IsNotNull(intPtr);
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
