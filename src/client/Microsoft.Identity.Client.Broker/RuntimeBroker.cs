@@ -405,7 +405,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         IntPtr.Zero,
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
-                        acquireTokenByUsernamePasswordParameters.Username,
                         cancellationToken).ConfigureAwait(false))
                     {
                         var errorMessage = "Could not acquire token with username and password.";
