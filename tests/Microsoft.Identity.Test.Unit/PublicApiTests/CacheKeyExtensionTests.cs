@@ -72,7 +72,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private async Task RunHappyPathTest(ConfidentialClientApplication app, MockHttpManager httpManager)
         {
-
             var appCacheAccess = app.AppTokenCache.RecordAccess();
 
             httpManager.AddInstanceDiscoveryMockHandler();

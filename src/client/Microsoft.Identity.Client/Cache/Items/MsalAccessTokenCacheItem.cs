@@ -363,12 +363,6 @@ namespace Microsoft.Identity.Client.Cache.Items
 #else
             SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, JObject.FromObject(AdditionalCacheKeyComponents));
 #endif
-            //SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, AdditionalCacheKeyComponents);
-
-            //foreach (var component in AdditionalCacheKeyComponents)
-            //{
-            //    SetItemIfValueNotNull(json, component.Key, component.Value);
-            //}
 
             return json;
         }
