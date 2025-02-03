@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -19,8 +19,9 @@ namespace Microsoft.Identity.Test.Unit.Helpers
 {
     /// <summary>
     /// This custom HttpManager does the following: 
-    /// - provides a standard response for discovery calls
-    /// - responds with valid tokens based on a naming convention (uid = "uid" + rtSecret, upn = "user_" + rtSecret)
+    /// - responds to instance discovery calls
+    /// - responds with valid token response based on a naming convention (uid = "uid" + rtSecret, upn = "user_" + rtSecret) for "refresh_token" flow
+    /// - responds with valid app token response for client_credentials flow.    
     /// </summary>
     internal class ParallelRequestMockHandler : IHttpManager
     {
