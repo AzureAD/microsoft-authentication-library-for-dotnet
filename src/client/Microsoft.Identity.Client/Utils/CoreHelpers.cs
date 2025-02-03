@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -178,6 +179,23 @@ namespace Microsoft.Identity.Client.Utils
         internal static string GetCcsUpnHint(string upn)
         {
             return string.IsNullOrEmpty(upn)? string.Empty : $@"upn:{upn}";
+        }
+
+        internal static string ComputeKeyFromComponents(Dictionary<string, string> cacheKeyComponents)
+        {
+            StringBuilder stringBuilder = new();
+
+            foreach (var component in cacheKeyComponents)
+            {
+                stringBuilder.Append(component.Key);
+                stringBuilder.Append(component.Value);
+            }
+
+            using (SHA256 hash = SHA256.Create())
+            {
+                var hashBytes = hash.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
+                return Base64UrlHelpers.Encode(hashBytes);
+            }
         }
     }
 }

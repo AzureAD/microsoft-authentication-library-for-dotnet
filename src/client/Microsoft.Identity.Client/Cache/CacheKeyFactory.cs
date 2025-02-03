@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -48,12 +50,17 @@ namespace Microsoft.Identity.Client.Cache
                 return key;
             }
 
-            if (requestParameters.AppConfig.IsConfidentialClient ||
-                requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenSilent)
+            if (requestParameters.AppConfig.IsConfidentialClient)
+            {
+                return requestParameters.CacheKeyComponents != null
+                    ? homeAccountIdFromResponse + CoreHelpers.ComputeKeyFromComponents((Dictionary<string, string>)requestParameters.CacheKeyComponents)
+                    : homeAccountIdFromResponse;
+            }
+            if (requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenSilent)
             {
                 return homeAccountIdFromResponse;
             }
-
+            
             return null;
         }
 

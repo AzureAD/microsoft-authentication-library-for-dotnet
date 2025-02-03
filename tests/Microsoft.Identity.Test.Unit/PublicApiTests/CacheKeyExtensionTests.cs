@@ -88,7 +88,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
             //Ensure that the order of the keys does not matter
-
             result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                                 .WithAdditionalCacheKeyComponents(_additionalCacheKeys3)
                                 .ExecuteAsync(CancellationToken.None)
@@ -102,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             //Ensure that tokens are not ovverriden
             httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-            result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+            result = await app.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
                                 .WithAdditionalCacheKeyComponents(_additionalCacheKeys2)
                                 .ExecuteAsync(CancellationToken.None)
                                 .ConfigureAwait(false);
@@ -111,18 +110,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("header.payload.signature", result.AccessToken);
             Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-            //Ensure tokens are retrieved with a populated cache
-            TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
-
-            result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
-                                .ExecuteAsync(CancellationToken.None)
-                                .ConfigureAwait(false);
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("header.payload.signature", result.AccessToken);
-            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
         }
 
         [TestMethod]

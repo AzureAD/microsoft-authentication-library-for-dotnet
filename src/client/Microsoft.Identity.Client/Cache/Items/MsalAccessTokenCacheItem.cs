@@ -182,13 +182,14 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             if (AdditionalCacheKeyComponents != null)
             {
+                _credentialDescriptor = StorageJsonValues.CredentialTypeAccessTokenExtended;
                 if (_extraKeyParts != null)
                 {
-                    _extraKeyParts.Concat(new[] { ComputeKeyFromComponents() });
+                    _extraKeyParts.Concat(new[] { CoreHelpers.ComputeKeyFromComponents(AdditionalCacheKeyComponents) });
                 }
                 else
                 {
-                    _extraKeyParts = new[] { ComputeKeyFromComponents() };
+                    _extraKeyParts = new[] { CoreHelpers.ComputeKeyFromComponents(AdditionalCacheKeyComponents) };
                 }
             }
 
@@ -202,23 +203,6 @@ namespace Microsoft.Identity.Client.Cache.Items
                 _extraKeyParts);
 
             iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
-        }
-
-        private string ComputeKeyFromComponents()
-        {
-            StringBuilder stringBuilder = new();
-
-            foreach (var component in AdditionalCacheKeyComponents)
-            {
-                stringBuilder.Append(component.Key);
-                stringBuilder.Append(component.Value);
-            }
-
-            using (SHA256 hash = SHA256.Create())
-            {
-                var hashBytes = hash.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
-                return Base64UrlHelpers.Encode(hashBytes);
-            }
         }
 
         internal string ToLogString(bool piiEnabled = false)
