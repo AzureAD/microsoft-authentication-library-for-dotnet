@@ -402,7 +402,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 // For Linux broker, use the interactive flow with username password to get the token
                 if (Environment.GetEnvironmentVariable("TF_BUILD") != null && DesktopOsHelper.IsLinux()) {
                     using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInInteractivelyAsync(
-                        Inptr.Zero,
+                        IntPtr.Zero,
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         acquireTokenByUsernamePasswordParameters.Username,
