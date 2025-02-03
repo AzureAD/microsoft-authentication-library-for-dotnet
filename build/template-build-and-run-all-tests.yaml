@@ -83,7 +83,7 @@ jobs: #Build and stage projects
       baseDefinitionId: '905' #this is the PR build and it is used as a baseline
       baseBranchRef: 'main'
 
-- job: 'BuildandRunUnitTestsonLinux'
+- job: 'BuildandRunIntegrationTestsonLinux'
   pool:
       vmImage: 'ubuntu-22.04'
       demands:

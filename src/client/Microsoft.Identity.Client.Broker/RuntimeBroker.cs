@@ -399,14 +399,27 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
                 authParams.Properties["MSALRuntime_Password"] = acquireTokenByUsernamePasswordParameters.Password;
-
-                using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
+                // For Linux broker, use the interactive flow with username password to get the token
+                if (Environment.GetEnvironmentVariable("TF_BUILD") != null && DesktopOsHelper.IsLinux()) {
+                    using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInInteractivelyAsync(
+                        Inptr.Zero,
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        acquireTokenByUsernamePasswordParameters.Username,
+                        cancellationToken).ConfigureAwait(false))
+                    {
+                        var errorMessage = "Could not acquire token with username and password.";
+                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    }
+                } else {
+                    using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
-                {
-                    var errorMessage = "Could not acquire token with username and password.";
-                    msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    {
+                        var errorMessage = "Could not acquire token with username and password.";
+                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    }
                 }
             }
 

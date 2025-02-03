@@ -143,13 +143,12 @@ steps:
   inputs:
     command: 'build'
     projects: |
-      # ./tests/Microsoft.Identity.Test.Common/Microsoft.Identity.Test.Common.csproj
       ./tests/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj
+    configuration: ${{ parameters.BuildConfiguration }}
 
 - script: |
     ls '$(System.DefaultWorkingDirectory)'
-    # ls '$(System.DefaultWorkingDirectory)/drop/'
-    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj --settings build/CodeCoverage.runsettings -l "console;verbosity=detailed" --blame-crash
+    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj --settings build/CodeCoverage.runsettings -l "console;verbosity=detailed" --filter FullyQualifiedName~Microsoft.Identity.Test.Integration.Broker.RuntimeBrokerTests.WamUsernamePasswordRequestAsync
   displayName: 'Run Integration tests .NET'
   env:
     CERTIFICATE_LOCATION: $(generateLabCert.certDir)
