@@ -9,7 +9,7 @@ steps:
 - template: template-install-keyvault-secrets.yaml
 
 
-- template: template-linux-setup.yaml
+# - template: template-linux-setup.yaml
 
 # - task: Bash@3
 #   displayName: Start Xvfb server and launch GUI
@@ -82,13 +82,13 @@ steps:
 #       ./tests/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj
 #     configuration: ${{ parameters.BuildConfiguration }}
 
-# - task: DotNetCoreCLI@2
-#   displayName: 'Build Integration Test'
-#   inputs:
-#     command: 'build'
-#     projects: |
-#       ./LibsAndSamples.sln
-#     configuration: ${{ parameters.BuildConfiguration }}
+- task: DotNetCoreCLI@2
+  displayName: 'Build Integration Test'
+  inputs:
+    command: 'build'
+    projects: |
+      ./LibsAndSamples.sln
+    configuration: ${{ parameters.BuildConfiguration }}
 
 - script: |
     ls '$(System.DefaultWorkingDirectory)'
