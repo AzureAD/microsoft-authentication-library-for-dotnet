@@ -89,7 +89,7 @@ steps:
           echo 'Description=X Virtual Frame Buffer Service' | sudo tee -a /etc/systemd/system/xvfb.service
           echo 'After=network.target' | sudo tee -a /etc/systemd/system/xvfb.service
           echo '[Service]' | sudo tee -a /etc/systemd/system/xvfb.service
-          echo 'ExecStart=/usr/bin/Xvfb :99 -screen 0 1024x768x24' | sudo tee -a /etc/systemd/system/xvfb.service
+          echo 'ExecStart=/usr/bin/Xvfb :1 -screen 0 1024x768x24' | sudo tee -a /etc/systemd/system/xvfb.service
           echo 'Restart=always' | sudo tee -a /etc/systemd/system/xvfb.service
           echo '[Install]' | sudo tee -a /etc/systemd/system/xvfb.service
           echo 'WantedBy=multi-user.target' | sudo tee -a /etc/systemd/system/xvfb.service
