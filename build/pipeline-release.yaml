@@ -16,7 +16,9 @@ extends:
     template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
     parameters:
         pool:
-          vmImage: 'windows-latest'
+            name: MSSecurity-1ES-Build-Agents-Pool
+            image: MSSecurity-1ES-Windows-2022
+            os: windows
         customBuildTags:
             - ES365AIMigrationTooling-BulkMigrated-Release
         stages:
