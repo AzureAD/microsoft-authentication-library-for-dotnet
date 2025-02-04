@@ -1,6 +1,7 @@
 # template-linux-setup.yaml
 # Setup the Linux environment for the build and test tasks
 
+steps:
 - task: PowerShell@2
   displayName: Upgrade to WSL2 and Install Ubuntu 22.04
   inputs:
