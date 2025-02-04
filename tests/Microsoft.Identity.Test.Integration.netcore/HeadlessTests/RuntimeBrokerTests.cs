@@ -218,6 +218,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                .WithBroker(_brokerOption)
                .Build();
 
