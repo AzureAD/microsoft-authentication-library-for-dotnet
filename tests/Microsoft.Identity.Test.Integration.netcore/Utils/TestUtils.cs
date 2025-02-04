@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.Utils
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 try {
-                    IntPtr display = XOpenDisplay(null);
+                    IntPtr display = XOpenDisplay(":1");
                     if (display == IntPtr.Zero)
                     {
                         Console.WriteLine("No X display available. Running in headless mode.");
