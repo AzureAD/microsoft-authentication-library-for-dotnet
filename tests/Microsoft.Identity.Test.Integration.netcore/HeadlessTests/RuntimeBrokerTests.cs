@@ -144,12 +144,13 @@ namespace Microsoft.Identity.Test.Integration.Broker
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
-            WamLoggerValidator wastestLogger = new WamLoggerValidator();
+            // WamLoggerValidator wastestLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
+            //    .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
+               .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                .WithBroker(_brokerOption)
                .Build();
 
@@ -308,6 +309,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                .WithBroker(_brokerOption)
                .Build();
 
