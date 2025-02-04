@@ -54,7 +54,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
-            AdditionalCacheKeyComponents = cacheKeyComponents;
+
+            if (cacheKeyComponents != null && cacheKeyComponents.Any())
+            {
+                AdditionalCacheKeyComponents = cacheKeyComponents;
+                CredentialType = StorageJsonValues.CredentialTypeAccessTokenExtended;
+            }
 #if !MOBILE
             PersistedCacheParameters = AcquireCacheParametersFromResponse(persistedCacheParameters, response.ExtensionData);
 #endif
@@ -112,7 +117,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = rawClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
-            AdditionalCacheKeyComponents = cacheKeyComponents;
+
+            if (cacheKeyComponents != null && cacheKeyComponents.Any())
+            {
+                AdditionalCacheKeyComponents = cacheKeyComponents;
+                CredentialType = StorageJsonValues.CredentialTypeAccessTokenExtended;
+            }
 
             InitCacheKey();
         }
@@ -324,7 +334,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             if (additionalCacheKeyComponents != null)
             {
                 item.AdditionalCacheKeyComponents = new SortedDictionary<string, string>(additionalCacheKeyComponents);
+                item.CredentialType = StorageJsonValues.CredentialTypeAccessTokenExtended;
             }
+
             item.OboCacheKey = oboCacheKey;
             item.PopulateFieldsFromJObject(j);
 

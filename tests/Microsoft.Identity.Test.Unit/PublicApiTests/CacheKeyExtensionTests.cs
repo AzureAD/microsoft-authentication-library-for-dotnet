@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -136,8 +137,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             if (CollectionHelpers.AreDictionariesEqual(
                 msalAccessTokenCacheItem.AdditionalCacheKeyComponents,
-                expectedAdditionalCacheKeyComponents) &&
-                msalAccessTokenCacheItem.CacheKey.Equals(expectedCacheKey))
+                expectedAdditionalCacheKeyComponents)
+                && msalAccessTokenCacheItem.CacheKey.Equals(expectedCacheKey)
+                && msalAccessTokenCacheItem.CredentialType == StorageJsonValues.CredentialTypeAccessTokenExtended)
             {
                 return;
             }
