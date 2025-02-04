@@ -29,6 +29,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         private readonly BrokerOptions _wamOptions;
         private static Exception s_initException;
 
+        [DllImport("libX11.so.6")]
+        private static extern IntPtr XOpenDisplay(string display);
+
         private static Dictionary<NativeInterop.LogLevel, LogLevel> LogLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
         {
             { NativeInterop.LogLevel.Trace, LogLevel.Verbose },
@@ -402,7 +405,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 // For Linux broker, use the interactive flow with username password to get the token
                 if (Environment.GetEnvironmentVariable("TF_BUILD") != null && DesktopOsHelper.IsLinux()) {
                     using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInInteractivelyAsync(
-                        _parentHandle,
+                        XOpenDisplay(":1"),
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
