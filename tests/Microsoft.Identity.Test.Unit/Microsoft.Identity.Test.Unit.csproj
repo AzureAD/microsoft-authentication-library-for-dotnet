@@ -66,6 +66,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)'">
     <PackageReference Include="System.Windows.Forms" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <ItemGroup>

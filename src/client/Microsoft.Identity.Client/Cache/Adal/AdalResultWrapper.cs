@@ -2,35 +2,20 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net;
-#else
-using Microsoft.Identity.Json;
-#endif
+using Microsoft.Identity.Client.Platforms.Json;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal class AdalResultWrapper
     {
-
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        [JsonProperty]
-#endif
         public AdalResult Result { get; set; }
 
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        [JsonProperty]
-#endif
         public string RawClientInfo { get; set; }
 
         /// <summary>
         /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
         /// </summary>
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        [JsonProperty]
-#endif
         public string RefreshToken { get; set; }
 
         /// <summary>
@@ -40,9 +25,6 @@ namespace Microsoft.Identity.Client.Cache
 
         // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
         // to get it from the STS response.
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        [JsonProperty]
-#endif
         internal string ResourceInResponse { get; set; }
 
         /// <summary>
@@ -63,9 +45,6 @@ namespace Microsoft.Identity.Client.Cache
             return JsonHelper.SerializeToJson(this);
         }
 
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        [JsonProperty]
-#endif
         public string UserAssertionHash { get; set; }
 
         internal AdalResultWrapper Clone()

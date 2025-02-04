@@ -2,16 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-#if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net;
+using Microsoft.Identity.Client.Platforms.Json;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.Region
 {
-    [JsonObject]
     [Preserve(AllMembers = true)]
     internal sealed class LocalImdsErrorResponse
     {

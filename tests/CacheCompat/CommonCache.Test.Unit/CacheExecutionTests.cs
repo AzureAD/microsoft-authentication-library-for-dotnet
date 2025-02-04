@@ -31,7 +31,6 @@ namespace CommonCache.Test.Unit
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext testContext)
         {
-            // TODO: add other users to the mix
             s_labUsers.Add(GetPublicAadUserDataAsync().GetAwaiter().GetResult());
         }
 

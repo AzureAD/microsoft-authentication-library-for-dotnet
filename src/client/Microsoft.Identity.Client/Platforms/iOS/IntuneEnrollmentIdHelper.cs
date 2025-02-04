@@ -4,10 +4,10 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Json;
-#if iOS
+using System.Text.Json.Serialization;
+using Microsoft.Identity.Client.Utils;
 using Foundation;
-#endif
+using System.Text.Json;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -18,13 +18,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         internal static string GetEnrollmentId(ILoggerAdapter logger)
         {
-#if iOS
             var keychainData = GetRawEnrollmentId();
             if(!string.IsNullOrEmpty(keychainData))
             {
                 try
                 {
-                    var enrollmentIDs = JsonConvert.DeserializeObject<EnrollmentIDs>(keychainData);
+                    var enrollmentIDs = JsonHelper.DeserializeFromJson<EnrollmentIDs>(keychainData);
 
                     if ((enrollmentIDs?.EnrollmentIds?.Count ?? 0) > 0)
                     {
@@ -33,24 +32,19 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 }
                 catch (JsonException jEx)
                 {
-                    logger.ErrorPii($"Failed to parse enrollmentID for KeychainData: {keychainData}", string.Empty);
+                    logger.Error($"Failed to parse enrollmentID for KeychainData");
                     logger.ErrorPii(jEx);
 
                     return string.Empty;
                 }
             }
-#endif
             return string.Empty;
         }
 
         internal static string GetRawEnrollmentId()
         {
-#if iOS
             var keychainData = NSUserDefaults.StandardUserDefaults.StringForKey(EnrollmentIdKey);
             return keychainData;
-#else
-            return string.Empty;
-#endif
         }
 
         internal static string GetRawMamResources()
@@ -58,44 +52,42 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             var keychainData = NSUserDefaults.StandardUserDefaults.StringForKey(Intune_MamResourceKey);
             return keychainData;
         }
+    }
 
-        /// <summary>
-        /// This class corresponds to the EnrollmentIDs entry in the Keychain
-        /// </summary>
-        internal class EnrollmentIDs
-        {
-            private const string EnrollmentIdsKey = "enrollment_ids";
+    /// <summary>
+    /// This class corresponds to the EnrollmentIDs entry in the Keychain
+    /// </summary>
+    internal class EnrollmentIDs
+    {
+        [JsonPropertyName("enrollment_ids")]
+        public List<EnrollmentIdProps> EnrollmentIds { get; set; }
+    }
 
-            private const string HomeAccountIdKey = "home_account_id";
+    internal class EnrollmentIdProps
+    {
+        private const string HomeAccountIdKey = "home_account_id";
 
-            private const string TidsKey = "tid";
+        private const string TidsKey = "tid";
 
-            private const string UserIdKey = "user_id";
+        private const string UserIdKey = "user_id";
 
-            private const string OidKey = "oid";
+        private const string OidKey = "oid";
 
-            private const string EnrollmentIdKey = "enrollment_id";
+        private const string EnrollmentIdKey = "enrollment_id";
 
-            internal class EnrollmentIdProps
-            {
-                [JsonProperty(PropertyName = HomeAccountIdKey)]
-                public string HomeAccountId { get; set; }
+        [JsonPropertyName(HomeAccountIdKey)]
+        public string HomeAccountId { get; set; }
 
-                [JsonProperty(PropertyName = TidsKey)]
-                public string Tid { get; set; }
+        [JsonPropertyName(TidsKey)]
+        public string Tid { get; set; }
 
-                [JsonProperty(PropertyName = UserIdKey)]
-                public string UserId { get; set; }
+        [JsonPropertyName(UserIdKey)]
+        public string UserId { get; set; }
 
-                [JsonProperty(PropertyName = OidKey)]
-                public string Oid { get; set; }
+        [JsonPropertyName(OidKey)]
+        public string Oid { get; set; }
 
-                [JsonProperty(PropertyName = EnrollmentIdKey)]
-                public string EnrollmentId { get; set; }
-            }
-
-            [JsonProperty(PropertyName = EnrollmentIdsKey)]
-            public List<EnrollmentIdProps> EnrollmentIds { get; set; }
-        }
+        [JsonPropertyName(EnrollmentIdKey)]
+        public string EnrollmentId { get; set; }
     }
 }

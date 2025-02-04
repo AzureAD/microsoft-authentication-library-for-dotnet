@@ -7,12 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
-#else
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -80,7 +75,6 @@ namespace Microsoft.Identity.Client.Internal
 
         public ClaimsPrincipal ClaimsPrincipal { get; private set; }
 
-
         private static IdToken ClaimsToToken(List<Claim> claims)
         {
             var principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
@@ -102,236 +96,7 @@ namespace Microsoft.Identity.Client.Internal
                 claims.SingleOrDefault(_ => string.Equals(_.Type, type, StringComparison.OrdinalIgnoreCase))?.Value;
         }
 
-        #region Using Newtonsoft
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        // There are quite a bit of API differences, so duplicated code, ideally will need to be refactored.
-
-        public static IdToken Parse(string idToken)
-        {
-            if (string.IsNullOrEmpty(idToken))
-            {
-                return null;
-            }
-
-            string[] idTokenSegments = idToken.Split(new[] { '.' });
-
-            if (idTokenSegments.Length < 2)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidJwtError,
-                    MsalErrorMessage.IDTokenMustHaveTwoParts);
-            }
-
-            try
-            {
-                string payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
-                var idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
-
-                List<Claim> claims = GetClaimsFromRawToken(idTokenClaims);
-                return ClaimsToToken(claims);
-            }
-            catch (JsonException exc)
-            {
-                throw new MsalClientException(
-                    MsalError.JsonParseError,
-                    MsalErrorMessage.FailedToParseIDToken,
-                    exc);
-            }
-        }
-
-        #region IdToken to Claims parsing - logic copied from Wilson!
-        private static List<Claim> GetClaimsFromRawToken(Dictionary<string, object> idTokenClaims)
-        {
-            List<Claim> claims = new List<Claim>();
-
-            string issuer = null;
-            if (idTokenClaims.TryGetValue(IdTokenClaim.Issuer, out object issuerObj))
-            {
-                issuer = issuerObj as string;
-            }
-            issuer ??= DefaultIssuser;
-
-            foreach (KeyValuePair<string, object> keyValuePair in idTokenClaims)
-            {
-                if (keyValuePair.Value == null)
-                {
-                    claims.Add(new Claim(keyValuePair.Key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
-                    continue;
-                }
-
-                var claimValue = keyValuePair.Value as string;
-                if (claimValue != null)
-                {
-                    claims.Add(new Claim(keyValuePair.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
-                    continue;
-                }
-
-                var jtoken = keyValuePair.Value as JToken;
-                if (jtoken != null)
-                {
-                    AddClaimsFromJToken(claims, keyValuePair.Key, jtoken, issuer);
-                    continue;
-                }
-
-                var objects = keyValuePair.Value as IEnumerable<object>;
-                if (objects != null)
-                {
-                    foreach (var obj in objects)
-                    {
-                        claimValue = obj as string;
-                        if (claimValue != null)
-                        {
-                            claims.Add(new Claim(keyValuePair.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
-                            continue;
-                        }
-
-                        jtoken = obj as JToken;
-                        if (jtoken != null)
-                        {
-                            AddDefaultClaimFromJToken(claims, keyValuePair.Key, jtoken, issuer);
-                            continue;
-                        }
-
-                        // DateTime claims require special processing. JsonConvert.SerializeObject(obj) will result in "\"dateTimeValue\"". The quotes will be added.
-                        if (obj is DateTime dateTimeValue)
-                            claims.Add(
-                                new Claim(
-                                    keyValuePair.Key,
-                                    dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture),
-                                    ClaimValueTypes.DateTime,
-                                    issuer,
-                                    issuer));
-                        else
-                            claims.Add(
-                                new Claim(
-                                    keyValuePair.Key,
-                                    JsonConvert.SerializeObject(obj),
-                                    GetClaimValueType(obj),
-                                    issuer,
-                                    issuer));
-                    }
-
-                    continue;
-                }
-
-                IDictionary<string, object> dictionary = keyValuePair.Value as IDictionary<string, object>;
-                if (dictionary != null)
-                {
-                    foreach (var item in dictionary)
-                        claims.Add(new Claim(keyValuePair.Key, "{" + item.Key + ":" + JsonConvert.SerializeObject(item.Value) + "}", GetClaimValueType(item.Value), issuer, issuer));
-
-                    continue;
-                }
-
-                // DateTime claims require special processing. JsonConvert.SerializeObject(keyValuePair.Value) will result in "\"dateTimeValue\"". The quotes will be added.
-                if (keyValuePair.Value is DateTime dateTime)
-                    claims.Add(new Claim(keyValuePair.Key, dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
-                else
-                    claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(keyValuePair.Value), GetClaimValueType(keyValuePair.Value), issuer, issuer));
-            }
-
-            return claims;
-        }
-
-        private static void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
-        {
-            if (jtoken.Type == JTokenType.Object)
-            {
-                claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), JsonClaimValueTypes.Json));
-            }
-            else if (jtoken.Type == JTokenType.Array)
-            {
-                var jarray = jtoken as JArray;
-                foreach (var item in jarray)
-                {
-                    switch (item.Type)
-                    {
-                        case JTokenType.Object:
-                            claims.Add(new Claim(claimType, item.ToString(Formatting.None), JsonClaimValueTypes.Json, issuer, issuer));
-                            break;
-
-                        // only go one level deep on arrays.
-                        case JTokenType.Array:
-                            claims.Add(new Claim(claimType, item.ToString(Formatting.None), JsonClaimValueTypes.JsonArray, issuer, issuer));
-                            break;
-
-                        default:
-                            AddDefaultClaimFromJToken(claims, claimType, item, issuer);
-                            break;
-                    }
-                }
-            }
-            else
-            {
-                AddDefaultClaimFromJToken(claims, claimType, jtoken, issuer);
-            }
-        }
-
-        private static void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
-        {
-            JValue jvalue = jtoken as JValue;
-            if (jvalue != null)
-            {
-                // String is special because item.ToString(Formatting.None) will result in "/"string/"". The quotes will be added.
-                // Boolean needs item.ToString otherwise 'true' => 'True'
-                if (jvalue.Type == JTokenType.String)
-                    claims.Add(new Claim(claimType, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer));
-                // DateTime claims require special processing. jtoken.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
-                else if (jvalue.Value is DateTime dateTimeValue)
-                    claims.Add(new Claim(claimType, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
-                else
-                    claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer));
-            }
-            else
-                claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), GetClaimValueType(jtoken), issuer, issuer));
-        }
-
-        private static string GetClaimValueType(object obj)
-        {
-            if (obj == null)
-                return JsonClaimValueTypes.JsonNull;
-
-            var objType = obj.GetType();
-
-            if (objType == typeof(string))
-                return ClaimValueTypes.String;
-
-            if (objType == typeof(int))
-                return ClaimValueTypes.Integer;
-
-            if (objType == typeof(bool))
-                return ClaimValueTypes.Boolean;
-
-            if (objType == typeof(double))
-                return ClaimValueTypes.Double;
-
-            if (objType == typeof(long))
-            {
-                long l = (long)obj;
-                if (l >= int.MinValue && l <= int.MaxValue)
-                    return ClaimValueTypes.Integer;
-
-                return ClaimValueTypes.Integer64;
-            }
-
-            if (objType == typeof(DateTime))
-                return ClaimValueTypes.DateTime;
-
-            if (objType == typeof(JObject))
-                return JsonClaimValueTypes.Json;
-
-            if (objType == typeof(JArray))
-                return JsonClaimValueTypes.JsonArray;
-
-            return objType.ToString();
-        }
-
-        #endregion
-#endif
-        #endregion
-
         #region Using System.Text.Json
-#if SUPPORTS_SYSTEM_TEXT_JSON
         // There are quite a bit of API differences, so duplicated code, ideally will need to be refactored.
         public static IdToken Parse(string idToken)
         {
@@ -550,7 +315,6 @@ namespace Microsoft.Identity.Client.Internal
 
             return valueKind.ToString();
         }
-#endif
         #endregion
     }
 }

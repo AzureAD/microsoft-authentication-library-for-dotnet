@@ -93,7 +93,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public static bool IsBrokerRequiredAuthCode(string authCode, out string installationUri)
         {
             if (authCode.StartsWith(BrokerParameter.AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired, StringComparison.OrdinalIgnoreCase))
-            //|| authCode.StartsWith(_serviceBundle.Config.RedirectUri, StringComparison.OrdinalIgnoreCase) // TODO: what is this?!
             {
                 installationUri = ExtractAppLink(authCode);
                 return (installationUri != null);

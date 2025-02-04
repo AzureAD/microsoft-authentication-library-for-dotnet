@@ -6,11 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using JObject = System.Text.Json.Nodes.JsonObject;
-#else
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client
 {

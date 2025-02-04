@@ -14,13 +14,9 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
-#if NET8_0_OR_GREATER
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
-#else
-using Microsoft.Identity.Json.Linq;
-#endif
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -45,12 +41,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             StorageJsonKeys.FamilyId
         };
 
-#if NET8_0_OR_GREATER
         private static readonly JsonDocumentOptions _documentOptions = new JsonDocumentOptions
         {
             AllowTrailingCommas = true
         };
-#endif
 
         private MsalAccessTokenCacheItem CreateAccessTokenItem(
             string kid = null,
@@ -264,7 +258,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string asJson = item.ToJsonString();
             var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
 
-            AssertAccessTokenCacheItemsAreEqual(item, item2, "123"); // TODO: fix this
+            AssertAccessTokenCacheItemsAreEqual(item, item2, "123"); 
         }
 
         [TestMethod]
@@ -556,17 +550,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await (tokenCache as ITokenCacheInternal).OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
-#if NET8_0_OR_GREATER
             var finalJson = JsonNode.Parse(Encoding.UTF8.GetString(cache), documentOptions: _documentOptions).AsObject();
 
             var originalJson = JsonNode.Parse(jsonContent, documentOptions: _documentOptions).AsObject();
             Assert.IsTrue(DeepEquals(originalJson, finalJson));
-#else
-            var finalJson = JObject.Parse(Encoding.UTF8.GetString(cache));
 
-            var originalJson = JObject.Parse(jsonContent);
-            Assert.IsTrue(JToken.DeepEquals(originalJson, finalJson));
-#endif
         }
 
         [TestMethod]
@@ -580,13 +568,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string actualJson = new UTF8Encoding().GetString(bytes);
 
-#if NET8_0_OR_GREATER
             Assert.IsTrue(DeepEquals(
                 JsonNode.Parse(actualJson, documentOptions: _documentOptions).AsObject(),
                 JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
-#else
-            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
-#endif
+
             var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null);
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
             s2.Deserialize(bytes, false);
@@ -596,13 +581,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // serialize again to detect errors that come from deserialization
             byte[] bytes2 = s2.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
-#if NET8_0_OR_GREATER
+
             Assert.IsTrue(DeepEquals(
                     JsonNode.Parse(actualJson2, documentOptions: _documentOptions).AsObject(),
                 JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
-#else
-            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
-#endif
+
         }
 
         [TestMethod]
@@ -656,13 +639,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // serialize again to detect errors that come from deserialization
             byte[] bytes2 = s1.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
-#if NET8_0_OR_GREATER
+
             Assert.IsTrue(DeepEquals(
                 JsonNode.Parse(actualJson2, documentOptions: _documentOptions).AsObject(),
                 JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
-#else
-            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
-#endif
+
         }
 
         [TestMethod]
@@ -958,7 +939,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             CoreAssert.AssertDictionariesAreEqual(expected.WamAccountIds, actual.WamAccountIds, StringComparer.Ordinal);
         }
 
-#if NET8_0_OR_GREATER
         private bool DeepEquals(JsonNode a, JsonNode b)
         {
             if (a == null && b == null)
@@ -1016,6 +996,5 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
             return true;
         }
-#endif
     }
 }

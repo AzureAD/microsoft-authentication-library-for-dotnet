@@ -12,22 +12,13 @@ using Android.OS;
 using Android.Content.PM;
 using Android.Util;
 using Java.Security;
-using Java.Util.Concurrent;
 using Signature = Android.Content.PM.Signature;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
-using System.Threading.Tasks;
-using OperationCanceledException = Android.Accounts.OperationCanceledException;
-using AndroidUri = Android.Net.Uri;
-using Android.Database;
-using Microsoft.Identity.Json.Utilities;
-using System.Threading;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Http;
 using AndroidNative = Android;
-using System.Linq;
+using System.Text.Json;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -48,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _androidContext = androidContext ?? throw new ArgumentNullException(nameof(androidContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _logger.Verbose(()=>"[Android broker] Getting the Android context for broker request. ");
+            _logger.Verbose(() => "[Android broker] Getting the Android context for broker request. ");
             AndroidAccountManager = AccountManager.Get(_androidContext);
         }
 
@@ -57,7 +48,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             using (_logger.LogMethodDuration())
             {
                 bool canInvoke = CanSwitchToBroker();
-                _logger.Verbose(()=>"[Android broker] Can invoke broker? " + canInvoke);
+                _logger.Verbose(() => "[Android broker] Can invoke broker? " + canInvoke);
 
                 return canInvoke;
             }
@@ -74,7 +65,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             //Force this to return true for broker test app
             var authenticator = GetInstalledAuthenticator();
-            return authenticator!= null
+            return authenticator != null
                    && !packageName.Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase)
                    && !packageName
            .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase);
@@ -120,30 +111,29 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             string homeAccountId = brokerRequest.HomeAccountId;
             string localAccountId = brokerRequest.LocalAccountId;
 
-                dynamic AccountDataList = JArray.Parse(accountData);
+            var accountDataList = JsonHelper.DeserializeFromJson<List<AccountData>>(accountData);
 
-                foreach (JObject account in AccountDataList)
+            foreach (AccountData account in accountDataList)
+            {
+                AccountInfo accountInfo = account.Account;
+                string accountInfoHomeAccountID = accountInfo.HomeAccountId;
+                string accountInfoLocalAccountID = accountInfo.LocalAccountId;
+
+                if (string.Equals(accountInfo.UserName, username, StringComparison.OrdinalIgnoreCase))
                 {
-                    var accountInfo = account[BrokerResponseConst.Account];
-                    var accountInfoHomeAccountID = accountInfo[BrokerResponseConst.HomeAccountId]?.ToString();
-                    var accountInfoLocalAccountID = accountInfo[BrokerResponseConst.LocalAccountId]?.ToString();
-
-                    if (string.Equals(accountInfo[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // TODO: broker request should be immutable!
-                        brokerRequest.HomeAccountId = accountInfoHomeAccountID;
-                        brokerRequest.LocalAccountId = accountInfoLocalAccountID;
-                        _logger.Info("[Android broker] Found broker account in Android account manager using the provided login hint. ");
-                        return brokerRequest;
-                    }
-
-                    if (string.Equals(accountInfoHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
-                         string.Equals(accountInfoLocalAccountID, localAccountId, StringComparison.Ordinal))
-                    {
-                        _logger.Info("[Android broker] Found broker account in Android account manager using the provided account. ");
-                        return brokerRequest;
-                    }
+                    brokerRequest.HomeAccountId = accountInfoHomeAccountID;
+                    brokerRequest.LocalAccountId = accountInfoLocalAccountID;
+                    _logger.Info("[Android broker] Found broker account in Android account manager using the provided login hint. ");
+                    return brokerRequest;
                 }
+
+                if (string.Equals(accountInfoHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
+                     string.Equals(accountInfoLocalAccountID, localAccountId, StringComparison.Ordinal))
+                {
+                    _logger.Info("[Android broker] Found broker account in Android account manager using the provided account. ");
+                    return brokerRequest;
+                }
+            }
 
             _logger.Info("[Android broker] The requested account does not exist in the Android account manager. ");
             throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
@@ -158,24 +148,24 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (!string.IsNullOrEmpty(accountData))
             {
-                dynamic authResult = JArray.Parse(accountData);
+                var accountDataList = JsonHelper.DeserializeFromJson<List<AccountData>>(accountData);
 
-                foreach (JObject account in authResult)
+                foreach (AccountData account in accountDataList)
                 {
-                    if (account.ContainsKey(BrokerResponseConst.Account))
+                    var accountInfo = account.Account;
+
+                    if (accountInfo != null && accountInfo.HomeAccountId != null)
                     {
-                        var accountInfo = account[BrokerResponseConst.Account];
                         IAccount iAccount = new Account(
-                            accountInfo.Value<string>(BrokerResponseConst.HomeAccountId) ?? string.Empty,
-                            accountInfo.Value<string>(BrokerResponseConst.UserName) ?? string.Empty,
-                            accountInfo.Value<string>(BrokerResponseConst.Environment) ?? string.Empty);
+                            accountInfo.HomeAccountId,
+                            accountInfo.UserName ?? string.Empty,
+                            accountInfo.Environment ?? string.Empty);
                         brokerAccounts.Add(iAccount);
                     }
                 }
             }
 
             _logger.Info(() => "[Android broker] Found " + brokerAccounts.Count + " accounts in the account manager. ");
-
             return brokerAccounts;
         }
 
@@ -258,7 +248,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public Bundle CreateBrokerAccountBundle(BrokerRequest brokerRequest)
         {
             _logger.InfoPii(
-                () => "[Android broker] CreateBrokerAccountBundle: " + JsonHelper.SerializeToJson(brokerRequest), 
+                () => "[Android broker] CreateBrokerAccountBundle: " + JsonHelper.SerializeToJson(brokerRequest),
                 () => "Enable PII to see the broker account bundle request. ");
             Bundle bundle = new Bundle();
 
@@ -387,7 +377,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType, StringComparison.OrdinalIgnoreCase)
                         && VerifySignature(authenticator.PackageName))
                     {
-                        _logger.Verbose(()=>"[Android broker] Found the Authenticator on the device. ");
+                        _logger.Verbose(() => "[Android broker] Found the Authenticator on the device. ");
                         return authenticator;
                     }
                 }

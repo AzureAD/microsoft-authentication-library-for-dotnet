@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         [Description("Mex endpoint fails to resolve")]
         public async Task MexEndpointFailsToResolveTestAsync()
         {
-            // TODO: should we move this into a separate test class for WsTrustWebRequestManager?
             using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get);

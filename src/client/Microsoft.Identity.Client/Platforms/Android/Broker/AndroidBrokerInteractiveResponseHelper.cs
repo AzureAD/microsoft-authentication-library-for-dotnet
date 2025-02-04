@@ -1,18 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -58,14 +54,15 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     case (int)BrokerResponseCode.BrowserCodeError:
                         unreliableLogger?.Info("[Android broker] Response received - error. ");
 
-                        dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                        var errorResult = JsonHelper.DeserializeFromJson<BrokerErrorResult>
+                            (data.GetStringExtra(BrokerConstants.BrokerResultV2));
 
                         string error;
                         string errorDescription;
                         if (errorResult != null)
                         {
-                            error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-                            errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                            error = errorResult.BrokerErrorCode;
+                            errorDescription = errorResult.BrokerErrorMessage;
 
                             unreliableLogger?.Error($"[Android broker] error: {error} errorDescription {errorDescription}. ");
                         }
@@ -76,21 +73,22 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             unreliableLogger?.Error("[Android broker] Error response received, but not error could be extracted. ");
                         }
 
-                        var httpResponse = new HttpResponse();
-                        //TODO: figure out how to get status code properly deserialized from JObject
-                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody]?.ToString();
+                        var httpResponse = new HttpResponse
+                        {
+                            Body = errorResult?.BrokerHttpBody
+                        };
 
                         InteractiveBrokerTokenResponse = new MsalTokenResponse
                         {
                             Error = error,
                             ErrorDescription = errorDescription,
-                            SubError = errorResult[BrokerResponseConst.BrokerSubError],
+                            SubError = errorResult?.BrokerSubError,
                             HttpResponse = httpResponse,
                             CorrelationId = InteractiveRequestCorrelationId,
-                            TenantId = errorResult[BrokerResponseConst.TenantId]?.ToString(),
-                            Upn = errorResult[BrokerResponseConst.UserName]?.ToString(),
-                            AccountUserId = errorResult[BrokerResponseConst.LocalAccountId]?.ToString(),
-                            AuthorityUrl = errorResult[BrokerResponseConst.Authority]?.ToString(),
+                            TenantId = errorResult?.TenantId,
+                            Upn = errorResult?.UserName,
+                            AccountUserId = errorResult?.LocalAccountId,
+                            AuthorityUrl = errorResult?.Authority,
                         };
                         break;
                     default:

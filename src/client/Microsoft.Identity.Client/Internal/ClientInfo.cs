@@ -4,17 +4,12 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net;
+using Microsoft.Identity.Client.Platforms.Json;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
-
-    [JsonObject]
+    
     [Preserve(AllMembers = true)]
     internal class ClientInfo
     {

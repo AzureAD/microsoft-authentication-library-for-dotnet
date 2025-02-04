@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 catch (MsalServiceException ex)
                 {
-                    // TODO: handle 429 concerns here and back off farther if needed.
+                    // TODO: handle 429 concerns here and back off further if needed.
                     if (ex.ErrorCode.Equals(OAuth2Error.AuthorizationPending, StringComparison.OrdinalIgnoreCase))
                     {
                         await Task.Delay(TimeSpan.FromSeconds(deviceCodeResult.Interval), cancellationToken)

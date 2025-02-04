@@ -2,11 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using JObject = System.Text.Json.Nodes.JsonObject;
-#else
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {

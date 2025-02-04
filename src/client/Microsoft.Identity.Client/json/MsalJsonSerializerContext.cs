@@ -1,23 +1,23 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Json;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
 
-namespace Microsoft.Identity.Client.Platforms.net
+
+namespace Microsoft.Identity.Client.Platforms.Json
 {
     /// <summary>
     /// This class specifies metadata for System.Text.Json source generation.
@@ -40,6 +40,14 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(ManagedIdentityResponse))]
     [JsonSerializable(typeof(ManagedIdentityErrorResponse))]
     [JsonSerializable(typeof(OidcMetadata))]
+#if ANDROID
+    [JsonSerializable(typeof(Android.Broker.BrokerErrorResponse))]    
+    [JsonSerializable(typeof(Android.Broker.BrokerRequest))]
+    [JsonSerializable(typeof(List<Android.Broker.AccountData>))]
+#endif
+#if iOS
+    [JsonSerializable(typeof(iOS.EnrollmentIDs))]
+#endif
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {

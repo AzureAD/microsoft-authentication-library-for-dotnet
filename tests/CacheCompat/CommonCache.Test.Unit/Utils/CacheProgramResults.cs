@@ -3,7 +3,7 @@
 
 using System.IO;
 using CommonCache.Test.Common;
-using Microsoft.Identity.Json;
+using Newtonsoft.Json;
 
 namespace CommonCache.Test.Unit.Utils
 {

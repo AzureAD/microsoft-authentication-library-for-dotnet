@@ -3,13 +3,9 @@
 
 using System;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JToken = System.Text.Json.Nodes.JsonNode;
-#else
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -48,22 +44,15 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             bool shouldSetValue = true;
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
             var asObj = value as JsonValue;
-#else
-            object asObj = value.ToObject<object>();
-#endif
+
             if (asObj == null)
             {
                 shouldSetValue = false;
             }
             else
             {
-#if SUPPORTS_SYSTEM_TEXT_JSON
                 string asString = asObj.GetValue<string>();
-#else
-                string asString = asObj as string;
-#endif
                 if (asString != null)
                 {
                     shouldSetValue = filter(asString);

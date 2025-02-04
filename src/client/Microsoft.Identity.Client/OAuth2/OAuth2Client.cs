@@ -17,12 +17,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Security.Cryptography.X509Certificates;
-
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
-#else
-using Microsoft.Identity.Json;
-#endif
+
 
 namespace Microsoft.Identity.Client.OAuth2
 {
