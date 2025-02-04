@@ -8,118 +8,54 @@ steps:
 
 - template: template-install-keyvault-secrets.yaml
 
-- task: Bash@3
-  displayName: Install broker and depenencies
-  inputs:
-    targetType: 'inline'
-    script: |
-      chmod +x ./build/linux-install-deps.sh
-      ./build/linux-install-deps.sh
 
-- task: Bash@3
-  name: SetDbusSession
-  displayName: Set DBUS_SESSION_BUS_ADDRESS
-  inputs:
-    targetType: inline
-    script: |
-      echo "Setting DBUS_SESSION_BUS_ADDRESS"
-      # ensure that /var/lib/dbus/machine-id exists and has the uuid in it
-      sudo dbus-uuidgen --ensure
-      DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${UID}/bus"
-      # enable session lingering for the user
-      sudo loginctl enable-linger ${USER}
-      # enable and start dbus service
-      sudo systemctl enable dbus.service
-      sudo systemctl start dbus.service
-      # make sure per-user instance of systemd is running
-      /usr/bin/dbus-daemon --session --address=systemd: --nofork --print-address --nopidfile --systemd-activation --syslog-only
-      echo "dbus-launch finished"
+- template: template-linux-setup.yaml
 
-      echo "##vso[task.setvariable variable=dbusSessionAddress;isOutput=true]$DBUS_SESSION_BUS_ADDRESS"
-      echo "Set dbusSessionAddress successfully"
-      echo "set DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}"
+# - task: Bash@3
+#   displayName: Start Xvfb server and launch GUI
+#   inputs:
+#     targetType: inline
+#     script: |
+#       if [ -f '/usr/bin/apt' ]; then
+#           sudo chmod 777 /etc/systemd/system/
+#           sudo rm -f /etc/systemd/system/xvfb.service
+#           sudo touch /etc/systemd/system/xvfb.service
+#           sudo chmod 777 /etc/systemd/system/xvfb.service
+#           echo '[unit]' | sudo tee -a /etc/systemd/system/xvfb.service
+#           echo 'Description=X Virtual Frame Buffer Service' | sudo tee -a /etc/systemd/system/xvfb.service
+#           echo 'After=network.target' | sudo tee -a /etc/systemd/system/xvfb.service
+#           echo '[Service]' | sudo tee -a /etc/systemd/system/xvfb.service
+#           echo 'ExecStart=/usr/bin/Xvfb :1 -screen 0 1024x768x24' | sudo tee -a /etc/systemd/system/xvfb.service
+#           echo 'Restart=always' | sudo tee -a /etc/systemd/system/xvfb.service
+#           echo '[Install]' | sudo tee -a /etc/systemd/system/xvfb.service
+#           echo 'WantedBy=multi-user.target' | sudo tee -a /etc/systemd/system/xvfb.service
 
-- task: Bash@3
-  name: SetTestKeyring
-  displayName: Set test key ring
-  timeoutInMinutes: 2
-  inputs:
-    targetType: inline
-    script: |
-      echo "Setting DBUS_SESSION_BUS_ADDRESS"
-      echo "Set to DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}"
+#           sudo systemctl enable /etc/systemd/system/xvfb.service
+#           sudo service xvfb start
 
-      killall -q -u "$(whoami)" gnome-keyring-daemon
-      echo "gnome-keyring-daemon was terminated"
+#           wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+#           sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+#           sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+#           rm -f packages.microsoft.gpg
+#           sudo apt update
+#           sudo apt install code
+#           export DISPLAY=:1
+#       elif [ -f '/usr/bin/yum' ]; then
+#           # install packages for GUI test
+#           sudo yum -y install xorg-x11-server-Xvfb mesa-libEGL-devel glx-utils mesa-dri-drivers xorg-x11-server-utils
+#           Xvfb -ac ${DISPLAY} 2>/dev/null &
+#           sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+#           sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+#           dnf check-update
+#           sudo dnf -y install code
+#       fi
 
-      rm -f ~/.local/share/keyrings/login.keyring
-      echo "Login keyring deleted"
-
-      _UNLOCK_KEYRING_DATA=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1`
-      echo "_UNLOCK_KEYRING_DATA is set"
-
-      eval $(echo -n "${_UNLOCK_KEYRING_DATA}" \
-        | gnome-keyring-daemon --daemonize --login \
-        | sed -e 's/^/export /')
-      echo "keyring daemon was set"
-
-      unset _UNLOCK_KEYRING_DATA
-      /usr/bin/gnome-keyring-daemon --start --components=secrets
-      echo "keyring daemon started"
-
-      secret-tool search --all version 1.0
-      echo "secret-tool executed"
-
-      echo "##vso[task.setvariable variable=keyRingControl;isOutput=true]$GNOME_KEYRING_CONTROL"
-      echo "GNOME_KEYRING_CONTROL was set."
-  env:
-    DBUS_SESSION_BUS_ADDRESS: $(SetDbusSession.dbusSessionAddress)
-
-- task: Bash@3
-  displayName: Start Xvfb server and launch GUI
-  inputs:
-    targetType: inline
-    script: |
-      if [ -f '/usr/bin/apt' ]; then
-          sudo chmod 777 /etc/systemd/system/
-          sudo rm -f /etc/systemd/system/xvfb.service
-          sudo touch /etc/systemd/system/xvfb.service
-          sudo chmod 777 /etc/systemd/system/xvfb.service
-          echo '[unit]' | sudo tee -a /etc/systemd/system/xvfb.service
-          echo 'Description=X Virtual Frame Buffer Service' | sudo tee -a /etc/systemd/system/xvfb.service
-          echo 'After=network.target' | sudo tee -a /etc/systemd/system/xvfb.service
-          echo '[Service]' | sudo tee -a /etc/systemd/system/xvfb.service
-          echo 'ExecStart=/usr/bin/Xvfb :1 -screen 0 1024x768x24' | sudo tee -a /etc/systemd/system/xvfb.service
-          echo 'Restart=always' | sudo tee -a /etc/systemd/system/xvfb.service
-          echo '[Install]' | sudo tee -a /etc/systemd/system/xvfb.service
-          echo 'WantedBy=multi-user.target' | sudo tee -a /etc/systemd/system/xvfb.service
-
-          sudo systemctl enable /etc/systemd/system/xvfb.service
-          sudo service xvfb start
-
-          wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-          sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
-          sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
-          rm -f packages.microsoft.gpg
-          sudo apt update
-          sudo apt install code
-          export DISPLAY=:1
-      elif [ -f '/usr/bin/yum' ]; then
-          # install packages for GUI test
-          sudo yum -y install xorg-x11-server-Xvfb mesa-libEGL-devel glx-utils mesa-dri-drivers xorg-x11-server-utils
-          Xvfb -ac ${DISPLAY} 2>/dev/null &
-          sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-          sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
-          dnf check-update
-          sudo dnf -y install code
-      fi
-
-      code .
-      dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
-      xhost +SI:localuser:$(whoami)
-      xhost +SI:localuser:microsoft-identity-broker
-  env:
-    DBUS_SESSION_BUS_ADDRESS: $(SetDbusSession.dbusSessionAddress)
+#       code .
+#       dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
+#       xhost +SI:localuser:$(whoami)
+#       xhost +SI:localuser:microsoft-identity-broker
+#   env:
+#     DBUS_SESSION_BUS_ADDRESS: $(SetDbusSession.dbusSessionAddress)
 
 - task: UseDotNet@2
   displayName: 'Use the latest .NET 8'
@@ -138,12 +74,20 @@ steps:
     custom: 'workload'
     arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
+# - task: DotNetCoreCLI@2
+#   displayName: 'Build Integration Test'
+#   inputs:
+#     command: 'build'
+#     projects: |
+#       ./tests/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj
+#     configuration: ${{ parameters.BuildConfiguration }}
+
 - task: DotNetCoreCLI@2
   displayName: 'Build Integration Test'
   inputs:
     command: 'build'
     projects: |
-      ./tests/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj
+      ./LibsAndSamples.sln
     configuration: ${{ parameters.BuildConfiguration }}
 
 - script: |
