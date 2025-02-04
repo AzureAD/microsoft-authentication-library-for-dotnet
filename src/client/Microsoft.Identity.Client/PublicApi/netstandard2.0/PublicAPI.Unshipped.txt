@@ -1,0 +1,1 @@
+static Microsoft.Identity.Client.Extensibility.AcquireTokenForClientBuilderExtensions.WithAdditionalCacheKeyComponents(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, System.Collections.Generic.IDictionary<string, string> cacheKeyComponents) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder

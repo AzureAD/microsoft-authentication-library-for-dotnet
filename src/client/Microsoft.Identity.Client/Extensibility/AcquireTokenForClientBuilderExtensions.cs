@@ -25,7 +25,6 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <item><description>In order for the tokens to be succsesfully retrieved from the cache, all components used to cache the token must be provided.</description></item>
         /// </list>
         /// </remarks>
-        [SuppressMessage("Microsoft.ApiDesignGuidelines", "RS0016:Symbol 'WithAdditionalCacheKeyComponents' is not part of the declared public API")]
         public static AcquireTokenForClientParameterBuilder WithAdditionalCacheKeyComponents(this AcquireTokenForClientParameterBuilder builder,
             IDictionary<string, string> cacheKeyComponents)
         {

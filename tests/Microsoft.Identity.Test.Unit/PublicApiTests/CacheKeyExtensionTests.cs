@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Dictionary<string, string> expectedAdditionalCacheKeyComponents,
             string expectedCacheKey)
         {
-            if (CollectionHelpers.AreStringDictionariesEqual(
+            if (CollectionHelpers.AreDictionariesEqual(
                 msalAccessTokenCacheItem.AdditionalCacheKeyComponents,
                 expectedAdditionalCacheKeyComponents) &&
                 msalAccessTokenCacheItem.CacheKey.Equals(expectedCacheKey))
