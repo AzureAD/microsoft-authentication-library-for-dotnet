@@ -103,7 +103,7 @@ steps:
           rm -f packages.microsoft.gpg
           sudo apt update
           sudo apt install code
-          export DISPLAY=:99
+          export DISPLAY=:1
       elif [ -f '/usr/bin/yum' ]; then
           # install packages for GUI test
           sudo yum -y install xorg-x11-server-Xvfb mesa-libEGL-devel glx-utils mesa-dri-drivers xorg-x11-server-utils
