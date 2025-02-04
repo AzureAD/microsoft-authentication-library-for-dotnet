@@ -16,9 +16,7 @@ extends:
     template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
     parameters:
         pool:
-            name: Azure-Pipelines-1ESPT-ExDShared
-            image: windows-latest
-            os: windows
+          vmImage: 'windows-latest'
         customBuildTags:
             - ES365AIMigrationTooling-BulkMigrated-Release
         stages:
