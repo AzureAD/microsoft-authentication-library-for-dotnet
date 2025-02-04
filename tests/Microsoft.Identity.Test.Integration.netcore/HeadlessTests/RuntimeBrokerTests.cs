@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
-            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             Assert.IsNotNull(accounts);
 
             var account = accounts.FirstOrDefault();
