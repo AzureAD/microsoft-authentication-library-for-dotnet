@@ -9,7 +9,7 @@ steps:
 - template: template-install-keyvault-secrets.yaml
 
 
-- template: template-linux-setup.yaml
+# - template: template-linux-setup.yaml
 
 # - task: Bash@3
 #   displayName: Start Xvfb server and launch GUI
