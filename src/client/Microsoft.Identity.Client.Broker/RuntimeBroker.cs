@@ -419,6 +419,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         var errorMessage = "Could not acquire token with username and password.";
                         msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                     }
+                }
                 
             }
 
