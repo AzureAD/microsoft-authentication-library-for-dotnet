@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Integration.Utils
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return new BrokerOptions(BrokerOptions.OperatingSystems.Linux);
+                return new BrokerOptions(BrokerOptions.OperatingSystems.Linux){ListOperatingSystemAccounts = true,};
             }
             else
             {
