@@ -223,6 +223,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(_brokerOption)
                .Build();
 
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            // Assert.IsNotNull(accounts);
+
             // Acquire token using username password
             //var result = await pca.AcquireTokenInteractive(scopes).WithLoginHint(labResponse.User.Upn).WithPassword(labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
