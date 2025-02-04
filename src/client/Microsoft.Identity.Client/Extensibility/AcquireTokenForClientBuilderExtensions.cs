@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -11,6 +13,35 @@ namespace Microsoft.Identity.Client.Extensibility
     /// </summary>
     public static class AcquireTokenForClientBuilderExtensions
     {
+        /// <summary>
+        /// Specifies additional cache key components to use when caching and retrieving tokens.
+        /// </summary>
+        /// <param name="cacheKeyComponents">The list of additional cache key components.</param>
+        /// <param name="builder"></param>
+        /// <returns>The builder.</returns>
+        /// <remarks>
+        /// <list type="bullet">
+        /// <item><description>This api can be used to associate certificate key identifiers along with other keys with a particular token.</description></item>
+        /// <item><description>In order for the tokens to be succsesfully retrieved from the cache, all components used to cache the token must be provided.</description></item>
+        /// </list>
+        /// </remarks>
+        [SuppressMessage("Microsoft.ApiDesignGuidelines", "RS0016:Symbol 'WithAdditionalCacheKeyComponents' is not part of the declared public API")]
+        public static AcquireTokenForClientParameterBuilder WithAdditionalCacheKeyComponents(this AcquireTokenForClientParameterBuilder builder,
+            IDictionary<string, string> cacheKeyComponents)
+        {
+            builder.ValidateUseOfExperimentalFeature();
+
+            if (cacheKeyComponents == null || cacheKeyComponents.Count == 0)
+            {
+                //no-op
+                return builder;
+            }
+
+            builder.CommonParameters.CacheKeyComponents = new SortedDictionary<string, string>(cacheKeyComponents);
+
+            return builder;
+        }
+
         /// <summary>
         /// Binds the token to a key in the cache. L2 cache keys contain the key id.
         /// No cryptographic operations is performed on the token.

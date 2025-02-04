@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             string itemKey = item.CacheKey;
-            string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId, item.KeyId);
+            string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId, item.KeyId, item.AdditionalCacheKeyComponents);
 
             // if a conflict occurs, pick the latest value
             AccessTokenCacheDictionary

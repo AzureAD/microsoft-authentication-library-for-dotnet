@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = null,
             string oboCacheKey = null,
             IEnumerable<string> persistedCacheParameters = null,
-            IDictionary<string, string> cacheKeyComponents = null)
+            SortedDictionary<string, string> cacheKeyComponents = null)
             : this(
                 scopes: ScopeHelper.OrderScopesAlphabetically(response.Scope), // order scopes to avoid cache duplication. This is not in the hot path.
                 cachedAt: DateTimeOffset.UtcNow,
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
-            AdditionalCacheKeyComponents = cacheKeyComponents?.OrderBy(kvp => kvp.Key).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            AdditionalCacheKeyComponents = cacheKeyComponents;
 #if !MOBILE
             PersistedCacheParameters = AcquireCacheParametersFromResponse(persistedCacheParameters, response.ExtensionData);
 #endif
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             DateTimeOffset? refreshOn = null,
             string tokenType = StorageJsonValues.TokenTypeBearer,
             string oboCacheKey = null,
-            Dictionary<string, string> cacheKeyComponents = null)
+            SortedDictionary<string, string> cacheKeyComponents = null)
             : this(scopes, cachedAt, expiresOn, extendedExpiresOn, refreshOn, tenantId, keyId, tokenType)
         {
             Environment = preferredCacheEnv;
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = rawClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
-            AdditionalCacheKeyComponents = cacheKeyComponents?.OrderBy(kvp => kvp.Key).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            AdditionalCacheKeyComponents = cacheKeyComponents;
 
             InitCacheKey();
         }
@@ -185,11 +185,11 @@ namespace Microsoft.Identity.Client.Cache.Items
                 _credentialDescriptor = StorageJsonValues.CredentialTypeAccessTokenExtended;
                 if (_extraKeyParts != null)
                 {
-                    _extraKeyParts.Concat(new[] { CoreHelpers.ComputeKeyFromComponents(AdditionalCacheKeyComponents) });
+                    _extraKeyParts.Concat(new[] { CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents) });
                 }
                 else
                 {
-                    _extraKeyParts = new[] { CoreHelpers.ComputeKeyFromComponents(AdditionalCacheKeyComponents) };
+                    _extraKeyParts = new[] { CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents) };
                 }
             }
 
@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string CacheKey { get; private set; }
 
-        internal Dictionary<string, string> AdditionalCacheKeyComponents { get; private set; }
+        internal SortedDictionary<string, string> AdditionalCacheKeyComponents { get; private set; }
 
         /// <summary>
         /// Additional parameters that were requested in the token request and are stored in the cache.
@@ -321,7 +321,10 @@ namespace Microsoft.Identity.Client.Cache.Items
                 keyId: keyId,
                 tokenType: tokenType);
 
-            item.AdditionalCacheKeyComponents = (Dictionary<string, string>)additionalCacheKeyComponents?? null;
+            if (additionalCacheKeyComponents != null)
+            {
+                item.AdditionalCacheKeyComponents = new SortedDictionary<string, string>(additionalCacheKeyComponents);
+            }
             item.OboCacheKey = oboCacheKey;
             item.PopulateFieldsFromJObject(j);
 

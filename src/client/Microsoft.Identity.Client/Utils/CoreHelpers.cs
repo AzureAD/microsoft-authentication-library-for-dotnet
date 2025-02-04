@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client.Utils
             return string.IsNullOrEmpty(upn)? string.Empty : $@"upn:{upn}";
         }
 
-        internal static string ComputeKeyFromComponents(Dictionary<string, string> cacheKeyComponents)
+        internal static string ComputeAccessTokenExtCacheKey(SortedDictionary<string, string> cacheKeyComponents)
         {
             StringBuilder stringBuilder = new();
 

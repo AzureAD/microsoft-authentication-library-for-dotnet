@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Globalization;
+using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -52,9 +52,7 @@ namespace Microsoft.Identity.Client.Cache
 
             if (requestParameters.AppConfig.IsConfidentialClient)
             {
-                return requestParameters.CacheKeyComponents != null
-                    ? homeAccountIdFromResponse + CoreHelpers.ComputeKeyFromComponents((Dictionary<string, string>)requestParameters.CacheKeyComponents)
-                    : homeAccountIdFromResponse;
+                return homeAccountIdFromResponse;
             }
             if (requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenSilent)
             {
@@ -85,8 +83,7 @@ namespace Microsoft.Identity.Client.Cache
                 requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
-                key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId);
-
+                key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId, requestParameters.CacheKeyComponents);
                 return true;
             }
 
@@ -94,8 +91,17 @@ namespace Microsoft.Identity.Client.Cache
             return false;
         }
 
-        public static string GetClientCredentialKey(string clientId, string tenantId, string popKid)
+        public static string GetClientCredentialKey(
+            string clientId,
+            string tenantId,
+            string popKid,
+            SortedDictionary<string, string> CacheKeyComponents = null)
         {
+            if (CacheKeyComponents != null && CacheKeyComponents.Any())
+            {
+                return $"{popKid}{clientId}_{tenantId}_AppTokenCache_{CoreHelpers.ComputeAccessTokenExtCacheKey(CacheKeyComponents)}";
+            }
+
             return $"{popKid}{clientId}_{tenantId}_AppTokenCache";
         }
 

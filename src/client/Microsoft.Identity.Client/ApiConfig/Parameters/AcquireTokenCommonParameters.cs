@@ -30,6 +30,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; internal set; }
         public X509Certificate2 MtlsCertificate { get; internal set; }
         public List<string> AdditionalCacheParameters { get; set; }
-        public IDictionary<string, string> CacheKeyComponents { get; internal set; }
+        public SortedDictionary<string, string> CacheKeyComponents { get; internal set; }
     }
 }

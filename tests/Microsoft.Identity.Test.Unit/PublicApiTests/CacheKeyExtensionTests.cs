@@ -8,9 +8,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -72,11 +75,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private async Task RunHappyPathTest(ConfidentialClientApplication app, MockHttpManager httpManager)
         {
-            var appCacheAccess = app.AppTokenCache.RecordAccess();
+            string expectedCacheKey1 = "-login.windows.net-accesstoken_extended-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-bns2ytmx5hxkh4fnfixridmezpbbayhnmuh6t4bbghi";
+            string expectedCacheKey2 = "-login.windows.net-accesstoken_extended-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-3-rg6_wyjx5bcy0c3cqq7gajtzgsqy3oxqpwj4y8k4u";
+
+            string expectedCacheKeyHash = string.Empty;
+            var appCacheAccess = app.AppTokenCache.RecordAccess((args) =>
+            {
+                if (expectedCacheKeyHash != null)
+                {
+                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedCacheKeyHash));
+                }
+            });
 
             httpManager.AddInstanceDiscoveryMockHandler();
             httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
+            expectedCacheKeyHash = CoreHelpers.ComputeAccessTokenExtCacheKey(new(_additionalCacheKeys1));
             var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                                     .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
                                     .ExecuteAsync(CancellationToken.None)
@@ -85,8 +99,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(result);
             Assert.AreEqual("header.payload.signature", result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First(), _additionalCacheKeys1, expectedCacheKey1);
 
             //Ensure that the order of the keys does not matter
+            expectedCacheKeyHash = CoreHelpers.ComputeAccessTokenExtCacheKey(new(_additionalCacheKeys3));
             result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                                 .WithAdditionalCacheKeyComponents(_additionalCacheKeys3)
                                 .ExecuteAsync(CancellationToken.None)
@@ -96,11 +112,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("header.payload.signature", result.AccessToken);
             Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First(), _additionalCacheKeys3, expectedCacheKey1);
 
             //Ensure that tokens are not ovverriden
             httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-
-            result = await app.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
+            expectedCacheKeyHash = null;
+            result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                                 .WithAdditionalCacheKeyComponents(_additionalCacheKeys2)
                                 .ExecuteAsync(CancellationToken.None)
                                 .ConfigureAwait(false);
@@ -109,45 +126,27 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("header.payload.signature", result.AccessToken);
             Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.CacheKey.Contains("bns2ytmx5hxkh4fnfixridmezpbbayhnmuh6t4bbghi")).FirstOrDefault(), _additionalCacheKeys1, expectedCacheKey1);
+            ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.CacheKey.Contains("3-rg6_wyjx5bcy0c3cqq7gajtzgsqy3oxqpwj4y8k4u")).FirstOrDefault(), _additionalCacheKeys2, expectedCacheKey2);
         }
 
-        [TestMethod]
-        public async Task CacheExtNullOrEmptyTestAsync()
+        private void ValidateCacheKeyComponents(MsalAccessTokenCacheItem msalAccessTokenCacheItem,
+            Dictionary<string, string> expectedAdditionalCacheKeyComponents,
+            string expectedCacheKey)
         {
-            using (var httpManager = new MockHttpManager())
+            if (CollectionHelpers.AreStringDictionariesEqual(
+                msalAccessTokenCacheItem.AdditionalCacheKeyComponents,
+                expectedAdditionalCacheKeyComponents) &&
+                msalAccessTokenCacheItem.CacheKey.Equals(expectedCacheKey))
             {
-                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                              .WithRedirectUri(TestConstants.RedirectUri)
-                                                              .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures()
-                                                              .BuildConcrete();
-
-                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                {
-                    await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                            .WithAdditionalCacheKeyComponents(null)
-                                            .ExecuteAsync(CancellationToken.None)
-                                            .ConfigureAwait(false);
-                }).ConfigureAwait(false);
-
-                Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
-
-                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                {
-                    await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                            .WithAdditionalCacheKeyComponents(new Dictionary<string, string> { })
-                                            .ExecuteAsync(CancellationToken.None)
-                                            .ConfigureAwait(false);
-                }).ConfigureAwait(false);
-
-                Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
+                return;
             }
+
+            Assert.Fail("Cache key components not found in the cached tokens");
         }
 
         [TestMethod]
-        public async Task CacheExtEnsureCacheMisIsLoggedTestAsync()
+        public async Task CacheExtEnsureStandardTokensDoNotClashTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -157,10 +156,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                               .WithRedirectUri(TestConstants.RedirectUri)
                                               .WithClientSecret(TestConstants.ClientSecret)
                                               .WithHttpManager(httpManager)
-                                              .WithLogging((LogLevel level, string message, bool containsPii) =>
-                                              {
-                                                  logMessages.AppendLine(message);
-                                              })
                                               .WithExperimentalFeatures()
                                               .BuildConcrete();
 
@@ -170,7 +165,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
                                         .ExecuteAsync(CancellationToken.None)
                                         .ConfigureAwait(false);
 
@@ -182,14 +176,30 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys2)
+                                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
                                     .ExecuteAsync(CancellationToken.None)
                                     .ConfigureAwait(false);
 
-                Assert.IsTrue(logMessages.ToString().Contains("No tokens found that match the provided key components."));
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+
+                //Ensure that default tokens are retrivable
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                //Ensure that extended tokens are retrivable
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
