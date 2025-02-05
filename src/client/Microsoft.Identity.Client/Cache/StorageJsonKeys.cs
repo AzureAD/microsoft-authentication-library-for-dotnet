@@ -40,6 +40,6 @@ namespace Microsoft.Identity.Client.Cache
         // this is here for back compatibility
         public const string ExtendedExpiresOn_MsalCompat = "ext_expires_on";
 
-        public const string AdditionalCacheKeyComponents = "additional_cache_key_components";
+        public const string CacheExtensions = "ext";
     }
 }

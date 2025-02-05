@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Client.Utils
             return string.IsNullOrEmpty(upn)? string.Empty : $@"upn:{upn}";
         }
 
-        internal static string ComputeAccessTokenExtCacheKey(SortedDictionary<string, string> cacheKeyComponents)
+        internal static string ComputeAccessTokenExtCacheKey(SortedList<string, string> cacheKeyComponents)
         {
             if (cacheKeyComponents == null || !cacheKeyComponents.Any())
             {

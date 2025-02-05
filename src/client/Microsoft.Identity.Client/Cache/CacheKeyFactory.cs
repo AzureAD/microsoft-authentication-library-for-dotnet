@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Cache
                 requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
-                key = GetTokenCacheItemKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId, requestParameters.CacheKeyComponents);
+                key = GetAppTokenCacheItemKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId, requestParameters.CacheKeyComponents);
                 return true;
             }
 
@@ -91,15 +91,15 @@ namespace Microsoft.Identity.Client.Cache
             return false;
         }
 
-        public static string GetTokenCacheItemKey(
+        public static string GetAppTokenCacheItemKey(
             string clientId,
             string tenantId,
             string popKid,
-            SortedDictionary<string, string> cacheKeyComponents = null)
+            SortedList<string, string> cacheKeyComponents = null)
         {
             if (cacheKeyComponents != null && cacheKeyComponents.Any())
             {
-                return $"{popKid}{clientId}_{tenantId}_AppTokenCache_{CoreHelpers.ComputeAccessTokenExtCacheKey(cacheKeyComponents)}";
+                return $"{popKid}{clientId}_{tenantId}_{CoreHelpers.ComputeAccessTokenExtCacheKey(cacheKeyComponents)}_AppTokenCache";
             }
 
             return $"{popKid}{clientId}_{tenantId}_AppTokenCache";

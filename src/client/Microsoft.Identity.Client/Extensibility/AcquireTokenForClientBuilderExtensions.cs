@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <item><description>In order for the tokens to be successfully retrieved from the cache, all components used to cache the token must be provided.</description></item>
         /// </list>
         /// </remarks>
-        public static AcquireTokenForClientParameterBuilder WithAdditionalCacheKeyComponents(this AcquireTokenForClientParameterBuilder builder,
+        internal static AcquireTokenForClientParameterBuilder WithAdditionalCacheKeyComponents(this AcquireTokenForClientParameterBuilder builder,
             IDictionary<string, string> cacheKeyComponents)
         {
             builder.ValidateUseOfExperimentalFeature();
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Extensibility
                 return builder;
             }
 
-            builder.CommonParameters.CacheKeyComponents = new SortedDictionary<string, string>(cacheKeyComponents);
+            builder.CommonParameters.CacheKeyComponents = new SortedList<string, string>(cacheKeyComponents);
 
             return builder;
         }

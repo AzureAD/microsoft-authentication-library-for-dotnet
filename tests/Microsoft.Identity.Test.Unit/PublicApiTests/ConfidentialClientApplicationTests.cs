@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
-                string partitionKey = CacheKeyFactory.GetTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid, null);
+                string partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid, null);
                 Assert.AreEqual(
                     partitionKey,
                     ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Single());
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
                 Assert.AreEqual(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
-                string partitionKey2 = CacheKeyFactory.GetTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid2, null);
+                string partitionKey2 = CacheKeyFactory.GetAppTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid2, null);
 
                 Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey)));
                 Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey2)));
@@ -246,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // One tenant partition with one token
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
-                string partitionKey = CacheKeyFactory.GetTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid, null);
+                string partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid, null);
 
                 Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey]);
                 Assert.AreEqual(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey].Count);
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Two tenant partitions with three tokens total
                 Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                string partitionKey2 = CacheKeyFactory.GetTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid2, null);
+                string partitionKey2 = CacheKeyFactory.GetAppTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid2, null);
 
                 Assert.AreEqual(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
                 Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey2]);

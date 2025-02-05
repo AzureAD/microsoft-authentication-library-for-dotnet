@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Utils
 #endif
         }
 
-        public static bool AreDictionariesEqual<TKey, TValue>(IDictionary<TKey, TValue> dict1, IDictionary<TKey, TValue> dict2)
+        public static bool AreDictionariesEqual(IDictionary<string, string> dict1, IDictionary<string, string> dict2)
         {
             if (dict1 == null || dict2 == null)
             {
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Utils
 
             foreach (var kvp in dict1)
             {
-                if (!dict2.TryGetValue(kvp.Key, out var value) || !EqualityComparer<TValue>.Default.Equals(kvp.Value, value))
+                if (!dict2.TryGetValue(kvp.Key, out var value) || !string.Equals(kvp.Value, value))
                 {
                     return false;
                 }

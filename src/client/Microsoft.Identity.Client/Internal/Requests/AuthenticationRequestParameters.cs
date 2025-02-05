@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
-        public SortedDictionary<string, string> CacheKeyComponents => _commonParameters.CacheKeyComponents;
+        public SortedList<string, string> CacheKeyComponents => _commonParameters.CacheKeyComponents;
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.

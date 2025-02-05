@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public IDictionary<string, string> CacheKeyComponents { get; internal set; }
+        public SortedList<string, string> CacheKeyComponents { get; internal set; }
 #endregion
 
 #region Region

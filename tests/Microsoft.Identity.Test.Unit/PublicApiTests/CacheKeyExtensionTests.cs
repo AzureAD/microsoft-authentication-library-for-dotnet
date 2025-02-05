@@ -15,6 +15,8 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache;
+using System.Net.Http;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -76,8 +78,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private async Task RunHappyPathTest(ConfidentialClientApplication app, MockHttpManager httpManager)
         {
-            string expectedCacheKey1 = "-login.windows.net-accesstoken_extended-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-bns2ytmx5hxkh4fnfixridmezpbbayhnmuh6t4bbghi";
-            string expectedCacheKey2 = "-login.windows.net-accesstoken_extended-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-3-rg6_wyjx5bcy0c3cqq7gajtzgsqy3oxqpwj4y8k4u";
+            string expectedCacheKey1 = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-bns2ytmx5hxkh4fnfixridmezpbbayhnmuh6t4bbghi";
+            string expectedCacheKey2 = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-3-rg6_wyjx5bcy0c3cqq7gajtzgsqy3oxqpwj4y8k4u";
 
             string expectedCacheKeyHash = string.Empty;
             var appCacheAccess = app.AppTokenCache.RecordAccess((args) =>
@@ -202,6 +204,55 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task CacheExtEnsurePopKeysFunctionAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                string expectedPopCacheKey = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-my-utid-r1/scope1 r1/scope2-pop-bns2ytmx5hxkh4fnfixridmezpbbayhnmuh6t4bbghi";
+                string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
+
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithExperimentalFeatures(true)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+                var popConfig = new PoPAuthenticationConfiguration(request);
+                var cacheAccess = app.AppTokenCache.RecordAccess();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                //Ensure that pop tokens are cached with the correct key and the key components are correct
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
+                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First(), _additionalCacheKeys1, expectedPopCacheKey);
+
+                //Ensure pop token can be retrieved from cache with the cache key components
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
+                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First(), _additionalCacheKeys1, expectedPopCacheKey);
             }
         }
 

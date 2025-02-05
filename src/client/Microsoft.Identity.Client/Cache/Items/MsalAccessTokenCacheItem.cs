@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = null,
             string oboCacheKey = null,
             IEnumerable<string> persistedCacheParameters = null,
-            SortedDictionary<string, string> cacheKeyComponents = null)
+            SortedList<string, string> cacheKeyComponents = null)
             : this(
                 scopes: ScopeHelper.OrderScopesAlphabetically(response.Scope), // order scopes to avoid cache duplication. This is not in the hot path.
                 cachedAt: DateTimeOffset.UtcNow,
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             DateTimeOffset? refreshOn = null,
             string tokenType = StorageJsonValues.TokenTypeBearer,
             string oboCacheKey = null,
-            SortedDictionary<string, string> cacheKeyComponents = null)
+            SortedList<string, string> cacheKeyComponents = null)
             : this(scopes, cachedAt, expiresOn, extendedExpiresOn, refreshOn, tenantId, keyId, tokenType)
         {
             Environment = preferredCacheEnv;
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return newAtItem;
         }
 
-        private void InitializeAdditionalCacheKeyComponents(SortedDictionary<string, string> cacheKeyComponents)
+        private void InitializeAdditionalCacheKeyComponents(SortedList<string, string> cacheKeyComponents)
         {
             if (cacheKeyComponents != null && cacheKeyComponents.Any())
             {
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 _credentialDescriptor = StorageJsonValues.CredentialTypeAccessTokenExtended;
                 if (_extraKeyParts != null)
                 {
-                    _extraKeyParts.Concat(new[] { CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents) });
+                    _extraKeyParts = _extraKeyParts.Concat(new[] { CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents) }).ToArray();
                 }
                 else
                 {
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string CacheKey { get; private set; }
 
-        internal SortedDictionary<string, string> AdditionalCacheKeyComponents { get; private set; }
+        internal SortedList<string, string> AdditionalCacheKeyComponents { get; private set; }
 
         /// <summary>
         /// Additional parameters that were requested in the token request and are stored in the cache.
@@ -320,7 +320,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId);
             string tokenType = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer;
             string scopes = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target);
-            var additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.AdditionalCacheKeyComponents);
+            var additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.CacheExtensions);
 
             var item = new MsalAccessTokenCacheItem(
                 scopes: scopes,
@@ -334,7 +334,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             if (additionalCacheKeyComponents != null)
             {
-                item.AdditionalCacheKeyComponents = new SortedDictionary<string, string>(additionalCacheKeyComponents);
+                item.AdditionalCacheKeyComponents = new SortedList<string, string>(additionalCacheKeyComponents);
                 item.CredentialType = StorageJsonValues.CredentialTypeAccessTokenExtended;
             }
 
@@ -377,9 +377,9 @@ namespace Microsoft.Identity.Client.Cache.Items
                     obj[accId.Key] = accId.Value;
                 }
 
-                SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, obj);
+                json[StorageJsonKeys.CacheExtensions] = obj;
 #else
-                SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, JObject.FromObject(AdditionalCacheKeyComponents));
+                SetItemIfValueNotNull(json, StorageJsonKeys.CacheExtensions, JObject.FromObject(AdditionalCacheKeyComponents));
 #endif
             }
             return json;
