@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         private static Dictionary<NativeInterop.LogLevel, LogLevel> LogLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
         {
             { NativeInterop.LogLevel.Trace, LogLevel.Verbose },
-            { NativeInterop.LogLevel.Debug, LogLevel.Verbose },
+            { NativeInterop.LogLevel.Debug, LogLevel.Info },
             { NativeInterop.LogLevel.Info, LogLevel.Info },
             { NativeInterop.LogLevel.Warning, LogLevel.Warning },
             { NativeInterop.LogLevel.Error, LogLevel.Error },
