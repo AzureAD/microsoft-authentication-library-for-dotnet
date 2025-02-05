@@ -3,17 +3,13 @@ trigger:
   branches:
     include:
     - 'main'
-
 pr: none
-
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'Release'
   #intended for running all ui automation tests as one to reduce time
   ConsolidateAppCenterTests: true
-
 #BUILD PHASE 
-
 stages:
 - stage: MSALBuildAndTest
   jobs: #Build and stage projects
