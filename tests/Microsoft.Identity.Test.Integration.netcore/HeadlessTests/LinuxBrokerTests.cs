@@ -1,0 +1,373 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+#if NET_CORE
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensions.Msal;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.SSHCertificates;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.Utils;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
+
+namespace Microsoft.Identity.Test.Integration.Broker
+{
+    [TestClass]
+    public class LinuxBrokerTests
+    {
+        private BrokerOptions _brokerOption = TestUtils.GetPlatformBroker();
+        
+        // This test should fail locally but succeed in a CI build.
+        [IgnoreOnOneBranch]
+        [TestMethod]
+        public async Task WamSilentAuthUserInteractionRequiredAsync()
+        {
+            string[] scopes = new[]
+                {
+                    "https://management.core.windows.net//.default"
+                };
+
+            PublicClientApplicationBuilder pcaBuilder = PublicClientApplicationBuilder
+               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
+               .WithAuthority("https://login.microsoftonline.com/organizations");
+
+            IPublicClientApplication pca = pcaBuilder
+                .WithBroker(_brokerOption)
+                .Build();
+
+            // Act
+            try
+            {
+                var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
+                Assert.Fail(" AcquireTokenSilent was successful. MsalUiRequiredException should have been thrown.");
+
+            }
+            catch (MsalUiRequiredException ex)
+            {
+                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.Message);
+            }
+        }
+    
+
+        [IgnoreOnOneBranch]
+        [TestMethod]
+        public async Task WamInvalidROPC_ThrowsException_TestAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            // WamLoggerValidator wastestLogger = new WamLoggerValidator();
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+            //    .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
+               .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+               .WithBroker(_brokerOption)
+               .Build();
+
+            MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                pca.AcquireTokenByUsernamePassword(
+                    scopes,
+                    "noUser",
+                    "badPassword")
+                .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            if (SharedUtilities.IsLinuxPlatform()) {
+                StringAssert.Contains("illegal_argument_exception", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]);
+            } else {
+                Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
+                Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
+                Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
+                Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
+                Assert.IsNotNull(ex.AdditionalExceptionData[MsalException.BrokerTelemetry]);
+            }
+        }
+
+        [IgnoreOnOneBranch]
+        [TestMethod]
+        public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
+        {
+            string[] scopes = new[]
+                {
+                    "https://management.core.windows.net//.default"
+                };
+
+            PublicClientApplicationBuilder pcaBuilder = PublicClientApplicationBuilder
+               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
+               .WithAuthority("https://login.microsoftonline.com/organizations");
+
+            IPublicClientApplication pca = pcaBuilder
+               .WithBroker(_brokerOption)
+               .Build();
+
+            // Act
+            try
+            {
+                var result = await pca.AcquireTokenSilent(scopes, "idlab@").ExecuteAsync().ConfigureAwait(false);
+
+            }
+            catch (MsalUiRequiredException ex)
+            {
+                Assert.IsTrue(ex.Message.Contains("You are trying to acquire a token silently using a login hint. " +
+                    "No account was found in the token cache having this login hint"));
+            }
+        }
+
+        [IgnoreOnOneBranch]
+        [TestMethod]
+        public async Task WamUsernamePasswordRequestAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };            
+
+            IntPtr intPtr = TestUtils.GetWindowHandle();
+            // Assert.IsNotNull(intPtr);
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+               .WithBroker(_brokerOption)
+               .Build();
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            // Assert.IsNotNull(accounts);
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenInteractive(scopes).WithLoginHint(labResponse.User.Upn).ExecuteAsync().ConfigureAwait(false);
+            // var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
+
+            // Get Accounts
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            var account = accounts.FirstOrDefault();
+            Assert.IsNotNull(account);
+
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
+
+            // Remove Account
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(accounts);
+
+            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+               () => pca.AcquireTokenSilent(scopes, account).ExecuteAsync())
+                .ConfigureAwait(false);
+        }
+
+        [IgnoreOnOneBranch]
+        [TestMethod]
+        public async Task WamUsernamePasswordWithForceRefreshAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+
+            IntPtr intPtr = TestUtils.GetWindowHandle();
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+               .WithBroker(_brokerOption)
+               .Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(
+                scopes, 
+                labResponse.User.Upn, 
+                labResponse.User.GetOrFetchPassword())
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            string ropcToken = result.AccessToken;
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);            
+            var account = accounts.FirstOrDefault();
+            Assert.IsNotNull(account);
+
+            result = await pca.AcquireTokenSilent(scopes, account)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            // This proves the token is from the cache
+            Assert.AreEqual(ropcToken, result.AccessToken);
+
+            result = await pca.AcquireTokenSilent(scopes, account)
+                .WithForceRefresh(true)
+               .ExecuteAsync().ConfigureAwait(false);
+
+            // This proves the token is not from the cache
+            Assert.AreNotEqual(ropcToken, result.AccessToken);
+        }
+
+        [IgnoreOnOneBranch]
+        [TestMethod]
+        [ExpectedException(typeof(MsalUiRequiredException))]
+        public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+
+            IntPtr intPtr = TestUtils.GetWindowHandle();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            WamLoggerValidator testLogger = new WamLoggerValidator();
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging(testLogger, enablePiiLogging: true)
+               .WithBroker(_brokerOption)
+               .Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            var account = accounts.FirstOrDefault();
+            Assert.IsNotNull(account);
+
+            Assert.IsTrue(testLogger.HasLogged);
+            Assert.IsTrue(testLogger.HasPiiLogged);
+
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
+
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            // this should throw MsalUiRequiredException
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+        }
+
+        [IgnoreOnOneBranch]
+        [TestMethod]
+        public async Task WamListWindowsWorkAndSchoolAccountsAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+
+            IntPtr intPtr = TestUtils.GetWindowHandle();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Linux)
+               {
+                   ListOperatingSystemAccounts = true,
+               })
+               .Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            //This test does not actually get a work or school account
+            //it simply validates that the GetAccounts merging works and accounts are returned
+            var account = accounts.FirstOrDefault();
+            Assert.AreEqual(labResponse.User.Upn, account.Username);
+        }
+
+        [IgnoreOnOneBranch]
+        [DataTestMethod]
+        [DataRow(null)]
+        [TestMethod]
+        public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
+        {
+            IntPtr intPtr = TestUtils.GetWindowHandle();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create("43dfbb29-3683-4673-a66f-baba91798bd2")
+               .WithAuthority("https://login.microsoftonline.com/organizations")
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithBroker(_brokerOption)
+               .Build();
+            // Act
+            if (SharedUtilities.IsLinuxPlatform()) {
+                var exLinux = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                 () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
+                        .ExecuteAsync())
+                        .ConfigureAwait(false);
+                StringAssert.Contains(exLinux.AdditionalExceptionData[MsalException.BrokerErrorContext], "requestedScopes is NULL or EMPTY");
+            } else {
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                 () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
+                        .ExecuteAsync())
+                        .ConfigureAwait(false);
+                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+            }
+        }
+
+    }
+}
+#endif
