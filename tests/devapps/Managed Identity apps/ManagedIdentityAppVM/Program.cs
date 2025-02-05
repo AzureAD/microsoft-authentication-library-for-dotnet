@@ -5,9 +5,15 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
 
+// Subscribe to certificate rotation notifications.
+ManagedIdentityApplication.BindingCertificateRotated += cert =>
+{
+    Console.WriteLine($"[Event] Binding certificate rotated. New certificate thumbprint: {cert.Thumbprint}");
+};
+
 IIdentityLogger identityLogger = new IdentityLogger();
 
-IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId("5bcd1685-b002-4fd1-8ebd-1ec3e1e4ca4d"))
                 .WithLogging(identityLogger, true)
                 .Build();
 
@@ -19,7 +25,19 @@ do
 
     try
     {
+        ManagedIdentityApplication.GetBindingCertificate(); 
+
         var result = await mi.AcquireTokenForManagedIdentity(scope)
+            .ExecuteAsync().ConfigureAwait(false);
+
+        ManagedIdentityApplication.GetBindingCertificate();
+
+        result = await mi.AcquireTokenForManagedIdentity(scope)
+            .ExecuteAsync().ConfigureAwait(false);
+
+        ManagedIdentityApplication.GetBindingCertificate();
+
+        result = await mi.AcquireTokenForManagedIdentity(scope).WithForceRefresh(true)
             .ExecuteAsync().ConfigureAwait(false);
 
         Console.WriteLine("Success");

@@ -1,2 +1,7 @@
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.Credential = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
+static Microsoft.Identity.Client.ManagedIdentityApplication.BindingCertificateRotated -> System.Action<System.Security.Cryptography.X509Certificates.X509Certificate2>
+static Microsoft.Identity.Client.ManagedIdentityApplication.ForceRenewBindingCertificate() -> System.Security.Cryptography.X509Certificates.X509Certificate2
+static Microsoft.Identity.Client.ManagedIdentityApplication.GetBindingCertificate() -> System.Security.Cryptography.X509Certificates.X509Certificate2
 static Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>

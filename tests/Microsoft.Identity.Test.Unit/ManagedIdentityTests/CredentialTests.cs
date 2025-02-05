@@ -29,6 +29,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
         internal const string Resource = "https://management.azure.com";
+        internal const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential";
+        internal const string MtlsEndpoint = "https://centraluseuap.mtlsauth.microsoft.com/" +
+            "72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token";
 
         [TestInitialize]
         public override void TestInitialize()
@@ -52,16 +55,54 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
-                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
-                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
-                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(ManagedIdentitySource.Imds, httpManager);
 
                 httpManager.AddManagedIdentityMockHandler(
                 ImdsEndpoint,
                 Resource,
                 MockHelpers.GetMsiSuccessfulResponse(),
                 ManagedIdentitySource.Imds);
+
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task CredentialHappyPathTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                MockHelpers.AddSuccessfulCredentialProbeResponse(httpManager);
+
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    CredentialEndpoint,
+                    MockHelpers.GetSuccessfulCredentialResponse());
+
+                httpManager.AddManagedIdentityMtlsMockHandler(
+                    MtlsEndpoint,
+                    ManagedIdentityTests.Resource,
+                    client_id: "2d0d13ad-3a4d-4cfd-98f8-f20621d55ded",  
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
 

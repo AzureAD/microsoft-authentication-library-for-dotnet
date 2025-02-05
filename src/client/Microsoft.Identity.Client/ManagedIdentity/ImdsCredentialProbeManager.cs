@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public async Task<bool> ExecuteProbeAsync(CancellationToken cancellationToken = default)
         {
-            _logger.Info("[Probe] Initiating probe to IMDS credential endpoint.");
+            _logger.Info("[Credential Probe] Initiating probe to IMDS credential endpoint.");
 
             var request = new ManagedIdentityRequest(HttpMethod.Post, new Uri($"{CredentialEndpoint}?cred-api-version=1.0"))
             {
@@ -36,9 +36,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             HttpContent httpContent = request.CreateHttpContent();
 
-            _logger.Info($"[Probe] Sending request to {CredentialEndpoint}");
-            _logger.Verbose(() => $"[Probe] Request Headers: {string.Join(", ", request.Headers)}");
-            _logger.Verbose(() => $"[Probe] Request Body: {ProbeBody}");
+            _logger.Info($"[Credential Probe] Sending request to {CredentialEndpoint}");
+            _logger.Verbose(() => $"[Credential Probe] Request Headers: {string.Join(", ", request.Headers)}");
+            _logger.Verbose(() => $"[Credential Probe] Request Body: {ProbeBody}");
 
             try
             {
@@ -59,8 +59,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (Exception ex)
             {
-                _logger.Error($"[Probe] Exception during probe: {ex.Message}");
-                _logger.Error($"[Probe] Stack Trace: {ex.StackTrace}");
+                _logger.Error($"[Credential Probe] Exception during probe: {ex.Message}");
+                _logger.Error($"[Credential Probe] Stack Trace: {ex.StackTrace}");
                 return false;
             }
         }
@@ -69,16 +69,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             if (response == null)
             {
-                _logger.Error("[Probe] No response received from the server.");
+                _logger.Error("[Credential Probe] No response received from the server.");
                 return;
             }
 
-            _logger.Info($"[Probe] Response Status Code: {response.StatusCode}");
-            _logger.Verbose(() => $"[Probe] Response Headers: {string.Join(", ", response.HeadersAsDictionary)}");
+            _logger.Info($"[Credential Probe] Response Status Code: {response.StatusCode}");
+            _logger.Verbose(() => $"[Credential Probe] Response Headers: {string.Join(", ", response.HeadersAsDictionary)}");
 
             if (response.Body != null)
             {
-                _logger.Verbose(() => $"[Probe] Response Body: {response.Body}");
+                _logger.Verbose(() => $"[Credential Probe] Response Body: {response.Body}");
             }
         }
 
@@ -86,20 +86,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             if (response == null)
             {
-                _logger.Error("[Probe] No response received from the server.");
+                _logger.Error("[Credential Probe] No response received from the server.");
                 return false;
             }
 
-            _logger.Info($"[Probe] Evaluating response from credential endpoint. Status Code: {response.StatusCode}");
+            _logger.Info($"[Credential Probe] Evaluating response from credential endpoint. Status Code: {response.StatusCode}");
 
             if (response.HeadersAsDictionary.TryGetValue("Server", out string serverHeader) &&
                 serverHeader.StartsWith(ImdsHeader, StringComparison.OrdinalIgnoreCase))
             {
-                _logger.Info($"[Probe] Credential endpoint supported. Server: {serverHeader}");
+                _logger.Info($"[Credential Probe] Credential endpoint supported. Server: {serverHeader}");
                 return true;
             }
 
-            _logger.Warning($"[Probe] Credential endpoint not supported. Status Code: {response.StatusCode}");
+            _logger.Warning($"[Credential Probe] Credential endpoint not supported. Status Code: {response.StatusCode}");
             return false;
         }
     }

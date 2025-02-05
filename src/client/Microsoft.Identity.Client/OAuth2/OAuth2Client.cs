@@ -17,7 +17,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Security.Cryptography.X509Certificates;
-
+using Microsoft.Identity.Client.ManagedIdentity;
+using System.Threading;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -41,6 +42,7 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
         private readonly X509Certificate2 _mtlsCertificate;
+        private StringContent _stringContent;
 
         public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
         {
@@ -68,6 +70,14 @@ namespace Microsoft.Identity.Client.OAuth2
         internal void AddHeader(string key, string value)
         {
             _headers[key] = value;
+        }
+
+        public void AddBodyContent(StringContent content)
+        {
+            if (content != null)
+            {
+                _stringContent = content;
+            }
         }
 
         internal IReadOnlyDictionary<string, string> GetBodyParameters()
@@ -98,6 +108,16 @@ namespace Microsoft.Identity.Client.OAuth2
                 false,
                 addCommonHeaders,
                 onBeforePostRequestHandler);
+        }
+
+        public async Task<ManagedIdentityCredentialResponse> GetCredentialResponseAsync(
+            Uri endpoint, 
+            RequestContext requestContext, 
+            CancellationToken cancellationToken)
+        {
+            return await ExecuteRequestAsync<ManagedIdentityCredentialResponse>(
+                endpoint, HttpMethod.Post, requestContext)
+                       .ConfigureAwait(false);
         }
 
         internal async Task<T> ExecuteRequestAsync<T>(
@@ -134,7 +154,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
-                            body: new FormUrlEncodedContent(_bodyParameters),
+                            body: _stringContent == null ? new FormUrlEncodedContent(_bodyParameters) : _stringContent,
                             HttpMethod.Post,
                             logger: requestContext.Logger,
                             doNotThrow: false,

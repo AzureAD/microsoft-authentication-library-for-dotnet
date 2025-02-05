@@ -12,6 +12,8 @@ using Microsoft.Identity.Test.Unit;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.ManagedIdentity;
+using System.Text;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -131,6 +133,24 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return
           "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
           "\"Bearer\",\"client_id\":\"client_id\"}";
+        }
+
+        public static void AddSuccessfulCredentialProbeResponse(MockHttpManager httpManager)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedUrl = "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0",
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                    {
+                        Content = new StringContent(
+                            "{\"error\":\"invalid_request\",\"error_description\":\"Required metadata header not specified\"}",
+                            Encoding.UTF8,
+                            "application/json"),
+                        Headers = { { "Server", "IMDS/1.0" } }
+                    }
+                });
         }
 
         public static string GetMsiErrorBadJson()
@@ -581,6 +601,134 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 WamAccountId = TestConstants.LocalAccountId,
                 TokenSource = TokenSource.Broker
             };
+        }
+
+        public static void AddCredentialEndpointNotFoundHandlers(
+            ManagedIdentitySource managedIdentitySource, 
+            MockHttpManager httpManager, 
+            string endpoint = "", 
+            int count = 4)
+        {
+            if (managedIdentitySource != ManagedIdentitySource.Imds)
+            {
+                return; // Only add handlers for IMDS
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: endpoint);
+            }
+        }
+
+        public static string GetSuccessfulCredentialResponse()
+        {
+            return "{\"client_id\":\"2d0d13ad-3a4d-4cfd-98f8-f20621d55ded\"," +
+                   "\"credential\":\"managed-identity-credential\"," +
+                   "\"expires_on\":" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 3600) + "," +
+                   "\"identity_type\":\"SystemAssigned\"," +
+                   "\"refresh_in\":" + ((DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 3600) / 2) + "," +
+                   "\"regional_token_url\":\"https://centraluseuap.mtlsauth.microsoft.com\"," +
+                   "\"tenant_id\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"}";
+        }
+
+        public static HttpResponseMessage GetSuccessfulCredentialHttpResponse()
+        {
+            string successResponse = "{\"client_id\":\"2d0d13ad-3a4d-4cfd-98f8-f20621d55ded\"," +
+                                     "\"credential\":\"accesstoken\"," +
+                                     "\"expires_on\":" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 3600) + "," +
+                                     "\"identity_type\":\"SystemAssigned\"," +
+                                     "\"refresh_in\":" + ((DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 3600) / 2) + "," +
+                                     "\"regional_token_url\":\"https://centraluseuap.mtlsauth.microsoft.com\"," +
+                                     "\"tenant_id\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"}";
+
+            return CreateSuccessResponseMessage(successResponse);
+        }
+
+        public static HttpResponseMessage GetMsiSuccessfulHttpResponse(int expiresInHours = 1)
+        {
+            string expiresOn = Client.Utils.DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
+            string msiSuccessResponse = "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
+                                        "\"Bearer\",\"client_id\":\"client_id\"}";
+
+            return CreateSuccessResponseMessage(msiSuccessResponse);
+        }
+
+        public static string GetSuccessfulMtlsResponse()
+        {
+            return "{\"token_type\":\"Bearer\",\"expires_in\":86399,\"ext_expires_in\":86399,\"access_token\":\"some-token\"}";
+        }
+
+        public static HttpResponseMessage GetSuccessfulMtlsHttpResponse()
+        {
+            string mtlsResponse = "{\"token_type\":\"Bearer\",\"expires_in\":86399,\"ext_expires_in\":86399,\"access_token\":\"some-token\"}";
+
+            return CreateSuccessResponseMessage(mtlsResponse);
+        }
+
+        public static MockHttpMessageHandler CreateManagedIdentityCredentialHandler()
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = GetSuccessfulCredentialHttpResponse(),
+            };
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler CreateManagedIdentityMsiTokenHandler()
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = GetMsiSuccessfulHttpResponse(),
+            };
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler CreateMtlsCredentialHandler(X509Certificate2 mtlsBindingCert)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = GetSuccessfulCredentialHttpResponse(),
+            };
+
+            // Add the certificate to the handler if provided
+            if (mtlsBindingCert != null)
+            {
+                handler.AddClientCertificate(mtlsBindingCert);
+            }
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler CreateMtlsTokenHandler()
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = GetSuccessfulMtlsHttpResponse(),
+            };
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler CreateCredentialTokenHandler()
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = GetSuccessfulCredentialHttpResponse(),
+            };
+
+            return handler;
+        }
+
+        public static void AddClientCertificate(this MockHttpMessageHandler handler, X509Certificate2 certificate)
+        {
+            handler.ClientCertificates.Add(certificate);
         }
     }
 }

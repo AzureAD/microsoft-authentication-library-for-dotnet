@@ -78,6 +78,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 ManagedIdentitySource.MachineLearning => MachineLearningManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.Credential => CredentialManagedIdentitySource.Create(requestContext),
                 _ => new ImdsManagedIdentitySource(requestContext)
             };
         }
