@@ -137,20 +137,19 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 result);
         }
     
-
+        [DoNotRunOnLinux] // Linux broker return different error code
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamInvalidROPC_ThrowsException_TestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
-            // WamLoggerValidator wastestLogger = new WamLoggerValidator();
+            WamLoggerValidator wastestLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-            //    .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
-               .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+               .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
                .WithBroker(_brokerOption)
                .Build();
 
@@ -162,15 +161,12 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            if (SharedUtilities.IsLinuxPlatform()) {
-                StringAssert.Contains("illegal_argument_exception", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]);
-            } else {
-                Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
-                Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
-                Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
-                Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
-                Assert.IsNotNull(ex.AdditionalExceptionData[MsalException.BrokerTelemetry]);
-            }
+            Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
+            Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
+            Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
+            Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
+            Assert.IsNotNull(ex.AdditionalExceptionData[MsalException.BrokerTelemetry]);
+            
         }
 
         [IgnoreOnOneBranch]
