@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <remarks>
         /// <list type="bullet">
         /// <item><description>This api can be used to associate certificate key identifiers along with other keys with a particular token.</description></item>
-        /// <item><description>In order for the tokens to be succsesfully retrieved from the cache, all components used to cache the token must be provided.</description></item>
+        /// <item><description>In order for the tokens to be successfully retrieved from the cache, all components used to cache the token must be provided.</description></item>
         /// </list>
         /// </remarks>
         public static AcquireTokenForClientParameterBuilder WithAdditionalCacheKeyComponents(this AcquireTokenForClientParameterBuilder builder,

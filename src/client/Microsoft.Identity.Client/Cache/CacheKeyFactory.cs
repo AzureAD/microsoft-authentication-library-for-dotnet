@@ -95,11 +95,11 @@ namespace Microsoft.Identity.Client.Cache
             string clientId,
             string tenantId,
             string popKid,
-            SortedDictionary<string, string> CacheKeyComponents = null)
+            SortedDictionary<string, string> cacheKeyComponents = null)
         {
-            if (CacheKeyComponents != null && CacheKeyComponents.Any())
+            if (cacheKeyComponents != null && cacheKeyComponents.Any())
             {
-                return $"{popKid}{clientId}_{tenantId}_AppTokenCache_{CoreHelpers.ComputeAccessTokenExtCacheKey(CacheKeyComponents)}";
+                return $"{popKid}{clientId}_{tenantId}_AppTokenCache_{CoreHelpers.ComputeAccessTokenExtCacheKey(cacheKeyComponents)}";
             }
 
             return $"{popKid}{clientId}_{tenantId}_AppTokenCache";
