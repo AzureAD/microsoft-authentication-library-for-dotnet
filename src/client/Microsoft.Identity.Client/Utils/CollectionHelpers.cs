@@ -39,6 +39,11 @@ namespace Microsoft.Identity.Client.Utils
 
         public static bool AreDictionariesEqual<TKey, TValue>(IDictionary<TKey, TValue> dict1, IDictionary<TKey, TValue> dict2)
         {
+            if (dict1 == null || dict2 == null)
+            {
+                return dict1 == dict2;
+            }
+
             if (dict1.Count != dict2.Count)
             {
                 return false;

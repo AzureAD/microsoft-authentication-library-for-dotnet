@@ -55,11 +55,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
 
-            if (cacheKeyComponents != null && cacheKeyComponents.Any())
-            {
-                AdditionalCacheKeyComponents = cacheKeyComponents;
-                CredentialType = StorageJsonValues.CredentialTypeAccessTokenExtended;
-            }
+            InitializeAdditionalCacheKeyComponents(cacheKeyComponents);
 #if !MOBILE
             PersistedCacheParameters = AcquireCacheParametersFromResponse(persistedCacheParameters, response.ExtensionData);
 #endif
@@ -118,11 +114,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
 
-            if (cacheKeyComponents != null && cacheKeyComponents.Any())
-            {
-                AdditionalCacheKeyComponents = cacheKeyComponents;
-                CredentialType = StorageJsonValues.CredentialTypeAccessTokenExtended;
-            }
+            InitializeAdditionalCacheKeyComponents(cacheKeyComponents);
 
             InitCacheKey();
         }
@@ -176,6 +168,15 @@ namespace Microsoft.Identity.Client.Cache.Items
                AdditionalCacheKeyComponents);
 
             return newAtItem;
+        }
+
+        private void InitializeAdditionalCacheKeyComponents(SortedDictionary<string, string> cacheKeyComponents)
+        {
+            if (cacheKeyComponents != null && cacheKeyComponents.Any())
+            {
+                AdditionalCacheKeyComponents = cacheKeyComponents;
+                CredentialType = StorageJsonValues.CredentialTypeAccessTokenExtended;
+            }
         }
 
         //internal for test
@@ -366,19 +367,21 @@ namespace Microsoft.Identity.Client.Cache.Items
             // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compatibility
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn_MsalCompat, extExpiresUnixTimestamp);
-#if SUPPORTS_SYSTEM_TEXT_JSON
-            var obj = new JsonObject();
-
-            foreach (KeyValuePair<string, string> accId in AdditionalCacheKeyComponents)
+            if (AdditionalCacheKeyComponents != null)
             {
-                obj[accId.Key] = accId.Value;
-            }
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                var obj = new JsonObject();
 
-            SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, obj);
+                foreach (KeyValuePair<string, string> accId in AdditionalCacheKeyComponents)
+                {
+                    obj[accId.Key] = accId.Value;
+                }
+
+                SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, obj);
 #else
-            SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, JObject.FromObject(AdditionalCacheKeyComponents));
+                SetItemIfValueNotNull(json, StorageJsonKeys.AdditionalCacheKeyComponents, JObject.FromObject(AdditionalCacheKeyComponents));
 #endif
-
+            }
             return json;
         }
 

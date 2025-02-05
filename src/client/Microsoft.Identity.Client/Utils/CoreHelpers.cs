@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Identity.Client.Core;
@@ -183,6 +184,11 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static string ComputeAccessTokenExtCacheKey(SortedDictionary<string, string> cacheKeyComponents)
         {
+            if (cacheKeyComponents == null || !cacheKeyComponents.Any())
+            {
+                return string.Empty;
+            }
+
             StringBuilder stringBuilder = new();
 
             foreach (var component in cacheKeyComponents)

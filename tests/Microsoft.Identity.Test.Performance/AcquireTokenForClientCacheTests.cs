@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Performance
         {
             for (int tenant = 0; tenant < totalTenants; tenant++)
             {
-                string key = CacheKeyFactory.GetClientCredentialKey(_cca.AppConfig.ClientId, $"{_tenantPrefix}{tenant}", "");
+                string key = CacheKeyFactory.GetTokenCacheItemKey(_cca.AppConfig.ClientId, $"{_tenantPrefix}{tenant}", "");
 
                 for (int token = 0; token < tokensPerTenant; token++)
                 {

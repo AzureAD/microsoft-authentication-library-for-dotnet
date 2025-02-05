@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Cache
                 requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
-                key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId, requestParameters.CacheKeyComponents);
+                key = GetTokenCacheItemKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId, requestParameters.CacheKeyComponents);
                 return true;
             }
 
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Cache
             return false;
         }
 
-        public static string GetClientCredentialKey(
+        public static string GetTokenCacheItemKey(
             string clientId,
             string tenantId,
             string popKid,
