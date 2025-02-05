@@ -147,7 +147,7 @@ steps:
     configuration: ${{ parameters.BuildConfiguration }}
 
 - script: |
-    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj --filter FullyQualifiedName~Microsoft.Identity.Test.Integration.Broker.RuntimeBrokerTests -l "console;verbosity=detailed"
+    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj -l "console;verbosity=detailed"
   displayName: 'Run Integration tests .NET'
   env:
     CERTIFICATE_LOCATION: $(generateLabCert.certDir)

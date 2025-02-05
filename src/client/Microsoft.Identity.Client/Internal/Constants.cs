@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Internal
         public const int CodeVerifierLength = 128;
         public const int CodeVerifierByteSize = 96;
 
-        public const string DefaultRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
+        public const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public const string NativeClientRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         public const string LocalHostRedirectUri = "http://localhost";
         public const string DefaultConfidentialClientRedirectUri = "https://replyUrlNotSet";
