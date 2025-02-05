@@ -505,7 +505,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
             var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
             string token = Base64UrlHelpers.Encode(headerBytes) + "." + Base64UrlHelpers.Encode(claimsBytes);
-
+            if (rsa is null)
+            {
+                throw new InvalidOperationException("RSA private key expected");
+            }
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new InvalidOperationException("Token expected");
+            }
             //codeql [SM03799] Backwards Compatibility: Requires accepting PKCS1 for supporting ADFS 
             byte[] signatureBytes = rsa.SignData(
                     Encoding.UTF8.GetBytes(token),
