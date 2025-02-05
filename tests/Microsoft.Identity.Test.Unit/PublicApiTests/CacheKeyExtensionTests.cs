@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First(), _additionalCacheKeys3, expectedCacheKey1);
 
-            //Ensure that tokens are not ovverriden
+            //Ensure that tokens are not overridden
             httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
             expectedCacheKeyHash = null;
             result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
