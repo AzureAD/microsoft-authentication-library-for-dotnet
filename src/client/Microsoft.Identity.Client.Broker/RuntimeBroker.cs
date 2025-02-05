@@ -115,18 +115,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
         private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
         {
-            LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
-            if (_logger.IsLoggingEnabled(msalLogLevel))
-            {
-                if (_logger.PiiLoggingEnabled)
-                {
-                    _logger.Log(msalLogLevel, args.Message, string.Empty);
-                }
-                else
-                {
-                    _logger.Log(msalLogLevel, string.Empty, args.Message);
-                }
-            }
+            LogLevel msalLogLevel = NativeInterop.LogLevel.Trace;
+            _logger.Log(msalLogLevel, args.Message, string.Empty);
+            // if (_logger.IsLoggingEnabled(msalLogLevel))
+            // {
+            //     if (_logger.PiiLoggingEnabled)
+            //     {
+            //         _logger.Log(msalLogLevel, args.Message, string.Empty);
+            //     }
+            //     else
+            //     {
+            //         _logger.Log(msalLogLevel, string.Empty, args.Message);
+            //     }
+            // }
         }
 
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
