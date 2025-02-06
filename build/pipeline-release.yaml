@@ -129,9 +129,14 @@ extends:
                           inputs:
                               versionSpec: '>=5.x'
                         - pwsh: |
-                            Get-ChildItem -Recurse $(Pipeline.Workspace)
+                            Get-ChildItem -Recurse '$(Pipeline.Workspace)\drop_build_main\packages'
                           displayName: List files
-
+                        - pwsh: |
+                            Get-ChildItem -Recurse $(Build.ArtifactStagingDirectory)
+                          displayName: List files
+                        - pwsh: |
+                            Get-ChildItem -Recurse $(System.ArtifactsDirectory)
+                          displayName: List files
                         - task: 1ES.PublishNuGet@1
                           displayName: 'Push to internal test feed'
                           inputs:
