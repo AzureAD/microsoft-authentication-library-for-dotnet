@@ -91,7 +91,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
-                
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 httpManager.AddManagedIdentityMockHandler(
                 endpoint,
                 Resource,
@@ -143,6 +145,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     Resource,
@@ -191,6 +195,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -251,6 +257,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -314,6 +322,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     Resource,
@@ -375,6 +385,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
+                
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -554,6 +566,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
@@ -596,6 +610,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     Resource,
@@ -636,6 +652,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
                     new SocketException(10051)));
 
@@ -675,6 +693,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -1114,6 +1134,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 httpManager.AddManagedIdentityMockHandler(
                      endpoint,
                      "scope",
@@ -1156,6 +1178,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(source, httpManager);
 
                 // Mock handler for the initial resource request
                 httpManager.AddManagedIdentityMockHandler(endpoint, initialResource,
@@ -1299,6 +1323,37 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Verify the ClientId for each cached entry
                 Assert.AreEqual(UserAssignedClientId, userAssignedTokens[0].ClientId, "User-assigned ClientId mismatch in cache.");
                 Assert.AreEqual(SystemAssignedClientId, systemAssignedTokens[0].ClientId, "System-assigned ClientId mismatch in cache.");
+            }
+        }
+
+        [TestMethod]
+        public async Task ManagedIdentitySourceCachingWorksAsExpectedAsync()
+        {
+            // Create ApplicationConfiguration and ServiceBundle
+            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
+            var serviceBundle = new ServiceBundle(config);
+
+            using (new EnvVariableContext())
+            {
+                // Set environment variables to resolve as ServiceFabric
+                Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", "http://localhost:40342/metadata/identity/oauth2/token");
+                Environment.SetEnvironmentVariable("IDENTITY_HEADER", "dummy-header");
+                Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", "dummy-thumbprint");
+
+                // First call to populate the cache
+                ManagedIdentitySource firstSource = await ManagedIdentityClient.GetManagedIdentitySourceAsync(serviceBundle).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ServiceFabric, firstSource, "Initial resolution failed to detect ServiceFabric.");
+
+                // Change environment variables to mimic a different identity source (shouldn't affect cached value)
+                Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", "http://localhost/other/metadata/identity/oauth2/token");
+                Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", null);
+
+                // Second call should return the cached value
+                ManagedIdentitySource cachedSource = await ManagedIdentityClient.GetManagedIdentitySourceAsync(serviceBundle).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ServiceFabric, cachedSource, "Cached value should remain as ServiceFabric.");
+
+                // Ensure the cache was not recomputed 
+                Assert.AreEqual(firstSource, cachedSource, "The cache was unexpectedly recomputed.");
             }
         }
     }
