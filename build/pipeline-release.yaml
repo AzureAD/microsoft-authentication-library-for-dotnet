@@ -131,7 +131,11 @@ extends:
                         - task: AzurePowerShell@5
                           inputs:
                             ScriptType: 'InlineScript'
-                            Inline: 'Get-ChildItem -Path $(System.ArtifactsDirectory)'
+                            Inline: 'Get-ChildItem -Path $(Pipeline.Workspace)'
+                        - task: AzurePowerShell@5
+                          inputs:
+                            ScriptType: 'InlineScript'
+                            Inline: 'Get-ChildItem -Path $(Pipeline.Workspace)/drop_build_main'
                         - task: 1ES.PublishNuGet@1
                           displayName: 'Push to internal test feed'
                           inputs:
