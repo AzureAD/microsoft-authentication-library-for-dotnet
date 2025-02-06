@@ -151,15 +151,22 @@ Write-Output "🔹 Certificate Thumbprint: $certThumbprint"
 # Extract Base64-encoded certificate chain (x5c)
 $x5c = [System.Convert]::ToBase64String($cert.RawData)
 
-$jwk = @{
-    kty = "RSA"
-    use = "sig"
-    alg = "RS256"
-    kid = $cert.Thumbprint
-    x5c = @($x5c)
-} | ConvertTo-Json -Depth 10 -Compress
+# Extract Base64-encoded certificate chain (x5c)
+$x5c = [System.Convert]::ToBase64String($cert.RawData)
 
-$body = "{""cnf"": {""jwk"": $jwk}}"
+# Construct the JSON body properly
+$bodyObject = @{
+    cnf = @{
+        jwk = @{
+            kty = "RSA"
+            use = "sig"
+            alg = "RS256"
+            kid = $cert.Thumbprint
+            x5c = @($x5c)  # Ensures correct array formatting
+        }
+    }
+    latch_key = $false #Production VMs need this, if you are running in canary then remove this. For the final product we do not need this 
+}
 
 Write-Output "🔹 JSON Payload: $body"
 
