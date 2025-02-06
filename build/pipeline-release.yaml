@@ -128,19 +128,11 @@ extends:
                           displayName: Use NuGet >=5.x
                           inputs:
                               versionSpec: '>=5.x'
-                        - task: AzurePowerShell@5
-                          inputs:
-                            ScriptType: 'InlineScript'
-                            Inline: 'Get-ChildItem -Path $(Pipeline.Workspace)'
-                        - task: AzurePowerShell@5
-                          inputs:
-                            ScriptType: 'InlineScript'
-                            Inline: 'Get-ChildItem -Path $(Pipeline.Workspace)/drop_build_main'
                         - task: 1ES.PublishNuGet@1
                           displayName: 'Push to internal test feed'
                           inputs:
-                              packageParentPath: '$(Build.ArtifactStagingDirectory)'
-                              packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.?.*.*.nupkg
+                              packageParentPath: '$(Pipeline.Workspace)/drop_build_main/packages'
+                              packagesToPush: Microsoft.Identity.Client.*.nupkg
                               feedPublish: a7934fdd-dcde-4492-a406-7fad6ac00e17/dcf100d4-744f-42fc-8523-f7d324acc230
                         # - task: 1ES.PublishNuGet@1
                         #   displayName: 'NuGet Push MSAL.Client Symbol'
