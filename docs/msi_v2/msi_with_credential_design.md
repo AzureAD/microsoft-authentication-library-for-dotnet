@@ -31,7 +31,7 @@ In **MSI V1**, IMDS directly returns an **access token**. However, in **MSI V2**
 
 To start the flow, MSAL requires a certificate. MSAL follows these steps:
 
-1. **Check for an existing certificate**: MSAL looks for a specific certificate (`devicecert.mtlsauth.local`).
+1. **Check for an existing certificate**: MSAL looks for a platform certificate (`devicecert.mtlsauth.local`) in the given Azure resource.
 2. **Create a new certificate if not found**: If the expected certificate is not available, MSAL generates one dynamically for authentication.
 
 ## Source Detection Logic
@@ -69,15 +69,25 @@ If identified, MSAL will use the appropriate legacy MSI endpoint for that resour
 
 This section outlines the necessary steps to acquire an access token using the MSI V2 `/credential` endpoint. 
 
-### 1. Check for an Existing (Platform) Certificate
+### 1. Check for an Existing (Platform) Certificate (Windows only)
 - Search for a specific certificate (`devicecert.mtlsauth.local`) in `Cert:\LocalMachine\My`.
-- If found, extract its thumbprint and use it for authentication.
+- If the certificate is not found in Local Machine, check Current User's certificate store (Cert:\CurrentUser\My).
+- If any certificate is found, extract its thumbprint and use it for authentication.
 
-### 2. Generate a New Certificate (if specific certificate is not found)
-- Create a new self-signed certificate with a 90-day validity.
-- Ensure the certificate has:
-  - Subject name `CN=mtls-auth` (name not final).
-  - Exportable key policy.
+### 2. Generate a New Certificate (if platform certificate is not found)
+- If no valid platform certificate is found in Cert:\LocalMachine\My or Cert:\CurrentUser\My, create a new in-memory self-signed certificate.
+- This applies especially to Linux VMs, where platform certificates are not pre-configured, and MSAL must always generate an in-memory certificate for MTLS authentication.
+
+#### Certificate Creation Requirements
+- **Subject Name:** CN=mtls-auth (subject name can be adjusted as needed).
+- **Validity Period:** 90 days.
+- **Key Export Policy:** Private key must be exportable to allow use for MTLS authentication.
+- **Key Usage must include:** Digital Signature, Key Encipherment and TLS Client Authentication.
+- **Storage:** The certificate should exist only in memory. It is not stored in the certificate store. It is discarded when the process exits.
+
+#### Certificate Rotation Strategy
+- **Track Expiry:** The expiration of the certificate must be monitored at runtime.
+- **Rotation Trigger:** 5 days before expiry, generate a new in-memory certificate.
 
 ### 3. Extract Certificate Data
 - Convert the certificate to a Base64-encoded string (`x5c`).
@@ -88,7 +98,7 @@ This section outlines the necessary steps to acquire an access token using the M
 - The request must include:
   - `Metadata: true` header.
   - `X-ms-Client-Request-id` header with a GUID.
-  - JSON body containing the certificate's public key in `jwk` format.
+  - JSON body containing the certificate's public key in `jwk` format. [RFC](https://datatracker.ietf.org/doc/html/rfc7517#appendix-B) 
 - Parse the response to extract:
   - `regional_token_url`
   - `tenant_id`
@@ -112,65 +122,75 @@ This section outlines the necessary steps to acquire an access token using the M
 ## End-to-End Script
 
 ```powershell
-# Define certificate details
-$certSubject = "CN=mtls-auth"
-$certThumbprint = ""
+# Define certificate subject names
+$searchSubject = "CN=devicecert.mtlsauth.local"  # Existing cert to look for
+$newCertSubject = "CN=mtls-auth"  # Subject for new self-signed cert
 
-# Check for an existing valid certificate in LocalMachine\My
-$existingCert = Get-ChildItem -Path "Cert:\LocalMachine\My" | Where-Object { $_.Subject -like "*$certSubject*" -and $_.NotAfter -gt (Get-Date) }
+# Step 1: Search for an existing certificate in LocalMachine\My
+$cert = Get-ChildItem -Path "Cert:\LocalMachine\My" | Where-Object { $_.Subject -eq $searchSubject -and $_.NotAfter -gt (Get-Date) }
 
-if ($existingCert) {
-    Write-Output "✅ Found existing valid certificate: $($existingCert.Subject)"
-    $cert = $existingCert
+# Step 2: If not found, search in CurrentUser\My
+if (-not $cert) {
+    Write-Output "🔍 No valid certificate found in LocalMachine\My. Checking CurrentUser\My..."
+    $cert = Get-ChildItem -Path "Cert:\CurrentUser\My" | Where-Object { $_.Subject -eq $searchSubject -and $_.NotAfter -gt (Get-Date) }
+}
+
+# Step 3: If found, use it
+if ($cert) {
+    Write-Output "✅ Found valid certificate: $($cert.Subject)"
 } else {
-    Write-Output "❌ No valid certificate found. Creating a new self-signed certificate..."
+    Write-Output "❌ No valid certificate found in both stores. Creating a new self-signed certificate in `CurrentUser\My`..."
 
-    # Create a new self-signed certificate
+    # Step 4: Generate a new self-signed certificate in `CurrentUser\My`
+    # For POC we are creating the cert in the user store. But in Product this will be a in-memory cert
     $cert = New-SelfSignedCertificate `
-        -Subject $certSubject `
-        -CertStoreLocation "Cert:\LocalMachine\My" `
+        -Subject $newCertSubject `
+        -CertStoreLocation "Cert:\CurrentUser\My" `
         -KeyExportPolicy Exportable `
         -KeySpec Signature `
         -KeyUsage DigitalSignature, KeyEncipherment `
         -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.2") `
         -NotAfter (Get-Date).AddDays(90)
 
-    Write-Output "✅ Created Self-Signed Certificate: $($cert.Subject)"
+    Write-Output "✅ Created certificate in CurrentUser\My: $($cert.Thumbprint)"
 }
 
-# Extract the thumbprint
-$certThumbprint = $cert.Thumbprint
-
-if (-not $certThumbprint) {
-    Write-Error "❌ Certificate thumbprint is empty. Exiting."
+# Ensure `$cert` is valid
+if (-not $cert) {
+    Write-Error "❌ No certificate found or created. Exiting."
     exit
 }
 
-Write-Output "🔹 Certificate Thumbprint: $certThumbprint"
+# Step 5: Compute SHA-256 of the Public Key for `kid`
+$publicKeyBytes = $cert.GetPublicKey()
+$sha256 = New-Object System.Security.Cryptography.SHA256Managed
+$certSha256 = [BitConverter]::ToString($sha256.ComputeHash($publicKeyBytes)) -replace "-", ""
 
-# Extract Base64-encoded certificate chain (x5c)
+Write-Output "🔐 Using SHA-256 Certificate Identifier (kid): $certSha256"
+
+# Step 6: Convert certificate to Base64 for JWT (x5c field)
 $x5c = [System.Convert]::ToBase64String($cert.RawData)
+Write-Output "📜 x5c: $x5c"
 
-# Extract Base64-encoded certificate chain (x5c)
-$x5c = [System.Convert]::ToBase64String($cert.RawData)
-
-# Construct the JSON body properly
+# Step 7: Construct the JSON body properly
 $bodyObject = @{
     cnf = @{
         jwk = @{
             kty = "RSA"
             use = "sig"
             alg = "RS256"
-            kid = $cert.Thumbprint
+            kid = $certSha256  # Use SHA-256 instead of Thumbprint
             x5c = @($x5c)  # Ensures correct array formatting
         }
     }
-    latch_key = $false #Production VMs need this, if you are running in canary then remove this. For the final product we do not need this 
+    latch_key = $false  # Some VMs need this. Remove in production if unnecessary.
 }
 
+# Convert JSON object to a string
+$body = $bodyObject | ConvertTo-Json -Depth 10 -Compress
 Write-Output "🔹 JSON Payload: $body"
 
-# Requesting MSI credential (Step 1)
+# Step 8: Request MSI credential
 $headers = @{
     "Metadata" = "true"
     "X-ms-Client-Request-id" = [guid]::NewGuid().ToString()
@@ -179,32 +199,27 @@ $headers = @{
 $imdsResponse = Invoke-WebRequest -Uri "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0" `
     -Method POST `
     -Headers $headers `
-    -Body $body `
-    -UseBasicParsing
+    -Body $body
 
 $jsonContent = $imdsResponse.Content | ConvertFrom-Json
 
 $regionalEndpoint = $jsonContent.regional_token_url + "/" + $jsonContent.tenant_id + "/oauth2/v2.0/token"
-$clientId = $jsonContent.client_id
-$credential = $jsonContent.credential
-
 Write-Output "✅ Using Regional Endpoint: $regionalEndpoint"
 
-$resource = "https://management.azure.com"
-$tokenRequestBody = "grant_type=client_credentials&scope=$resource/.default&client_id=$clientId&client_assertion=$credential&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
-
+# Step 9: Authenticate with Azure
 $tokenHeaders = @{
     "Content-Type" = "application/x-www-form-urlencoded"
     "Accept" = "application/json"
 }
+
+$tokenRequestBody = "grant_type=client_credentials&scope=https://management.azure.com/.default&client_id=$($jsonContent.client_id)&client_assertion=$($jsonContent.credential)&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
 
 try {
     $tokenResponse = Invoke-WebRequest -Uri $regionalEndpoint `
         -Method POST `
         -Headers $tokenHeaders `
         -Body $tokenRequestBody `
-        -Certificate $cert `
-        -UseBasicParsing
+        -Certificate $cert  # Use the full certificate object
 
     $tokenJson = $tokenResponse.Content | ConvertFrom-Json
     Write-Output "🔑 Access Token: $($tokenJson.access_token)"
@@ -213,16 +228,12 @@ try {
 }
 ```
 
-## Summary of New APIs
+## Summary of New APIs on Managed Identity Builder
 
-| API Name                         | Purpose                                                   |
-|----------------------------------|-----------------------------------------------------------|
-| `WithClientCapabilities()`       | Allows client capabilities                                |
-| `WithClaims()`                   | Allows passing of claims (bypasses cache).                |
-| `GetBindingCertificate()`        | Helper method to get the binding certificate.             |
-| `GetManagedIdentitySourceAsync()`| Helper method to get the managed identity source.         |
-| `WithProofOfPossession()`        | Requests a PoP token instead of a default Bearer token.   |
-
+| API Name                         | Purpose                                                                            |
+|----------------------------------|------------------------------------------------------------------------------------|
+| `GetBindingCertificate()`        | Helper method to get the binding certificate when a credential endpoint exist.     |
+| `GetManagedIdentitySourceAsync()`| Helper method to get the managed identity source.                                  |
 
 ## Related Documents
 

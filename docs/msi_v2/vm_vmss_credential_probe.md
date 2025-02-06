@@ -55,6 +55,8 @@ Content-Type: text/plain; charset=utf-8
 | **4️⃣** | If **500 Internal Server Error**, check the **Server** header. | `"Microsoft-IIS/10.0"` (no `IMDS/`) | Retry the request (IMDS might be restarting). |
 | **5️⃣** | If the response does not match the above cases, treat it as **unexpected behavior**. | | Log the issue or fallback to IMDS `/token` if applicable. |
 
+MSAL will use it's existing retry logic to handle the IMDS restart scenario and other retryable errors.
+
 ---
 
 ## 5. Document Purpose
