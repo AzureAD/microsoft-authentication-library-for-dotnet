@@ -128,11 +128,15 @@ extends:
                           displayName: Use NuGet >=5.x
                           inputs:
                               versionSpec: '>=5.x'
+                        - pwsh: |
+                            Get-ChildItem -Recurse $(Pipeline.Workspace)
+                          displayName: List files
+
                         - task: 1ES.PublishNuGet@1
                           displayName: 'Push to internal test feed'
                           inputs:
                               packageParentPath: '$(Build.ArtifactStagingDirectory)'
-                              packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.*.nupkg
+                              packagesToPush: $(System.ArtifactsDirectory)/**/*.nupkg
                               feedPublish: a7934fdd-dcde-4492-a406-7fad6ac00e17/dcf100d4-744f-42fc-8523-f7d324acc230
                         # - task: 1ES.PublishNuGet@1
                         #   displayName: 'NuGet Push MSAL.Client Symbol'
