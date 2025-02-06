@@ -122,6 +122,23 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// </summary>
+        public AcquireTokenForClientParameterBuilder WithFmiPath(string pathSuffix)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            if (CommonParameters.CacheKeyComponents == null)
+            {
+                CommonParameters.CacheKeyComponents = new SortedList<string, string>();
+            }
+
+            CommonParameters.CacheKeyComponents.Add("fmi_path", pathSuffix);
+            CommonParameters.FmiPathSuffix = pathSuffix;
+
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

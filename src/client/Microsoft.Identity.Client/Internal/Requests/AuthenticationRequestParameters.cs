@@ -175,6 +175,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string LongRunningOboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
+
+        public string FmiPathSuffix => _commonParameters.FmiPathSuffix;
         #endregion
 
         public void LogParameters()

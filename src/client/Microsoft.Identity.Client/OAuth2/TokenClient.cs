@@ -56,6 +56,12 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
                 }
+                if (!string.IsNullOrEmpty(_requestParams.FmiPathSuffix))
+                {
+                    //Need to verify additional "/" is not added
+                    tokenEndpoint += _requestParams.FmiPathSuffix;
+                }
+
                 Debug.Assert(_requestParams.RequestContext.ApiEvent != null, "The Token Client must only be called by requests.");
                 _requestParams.RequestContext.ApiEvent.TokenEndpoint = tokenEndpoint;
 
