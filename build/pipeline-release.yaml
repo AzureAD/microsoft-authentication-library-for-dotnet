@@ -106,8 +106,8 @@ extends:
                           inputs:
                               notifyUsers: |-
                                   avdunn@microsoft.com
-                              approvers: |-
-                                  avdunn@microsoft.com
+                              # approvers: |-
+                              #     avdunn@microsoft.com
                   - job: Job_1
                     displayName: Agent job
                     dependsOn: PreDeploymentApprovalJob
