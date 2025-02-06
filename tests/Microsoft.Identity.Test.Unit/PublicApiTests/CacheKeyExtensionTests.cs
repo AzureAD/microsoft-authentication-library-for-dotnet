@@ -208,6 +208,49 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task CacheExtEnsureNoComponentsAreAddedWithEmptyArrayTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                              .WithClientSecret(TestConstants.ClientSecret)
+                                              .WithHttpManager(httpManager)
+                                              .WithExperimentalFeatures()
+                                              .BuildConcrete();
+
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                        .WithAdditionalCacheKeyComponents(new SortedList<string, string>())
+                                        .ExecuteAsync(CancellationToken.None)
+                                        .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.IsNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().AdditionalCacheKeyComponents);
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                        .WithForceRefresh(true)
+                                        .WithAdditionalCacheKeyComponents(null)
+                                        .ExecuteAsync(CancellationToken.None)
+                                        .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.IsNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().AdditionalCacheKeyComponents);
+            }
+        }
+
+        [TestMethod]
         public async Task CacheExtEnsurePopKeysFunctionAsync()
         {
             using (var httpManager = new MockHttpManager())
