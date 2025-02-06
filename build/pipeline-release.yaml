@@ -128,6 +128,10 @@ extends:
                           displayName: Use NuGet >=5.x
                           inputs:
                               versionSpec: '>=5.x'
+                        - task: AzurePowerShell@5
+                          inputs:
+                            ScriptType: 'InlineScript'
+                            Inline: 'Get-ChildItem -Path $(System.ArtifactsDirectory)'
                         - task: 1ES.PublishNuGet@1
                           displayName: 'Push to internal test feed'
                           inputs:
