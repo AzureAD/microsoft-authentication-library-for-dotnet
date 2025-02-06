@@ -480,7 +480,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 { "sub", issuer }
             };
 
-            RSACng rsa = certificate.GetRSAPrivateKey() as RSACng;
+            // RSACng rsa = certificate.GetRSAPrivateKey() as RSACng;
+            // cng is Windows specific, so we use RSA instead
+            RSA rsa = certificate.GetRSAPrivateKey();  // Works cross-platform
 
             Dictionary<string, string> header;
             if (useSha2AndPss)
