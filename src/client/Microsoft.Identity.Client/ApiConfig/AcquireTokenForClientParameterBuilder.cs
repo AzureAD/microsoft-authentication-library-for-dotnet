@@ -125,13 +125,13 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary> 
-        /// Adds an fmi_path parameter to the request. It changes the subject of the token. 
+        /// Adds an fmi_path parameter to the request. It modifies the subject of the token. 
         /// </summary>
         public AcquireTokenForClientParameterBuilder WithFmiPath(string pathSuffix)
         {
             ValidateUseOfExperimentalFeature();
 
-            if (string.IsNullOrEmpty(pathSuffix))
+           if (string.IsNullOrWhiteSpace(pathSuffix))
             {
                 throw new ArgumentNullException(nameof(pathSuffix));
             }
