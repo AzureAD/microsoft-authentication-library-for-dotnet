@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
-        /// <summary>
+        /// <summary> Adds an fmi_path parameter to the request. It changes the subject of the token. 
         /// </summary>
         public AcquireTokenForClientParameterBuilder WithFmiPath(string pathSuffix)
         {
