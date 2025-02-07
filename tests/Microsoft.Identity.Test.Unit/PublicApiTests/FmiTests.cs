@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(fmiClientId, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().ClientId);
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                                         .WithFmiPath("fmiPath")
@@ -55,6 +56,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(fmiClientId, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().ClientId);
             }
         }
     }
