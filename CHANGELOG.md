@@ -2,7 +2,6 @@
 ==========
 ### Features
 - Added WithFmiPath() api to support FMI scenarios in MSAL. See [Issue #5110](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5110)
-- Added `WithAdditionalCacheKeyComponents()` API to enable the modification of access token cache keys using the provided components. See [Issue #5091](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5091)
 - MSAL will now pass Client sku and Version to MsalRuntime for MSAL Runtime's client telemetry. See [Issue #5103](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5103)
 
 ### Bug Fixes
