@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -36,8 +38,34 @@ namespace Microsoft.Identity.Client.Extensibility
                 return builder;
             }
 
-            builder.CommonParameters.CacheKeyComponents = new SortedList<string, string>(cacheKeyComponents);
+            StringBuilder offendingKeys = new();
 
+            //Ensure known JSON keys are not added to cache key components
+            foreach (var kvp in cacheKeyComponents)
+            {
+                if (StorageJsonKeys.IsKnownStorageJsonKey(kvp.Key))
+                {
+                    offendingKeys.AppendLine(kvp.Key);
+                }
+            }
+
+            if (offendingKeys.Length != 0)
+            {
+                throw new ArgumentException($"Keys added to {nameof(cacheKeyComponents)} are invalid. Offending keys are: {offendingKeys.ToString()}");
+            }
+
+            if (builder.CommonParameters.CacheKeyComponents == null)
+            {
+                builder.CommonParameters.CacheKeyComponents = new SortedList<string, string>(cacheKeyComponents);
+            }
+            else
+            {
+                foreach (var kvp in cacheKeyComponents)
+                {
+                    builder.CommonParameters.CacheKeyComponents.Add(kvp.Key, kvp.Value);
+                }
+            }
+            
             return builder;
         }
 
