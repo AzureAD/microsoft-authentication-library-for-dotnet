@@ -14,6 +14,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
@@ -122,18 +124,23 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
-        /// <summary> Adds an fmi_path parameter to the request. It changes the subject of the token. 
+        /// <summary> 
+        /// Adds an fmi_path parameter to the request. It changes the subject of the token. 
         /// </summary>
         public AcquireTokenForClientParameterBuilder WithFmiPath(string pathSuffix)
         {
             ValidateUseOfExperimentalFeature();
 
-            if (CommonParameters.CacheKeyComponents == null)
+            if (string.IsNullOrEmpty(pathSuffix))
             {
-                CommonParameters.CacheKeyComponents = new SortedList<string, string>();
+                throw new ArgumentNullException(nameof(pathSuffix));
             }
 
-            CommonParameters.CacheKeyComponents.Add("fmi_path", pathSuffix);
+            var cacheKey = new SortedList<string, string>();
+            cacheKey.Add(OAuth2Parameter.FmiPath, pathSuffix);
+
+            this.WithAdditionalCacheKeyComponents(cacheKey);
+
             CommonParameters.FmiPathSuffix = pathSuffix;
 
             return this;
