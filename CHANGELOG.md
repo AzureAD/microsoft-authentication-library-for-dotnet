@@ -2,13 +2,13 @@
 ==========
 ### Features
 - Added WithFmiPath() api to support FMI scenarios in MSAL. See [Issue #5110](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5110)
-- Added WithAdditionalCacheKeyComponents() to enable the modification access token of cache keys with the provided components. See [Issue #5091](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5091)
+- Added `WithAdditionalCacheKeyComponents()` API to enable the modification of access token cache keys using the provided components. See [Issue #5091](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5091)
 
 ### Bug Fixes
-- Reordered the condition for ManagedIdentitySource.MachineLearning to be checked after ManagedIdentitySource.AppService instead of before it. See [Issue #5077]([https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/e22ca8a2d8b37232f6878782746e76d0f9d9ad50](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5077))
-- Improve Managed Identity Source Detection Logging for Debugging. See [Issue #5097](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5097)
-- In case of 404, MSAL will now ensure the exception message contains the endpoint and authority URLs. See [Issue #4769](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4769)
-- MSAL will now set UseShellExecute to false in OpenLinuxBrowser. See [Issue #5075](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5075)
+- Reordered the condition for ManagedIdentitySource.MachineLearning to be checked after ManagedIdentitySource.AppService instead of before it. See [Issue #5077](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5077)
+- Improved Managed Identity Source Detection Logging for Debugging. See [Issue #5097](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5097)
+- When a 404 error occurs, MSAL will now include the endpoint and authority URLs in the exception message for better debugging. See [Issue #4769](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4769)
+- MSAL will now set `UseShellExecute` to `false` in OpenLinuxBrowser. See [Issue #5075](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5075)
 - Fixing threading exception when using ExtraQueryParameters. See [Issue #5108](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5108)
 
 4.67.2
