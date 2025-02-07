@@ -36,5 +36,28 @@ namespace Microsoft.Identity.Client.Utils
             return new Dictionary<TKey, TValue>();
 #endif
         }
+
+        public static bool AreDictionariesEqual(IDictionary<string, string> dict1, IDictionary<string, string> dict2)
+        {
+            if (dict1 == null || dict2 == null)
+            {
+                return dict1 == dict2;
+            }
+
+            if (dict1.Count != dict2.Count)
+            {
+                return false;
+            }
+
+            foreach (var kvp in dict1)
+            {
+                if (!dict2.TryGetValue(kvp.Key, out var value) || !string.Equals(kvp.Value, value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

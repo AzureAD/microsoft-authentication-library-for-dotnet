@@ -160,6 +160,8 @@ namespace Microsoft.Identity.Client
                 return null;
             }
         }
+
+        public SortedList<string, string> CacheKeyComponents { get; internal set; }
 #endregion
 
 #region Region

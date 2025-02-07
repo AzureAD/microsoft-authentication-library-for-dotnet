@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -80,7 +81,8 @@ namespace Microsoft.Identity.Client
                         homeAccountId,
                         requestParams.AuthenticationScheme.KeyId,
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
-                        requestParams.PersistedCacheParameters);
+                        requestParams.PersistedCacheParameters,
+                        requestParams.CacheKeyComponents);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -151,7 +153,6 @@ namespace Microsoft.Identity.Client
                         tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
                     }
                 }
-
 
                 account = new Account(
                   homeAccountId,
@@ -471,6 +472,7 @@ namespace Microsoft.Identity.Client
             FilterTokensByScopes(accessTokens, requestParams);
             accessTokens = await FilterTokensByEnvironmentAsync(accessTokens, requestParams).ConfigureAwait(false);
             FilterTokensByClientId(accessTokens);
+            FilterTokensByAdditionalKeyComponents(accessTokens, requestParams);
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
@@ -493,6 +495,23 @@ namespace Microsoft.Identity.Client
             requestParams.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
 
             return msalAccessTokenCacheItem;
+        }
+
+        private void FilterTokensByAdditionalKeyComponents(List<MsalAccessTokenCacheItem> accessTokens, AuthenticationRequestParameters requestParams)
+        {
+            if (requestParams.CacheKeyComponents != null)
+            {
+                accessTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents != null &&
+                    CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.CacheKeyComponents),
+                    requestParams.RequestContext.Logger,
+                    "Filtering by additional key components");
+
+                if (accessTokens.Count == 0)
+                {
+                    requestParams.RequestContext.Logger.Verbose(() => "No tokens found that match the provided key components. ");
+                }
+            }
         }
 
         private static void FilterTokensByScopes(

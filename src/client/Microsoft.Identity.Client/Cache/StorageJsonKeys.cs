@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+
 namespace Microsoft.Identity.Client.Cache
 {
     internal static class StorageJsonKeys
@@ -39,5 +41,47 @@ namespace Microsoft.Identity.Client.Cache
         // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
         // this is here for back compatibility
         public const string ExtendedExpiresOn_MsalCompat = "ext_expires_on";
+
+        public const string CacheExtensions = "ext";
+
+        //Known storeage keys need to be added here
+        public static readonly HashSet<string> s_knownStorageJsonKeys = new HashSet<string>
+        {
+            HomeAccountId, 
+            Environment, 
+            Realm, 
+            LocalAccountId, 
+            Username, 
+            AuthorityType, 
+            AlternativeAccountId,
+            GivenName, 
+            FamilyName, 
+            MiddleName,
+            Name, 
+            AvatarUrl, 
+            CredentialType,
+            ClientId,
+            Secret,
+            Target,
+            CachedAt, 
+            ExpiresOn, 
+            RefreshOn, 
+            ExtendedExpiresOn, 
+            ClientInfo,
+            FamilyId,
+            AppMetadata, 
+            KeyId,
+            TokenType, 
+            WamAccountIds, 
+            AccountSource,
+            UserAssertionHash,
+            ExtendedExpiresOn_MsalCompat, 
+            CacheExtensions
+        };
+
+        public static bool IsKnownStorageJsonKey(string key)
+        {
+            return s_knownStorageJsonKeys.Contains(key);
+        }
     }
 }
