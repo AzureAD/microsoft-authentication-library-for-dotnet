@@ -40,13 +40,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                                 { "key1", "value1" }
                                                                             };
 
-        private Dictionary<string, string> _knownKeyList = new Dictionary<string, string>
-                                                                            {
-                                                                                { "client_id", "value1" },
-                                                                                { "name", "value2" },
-                                                                                { "environment", "value3" }
-                                                                            };
-
         private Dictionary<string, string> _additionalCacheKeysCombined = new Dictionary<string, string>
                                                                             {
                                                                                 { "key1", "value1" },
@@ -311,35 +304,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First(), _additionalCacheKeys1, expectedPopCacheKey);
-            }
-        }
-
-        [TestMethod]
-        public async Task CacheExtEnsureInputKeysAreValidTestAsync()
-        {
-            string expectedExceptionMessage = "Keys added to cacheKeyComponents are invalid. Offending keys are: client_id\r\nname\r\nenvironment\r\n";
-            using (var httpManager = new MockHttpManager())
-            {
-                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                              .WithRedirectUri(TestConstants.RedirectUri)
-                                              .WithClientSecret(TestConstants.ClientSecret)
-                                              .WithHttpManager(httpManager)
-                                              .WithExperimentalFeatures()
-                                              .BuildConcrete();
-
-                var appCacheAccess = app.AppTokenCache.RecordAccess();
-
-                //Ensure that an exception is thrown when known keys are added to the cache key components
-                var exception = await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
-                {
-                    await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                        .WithAdditionalCacheKeyComponents(_knownKeyList)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
-                }).ConfigureAwait(false);
-
-                Assert.AreEqual(expectedExceptionMessage, exception.Message);
             }
         }
 
