@@ -128,15 +128,15 @@ extends:
                           displayName: Use NuGet >=5.x
                           inputs:
                               versionSpec: '>=5.x'
-                        - pwsh: |
-                            Get-ChildItem -Recurse '$(Pipeline.Workspace)\drop_build_main\packages'
-                          displayName: List files
+                        # - pwsh: |
+                        #     Get-ChildItem -Recurse '$(Pipeline.Workspace)\drop_build_main\packages'
+                        #   displayName: List files Pipeline.Workspac
                         - pwsh: |
                             Get-ChildItem -Recurse $(Build.ArtifactStagingDirectory)
-                          displayName: List files
+                          displayName: List files ArtifactStagingDirectory
                         - pwsh: |
                             Get-ChildItem -Recurse $(System.ArtifactsDirectory)
-                          displayName: List files
+                          displayName: List files ArtifactsDirectory
                         - task: 1ES.PublishNuGet@1
                           displayName: 'Push to internal test feed'
                           inputs:
