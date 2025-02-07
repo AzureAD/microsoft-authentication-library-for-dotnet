@@ -118,7 +118,7 @@ extends:
                             - input: pipelineArtifact
                               pipeline: '_MSALNET-OneBranch-Release-Official'
                               artifactName: 'drop_build_main'
-                              targetPath: '$(Pipeline.Workspace)/drop_build_main'
+                              targetPath: '$(Build.ArtifactStagingDirectory)/drop_build_main'
                             # - input: pipelineArtifact
                             #   pipeline: '_MSALNET-OneBranch-Release-Official'
                             #   artifactName: 'drop_build_main_signingLogs1'
