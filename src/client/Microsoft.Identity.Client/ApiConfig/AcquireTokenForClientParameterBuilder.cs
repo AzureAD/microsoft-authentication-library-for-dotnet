@@ -136,8 +136,10 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(pathSuffix));
             }
 
-            var cacheKey = new SortedList<string, string>();
-            cacheKey.Add(OAuth2Parameter.FmiPath, pathSuffix);
+            var cacheKey = new SortedList<string, string>
+            { 
+                { OAuth2Parameter.FmiPath, pathSuffix } 
+            };
 
             this.WithAdditionalCacheKeyComponents(cacheKey);
 
