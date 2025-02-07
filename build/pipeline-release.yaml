@@ -142,7 +142,7 @@ extends:
                           inputs:
                               packageParentPath: $(Build.ArtifactStagingDirectory)
                               packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\*.nupkg
-                              publishVstsFeed: MSAL-Internal-Testing  # Internal only
+                              publishVstsFeed: IDDP/MSAL-Internal-Testing  # Internal only
                               nuGetFeedType: internal
                         # - task: 1ES.PublishNuGet@1
                         #   displayName: 'NuGet Push MSAL.Client Symbol'
