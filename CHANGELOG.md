@@ -9,7 +9,7 @@
 - Improved Managed Identity Source Detection Logging for Debugging. See [Issue #5097](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5097)
 - When a 404 error occurs, MSAL will now include the endpoint and authority URLs in the exception message for better debugging. See [Issue #4769](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4769)
 - MSAL will now set `UseShellExecute` to `false` in OpenLinuxBrowser. See [Issue #5075](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5075)
-- Fixing threading exception when using ExtraQueryParameters. See [Issue #5108](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5108)
+- Fixed a threading exception when using ExtraQueryParameters. See [Issue #5108](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5108)
 
 4.67.2
 ==========
