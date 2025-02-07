@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage( expectedPostData: new Dictionary<string, string>() { { OAuth2Parameter.FmiPath, "fmiPath" } });
 
+                //Ensure that the FMI path is set correctly and token is retrieved
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                                         .WithFmiPath("fmiPath")
                                         .ExecuteAsync(CancellationToken.None)
