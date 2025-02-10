@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             message = Uri.EscapeDataString(message);
-            message = message.Replace("%20", "+");
 
             return message;
         }
@@ -44,7 +43,7 @@ namespace Microsoft.Identity.Client.Utils
             {
                 return message;
             }
-
+            // Keep trying to replace "+" to "%20" to increase compatibility
             message = message.Replace("+", "%20");
             message = Uri.UnescapeDataString(message);
 
