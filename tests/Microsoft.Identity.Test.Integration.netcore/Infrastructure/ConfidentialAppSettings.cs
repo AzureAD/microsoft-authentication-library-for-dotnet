@@ -3,6 +3,7 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 
@@ -196,7 +197,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
         public static Lazy<X509Certificate2> GetCertificateLazy(string certName) => new Lazy<X509Certificate2>(() =>
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(certName);
+            X509Certificate2 cert = CertificateFinder.FindCertificateByName(certName);
             if (cert == null)
             {
                 throw new InvalidOperationException(

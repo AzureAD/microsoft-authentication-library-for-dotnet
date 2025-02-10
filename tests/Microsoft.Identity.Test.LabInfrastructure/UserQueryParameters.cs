@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
-    public struct UserQuery
+    internal struct UserQuery
     {
         public UserType? UserType { get; set; }
         public MFA? MFA { get; set; }
@@ -78,5 +75,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             SignInAudience = LabInfrastructure.SignInAudience.AzureAdMyOrg
 
         };
+
+        public override string ToString()
+        {
+            return $"UserType: {UserType}, MFA: {MFA}, ProtectionPolicy: {ProtectionPolicy}, HomeDomain: {HomeDomain}, HomeUPN: {HomeUPN}, B2CIdentityProvider: {B2CIdentityProvider}, FederationProvider: {FederationProvider}, AzureEnvironment: {AzureEnvironment}, SignInAudience: {SignInAudience}, AppPlatform: {AppPlatform}, PublicClient: {PublicClient}, Upn: {Upn}";
+        }
     }
 }

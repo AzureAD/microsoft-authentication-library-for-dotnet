@@ -64,11 +64,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.Inconclusive("Can't run regional on local devbox.");
             }
 
-            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            var cert = CertificateFinder.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            var builder = ConfidentialClientApplicationBuilder.Create(LabAuthenticationHelper.LabAccessConfidentialClientId)
+            var builder = ConfidentialClientApplicationBuilder.Create(LabApiConstants.LabClientId)
                 .WithCertificate(cert, sendX5C: true)
-                .WithAuthority(LabAuthenticationHelper.LabClientInstance, LabAuthenticationHelper.LabClientTenantId);
+                .WithAuthority(LabApiConstants.LabClientInstance, LabApiConstants.LabClientTenantId);
 
             // auto-detect should work on Azure DevOps build
             if (useRegional)
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var cca = builder.Build();
 
-            var result = await cca.AcquireTokenForClient([LabAuthenticationHelper.LabScope]).ExecuteAsync().ConfigureAwait(false);
+            var result = await cca.AcquireTokenForClient([LabApiConstants.LabScope]).ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue, "refresh_in was not issued - did the MSAL SKU value change?");
