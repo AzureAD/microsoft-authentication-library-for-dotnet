@@ -44,14 +44,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 var certPasswrod = Environment.GetEnvironmentVariable("CERTIFICATE_PASSWORD");
                 var certLocation = Environment.GetEnvironmentVariable("CERTIFICATE_LOCATION");
                 var cert = new X509Certificate2(certLocation, certPasswrod, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
-                if (cert.HasPrivateKey)
-                {
-                    Console.WriteLine("Private key is available.");
-                }
-                else
-                {
-                    Console.WriteLine("Private key is missing.");
-                }
                 return cert;
             }
             // Don't validate certs, since the test root isn't installed.
