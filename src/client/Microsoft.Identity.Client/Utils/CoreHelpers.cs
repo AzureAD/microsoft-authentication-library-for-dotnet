@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Utils
             {
                 return message;
             }
-            // Keep trying to replace "+" to "%20" to increase compatibility
+           // Replace "+" with "%20" for backward compatibility with older systems that used "+" for spaces.
             message = message.Replace("+", "%20");
             message = Uri.UnescapeDataString(message);
 
