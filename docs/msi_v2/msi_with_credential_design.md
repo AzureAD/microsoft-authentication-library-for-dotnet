@@ -65,6 +65,10 @@ If identified, MSAL will use the appropriate legacy MSI endpoint for that resour
 - This credential is only valid for a short duration (1 hour) and must be used **immediately** to acquire an access token from ESTS.
 - This mechanism improves security by reducing the lifetime of sensitive authentication materials.
 
+### Retry Logic
+
+MSAL uses the **default Managed Identity retry policy** for MSI V2 credntial/token requests, whether calling the ESTS endpoint or the new `/credential` endpoint.
+
 ## Steps for MSI V2 Authentication
 
 This section outlines the necessary steps to acquire an access token using the MSI V2 `/credential` endpoint. 
@@ -234,6 +238,46 @@ try {
 |----------------------------------|------------------------------------------------------------------------------------|
 | `GetBindingCertificate()`        | Helper method to get the binding certificate when a credential endpoint exist.     |
 | `GetManagedIdentitySourceAsync()`| Helper method to get the managed identity source.                                  |
+| `WithCorrelationID(GUID id)`     | Sets the correlation id for the managed identity requests (v2 source only)         |    
+
+## Client-Side Telemetry
+
+To improve observability and diagnostics of Managed Identity (MSI) scenarios within MSAL, we propose introducing a **new telemetry counter** named `MsalMsiCounter`. This counter will be incremented (or otherwise recorded) whenever MSI token acquisition activities occur, capturing the most relevant context in the form of tags.
+
+### Counter Name
+- **`MsalMsiCounter`**
+
+### Tags
+Each time we increment `MsalMsiCounter`, we include the following tags:
+
+1. **MsiSource**  
+   Describes which MSI path or resource is used.  
+   - Possible values: `"AppService"`, `"CloudShell"`, `"AzureArc"`, `"ImdsV1"`, `"ImdsV2"`, `"ServiceFabric"`
+
+2. **TokenType**  
+   Specifies the type of token being requested or used.  
+   - Possible values: `"Bearer"`, `"POP"`, `"mtls_pop"`
+
+3. **bypassCache**  
+   Indicates whether the MSAL cache was intentionally bypassed.  
+   - Possible values: `"true"`, `"false"`
+
+4. **CertType**  
+   Identifies which certificate was used during the MSI V2 flow.  
+   - Possible values: `"Platform"`, `"inMemory"`, `"UserProvided"`
+
+5. **errorCodeToCredentialEndpoint**  
+   If using the `/credential` endpoint (ImdsV2) and an error occurred, logs the relevant HTTP status or error code.  
+   - Possible values: `"404"`, `"500"`
+   - Empty if there was no error.
+
+6. **MsalVersion**  
+   The MSAL library version in use.  
+   - Example: `"4.51.2"`
+
+7. **Platform**  
+   The runtime/OS environment.  
+   - Examples: `"net6.0-linux"`, `"net472-windows"`
 
 ## Related Documents
 
