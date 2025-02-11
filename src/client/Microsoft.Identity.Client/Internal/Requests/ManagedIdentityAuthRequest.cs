@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                
+
                 logger.Info("[ManagedIdentityRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set. " +
                     "This means either a force refresh was requested or claims were present.");
 
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Info("[ManagedIdentityRequest] Access token retrieved from cache.");
 
                 try
-                {  
+                {
                     var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
                     // If needed, refreshes token in the background
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            CancellationToken cancellationToken, 
+            CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
             AuthenticationResult authResult;
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // Bypass cache and send request to token endpoint, when
                 // 1. Force refresh is requested, or
                 // 2. If the access token needs to be refreshed proactively.
-                if (_managedIdentityParameters.ForceRefresh || 
+                if (_managedIdentityParameters.ForceRefresh ||
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
                     !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
                 {
@@ -152,8 +152,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            ManagedIdentityClient managedIdentityClient = 
-                new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
+            ManagedIdentityClient managedIdentityClient =
+                await ManagedIdentityClient.CreateAsync(AuthenticationRequestParameters.RequestContext)
+                .ConfigureAwait(false);
 
             ManagedIdentityResponse managedIdentityResponse =
                 await managedIdentityClient

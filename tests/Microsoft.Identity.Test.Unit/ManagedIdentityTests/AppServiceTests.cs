@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
-        public void TestAppServiceUpgradeScenario(
+        public async Task TestAppServiceUpgradeScenarioAsync(
             string endpoint,
             ManagedIdentitySource managedIdentitySource,
             ManagedIdentitySource expectedManagedIdentitySource)
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetUpgradeScenarioEnvironmentVariables(managedIdentitySource, endpoint);
 
-                Assert.AreEqual(expectedManagedIdentitySource, ManagedIdentityApplication.GetManagedIdentitySource());
+                Assert.AreEqual(expectedManagedIdentitySource, await ManagedIdentityApplication.GetManagedIdentitySourceAsync().ConfigureAwait(false));
             }
         }
     }
