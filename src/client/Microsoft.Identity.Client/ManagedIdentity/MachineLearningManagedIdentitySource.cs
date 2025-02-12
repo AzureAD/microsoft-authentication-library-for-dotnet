@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -62,7 +63,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return true;
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override ManagedIdentityRequest CreateRequest(string resource, AcquireTokenForManagedIdentityParameters parameters)
         {
             ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
 
@@ -70,6 +71,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.Headers.Add(SecretHeaderName, _secret);
             request.QueryParameters["api-version"] = MachineLearningMsiApiVersion;
             request.QueryParameters["resource"] = resource;
+
+            ApplyClaimsAndCapabilities(request, parameters);
 
             switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {

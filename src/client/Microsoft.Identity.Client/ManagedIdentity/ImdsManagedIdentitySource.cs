@@ -56,13 +56,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating IMDS managed identity source. Endpoint URI: " + _imdsEndpoint);
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override ManagedIdentityRequest CreateRequest(string resource, AcquireTokenForManagedIdentityParameters parameters)
         {
             ManagedIdentityRequest request = new(HttpMethod.Get, _imdsEndpoint);
 
             request.Headers.Add("Metadata", "true");
             request.QueryParameters["api-version"] = ImdsApiVersion;
             request.QueryParameters["resource"] = resource;
+
+            ApplyClaimsAndCapabilities(request, parameters);
 
             switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
