@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // Skip checking cache when force refresh or claims is specified
             if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
+                _managedIdentityParameters.Claims = AuthenticationRequestParameters.Claims;
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
                 
                 logger.Info("[ManagedIdentityRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set. " +

@@ -12,6 +12,8 @@ using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -48,7 +50,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
 
-            ManagedIdentityRequest request = CreateRequest(resource);
+            ManagedIdentityRequest request = CreateRequest(resource, parameters);
 
             _requestContext.Logger.Info("[Managed Identity] Sending request to managed identity endpoints.");
 
@@ -130,7 +132,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             throw exception;
         }
 
-        protected abstract ManagedIdentityRequest CreateRequest(string resource);
+        protected abstract ManagedIdentityRequest CreateRequest(string resource, AcquireTokenForManagedIdentityParameters parameters);
 
         protected ManagedIdentityResponse GetSuccessfulResponse(HttpResponse response)
         {
@@ -297,6 +299,55 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 null);
 
             throw exception;
+        }
+
+        /// <summary>
+        /// Sets the claims and capabilities in the request.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="parameters"></param>
+        protected virtual void ApplyClaimsAndCapabilities(
+            ManagedIdentityRequest request,
+            AcquireTokenForManagedIdentityParameters parameters)
+        {
+            IEnumerable<string> clientCapabilities = _requestContext.ServiceBundle.Config.ClientCapabilities;
+
+            // If claims are present, set bypass_cache=true
+            if (!string.IsNullOrEmpty(parameters.Claims))
+            {
+                SetRequestParameter(request, "bypass_cache", "true");
+                _requestContext.Logger.Info("[Managed Identity] Setting bypass_cache=true in the Managed Identity request due to claims.");
+
+                // Set xms_cc only if clientCapabilities exist
+                if (clientCapabilities != null && clientCapabilities.Any())
+                {
+                    SetRequestParameter(request, "xms_cc", string.Join(",", clientCapabilities));
+                    _requestContext.Logger.Info("[Managed Identity] Adding client capabilities (xms_cc) to Managed Identity request.");
+                }
+            }
+            else
+            {
+                SetRequestParameter(request, "bypass_cache", "false");
+                _requestContext.Logger.Info("[Managed Identity] Setting bypass_cache=false (no claims provided).");
+            }
+        }
+
+        /// <summary>
+        /// Sets the request parameter in either the query or body based on the request method.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        protected void SetRequestParameter(ManagedIdentityRequest request, string key, string value)
+        {
+            if (request.Method == HttpMethod.Post)
+            {
+                request.BodyParameters[key] = value;
+            }
+            else
+            {
+                request.QueryParameters[key] = value;
+            }
         }
     }
 }

@@ -338,7 +338,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     scope,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
+                    managedIdentitySource, 
+                    claimsEnabled: true, 
+                    capabilityEnabled: true);
 
                 // Acquire token with force refresh
                 result = await mi.AcquireTokenForManagedIdentity(scope).WithClaims(TestConstants.Claims)
@@ -400,7 +402,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     scope,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
+                    managedIdentitySource,
+                    claimsEnabled: true);
 
                 // Acquire token with force refresh
                 result = await mi.AcquireTokenForManagedIdentity(scope).WithClaims(TestConstants.Claims)
