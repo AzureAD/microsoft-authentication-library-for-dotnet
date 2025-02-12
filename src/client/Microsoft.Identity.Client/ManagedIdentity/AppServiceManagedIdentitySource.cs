@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
@@ -13,7 +15,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class AppServiceManagedIdentitySource : AbstractManagedIdentity
     {
         // MSI Constants. Docs for MSI are available here https://docs.microsoft.com/azure/app-service/overview-managed-identity
-        private const string AppServiceMsiApiVersion = "2019-08-01";
+        private const string AppServiceMsiApiVersion = "2025-03-30";
         private const string SecretHeaderName = "X-IDENTITY-HEADER";
 
         private readonly Uri _endpoint;
@@ -65,13 +67,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return true;
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override ManagedIdentityRequest CreateRequest(string resource, AcquireTokenForManagedIdentityParameters parameters)
         {
             ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
             
             request.Headers.Add(SecretHeaderName, _secret);
             request.QueryParameters["api-version"] = AppServiceMsiApiVersion;
             request.QueryParameters["resource"] = resource;
+
+            ApplyClaimsAndCapabilities(request, parameters);
 
             switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {

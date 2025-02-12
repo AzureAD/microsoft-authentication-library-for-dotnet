@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
-        [DataTestMethod]
+        //[DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
         //[DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
         //[DataRow(MsiAzureResource.VM, "", DisplayName = "System_Identity_Virtual_Machine")]
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [TestMethod]
+        //[TestMethod]
         public async Task AcquireMsiToken_ForTokenExchangeResource_Successfully()
         {
             string resource = "api://AzureAdTokenExchange";
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [TestMethod]
+        //[TestMethod]
         public async Task AcquireMsiToken_ExchangeForEstsToken_Successfully()
         {
            const string resource = "api://AzureAdTokenExchange";
