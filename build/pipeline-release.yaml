@@ -22,78 +22,75 @@ extends:
         customBuildTags:
             - ES365AIMigrationTooling-BulkMigrated-Release
         stages:
-            # - stage: Stage_1
-            #   displayName: Upload to Nuget
-            #   jobs:
-            #       - job: PreDeploymentApprovalJob
-            #         displayName: Pre-Deployment Approval
-            #         condition: succeeded()
-            #         timeoutInMinutes: 43200
-            #         pool: server
-            #         steps:
-            #             - task: ManualValidation@1
-            #               inputs:
-            #                   notifyUsers: |-
-            #                       avdunn@microsoft.com
-            #                   approvers: |-
-            #                       avdunn@microsoft.com
-            #       - job: Job_1
-            #         displayName: Agentless Job - Approval Service
-            #         dependsOn: PreDeploymentApprovalJob
-            #         condition: succeeded()
-            #         timeoutInMinutes: 7200
-            #         pool: server
-            #       - job: Job_2
-            #         displayName: Agent Job
-            #         condition: succeeded()
-            #         timeoutInMinutes: 0
-            #         templateContext:
-            #             inputs:
-            #                 - input: pipelineArtifact
-            #                   pipeline: '_MSALNET-OneBranch-Release-Official'
-            #                   artifactName: 'drop_build_main'
-            #                   targetPath: '$(Pipeline.Workspace)/drop_build_main'
-            #                 - input: pipelineArtifact
-            #                   pipeline: '_MSALNET-OneBranch-Release-Official'
-            #                   artifactName: 'drop_build_main_signingLogs1'
-            #                   targetPath: '$(Pipeline.Workspace)/drop_build_main_signingLogs1'
-            #         steps:
-            #             - task: NuGetToolInstaller@1
-            #               displayName: Use NuGet >=5.x
-            #               inputs:
-            #                   versionSpec: '>=5.x'
-            #             # - task: 1ES.PublishNuGet@1
-            #             #   displayName: 'NuGet Push MSAL'
-            #             #   inputs:
-            #             #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-            #             #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.?.*.*.nupkg
-            #             #       nuGetFeedType: external
-            #             #       feedPublish: NuGetMsal_NET2
-            #             #       externalEndpoint: NuGetMsal_NET2
-            #             # - task: 1ES.PublishNuGet@1
-            #             #   displayName: 'NuGet Push MSAL.Desktop'
-            #             #   inputs:
-            #             #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-            #             #       solution: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Desktop.?.*.*.nupkg
-            #             #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Desktop.?.*.*.nupkg
-            #             #       nuGetFeedType: external
-            #             #       externalEndpoint: NuGetMsal_NET2
-            #             # - task: 1ES.PublishNuGet@1
-            #             #   displayName: 'NuGet Push MSAL.Broker'
-            #             #   inputs:
-            #             #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-            #             #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Broker.?.*.*.nupkg
-            #             #       nuGetFeedType: external
-            #             #       externalEndpoint: NuGetMsal_NET2
-            #             # - task: 1ES.PublishNuGet@1
-            #             #   displayName: 'NuGet Push MSAL Extension'
-            #             #   inputs:
-            #             #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-            #             #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Extensions.Msal.?.*.*.nupkg
-            #             #       nuGetFeedType: external
-            #             #       feedPublish: NuGetMsal_NET2
-            #             #       externalEndpoint: NuGetMsal_NET2
             - stage: Stage_1
+              displayName: Upload to Nuget
+              jobs:
+                  - job: PreDeploymentApprovalJob
+                    displayName: Pre-Deployment Approval
+                    condition: succeeded()
+                    timeoutInMinutes: 60
+                    pool: server
+                    steps:
+                        - task: ManualValidation@1
+                          inputs:
+                              notifyUsers: |-
+                                  avdunn@microsoft.com
+                  - job: Job_1
+                    displayName: Agentless Job - Approval Service
+                    dependsOn: PreDeploymentApprovalJob
+                    condition: succeeded()
+                    timeoutInMinutes: 7200
+                    pool: server
+                  - job: Job_2
+                    displayName: Agent Job
+                    condition: succeeded()
+                    timeoutInMinutes: 0
+                    templateContext:
+                        inputs:
+                            - input: pipelineArtifact
+                              pipeline: '_MSALNET-OneBranch-Release-Official'
+                              artifactName: 'drop_build_main'
+                              targetPath: '$(Build.ArtifactStagingDirectory)/drop_build_main'
+                            - input: pipelineArtifact
+                              pipeline: '_MSALNET-OneBranch-Release-Official'
+                              artifactName: 'drop_build_main_signingLogs1'
+                              targetPath: '$(Build.ArtifactStagingDirectory)/drop_build_main_signingLogs1'
+                    steps:
+                        - task: NuGetToolInstaller@1
+                          displayName: Use NuGet >=5.x
+                          inputs:
+                              versionSpec: '>=5.x'
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL'
+                          inputs:
+                              packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                              packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.?.*.*.nupkg
+                              nuGetFeedType: external
+                              feedPublish: NuGetMsal_NET2
+                              externalEndpoint: NuGetMsal_NET2
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL.Desktop'
+                          inputs:
+                              packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                              packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.Desktop.?.*.*.nupkg
+                              nuGetFeedType: external
+                              externalEndpoint: NuGetMsal_NET2
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL.Broker'
+                          inputs:
+                              packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                              packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.Broker.?.*.*.nupkg
+                              nuGetFeedType: external
+                              externalEndpoint: NuGetMsal_NET2
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL Extension'
+                          inputs:
+                              packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                              packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.Extensions.Msal.?.*.*.nupkg
+                              nuGetFeedType: external
+                              feedPublish: NuGetMsal_NET2
+                              externalEndpoint: NuGetMsal_NET2
+            - stage: Stage_2
               displayName: Upload to IDDP (VSTS)
               jobs:
                   - job: PreDeploymentApprovalJob
@@ -106,8 +103,6 @@ extends:
                           inputs:
                               notifyUsers: |-
                                   avdunn@microsoft.com
-                              # approvers: |-
-                              #     avdunn@microsoft.com
                   - job: Job_1
                     displayName: Agent job
                     dependsOn: PreDeploymentApprovalJob
@@ -119,70 +114,60 @@ extends:
                               pipeline: '_MSALNET-OneBranch-Release-Official'
                               artifactName: 'drop_build_main'
                               targetPath: '$(Build.ArtifactStagingDirectory)/drop_build_main'
-                            # - input: pipelineArtifact
-                            #   pipeline: '_MSALNET-OneBranch-Release-Official'
-                            #   artifactName: 'drop_build_main_signingLogs1'
-                            #   targetPath: '$(Pipeline.Workspace)/drop_build_main_signingLogs1'
+                            - input: pipelineArtifact
+                              pipeline: '_MSALNET-OneBranch-Release-Official'
+                              artifactName: 'drop_build_main_signingLogs1'
+                              targetPath: '$(Build.ArtifactStagingDirectory)/drop_build_main_signingLogs1'
                     steps:
                         - task: NuGetToolInstaller@1
                           displayName: Use NuGet >=5.x
                           inputs:
                               versionSpec: '>=5.x'
-                        # - pwsh: |
-                        #     Get-ChildItem -Recurse '$(Pipeline.Workspace)\drop_build_main\packages'
-                        #   displayName: List files Pipeline.Workspac
-                        - pwsh: |
-                            Get-ChildItem -Recurse $(Build.ArtifactStagingDirectory)
-                          displayName: List files ArtifactStagingDirectory
-                        - pwsh: |
-                            Get-ChildItem -Recurse $(System.ArtifactsDirectory)
-                          displayName: List files ArtifactsDirectory
                         - task: 1ES.PublishNuGet@1
-                          displayName: 'Push to internal test feed'
+                          displayName: 'NuGet Push MSAL'
                           inputs:
-                              packageParentPath: $(Build.ArtifactStagingDirectory)
-                              packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\*.nupkg
-                              publishVstsFeed: IDDP/MSAL-Internal-Testing  # Internal only
-                              nuGetFeedType: internal
-                        # - task: 1ES.PublishNuGet@1
-                        #   displayName: 'NuGet Push MSAL.Client Symbol'
-                        #   inputs:
-                        #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-                        #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.?.*.*.snupkg
-                        #       feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
-                        # - task: 1ES.PublishNuGet@1
-                        #   displayName: 'NuGet Push MSAL Desktop'
-                        #   inputs:
-                        #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-                        #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Desktop.?.*.*.nupkg
-                        #       feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
-                        # - task: 1ES.PublishNuGet@1
-                        #   displayName: 'NuGet Push MSAL Desktop Symbol'
-                        #   inputs:
-                        #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-                        #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Desktop.?.*.*.snupkg
-                        #       feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
-                        # - task: 1ES.PublishNuGet@1
-                        #   displayName: 'NuGet Push MSAL Desktop Broker'
-                        #   inputs:
-                        #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-                        #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Broker.?.*.*.nupkg
-                        #       feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
-                        # - task: 1ES.PublishNuGet@1
-                        #   displayName: 'NuGet Push MSAL Desktop Broker Symbol'
-                        #   inputs:
-                        #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-                        #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Broker.?.*.*.snupkg
-                        #       feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
-                        # - task: 1ES.PublishNuGet@1
-                        #   displayName: 'NuGet Push MSAL Extension'
-                        #   inputs:
-                        #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-                        #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Extensions.Msal.?.*.*.nupkg
-                        #       feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
-                        # - task: 1ES.PublishNuGet@1
-                        #   displayName: 'NuGet Push MSAL Extension Symbol'
-                        #   inputs:
-                        #       packageParentPath: '$(Build.ArtifactStagingDirectory)'
-                        #       packagesToPush: $(System.ArtifactsDirectory)/**/Microsoft.Identity.Client.Extensions.Msal.?.*.*.snupkg
-                        #       feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
+                            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                            packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.?.*.*.nupkg
+                            feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL.Client Symbol'
+                          inputs:
+                            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                            packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.?.*.*.snupkg
+                            feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL Desktop'
+                          inputs:
+                            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                            packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.Desktop.?.*.*.nupkg
+                            feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL Desktop Symbol'
+                          inputs:
+                            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                            packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.Desktop.?.*.*.snupkg
+                            feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL Desktop Broker'
+                          inputs:
+                            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                            packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.Broker.?.*.*.nupkg
+                            feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL Desktop Broker Symbol'
+                          inputs:
+                            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                            packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.Broker.?.*.*.snupkg
+                            feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL Extension'
+                          inputs:
+                            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                            packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.Extensions.Msal.?.*.*.nupkg
+                            feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
+                        - task: 1ES.PublishNuGet@1
+                          displayName: 'NuGet Push MSAL Extension Symbol'
+                          inputs:
+                            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                            packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.Extensions.Msal.?.*.*.snupkg
+                            feedPublish: 46419298-b96c-437f-bd4c-12c8df7f868d
