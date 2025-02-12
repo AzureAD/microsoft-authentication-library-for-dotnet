@@ -493,11 +493,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private (ConfidentialClientApplication app, MockHttpMessageHandler handler) CreateConfidentialClient(
             MockHttpManager httpManager,
             X509Certificate2 cert,
-            CredentialType credentialType = CredentialType.Certificate)
+            CredentialType credentialType = CredentialType.Certificate,
+            bool withClientCapability = false)
         {
             var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithRedirectUri(TestConstants.RedirectUri)
                               .WithHttpManager(httpManager);
+
+            if (withClientCapability)
+            { 
+                builder.WithClientCapabilities(TestConstants.ClientCapabilities);
+            }
 
             ConfidentialClientApplication app;
 
@@ -526,15 +532,38 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNull(app.Certificate);
                     break;
                 case CredentialType.SignedAssertionWithAssertionRequestOptionsAsyncDelegate:
-                    builder = builder.WithClientAssertion((options) =>
                     {
-                        Assert.IsNotNull(options.ClientID);
-                        Assert.IsNotNull(options.TokenEndpoint);
-                        return Task.FromResult(TestConstants.DefaultClientAssertion);
-                    });
-                    app = builder.BuildConcrete();
-                    Assert.IsNull(app.Certificate);
-                    break;
+                        bool localWithClientCapability = withClientCapability;
+
+                        builder = builder.WithClientAssertion((options) =>
+                        {
+                            // Basic checks
+                            Assert.IsNotNull(options.ClientID);
+                            Assert.IsNotNull(options.TokenEndpoint);
+
+                            // Conditionally check ClientCapabilities
+                            if (localWithClientCapability)
+                            {
+                                Assert.IsNotNull(options.ClientCapabilities, "Expected ClientCapabilities to be set.");
+                                CollectionAssert.AreEqual(
+                                    TestConstants.ClientCapabilities,
+                                    options.ClientCapabilities.ToList(),
+                                    "ClientCapabilities should match what was configured."
+                                );
+                            }
+                            else
+                            {
+                                Assert.IsNull(options.ClientCapabilities, "ClientCapabilities should not be set if not requested.");
+                            }
+
+                            return Task.FromResult(TestConstants.DefaultClientAssertion);
+                        });
+
+                        app = builder.BuildConcrete();
+                        Assert.IsNull(app.Certificate);
+
+                        break;
+                    }
                 case CredentialType.Certificate:
                     builder = builder.WithCertificate(cert);
                     app = builder.BuildConcrete();
@@ -751,6 +780,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup =
                     CreateConfidentialClient(httpManager, null, CredentialType.SignedAssertionWithAssertionRequestOptionsAsyncDelegate);
+
+                var result = await setup.App.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+
+                Assert.AreEqual(
+                    TestConstants.DefaultClientAssertion,
+                    setup.Handler.ActualRequestPostData["client_assertion"]);
+
+                Assert.AreEqual(
+                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                    setup.Handler.ActualRequestPostData["client_assertion_type"]);
+            }
+        }
+
+        [TestMethod]
+        public async Task SignedAssertionWithClientCapabilitiesTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup =
+                    CreateConfidentialClient(httpManager, 
+                    null, 
+                    CredentialType.SignedAssertionWithAssertionRequestOptionsAsyncDelegate,
+                    true);
 
                 var result = await setup.App.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);

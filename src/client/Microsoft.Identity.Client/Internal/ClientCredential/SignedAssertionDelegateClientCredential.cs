@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -36,17 +37,41 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string tokenEndpoint,
             CancellationToken cancellationToken)
         {
-            string signedAssertion = await (_signedAssertionDelegate != null 
-                ? _signedAssertionDelegate(cancellationToken).ConfigureAwait(false)
-                : _signedAssertionWithInfoDelegate(new AssertionRequestOptions {
+            if (_signedAssertionDelegate != null)
+            {
+                // If no "AssertionRequestOptions" delegate is supplied
+                string signedAssertion = await _signedAssertionDelegate(cancellationToken).ConfigureAwait(false);
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, signedAssertion);
+            }
+            else
+            {
+                // Build the AssertionRequestOptions and conditionally set ClientCapabilities
+                var assertionOptions = new AssertionRequestOptions
+                {
                     CancellationToken = cancellationToken,
                     ClientID = requestParameters.AppConfig.ClientId,
                     TokenEndpoint = tokenEndpoint
-                }).ConfigureAwait(false));
+                };
 
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, signedAssertion);
+                // Only set client capabilities if they exist and are not empty
+                var configuredCapabilities = requestParameters
+                    .RequestContext
+                    .ServiceBundle
+                    .Config
+                    .ClientCapabilities;
+
+                if (configuredCapabilities != null && configuredCapabilities.Any())
+                {
+                    assertionOptions.ClientCapabilities = configuredCapabilities;
+                }
+
+                // Delegate that uses AssertionRequestOptions
+                string signedAssertion = await _signedAssertionWithInfoDelegate(assertionOptions).ConfigureAwait(false);
+
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, signedAssertion);
+            }
         }
-
     }
 }

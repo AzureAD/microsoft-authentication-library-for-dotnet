@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading;
 namespace Microsoft.Identity.Client
 {
@@ -30,5 +31,11 @@ namespace Microsoft.Identity.Client
         /// Claims to be included in the client assertion
         /// </summary>
         public string Claims { get; set; }
+
+        /// <summary>
+        /// Capabilities that the client application declares in the assertion.
+        /// The service may require or interpret these capabilities in advanced scenarios.
+        /// </summary>
+        public IEnumerable<string> ClientCapabilities { get; set; }
     }
 }
