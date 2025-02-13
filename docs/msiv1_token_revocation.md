@@ -67,7 +67,7 @@ var result = await mi.AcquireTokenForManagedIdentity(new[] { "https://management
 
 ## End to End testing 
 
-Given the complexity of the scenario, it may not be easy to automate this. This section will be updated when we have more details on how to manually test this flow. 
+Given the complexity of the scenario, it may not be easy to automate this. Here is the [guideline](https://microsoft.sharepoint.com/:w:/t/AzureMSI/ESBeuafJLZdNlSxkBKvjcswBD4FGVz0o6YJcf4mfDRSH-Q?e=2hJRUt) to test this feature manually using a Virtual Machine. For further details, please contact Gladwin. 
 
 ## Reference
 
