@@ -6,7 +6,7 @@ This specification describes **two optional parameters** that MSAL can send to t
 
 ## Overview
 
-When MSAL requests a token from the MSI v1 endpoint for resources like `https://management.azure.com/`, it typically reuses valid, locally cached tokens. However, certain scenarios require explicitly **ignoring** the cache or specifying **client capabilities** that Azure AD uses to enable or disable particular features.
+When MSAL requests a token from the MSI v1 endpoint for resources like `https://management.azure.com/`, it typically reuses valid, locally cached tokens. However, certain scenarios (for e.g. [claims challenge](https://learn.microsoft.com/en-us/entra/identity-platform/claims-challenge?tabs=dotnet)) require explicitly **ignoring** the cache or specifying **client capabilities** that Azure AD uses to issue a fresh token.
 
 To address these scenarios, two **optional** query parameters can be included in the MSI v1 token request:
 
@@ -21,11 +21,11 @@ To address these scenarios, two **optional** query parameters can be included in
 
 ### Purpose
 
-Allows the developer to **get a brand-new token** from Azure AD. When `bypass_cache=true`, MSAL will ignore any valid, cached token and ensure the MSI v1 endpoint fetches a **new** token from Azure AD rather than returning a cached one.
+Allows MSAL to to **get a brand-new token** from Azure AD. When `bypass_cache=true`, MSAL will ignore any valid, cached token and ensure the MSI v1 endpoint fetches a **new** token from Azure AD rather than returning a cached one.
 
 ### Behavior
-- If set to `true`, MSAL will send `bypass_cache=true` to the MSI endpoint.
-- If set to `false` or omitted, MSAL can return a cached token (if one exists and is still valid).
+- If set to `true`, MSI encoded will skip it's internal cache and issue a fresh token.
+- If set to `false` or omitted, MSI will return a valid cached token.
 
 ### Use Cases
 - **Token Revocation**: Ensures any previously revoked or invalidated token is not served from cache.
@@ -36,13 +36,39 @@ Allows the developer to **get a brand-new token** from Azure AD. When `bypass_ca
 
 ### Purpose
 
-Enables the developer to specify **client capabilities** in the token acquisition request. These capabilities are often used to unlock or disable specific features in Azure AD, such as handling specialized revocation scenarios.
+Enables the MSAL to pass **client capabilities** in the token acquisition request. These capabilities are often used to unlock or disable specific features in Azure AD, such as handling specialized revocation scenarios.
 
 ### Behavior
 - The value is typically a comma-separated list of capability strings.
-- MSAL sends `xms_cc` to the MSI v1 endpoint, which then relays these capabilities to Azure AD as part of a JSON-encoded `claims` parameter.
+- MSAL sends `xms_cc` to the MSI v1 endpoint, provided MSAL app developers have set these capabilities in the application.
 
 ### Use Cases
-- **“Undo token revocation”** or other advanced features: By setting the required capabilities (`cp1`, etc.), MSAL can influence how Azure AD issues the token.
+- **“Undo token revocation”** or other advanced features: By setting the required capabilities (`cp1`, etc.), 
 
 ---
+
+## Usage 
+
+App developers can already specify these parameters using existing APIs in MSAL. For instance:
+
+```cs
+// Example usage in MSAL (already shipped, no new APIs added)
+var mi = ManagedIdentityApplicationBuilder
+    .Create(ManagedIdentityId.SystemAssigned)
+    .WithClientCapabilities(ClientCapabilities) // e.g. ["cp1", "cp2"]
+    .Build();
+
+var result = await mi.AcquireTokenForManagedIdentity(new[] { "https://management.azure.com/.default" })
+    .WithClaims(Claims)
+    .ExecuteAsync()
+    .ConfigureAwait(false);
+
+```
+
+## End to End testing 
+
+Given the complexity of the scenario, it may not be easy to automate this. This section will be updated when we have more details on how to manually test this flow. 
+
+## Reference
+
+[Token Revocation docs](https://microsoft.sharepoint.com/:w:/t/AzureMSI/ETSZ_FUzbcxMrcupnuPC8r4BV0dFQrONe1NdjATd3IceLA?e=n72v65)
