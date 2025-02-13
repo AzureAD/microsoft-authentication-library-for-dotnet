@@ -14,6 +14,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
@@ -120,6 +122,30 @@ namespace Microsoft.Identity.Client
         public AcquireTokenForClientParameterBuilder WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary> 
+        /// Adds an fmi_path parameter to the request. It modifies the subject of the token. 
+        /// </summary>
+        public AcquireTokenForClientParameterBuilder WithFmiPath(string pathSuffix)
+        {
+            ValidateUseOfExperimentalFeature();
+
+           if (string.IsNullOrWhiteSpace(pathSuffix))
+            {
+                throw new ArgumentNullException(nameof(pathSuffix));
+            }
+
+            var cacheKey = new SortedList<string, string>
+            { 
+                { OAuth2Parameter.FmiPath, pathSuffix } 
+            };
+
+            this.WithAdditionalCacheKeyComponents(cacheKey);
+
+            CommonParameters.FmiPathSuffix = pathSuffix;
+
+            return this;
         }
 
         /// <inheritdoc/>

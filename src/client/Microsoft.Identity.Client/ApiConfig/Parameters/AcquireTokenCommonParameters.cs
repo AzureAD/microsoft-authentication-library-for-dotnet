@@ -31,5 +31,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public X509Certificate2 MtlsCertificate { get; internal set; }
         public List<string> AdditionalCacheParameters { get; set; }
         public SortedList<string, string> CacheKeyComponents { get; internal set; }
+        public string FmiPathSuffix { get; internal set; }
     }
 }
