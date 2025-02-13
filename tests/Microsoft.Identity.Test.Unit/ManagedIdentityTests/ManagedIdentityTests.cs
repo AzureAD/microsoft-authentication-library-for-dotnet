@@ -1332,6 +1332,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // Create ApplicationConfiguration and ServiceBundle
             var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
             var serviceBundle = new ServiceBundle(config);
+            var cancellationToken = CancellationToken.None;
 
             using (new EnvVariableContext())
             {
@@ -1341,7 +1342,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", "dummy-thumbprint");
 
                 // First call to populate the cache
-                ManagedIdentitySource firstSource = await ManagedIdentityClient.GetManagedIdentitySourceAsync(serviceBundle).ConfigureAwait(false);
+                ManagedIdentitySource firstSource = await ManagedIdentityClient.GetManagedIdentitySourceAsync(serviceBundle, cancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.ServiceFabric, firstSource, "Initial resolution failed to detect ServiceFabric.");
 
                 // Change environment variables to mimic a different identity source (shouldn't affect cached value)
@@ -1349,7 +1350,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", null);
 
                 // Second call should return the cached value
-                ManagedIdentitySource cachedSource = await ManagedIdentityClient.GetManagedIdentitySourceAsync(serviceBundle).ConfigureAwait(false);
+                ManagedIdentitySource cachedSource = await ManagedIdentityClient.GetManagedIdentitySourceAsync(serviceBundle, cancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.ServiceFabric, cachedSource, "Cached value should remain as ServiceFabric.");
 
                 // Ensure the cache was not recomputed 

@@ -51,8 +51,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     customHttpClient: null,
                     cancellationToken).ConfigureAwait(false);
 
-                LogResponseDetails(response);
-
                 return EvaluateProbeResponse(response);
             }
             catch (Exception ex)
@@ -62,27 +60,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        private void LogResponseDetails(HttpResponse response)
-        {
-            if (response == null)
-            {
-                _logger.Info("[Credential Probe] No response received from the server.");
-                return;
-            }
-
-            _logger.Info($"[Credential Probe] Response received from the server. Response Status Code: {response.StatusCode}");
-        }
-
         private bool EvaluateProbeResponse(HttpResponse response)
         {
+            // 1. Handle null response
             if (response == null)
             {
                 _logger.Error("[Credential Probe] No response received from the server.");
                 return false;
             }
 
-            _logger.Info($"[Credential Probe] Evaluating response from credential endpoint. Status Code: {response.StatusCode}");
+            // 2. Log basic details
+            _logger.Info($"[Credential Probe] Response received from the server. Status Code: {response.StatusCode}");
 
+            // 3. Evaluate IMDS header
             if (response.HeadersAsDictionary.TryGetValue("server", out string serverHeader) &&
                 serverHeader.TrimStart().StartsWith(ImdsHeader, StringComparison.OrdinalIgnoreCase))
             {

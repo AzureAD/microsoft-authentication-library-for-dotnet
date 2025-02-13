@@ -144,9 +144,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(
+        internal static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(
             IServiceBundle serviceBundle,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             if (serviceBundle == null)
             {
