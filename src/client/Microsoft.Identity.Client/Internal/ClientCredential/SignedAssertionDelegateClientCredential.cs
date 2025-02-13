@@ -27,7 +27,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public SignedAssertionDelegateClientCredential(Func<AssertionRequestOptions, Task<string>> signedAssertionDelegate)
         {
-            _signedAssertionWithInfoDelegate = signedAssertionDelegate;
+            _signedAssertionWithInfoDelegate = signedAssertionDelegate ?? throw new ArgumentNullException(nameof(signedAssertionDelegate),
+                    "Signed assertion delegate cannot be null.");
         }
 
         public async Task AddConfidentialClientParametersAsync(

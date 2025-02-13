@@ -858,6 +858,30 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void Constructor_NullDelegate_ThrowsArgumentNullException()
+        {
+            // Arrange
+            Func<AssertionRequestOptions, Task<string>> nullDelegate = null;
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(() =>
+                new SignedAssertionDelegateClientCredential(nullDelegate));
+        }
+
+        [TestMethod]
+        public void Constructor_ValidDelegate_DoesNotThrow()
+        {
+            // Arrange
+            Func<AssertionRequestOptions, Task<string>> validDelegate =
+                (options) => Task.FromResult("fake_assertion");
+
+            // Act & Assert
+            // Should not throw
+            var credential = new SignedAssertionDelegateClientCredential(validDelegate);
+            Assert.IsNotNull(credential);
+        }
+
+        [TestMethod]
         public async Task GetAuthorizationRequestUrlNoRedirectUriTestAsync()
         {
             using (var httpManager = new MockHttpManager())
