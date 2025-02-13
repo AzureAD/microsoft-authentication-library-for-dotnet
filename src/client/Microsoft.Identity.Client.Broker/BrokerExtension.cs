@@ -80,12 +80,21 @@ namespace Microsoft.Identity.Client.Broker
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
             }
+            else if (DesktopOsHelper.IsMac())
+            {
+                 builder.Config.BrokerCreatorFunc =
+                     (uiParent, appConfig, logger) =>
+                     {
+                         logger.Info("[Runtime] macOS supports broker.");
+                         return new RuntimeBroker(uiParent, appConfig, logger);
+                     };
+            }
             else
             {
                 builder.Config.BrokerCreatorFunc =
                    (uiParent, appConfig, logger) =>
                    {
-                       logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. Runtime broker or SsoPolicy support is not available.");
+                       logger.Info("[RuntimeBroker] not available in current platform.");
                        return new NullBroker(logger);
                    };
             }
