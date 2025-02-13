@@ -1,0 +1,1 @@
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems.Linux = 2 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
