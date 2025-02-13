@@ -43,45 +43,5 @@ namespace Microsoft.Identity.Client.Cache
         public const string ExtendedExpiresOn_MsalCompat = "ext_expires_on";
 
         public const string CacheExtensions = "ext";
-
-        //Known storeage keys need to be added here
-        public static readonly HashSet<string> s_knownStorageJsonKeys = new HashSet<string>
-        {
-            HomeAccountId, 
-            Environment, 
-            Realm, 
-            LocalAccountId, 
-            Username, 
-            AuthorityType, 
-            AlternativeAccountId,
-            GivenName, 
-            FamilyName, 
-            MiddleName,
-            Name, 
-            AvatarUrl, 
-            CredentialType,
-            ClientId,
-            Secret,
-            Target,
-            CachedAt, 
-            ExpiresOn, 
-            RefreshOn, 
-            ExtendedExpiresOn, 
-            ClientInfo,
-            FamilyId,
-            AppMetadata, 
-            KeyId,
-            TokenType, 
-            WamAccountIds, 
-            AccountSource,
-            UserAssertionHash,
-            ExtendedExpiresOn_MsalCompat, 
-            CacheExtensions
-        };
-
-        public static bool IsKnownStorageJsonKey(string key)
-        {
-            return s_knownStorageJsonKeys.Contains(key);
-        }
     }
 }

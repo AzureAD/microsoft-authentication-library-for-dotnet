@@ -38,22 +38,6 @@ namespace Microsoft.Identity.Client.Extensibility
                 return builder;
             }
 
-            StringBuilder offendingKeys = new();
-
-            //Ensure known JSON keys are not added to cache key components
-            foreach (var kvp in cacheKeyComponents)
-            {
-                if (StorageJsonKeys.IsKnownStorageJsonKey(kvp.Key))
-                {
-                    offendingKeys.AppendLine(kvp.Key);
-                }
-            }
-
-            if (offendingKeys.Length != 0)
-            {
-                throw new ArgumentException($"Keys added to {nameof(cacheKeyComponents)} are invalid. Offending keys are: {offendingKeys.ToString()}");
-            }
-
             if (builder.CommonParameters.CacheKeyComponents == null)
             {
                 builder.CommonParameters.CacheKeyComponents = new SortedList<string, string>(cacheKeyComponents);
