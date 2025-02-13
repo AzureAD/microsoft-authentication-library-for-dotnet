@@ -1,2 +1,4 @@
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ImdsV2 = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+static Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
 Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.get -> System.Collections.Generic.IEnumerable<string>
 Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.set -> void
