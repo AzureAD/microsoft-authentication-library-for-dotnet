@@ -7,9 +7,15 @@ using Microsoft.IdentityModel.Abstractions;
 
 IIdentityLogger identityLogger = new IdentityLogger();
 
-IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithLogging(identityLogger, true)
-                .Build();
+var managedIdentitySource = await ManagedIdentityApplication.
+    GetManagedIdentitySourceAsync().ConfigureAwait(false);
+
+Console.WriteLine($"Managed identity source detected: {managedIdentitySource}");
+
+IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
+    .Create(ManagedIdentityId.SystemAssigned)
+    .WithLogging(identityLogger, true)
+    .Build();
 
 string? scope = "https://management.azure.com";
 

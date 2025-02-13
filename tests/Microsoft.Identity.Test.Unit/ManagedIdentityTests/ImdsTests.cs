@@ -36,6 +36,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(ManagedIdentitySource.Imds, httpManager);
+
                 // Adding multiple mock handlers to simulate retries for GatewayTimeout
                 for (int i = 0; i < expectedAttempts; i++)
                 {

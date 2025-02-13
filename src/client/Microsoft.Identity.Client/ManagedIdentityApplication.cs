@@ -36,11 +36,15 @@ namespace Microsoft.Identity.Client
 
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
 
-            this.ServiceBundle.ApplicationLogger.Verbose(()=>$"ManagedIdentityApplication {configuration.GetHashCode()} created");
+            s_serviceBundle = this.ServiceBundle;
+
+            s_serviceBundle.ApplicationLogger.Verbose(() => $"ManagedIdentityApplication {configuration.GetHashCode()} created");
         }
 
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
+
+        private static IServiceBundle s_serviceBundle;
 
         /// <inheritdoc/>
         public AcquireTokenForManagedIdentityParameterBuilder AcquireTokenForManagedIdentity(string resource)
@@ -59,9 +63,20 @@ namespace Microsoft.Identity.Client
         /// Detects and returns the managed identity source available on the environment.
         /// </summary>
         /// <returns>Managed identity source detected on the environment if any.</returns>
+        [Obsolete("GetManagedIdentitySource() is deprecated and will be removed in a future release. Use GetManagedIdentitySourceAsync() instead.")]
+
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
             return ManagedIdentityClient.GetManagedIdentitySource();
+        }
+
+        /// <summary>
+        /// Detects and returns the managed identity source available on the environment asynchronously.
+        /// </summary>
+        /// <returns>Managed identity source detected on the environment if any.</returns>
+        public static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(CancellationToken cancellationToken = default)
+        {
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(s_serviceBundle, cancellationToken).ConfigureAwait(false);
         }
     }
 }
