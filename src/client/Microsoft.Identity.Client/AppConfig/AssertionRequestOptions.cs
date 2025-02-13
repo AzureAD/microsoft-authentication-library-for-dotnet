@@ -33,8 +33,9 @@ namespace Microsoft.Identity.Client
         public string Claims { get; set; }
 
         /// <summary>
-        /// Capabilities that the client application declares in the assertion.
-        /// The service may require or interpret these capabilities in advanced scenarios.
+        /// Capabilities that the client application has declared. 
+        /// If the callback implementer calls the token issuer using another client application object 
+        /// (e.g. ManagedIdentityApplication or ConfidentialClientApplication), the same capabilities should be used there.
         /// </summary>
         public IEnumerable<string> ClientCapabilities { get; set; }
     }
