@@ -493,11 +493,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private (ConfidentialClientApplication app, MockHttpMessageHandler handler) CreateConfidentialClient(
             MockHttpManager httpManager,
             X509Certificate2 cert,
-            CredentialType credentialType = CredentialType.Certificate)
+            CredentialType credentialType = CredentialType.Certificate,
+            bool withClientCapability = false)
         {
             var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithRedirectUri(TestConstants.RedirectUri)
                               .WithHttpManager(httpManager);
+
+            if (withClientCapability)
+            { 
+                builder.WithClientCapabilities(TestConstants.ClientCapabilities);
+            }
 
             ConfidentialClientApplication app;
 
@@ -526,15 +532,38 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNull(app.Certificate);
                     break;
                 case CredentialType.SignedAssertionWithAssertionRequestOptionsAsyncDelegate:
-                    builder = builder.WithClientAssertion((options) =>
                     {
-                        Assert.IsNotNull(options.ClientID);
-                        Assert.IsNotNull(options.TokenEndpoint);
-                        return Task.FromResult(TestConstants.DefaultClientAssertion);
-                    });
-                    app = builder.BuildConcrete();
-                    Assert.IsNull(app.Certificate);
-                    break;
+                        bool localWithClientCapability = withClientCapability;
+
+                        builder = builder.WithClientAssertion((options) =>
+                        {
+                            // Basic checks
+                            Assert.IsNotNull(options.ClientID);
+                            Assert.IsNotNull(options.TokenEndpoint);
+
+                            // Conditionally check ClientCapabilities
+                            if (localWithClientCapability)
+                            {
+                                Assert.IsNotNull(options.ClientCapabilities, "Expected ClientCapabilities to be set.");
+                                CollectionAssert.AreEqual(
+                                    TestConstants.ClientCapabilities,
+                                    options.ClientCapabilities.ToList(),
+                                    "ClientCapabilities should match what was configured."
+                                );
+                            }
+                            else
+                            {
+                                Assert.IsNull(options.ClientCapabilities, "ClientCapabilities should not be set if not requested.");
+                            }
+
+                            return Task.FromResult(TestConstants.DefaultClientAssertion);
+                        });
+
+                        app = builder.BuildConcrete();
+                        Assert.IsNull(app.Certificate);
+
+                        break;
+                    }
                 case CredentialType.Certificate:
                     builder = builder.WithCertificate(cert);
                     app = builder.BuildConcrete();
@@ -769,6 +798,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task SignedAssertionWithClientCapabilitiesTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup =
+                    CreateConfidentialClient(httpManager, 
+                    null, 
+                    CredentialType.SignedAssertionWithAssertionRequestOptionsAsyncDelegate,
+                    true);
+
+                var result = await setup.App.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+
+                Assert.AreEqual(
+                    TestConstants.DefaultClientAssertion,
+                    setup.Handler.ActualRequestPostData["client_assertion"]);
+
+                Assert.AreEqual(
+                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                    setup.Handler.ActualRequestPostData["client_assertion_type"]);
+            }
+        }
+
+        [TestMethod]
         public async Task ConfidentialClientUsingSignedClientAssertion_AsyncDelegate_CancellationTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -797,6 +855,68 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .ExecuteAsync(cancellationTokenSource.Token)).ConfigureAwait(false);
             }
+        }
+
+        [TestMethod]
+        public async Task SignedAssertionWithSingleClientCapabilityTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // 1. Instance discovery
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // 2. Mock the token endpoint response
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientCapabilities(new[] { "cp1" }) // Single capability
+                    .WithClientAssertion((options) =>
+                    {
+                        // Assert - only one capability
+                        Assert.IsNotNull(options.ClientCapabilities);
+                        CollectionAssert.AreEquivalent(
+                            new[] { "cp1" },
+                            options.ClientCapabilities.ToList());
+
+                        return Task.FromResult(TestConstants.DefaultClientAssertion);
+                    });
+
+                var app = builder.BuildConcrete();
+
+                // Act - calls the token endpoint
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Basic validations
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+            }
+        }
+
+        [TestMethod]
+        public void Constructor_NullDelegate_ThrowsArgumentNullException()
+        {
+            // Arrange
+            Func<AssertionRequestOptions, Task<string>> nullDelegate = null;
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(() =>
+                new SignedAssertionDelegateClientCredential(nullDelegate));
+        }
+
+        [TestMethod]
+        public void Constructor_ValidDelegate_DoesNotThrow()
+        {
+            // Arrange
+            Func<AssertionRequestOptions, Task<string>> validDelegate =
+                (options) => Task.FromResult("fake_assertion");
+
+            // Act & Assert
+            // Should not throw
+            var credential = new SignedAssertionDelegateClientCredential(validDelegate);
+            Assert.IsNotNull(credential);
         }
 
         [TestMethod]
@@ -1857,6 +1977,81 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             options.TokenEndpoint = "https://login.microsoft.com/v2.0/token";
             options.CancellationToken = CancellationToken.None;
             options.Claims = TestConstants.Claims;
+        }
+
+        [TestMethod]
+        public void ConfidentialClient_WithEmptyClientSecret_ThrowsException()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() =>
+            {
+                ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(string.Empty) // or null
+                    .Build();
+            });
+        }
+
+        [TestMethod]
+        public async Task ConfidentialClient_WithClaims_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // Mock success with verifying we got the extra claims in the request
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>()
+                {
+                    { "claims", "{\"extra_claim\":\"value\"}" }
+                };
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClaims("{\"extra_claim\":\"value\"}")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenByAuthorizationCode_NullOrEmptyCode_ThrowsAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // Act & Assert
+                await AssertException.TaskThrowsAsync<ArgumentException>(
+                    () => app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, null).ExecuteAsync()
+                ).ConfigureAwait(false);
+
+                await AssertException.TaskThrowsAsync<ArgumentException>(
+                    () => app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, string.Empty).ExecuteAsync()
+                ).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public void ConfidentialClient_WithInvalidAuthority_ThrowsArgumentException()
+        {
+            Assert.ThrowsException<ArgumentException>(() =>
+            {
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority("NotAValidAuthority")
+                    .Build();
+            });
         }
     }
 }
