@@ -67,6 +67,14 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     assertionOptions.ClientCapabilities = configuredCapabilities;
                 }
 
+                // Only set claims if they exist and are not empty
+                var configuredClaims = requestParameters.Claims;
+
+                if (!string.IsNullOrWhiteSpace(configuredClaims))
+                {
+                    assertionOptions.Claims = configuredClaims;
+                }
+
                 // Delegate that uses AssertionRequestOptions
                 string signedAssertion = await _signedAssertionWithInfoDelegate(assertionOptions).ConfigureAwait(false);
 
