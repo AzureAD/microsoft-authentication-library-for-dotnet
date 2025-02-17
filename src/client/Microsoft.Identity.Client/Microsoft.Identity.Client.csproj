@@ -85,6 +85,7 @@
     <None Include="Platforms\net\JsonObjectAttribute.cs" />
     <None Include="Platforms\net\JsonStringConverter.cs" />
     <None Include="Platforms\net\MsalJsonSerializerContext.cs" />
+    <None Include="Utils\ManagedIdentityCertificateManager.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
@@ -162,5 +163,9 @@
   <ItemGroup Label="For public api analyzer support">
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Shipped.txt" />
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Utils\ManagedIdentityCertificateManager.cs" />
   </ItemGroup>
 </Project>
