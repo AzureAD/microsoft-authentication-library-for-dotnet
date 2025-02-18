@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
     {
         private readonly ManagedIdentityApplication _managedIdentityApplication;
 
-        public ManagedIdentityExecutor(IServiceBundle serviceBundle, ManagedIdentityApplication managedIdentityApplication) 
+        public ManagedIdentityExecutor(IServiceBundle serviceBundle, ManagedIdentityApplication managedIdentityApplication)
             : base(serviceBundle)
         {
             ClientApplicationBase.GuardMobileFrameworks();
@@ -33,21 +33,40 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForManagedIdentityParameters managedIdentityParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(
+                commonParameters.CorrelationId,
+                commonParameters.MtlsCertificate,
+                cancellationToken);
 
-            var requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _managedIdentityApplication.AppTokenCacheInternal).ConfigureAwait(false);
 
-            var handler = new ManagedIdentityAuthRequest(
-                ServiceBundle,
-                requestParams,
-                managedIdentityParameters);
+            // Determine the Managed Identity Source
+            ManagedIdentitySource managedIdentitySource =
+                await ManagedIdentityClient.GetManagedIdentitySourceAsync(ServiceBundle, cancellationToken)
+                .ConfigureAwait(false);
 
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+            ManagedIdentityAuthRequest authRequest;
+
+            if (managedIdentitySource == ManagedIdentitySource.ImdsV2)
+            {
+                authRequest = new CredentialManagedIdentityAuthRequest(
+                    ServiceBundle,
+                    requestParams,
+                    managedIdentityParameters);
+            }
+            else
+            {
+                authRequest = new LegacyManagedIdentityAuthRequest(
+                    ServiceBundle,
+                    requestParams,
+                    managedIdentityParameters);
+            }
+
+            // Execute the request
+            return await authRequest.RunAsync(cancellationToken).ConfigureAwait(false);
         }
-
-     
     }
 }

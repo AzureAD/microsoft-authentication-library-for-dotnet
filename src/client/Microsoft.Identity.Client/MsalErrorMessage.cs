@@ -268,6 +268,10 @@ namespace Microsoft.Identity.Client
 
         public const string CustomWebUiReturnedInvalidUri = "ICustomWebUi returned an invalid URI - it is empty or has no query. ";
 
+        public const string CredentialEndpointNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity credential endpoint.";
+
+        public const string CredentialResponseMissingHeader = "[Managed Identity] Did not receive expected Server header in the response from Credential Endpoint.";
+
         public static string RedirectUriMismatch(string expectedUri, string actualUri)
         {
             return $"Redirect Uri mismatch.  Expected ({expectedUri}) Actual ({actualUri}). ";

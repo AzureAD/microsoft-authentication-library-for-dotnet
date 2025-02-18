@@ -53,8 +53,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             ManagedIdentitySource expectedManagedIdentitySource)
         {
             using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
 
                 Assert.AreEqual(expectedManagedIdentitySource, await ManagedIdentityApplication.GetManagedIdentitySourceAsync().ConfigureAwait(false));
             }

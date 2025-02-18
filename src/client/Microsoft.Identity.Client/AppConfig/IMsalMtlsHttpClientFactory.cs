@@ -7,8 +7,8 @@ using System.Security.Cryptography.X509Certificates;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Internal factory responsible for creating HttpClient instances configured for mutual TLS (MTLS).
-    /// This factory is specifically intended for use within the MSAL library for secure communication with Azure AD using MTLS.
+    /// Factory responsible for creating HttpClient instances configured for mutual TLS (MTLS).
+    /// This factory is specifically intended for use with the MSAL library for secure communication with Azure AD using MTLS.
     /// For more details on HttpClient instancing, see https://learn.microsoft.com/dotnet/api/system.net.http.httpclient?view=net-7.0#instancing.
     /// </summary>
     /// <remarks>
@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
     /// If your application requires Integrated Windows Authentication, set <see cref="HttpClientHandler.UseDefaultCredentials"/> to true.
     /// This interface is intended for internal use by MSAL only and is designed to support MTLS scenarios.
     /// </remarks>
-    internal interface IMsalMtlsHttpClientFactory : IMsalHttpClientFactory
+    public interface IMsalMtlsHttpClientFactory : IMsalHttpClientFactory
     {
         /// <summary>
         /// Returns an HttpClient configured with a certificate for mutual TLS authentication.
