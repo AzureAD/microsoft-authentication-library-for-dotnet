@@ -8,10 +8,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -76,7 +81,9 @@ namespace Microsoft.Identity.Client
         /// <returns>Managed identity source detected on the environment if any.</returns>
         public static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(CancellationToken cancellationToken = default)
         {
-            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(s_serviceBundle, cancellationToken).ConfigureAwait(false);
+            IServiceBundle serviceBundle = s_serviceBundle ?? new ServiceBundle(new ApplicationConfiguration(MsalClientType.ManagedIdentityClient));
+
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(serviceBundle, cancellationToken).ConfigureAwait(false);
         }
     }
 }

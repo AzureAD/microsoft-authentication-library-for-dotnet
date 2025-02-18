@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _logger.Info($"[Credential Probe] Response received from the server. Status Code: {response.StatusCode}");
 
             // 3. Evaluate IMDS header
-            if (response.HeadersAsDictionary.TryGetValue("server", out string serverHeader) &&
+            if (response.HeadersAsDictionary.TryGetValue("Server", out string serverHeader) &&
                 serverHeader.TrimStart().StartsWith(ImdsHeader, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Info("[Credential Probe] Credential endpoint supported. Server Header contains IMDS.");
