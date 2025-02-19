@@ -15,7 +15,7 @@ This section covers:
 
 The Problem: Certificate Expiry and Rotation
 
-- mTLS Proof of Possession (PoP) tokens are signed by a a binding certificate.
+- mTLS Proof of Possession (PoP) tokens are signed by a binding certificate.
 - The binding certificate is valid for 90 days.
 - A new certificate is made available 5 days before expiration.
 - The SDKs consuming MSAL (customizing httpclient) must ensure that its HttpClient uses the latest certificate.
@@ -56,6 +56,7 @@ SDKs customizing the httpclient factory will need a way to get the binding certi
 |----------------------------------|------------------------------------------------------------------------------------|
 | `GetManagedIdentitySourceAsync()`| Will expose the MSI Source including the new `IMDSV2` source                       |
 | `GetBindingCertificate()`        | Helper method to get the binding certificate when source is `IMDSV2`.              |
+| `BindingCertificateRefreshed`    | Event to notify SDKs when the binding certificate is updated.                      |
 
 
 
