@@ -29,40 +29,37 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         private const string _fmiAuthority = "https://login.microsoftonline.com/" + _fmiTenantId;
         private const string _fmiScope1 = "api://AzureFMITokenExchange/.default";
         private const string _fmiScope2 = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default";
-        private const string _fmiScope3 = "api://AzureAADTokenExchange/.default";
+        private const string _fmiScope3 = "api://AzureADTokenExchange/.default";
         private const string _fmiPath = "SomeFmiPath/fmi";
 
         [TestMethod]
-        [DataRow(_fmiClientId, _fmiAuthority, _fmiScope1, false)]
-        [DataRow(_fmiClientId, _fmiAuthority, _fmiScope2, false)]
-        [DataRow(_fmiClientId, _fmiAuthority, _fmiScope1, true)]
-        //[DataRow(_fmiAppUrn, _fmiAuthority, _fmiScope3, true)]
-        public async Task FmiIntegrationTestAsync(string clientId, string authority, string scope, bool useAssertion)
+        public async Task RmaFmiCredFlow1Async()
         {
-            await RunHappyPath(clientId, authority, scope, useAssertion).ConfigureAwait(false);
+            await RunRmaFlow(_fmiClientId, _fmiAuthority, _fmiScope1).ConfigureAwait(false);
         }
 
-        private async Task RunHappyPath(string clientId, string authority, string scope, bool useAssertion)
+        public async Task RmaFmiCredFlow2Async()
+        {
+            await RunRmaFlow(_fmiClientId, _fmiAuthority, _fmiScope2).ConfigureAwait(false);
+        }
+
+        public async Task FmiCredFlow2Async()
+        {
+            var fmiCredential = await RunRmaFlow(_fmiClientId, _fmiAuthority, _fmiScope2).ConfigureAwait(false);
+            await RunFicFlow(fmiCredential).ConfigureAwait(false);
+        }
+
+        private async Task<string> RunRmaFlow(string clientId, string authority, string scope)
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            ConfidentialClientApplication confidentialApp = null;
-            var builder = ConfidentialClientApplicationBuilder
+            var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority(authority, true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1")
-                        .WithExperimentalFeatures(true);
-
-            if (useAssertion)
-            {
-                builder.WithClientAssertion(options => GetSignedClientAssertion(cert, options.TokenEndpoint, options.ClientID));
-            }
-            else
-            {
-                builder.WithCertificate(cert, sendX5C: true);
-            }
-
-            confidentialApp = builder.BuildConcrete();
+                        .WithExperimentalFeatures(true)
+                        .WithCertificate(cert, sendX5C: true)
+                        .BuildConcrete();
 
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
@@ -82,27 +79,42 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             Assert.AreEqual(_fmiTenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
+
+            return authResult.AccessToken;
         }
 
-        private Task<string> GetSignedClientAssertion(X509Certificate2 certificate, string tokenEndpoint, string clientId)
+        private async Task RunFicFlow(string fmiCredential)
         {
-            // no need to add exp, nbf as JsonWebTokenHandler will add them by default.
-            var claims = new Dictionary<string, object>()
-            {
-                { "aud", tokenEndpoint },
-                { "iss", clientId },
-                { "jti", Guid.NewGuid().ToString() },
-                { "sub", clientId }
-            };
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                        .Create(_fmiAppUrn)
+                        .WithAuthority(_fmiAuthority, true)
+                        .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1")
+                        .WithExperimentalFeatures(true)
+                        .WithClientAssertion((options) =>
+                            {
+                                Assert.AreEqual(_fmiAppUrn, options.ClientID);
+                                return Task.FromResult(fmiCredential);
+                            })
+                        .BuildConcrete();
 
-            var securityTokenDescriptor = new SecurityTokenDescriptor
-            {
-                Claims = claims,
-                SigningCredentials = new X509SigningCredentials(certificate)
-            };
+            var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
-            var handler = new JsonWebTokenHandler();
-            return Task.FromResult(handler.CreateToken(securityTokenDescriptor));
+            var authResult = await confidentialApp.AcquireTokenForClient(new[] { _fmiScope3 })
+                                                    .WithFmiPath(_fmiPath)
+                                                    .ExecuteAsync()
+                                                    .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult);
+            appCacheRecorder.AssertAccessCounts(1, 1);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            CollectionAssert.AreEquivalent(new[] { _fmiScope3 }, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestScopes.ToArray());
+            CollectionAssert.AreEquivalent(new[] { _fmiScope3 }, appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
+            Assert.AreEqual(_fmiTenantId, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestTenantId ?? "");
+            Assert.AreEqual(_fmiTenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
+            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
+            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
         }
     }
 }
