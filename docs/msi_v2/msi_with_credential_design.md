@@ -269,10 +269,12 @@ Each time we increment `MsalMsiCounter`, we include the following tags:
    Identifies which certificate was used during the MSI V2 flow.  
    - Possible values: `"Platform"`, `"inMemory"`, `"UserProvided"`
 
-5. **errorCodeToCredentialEndpoint**  
-   If using the `/credential` endpoint (ImdsV2) and an error occurred, logs the relevant HTTP status or error code.  
-   - Possible values: `"404"`, `"500"`
-   - Empty if there was no error.
+5. **CredentialOutcome**  
+   If using the `/credential` endpoint (ImdsV2) log the outcome.  
+   - Not found
+   - Retry Failed
+   - Retry Succeeded
+   - Success
 
 6. **MsalVersion**  
    The MSAL library version in use.  

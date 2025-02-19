@@ -59,7 +59,50 @@ MSAL will use it's existing retry logic to handle the IMDS restart scenario and 
 
 ---
 
-## 5. Document Purpose
+## Client-Side Telemetry
+
+To improve observability and diagnostics of Managed Identity (MSI) scenarios within MSAL, we propose introducing a **new telemetry counter** named `MsalMsiCounter`. This counter will be incremented (or otherwise recorded) whenever MSI token acquisition activities occur, capturing the most relevant context in the form of tags.
+
+### Counter Name
+- **`MsalMsiCounter`**
+
+### Tags
+Each time we increment `MsalMsiCounter`, we include the following tags:
+
+1. **MsiSource**  
+   Describes which MSI path or resource is used.  
+   - Possible values: `"AppService"`, `"CloudShell"`, `"AzureArc"`, `"ImdsV1"`, `"ImdsV2"`, `"ServiceFabric"`
+
+2. **TokenType**  
+   Specifies the type of token being requested or used.  
+   - Possible values: `"Bearer"`, `"POP"`, `"mtls_pop"`
+
+3. **bypassCache**  
+   Indicates whether the MSAL cache was intentionally bypassed.  
+   - Possible values: `"true"`, `"false"`
+
+4. **CertType**  
+   Identifies which certificate was used during the MSI V2 flow.  
+   - Possible values: `"Platform"`, `"inMemory"`, `"UserProvided"`
+
+5. **CredentialOutcome**  
+   If using the `/credential` endpoint (ImdsV2) log the outcome.  
+   - Not found 
+   - Retry Failed
+   - Retry Succeeded
+   - Success
+
+6. **MsalVersion**  
+   The MSAL library version in use.  
+   - Example: `"4.51.2"`
+
+7. **Platform**  
+   The runtime/OS environment.  
+   - Examples: `"net6.0-linux"`, `"net472-windows"`
+
+---
+
+## 6. Document Purpose
 This document provides a **step-by-step breakdown** of the **[MSI V2 authentication probe](https://microsoft.sharepoint.com/:w:/t/AzureMSI/EUOAjN2q-hBNptrwi1ZolLgBsAYYmm_qRKXsoY62D2oiAg?e=hSAVOl)**, ensuring:
 - **Correct detection of the `/credential` endpoint.**
 - **Proper handling of IMDS restarts and failures.**

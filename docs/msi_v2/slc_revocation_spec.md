@@ -57,3 +57,58 @@ if (tokenResponse.get("error") == "invalid_client") {
 return tokenResponse;
 ```
 
+## Acceptance Tests
+
+### Test Scenarios and Expected Behavior
+
+The following acceptance tests validate the behavior of MSAL when handling SLC revocation scenarios. Each test case ensures that MSAL correctly interacts with IMDS and eSTS when an invalid credential is detected.
+
+| **Test Case**                         | **Description**                                                                                          | **Expected Outcome** |
+|----------------------------------------|----------------------------------------------------------------------------------------------------------|----------------------|
+| **Revoked Token Scenario**             | Simulate eSTS returning `{"error": "invalid_client", "suberror": "revoked_token"}` when MSAL requests a token. | MSAL calls IMDS with `error_code=revoked_token`, retrieves a new SLC, and retries the token request with eSTS. |
+| **Unspecified Credential Issue**       | Simulate eSTS returning `{"error": "invalid_client"}` without a suberror.                                 | MSAL calls IMDS with `error_code=unspecified`, retrieves a new SLC, and retries the token request with eSTS. |
+| **Claims Challenge Handling**          | Simulate an API rejecting an access token due to missing claims (`insufficient_claims`).                 | MSAL does not retry automatically; the app developer must pass claims, triggering a new token request. |
+| **Successful Token Retry**             | Simulate eSTS initially rejecting the token but accepting a new token after IMDS issues a fresh SLC.     | MSAL successfully retries and obtains a valid token. |
+| **IMDS Fails to Issue New Credential** | Simulate IMDS failing to provide a new SLC after receiving an `error_code` parameter.                    | MSAL logs an error and returns failure, ensuring that telemetry captures the failure reason. |
+| **Telemetry Validation**               | Ensure `MsalMsiCounter` correctly logs telemetry tags such as `MsiSource`, `TokenType`, `bypassCache`, and `CredentialOutcome`. | Telemetry records correct values for each token acquisition attempt, including failures. |
+
+## Client-Side Telemetry
+
+To improve observability and diagnostics of Managed Identity (MSI) scenarios within MSAL, we propose introducing a **new telemetry counter** named `MsalMsiCounter`. This counter will be incremented (or otherwise recorded) whenever MSI token acquisition activities occur, capturing the most relevant context in the form of tags.
+
+### Counter Name
+- **`MsalMsiCounter`**
+
+### Tags
+Each time we increment `MsalMsiCounter`, we include the following tags:
+
+1. **MsiSource**  
+   Describes which MSI path or resource is used.  
+   - Possible values: `"AppService"`, `"CloudShell"`, `"AzureArc"`, `"ImdsV1"`, `"ImdsV2"`, `"ServiceFabric"`
+
+2. **TokenType**  
+   Specifies the type of token being requested or used.  
+   - Possible values: `"Bearer"`, `"POP"`, `"mtls_pop"`
+
+3. **bypassCache**  
+   Indicates whether the MSAL cache was intentionally bypassed.  
+   - Possible values: `"true"`, `"false"`
+
+4. **CertType**  
+   Identifies which certificate was used during the MSI V2 flow.  
+   - Possible values: `"Platform"`, `"inMemory"`, `"UserProvided"`
+
+5. **CredentialOutcome**  
+   If using the `/credential` endpoint (ImdsV2) log the outcome.  
+   - Not found
+   - Retry Failed
+   - Retry Succeeded
+   - Success
+
+6. **MsalVersion**  
+   The MSAL library version in use.  
+   - Example: `"4.51.2"`
+
+7. **Platform**  
+   The runtime/OS environment.  
+   - Examples: `"net6.0-linux"`, `"net472-windows"`
