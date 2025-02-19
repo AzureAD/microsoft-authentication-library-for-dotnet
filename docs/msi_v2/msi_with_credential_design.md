@@ -9,21 +9,22 @@ This document provides detailed guidance for SDK developers to implement MSI V2 
 The primary objective is to enable seamless token acquisition in MSI V2 for VM/VMSS, utilizing the `/credential` endpoint.
 
 - Define the **MSI V2 token acquisition process**.
-- Describe how MSAL interacts with the `/credential` and the ESTS token endpoints.
+- Describe how MSAL interacts with the `/credential` and the ESTS regional token endpoint.
 - Ensure compatibility with **Windows and Linux** VMs and VMSS.
 
 ## Token Acquisition Process
 
-In **MSI V1**, IMDS directly returns an **access token**. However, in **MSI V2**, the process involves two steps:
+In **MSI V1**, IMDS or any other Managed Identity Resource Provider (MIRP) directly returns an **access token**. However, in **MSI V2**, the process involves two steps:
 
 ### Short-Lived Credential Retrieval from `/credential` Endpoint
 
+- Azure Managed Identity Resource Providers host the `/credential` endpoint.
 - The client (MSAL) calls the `/credential` endpoint to retrieve a **short-lived credential (SLC)**.
 - This credential is valid for a short duration and must be used promptly in the next step.
 
 ### Access Token Acquisition via ESTS
 
-- The client presents the **short-lived credential** to **ESTS** over **MTLS**.
+- The client presents the **short-lived credential** to **ESTS** over **MTLS** as an assertion.
 - ESTS validates the credential and issues an **access token**.
 - The access token is then used to authenticate with Azure services.
 
@@ -31,8 +32,9 @@ In **MSI V1**, IMDS directly returns an **access token**. However, in **MSI V2**
 
 To start the flow, MSAL requires a certificate. MSAL follows these steps:
 
-1. **Check for an existing certificate**: MSAL looks for a platform certificate (`devicecert.mtlsauth.local`) in the given Azure resource.
-2. **Create a new certificate if not found**: If the expected certificate is not available, MSAL generates one dynamically for authentication.
+1. **Check for an existing certificate (Windows only)**: MSAL looks for a platform certificate (`devicecert.mtlsauth.local`) in the given Azure resource (In both local machine and local user store). 
+2. **Create a new certificate, if none is found**: If a platform certificate is not available, MSAL generates one (self signed) for authentication.
+3. **Linux Only**: MSAL will always generate a self signed certificate on Linux.
 
 ## Source Detection Logic
 
@@ -44,46 +46,47 @@ MSAL checks for Azure resource type based on specific environment variables to d
 
 - **Service Fabric**
 - **App Service**
-- **Azure Arc**
-- **Cloud Shell**
 - **Machine Learning**
+- **Cloud Shell**
+- **Azure Arc**
 
 If identified, MSAL will use the appropriate legacy MSI endpoint for that resource.
 
 ### Fallback to IMDS
 
 - If no specific Azure resource is identified from the environment variables, MSAL will fall back to IMDS (VMs and VMSS).
-- In this new design, Before fully falling back to IMDS, MSAL will now **probe the Credential Endpoint in IMDS**.
-- MSAL probes to see if the `/credential` endpoint exists in IMDS.
+- This fallback is the MSI v1 design or the legacy fallback mechanism.
+- In this new MSI v2 design, Before fully falling back to IMDS, MSAL will now **probe for the Credential Endpoint**.
+- MSAL probes to see if the `/credential` endpoint exists.
 - If the `/credential` endpoint is unavailable, it falls back to the legacy `/token` endpoint.
+- If probe is succesful then we can assume the current Azure Resource is a VM/VMSS 
 
 ## MSI V2 /credential Endpoint Details
 
 ### Short-Lived Credential Retrieval
 
-- The `/credential` endpoint provides a **temporary credential** instead of a direct access token.
+- The `/credential` endpoint provides a **temporary credential** instead of an access token.
 - This credential is only valid for a short duration (1 hour) and must be used **immediately** to acquire an access token from ESTS.
 - This mechanism improves security by reducing the lifetime of sensitive authentication materials.
 
 ### Retry Logic
 
-MSAL uses the **default Managed Identity retry policy** for MSI V2 credntial/token requests, whether calling the ESTS endpoint or the new `/credential` endpoint.
+MSAL uses the **default Managed Identity [retry](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/651b71c7d1dcaf3261e598e01e017dfd3672bb25/src/client/Microsoft.Identity.Client/Http/HttpManagerFactory.cs#L28) policy** for MSI V2 credential/token requests, whether calling the ESTS endpoint or the new `/credential` endpoint. i.e. MSAL performs 3 retries with a 1 second pause between each retry. Retries are performed on certain error [codes](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/651b71c7d1dcaf3261e598e01e017dfd3672bb25/src/client/Microsoft.Identity.Client/Http/HttpRetryCondition.cs#L12) only.
 
 ## Steps for MSI V2 Authentication
 
 This section outlines the necessary steps to acquire an access token using the MSI V2 `/credential` endpoint. 
 
 ### 1. Check for an Existing (Platform) Certificate (Windows only)
-- Search for a specific certificate (`devicecert.mtlsauth.local`) in `Cert:\LocalMachine\My`.
-- If the certificate is not found in Local Machine, check Current User's certificate store (Cert:\CurrentUser\My).
-- If any certificate is found, extract its thumbprint and use it for authentication.
+- Search for a specific certificate (`devicecert.mtlsauth.local`) in `(Cert:\LocalMachine\My)`.
+- If the certificate is not found in Local Machine, check Current User's certificate store `(Cert:\CurrentUser\My)`.
 
 ### 2. Generate a New Certificate (if platform certificate is not found)
 - If no valid platform certificate is found in Cert:\LocalMachine\My or Cert:\CurrentUser\My, create a new in-memory self-signed certificate.
 - This applies especially to Linux VMs, where platform certificates are not pre-configured, and MSAL must always generate an in-memory certificate for MTLS authentication.
 
 #### Certificate Creation Requirements
-- **Subject Name:** CN=mtls-auth (subject name can be adjusted as needed).
+- **Subject Name:** CN=mtls-auth (subject name not final).
 - **Validity Period:** 90 days.
 - **Key Export Policy:** Private key must be exportable to allow use for MTLS authentication.
 - **Key Usage must include:** Digital Signature, Key Encipherment and TLS Client Authentication.
@@ -187,7 +190,7 @@ $bodyObject = @{
             x5c = @($x5c)  # Ensures correct array formatting
         }
     }
-    latch_key = $false  # Some VMs need this. Remove in production if unnecessary.
+    latch_key = $false  # Final version of the product should not have this. IMDS team is working on removing this. 
 }
 
 # Convert JSON object to a string
