@@ -1,31 +1,48 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Azure;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public static class LabUserHelper
     {
-        private static readonly LabServiceApi s_labService;
+        private static readonly LabServiceApi s_labService = new LabServiceApi();
         private static readonly ConcurrentDictionary<UserQuery, LabResponse> s_userCache =
             new ConcurrentDictionary<UserQuery, LabResponse>();
 
-        public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsal { get; }
-        public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsid { get; }
+        public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsal { get; private set; }
+        public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsid { get; private set; }
 
-        static LabUserHelper()
+        private static bool _isInitialized = false;
+        private static readonly object _initializationLock = new object();
+
+        public static void Initialize()
         {
-            KeyVaultSecretsProviderMsal = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
-            KeyVaultSecretsProviderMsid = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
-            s_labService = new LabServiceApi();
+            if (_isInitialized)
+            {
+                return;
+            }
+
+            lock (_initializationLock)
+            {
+                if (_isInitialized)
+                {
+                    return;
+                }
+
+                KeyVaultSecretsProviderMsal = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
+                KeyVaultSecretsProviderMsid = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
+
+                _isInitialized = true;
+            }
         }
 
-        public static async Task<LabResponse> GetLabUserDataAsync(UserQuery query)
+        internal static async Task<LabResponse> GetLabUserDataAsync(UserQuery query)
         {
+            Initialize();
+
             if (s_userCache.ContainsKey(query))
             {
                 Trace.WriteLine("Lab user cache hit. Selected user: " + s_userCache[query].User.Upn);
@@ -35,7 +52,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             var response = await s_labService.GetLabResponseFromApiAsync(query).ConfigureAwait(false);
             if (response == null)
             {
-                throw new LabUserNotFoundException(query, "Found no users for the given query.");
+                throw new LabUserNotFoundException("Found no users for the given query: " + query);
             }
 
             bool added = s_userCache.TryAdd(query, response);
@@ -53,23 +70,16 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static async Task<string> GetMSIEnvironmentVariablesAsync(string uri)
         {
+            Initialize();
             string result = await s_labService.GetLabResponseAsync(uri).ConfigureAwait(false);
             return result;
         }
 
-        /// <summary>
-        /// Returns the AAD cloud user idlab1@msidlab4.onmicrosoft.com
-        /// </summary>
-        /// <returns></returns>
         public static Task<LabResponse> GetDefaultUserAsync()
         {
             return GetLabUserDataAsync(UserQuery.PublicAadUserQuery);
         }
 
-        /// <summary>
-        /// Returns the AAD cloud user idlab@msidlab4.onmicrosoft.com
-        /// </summary>
-        /// <returns></returns>
         public static Task<LabResponse> GetDefaultUser2Async()
         {
             return GetLabUserDataAsync(UserQuery.PublicAadUser2Query);
@@ -121,6 +131,17 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             var response = GetLabUserDataAsync(UserQuery.ArlingtonUserQuery);
             response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
             return response;
+        }
+
+        public static Task<LabResponse> GetCiamUserAync()
+        {
+            var query = new UserQuery()
+            {
+                FederationProvider = FederationProvider.CIAMCUD,
+                SignInAudience = SignInAudience.AzureAdMyOrg
+            };
+
+            return GetLabUserDataAsync(query);
         }
 
         public static Task<LabResponse> GetArlingtonADFSUserAsync()

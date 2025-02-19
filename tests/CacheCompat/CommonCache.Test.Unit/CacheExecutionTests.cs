@@ -19,8 +19,8 @@ namespace CommonCache.Test.Unit
 
         private static async Task<LabUserData> GetPublicAadUserDataAsync()
         {
-            var api = new LabServiceApi();
-            LabResponse labResponse = (await api.GetLabResponseFromApiAsync(UserQuery.PublicAadUserQuery).ConfigureAwait(false));
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+
             return new LabUserData(
               labResponse.User.Upn,
               labResponse.User.GetOrFetchPassword(),
