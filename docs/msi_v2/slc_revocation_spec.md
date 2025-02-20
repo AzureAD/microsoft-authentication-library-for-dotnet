@@ -6,6 +6,8 @@ This document outlines the design and implementation details for short-lived cre
 
 In the MSI v2 authentication flow, MSAL first obtains a credential from IMDS and uses it to request a token from eSTS. In some cases, eSTS may respond with an error code indicating that the credential is no longer valid. When this occurs, MSAL must pass the error code back to IMDS to request a new credential before retrying the token request with eSTS. 
 
+### slc or credential revocation
+
 ```mermaid
 sequenceDiagram
     participant Application
@@ -35,6 +37,8 @@ sequenceDiagram
 
     MSAL ->> Application: 10. Return Access Token
 ```
+
+### claims challenge
 
 ```mermaid
 sequenceDiagram
