@@ -36,7 +36,7 @@ extends:
               - task: ManualValidation@1
                 inputs:
                   notifyUsers: |
-                    $(approvers)
+                    avdunn@microsoft.com
           - job: Release
             displayName: Release Steps
             dependsOn: Require_Approval # Only run this job if the manual approval job succeeds
