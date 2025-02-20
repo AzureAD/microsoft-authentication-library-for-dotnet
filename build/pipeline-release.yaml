@@ -42,7 +42,7 @@ extends:
                     avdunn@microsoft.com
           - job: Release
             displayName: Release Steps
-            condition: succeeded() # Only run this job if the previous job succeeded, in this case manual approval
+            dependsOn: Require_Approval # Only run this job if the this case manual approval
             timeoutInMinutes: 0
             templateContext:
               inputs:
@@ -51,7 +51,7 @@ extends:
                   artifactName: 'drop_build_main'
                   targetPath: '$(Build.ArtifactStagingDirectory)/drop_build_main'
             steps:
-              - script: echo $(Release.Nuget) $(buildVersion)
+              - script: echo $(Release.Nuget) $(ReleaseNuget)
                 displayName: script
               - task: NuGetToolInstaller@1
                 displayName: Use NuGet >=5.x
