@@ -16,6 +16,30 @@ The primary objective is to enable seamless token acquisition in MSI V2 for VM/V
 
 In **MSI V1**, IMDS or any other Managed Identity Resource Provider (MIRP) directly returns an **access token**. However, in **MSI V2**, the process involves two steps:
 
+```mermaid
+sequenceDiagram
+    participant Application
+    participant MSAL
+    participant IMDS
+    participant ESTS
+
+    Application ->> MSAL: 1. Request token using Managed Identity
+    MSAL ->> IMDS: 2. Probe for `/credential` endpoint availability
+    IMDS -->> MSAL: 3. Response (200 OK / 404 Not Found)
+
+    alt `/credential` endpoint available
+        MSAL ->> IMDS: 4. Request Short-Lived Credential (SLC) via `/credential`
+        IMDS -->> MSAL: 5. Return SLC
+        MSAL ->> ESTS: 6. Exchange SLC for Access Token via MTLS
+        ESTS -->> MSAL: 7. Return Access Token
+        MSAL ->> Application: 8. Return Access Token
+    else `/credential` endpoint not available
+        MSAL ->> IMDS: 4a. Fallback to legacy `/token` endpoint
+        IMDS -->> MSAL: 5a. Return Access Token
+        MSAL ->> Application: 6a. Return Access Token
+    end
+```
+
 ### Short-Lived Credential Retrieval from `/credential` Endpoint
 
 - Azure Managed Identity Resource Providers host the `/credential` endpoint.
