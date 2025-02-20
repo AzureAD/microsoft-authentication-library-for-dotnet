@@ -256,16 +256,18 @@ namespace Microsoft.Identity.Client.OAuth2
                 exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.NonParsableOAuthError,
                     MsalErrorMessage.NonParsableOAuthError,
-                    response);
+                    response,
+                    null,
+                    requestContext);
             }
             catch (Exception ex)
             {
-
                 exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.UnknownError,
                     response.Body,
                     response,
-                    ex);
+                    ex,
+                    requestContext);
             }
 
             exceptionToThrow ??= MsalServiceExceptionFactory.FromHttpResponse(
@@ -273,7 +275,9 @@ namespace Microsoft.Identity.Client.OAuth2
                         ? MsalError.HttpStatusNotFound
                         : MsalError.HttpStatusCodeNotOk,
                     httpErrorCodeMessage,
-                    response);
+                    response,
+                    null,
+                    requestContext);
 
             if (shouldLogAsError)
             {

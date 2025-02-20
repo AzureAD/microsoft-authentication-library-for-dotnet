@@ -183,13 +183,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string token = "header.payload.signature", 
             string expiresIn = "3599",
             string tokenType = "Bearer",
-            IList<string> unexpectedHttpHeaders = null)
+            IList<string> unexpectedHttpHeaders = null,
+            Dictionary<string, string> expectedPostData = null
+            )
         {
             var handler = new MockHttpMessageHandler()
             {
                 ExpectedMethod = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token, expiresIn, tokenType),
-                UnexpectedRequestHeaders = unexpectedHttpHeaders
+                UnexpectedRequestHeaders = unexpectedHttpHeaders,
+                ExpectedPostData = expectedPostData
             };
 
             httpManager.AddMockHandler(handler);

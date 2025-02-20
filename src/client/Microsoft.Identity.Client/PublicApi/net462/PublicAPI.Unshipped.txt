@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.set -> void

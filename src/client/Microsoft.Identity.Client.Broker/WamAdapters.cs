@@ -191,6 +191,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     authParams.Properties[kvp.Key] = kvp.Value;
                 }
             }
+            
+            //pass client sku and ver
+            Dictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(logger);
+            authParams.Properties["msal_client_sku"] = msalIdParams[MsalIdParameter.Product];
+            authParams.Properties["msal_client_ver"] = msalIdParams[MsalIdParameter.Version];
 
             //pass extra query parameters if there are any
             if (authenticationRequestParameters.ExtraQueryParameters != null)

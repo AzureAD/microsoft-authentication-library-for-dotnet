@@ -294,7 +294,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithExtraQueryParameters(IDictionary<string, string> extraQueryParameters)
         {
-            Config.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Config.ExtraQueryParameters = extraQueryParameters;
             return this as T;
         }
 

@@ -56,6 +56,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
                 }
+
                 Debug.Assert(_requestParams.RequestContext.ApiEvent != null, "The Token Client must only be called by requests.");
                 _requestParams.RequestContext.ApiEvent.TokenEndpoint = tokenEndpoint;
 
@@ -161,6 +162,11 @@ namespace Microsoft.Identity.Client.OAuth2
             foreach (var kvp in _requestParams.AuthenticationScheme.GetTokenRequestParams())
             {
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
+            }
+
+            if (!string.IsNullOrEmpty(_requestParams.FmiPathSuffix))
+            {
+                _oAuth2Client.AddBodyParameter(OAuth2Parameter.FmiPath, _requestParams.FmiPathSuffix);
             }
 
             _oAuth2Client.AddHeader(

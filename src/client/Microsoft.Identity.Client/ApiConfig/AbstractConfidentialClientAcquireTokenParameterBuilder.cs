@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Modifies the request to acquire a Signed HTTP Request (SHR) Proof-of-Possession (PoP) token, rather than a Bearer.
         /// SHR PoP tokens are bound to the HTTP request and to a cryptographic key, which MSAL manages on Windows.
-       /// SHR PoP tokens are different from mTLS PoP tokens, which are used for Mutual TLS (mTLS) authentication. See <see href="https://aka.ms/mtls-pop"/> for details.
+        /// SHR PoP tokens are different from mTLS PoP tokens, which are used for Mutual TLS (mTLS) authentication. See <see href="https://aka.ms/mtls-pop"/> for details.
         /// </summary>
         /// <param name="popAuthenticationConfiguration">Configuration properties used to construct a Proof-of-Possession request.</param>
         /// <returns>The builder.</returns>
