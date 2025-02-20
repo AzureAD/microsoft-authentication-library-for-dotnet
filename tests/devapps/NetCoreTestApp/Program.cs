@@ -22,6 +22,12 @@ namespace NetCoreTestApp
 {
     public class Program
     {
+        internal /* for test */ static Dictionary<string, string> CallerSDKDetails { get; } = new()
+          {
+              { "caller-sdk-id", "IdWeb_1" },
+              { "caller-sdk-ver", "123" }
+          };
+
         // This app has http://localhost redirect uri registered
         private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
 
@@ -30,8 +36,6 @@ namespace NetCoreTestApp
         // Confidential client app with access to https://graph.microsoft.com/.default
         private static string s_clientIdForConfidentialApp;
 
-        // App secret for app above 
-        private static string s_confidentialClientSecret;
 
         // App certificate for app above 
         private static X509Certificate2 s_confidentialClientCertificate;
@@ -65,7 +69,6 @@ namespace NetCoreTestApp
             var ccaSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             s_clientIdForConfidentialApp = ccaSettings.ClientId;
             s_ccaAuthority = ccaSettings.Authority;
-            s_confidentialClientSecret = ccaSettings.GetSecret();
             s_confidentialClientCertificate = ccaSettings.GetCertificate();
 
             var pca = CreatePca();
@@ -86,7 +89,7 @@ namespace NetCoreTestApp
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true);
 
-            if(withWamBroker)
+            if (withWamBroker)
             {
                 IntPtr consoleWindowHandle = GetConsoleWindow();
                 Func<IntPtr> consoleWindowHandleProvider = () => consoleWindowHandle;
@@ -233,12 +236,13 @@ namespace NetCoreTestApp
                             break;
 
                         case 7:
-                            for (int i = 0; i < 100; i++)
+                            var cca = CreateCca();
+
+                            for (int i = 0; i < 1000; i++)
                             {
-                                var cca = CreateCca();
 
                                 var resultX = await cca.AcquireTokenForClient(GraphAppScope)
-                                    //.WithForceRefresh(true)
+                                    //.WithForceRefresh(true)                                    
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
 
@@ -282,11 +286,12 @@ namespace NetCoreTestApp
 
                         case 11: // AcquireTokenForClient with multiple threads
                             Console.Write("Enter number of threads to start (default 10): ");
-                            int totalThreads = int.TryParse(Console.ReadLine(), out totalThreads) ? totalThreads : 10;
+                            int totalThreads = int.TryParse(Console.ReadLine(), out totalThreads) ? totalThreads : 100;
                             Console.Write("Enter run duration in seconds (default 10): ");
                             int durationInSeconds = int.TryParse(Console.ReadLine(), out durationInSeconds) ? durationInSeconds : 10;
-
-                            var acquireTokenBuilder = CreateCca().AcquireTokenForClient(GraphAppScope);
+                            var cca2 = CreateCca();
+                            var acquireTokenBuilder = cca2.AcquireTokenForClient(GraphAppScope)
+                                .WithExtraQueryParameters(CallerSDKDetails);
 
                             var threads = new List<Thread>();
                             for (int i = 0; i < totalThreads; i++)
@@ -375,7 +380,7 @@ namespace NetCoreTestApp
 
                         case 15: //acquire token with cert over MTLS SNI + MTLS 
 
-                            var cca1 = CreateCcaForMtlsPop("westus3", s_confidentialClientCertificate);
+                            var cca1 = CreateCcaForMtlsPop("westus3");
 
                             var resultX1 = await cca1.AcquireTokenForClient(GraphAppScope)
                                 .WithMtlsProofOfPossession()
@@ -405,21 +410,12 @@ namespace NetCoreTestApp
             }
         }
 
-        private static IConfidentialClientApplication CreateCca(X509Certificate2 certificate = null)
+        private static IConfidentialClientApplication CreateCca()
         {
             ConfidentialClientApplicationBuilder ccaBuilder = ConfidentialClientApplicationBuilder
                 .Create(s_clientIdForConfidentialApp)
-                .WithAuthority(s_ccaAuthority);
-
-            // Use WithCertificate if a certificate is provided; otherwise, use WithClientSecret.
-            if (certificate != null)
-            {
-                ccaBuilder = ccaBuilder.WithCertificate(certificate);
-            }
-            else
-            {
-                ccaBuilder = ccaBuilder.WithClientSecret(s_confidentialClientSecret);
-            }
+                .WithAuthority(s_ccaAuthority)
+                .WithCertificate(s_confidentialClientCertificate);
 
             IConfidentialClientApplication ccapp = ccaBuilder.Build();
 
@@ -429,25 +425,18 @@ namespace NetCoreTestApp
             return ccapp;
         }
 
-        private static IConfidentialClientApplication CreateCcaForMtlsPop(string region, X509Certificate2 certificate = null)
+        private static IConfidentialClientApplication CreateCcaForMtlsPop(string region)
         {
             ConfidentialClientApplicationBuilder ccaBuilder = ConfidentialClientApplicationBuilder
                 .Create("163ffef9-a313-45b4-ab2f-c7e2f5e0e23e")
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion(region);
 
-            // Use WithCertificate if a certificate is provided; otherwise, use WithClientSecret.
-            if (certificate != null)
-            {
-                ccaBuilder = ccaBuilder.WithCertificate(certificate, true);
 
-                //Add Experimental feature for MTLS PoP
-                ccaBuilder = ccaBuilder.WithExperimentalFeatures();
-            }
-            else
-            {
-                ccaBuilder = ccaBuilder.WithClientSecret(s_confidentialClientSecret);
-            }
+            ccaBuilder = ccaBuilder.WithCertificate(s_confidentialClientCertificate, true);
+
+            //Add Experimental feature for MTLS PoP
+            ccaBuilder = ccaBuilder.WithExperimentalFeatures();
 
             IConfidentialClientApplication ccapp = ccaBuilder.Build();
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,9 +46,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             AuthorityManager = new AuthorityManager(RequestContext, initialAuthority);
 
-            // Set application wide query parameters.
-            ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ??
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            // it is important to copy the values from the config to the request, so that the request can be modified
+            // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5108 
+            if (serviceBundle.Config.ExtraQueryParameters is null)
+            {
+                ExtraQueryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+            else
+            {
+                ExtraQueryParameters = new Dictionary<string, string>(
+                    serviceBundle.Config.ExtraQueryParameters, 
+                    StringComparer.OrdinalIgnoreCase);
+            }
 
             // Copy in call-specific query parameters.
             if (commonParameters.ExtraQueryParameters != null)
@@ -117,6 +127,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
+        public SortedList<string, string> CacheKeyComponents => _commonParameters.CacheKeyComponents;
+
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
@@ -163,6 +175,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string LongRunningOboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
+
+        public string FmiPathSuffix => _commonParameters.FmiPathSuffix;
         #endregion
 
         public void LogParameters()
