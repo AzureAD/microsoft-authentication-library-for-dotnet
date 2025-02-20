@@ -51,8 +51,8 @@ extends:
                   artifactName: 'drop_build_main'
                   targetPath: '$(Build.ArtifactStagingDirectory)/drop_build_main'
             steps:
-              - script: echo $(Release.Nuget) $(Release.IDDP) 
-                displayName: Say hello
+              - script: echo $(Release.Nuget) $(buildVersion)
+                displayName: script
               - task: NuGetToolInstaller@1
                 displayName: Use NuGet >=5.x
                 inputs:
