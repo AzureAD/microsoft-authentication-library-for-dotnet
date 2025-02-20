@@ -58,11 +58,18 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #endif
         }
 
-        public static bool IsWslEnv()
+        private static bool IsWslEnv()
         {
             if (IsLinux()) {
-                var versionInfo = File.ReadAllText("/proc/version");
-                return versionInfo.Contains("Microsoft") || versionInfo.Contains("WSL");
+                try
+                {
+                    var versionInfo = File.ReadAllText("/proc/version");
+                    return versionInfo.Contains("Microsoft") || versionInfo.Contains("WSL");
+                }
+                catch
+                {
+                    return false; // if we can't read the file, we can't determine if it's WSL
+                }
             }
             return false;
         }
