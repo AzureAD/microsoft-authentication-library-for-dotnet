@@ -27,7 +27,7 @@ extends:
     stages:
       - stage: Release_Nuget
         displayName: Upload to Nuget
-        condition: eq('${{ variables.ReleaseNuget }}', true) # Only run this stage if set to true at runtime
+        # condition: eq('${{ variables.ReleaseNuget }}', true) # Only run this stage if set to true at runtime
         # dependsOn: build # Only run if the 'build' stage completes
         jobs:
           - job: Require_Approval
@@ -51,6 +51,8 @@ extends:
                   artifactName: 'drop_build_main'
                   targetPath: '$(Build.ArtifactStagingDirectory)/drop_build_main'
             steps:
+              - script: echo $(Release.Nuget) $(Release.IDDP) 
+                displayName: Say hello
               - task: NuGetToolInstaller@1
                 displayName: Use NuGet >=5.x
                 inputs:
