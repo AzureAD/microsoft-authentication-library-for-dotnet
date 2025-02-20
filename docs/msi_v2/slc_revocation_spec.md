@@ -6,6 +6,42 @@ This document outlines the design and implementation details for short-lived cre
 
 In the MSI v2 authentication flow, MSAL first obtains a credential from IMDS and uses it to request a token from eSTS. In some cases, eSTS may respond with an error code indicating that the credential is no longer valid. When this occurs, MSAL must pass the error code back to IMDS to request a new credential before retrying the token request with eSTS. 
 
+```mermaid
+sequenceDiagram
+    participant Application
+    participant MSAL
+    participant IMDS
+    participant eSTS
+
+    Application ->> MSAL: 1. Request Access Token
+    MSAL ->> IMDS: 2. Request Short-Lived Credential (SLC)
+    IMDS -->> MSAL: 3. Return SLC
+    MSAL ->> eSTS: 4. Exchange SLC for Access Token
+    eSTS -->> MSAL: 5. Response (HTTP 200 / error)
+
+    alt Token Revoked
+        eSTS -->> MSAL: 5a. Return `{"error": "invalid_client", "suberror": "revoked_token"}`
+        MSAL ->> IMDS: 6. Request new SLC with `error_code=revoked_token`
+        IMDS -->> MSAL: 7. Return new SLC
+        MSAL ->> eSTS: 8. Retry Access Token request with new SLC
+        eSTS -->> MSAL: 9. Return new Access Token
+    else Unspecified Credential Issue
+        eSTS -->> MSAL: 5b. Return `{"error": "invalid_client"}`
+        MSAL ->> IMDS: 6a. Request new SLC with `error_code=unspecified`
+        IMDS -->> MSAL: 7a. Return new SLC
+        MSAL ->> eSTS: 8a. Retry Access Token request with new SLC
+        eSTS -->> MSAL: 9a. Return new Access Token
+    else Claims Challenge
+        eSTS -->> MSAL: 5c. Return `insufficient_claims`
+        MSAL ->> Application: 6b. Notify Application (Claims Required)
+        Application ->> MSAL: 7b. Retry with updated claims
+        MSAL ->> eSTS: 8b. Request Access Token with Claims
+        eSTS -->> MSAL: 9b. Return Access Token
+    end
+
+    MSAL ->> Application: 10. Return Access Token
+```
+
 ## SLC Revocation Scenarios
 
 - **Revoked Token Scenario:** The token issued by an SLC has been revoked. In this case, Entra ID considers the SLC as invalid.
