@@ -30,7 +30,7 @@ extends:
           - job: Require_Approval
             displayName: Pre-Deployment Approval
             condition: succeeded()
-            timeoutInMinutes: 60
+            timeoutInMinutes: 1
             pool: server
             steps:
               - task: ManualValidation@1
