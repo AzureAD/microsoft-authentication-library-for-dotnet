@@ -1,5 +1,29 @@
 # Probe Logic for VM/VMSS Credential Endpoint
 
+```mermaid
+sequenceDiagram
+    participant SDK
+    participant IMDS
+
+    SDK ->> IMDS: 1. Send probe request (POST `/credential` with `.` body, no headers)
+    IMDS -->> SDK: 2. Response (HTTP 400 Bad Request / HTTP 500 Internal Server Error / other)
+
+    alt `/credential` endpoint available
+        IMDS -->> SDK: 3. Return HTTP 400 Bad Request
+        SDK ->> SDK: 4. Confirm `/credential` endpoint exists
+    else IMDS is restarting
+        IMDS -->> SDK: 3a. Return HTTP 500 Internal Server Error
+        SDK ->> SDK: 4a. Check `Server` header for IMDS presence
+        alt IMDS unavailable (No "IMDS/" in `Server` header)
+            SDK ->> SDK: 5. Retry request with exponential backoff
+        else IMDS available
+            SDK ->> SDK: 5a. Proceed with fallback logic
+        end
+    else Unexpected Response
+        SDK ->> SDK: 6. Log issue and fallback to `/token` if applicable
+    end
+```
+
 ## 1. Probe Request
 To determine if the **MSI V2 `/credential` endpoint** is available in IMDS for **VM/VMSS**, send a **POST request** with the following criteria:
 - **No headers**
