@@ -2,33 +2,6 @@
 
 ## Overview
 
-```mermaid
-sequenceDiagram
-    participant SDK_Client
-    participant MSAL
-    participant CertificateManager
-    participant IMDS
-
-    SDK_Client ->> MSAL: 1. Request HttpClient for mTLS
-    MSAL ->> CertificateManager: 2. GetBindingCertificate()
-    CertificateManager -->> MSAL: 3. Return Binding Certificate
-    MSAL ->> SDK_Client: 4. Return HttpClient with Certificate
-
-    Note over SDK_Client,MSAL: mTLS Authenticated Communication Enabled
-
-    %% Certificate Rotation Handling %%
-    CertificateManager ->> IMDS: 5. Check Certificate Expiry
-    IMDS -->> CertificateManager: 6. New Certificate Available (5 days before expiry)
-    CertificateManager ->> MSAL: 7. Fire `BindingCertificateRefreshed` Event
-    MSAL ->> SDK_Client: 8. Notify SDK via `BindingCertificateRefreshed`
-    SDK_Client ->> MSAL: 9. Recreate HttpClient with New Certificate
-    MSAL ->> CertificateManager: 10. Get Updated Binding Certificate
-    CertificateManager -->> MSAL: 11. Return New Certificate
-    MSAL ->> SDK_Client: 12. Return Updated HttpClient
-
-    Note over SDK_Client,MSAL: SDK Client Now Uses Latest Binding Certificate
-```
-
 To support MSI V2 authentication with the `/credential` endpoint, the **Azure SDK** leverages the `IMsalMtlsHttpClientFactory` interface and **certificate management APIs** for secure communication with Azure AD using **mutual TLS (mTLS)**.
 
 This section covers:
