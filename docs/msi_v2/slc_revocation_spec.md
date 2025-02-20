@@ -31,15 +31,32 @@ sequenceDiagram
         IMDS -->> MSAL: 7a. Return new SLC
         MSAL ->> eSTS: 8a. Retry Access Token request with new SLC
         eSTS -->> MSAL: 9a. Return new Access Token
-    else Claims Challenge
-        eSTS -->> MSAL: 5c. Return `insufficient_claims`
-        MSAL ->> Application: 6b. Notify Application (Claims Required)
-        Application ->> MSAL: 7b. Retry with updated claims
-        MSAL ->> eSTS: 8b. Request Access Token with Claims
-        eSTS -->> MSAL: 9b. Return Access Token
     end
 
     MSAL ->> Application: 10. Return Access Token
+```
+
+```mermaid
+sequenceDiagram
+    participant Application
+    participant MSAL
+    participant IMDS
+    participant eSTS
+    participant Resource
+
+    Application ->> MSAL: 1. Request Access Token
+    MSAL ->> IMDS: 2. Request Short-Lived Credential (SLC)
+    IMDS -->> MSAL: 3. Return SLC
+    MSAL ->> eSTS: 4. Exchange SLC for Access Token
+    eSTS -->> MSAL: 5. Return Access Token
+    MSAL ->> Application: 6. Return Access Token
+
+    Application ->> Resource: 7. Call API with Access Token
+    Resource -->> Application: 8. Response (401 Unauthorized) + `WWW-Authenticate` header with claims
+    Application ->> MSAL: 9. Request new token with extracted claims
+    MSAL ->> eSTS: 10. Retry Access Token request with Claims
+    eSTS -->> MSAL: 11. Return new Access Token
+    MSAL ->> Application: 12. Return new Access Token
 ```
 
 ## SLC Revocation Scenarios
