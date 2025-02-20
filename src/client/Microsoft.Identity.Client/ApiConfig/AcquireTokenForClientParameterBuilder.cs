@@ -41,7 +41,17 @@ namespace Microsoft.Identity.Client
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes)
         {
-            return new AcquireTokenForClientParameterBuilder(confidentialClientApplicationExecutor).WithScopes(scopes);
+            var builder = new AcquireTokenForClientParameterBuilder(confidentialClientApplicationExecutor).WithScopes(scopes);
+
+            if (!string.IsNullOrEmpty(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateSerialNumber))
+            {
+                builder.WithAdditionalCacheKeyComponents(new SortedList<string, string>
+                {
+                    { Constants.CertSerialNumber, confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateSerialNumber }
+                });
+            }
+
+            return builder;
         }
 
         /// <summary>
