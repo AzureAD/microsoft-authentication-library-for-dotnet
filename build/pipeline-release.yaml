@@ -12,9 +12,6 @@ resources:
       type: git
       name: 1ESPipelineTemplates/1ESPipelineTemplates
       ref: refs/tags/release
-variables:
-    ReleaseNuget: $(Release.Nuget)
-    ReleaseIDDP: $(Release.IDDP)
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
@@ -51,12 +48,19 @@ extends:
                   artifactName: 'drop_build_main'
                   targetPath: '$(Build.ArtifactStagingDirectory)/drop_build_main'
             steps:
-              - script: echo $(Release.Nuget) $(ReleaseNuget)
-                displayName: script
+              - script: dir $(Build.ArtifactStagingDirectory)\drop_build_main\packages\
+                displayName: content
               - task: NuGetToolInstaller@1
                 displayName: Use NuGet >=5.x
                 inputs:
                   versionSpec: '>=5.x'
+              - task: 1ES.PublishNuGet@1
+                displayName: 'NuGet Push MSAL'
+                inputs:
+                  packageParentPath: '$(Build.ArtifactStagingDirectory)'
+                  packagesToPush: $(Build.ArtifactStagingDirectory)\drop_build_main\packages\Microsoft.Identity.Client.*.nupkg
+                  feedPublish: 'a7934fdd-dcde-4492-a406-7fad6ac00e17/dcf100d4-744f-42fc-8523-f7d324acc230'
+              # - task: 1ES.PublishNuGet@1
               # - task: 1ES.PublishNuGet@1
               #   displayName: 'NuGet Push MSAL'
               #   inputs:
