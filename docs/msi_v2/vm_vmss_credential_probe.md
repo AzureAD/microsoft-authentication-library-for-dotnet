@@ -14,13 +14,11 @@ sequenceDiagram
     else IMDS is restarting
         IMDS -->> SDK: 3a. Return HTTP 500 Internal Server Error
         SDK ->> SDK: 4a. Check `Server` header for IMDS presence
-        alt IMDS unavailable (No "IMDS/" in `Server` header)
-            SDK ->> SDK: 5. Retry request with exponential backoff
-        else IMDS available
-            SDK ->> SDK: 5a. Proceed with fallback logic
+        alt IMDS header unavailable (No "IMDS/" in `Server` header)
+            SDK ->> SDK: 5. fallback to IMDS
+        else IMDS header available
+            SDK ->> SDK: 5a. Proceed with IMDS V2 Source
         end
-    else Unexpected Response
-        SDK ->> SDK: 6. Log issue and fallback to `/token` if applicable
     end
 ```
 
