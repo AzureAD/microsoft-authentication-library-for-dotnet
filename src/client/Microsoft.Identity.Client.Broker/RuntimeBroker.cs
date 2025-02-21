@@ -31,11 +31,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         private static Exception s_initException;
 
         // Linux broker's username password flow is via interactive calls
-        if (Environment.GetEnvironmentVariable("TF_BUILD") != null && DesktopOsHelper.IsLinux())
-        {
-            [DllImport("libX11.so.6")]
-            private static extern IntPtr XOpenDisplay(string display);
-        }
+        [DllImport("libX11.so.6")]
+        private static extern IntPtr XOpenDisplay(string display);
 
         private static Dictionary<NativeInterop.LogLevel, LogLevel> LogLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
         {
