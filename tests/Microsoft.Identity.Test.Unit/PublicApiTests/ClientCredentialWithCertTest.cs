@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Test.Unit
     [DeploymentItem(@"Resources\RSATestCertDotNet.pfx")]
     public class ConfidentialClientWithCertTests : TestBase
     {
+        private byte[] _serializedCache;
+
         [TestInitialize]
         public override void TestInitialize()
         {
@@ -702,6 +704,92 @@ namespace Microsoft.Identity.Test.Unit
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
+        }
+
+        [TestMethod]
+        public async Task EnsureCertificateSerialNumberIsAddedToCacheKeyTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var certificate = CertHelper.GetOrCreateTestCert();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                              .WithCertificate(certificate, true, true)
+                                              .WithHttpManager(httpManager)
+                                              .WithExperimentalFeatures()
+                                              .BuildConcrete();
+
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+
+                app.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+                app.AppTokenCache.SetAfterAccess(AfterCacheAccess);
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                //Ensure serial number matches
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                        .ExecuteAsync(CancellationToken.None)
+                                        .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+
+                var serialNumber = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().AdditionalCacheKeyComponents.FirstOrDefault().Value;
+                Assert.AreEqual(certificate.SerialNumber, serialNumber);
+
+                //Ensure serial number is available from cache
+
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                        .ExecuteAsync(CancellationToken.None)
+                                        .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+
+                serialNumber = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().AdditionalCacheKeyComponents.FirstOrDefault().Value;
+                Assert.AreEqual(certificate.SerialNumber, serialNumber);
+
+                //Ensure serial number is available from cache in new app
+                var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                              .WithRedirectUri(TestConstants.RedirectUri)
+                              .WithCertificate(certificate, true, true)
+                              .WithHttpManager(httpManager)
+                              .WithExperimentalFeatures()
+                              .BuildConcrete();
+
+                appCacheAccess = app2.AppTokenCache.RecordAccess();
+
+                app2.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+                app2.AppTokenCache.SetAfterAccess(AfterCacheAccess);
+
+                //Ensure serial number matches
+                result = await app2.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                        .ExecuteAsync(CancellationToken.None)
+                                        .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+
+                serialNumber = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().AdditionalCacheKeyComponents.FirstOrDefault().Value;
+                Assert.AreEqual(certificate.SerialNumber, serialNumber);
+            }
+        }
+
+        private void BeforeCacheAccess(TokenCacheNotificationArgs args)
+        {
+            args.TokenCache.DeserializeMsalV3(_serializedCache);
+        }
+
+        private void AfterCacheAccess(TokenCacheNotificationArgs args)
+        {
+            _serializedCache = args.TokenCache.SerializeMsalV3();
         }
 
         private static string ComputeCertThumbprint(X509Certificate2 certificate, bool useSha2)
