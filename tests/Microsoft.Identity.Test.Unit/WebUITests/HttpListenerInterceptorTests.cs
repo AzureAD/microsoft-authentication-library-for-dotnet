@@ -90,28 +90,30 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public async Task ValidateHttpListenerRedirectUriAsync()
         {
-            HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
-                Substitute.For<ILoggerAdapter>());
+            HttpListenerInterceptor listenerInterceptor = new(Substitute.For<ILoggerAdapter>());
 
             int port = FindFreeLocalhostPort();
-
             listenerInterceptor.TestBeforeStart = (url) => Assert.AreEqual(@"http://localhost:" + port + @"/TestPath/", url);
 
-            // Start the listener in the background
+            // Start listener and wait for readiness
             Task<Uri> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                 port,
                 "/TestPath/",
-                (_) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
+                (_) => new MessageAndHttpCode(HttpStatusCode.OK, "OK"),
                 CancellationToken.None);
 
-            // Issue an HTTP request on the main thread
+            // Add a delay to ensure the listener has time to bind
+            await Task.Delay(500).ConfigureAwait(false); // Adjust delay if needed but this should be enough
+
+            // Issue an HTTP request
             await SendMessageToPortAsync(port, "TestPath").ConfigureAwait(false);
 
-            // Wait for the listener to do its stuff
-            listenTask.Wait(5000 /* 5s timeout */);
+            // Wait for listener to handle request
+            Task completedTask = await Task.WhenAny(listenTask, Task.Delay(5000)).ConfigureAwait(false);
+            bool completed = completedTask == listenTask;
 
             // Assert
-            Assert.IsTrue(listenTask.IsCompleted);
+            Assert.IsTrue(completed, "Listener did not complete within timeout.");
             Assert.AreEqual(GetLocalhostUriWithParams(port, "TestPath"), listenTask.Result.ToString());
         }
 
