@@ -103,7 +103,7 @@ steps:
         }
 
         #check Linux runtime files
-        $linuxRuntimes = 'runtimes/linux-x64/native/libmsalruntime.so';
+        $linuxRuntimes = 'runtimes\linux-x64\native\libmsalruntime.so';
         $LinuxAppsToCheck = 'NetWSLWam\bin\Release\net8.0\';
         $appFullPath = $searchInFolder+$LinuxAppsToCheck+$linuxRuntimes
         Write-Host $appFullPath
