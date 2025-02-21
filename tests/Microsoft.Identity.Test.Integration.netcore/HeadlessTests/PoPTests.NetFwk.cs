@@ -71,7 +71,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await BearerAndPoP_CanCoexist_Async().ConfigureAwait(false);
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task HappyPath_Async()
         {            
