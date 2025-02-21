@@ -33,7 +33,7 @@ namespace WAMClassLibrary
             Func<IntPtr> consoleWindowHandleProvider = () => _parentHandle;
 
             // 1. Configuration - read below about redirect URI
-            var pca = PublicClientApplicationBuilder.Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
+            var pca = PublicClientApplicationBuilder.Create("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0"/*Lab Public Multi-Tenant*/)
                           .WithAuthority("https://login.microsoftonline.com/common")
                           .WithDefaultRedirectUri()
                           .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Linux){
