@@ -56,7 +56,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();           
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
         [RunOn(TargetFrameworks.NetCore)]
         public async Task PoP_MultipleKeys_Async()
         {
