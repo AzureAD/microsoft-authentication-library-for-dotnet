@@ -9,7 +9,7 @@ steps:
 - template: template-install-keyvault-secrets.yaml
 
 - task: Bash@3
-  displayName: Install broker and depenencies
+  displayName: Install broker and dependencies
   inputs:
     targetType: 'inline'
     script: |
