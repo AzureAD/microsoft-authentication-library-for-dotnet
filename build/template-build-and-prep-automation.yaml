@@ -102,6 +102,16 @@ steps:
             }
         }
 
+        #check Linux runtime files
+        $linuxRuntimes = 'runtimes/linux-x64/native/libmsalruntime.so';
+        $LinuxAppsToCheck = 'NetWSLWam\bin\Release\net8.0\';
+        $appFullPath = $searchInFolder+$LinuxAppsToCheck+$linuxRuntimes
+        Write-Host $appFullPath
+        if (-not(Test-Path -Path $appFullPath -PathType Leaf))
+        {
+            $errors += "Failed to find Linux runtime files in : " + $SearchInFolder + $app + "`n";
+        }
+
         #exit if there are errors
         IF (![string]::IsNullOrWhitespace($errors))
         {

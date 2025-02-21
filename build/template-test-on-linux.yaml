@@ -132,7 +132,7 @@ steps:
     script: 'nuget locals all -clear'
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore'
+  displayName: 'Wotnet workload restore'
   inputs:
     command: 'custom'
     custom: 'workload'
