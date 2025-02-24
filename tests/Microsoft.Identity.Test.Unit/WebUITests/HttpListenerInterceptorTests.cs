@@ -93,28 +93,50 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             HttpListenerInterceptor listenerInterceptor = new(Substitute.For<ILoggerAdapter>());
 
             int port = FindFreeLocalhostPort();
-            listenerInterceptor.TestBeforeStart = (url) => Assert.AreEqual(@"http://localhost:" + port + @"/TestPath/", url);
+            listenerInterceptor.TestBeforeStart = (url) => Assert.AreEqual($"http://localhost:{port}/TestPath/", url);
 
-            // Start listener and wait for readiness
+            // Start listener in the background
             Task<Uri> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                 port,
                 "/TestPath/",
                 (_) => new MessageAndHttpCode(HttpStatusCode.OK, "OK"),
                 CancellationToken.None);
 
-            // Add a delay to ensure the listener has time to bind
-            await Task.Delay(500).ConfigureAwait(false); // Adjust delay if needed but this should be enough
+            // Ensure the listener is bound before making the request
+            await EnsureListenerIsReady(port, TimeSpan.FromSeconds(2)).ConfigureAwait(false);
 
             // Issue an HTTP request
             await SendMessageToPortAsync(port, "TestPath").ConfigureAwait(false);
 
-            // Wait for listener to handle request
-            Task completedTask = await Task.WhenAny(listenTask, Task.Delay(5000)).ConfigureAwait(false);
-            bool completed = completedTask == listenTask;
+            // Wait for listener to handle request with a timeout
+            bool completed = (await Task.WhenAny(listenTask, Task.Delay(5000)).ConfigureAwait(false)) == listenTask;
 
             // Assert
             Assert.IsTrue(completed, "Listener did not complete within timeout.");
             Assert.AreEqual(GetLocalhostUriWithParams(port, "TestPath"), listenTask.Result.ToString());
+        }
+
+        /// <summary>
+        /// Ensures the HTTP listener is ready by checking the port binding.
+        /// Fixes: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5152
+        /// </summary>
+        private static async Task EnsureListenerIsReady(int port, TimeSpan timeout)
+        {
+            using CancellationTokenSource cts = new(timeout);
+            while (!cts.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    using TcpClient client = new();
+                    await client.ConnectAsync("localhost", port).ConfigureAwait(false);
+                    return; // If connection succeeds, listener is ready
+                }
+                catch
+                {
+                    await Task.Delay(100).ConfigureAwait(false); // Retry after delay
+                }
+            }
+            throw new TimeoutException($"Listener did not start within {timeout.TotalSeconds} seconds.");
         }
 
         [TestMethod]
