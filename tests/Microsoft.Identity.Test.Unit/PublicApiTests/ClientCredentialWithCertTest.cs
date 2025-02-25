@@ -720,6 +720,8 @@ namespace Microsoft.Identity.Test.Unit
                                               .WithCacheOptions(options: new CacheOptions() { UseSharedCache = true })
                                               .BuildConcrete();
 
+                //Clear static caches
+                app.AppTokenCacheInternal.Accessor.Clear();
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -814,6 +816,9 @@ namespace Microsoft.Identity.Test.Unit
                                               .WithExperimentalFeatures()
                                               .WithCacheOptions(options: new CacheOptions() { UseSharedCache = true })
                                               .BuildConcrete();
+
+                //Clear static caches
+                app.AppTokenCacheInternal.Accessor.Clear();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
 
