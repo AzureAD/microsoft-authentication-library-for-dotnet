@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
@@ -29,6 +30,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         private readonly BrokerOptions _wamOptions;
         private static Exception s_initException;
 
+        // Linux broker's username password flow is via interactive calls
+        [DllImport("libX11.so.6")]
+        private static extern IntPtr XOpenDisplay(string display);
+
         private static Dictionary<NativeInterop.LogLevel, LogLevel> LogLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
         {
             { NativeInterop.LogLevel.Trace, LogLevel.Verbose },
@@ -39,7 +44,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             { NativeInterop.LogLevel.Fatal, LogLevel.Error },
         };
 
-        public bool IsPopSupported => true;
+        /// <summary>
+        /// Pop is supported on Windows only
+        /// </summary>
+        public bool IsPopSupported => DesktopOsHelper.IsWindows();
 
         /// <summary>
         /// Being a C API, MSAL runtime uses a "global init" and "global shutdown" approach. 
@@ -94,7 +102,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ILoggerAdapter logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
+            
             if (_logger.PiiLoggingEnabled)
             {
                 s_lazyCore.Value.EnablePii(_logger.PiiLoggingEnabled);
@@ -396,15 +404,29 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
                 authParams.Properties["MSALRuntime_Password"] = acquireTokenByUsernamePasswordParameters.Password;
-
-                using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
+                // For Linux broker, use the interactive flow with username password to get the token
+                if (Environment.GetEnvironmentVariable("TF_BUILD") != null && DesktopOsHelper.IsLinux()) {
+                    using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInInteractivelyAsync(
+                        XOpenDisplay(":1"),
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        acquireTokenByUsernamePasswordParameters.Username,
+                        cancellationToken).ConfigureAwait(false))
+                    {
+                        var errorMessage = "Could not acquire token with username and password.";
+                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    }
+                } else {
+                    using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
-                {
-                    var errorMessage = "Could not acquire token with username and password.";
-                    msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    {
+                        var errorMessage = "Could not acquire token with username and password.";
+                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    }
                 }
+                
             }
 
             return msalTokenResponse;
@@ -586,7 +608,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
         public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
-            if (!DesktopOsHelper.IsWin10OrServerEquivalent())
+            if (!DesktopOsHelper.IsWin10OrServerEquivalent() && !DesktopOsHelper.IsLinux())
             {
                 _logger?.Warning("[RuntimeBroker] Not a supported operating system. WAM broker is not available. ");
                 return false;
