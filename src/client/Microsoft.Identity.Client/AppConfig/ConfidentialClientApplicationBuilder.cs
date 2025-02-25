@@ -147,12 +147,12 @@ namespace Microsoft.Identity.Client
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C, bool associateTokensWithCertificateSerialNumber)
         {
+            WithCertificate(certificate, sendX5C);
+
             if (associateTokensWithCertificateSerialNumber)
             {
-                Config.CertificateSerialNumber = certificate.SerialNumber;
+                Config.CertificateIdToAssociateWithToken = certificate.SerialNumber;
             }
-
-            WithCertificate(certificate, sendX5C);
 
             return this;
         }

@@ -43,11 +43,11 @@ namespace Microsoft.Identity.Client
         {
             var builder = new AcquireTokenForClientParameterBuilder(confidentialClientApplicationExecutor).WithScopes(scopes);
 
-            if (!string.IsNullOrEmpty(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateSerialNumber))
+            if (!string.IsNullOrEmpty(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken))
             {
                 builder.WithAdditionalCacheKeyComponents(new SortedList<string, string>
                 {
-                    { Constants.CertSerialNumber, confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateSerialNumber }
+                    { Constants.CertSerialNumber, confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken }
                 });
             }
 
