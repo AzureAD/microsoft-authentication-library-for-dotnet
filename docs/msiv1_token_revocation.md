@@ -1,73 +1,85 @@
 # MSAL Support for MSI v1 Token Revocation and Capabilities
 
-This specification describes **two optional parameters** that MSAL can send to the **MSI v1 endpoint** (e.g., `http://169.254.169.254/metadata/identity/oauth2/token`) when acquiring tokens via **Managed Identity**. These parameters empower developers to control **token revocation** and specify **client capabilities** that might alter the token issuance behavior by Azure AD (ESTS).
-
 ---
 
-## Overview
+## Goals
 
-When MSAL requests a token from the MSI v1 endpoint for resources like `https://management.azure.com/`, it typically reuses valid, locally cached tokens. However, certain scenarios (for e.g. [claims challenge](https://learn.microsoft.com/en-us/entra/identity-platform/claims-challenge?tabs=dotnet)) require explicitly **ignoring** the cache or specifying **client capabilities** that Azure AD uses to issue a fresh token.
+1. App developers and higher level SDKs like Azure SDK rely on the CAE protocol for token revocation scenarios (`WithClaims`, `WithClientCapabilities`). 
+1. RPs are enabled to perform token revocation.
+1. A telemetry signal for eSTS exists to differentiate which apps are CAE enlightened.
 
-To address these scenarios, two **optional** query parameters can be included in the MSI v1 token request:
+## Flow diagram - revocation event
 
-1. **`bypass_cache`**  
-   - Forces a token refresh if set to `true`.
-2. **`xms_cc`**  
-   - Declares special client capabilities that Azure AD should consider (e.g., for advanced or “undo revocation” scenarios).
+```mermaid
+sequenceDiagram
+    participant Resource
+    actor CX
+    participant MSAL
+    participant SF        
+    participant eSTS
 
----
-
-## 1. `bypass_cache`
-
-### Purpose
-
-Allows MSAL to to **get a brand-new token** from Azure AD. When `bypass_cache=true`, MSAL will ignore any valid, cached token and ensure the MSI v1 endpoint fetches a **new** token from Azure AD rather than returning a cached one.
-
-### Behavior
-- If set to `true`, MSI encoded will skip it's internal cache and issue a fresh token.
-- If set to `false` or omitted, MSI will return a valid cached token.
-
-### Use Cases
-- **Token Revocation**: Ensures any previously revoked or invalidated token is not served from cache.
-
----
-
-## 2. `xms_cc`
-
-### Purpose
-
-Enables the MSAL to pass **client capabilities** in the token acquisition request. These capabilities are often used to unlock or disable specific features in Azure AD, such as handling specialized revocation scenarios.
-
-### Behavior
-- The value is typically a comma-separated list of capability strings.
-- MSAL sends `xms_cc` to the MSI v1 endpoint, provided MSAL app developers have set these capabilities in the application.
-
-### Use Cases
-- **“Undo token revocation”** or other advanced features: By setting the required capabilities (`cp1`, etc.), 
-
----
-
-## Usage 
-
-App developers can already specify these parameters using existing APIs in MSAL. For instance:
-
-```cs
-// Example usage in MSAL (already shipped, no new APIs added)
-var mi = ManagedIdentityApplicationBuilder
-    .Create(ManagedIdentityId.SystemAssigned)
-    .WithClientCapabilities(ClientCapabilities) // e.g. ["cp1", "cp2"]
-    .Build();
-
-var result = await mi.AcquireTokenForManagedIdentity(new[] { "https://management.azure.com/.default" })
-    .WithClaims(Claims)
-    .ExecuteAsync()
-    .ConfigureAwait(false);
-
+rect rgb(173, 216, 230)
+    CX->> Resource: 1. Call resource with "bad" token T
+    Resource->>CX: 2.HTTP 401 + claims C
+    CX->>CX: 3. Parse response, extract claims C
+    CX->>MSAL: 4. MSI.AcquireToken <br/> WithClaims(C) <br/> WithClientCapabilities("cp1")
+end
+rect rgb(215, 234, 132)
+    MSAL->>MSAL: 5. Get token T from cache. Assume it is the "bad" token.
+    MSAL->>SF: 6. Call MITS_endpoint?xms_cc=cp1&revoked_token=SHA256(T)
+    SF->>eSTS: 7. CCA.AcquireTokenForClient SN/I cert <br/> WithClientCapabilities(cp1) <br/> WithAccessTokenToRefresh(SHA256(T))
+end
 ```
 
-## End to End testing 
+Steps 1-4 fall to the Client (i.e. application using MSI directly or higher level SDK like Azure KeyVault). This is the **standard CAE flow**.
+Steps 5-7 are new and show how the RP propagates the revocation signal.
 
-Given the complexity of the scenario, it may not be easy to automate this. Here is the [guideline](https://microsoft.sharepoint.com/:w:/t/AzureMSI/ESBeuafJLZdNlSxkBKvjcswBD4FGVz0o6YJcf4mfDRSH-Q?e=2hJRUt) to test this feature manually using a Virtual Machine. For further details, please contact Gladwin. 
+
+> [!NOTE]  
+>  ClientCapabilities is an array of capabilities. In case the app developer sends multiple capabilities, these will be sent to the RP as `MITS_endpoint?xms_cc=cp1,cp2,cp3`. The RP MUST pass "cp1" (i.e. the CAE capabilitiy) if it is included.
+
+
+## Flow diagram - non-revocation event
+
+The client "enlightment" status is still propagated via the client capability "cp1".
+
+```mermaid
+sequenceDiagram
+    actor CX
+    participant MSAL
+    participant SF        
+    participant eSTS
+
+rect rgb(173, 216, 230)   
+    CX->>MSAL: 1. MSI.AcquireToken <br/> WithClientCapabilities("cp1")
+    MSAL->>MSAL: 2. Find and return token T in cache. <br/>If not found, goto next step.
+end
+rect rgb(215, 234, 132)    
+    MSAL->>SF: 3. Call MITS_endpoint?xms_cc=cp1
+    SF->>eSTS: 4. Find cached token or call <br/> CCA.AcquireTokenForClient SN/I cert <br/> WithClientCapabilities(cp1) <br/> 
+end
+```
+
+### New MSAL API - WithAccessTokenToRefresh()
+
+To support the RP, MSAL will add a new API for `ConfidentialClientApplication.AcquireTokenForClient` -  `.WithAccessTokenToRefresh(string thumbprintOfAccessTokenToRefresh)`. This may be extended to other flows too in the future.
+
+This API will be in a namespace that indicates it is supposed to be used by RPs - `Microsoft.Identity.Client.RP`.
+
+#### Behavior
+
+- MSAL will look in the cache first, for a non-expired token. If it exists:
+  - If it matches the "Bad" token SHA256 thumbprint, then MSAL will log this event, ignore the token, and get another token from the STS
+  - If it doesn't match, it means that a new token was already updated. Return it.
+- If it doesn't exist, call eSTS
+
+#### Motivation
+
+The *internal protocol* between the client and the RP (i.e. calling the MITS endpoint in case of Service Fabric), is a simplified version of CAE. This is because CAE is claims driven and involves JSON operations such as JSON doc merges. The RP doesn't need the actual claims to perform revocation, it just needs a signal to bypass the cache. As such, it was decided to not use the full claims value internally.
+
+## End to End testing
+
+Given the complexity of the scenario, it may not be easy to automate this. Here is the [guideline](https://microsoft.sharepoint.com/:w:/t/AzureMSI/ESBeuafJLZdNlSxkBKvjcswBD4FGVz0o6YJcf4mfDRSH-Q?e=2hJRUt).
 
 ## Reference
 
