@@ -130,35 +130,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the certificate associated with the application.
-        /// Applicable to first-party applications only, this method also allows to specify 
-        /// if the <see href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.7">x5c claim</see> should be sent to Azure AD.
-        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
-        /// this method will send the certificate chain to Azure AD along with the token request,
-        /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
-        /// This saves the application admin from the need to explicitly manage the certificate rollover
-        /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
-        /// This API allow you to associate the tokens acquired from Azure AD with the certificate serial number. 
-
-        /// This can be used to partition the cache by certificate. Tokens acquired with one certificate will not be accessible to another certificate with a different serial number.
-        /// </summary>
-        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        /// <param name="sendX5C">To send X5C with every request or not. The default is <c>false</c></param>
-        /// <param name="associateTokensWithCertificateSerialNumber">Determines if the application tokens acquired from Azure AD are associated with the certificate serial number</param>
-        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C, bool associateTokensWithCertificateSerialNumber)
-        {
-            WithCertificate(certificate, sendX5C);
-
-            if (associateTokensWithCertificateSerialNumber)
-            {
-                Config.CertificateIdToAssociateWithToken = certificate.SerialNumber;
-            }
-
-            return this;
-        }
-
-        /// <summary>
         /// Sets the certificate associated with the application along with the specific claims to sign.
         /// By default, this will merge the <paramref name="claimsToSign"/> with the default required set of claims needed for authentication.
         /// If <paramref name="mergeWithDefaultClaims"/> is set to false, you will need to provide the required default claims. See https://aka.ms/msal-net-client-assertion

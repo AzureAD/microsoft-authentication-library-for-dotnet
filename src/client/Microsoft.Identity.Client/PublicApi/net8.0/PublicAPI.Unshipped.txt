@@ -1,3 +1,4 @@
 Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.get -> System.Collections.Generic.IEnumerable<string>
 Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.set -> void
-Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, bool sendX5C, bool associateTokensWithCertificateSerialNumber) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.RP.ConfidentialClientApplicationBuilderForResourceProviders
+static Microsoft.Identity.Client.RP.ConfidentialClientApplicationBuilderForResourceProviders.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, bool sendX5C, bool associateTokensWithCertificateSerialNumber) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder

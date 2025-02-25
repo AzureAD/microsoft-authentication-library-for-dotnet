@@ -21,6 +21,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Client.Internal.JsonWebToken;
+using Microsoft.Identity.Client.RP;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -881,7 +882,7 @@ namespace Microsoft.Identity.Test.Unit
                                               .BuildConcrete();
                 });
                 
-                Assert.AreEqual("Value cannot be null.\r\nParameter name: certificate", exception.Message);
+                Assert.IsTrue(exception.Message.Contains("Value cannot be null"));
             }
         }
 
