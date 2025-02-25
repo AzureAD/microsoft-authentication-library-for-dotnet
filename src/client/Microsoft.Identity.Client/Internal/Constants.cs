@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string ManagedIdentityDefaultClientId = "system_assigned_managed_identity";
         public const string ManagedIdentityDefaultTenant = "managed_identity";
         public const string CiamAuthorityHostSuffix = ".ciamlogin.com";
+        public const string CertSerialNumber = "cert_sn";
 
         public const int CallerSdkIdMaxLength = 10;
         public const int CallerSdkVersionMaxLength = 20;
