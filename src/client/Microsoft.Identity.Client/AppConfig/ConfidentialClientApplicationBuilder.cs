@@ -138,8 +138,9 @@ namespace Microsoft.Identity.Client
         /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
         /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
-        /// This api allow you to associate the tokens acquired from Azure AD with the certificate serial number. 
-        /// This can be used to partition the cache by certificate. Tokens acquired with one certificate will not be available to another certificate with a different serial number.
+        /// This API allow you to associate the tokens acquired from Azure AD with the certificate serial number. 
+
+        /// This can be used to partition the cache by certificate. Tokens acquired with one certificate will not be accessible to another certificate with a different serial number.
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="sendX5C">To send X5C with every request or not. The default is <c>false</c></param>
