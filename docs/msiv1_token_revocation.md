@@ -4,7 +4,7 @@
 
 ## Goals
 
-1. App developers and higher level SDKs like Azure SDK rely on the CAE protocol for token revocation scenarios (`WithClaims`, `WithClientCapabilities`). 
+1. App developers and higher level SDKs like Azure SDK rely on the [CAE protocol](https://learn.microsoft.com/en-us/entra/identity-platform/app-resilience-continuous-access-evaluation?tabs=dotnet) for token revocation scenarios (`WithClaims`, `WithClientCapabilities`). 
 1. RPs are enabled to perform token revocation.
 1. A telemetry signal for eSTS exists to differentiate which apps are CAE enlightened.
 
