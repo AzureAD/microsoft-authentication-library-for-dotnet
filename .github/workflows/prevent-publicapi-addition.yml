@@ -1,0 +1,23 @@
+name: Prevent PublicAPI File Additions
+
+on: [pull_request]
+
+jobs:
+  check-publicapi-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Scan for accidental PublicAPI text file references
+        run: |
+          set -e  # Stop on first error
+          
+          # Find all .csproj files and check for unwanted lines
+          if find . -name "*.csproj" -exec grep -q "PublicAPI.Shipped.txt" {} \; || \
+             find . -name "*.csproj" -exec grep -q "PublicAPI.Unshipped.txt" {} \; then
+            echo "Error: PublicAPI.Shipped.txt or PublicAPI.Unshipped.txt detected in a .csproj file."
+            exit 1
+          else
+            echo "All good - No PublicAPI references found."
+          fi
