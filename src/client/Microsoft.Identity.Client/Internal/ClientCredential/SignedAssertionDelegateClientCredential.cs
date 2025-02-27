@@ -42,7 +42,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 // If no "AssertionRequestOptions" delegate is supplied
                 string signedAssertion = await _signedAssertionDelegate(cancellationToken).ConfigureAwait(false);
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType,
+                                                                requestParameters.AppConfig.ClientId == Constants.FmiUrnClientId ?
+                                                                OAuth2AssertionType.FmiBearer : OAuth2AssertionType.JwtBearer);
                 oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, signedAssertion);
             }
             else
