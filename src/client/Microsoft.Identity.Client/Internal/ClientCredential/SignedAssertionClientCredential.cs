@@ -30,7 +30,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string tokenEndpoint,
             CancellationToken cancellationToken)
         {
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType,
+                                                            string.Equals(requestParameters.AppConfig.ClientId, Constants.FmiUrnClientId) ?
+                                                            OAuth2AssertionType.FmiBearer : OAuth2AssertionType.JwtBearer);
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, _signedAssertion);
             return Task.CompletedTask;
         }
