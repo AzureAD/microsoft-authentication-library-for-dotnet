@@ -55,18 +55,18 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     TokenEndpoint = tokenEndpoint
                 };
 
-                // Only set client capabilities if they exist and are not empty
+                // Set client capabilities 
                 var configuredCapabilities = requestParameters
                     .RequestContext
                     .ServiceBundle
                     .Config
                     .ClientCapabilities;
 
-                if (configuredCapabilities != null && configuredCapabilities.Any())
-                {
-                    assertionOptions.ClientCapabilities = configuredCapabilities;
-                }
+                assertionOptions.ClientCapabilities = configuredCapabilities;
 
+                //Set claims
+                assertionOptions.Claims = requestParameters.Claims;
+            
                 // Delegate that uses AssertionRequestOptions
                 string signedAssertion = await _signedAssertionWithInfoDelegate(assertionOptions).ConfigureAwait(false);
 

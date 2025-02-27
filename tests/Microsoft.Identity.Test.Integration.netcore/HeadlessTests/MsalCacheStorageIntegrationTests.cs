@@ -125,15 +125,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     attribute2: new KeyValuePair<string, string>("MsalClientVersion", "1.0.0.0"))
                 .Build();
 
-            // Tests run on machines without Libsecret
             Storage store = Storage.Create(storageWithKeyRing, logger: _logger);
             Assert.IsTrue(store.CacheAccessor is LinuxKeyringAccessor);
 
-            // ADO Linux test agents do not have libsecret installed by default
-            // If you run this test on a Linux box with UI / LibSecret, then this test will fail
-            // because the statement below will not throw.
-            AssertException.Throws<MsalCachePersistenceException>(
-                () => store.VerifyPersistence());
+            // Installed libsecret on ADO Linux test agents, please see build/linux-install-deps.sh
+            // and setup keyring on the agent, please see build/template-test-on-linux.yml
+            store.VerifyPersistence();
 
             Storage unprotectedStore = Storage.Create(s_storageCreationProperties, _logger);
             Assert.IsTrue(unprotectedStore.CacheAccessor is FileAccessor);
@@ -147,8 +144,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Mimic another sdk client to check libsecret availability by calling
             // MsalCacheStorage.VerifyPeristence() -> LinuxKeyringAccessor.CreateForPersistenceValidation()
-            AssertException.Throws<MsalCachePersistenceException>(
-                () => store.VerifyPersistence());
+            store.VerifyPersistence();
 
             // Verify above call doesn't delete existing cache file
             Assert.IsTrue(File.Exists(s_storageCreationProperties.CacheFilePath));
