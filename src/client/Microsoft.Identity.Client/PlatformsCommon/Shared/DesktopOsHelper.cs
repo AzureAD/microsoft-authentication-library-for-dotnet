@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Utils;
@@ -18,6 +19,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
            IsWamSupportedOSInternal);
         private static Lazy<string> s_winVersionLazy = new Lazy<string>(
             GetWindowsVersionStringInternal);
+
+        private static Lazy<bool> s_wslEnvLazy = new Lazy<bool>(IsWslEnv);
 
         public static bool IsWindows()
         {
@@ -54,6 +57,22 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
             return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 #endif
+        }
+
+        private static bool IsWslEnv()
+        {
+            if (IsLinux()) {
+                try
+                {
+                    var versionInfo = File.ReadAllText("/proc/version");
+                    return versionInfo.Contains("Microsoft") || versionInfo.Contains("WSL");
+                }
+                catch
+                {
+                    return false; // if we can't read the file, we can't determine if it's WSL
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -94,6 +113,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
             return RuntimeInformation.OSDescription;
 #endif
+        }
+
+        public static bool IsRunningOnWsl()
+        {
+            return s_wslEnvLazy.Value;
         }
 
         public static string GetWindowsVersionString()

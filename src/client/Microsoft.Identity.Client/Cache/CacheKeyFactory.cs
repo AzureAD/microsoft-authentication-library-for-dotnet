@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Globalization;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -48,12 +50,15 @@ namespace Microsoft.Identity.Client.Cache
                 return key;
             }
 
-            if (requestParameters.AppConfig.IsConfidentialClient ||
-                requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenSilent)
+            if (requestParameters.AppConfig.IsConfidentialClient)
             {
                 return homeAccountIdFromResponse;
             }
-
+            if (requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenSilent)
+            {
+                return homeAccountIdFromResponse;
+            }
+            
             return null;
         }
 
@@ -78,8 +83,7 @@ namespace Microsoft.Identity.Client.Cache
                 requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
-                key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId);
-
+                key = GetAppTokenCacheItemKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId, requestParameters.CacheKeyComponents);
                 return true;
             }
 
@@ -87,8 +91,17 @@ namespace Microsoft.Identity.Client.Cache
             return false;
         }
 
-        public static string GetClientCredentialKey(string clientId, string tenantId, string popKid)
+        public static string GetAppTokenCacheItemKey(
+            string clientId,
+            string tenantId,
+            string popKid,
+            SortedList<string, string> cacheKeyComponents = null)
         {
+            if (cacheKeyComponents != null && cacheKeyComponents.Any())
+            {
+                return $"{popKid}{clientId}_{tenantId}_{CoreHelpers.ComputeAccessTokenExtCacheKey(cacheKeyComponents)}_AppTokenCache";
+            }
+
             return $"{popKid}{clientId}_{tenantId}_AppTokenCache";
         }
 

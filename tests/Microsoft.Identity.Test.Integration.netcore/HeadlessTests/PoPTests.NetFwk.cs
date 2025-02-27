@@ -16,6 +16,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Extensions.Msal;
 #if NET_CORE
 using Microsoft.Identity.Client.Broker;
 #endif
@@ -61,6 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await MultipleKeys_Async().ConfigureAwait(false);
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [RunOn(TargetFrameworks.NetCore)]
         public async Task PoP_BearerAndPoP_CanCoexist_Async()
         {
@@ -217,6 +219,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result);
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [RunOn(TargetFrameworks.NetCore)]
         public async Task PopTestWithConfigObjectAsync()
         {
@@ -254,6 +257,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task PopTestWithRSAAsync()
         {
@@ -291,6 +295,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_PopTestWithRSAAsync()
         {
@@ -323,6 +328,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task PopTest_ExternalWilsonSigning_Async()
         {
@@ -388,7 +394,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 TokenSource.Cache,
                 result2.AuthenticationResultMetadata.TokenSource);
         }
-
+        
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task PopTestWithECDAsync()
         {
@@ -427,6 +434,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result);
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task NewPOP_WithKeyIdOnly_Async()
         {
@@ -520,6 +528,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task InMemoryCryptoProvider_AlgIsPS256()
         {
@@ -662,6 +671,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(responseWithPopToken.IsSuccessStatusCode, "The response should be successful with the PoP token");
         }
 
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
         public async Task PoPToken_ShouldHaveCorrectAlgorithm_PS256_Async()
         {
@@ -700,12 +710,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
 #if NET_CORE
+        [DoNotRunOnLinux] // POP is not supported on Linux
         [IgnoreOnOneBranch]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
-            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
             WamLoggerValidator wastestLogger = new WamLoggerValidator();
 
@@ -726,7 +736,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
                 .ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes, true);
 
             Assert.IsTrue(wastestLogger.HasLogged);
 
@@ -741,31 +751,29 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public void CheckPopRuntimeBrokerSupportTest()
         {
             //Broker enabled
-            var pcaBuilder = PublicClientApplicationBuilder
-                                            .Create(TestConstants.ClientId);
+            if (SharedUtilities.IsWindowsPlatform()) {
+                CheckPopSupport(new BrokerOptions(BrokerOptions.OperatingSystems.Windows), true);
+            }
 
-            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+            //Broker disabled
+            CheckPopSupport(new BrokerOptions(BrokerOptions.OperatingSystems.None), false);
+
+            // POP is not supported on Linux
+            if (SharedUtilities.IsLinuxPlatform()) {
+                CheckPopSupport(new BrokerOptions(BrokerOptions.OperatingSystems.Linux), false);
+            }
+        }
+        
+        private static void CheckPopSupport(BrokerOptions brokerOptions, bool isPopSupported)
+        {
+            var pcaBuilder = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId);
+
+            pcaBuilder = pcaBuilder.WithBroker(brokerOptions);
 
             IPublicClientApplication app = pcaBuilder.Build();
 
-            Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
-
-            //Broker disabled
-            pcaBuilder = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId);
-
-            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
-
-            app = pcaBuilder.Build();
-
-            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
-
-            //Broker not configured
-            app = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .Build();
-
-            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
+            Assert.AreEqual(isPopSupported, app.IsProofOfPossessionSupportedByClient());
         }
 #endif
 

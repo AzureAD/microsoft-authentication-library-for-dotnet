@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Text;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -23,7 +25,8 @@ namespace Microsoft.Identity.Client
           string errorCode,
           string errorMessage,
           HttpResponse httpResponse,
-          Exception innerException = null)
+          Exception innerException = null,
+          RequestContext context = null)
         {
             MsalServiceException ex = null;
             OAuth2ResponseBase oAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
@@ -39,7 +42,7 @@ namespace Microsoft.Identity.Client
                 else  
                 {  
                     errorMessageToUse  = errorMessage;  
-                }  
+                }
 
                 if (oAuth2Response.Claims == null)
                 {
@@ -61,7 +64,7 @@ namespace Microsoft.Identity.Client
                     innerException);
             }
 
-            ex ??= new MsalServiceException(errorCode, errorMessage, innerException);
+            ex ??= new MsalServiceException(errorCode, GetErrorMessage(errorMessage, httpResponse, context), innerException);
 
             SetHttpExceptionData(ex, httpResponse);
 
@@ -71,6 +74,32 @@ namespace Microsoft.Identity.Client
             ex.ErrorCodes = oAuth2Response?.ErrorCodes;
 
             return ex;
+        }
+
+        private static string GetErrorMessage(string errorMessage, HttpResponse httpResponse, RequestContext context)
+        {
+            // Using StringBuilder for more efficient string concatenation
+            var sb = new StringBuilder(errorMessage);
+
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound && context != null)
+            {
+                sb.Append("\nAuthority used: ")
+                  .Append(context.ServiceBundle.Config.Authority?.AuthorityInfo?.CanonicalAuthority?.AbsoluteUri?.Split('?')[0]);
+
+                if (context.ApiEvent != null && !context.ApiEvent.TokenEndpoint.IsNullOrEmpty())
+                {
+                    sb.Append("\nToken Endpoint: ")
+                      .Append(context.ApiEvent?.TokenEndpoint);
+                }
+
+                if (!context.ServiceBundle.Config.AzureRegion.IsNullOrEmpty())
+                {
+                    sb.Append("\nRegion Used: ")
+                      .Append(context.ServiceBundle.Config.AzureRegion);
+                }
+            }
+
+            return sb.ToString();
         }
 
         private static bool IsThrottled(OAuth2ResponseBase oAuth2Response)

@@ -87,7 +87,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
         }
 
-
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
@@ -481,7 +480,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 { "sub", issuer }
             };
 
-            RSACng rsa = certificate.GetRSAPrivateKey() as RSACng;
+            // cng is Windows specific, so we use RSA instead
+            RSA rsa = certificate.GetRSAPrivateKey();  // Works cross-platform
 
             Dictionary<string, string> header;
             if (useSha2AndPss)
@@ -506,7 +506,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
             var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
             string token = Base64UrlHelpers.Encode(headerBytes) + "." + Base64UrlHelpers.Encode(claimsBytes);
-
+            if (rsa is null)
+            {
+                throw new InvalidOperationException("RSA private key expected");
+            }
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new InvalidOperationException("Token expected");
+            }
             //codeql [SM03799] Backwards Compatibility: Requires accepting PKCS1 for supporting ADFS 
             byte[] signatureBytes = rsa.SignData(
                     Encoding.UTF8.GetBytes(token),

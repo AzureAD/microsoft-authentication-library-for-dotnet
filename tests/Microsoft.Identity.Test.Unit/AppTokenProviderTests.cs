@@ -213,7 +213,6 @@ namespace Microsoft.Identity.Test.Unit
                     });
                 }
 
-
                 await Task.WhenAll(tasks).ConfigureAwait(false);
 
                 Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");

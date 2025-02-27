@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client
         public LogCallback LoggingCallback { get; internal set; }
         public IIdentityLogger IdentityLogger { get; internal set; }
         public string Component { get; internal set; }
-        public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
+        public IDictionary<string, string> ExtraQueryParameters { get; internal set; }
         public bool UseRecommendedDefaultRedirectUri { get; internal set; }
 
         public bool ExperimentalFeaturesEnabled { get; set; } = false;
@@ -121,6 +121,7 @@ namespace Microsoft.Identity.Client
         public bool IsManagedIdentity { get; }
         public bool IsConfidentialClient { get; }
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
+        public string CertificateIdToAssociateWithToken { get; set; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
@@ -160,6 +161,8 @@ namespace Microsoft.Identity.Client
                 return null;
             }
         }
+
+        public SortedList<string, string> CacheKeyComponents { get; internal set; }
 #endregion
 
 #region Region

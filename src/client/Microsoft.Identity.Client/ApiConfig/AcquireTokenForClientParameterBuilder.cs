@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -14,6 +14,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
@@ -39,7 +41,17 @@ namespace Microsoft.Identity.Client
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes)
         {
-            return new AcquireTokenForClientParameterBuilder(confidentialClientApplicationExecutor).WithScopes(scopes);
+            var builder = new AcquireTokenForClientParameterBuilder(confidentialClientApplicationExecutor).WithScopes(scopes);
+
+            if (!string.IsNullOrEmpty(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken))
+            {
+                builder.WithAdditionalCacheKeyComponents(new SortedList<string, string>
+                {
+                    { Constants.CertSerialNumber, confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken }
+                });
+            }
+
+            return builder;
         }
 
         /// <summary>
@@ -120,6 +132,30 @@ namespace Microsoft.Identity.Client
         public AcquireTokenForClientParameterBuilder WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary> 
+        /// Adds an fmi_path parameter to the request. It modifies the subject of the token. 
+        /// </summary>
+        public AcquireTokenForClientParameterBuilder WithFmiPath(string pathSuffix)
+        {
+            ValidateUseOfExperimentalFeature();
+
+           if (string.IsNullOrWhiteSpace(pathSuffix))
+            {
+                throw new ArgumentNullException(nameof(pathSuffix));
+            }
+
+            var cacheKey = new SortedList<string, string>
+            { 
+                { OAuth2Parameter.FmiPath, pathSuffix } 
+            };
+
+            this.WithAdditionalCacheKeyComponents(cacheKey);
+
+            CommonParameters.FmiPathSuffix = pathSuffix;
+
+            return this;
         }
 
         /// <inheritdoc/>

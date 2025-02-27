@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -31,7 +33,6 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             message = Uri.EscapeDataString(message);
-            message = message.Replace("%20", "+");
 
             return message;
         }
@@ -42,7 +43,7 @@ namespace Microsoft.Identity.Client.Utils
             {
                 return message;
             }
-
+           // Replace "+" with "%20" for backward compatibility with older systems that used "+" for spaces.
             message = message.Replace("+", "%20");
             message = Uri.UnescapeDataString(message);
 
@@ -178,6 +179,28 @@ namespace Microsoft.Identity.Client.Utils
         internal static string GetCcsUpnHint(string upn)
         {
             return string.IsNullOrEmpty(upn)? string.Empty : $@"upn:{upn}";
+        }
+
+        internal static string ComputeAccessTokenExtCacheKey(SortedList<string, string> cacheKeyComponents)
+        {
+            if (cacheKeyComponents == null || !cacheKeyComponents.Any())
+            {
+                return string.Empty;
+            }
+
+            StringBuilder stringBuilder = new();
+
+            foreach (var component in cacheKeyComponents)
+            {
+                stringBuilder.Append(component.Key);
+                stringBuilder.Append(component.Value);
+            }
+
+            using (SHA256 hash = SHA256.Create())
+            {
+                var hashBytes = hash.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
+                return Base64UrlHelpers.Encode(hashBytes);
+            }
         }
     }
 }
