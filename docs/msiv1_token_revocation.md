@@ -26,7 +26,7 @@ rect rgb(173, 216, 230)
 end
 rect rgb(215, 234, 132)
     MSAL->>MSAL: 5. Get token T from cache. Assume it is the "bad" token.
-    MSAL->>SF: 6. Call MITS_endpoint?xms_cc=cp1&revoked_token=SHA256(T)
+    MSAL->>SF: 6. Call MITS_endpoint?claims=C&token_sha256_to_refresh=SHA256(T)
     SF->>eSTS: 7. CCA.AcquireTokenForClient SN/I cert <br/> WithClientCapabilities(cp1) <br/> WithAccessTokenToRefresh(SHA256(T))
 end
 ```
