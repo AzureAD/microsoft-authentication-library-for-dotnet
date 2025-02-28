@@ -12,16 +12,21 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     {
         private static Dictionary<KnownTestCertType, X509Certificate2> s_x509Certificates = new Dictionary<KnownTestCertType, X509Certificate2>();
 
-        public static X509Certificate2 GetOrCreateTestCert(KnownTestCertType knownTestCertType = KnownTestCertType.RSA)
+        public static X509Certificate2 GetOrCreateTestCert(KnownTestCertType knownTestCertType = KnownTestCertType.RSA, bool regenerateCert = false)
         {
             // create the cert if it doesn't exist. use a lock to prevent multiple threads from creating the cert
             s_x509Certificates.TryGetValue(knownTestCertType, out X509Certificate2 x509Certificate2);
 
-            if (x509Certificate2 == null)
+            if (x509Certificate2 == null || regenerateCert)
             {
                 lock (typeof(CertHelper))
                 {
-                    if (x509Certificate2 == null)
+                    if (x509Certificate2 != null)
+                    {
+                        x509Certificate2 = CreateTestCert(knownTestCertType);
+                        s_x509Certificates[knownTestCertType] = x509Certificate2;
+                    }
+                    else
                     {
                         x509Certificate2 = CreateTestCert(knownTestCertType);
                         s_x509Certificates.Add(knownTestCertType, x509Certificate2);

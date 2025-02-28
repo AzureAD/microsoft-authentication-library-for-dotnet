@@ -2020,6 +2020,103 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task SignedAssertionDelegateClientCredential_Claims_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // Mock the expected response and ensure the claims parameter is included in the request
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>()
+                {
+                    { "claims", "{\"extra_claim\":\"value\"}" }
+                };
+
+                // Create ConfidentialClientApplication with a SignedAssertion delegate
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        // Ensure that the claims were properly passed to the assertion options
+                        Assert.AreEqual("{\"extra_claim\":\"value\"}", options.Claims);
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                // Act: Acquire token with claims
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClaims("{\"extra_claim\":\"value\"}")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert: Ensure we got a valid token
+                Assert.IsNotNull(result);
+            }
+        }
+
+        [TestMethod]
+        public async Task SignedAssertionDelegateClientCredential_NoClaims_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        // Ensure claims are  set when WithClaims is called
+                        Assert.IsNull(options.Claims);
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsFalse(handler.ActualRequestPostData.ContainsKey("claims"));
+            }
+        }
+
+        [TestMethod]
+        public async Task SignedAssertionDelegateClientCredential_WithClaims_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        // Ensure claims are NOT set when WithClaims is not called
+                        Assert.IsNull(options.Claims);
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsFalse(handler.ActualRequestPostData.ContainsKey("claims"));
+            }
+        }
+
+        [TestMethod]
         public async Task AcquireTokenByAuthorizationCode_NullOrEmptyCode_ThrowsAsync()
         {
             using (var httpManager = new MockHttpManager())
