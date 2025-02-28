@@ -872,7 +872,13 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
 
-                var token = app2.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.AdditionalCacheKeyComponents.Any()).FirstOrDefault();
+                var token = app2.AppTokenCacheInternal.Accessor.GetAllAccessTokens()
+                                                                .Where(x =>
+                                                                x.AdditionalCacheKeyComponents != null &&
+                                                                x.AdditionalCacheKeyComponents.Any()).FirstOrDefault();
+
+                Assert.IsNotNull(token);
+
                 Assert.AreEqual(certificate.SerialNumber, token.AdditionalCacheKeyComponents.FirstOrDefault().Value);
             }
         }
