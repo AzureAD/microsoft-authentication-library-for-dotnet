@@ -33,6 +33,10 @@ namespace Microsoft.Identity.Client
             /// Use broker on Linux
             /// </summary>
             Linux = 0b_0000_0010,  // 2
+            /// <summary>
+            /// Use broker on OSX
+            /// </summary>
+            OSX = 0b_0000_0011,  // 3
         }
 
         /// <summary>
@@ -87,6 +91,11 @@ namespace Microsoft.Identity.Client
             {
                 return true;
             } else if (EnabledOn.HasFlag(OperatingSystems.Linux) && DesktopOsHelper.IsLinux()) {
+                return true;
+            }
+
+            if (EnabledOn.HasFlag(OperatingSystems.OSX) && DesktopOsHelper.IsMac())
+            {
                 return true;
             }
 

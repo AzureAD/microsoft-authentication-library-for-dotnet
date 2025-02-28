@@ -22,7 +22,9 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <returns>A value indicating if we are running on mac or not</returns>
         public static bool IsMacPlatform()
         {
-#if NET45_OR_GREATER
+#if NET8_0_OR_GREATER
+            return DesktopOsHelper.IsMac();
+#elif NET45_OR_GREATER
             // we have to also check for PlatformID.Unix because Mono can sometimes return Unix as the platform on a Mac machine.
             // see http://www.mono-project.com/docs/faq/technical/
             return Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix;
