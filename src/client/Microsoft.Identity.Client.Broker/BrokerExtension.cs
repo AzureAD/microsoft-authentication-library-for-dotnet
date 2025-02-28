@@ -71,15 +71,15 @@ namespace Microsoft.Identity.Client.Broker
 
         private static void AddRuntimeSupport(PublicClientApplicationBuilder builder)
         {
-            if (DesktopOsHelper.IsWin10OrServerEquivalent())
+            if (DesktopOsHelper.IsWin10OrServerEquivalent() || DesktopOsHelper.IsLinux())
             {
                  builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
                      {
-                         logger.Info("[Runtime] WAM supported OS.");
+                         logger.Info("[Runtime] Broker supported OS.");
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
-            }
+            } 
             else
             {
                 builder.Config.BrokerCreatorFunc =
