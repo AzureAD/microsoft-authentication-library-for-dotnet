@@ -64,7 +64,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow("urn:microsoft:identity:fmi", "SignedAssertionDelegate")]
         [DataRow(TestConstants.ClientId, "Cert")]
         [DataRow(TestConstants.ClientId, "SignedAssertionDelegate")]
-        public async Task FmiEnsureWithFmiPathUsesCorrectClientAssertion(string clientId, string ClientAssertionType)
+        [DataRow("urn:microsoft:identity:fmi", "SignedAssertionDelegate2")]
+        [DataRow(TestConstants.ClientId, "SignedAssertionDelegate2")]
+        public async Task FmiEnsureWithFmiPathUsesCorrectClientAssertion(string clientId, string clientAssertionType)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -76,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                               .WithRedirectUri(TestConstants.RedirectUri);
 
-                switch (ClientAssertionType)
+                switch (clientAssertionType)
                 {
                     case "Cert":
                         builder.WithCertificate(certificate);
@@ -84,6 +86,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     case "SignedAssertionDelegate":
                         builder.WithClientAssertion(() => { return TestConstants.DefaultClientAssertion; });
                         break;
+                    case "SignedAssertionDelegate2":
+                        Func<AssertionRequestOptions, Task<string>> func = (AssertionRequestOptions options) =>
+                        {
+                            return Task.FromResult(TestConstants.DefaultClientAssertion);
+                        };
+                        builder.WithClientAssertion(func);
+                        break;
+                    default:
+                        throw new NotImplementedException();
                 }
 
                 var app = builder.WithHttpManager(httpManager)
