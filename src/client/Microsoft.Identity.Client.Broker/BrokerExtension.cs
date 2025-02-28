@@ -71,21 +71,12 @@ namespace Microsoft.Identity.Client.Broker
 
         private static void AddRuntimeSupport(PublicClientApplicationBuilder builder)
         {
-            if (DesktopOsHelper.IsWin10OrServerEquivalent() || DesktopOsHelper.IsLinux())
+            if (DesktopOsHelper.IsWin10OrServerEquivalent() || DesktopOsHelper.IsLinux() || DesktopOsHelper.IsMac())
             {
                  builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
                      {
                          logger.Info("[Runtime] Broker supported OS.");
-                         return new RuntimeBroker(uiParent, appConfig, logger);
-                     };
-            }
-            else if (DesktopOsHelper.IsMac())
-            {
-                 builder.Config.BrokerCreatorFunc =
-                     (uiParent, appConfig, logger) =>
-                     {
-                         logger.Info("[Runtime] macOS supports broker.");
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
             }

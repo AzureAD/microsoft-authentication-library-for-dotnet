@@ -28,9 +28,8 @@ public partial class MainPage : ContentPage
 		SemanticScreenReader.Announce(CACIACSBtn.Text);
 
         PublicClientApplicationBuilder builder = PublicClientApplicationBuilder
-			.Create("04b07795-8ddb-461a-bbee-02f9e1bf7b46")
+			.Create("7e5e53b7-864a-40bc-903f-89708a6af755")
 			.WithRedirectUri("msauth.com.msauth.unsignedapp://auth")
-			.WithClientCapabilities(new[] { "cp1" })
 			.WithAuthority("https://login.microsoftonline.com/common");
 		
 		builder = builder.WithLogging(SampleLogging);
@@ -70,9 +69,8 @@ public partial class MainPage : ContentPage
 		inUse = true;
 
 		PublicClientApplicationBuilder builder = PublicClientApplicationBuilder
-			.Create("04b07795-8ddb-461a-bbee-02f9e1bf7b46")
+			.Create("7e5e53b7-864a-40bc-903f-89708a6af755")
 			.WithRedirectUri("msauth.com.msauth.unsignedapp://auth")
-			.WithClientCapabilities(new[] { "cp1" })
 			.WithAuthority("https://login.microsoftonline.com/common");
 		
 		builder = builder.WithLogging(SampleLogging);

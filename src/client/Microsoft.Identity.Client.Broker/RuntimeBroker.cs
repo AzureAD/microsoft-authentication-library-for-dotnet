@@ -108,6 +108,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 s_lazyCore.Value.EnablePii(_logger.PiiLoggingEnabled);
             }
 
+            // We need to set parent window handle for MSALRuntime on Windows.
+            // On Windows, WAM UI correctly parented will prevent issues like WAM UI being hidden by terminal app.
+            // The solution will be different on different platforms.
             if (DesktopOsHelper.IsWindows())
             {
                 _parentHandle = GetParentWindow(uiParent);
