@@ -1,3 +1,14 @@
+4.69.1
+==========
+### Features
+- Enabled broker support on the Linux platform. See [Issue #5086](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5086)
+- Added a `WithCertificate(..., bool associateTokensWithCertificateSerialNumber)` overload to enable the use of the certificates serial number as part of the cache key for tokens. [Issue #5150](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5150)
+
+### Bug Fixes
+- MSAL will now stop replacing "%20" with "+" since it is obsolete. See [Issue #5061](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5061)
+- Exposing client capabilities in AssertionRequestOptions for MSI FIC scenarios [Issue #4948](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4948)
+- Added the missing claims in SignedAssertion when using the AssertionRequestOptions Delegate [Issue #5143](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5143)
+
 4.68.0
 ==========
 ### Features
