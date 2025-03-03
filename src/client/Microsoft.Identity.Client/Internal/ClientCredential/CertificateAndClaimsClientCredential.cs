@@ -65,9 +65,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
                 string assertion = jwtToken.Sign(Certificate, requestParameters.SendX5C, useSha2);
 
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType,
-                                                                string.Equals(clientId, Constants.FmiUrnClientId) ? 
-                                                                OAuth2AssertionType.FmiBearer : OAuth2AssertionType.JwtBearer);
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
                 oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
             }
             else
