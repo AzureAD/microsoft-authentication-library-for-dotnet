@@ -26,7 +26,7 @@ rect rgb(173, 216, 230)
 end
 rect rgb(215, 234, 132)
     MSAL->>MSAL: 5. Get token T from cache. Assume it is the "bad" token.
-    MSAL->>SF: 6. Call MITS_endpoint?claims=C&token_sha256_to_refresh=SHA256(T)
+    MSAL->>SF: 6. Call MITS_endpoint?xms_cc=cp1&token_sha256_to_refresh=SHA256(T)
     SF->>eSTS: 7. CCA.AcquireTokenForClient SN/I cert <br/> WithClientCapabilities(cp1) <br/> WithAccessTokenToRefresh(SHA256(T))
 end
 ```
@@ -37,6 +37,9 @@ Steps 5-7 are new and show how the RP propagates the revocation signal.
 
 > [!NOTE]  
 >  ClientCapabilities is an array of capabilities. In case the app developer sends multiple capabilities, these will be sent to the RP as `MITS_endpoint?xms_cc=cp1,cp2,cp3`. The RP MUST pass "cp1" (i.e. the CAE capabilitiy) if it is included.
+
+> [!NOTE]  
+> Parameter / APIs names are not final.
 
 
 ## Flow diagram - non-revocation event
