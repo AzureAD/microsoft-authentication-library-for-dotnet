@@ -53,8 +53,6 @@ namespace Microsoft.Identity.Client.Internal
         public const int CallerSdkIdMaxLength = 10;
         public const int CallerSdkVersionMaxLength = 20;
 
-        public const string FmiUrnClientId = "urn:microsoft:identity:fmi";
-
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {
             return $"https://enterpriseregistration.{domain}/enrollmentserver/contract";
