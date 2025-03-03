@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Broker
                 builder.Config.BrokerCreatorFunc =
                    (uiParent, appConfig, logger) =>
                    {
-                       logger.Warning($"[RuntimeBroker] Not available on the current platform: {osType}.");
+                       logger.Warning($"[RuntimeBroker] Not available on the current platform.");
                        return new NullBroker(logger);
                    };
             }

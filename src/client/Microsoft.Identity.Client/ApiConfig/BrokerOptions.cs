@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
             /// <summary>
             /// Use broker on OSX
             /// </summary>
-            OSX = 0b_0000_0011,  // 3
+            OSX = 0b_0000_0100,  // 4
         }
 
         /// <summary>

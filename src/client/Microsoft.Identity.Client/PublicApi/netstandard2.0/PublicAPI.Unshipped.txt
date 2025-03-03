@@ -1,4 +1,4 @@
-Microsoft.Identity.Client.BrokerOptions.OperatingSystems.OSX = 3 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems.OSX = 4 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
 Microsoft.Identity.Client.BrokerOptions.OperatingSystems.Linux = 2 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
 Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.get -> System.Collections.Generic.IEnumerable<string>
 Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.set -> void
