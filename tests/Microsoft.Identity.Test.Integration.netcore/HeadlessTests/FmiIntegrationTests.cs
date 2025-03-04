@@ -16,6 +16,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 {
     /// <summary>
     /// The tests in this file are demonstrations of the various authentication flows outlined in the "FMI protocol spec v1.0" Section 3.2
+    /// https://microsoft.sharepoint.com/:w:/t/aad/protocols/EThMH6es0UNKhsFlVgBiBegByuZQ6CnaCzzAdAV0excHVA?e=m5xXtV
     /// </summary>
     [TestClass]
     public class FmiIntegrationTests
