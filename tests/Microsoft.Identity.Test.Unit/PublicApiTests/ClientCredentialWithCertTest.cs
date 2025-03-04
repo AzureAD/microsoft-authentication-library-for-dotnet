@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 #if !ANDROID && !iOS 
@@ -30,10 +30,13 @@ namespace Microsoft.Identity.Test.Unit
     [DeploymentItem(@"Resources\RSATestCertDotNet.pfx")]
     public class ConfidentialClientWithCertTests : TestBase
     {
+        private byte[] _serializedCache;
+
         [TestInitialize]
         public override void TestInitialize()
         {
             base.TestInitialize();
+            _serializedCache = null;
         }
 
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(bool clientCredentialFlow)
@@ -717,11 +720,11 @@ namespace Microsoft.Identity.Test.Unit
                                               .WithCertificate(certificate, true, true)
                                               .WithHttpManager(httpManager)
                                               .WithExperimentalFeatures()
-                                              .WithCacheOptions(options: new CacheOptions() { UseSharedCache = true })
                                               .BuildConcrete();
 
-                //Clear static caches
-                app.AppTokenCacheInternal.Accessor.Clear();
+                app.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+                app.AppTokenCache.SetAfterAccess(AfterCacheAccess);
+
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -758,9 +761,11 @@ namespace Microsoft.Identity.Test.Unit
                               .WithRedirectUri(TestConstants.RedirectUri)
                               .WithCertificate(certificate, true, true)
                               .WithHttpManager(httpManager)
-                              .WithCacheOptions(options: new CacheOptions() { UseSharedCache = true })
                               .WithExperimentalFeatures()
                               .BuildConcrete();
+
+                app2.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+                app2.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
                 appCacheAccess = app2.AppTokenCache.RecordAccess();
 
@@ -785,9 +790,11 @@ namespace Microsoft.Identity.Test.Unit
                             .WithRedirectUri(TestConstants.RedirectUri)
                             .WithCertificate(certificate2, true, true)
                             .WithHttpManager(httpManager)
-                            .WithCacheOptions(options: new CacheOptions() { UseSharedCache = true })
                             .WithExperimentalFeatures()
                             .BuildConcrete();
+
+                app3.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+                app3.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
                 //Ensure serial number does not match
                 result = await app3.AcquireTokenForClient(TestConstants.s_scope.ToArray())
@@ -814,11 +821,10 @@ namespace Microsoft.Identity.Test.Unit
                                               .WithCertificate(certificate, true, false)
                                               .WithHttpManager(httpManager)
                                               .WithExperimentalFeatures()
-                                              .WithCacheOptions(options: new CacheOptions() { UseSharedCache = true })
                                               .BuildConcrete();
 
-                //Clear static caches
-                app.AppTokenCacheInternal.Accessor.Clear();
+                app.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+                app.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
 
@@ -850,9 +856,11 @@ namespace Microsoft.Identity.Test.Unit
                               .WithRedirectUri(TestConstants.RedirectUri)
                               .WithCertificate(certificate, true, true)
                               .WithHttpManager(httpManager)
-                              .WithCacheOptions(options: new CacheOptions() { UseSharedCache = true })
                               .WithExperimentalFeatures()
                               .BuildConcrete();
+
+                app2.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+                app2.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
                 app2.AppTokenCache.RecordAccess();
 
@@ -864,8 +872,14 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
 
-                var serialNumber = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().AdditionalCacheKeyComponents.FirstOrDefault().Value;
-                Assert.AreEqual(certificate.SerialNumber, serialNumber);
+                var token = app2.AppTokenCacheInternal.Accessor.GetAllAccessTokens()
+                                                                .Where(x =>
+                                                                x.AdditionalCacheKeyComponents?.Any() == true &&
+                                                                x.AdditionalCacheKeyComponents.Any()).FirstOrDefault();
+
+                Assert.IsNotNull(token);
+
+                Assert.AreEqual(certificate.SerialNumber, token.AdditionalCacheKeyComponents.FirstOrDefault().Value);
             }
         }
 
@@ -889,6 +903,16 @@ namespace Microsoft.Identity.Test.Unit
                 
                 Assert.IsTrue(exception.Message.Contains("Value cannot be null"));
             }
+        }
+
+        private void BeforeCacheAccess(TokenCacheNotificationArgs args)
+        {
+            args.TokenCache.DeserializeMsalV3(_serializedCache);
+        }
+
+        private void AfterCacheAccess(TokenCacheNotificationArgs args)
+        {
+            _serializedCache = args.TokenCache.SerializeMsalV3();
         }
 
         private static string ComputeCertThumbprint(X509Certificate2 certificate, bool useSha2)
