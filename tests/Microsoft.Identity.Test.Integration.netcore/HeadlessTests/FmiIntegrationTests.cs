@@ -60,19 +60,20 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Recording test data for Asserts
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "4df2cbbb-8612-49c1-87c8-f334d6d065ad_f645ad92-e38d-4d1a-b510-d1b09a74a8ca_7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI_AppTokenCache";
+            expectedExternalCacheKey = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
 
             //Acquire Fmi Cred
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
-                                                    .WithFmiPath("SomeFmiPath/Path") //Sets fmi path in client credential request.
+                                                    .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
 
             //Assert
             AssertResults(authResult,
                           confidentialApp,
-                          "-login.windows.net-atext-4df2cbbb-8612-49c1-87c8-f334d6d065ad-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-api://azurefmitokenexchange/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
-                          "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265");
+                          "-login.windows.net-atext-4df2cbbb-8612-49c1-87c8-f334d6d065ad-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-api://azurefmitokenexchange/.default-zm2n0e62zwtsnnsozptlsooob_c7i-gfpxhyqqinjuw",
+                          "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265",
+                          "SomeFmiPath/FmiCredentialPath");
         }
 
         [TestMethod]
@@ -94,7 +95,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Fmi app/scenario parameters
             var clientId = "4df2cbbb-8612-49c1-87c8-f334d6d065ad";
-            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default";
+            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default"; //Guid for api://AzureFMITokenExchange
 
             //Act
             //Create application
@@ -112,19 +113,20 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Recording test data for Asserts
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "4df2cbbb-8612-49c1-87c8-f334d6d065ad_f645ad92-e38d-4d1a-b510-d1b09a74a8ca_7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI_AppTokenCache";
+            expectedExternalCacheKey = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
 
             //Acquire Token
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
-                                                    .WithFmiPath("SomeFmiPath/Path") //Sets fmi path in client credential request.
+                                                    .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
 
             //Assert
             AssertResults(authResult,
                           confidentialApp,
-                          "-login.windows.net-atext-4df2cbbb-8612-49c1-87c8-f334d6d065ad-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-022907d3-0f1b-48f7-badc-1ba6abab6d66/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
-                          "022907d3-0f1b-48f7-badc-1ba6abab6d66");
+                          "-login.windows.net-atext-4df2cbbb-8612-49c1-87c8-f334d6d065ad-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-022907d3-0f1b-48f7-badc-1ba6abab6d66/.default-zm2n0e62zwtsnnsozptlsooob_c7i-gfpxhyqqinjuw",
+                          "022907d3-0f1b-48f7-badc-1ba6abab6d66",
+                          "SomeFmiPath/FmiCredentialPath");
         }
 
         [TestMethod]
@@ -176,12 +178,13 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             AssertResults(authResult,
                           confidentialApp,
                           "-login.windows.net-atext-urn:microsoft:identity:fmi-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-api://azurefmitokenexchange/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
-                          "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265");
+                          "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265",
+                          "SomeFmiPath/Path");
         }
 
         [TestMethod]
-        [Ignore("Waiting for ESTS Implementation. Also requires Coorp net to run")]
         //Sub-RMA getting FIC for leaf entity.
+        [Ignore("Waiting for ESTS Implementation. Also requires Coorp net to run")]
         public async Task Flow4_SubRma_FmiCredential_For_leaf()
         {
             //Arrange
@@ -198,7 +201,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
-            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default";
+            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default"; //Guid for api://AzureFMITokenExchange
 
             //Act
             //Create application
@@ -228,7 +231,8 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             AssertResults(authResult,
                           confidentialApp,
                           "expectedInternalCacheKey",
-                          "expectedAudience");
+                          "expectedAudience",
+                          "SomeFmiPath/Path");
         }
 
         [TestMethod]
@@ -250,7 +254,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
-            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default";
+            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default"; //Guid for api://AzureFMITokenExchange
 
             //Act
             //Create application
@@ -280,7 +284,8 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             AssertResults(authResult,
                           confidentialApp,
                           "-login.windows.net-atext-urn:microsoft:identity:fmi-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-022907d3-0f1b-48f7-badc-1ba6abab6d66/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
-                          "022907d3-0f1b-48f7-badc-1ba6abab6d66");
+                          "022907d3-0f1b-48f7-badc-1ba6abab6d66",
+                          "SomeFmiPath/Path");
         }
 
         private static async Task<string> GetParentCredential(AssertionRequestOptions options)
@@ -302,7 +307,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Acquire Token
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
-                                                    .WithFmiPath("SomeFmiPath/Path") //Sets fmi path in client credential request.
+                                                    .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
 
@@ -323,7 +328,8 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             AuthenticationResult authResult,
             ConfidentialClientApplication confidentialApp,
             string expectedInternalCacheKey,
-            string expectedAudience)
+            string expectedAudience,
+            string expectedFmiPath)
         {
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
@@ -333,7 +339,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             Assert.IsNotNull(authResult);
             Assert.AreEqual(expectedAudience, audience);
-            Assert.IsTrue(subject.Contains("SomeFmiPath/Path"));
+            Assert.IsTrue(subject.Contains(expectedFmiPath));
             Assert.AreEqual(expectedInternalCacheKey, token.CacheKey);
         }
     }
