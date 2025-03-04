@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 #if !ANDROID && !iOS 
@@ -872,7 +872,13 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
 
-                var token = app2.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.AdditionalCacheKeyComponents.Any()).FirstOrDefault();
+                var token = app2.AppTokenCacheInternal.Accessor.GetAllAccessTokens()
+                                                                .Where(x =>
+                                                                x.AdditionalCacheKeyComponents?.Any() == true &&
+                                                                x.AdditionalCacheKeyComponents.Any()).FirstOrDefault();
+
+                Assert.IsNotNull(token);
+
                 Assert.AreEqual(certificate.SerialNumber, token.AdditionalCacheKeyComponents.FirstOrDefault().Value);
             }
         }
