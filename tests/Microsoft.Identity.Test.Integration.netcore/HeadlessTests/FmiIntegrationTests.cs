@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
         [TestMethod]
         //RMA getting FMI cred for a leaf entity or sub-RMA
+        [Ignore("Requires Coorp net to run")]
         public async Task Flow1_RmaCredential_From_CertTestAsync()
         {
             //Arrange
@@ -75,6 +76,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
         [TestMethod]
         //RMA getting FMI token for a leaf entity
+        [Ignore("Requires Coorp net to run")]
         public async Task Flow2_RmaToken_From_CertTestAsync()
         {
             //Arrange
@@ -125,8 +127,8 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         }
 
         [TestMethod]
-        [Ignore("Waiting for ESTS Implementation")]
         //Sub-RMA getting FMI cred for a child sub-RMA
+        [Ignore("Requires Coorp net to run")]
         public async Task Flow3_FmiCredential_From_RmaCredential()
         {
             //Arrange
@@ -143,7 +145,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
-            var scope = "api://AzureFMITokenExchange/.default\"";
+            var scope = "api://AzureFMITokenExchange/.default";
 
             //Act
             //Create application
@@ -152,16 +154,16 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
                         .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
-                        .WithClientAssertion((options) => GetParentCredential(options))
+                        .WithClientAssertion((options) => GetParentCredential(options)) //This api acquires the FMI credential needed to authenticate
                         .BuildConcrete();
 
-            //Configure token cache serialization
+            //FOR TESTING ONLY: Configure token cache serialization
             confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "4df2cbbb-8612-49c1-87c8-f334d6d065ad_f645ad92-e38d-4d1a-b510-d1b09a74a8ca_7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI_AppTokenCache";
+            expectedExternalCacheKey = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
 
             //Acquire Fmi Cred
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
@@ -172,12 +174,12 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             //Assert
             AssertResults(authResult,
                           confidentialApp,
-                          "expectedInternalCacheKey",
-                          "expectedAudience");
+                          "-login.windows.net-atext-urn:microsoft:identity:fmi-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-api://azurefmitokenexchange/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
+                          "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265");
         }
 
         [TestMethod]
-        [Ignore("Waiting for ESTS Implementation")]
+        [Ignore("Waiting for ESTS Implementation. Also requires Coorp net to run")]
         //Sub-RMA getting FIC for leaf entity.
         public async Task Flow4_SubRma_FmiCredential_For_leaf()
         {
@@ -195,7 +197,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
-            var scope = "api://d796a5d2-0fb6-499a-b311-8bf5b3d058f7/.default";
+            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default";
 
             //Act
             //Create application
@@ -204,7 +206,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
                         .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
-                        .WithClientAssertion((options) => GetParentCredential(options))
+                        .WithClientAssertion((options) => GetParentCredential(options)) //This api acquires the FMI credential needed to authenticate
                         .BuildConcrete();
 
             //Configure token cache serialization
@@ -229,8 +231,8 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         }
 
         [TestMethod]
-        [Ignore("Waiting for ESTS Implementation")]
         //Sub-RMA getting FMI token for leaf entity
+        [Ignore("Requires Coorp net to run")]
         public async Task Flow5_SubRma_FmiToken_From_FmiCred_For_leafTestAsync()
         {
             //Arrange
@@ -247,7 +249,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
-            var scope = "api://d796a5d2-0fb6-499a-b311-8bf5b3d058f7/.default";
+            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default";
 
             //Act
             //Create application
@@ -256,7 +258,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
                         .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
-                        .WithClientAssertion((options) => GetParentCredential(options))
+                        .WithClientAssertion((options) => GetParentCredential(options)) //This api acquires the FMI credential needed to authenticate
                         .BuildConcrete();
 
             //Configure token cache serialization
@@ -265,59 +267,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Recording test data for Asserts
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "";
-
-            //Acquire Fmi Cred
-            var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
-                                                    .WithFmiPath("SomeFmiPath/Path") //Sets fmi path in client credential request.
-                                                    .ExecuteAsync()
-                                                    .ConfigureAwait(false);
-
-            //Assert
-            AssertResults(authResult,
-                          confidentialApp, 
-                          "expectedInternalCacheKey",
-                          "expectedAudience");
-        }
-
-        [TestMethod]
-        [Ignore("Waiting for ESTS Implementation")]
-        //Any app cred (including RMAs) -> FMI-FIC (1st leg of FMI connector flow).
-        public async Task Flow6_FmiFic_From_AnyAppTestAsync()
-        {
-            //Arrange
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-            string expectedExternalCacheKey = null;
-
-            Action<TokenCacheNotificationArgs> extCacheKeyEvaluator = (args) =>
-            {
-                if (expectedExternalCacheKey != null)
-                {
-                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedExternalCacheKey));
-                }
-            };
-
-            //Fmi app/scenario parameters
-            var clientId = "4df2cbbb-8612-49c1-87c8-f334d6d065ad";
-            var scope = "api://AzureADTokenExchange/.default";
-
-            //Act
-            //Create application
-            var confidentialApp = ConfidentialClientApplicationBuilder
-                        .Create(clientId)
-                        .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
-                        .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
-                        .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
-                        .BuildConcrete();
-
-            //Configure token cache serialization
-            confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
-            confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
-
-            //Recording test data for Asserts
-            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "";
+            expectedExternalCacheKey = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
 
             //Acquire Fmi Cred
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
@@ -328,67 +278,15 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             //Assert
             AssertResults(authResult,
                           confidentialApp,
-                          "expectedInternalCacheKey",
-                          "expectedAudience");
-        }
-
-        [TestMethod]
-        [Ignore("Waiting for ESTS Implementation")]
-        //FMI-FIC -> Access token (2nd leg of FMI connector flow)
-        public async Task Flow7_FmiToken_From_FmiFicTestAsync()
-        {
-            //Arrange
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-            string expectedExternalCacheKey = null;
-
-            Action<TokenCacheNotificationArgs> extCacheKeyEvaluator = (args) =>
-            {
-                if (expectedExternalCacheKey != null)
-                {
-                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedExternalCacheKey));
-                }
-            };
-
-            //Fmi app/scenario parameters
-            var clientId = "AppId to impersonate";
-            var scope = "api://d796a5d2-0fb6-499a-b311-8bf5b3d058f7/.default";
-
-            //Act
-            //Create application
-            var confidentialApp = ConfidentialClientApplicationBuilder
-                        .Create(clientId)
-                        .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
-                        .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
-                        .WithClientAssertion((options) => GetParentCredential(options))
-                        .BuildConcrete();
-
-            //Configure token cache serialization
-            confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
-            confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
-
-            //Recording test data for Asserts
-            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "";
-
-            //Acquire Fmi Cred
-            var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
-                                                    .WithFmiPath("") //Sets fmi path in client credential request.
-                                                    .ExecuteAsync()
-                                                    .ConfigureAwait(false);
-
-            //Assert
-            AssertResults(authResult,
-                          confidentialApp,
-                          "expectedInternalCacheKey",
-                          "expectedAudience");
+                          "-login.windows.net-atext-urn:microsoft:identity:fmi-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-022907d3-0f1b-48f7-badc-1ba6abab6d66/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
+                          "022907d3-0f1b-48f7-badc-1ba6abab6d66");
         }
 
         private static async Task<string> GetParentCredential(AssertionRequestOptions options)
         {
             //Fmi app/scenario parameters
             var clientId = "4df2cbbb-8612-49c1-87c8-f334d6d065ad";
-            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default";
+            var scope = "api://AzureFMITokenExchange/.default";
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
