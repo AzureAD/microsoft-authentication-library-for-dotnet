@@ -71,8 +71,12 @@
 		</NativeReference>
 	</ItemGroup>
 
-	<ItemGroup>
+	<!-- <ItemGroup>
 		<ProjectReference Include="../../../src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj" />
+	</ItemGroup> -->
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.68.4-internal-preview" />
 	</ItemGroup>
 
 </Project>
