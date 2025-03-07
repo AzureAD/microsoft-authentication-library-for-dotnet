@@ -62,4 +62,4 @@ graph TD;
 ```
 ---
 
-**References: ** https://learn.microsoft.com/en-gb/entra/identity/managed-identities-azure-resources/how-to-use-vm-token#error-handling
+**References:** https://learn.microsoft.com/en-gb/entra/identity/managed-identities-azure-resources/how-to-use-vm-token#error-handling
