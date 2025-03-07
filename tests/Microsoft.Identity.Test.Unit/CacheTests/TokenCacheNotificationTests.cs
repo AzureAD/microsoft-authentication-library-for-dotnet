@@ -533,5 +533,47 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             }
         }
+
+        [TestMethod]
+        [DataRow(TestConstants.ClientId)]
+        [DataRow(TestConstants.FmiNodeClientId)]
+        public async Task TokenCacheSerializationArgs_AppCache_IsFmiClientNode_Async(string clientId)
+        {
+            using (var harness = CreateTestHarness())
+            {
+                //Confirm that IsFmiClientNode is correct
+                // Arrange
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(clientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                var appTokenCacheRecoder = cca.AppTokenCache.RecordAccess((args) =>
+                {
+                    Assert.AreEqual(clientId, args.ClientId);
+                    if (clientId.Equals(TestConstants.FmiNodeClientId))
+                    {
+                        Assert.IsTrue(args.IsFmiClientNode);
+                    }
+                    else
+                    {
+                        Assert.IsFalse(args.IsFmiClientNode);
+                    }
+
+                    CollectionAssert.AreEquivalent(TestConstants.s_scope.ToArray(), args.RequestScopes.ToArray());
+                });
+
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
+
+                // Act - Client Credentials with authority override
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithTenantId(TestConstants.TenantId2)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                appTokenCacheRecoder.AssertAccessCounts(1, 1);
+            }
+        }
     }
 }

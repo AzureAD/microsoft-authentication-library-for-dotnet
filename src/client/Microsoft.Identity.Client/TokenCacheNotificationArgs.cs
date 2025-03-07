@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.IdentityModel.Abstractions;
 
@@ -255,5 +256,13 @@ namespace Microsoft.Identity.Client
         /// Cache Details contains the details of L1/ L2 cache for telemetry logging.
         /// </summary>
         public TelemetryData TelemetryData { get; }
+
+        /// <summary>
+        /// Determines if the client application authentication is an FMI node under an RMA.
+        /// </summary>
+        public bool IsFmiClientNode 
+        {
+            get { return ClientId.Equals(Constants.FmiNodeClientId); }
+        }
     }
 }
