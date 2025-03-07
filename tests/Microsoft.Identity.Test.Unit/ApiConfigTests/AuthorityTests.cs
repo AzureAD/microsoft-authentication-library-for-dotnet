@@ -485,6 +485,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [DataRow(AuthorityType_Aad, TestConstants.AuthorityOrganizationsTenant)]
         [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityCommon)]
         [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityOrganizations)]
+        // Mixed-Case Authorities
+        [DataRow(AuthorityType_Aad, $"https://{TestConstants.ProductionPrefNetworkEnvironment}/COMMON/")]
+        [DataRow(AuthorityType_Aad, $"https://{TestConstants.ProductionPrefNetworkEnvironment}/Organizations/")]
+        [DataRow(AuthorityType_Dsts, $"{TestConstants.DstsAuthorityTenantless}COMMON/")]
+        [DataRow(AuthorityType_Dsts, $"{TestConstants.DstsAuthorityTenantless}Organizations")]
         public void ThrowIfNotSupportedForMtls_ForUnsuppportedTenant_ThrowsException(int authorityType, string authority)
         {
             // Arrange
