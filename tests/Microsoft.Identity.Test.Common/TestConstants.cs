@@ -45,9 +45,9 @@ namespace Microsoft.Identity.Test.Unit
         public const string Utid = "my-utid";
         public const string Utid2 = "my-utid2";
 
-        public const string Common = Constants.CommonTenant;
-        public const string Organizations = Constants.OrganizationsTenant;
-        public const string Consumers = Constants.ConsumerTenant;
+        public const string Common = Constants.Common;
+        public const string Organizations = Constants.Organizations;
+        public const string Consumers = Constants.Consumers;
         public const string Guest = "guest";
         public const string Home = "home";
         public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";

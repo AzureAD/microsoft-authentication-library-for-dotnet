@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
                     CanonicalAuthority = new Uri($"https://{authorityUri.Authority}/{pathSegments[0]}/{pathSegments[1]}/");
 
                     UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                        $"https://{authorityUri.Authority}/{pathSegments[0]}/{Constants.CommonTenant}/userrealm/",
+                        $"https://{authorityUri.Authority}/{pathSegments[0]}/{Constants.Common}/userrealm/",
                         authorityUri.Port);
                     break;
                 default:
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
                             authorityUri.Port));
 
                     UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                        $"https://{Host}/{Constants.CommonTenant}/userrealm/",
+                        $"https://{Host}/{Constants.Common}/userrealm/",
                         authorityUri.Port);
                     break;
             }
@@ -157,8 +157,8 @@ namespace Microsoft.Identity.Client
             string[] pathSegments = GetPathSegments(CanonicalAuthority.AbsoluteUri);
             
             var isNotSupportedTenant = pathSegments.Any(s => 
-                Constants.CommonTenant.Equals(s, StringComparison.OrdinalIgnoreCase) ||
-                Constants.OrganizationsTenant.Equals(s, StringComparison.OrdinalIgnoreCase));
+                Constants.Common.Equals(s, StringComparison.OrdinalIgnoreCase) ||
+                Constants.Organizations.Equals(s, StringComparison.OrdinalIgnoreCase));
 
             if (isNotSupportedTenant)
             {
@@ -295,11 +295,11 @@ namespace Microsoft.Identity.Client
             switch (authorityAudience)
             {
                 case AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount:
-                    return Constants.CommonTenant;
+                    return Constants.Common;
                 case AadAuthorityAudience.AzureAdMultipleOrgs:
-                    return Constants.OrganizationsTenant;
+                    return Constants.Organizations;
                 case AadAuthorityAudience.PersonalMicrosoftAccount:
-                    return Constants.ConsumerTenant;
+                    return Constants.Consumers;
                 case AadAuthorityAudience.AzureAdMyOrg:
                     if (string.IsNullOrWhiteSpace(tenantId))
                     {

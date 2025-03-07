@@ -20,9 +20,9 @@ namespace Microsoft.Identity.Client.Internal
         public const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
 
         public const string MsaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad";
-        public const string ConsumerTenant = "consumers";
-        public const string OrganizationsTenant = "organizations";
-        public const string CommonTenant = "common";
+        public const string Consumers = "consumers";
+        public const string Organizations = "organizations";
+        public const string Common = "common";
 
         public const string UserRealmMsaDomainName = "live.com";
 

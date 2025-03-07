@@ -1041,14 +1041,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #pragma warning disable CS0618 // Type or member is obsolete
                 Uri authorizationRequestUrl = confidentialClientApplication
                     .GetAuthorizationRequestUrl(new List<string> { "" })
-                    .WithAuthority(AzureCloudInstance.AzurePublic, Constants.ConsumerTenant)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, Constants.Consumers)
                     .ExecuteAsync()
                     .ConfigureAwait(false)
                     .GetAwaiter()
                     .GetResult();
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Constants.CommonTenant));
+                Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Constants.Common));
             }
         }
 
