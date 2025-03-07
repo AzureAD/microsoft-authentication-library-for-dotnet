@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -169,22 +168,7 @@ namespace Microsoft.Identity.Client
         {
             if (CommonParameters.MtlsCertificate != null)
             {
-                string authorityUri = ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri;
-
-                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad && 
-                    ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Dsts)
-                {
-                    throw new MsalClientException(
-                        MsalError.InvalidAuthorityType,
-                        MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
-                }
-
-                if (authorityUri.Contains("/common", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new MsalClientException(
-                        MsalError.MissingTenantedAuthority,
-                        MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
-                }
+                ServiceBundle.Config.Authority.AuthorityInfo.ThrowIfNotSupportedForMtls();
 
                 // Check for Azure region only if the authority is AAD
                 if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&

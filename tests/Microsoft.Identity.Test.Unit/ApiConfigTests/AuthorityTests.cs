@@ -458,6 +458,61 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(app.AuthorityInfo.AuthorityType.ToString(), authorityType);
         }
 
+        #region ThrowIfNotSupportedForMtls
+        [TestMethod]
+        public void ThrowIfNotSupportedForMtls_ForInvalidAuthorityType_ThrowsException()
+        {
+            // Arrange
+            var authorityInfo = new AuthorityInfo(AuthorityType.B2C, "https://example.com/tfp/tenant/policy", false);
+
+            // Act & Assert
+            MsalClientException ex = AssertException.Throws<MsalClientException>(() => authorityInfo.ThrowIfNotSupportedForMtls());
+
+            // Assert
+            Assert.AreEqual(MsalError.InvalidAuthorityType, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.MtlsInvalidAuthorityTypeMessage, ex.Message);
+        }
+
+        /// <summary>
+        /// Below public constants are defined as <see cref="AuthorityType"/> is marked internal
+        /// and thus, cannot be used as a parameter in the test method which uses DataRow attribute.
+        /// </summary>
+        public const int AuthorityType_Aad = (int)AuthorityType.Aad;
+        public const int AuthorityType_Dsts = (int)AuthorityType.Dsts;
+
+        [DataTestMethod]
+        [DataRow(AuthorityType_Aad, TestConstants.AuthorityCommonTenant)]
+        [DataRow(AuthorityType_Aad, TestConstants.AuthorityOrganizationsTenant)]
+        [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityCommon)]
+        [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityOrganizations)]
+        public void ThrowIfNotSupportedForMtls_ForUnsuppportedTenant_ThrowsException(int authorityType, string authority)
+        {
+            // Arrange
+            var authorityInfo = new AuthorityInfo((AuthorityType)authorityType, authority, false);
+
+            // Act & Assert
+            MsalClientException ex = AssertException.Throws<MsalClientException>(() => authorityInfo.ThrowIfNotSupportedForMtls());
+
+            // Assert
+            Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage, ex.Message);
+        }
+
+        [TestMethod]
+        [DataRow(AuthorityType_Aad, TestConstants.AuthorityTenant)]
+        [DataRow(AuthorityType_Aad, TestConstants.AuthorityConsumerTidTenant)]
+        [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityTenanted)]
+        [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityConsumers)]
+        public void ThrowIfNotSupportedForMtls_ForSupportedAuthorityTypeAndTenant_ShouldNotThrow(int authorityType, string authority)
+        {
+            // Arrange
+            var authorityInfo = new AuthorityInfo((AuthorityType)authorityType, authority, false);
+
+            // Act & Assert
+            authorityInfo.ThrowIfNotSupportedForMtls();
+        }
+        #endregion
+
         private static void VerifyAuthority(
             Authority configAuthority,
             Authority requestAuthority,

@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPopWithoutTenantIdAsync()
+        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsync_ThrowsException()
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
@@ -456,10 +456,13 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [DataTestMethod]
-        [DataRow("https://login.microsoftonline.com", "Public Cloud")]
-        [DataRow("https://login.microsoftonline.us", "Azure Government")]
-        [DataRow("https://login.partner.microsoftonline.cn", "Azure China")]
-        public async Task MtlsPop_WithCommonAsync(string authorityUrl, string cloudType)
+        [DataRow("https://login.microsoftonline.com", TestConstants.Common, "Public Cloud")]
+        [DataRow("https://login.microsoftonline.com", TestConstants.Organizations, "Public Cloud")]
+        [DataRow("https://login.microsoftonline.us", TestConstants.Common, "Azure Government")]
+        [DataRow("https://login.microsoftonline.us", TestConstants.Organizations, "Azure Government")]
+        [DataRow("https://login.partner.microsoftonline.cn", TestConstants.Common, "Azure China")]
+        [DataRow("https://login.partner.microsoftonline.cn", TestConstants.Organizations, "Azure China")]
+        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsync_ThrowsException(string authorityUrl, string nonTenantValue, string cloudType)
         {
             const string region = "eastus";
 
@@ -471,13 +474,13 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithCertificate(s_testCertificate)
-                        .WithAuthority($"{authorityUrl}/common")
+                        .WithAuthority($"{authorityUrl}/{nonTenantValue}")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                         .WithExperimentalFeatures()
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
-                    // Expect an exception due to using /common with MTLS PoP
+                    // Expect an exception due to using /common or /organizations with MTLS PoP
                     MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                         await app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
@@ -717,17 +720,19 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [TestMethod]
-        public async Task MtlsPopDstsCommonAuthorityFailsAsync()
+        [DataTestMethod]
+        [DataRow(TestConstants.DstsAuthorityCommon)]
+        [DataRow(TestConstants.DstsAuthorityOrganizations)]
+        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsyncForDsts_ThrowsException(string authorityUrl)
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
-                            .WithAuthority(TestConstants.DstsAuthorityCommon)
+                            .WithAuthority(authorityUrl)
                             .WithCertificate(s_testCertificate)
                             .WithExperimentalFeatures()
                             .Build();
 
-            // Set WithMtlsProofOfPossession on the request without specifying an authority
+            // Set WithMtlsProofOfPossession on the request specifying an authority
             MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession()

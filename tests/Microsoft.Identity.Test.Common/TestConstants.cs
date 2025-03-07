@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -44,9 +45,9 @@ namespace Microsoft.Identity.Test.Unit
         public const string Utid = "my-utid";
         public const string Utid2 = "my-utid2";
 
-        public const string Common = "common";
-        public const string Organizations = "organizations";
-        public const string Consumers = "consumers";
+        public const string Common = Constants.CommonTenant;
+        public const string Organizations = Constants.OrganizationsTenant;
+        public const string Consumers = Constants.ConsumerTenant;
         public const string Guest = "guest";
         public const string Home = "home";
         public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
@@ -112,6 +113,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
         public const string DstsAuthorityTenanted = DstsAuthorityTenantless + TenantId + "/";
         public const string DstsAuthorityCommon = DstsAuthorityTenantless + Common + "/";
+        public const string DstsAuthorityOrganizations = DstsAuthorityTenantless + Organizations + "/";
+        public const string DstsAuthorityConsumers = DstsAuthorityTenantless + Consumers + "/";
 
         public const string GenericAuthority = "https://demo.duendesoftware.com";
 
