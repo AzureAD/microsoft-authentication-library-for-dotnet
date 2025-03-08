@@ -157,6 +157,26 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Specifies that the token refresh should only occur if the specified SHA-256 hash
+        /// of the previously issued access token matches a cached token.
+        /// If the hash does not match, the existing cached token is returned without refresh.
+        /// </summary>
+        /// <param name="hash">The SHA-256 hash of the access token to refresh.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenForClientParameterBuilder WithAccessTokenSha256ToRefresh(string hash)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            if (string.IsNullOrWhiteSpace(hash))
+            {
+                throw new ArgumentNullException(nameof(hash), "Access token hash cannot be null or empty.");
+            }
+
+            Parameters.AccessTokenHashToRefresh = hash;
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
@@ -182,6 +202,14 @@ namespace Microsoft.Identity.Client
             }
 
             base.Validate();
+
+            // Force refresh + AccessTokenHashToRefresh APIs cannot be used together
+            if (Parameters.ForceRefresh && !string.IsNullOrEmpty(Parameters.AccessTokenHashToRefresh))
+            {
+                throw new MsalClientException(
+                    MsalError.ForceRefreshNotCompatibleWithTokenHash,
+                    MsalErrorMessage.ForceRefreshAndTokenHasNotCompatible);
+            }
 
             if (Parameters.SendX5C == null)
             {

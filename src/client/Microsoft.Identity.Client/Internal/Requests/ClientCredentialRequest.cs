@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -47,8 +50,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationResult authResult;
 
+            bool skipCache = _clientParameters.ForceRefresh || 
+                (!string.IsNullOrEmpty(AuthenticationRequestParameters.Claims) && 
+                string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh));
+
             // Skip checking cache when force refresh or claims are specified
-            if (_clientParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+            if (skipCache)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("[ClientCredentialRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set.");
@@ -193,12 +200,38 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (cachedAccessTokenItem != null && !_clientParameters.ForceRefresh)
             {
+                if (!string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh))
+                {
+                    string cachedTokenHash = ComputeSHA256(cachedAccessTokenItem.Secret);
+
+                    if (string.Equals(cachedTokenHash, _clientParameters.AccessTokenHashToRefresh, StringComparison.Ordinal))
+                    {
+                        AuthenticationRequestParameters.RequestContext.Logger.Info(
+                            "[ClientCredentialRequest] Found the 'bad' token in the cache. Skipping cache usage.");
+                        return null; // triggers a new token acquisition
+                    }
+                }
+
                 AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                 Metrics.IncrementTotalAccessTokensFromCache();
                 return cachedAccessTokenItem;
             }
 
             return null;
+        }
+
+        private static string ComputeSHA256(string token)
+        {
+#if NET6_0_OR_GREATER
+            byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+            return Convert.ToBase64String(hashBytes);
+#else
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
+                return Convert.ToBase64String(hashBytes);
+            }
+#endif
         }
 
         private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
