@@ -1,0 +1,2 @@
+const Microsoft.Identity.Client.MsalError.ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible" -> string
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAccessTokenSha256ToRefresh(string hash) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder

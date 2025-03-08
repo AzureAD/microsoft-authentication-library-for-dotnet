@@ -9,9 +9,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
     internal class AcquireTokenForClientParameters : AbstractAcquireTokenConfidentialClientParameters, IAcquireTokenParameters
     {
-        /// <summary>
-        /// </summary>
         public bool ForceRefresh { get; set; }
+
+        /// <summary>
+        /// The SHA-256 hash of the access token that should be refreshed.
+        /// If set, token refresh will occur only if a matching token is found in cache.
+        /// </summary>
+        public string AccessTokenHashToRefresh { get; set; }
 
         /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)

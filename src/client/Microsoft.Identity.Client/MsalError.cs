@@ -1177,5 +1177,16 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation:</para> Ensure that the AzureRegion configuration is set when using mTLS PoP as it requires a regional endpoint.
         /// </summary>
         public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
+
+        /// <summary>
+        /// <para>What happened?</para> The operation attempted to force a token refresh while also using a token hash. 
+        /// These two options are incompatible because forcing a refresh bypasses token caching, 
+        /// which conflicts with token hash validation.
+        /// <para>Mitigation:</para>
+        /// - Ensure that `force_refresh` is not set to `true` when using a token hash.
+        /// - Review the request parameters to ensure they are not conflicting.
+        /// - If token hashing is required, allow the cached token to be used instead of forcing a refresh.
+        /// </summary>
+        public const string ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible";
     }
 }
