@@ -2,7 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Reflection.Emit;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
@@ -459,62 +460,114 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         #region ThrowIfNotSupportedForMtls
-        [TestMethod]
-        public void ThrowIfNotSupportedForMtls_ForInvalidAuthorityType_ThrowsException()
-        {
-            // Arrange
-            var authorityInfo = new AuthorityInfo(AuthorityType.B2C, "https://example.com/tfp/tenant/policy", false);
-
-            // Act & Assert
-            MsalClientException ex = AssertException.Throws<MsalClientException>(() => authorityInfo.ThrowIfNotSupportedForMtls());
-
-            // Assert
-            Assert.AreEqual(MsalError.InvalidAuthorityType, ex.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.MtlsInvalidAuthorityTypeMessage, ex.Message);
-        }
-
-        /// <summary>
-        /// Below public constants are defined as <see cref="AuthorityType"/> is marked internal
-        /// and thus, cannot be used as a parameter in the test method which uses DataRow attribute.
-        /// </summary>
-        public const int AuthorityType_Aad = (int)AuthorityType.Aad;
-        public const int AuthorityType_Dsts = (int)AuthorityType.Dsts;
-
-        [DataTestMethod]
-        [DataRow(AuthorityType_Aad, TestConstants.AuthorityCommonTenant)]
-        [DataRow(AuthorityType_Aad, TestConstants.AuthorityOrganizationsTenant)]
-        [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityCommon)]
-        [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityOrganizations)]
-        // Mixed-Case Authorities
-        [DataRow(AuthorityType_Aad, $"https://{TestConstants.ProductionPrefNetworkEnvironment}/COMMON/")]
-        [DataRow(AuthorityType_Aad, $"https://{TestConstants.ProductionPrefNetworkEnvironment}/Organizations/")]
-        [DataRow(AuthorityType_Dsts, $"{TestConstants.DstsAuthorityTenantless}COMMON/")]
-        [DataRow(AuthorityType_Dsts, $"{TestConstants.DstsAuthorityTenantless}Organizations")]
-        public void ThrowIfNotSupportedForMtls_ForUnsuppportedTenant_ThrowsException(int authorityType, string authority)
-        {
-            // Arrange
-            var authorityInfo = new AuthorityInfo((AuthorityType)authorityType, authority, false);
-
-            // Act & Assert
-            MsalClientException ex = AssertException.Throws<MsalClientException>(() => authorityInfo.ThrowIfNotSupportedForMtls());
-
-            // Assert
-            Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage, ex.Message);
-        }
+        private static readonly AuthorityType[] s_unsupportedMtlsAuthorityTypes = Enum
+            .GetValues(typeof(AuthorityType))
+            .Cast<AuthorityType>()
+            .Where(type =>
+                type != AuthorityType.Aad &&
+                type != AuthorityType.Dsts)
+            .ToArray();
 
         [TestMethod]
-        [DataRow(AuthorityType_Aad, TestConstants.AuthorityTenant)]
-        [DataRow(AuthorityType_Aad, TestConstants.AuthorityConsumerTidTenant)]
-        [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityTenanted)]
-        [DataRow(AuthorityType_Dsts, TestConstants.DstsAuthorityConsumers)]
-        public void ThrowIfNotSupportedForMtls_ForSupportedAuthorityTypeAndTenant_ShouldNotThrow(int authorityType, string authority)
+        public void ThrowIfNotSupportedForMtls_ForAllUnsupportedAuthorityTypes_ThrowsException()
         {
-            // Arrange
-            var authorityInfo = new AuthorityInfo((AuthorityType)authorityType, authority, false);
+            foreach (var authorityType in s_unsupportedMtlsAuthorityTypes)
+            {
+                // Arrange
+                string testUri = GetTestUriForAuthorityType(authorityType);
+                var authorityInfo = new AuthorityInfo(authorityType, testUri, false);
+                var authority = Authority.CreateAuthority(authorityInfo);
 
-            // Act & Assert
-            authorityInfo.ThrowIfNotSupportedForMtls();
+                // Act & Assert
+                MsalClientException ex = AssertException.Throws<MsalClientException>(
+                    () => authority.ThrowIfNotSupportedForMtls());
+
+                // Assert error code and message
+                Assert.AreEqual(MsalError.InvalidAuthorityType, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.MtlsInvalidAuthorityTypeMessage, ex.Message);
+            }
+
+            string GetTestUriForAuthorityType(AuthorityType authorityType)
+            {
+                switch (authorityType)
+                {
+                    case AuthorityType.B2C:
+                        return TestConstants.B2CAuthority;
+                    case AuthorityType.Adfs:
+                        return TestConstants.ADFSAuthority;
+                    case AuthorityType.Generic:
+                        return TestConstants.GenericAuthority;
+                    default:
+                        return "https://example.com/tenant";
+                }
+            }
+        }
+
+        private static readonly Dictionary<AuthorityType, List<string>> s_mtlsSupportedAuthorityTypesWithUnsupportedAuthorityUriMap = new()
+        {
+            {
+                AuthorityType.Aad,
+                [
+                    TestConstants.AuthorityCommonTenant,
+                    TestConstants.AuthorityOrganizationsTenant,
+                    $"https://{TestConstants.ProductionPrefNetworkEnvironment}/COMMON/",
+                    $"https://{TestConstants.ProductionPrefNetworkEnvironment}/Organizations/",
+                ]
+            },
+            {
+                AuthorityType.Dsts,
+                [
+                    TestConstants.DstsAuthorityCommon,
+                    TestConstants.DstsAuthorityOrganizations,
+                    $"{TestConstants.DstsAuthorityTenantless}COMMON/",
+                    $"{TestConstants.DstsAuthorityTenantless}Organizations",
+                ]
+            },
+        };
+
+        [TestMethod]
+        public void ThrowIfNotSupportedForMtls_ForUnsuppportedTenant_ThrowsException()
+        {
+            foreach (var keyValuePair in s_mtlsSupportedAuthorityTypesWithUnsupportedAuthorityUriMap)
+            {
+                // Arrange
+                var authorityType = keyValuePair.Key;
+                foreach (var authorityUri in keyValuePair.Value)
+                {
+                    var authorityInfo = new AuthorityInfo((AuthorityType)authorityType, authorityUri, false);
+                    var authority = Authority.CreateAuthority(authorityInfo);
+
+                    // Act & Assert
+                    MsalClientException ex = AssertException.Throws<MsalClientException>(() => authority.ThrowIfNotSupportedForMtls());
+
+                    // Assert
+                    Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage, ex.Message);
+                }
+            }
+        }
+
+        private static readonly Dictionary<AuthorityType, List<string>> s_supportedMtlsAuthorityTypesAndAuthorityUriMap = new()
+        {
+            { AuthorityType.Aad, [TestConstants.AuthorityTenant, TestConstants.AuthorityConsumerTidTenant] },
+            { AuthorityType.Dsts, [TestConstants.DstsAuthorityTenanted, TestConstants.DstsAuthorityConsumers] },
+        };
+        [TestMethod]
+        public void ThrowIfNotSupportedForMtls_ForSupportedAuthorityTypeAndTenant_ShouldNotThrow()
+        {
+            foreach (var keyValuePair in s_supportedMtlsAuthorityTypesAndAuthorityUriMap)
+            {
+                // Arrange
+                var authorityType = keyValuePair.Key;
+                foreach (var authorityUri in keyValuePair.Value)
+                {
+                    var authorityInfo = new AuthorityInfo(authorityType, authorityUri, false);
+                    var authority = Authority.CreateAuthority(authorityInfo);
+
+                    // Act & Assert
+                    authority.ThrowIfNotSupportedForMtls();
+                }
+            }
         }
         #endregion
 

@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client
         {
             if (CommonParameters.MtlsCertificate != null)
             {
-                ServiceBundle.Config.Authority.AuthorityInfo.ThrowIfNotSupportedForMtls();
+                ServiceBundle.Config.Authority.ThrowIfNotSupportedForMtls();
 
                 // Check for Azure region only if the authority is AAD
                 if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&

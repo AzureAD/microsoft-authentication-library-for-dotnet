@@ -144,30 +144,6 @@ namespace Microsoft.Identity.Client
             AuthorityType != AuthorityType.Generic &&
             AuthorityType != AuthorityType.Adfs;
 
-        internal void ThrowIfNotSupportedForMtls()
-        {
-            if (AuthorityType != AuthorityType.Aad &&
-                AuthorityType != AuthorityType.Dsts)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidAuthorityType,
-                    MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
-            }
-
-            string[] pathSegments = GetPathSegments(CanonicalAuthority.AbsoluteUri);
-            
-            var isNotSupportedTenant = pathSegments.Any(s => 
-                Constants.Common.Equals(s, StringComparison.OrdinalIgnoreCase) ||
-                Constants.Organizations.Equals(s, StringComparison.OrdinalIgnoreCase));
-
-            if (isNotSupportedTenant)
-            {
-                throw new MsalClientException(
-                    MsalError.MissingTenantedAuthority,
-                    MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
-            }
-        }
-
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
         {
