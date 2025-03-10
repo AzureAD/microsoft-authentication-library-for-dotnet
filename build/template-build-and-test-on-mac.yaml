@@ -49,6 +49,7 @@ steps:
     script: |
       dotnet nuget locals all --clear 
       dotnet workload install maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
+      dotnet restore "./tests/devapps/MauiMacAppWithBroker/MauiMacAppWithBroker.csproj" --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
 
 - task: DotNetCoreCLI@2
   displayName: 'Build mac dotnet sample app'
