@@ -94,3 +94,13 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-test-on-linux.yaml
+
+- job: 'BuildAndTestOnMac'
+  pool:
+      vmImage: macOS-14
+  variables:
+      runCodesignValidationInjection: false
+      Codeql.SkipTaskAutoInjection: true
+
+  steps:
+  - template: template-build-and-test-on-mac.yaml

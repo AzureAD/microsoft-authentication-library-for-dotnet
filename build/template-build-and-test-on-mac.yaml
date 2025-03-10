@@ -1,0 +1,35 @@
+parameters:
+- name: xcodeVersion
+  type: string
+  default: 16.0
+
+
+steps:
+
+- task: InstallAppleCertificate@2
+  retryCountOnTaskFailure: 3
+  inputs:
+    certSecureFile: 'MSALCPPAppleBuildCertificate.p12'
+    certPwd: '$(MSALCPPAppleBuildCertificatePassword)'
+
+- task: InstallAppleProvisioningProfile@1
+  displayName: 'Install an Apple provisioning profile'
+  retryCountOnTaskFailure: 3
+  inputs:
+    # NOTE: Please seek help from MSAL CPP team to grant permission if new provisioning profile updated.
+    provProfileSecureFile: 'Mac_Team_Provisioning_Profile.provisionprofile'
+
+- task: Bash@3
+  displayName: (Hosted Agent Only) Select Xcode Version ${{ parameters.xcodeVersion }}
+  inputs:
+    targetType: inline
+    script: |
+      # If this is a hosted agent, let's explicitly set the Xcode version we want to use:
+      XCODE_PATH=/Applications/Xcode_${{ parameters.xcodeVersion }}.app/Contents/Developer
+      if [[ -d "$XCODE_PATH" ]]; then
+        sudo xcode-select -s "$XCODE_PATH"
+      else
+        XCODE_PATH=$(xcode-select -p)
+        echo "Xcode ${{ parameters.xcodeVersion }} not found. Using default Xcode at $XCODE_PATH"
+      fi
+  condition: and(eq(variables['Agent.OS'], 'Darwin'), or(startsWith(variables['Agent.Name'], 'Hosted'), startsWith(variables['Agent.Name'], 'Azure Pipelines')))
