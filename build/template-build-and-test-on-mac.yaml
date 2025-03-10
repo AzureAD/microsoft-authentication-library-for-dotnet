@@ -33,3 +33,39 @@ steps:
         echo "Xcode ${{ parameters.xcodeVersion }} not found. Using default Xcode at $XCODE_PATH"
       fi
   condition: and(eq(variables['Agent.OS'], 'Darwin'), or(startsWith(variables['Agent.Name'], 'Hosted'), startsWith(variables['Agent.Name'], 'Azure Pipelines')))
+
+- task: UseDotNet@2
+  retryCountOnTaskFailure: 3
+  displayName: 'Install .NET Core SDK'
+  inputs:
+    version: 8.x
+
+- task: NuGetAuthenticate@1
+
+- task: Bash@3
+  displayName: Install MAUI
+  inputs:
+    targetType: 'inline'
+    script: |
+      dotnet nuget locals all --clear 
+      dotnet workload install maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build mac dotnet sample app'
+  inputs:
+    command: 'build'
+    projects: |
+      ./tests/devapps/MauiMacAppWithBroker/MauiMacAppWithBroker.csproj
+    
+
+
+
+
+
+
+
+
+
+
+
+
