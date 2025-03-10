@@ -13,26 +13,39 @@
 ```mermaid
 sequenceDiagram
     participant Resource
-    actor CX
-    participant MSAL
-    participant SF        
+    actor Client/Caller (CX)
+    participant MSAL (Leaf)
+    participant MITS (Proxy)
+    participant SFRP (RP)
     participant eSTS
 
 rect rgb(173, 216, 230)
-    CX->> Resource: 1. Call resource with "bad" token T
-    Resource->>CX: 2.HTTP 401 + claims C
+    CX->>Resource: 1. Call resource with "bad" token T
+    Resource->>CX: 2. HTTP 401 + claims C
     CX->>CX: 3. Parse response, extract claims C
-    CX->>MSAL: 4. MSI.AcquireToken <br/> WithClaims(C) <br/> WithClientCapabilities("cp1")
+    CX->>MSAL: 4. MSI.AcquireToken(...).WithClaims(C).WithClientCapabilities("cp1")
 end
+
 rect rgb(215, 234, 132)
-    MSAL->>MSAL: 5. Get token T from cache. Assume it is the "bad" token.
-    MSAL->>SF: 6. Call MITS_endpoint?xms_cc=cp1&token_sha256_to_refresh=SHA256(T)
-    SF->>eSTS: 7. CCA.AcquireTokenForClient SN/I cert <br/> WithClientCapabilities(cp1) <br/> WithAccessTokenToRefresh(SHA256(T))
+    MSAL->>MSAL: 5. Looks up old token T in local cache
+    MSAL->>MITS: 6. MITS_endpoint?xms_cc=cp1&token_sha256_to_refresh=SHA256(T)
+    MITS->>SFRP: 7. (Forward request w/ cc=cp1, hash=SHA256(T))
+    SFRP->>SFRP: 8. Another MSAL call AcquireTokenForClient(...).WithClientCapabilities(cp1)
+    SFRP->>eSTS: 9. eSTS issues a new token
 end
 ```
 
 Steps 1-4 fall to the Client (i.e. application using MSI directly or higher level SDK like Azure KeyVault). This is the **standard CAE flow**.
-Steps 5-7 are new and show how the RP propagates the revocation signal.
+Steps 5-9 are new and show how the RP propagates the revocation signal.
+
+### Explanation:
+1. The client (CX) calls some **Resource** with token **T**.
+2. The resource detects **T** is bad (revoked) and returns **401** + **claims C**.
+3. CX parses **C** and calls **MSAL** with `.WithClaims(C).WithClientCapabilities(cp1)`.
+4. MSAL sees the local cached token is "bad" → triggers a refresh flow.
+5. MSAL calls **MITS** with `xms_cc=cp1&token_sha256_to_refresh=SHA256(T)`.
+6. **MITS** is basically a proxy, forwarding the query to **SFRP**.
+7. **SFRP** uses MSAL again to get a **new** token from eSTS.
 
 
 > [!NOTE]  
@@ -75,6 +88,23 @@ This API will be in a namespace that indicates it is supposed to be used by RPs 
   - If it matches the "Bad" token SHA256 thumbprint, then MSAL will log this event, ignore the token, and get another token from the STS
   - If it doesn't match, it means that a new token was already updated. Return it.
 - If it doesn't exist, call eSTS
+
+## `xms_cc` as a List Value (URL Encoding)
+
+### **Multiple Capabilities**
+The `xms_cc` parameter can hold **multiple** client capabilities, formatted as:  
+`xms_cc=cp1,cp2,cp3`
+
+#### **Processing on SFRP:**
+1. **On the calling side** (MSAL → MITS → SFRP), always **URL-encode** `xms_cc`, because commas (`,`) must be encoded in queries.
+2. **SFRP** must **URL-decode** and **split** on commas:
+   ```csharp
+   // Example: “cp1,cp2,cp3”
+   string raw = HttpUtility.UrlDecode(request.Query["xms_cc"]);
+   string[] caps = raw.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+   var clientCapabilities = caps.Select(c => c.Trim());
+   ```
+3. **MITS** typically just passes `xms_cc` along to SFRP if it’s acting as a simple proxy.
 
 #### Motivation
 
