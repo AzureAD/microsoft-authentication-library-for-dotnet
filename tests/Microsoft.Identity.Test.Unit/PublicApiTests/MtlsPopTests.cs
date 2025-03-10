@@ -129,12 +129,15 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
         }
 
-        [TestMethod]
-        public async Task MtlsPopWithoutRegionAsync()
+        [DataTestMethod]
+        [DataRow(null, DisplayName = "Region is null")]
+        [DataRow("", DisplayName = "Region is empty string")]
+        [DataRow("   ", DisplayName = "Region is whitespace")]
+        public async Task MtlsPopWithoutRegionAsync(string region)
         {
             using (var envContext = new EnvVariableContext())
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", null); // Ensure no region is set
+                Environment.SetEnvironmentVariable("REGION_NAME", region); // Ensure no region is set
 
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                                 .Create(TestConstants.ClientId)
@@ -151,6 +154,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.MtlsPopWithoutRegion, ex.Message);
             }
         }
 

@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
 
                 // Check for Azure region only if the authority is AAD
                 if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                    string.IsNullOrEmpty(ServiceBundle.Config.AzureRegion))
+                    string.IsNullOrWhiteSpace(ServiceBundle.Config.AzureRegion))
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopWithoutRegion,
