@@ -82,8 +82,6 @@ rect rgb(215, 234, 132)
         SFRP->>MSAL: 7. Return token to MSAL
     end
 end
-
-end
 ```
 
 ### New MSAL API - WithAccessTokenToRefresh()
