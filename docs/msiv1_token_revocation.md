@@ -72,7 +72,7 @@ rect rgb(173, 216, 230)
     MSAL->>MSAL: 2. Find and return token T in cache. <br/>If not found, goto next step.
 end
 rect rgb(215, 234, 132)    
-    MSAL->>MITS: 3. Call MITS_endpoint?xms_cc=cp1&token_sha256_to_refresh=SHA256(Token)
+    MSAL->>MITS: 3. Call MITS_endpoint?xms_cc=cp1
     MITS->>SFRP: 4. Forward request to SFRP
     alt Cache Hit
         SFRP->>MSAL: 5a. Return cached token
@@ -113,6 +113,9 @@ The `xms_cc` parameter can hold **multiple** client capabilities, formatted as:
    var clientCapabilities = caps.Select(c => c.Trim());
    ```
 3. **MITS** typically just passes `xms_cc` along to SFRP if it’s acting as a simple proxy.
+
+> [!NOTE]  
+> RPs or MITS should not bypass cache if a bad token is not passed by MSAL. 
 
 #### Motivation
 
