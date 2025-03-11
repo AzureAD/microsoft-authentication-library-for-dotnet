@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     if (string.Equals(cachedTokenHash, _clientParameters.AccessTokenHashToRefresh, StringComparison.Ordinal))
                     {
                         AuthenticationRequestParameters.RequestContext.Logger.Info(
-                            "[ClientCredentialRequest] Found the 'bad' token in the cache. Skipping cache usage.");
+                            "[ClientCredentialRequest] A cached token was found, but it matches the AccessTokenHashToRefresh, so it is ignored");
                         return null; // triggers a new token acquisition
                     }
                 }
