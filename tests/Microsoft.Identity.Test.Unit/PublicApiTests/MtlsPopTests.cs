@@ -130,28 +130,40 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [DataTestMethod]
-        [DataRow(null, DisplayName = "Region is null")]
-        [DataRow("", DisplayName = "Region is empty string")]
-        [DataRow("   ", DisplayName = "Region is whitespace")]
-        public async Task MtlsPopWithoutRegionAsync(string region)
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task MtlsPop_WithoutRegion_ThrowsException(bool setAzureRegion)
         {
             using (var envContext = new EnvVariableContext())
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", region); // Ensure no region is set
+                IConfidentialClientApplication app;
+                if (setAzureRegion)
+                {
+                    app = ConfidentialClientApplicationBuilder
+                                    .Create(TestConstants.ClientId)
+                                    .WithAuthority(TestConstants.AuthorityTenant)
+                                    .WithCertificate(s_testCertificate)
+                                    // Setting Azure region to ConfidentialClientApplicationBuilder.DisableForceRegion overrides the AzureRegion to null.
+                                    .WithAzureRegion(ConfidentialClientApplicationBuilder.DisableForceRegion)
+                                    .WithExperimentalFeatures()
+                                    .Build();
+                }
+                else
+                {
+                    app = ConfidentialClientApplicationBuilder
+                                    .Create(TestConstants.ClientId)
+                                    .WithAuthority(TestConstants.AuthorityTenant)
+                                    .WithCertificate(s_testCertificate)
+                                    .WithExperimentalFeatures()
+                                    .Build();
+                }
 
-                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .WithAuthority(TestConstants.AuthorityTenant)
-                                .WithCertificate(s_testCertificate)
-                                .WithExperimentalFeatures()
-                                .Build();
-
-                // Set WithMtlsProofOfPossession on the request without specifying a region
+                // Set WithMtlsProofOfPossession on the request
                 MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                    app.AcquireTokenForClient(TestConstants.s_scope)
-                       .WithMtlsProofOfPossession() // Enables MTLS PoP
-                       .ExecuteAsync())
-                    .ConfigureAwait(false);
+                        app.AcquireTokenForClient(TestConstants.s_scope)
+                           .WithMtlsProofOfPossession() // Enables MTLS PoP
+                           .ExecuteAsync())
+                        .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.MtlsPopWithoutRegion, ex.Message);

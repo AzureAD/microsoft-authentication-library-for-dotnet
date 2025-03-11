@@ -165,6 +165,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
+        /// <seealso cref="ConfidentialClientApplicationBuilder.Validate"/> for a comment inside this function for AzureRegion.
         protected override void Validate()
         {
             if (CommonParameters.MtlsCertificate != null)
@@ -187,8 +188,10 @@ namespace Microsoft.Identity.Client
                 }
 
                 // Check for Azure region only if the authority is AAD
+                // AzureRegion is by default set to null or set to null when the application is created
+                // with region set to DisableForceRegion (see ConfidentialClientApplicationBuilder.Validate)
                 if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                    string.IsNullOrWhiteSpace(ServiceBundle.Config.AzureRegion))
+                    ServiceBundle.Config.AzureRegion == null)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopWithoutRegion,
