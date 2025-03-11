@@ -63,7 +63,8 @@ The client "enlightment" status is still propagated via the client capability "c
 sequenceDiagram
     actor CX
     participant MSAL
-    participant SF        
+    participant MITS
+    participant SFRP        
     participant eSTS
 
 rect rgb(173, 216, 230)   
@@ -71,8 +72,17 @@ rect rgb(173, 216, 230)
     MSAL->>MSAL: 2. Find and return token T in cache. <br/>If not found, goto next step.
 end
 rect rgb(215, 234, 132)    
-    MSAL->>SF: 3. Call MITS_endpoint?xms_cc=cp1
-    SF->>eSTS: 4. Find cached token or call <br/> CCA.AcquireTokenForClient SN/I cert <br/> WithClientCapabilities(cp1) <br/> 
+    MSAL->>MITS: 3. Call MITS_endpoint?xms_cc=cp1&token_sha256_to_refresh=SHA256(Token)
+    MITS->>SFRP: 4. Forward request to SFRP
+    alt Cache Hit
+        SFRP->>MSAL: 5a. Return cached token
+    else Cache Miss
+        SFRP->>eSTS: 5b. Call CCA.AcquireTokenForClient SN/I cert <br/> WithClientCapabilities(cp1)
+        eSTS->>SFRP: 6. Return new token
+        SFRP->>MSAL: 7. Return token to MSAL
+    end
+end
+
 end
 ```
 
