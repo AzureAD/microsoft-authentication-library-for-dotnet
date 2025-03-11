@@ -86,7 +86,7 @@ end
 
 ### New MSAL API - WithAccessTokenToRefresh()
 
-To support the RP, MSAL will add a new API for `ConfidentialClientApplication.AcquireTokenForClient` -  `.WithAccessTokenToRefresh(string thumbprintOfAccessTokenToRefresh)`. This may be extended to other flows too in the future.
+To support the RP, MSAL will add a new API for `ConfidentialClientApplication.AcquireTokenForClient` -  `.WithAccessTokenToRefresh(string tokenHash)`. This may be extended to other flows too in the future.
 
 This API will be in a namespace that indicates it is supposed to be used by RPs - `Microsoft.Identity.Client.RP`.
 
