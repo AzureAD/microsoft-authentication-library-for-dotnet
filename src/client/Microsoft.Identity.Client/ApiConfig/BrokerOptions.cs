@@ -29,6 +29,10 @@ namespace Microsoft.Identity.Client
             /// Use broker on Windows OS
             /// </summary>
             Windows = 0b_0000_0001,  // 1
+            /// <summary>
+            /// Use broker on Linux
+            /// </summary>
+            Linux = 0b_0000_0010,  // 2
         }
 
         /// <summary>
@@ -71,8 +75,9 @@ namespace Microsoft.Identity.Client
         public bool MsaPassthrough { get; set; } = false;
 
         /// <summary>
-        /// Currently only supported on Windows
+        /// Currently only supported on Windows and Linux
         /// Allows the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
+        /// Linux broker will discover accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
         /// </summary>        
         public bool ListOperatingSystemAccounts { get; set; }
 
@@ -80,6 +85,8 @@ namespace Microsoft.Identity.Client
         {
             if (EnabledOn.HasFlag(OperatingSystems.Windows) && DesktopOsHelper.IsWindows())
             {
+                return true;
+            } else if (EnabledOn.HasFlag(OperatingSystems.Linux) && DesktopOsHelper.IsLinux()) {
                 return true;
             }
 

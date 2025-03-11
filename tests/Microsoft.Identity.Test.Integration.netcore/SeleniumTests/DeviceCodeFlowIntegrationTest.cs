@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.Utils;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -126,7 +127,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(LabResponse labResponse, string userType)
         {
             Trace.WriteLine($"Calling AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync with {0}", userType);
-            BrokerOptions options = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
+            BrokerOptions options = TestUtils.GetPlatformBroker();
             var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithTestLogging().WithBroker(options);
 
             switch (labResponse.User.AzureEnvironment)
