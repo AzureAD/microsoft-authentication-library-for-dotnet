@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client
         public TelemetryData TelemetryData { get; }
 
         /// <summary>
-        /// Determines if the client application authentication is an FMI node under an RMA.
+        /// Determines whether the client application authentication instance is classified as an FMI (Federated Managed Identity) node under a specified RMA (Resource Managed Authority).
         /// </summary>
         public bool IsFmiClientNode 
         {
