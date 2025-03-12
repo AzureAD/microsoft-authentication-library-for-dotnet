@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -13,6 +14,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -21,6 +23,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly AcquireTokenForClientParameters _clientParameters;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly ICryptographyManager _cryptoManager;
 
         public ClientCredentialRequest(
             IServiceBundle serviceBundle,
@@ -29,6 +32,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, clientParameters)
         {
             _clientParameters = clientParameters;
+            _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -47,14 +51,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
             }
-
             AuthenticationResult authResult;
 
+            // Skip cache if either:
+            // 1) ForceRefresh is set, or
+            // 2) Claims are specified and there is no AccessTokenHashToRefresh.
+            // This ensures that when both claims and AccessTokenHashToRefresh are set,
+            // we do NOT skip the cache, allowing MSAL to attempt retrieving a matching
+            // cached token by the provided hash before requesting a new token.
             bool skipCache = _clientParameters.ForceRefresh || 
                 (!string.IsNullOrEmpty(AuthenticationRequestParameters.Claims) && 
                 string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh));
 
-            // Skip checking cache when force refresh or claims are specified
+            // Skip checking cache when either ForceRefresh is true
+            // or (Claims are present without a token hash).
             if (skipCache)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
@@ -196,42 +206,83 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
         {
+            // 1) Get the cached item 
             MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
-            if (cachedAccessTokenItem != null && !_clientParameters.ForceRefresh)
+            // 2) If no cached item or force refresh is requested, return null
+            if (!IsValidCachedToken(cachedAccessTokenItem))
             {
-                if (!string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh))
-                {
-                    string cachedTokenHash = ComputeSHA256(cachedAccessTokenItem.Secret);
-
-                    if (string.Equals(cachedTokenHash, _clientParameters.AccessTokenHashToRefresh, StringComparison.Ordinal))
-                    {
-                        AuthenticationRequestParameters.RequestContext.Logger.Info(
-                            "[ClientCredentialRequest] A cached token was found, but it matches the AccessTokenHashToRefresh, so it is ignored");
-                        return null; // triggers a new token acquisition
-                    }
-                }
-
-                AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-                Metrics.IncrementTotalAccessTokensFromCache();
-                return cachedAccessTokenItem;
+                return null;
             }
 
-            return null;
+            // 3) If there is a matching AccessTokenHashToRefresh, ignore this cached token
+            if (IsTokenIgnoredByMatchingHash(cachedAccessTokenItem))
+            {
+                return null;
+            }
+
+            // 4) Otherwise, record a cache hit and return the cached token
+            MarkAccessTokenAsCacheHit();
+            return cachedAccessTokenItem;
         }
 
-        private static string ComputeSHA256(string token)
+        /// <summary>
+        /// Checks if the cached access token can be used.
+        /// </summary>
+        private bool IsValidCachedToken(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
-#if NET6_0_OR_GREATER
-            byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
-            return Convert.ToBase64String(hashBytes);
-#else
-            using (var sha256 = SHA256.Create())
+            // Return false if:
+            // - The cache is empty
+            // - ForceRefresh is enabled
+            if (cachedAccessTokenItem == null || _clientParameters.ForceRefresh)
             {
-                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
-                return Convert.ToBase64String(hashBytes);
+                return false;
             }
-#endif
+
+            return true;
+        }
+
+        /// <summary>
+        /// Determines whether the cached token should be ignored due to matching the AccessTokenHashToRefresh.
+        /// </summary>
+        private bool IsTokenIgnoredByMatchingHash(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {
+            if (string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh))
+            {
+                return false;
+            }
+
+            string cachedTokenHash = _cryptoManager.CreateSha256Hash(cachedAccessTokenItem.Secret);
+
+            // If the hash of the cached token matches the hash to refresh, ignore the cached token
+            bool matchesHash = string.Equals(
+                cachedTokenHash,
+                _clientParameters.AccessTokenHashToRefresh,
+                StringComparison.Ordinal);
+
+            if (matchesHash)
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    "[ClientCredentialRequest] A cached token was found and its hash matches AccessTokenHashToRefresh, so it is ignored.");
+                return true;
+            }
+            else
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    "[ClientCredentialRequest] A cached token was found, but its hash does NOT match AccessTokenHashToRefresh. Using the cached token.");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Marks the current access token retrieval as a successful cache hit, 
+        /// and increments any relevant telemetry or counters.
+        /// </summary>
+        private void MarkAccessTokenAsCacheHit()
+        {
+            // Mark the request as a cache hit
+            AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+            Metrics.IncrementTotalAccessTokensFromCache();
         }
 
         private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
