@@ -231,10 +231,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// </summary>
         private bool IsValidCachedToken(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
-            // Return false if:
-            // - The cache is empty
-            // - ForceRefresh is enabled
-            if (cachedAccessTokenItem == null || _clientParameters.ForceRefresh)
+            // Return false if the cache is empty
+            if (cachedAccessTokenItem == null)
             {
                 return false;
             }
