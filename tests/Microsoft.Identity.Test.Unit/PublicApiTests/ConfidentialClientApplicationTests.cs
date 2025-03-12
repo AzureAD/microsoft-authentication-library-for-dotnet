@@ -11,6 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.RP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
@@ -2338,6 +2339,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // First network call: populates the cache with "cache-token"
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "cache-token");
+
                 var initialResult = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
