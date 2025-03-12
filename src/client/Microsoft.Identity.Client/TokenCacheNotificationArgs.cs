@@ -41,13 +41,13 @@ namespace Microsoft.Identity.Client
                    hasTokens,
                    suggestedCacheExpiry,
                    cancellationToken,
-                   default, 
-                   default, 
+                   default,
+                   default,
                    default,
                    null,
                    default)
-            {
-            }
+        {
+        }
 
         /// <summary>
         /// This constructor is for test purposes only. It allows apps to unit test their MSAL token cache implementation code.
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client
             bool hasTokens,
             DateTimeOffset? suggestedCacheExpiry,
             CancellationToken cancellationToken,
-            Guid correlationId)       
+            Guid correlationId)
            : this(tokenCache,
                    clientId,
                    account,
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client
                    default,
                    null,
                    default)
-        { 
+        {
         }
 
         /// <summary>
@@ -93,10 +93,10 @@ namespace Microsoft.Identity.Client
             bool hasTokens,
             DateTimeOffset? suggestedCacheExpiry,
             CancellationToken cancellationToken,
-            Guid correlationId, 
+            Guid correlationId,
             IEnumerable<string> requestScopes,
             string requestTenantId)
-            
+
         {
             TokenCache = tokenCache;
             ClientId = clientId;
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client
             SuggestedCacheExpiry = suggestedCacheExpiry;
             IdentityLogger = identityLogger;
             PiiLoggingEnabled = piiLoggingEnabled;
-            TelemetryData = telemetryData?? new TelemetryData();
+            TelemetryData = telemetryData ?? new TelemetryData();
         }
 
         /// <summary>
@@ -260,9 +260,17 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Determines whether the client application authentication instance is classified as an FMI (Federated Managed Identity) node under a specified RMA (Resource Managed Authority).
         /// </summary>
-        public bool IsFmiClientNode 
+        public string NoDistributedCacheUseReason
         {
-            get { return ClientId.Equals(Constants.FmiNodeClientId); }
+            get
+            {
+                if (ClientId.Equals(Constants.FmiNodeClientId))
+                {
+                    return "The currently provided client id indicates that this is a RMA (Resource Managed Authority) node client. RMA node clients should not use a distributed cache, please use an in memory cache instead.";
+                }
+
+                return string.Empty;
+            }
         }
     }
 }

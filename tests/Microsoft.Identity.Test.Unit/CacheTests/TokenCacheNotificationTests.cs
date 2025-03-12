@@ -541,7 +541,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                //Confirm that IsFmiClientNode is correct
+                // Confirm that NoDistributedCacheUseReason is correct
                 // Arrange
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(clientId)
@@ -554,11 +554,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     Assert.AreEqual(clientId, args.ClientId);
                     if (clientId.Equals(TestConstants.FmiNodeClientId))
                     {
-                        Assert.IsTrue(args.IsFmiClientNode);
+                        // string should not be null or empty
+                        Assert.IsTrue(!string.IsNullOrEmpty(args.NoDistributedCacheUseReason));
                     }
                     else
                     {
-                        Assert.IsFalse(args.IsFmiClientNode);
+                        // string should be null or empty
+                        Assert.IsTrue(string.IsNullOrEmpty(args.NoDistributedCacheUseReason));
                     }
 
                     CollectionAssert.AreEquivalent(TestConstants.s_scope.ToArray(), args.RequestScopes.ToArray());
