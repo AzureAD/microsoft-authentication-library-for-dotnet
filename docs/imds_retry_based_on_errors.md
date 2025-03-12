@@ -9,15 +9,15 @@ This document defines the error handling and retry strategy for MSAL when intera
 
 | **HTTP Status Code** | **Error Reason**                               | **Recommended Action**                      | **Retry Delay Strategy**                 |
 |----------------------|-----------------------------------------------|---------------------------------------------|-----------------------------------------|
-| **404**             | IMDS endpoint is updating / Identity Not Found | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s**            |
-| **410**             | IMDS is undergoing updates                    | Wait up to **70 seconds**, then retry      | **70s (fixed wait)**                    |
-| **429**             | IMDS Throttle limit reached                   | Retry with Exponential Backoff (max 5 retries) | **2s → 4s → 8s → 16s → 32s (max 32s)**           |
-| **408**             | Request Timeout                                | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s (max 16s)**            |
-| **504**             | Gateway Timeout                               | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s (max 16s)**            |
-| **5xx**             | Transient service error                        | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s (max 16s)**           |
 | **400**             | Bad Request (Invalid Parameters)               | **Do not retry**, fix request               | **No retry**                             |
 | **401**             | Unauthorized                                  | **Do not retry**, check authentication setup | **No retry**                             |
 | **403**             | Forbidden                                     | **Do not retry**, verify permissions       | **No retry**                             |
+| **404**             | IMDS endpoint is updating / Identity Not Found | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s**            |
+| **408**             | Request Timeout                                | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s (max 16s)**            |
+| **410**             | IMDS is undergoing updates                    | Wait up to **70 seconds**, then retry      | **70s (fixed wait)**                    |
+| **429**             | IMDS Throttle limit reached                   | Retry with Exponential Backoff (max 5 retries) | **2s → 4s → 8s → 16s → 32s (max 32s)**           |
+| **504**             | Gateway Timeout                               | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s (max 16s)**            |
+| **5xx**             | Transient service error                        | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s (max 16s)**           |
 
 ---
 
