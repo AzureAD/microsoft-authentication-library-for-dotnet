@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.IdentityModel.Abstractions;
 
@@ -40,13 +41,13 @@ namespace Microsoft.Identity.Client
                    hasTokens,
                    suggestedCacheExpiry,
                    cancellationToken,
-                   default, 
-                   default, 
+                   default,
+                   default,
                    default,
                    null,
                    default)
-            {
-            }
+        {
+        }
 
         /// <summary>
         /// This constructor is for test purposes only. It allows apps to unit test their MSAL token cache implementation code.
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client
             bool hasTokens,
             DateTimeOffset? suggestedCacheExpiry,
             CancellationToken cancellationToken,
-            Guid correlationId)       
+            Guid correlationId)
            : this(tokenCache,
                    clientId,
                    account,
@@ -76,7 +77,7 @@ namespace Microsoft.Identity.Client
                    default,
                    null,
                    default)
-        { 
+        {
         }
 
         /// <summary>
@@ -92,10 +93,10 @@ namespace Microsoft.Identity.Client
             bool hasTokens,
             DateTimeOffset? suggestedCacheExpiry,
             CancellationToken cancellationToken,
-            Guid correlationId, 
+            Guid correlationId,
             IEnumerable<string> requestScopes,
             string requestTenantId)
-            
+
         {
             TokenCache = tokenCache;
             ClientId = clientId;
@@ -145,7 +146,7 @@ namespace Microsoft.Identity.Client
             SuggestedCacheExpiry = suggestedCacheExpiry;
             IdentityLogger = identityLogger;
             PiiLoggingEnabled = piiLoggingEnabled;
-            TelemetryData = telemetryData?? new TelemetryData();
+            TelemetryData = telemetryData ?? new TelemetryData();
         }
 
         /// <summary>
@@ -255,5 +256,21 @@ namespace Microsoft.Identity.Client
         /// Cache Details contains the details of L1/ L2 cache for telemetry logging.
         /// </summary>
         public TelemetryData TelemetryData { get; }
+
+        /// <summary>
+        /// Determines whether the client application authentication instance is classified as an FMI (Federated Managed Identity) node under a specified RMA (Resource Managed Authority).
+        /// </summary>
+        public string NoDistributedCacheUseReason
+        {
+            get
+            {
+                if (ClientId.Equals(Constants.FmiNodeClientId))
+                {
+                    return "The currently provided client id indicates that this is a RMA (Resource Managed Authority) node client. RMA node clients should not use a distributed cache, please use an in memory cache instead.";
+                }
+
+                return string.Empty;
+            }
+        }
     }
 }
