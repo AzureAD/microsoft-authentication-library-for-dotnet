@@ -2238,29 +2238,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        public async Task WithAccessTokenSha256ToRefresh_NullOrEmpty_ThrowsArgumentNullException_Async()
-        {
-            ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .WithExperimentalFeatures(true)
-                .BuildConcrete();
-
-            // 1) If hash is null, expect ArgumentNullException
-            await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
-                app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAccessTokenSha256ToRefresh(null)  // Null hash
-                    .ExecuteAsync()
-            ).ConfigureAwait(false);
-
-            // 2) If hash is empty, expect ArgumentNullException
-            await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
-                app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAccessTokenSha256ToRefresh("")  // Empty hash
-                    .ExecuteAsync()
-            ).ConfigureAwait(false);
-
-        }
-
         [TestMethod]
         public async Task ForceRefreshAndAccessTokenHash_ThrowsException_Async()
         {
