@@ -124,26 +124,6 @@ namespace Microsoft.Identity.Client.Instance
         internal abstract Task<string> GetAuthorizationEndpointAsync(RequestContext requestContext);
 
         internal abstract Task<string> GetDeviceCodeEndpointAsync(RequestContext requestContext);
-
-        internal void ThrowIfNotSupportedForMtls()
-        {
-            if (AuthorityInfo.AuthorityType != AuthorityType.Aad &&
-                AuthorityInfo.AuthorityType != AuthorityType.Dsts)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidAuthorityType,
-                    MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
-            }
-
-            var isNotSupportedTenant = Constants.Common.Equals(TenantId, StringComparison.OrdinalIgnoreCase) || Constants.Organizations.Equals(TenantId, StringComparison.OrdinalIgnoreCase);
-
-            if (isNotSupportedTenant)
-            {
-                throw new MsalClientException(
-                    MsalError.MissingTenantedAuthority,
-                    MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
-            }
-        }
         #endregion
 
         internal static string GetEnvironment(string authority)

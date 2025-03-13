@@ -169,8 +169,6 @@ namespace Microsoft.Identity.Client
         {
             if (CommonParameters.MtlsCertificate != null)
             {
-                ServiceBundle.Config.Authority.ThrowIfNotSupportedForMtls();
-
                 // Check for Azure region only if the authority is AAD
                 // AzureRegion is by default set to null or set to null when the application is created
                 // with region set to DisableForceRegion (see ConfidentialClientApplicationBuilder.Validate)

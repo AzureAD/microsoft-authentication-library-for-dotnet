@@ -186,7 +186,8 @@ namespace Microsoft.Identity.Test.Unit
                    .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
+            Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.MtlsPopWithoutRegion, ex.Message);
         }
 
         [TestMethod]
@@ -449,9 +450,9 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [DataTestMethod]
-        [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority")]
-        [DataRow("https://contoso.adfs.contoso.com/adfs", "ADFS Authority")]
-        public async Task MtlsPop_NonAadAuthorityAsync(string authorityUrl, string authorityType)
+        [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(MsalServiceException))]
+        [DataRow("https://contoso.adfs.contoso.com/adfs", "ADFS Authority", typeof(HttpRequestException))]
+        public async Task MtlsPop_NonAadAuthorityAsync(string authorityUrl, string authorityType, Type expectedException)
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
@@ -461,14 +462,13 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request with a non-AAD authority
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+            Exception ex = await AssertException.TaskThrowsAsync<Exception>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
                    .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.InvalidAuthorityType, ex.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.MtlsInvalidAuthorityTypeMessage, ex.Message, $"{authorityType} test failed.");
+            Assert.AreEqual(expectedException, ex.GetType());
         }
 
         [DataTestMethod]
@@ -749,13 +749,11 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request specifying an authority
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+            HttpRequestException ex = await AssertException.TaskThrowsAsync<HttpRequestException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession()
                    .ExecuteAsync())
                 .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
         }
     }
 }
