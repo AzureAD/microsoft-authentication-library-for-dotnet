@@ -54,7 +54,7 @@ graph TD;
   C -- Yes --> D[🔄 Retry: 1s → 2s → 4s]
   C -- No --> E[❌ Do Not Retry]
   A -->|5xx Error?| F[🔄 Retry: 1s → 2s → 4s]
-  A -->|429 Throttling?| G[🔄 Retry: 2s → 4s]
+  A -->|429 Throttling?| G[🔄 Retry: 1s → 2s → 4s]
   A -->|410 IMDS Updating?| H[⏳ Wait 70s, Then Retry]
 ```
 
