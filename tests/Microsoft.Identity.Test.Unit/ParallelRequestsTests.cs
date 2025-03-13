@@ -46,20 +46,20 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task ExtraQP()
         {
-            Dictionary<string, string> extraQp = new()
-              {
-                  { "key1", "1" },
-                  { "key2", "2" }
-              };
+            //Dictionary<string, string> extraQp = new()
+            //  {
+            //      { "key1", "1" },
+            //      { "key2", "2" }
+            //  };
 
             // Arrange
-            const int NumberOfRequests = 20;
+            const int NumberOfRequests = 1000;
 
             ParallelRequestMockHandler httpManager = new ParallelRequestMockHandler();
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithAuthority(TestConstants.AuthorityUtidTenant, true)
+                .WithAuthority("https://login.microsoftonline.com/common")
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithHttpManager(httpManager)
                 .Build();
@@ -70,11 +70,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    return await cca.AcquireTokenForClient(TestConstants.s_scope)
-                        .WithExtraQueryParameters(extraQp)
+                    string tid = $"tidtid_{i}";
+                    var res = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithTenantId(tid)
+                        //.WithExtraQueryParameters(extraQp)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
 
+                    //Assert.AreEqual(tid, res.TenantId);
+                    Assert.IsTrue(res.AuthenticationResultMetadata.TokenEndpoint.Contains(tid));
+                    Assert.IsTrue(res.AccessToken == $"token_{tid}");
+                    return res;
                 }));
             }
 

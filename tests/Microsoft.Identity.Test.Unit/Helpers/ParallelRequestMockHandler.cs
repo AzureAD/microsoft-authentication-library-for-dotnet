@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
     /// </summary>
     internal class ParallelRequestMockHandler : IHttpManager
     {
-        public long LastRequestDurationInMs => 50;
+        public long LastRequestDurationInMs => 5;
 
         public async Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
             }
 
             if (HttpMethod.Post == method &&
-                UriWithoutQuery(endpoint).AbsoluteUri.Equals("https://login.microsoftonline.com/my-utid/oauth2/v2.0/token"))
+                UriWithoutQuery(endpoint).AbsoluteUri.EndsWith("oauth2/v2.0/token"))
             {
                 var bodyString = await (body as FormUrlEncodedContent).ReadAsStringAsync().ConfigureAwait(false);
                 var bodyDict = bodyString.Replace("?", "").Split('&').ToDictionary(x => x.Split('=')[0], x => x.Split('=')[1]);
@@ -71,7 +71,11 @@ namespace Microsoft.Identity.Test.Unit.Helpers
 
                 if (bodyDict["grant_type"] == "client_credentials")
                 {
-                    HttpResponseMessage response = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage();
+                    var segments = endpoint.AbsolutePath.Split('/');
+                    string tid = segments[1];
+
+                    HttpResponseMessage response =
+                        MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage($"token_{tid}");
                     string payload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                     return new HttpResponse()
