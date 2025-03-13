@@ -2157,6 +2157,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task WithAccessTokenSha256ToRefresh_MatchingHash_GetsTokenFromIdp_Async()
         {
+            const string accessToken = "access-token";
+
             // Arrange
             using (var httpManager = new MockHttpManager())
             {
@@ -2170,19 +2172,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .BuildConcrete();
 
                 // 1) First network call: populates the cache with "access-token"
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "access-token");
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: accessToken);
                 AuthenticationResult initialResult = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
 
-                Assert.AreEqual("access-token", initialResult.AccessToken);
+                Assert.AreEqual(accessToken, initialResult.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, initialResult.AuthenticationResultMetadata.TokenSource);
 
                 // 2) Second call: re-check the cache. Should see the same token from cache
                 AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual("access-token", secondResult.AccessToken);
+                Assert.AreEqual(accessToken, secondResult.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
 
                 // 3) Now specify the same token's hash as "bad" => expect a new token from IdP
-                string tokenHash = ComputeSHA256("access-token");
+                string tokenHash = ComputeSHA256(accessToken);
 
                 // Add another network response to simulate fetching a new token
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "new-access-token");
@@ -2263,6 +2265,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task AcquireTokenForClient_WithClaims_And_MatchingHash_SkipsCache_Async()
         {
+            const string oldToken = "old-token";
+            const string freshToken = "fresh-token";
+
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -2275,16 +2280,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "old-token");
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: oldToken);
                 AuthenticationResult firstResult = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
 
-                Assert.AreEqual("old-token", firstResult.AccessToken);
+                Assert.AreEqual(oldToken, firstResult.AccessToken);
 
                 // 2) We do matching hash => a new token is returned
-                string tokenHash = ComputeSHA256("old-token");
+                string tokenHash = ComputeSHA256(oldToken);
 
                 // Add second network response for the new token
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "fresh-token");
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: freshToken);
 
                 // Act
                 AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -2294,7 +2299,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert => new token from the IDP
-                Assert.AreEqual("fresh-token", result.AccessToken);
+                Assert.AreEqual(freshToken, result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
@@ -2302,6 +2307,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task AcquireTokenForClient_WithClaims_And_MismatchedHash_UsesCache_Async()
         {
+            const string cacheToken = "cache-token";
+
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -2315,13 +2322,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .BuildConcrete();
 
                 // First network call: populates the cache with "cache-token"
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "cache-token");
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: cacheToken);
 
                 var initialResult = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.AreEqual("cache-token", initialResult.AccessToken);
+                Assert.AreEqual(cacheToken, initialResult.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, initialResult.AuthenticationResultMetadata.TokenSource);
 
                 // 2) We'll do a mismatched hash => expect to keep using the cached token
@@ -2335,7 +2342,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert => we keep using the cached token
-                Assert.AreEqual("cache-token", result.AccessToken,
+                Assert.AreEqual(cacheToken, result.AccessToken,
                     "We reuse the cache if the hash does not match the 'bad' token’s hash.");
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
