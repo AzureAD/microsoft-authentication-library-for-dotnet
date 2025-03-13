@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 builder.AppendLine("=== AcquireTokenForClientParameters ===");
                 builder.AppendLine("SendX5C: " + SendX5C);
                 builder.AppendLine("ForceRefresh: " + ForceRefresh);
+                builder.AppendLine($"AccessTokenHashToRefresh: {!string.IsNullOrEmpty(AccessTokenHashToRefresh)}");
                 logger.Info(builder.ToString());
             }
         }

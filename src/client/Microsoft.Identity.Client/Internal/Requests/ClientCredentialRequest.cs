@@ -202,6 +202,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return authResult;
         }
 
+        /// <summary>
+        /// Checks if the token should be used from the cache.
+        /// </summary>
+        /// <returns></returns>
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
         {
             // Fetch the cache item (could be null if none found).
@@ -219,6 +223,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return cacheItem;
         }
 
+        /// <summary>
+        /// Checks if the token should be used from the cache.
+        /// </summary>
+        /// <param name="cacheItem"></param>
+        /// <returns></returns>
         private bool ShouldUseCachedToken(MsalAccessTokenCacheItem cacheItem)
         {
             // 1) No cached item 
@@ -239,18 +248,32 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return true;
         }
 
+        /// <summary>
+        /// Checks if the token hash matches the hash provided in AccessTokenHashToRefresh.
+        /// </summary>
+        /// <param name="tokenSecret"></param>
+        /// <param name="accessTokenHashToRefresh"></param>
+        /// <returns></returns>
         private bool IsMatchingTokenHash(string tokenSecret, string accessTokenHashToRefresh)
         {
             string cachedTokenHash = _cryptoManager.CreateSha256Hash(tokenSecret);
             return string.Equals(cachedTokenHash, accessTokenHashToRefresh, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Marks the request as a cache hit and increments the cache hit count.
+        /// </summary>
         private void MarkAccessTokenAsCacheHit()
         {
             AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
             Metrics.IncrementTotalAccessTokensFromCache();
         }
 
+        /// <summary>
+        /// returns the cached access token item 
+        /// </summary>
+        /// <param name="cachedAccessTokenItem"></param>
+        /// <returns></returns>
         private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
             AuthenticationResult authResult = new AuthenticationResult(
@@ -266,6 +289,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return authResult;
         }
 
+        /// <summary>
+        /// Gets overriden scopes for client credentials flow
+        /// </summary>
+        /// <param name="inputScopes"></param>
+        /// <returns></returns>
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
             // Client credentials should not add the reserved scopes
@@ -274,6 +302,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return new SortedSet<string>(inputScopes);
         }
 
+        /// <summary>
+        /// Gets the body parameters for the client credentials flow
+        /// </summary>
+        /// <returns></returns>
         private Dictionary<string, string> GetBodyParameters()
         {
             var dict = new Dictionary<string, string>
@@ -285,6 +317,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return dict;
         }
 
+        /// <summary>
+        /// Gets the CCS header for the client credentials flow
+        /// </summary>
+        /// <param name="additionalBodyParameters"></param>
+        /// <returns></returns>
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
             return null;
