@@ -12,12 +12,12 @@ This document defines the error handling and retry strategy for MSAL when intera
 | **400**             | Bad Request (Invalid Parameters)               | **Do not retry**, fix request               | **No retry**                             |
 | **401**             | Unauthorized                                  | **Do not retry**, check authentication setup | **No retry**                             |
 | **403**             | Forbidden                                     | **Do not retry**, verify permissions       | **No retry**                             |
-| **404**             | IMDS endpoint is updating / Identity Not Found | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s**            |
-| **408**             | Request Timeout                                | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s (max 16s)**            |
+| **404**             | IMDS endpoint is updating / Identity Not Found | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
+| **408**             | Request Timeout                                | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **410**             | IMDS is undergoing updates                    | Wait up to **70 seconds**, then retry      | **70s (fixed wait)**                    |
-| **429**             | IMDS Throttle limit reached                   | Retry with Exponential Backoff (max 5 retries) | **2s → 4s → 8s → 16s → 32s (max 32s)**           |
-| **504**             | Gateway Timeout                               | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s (max 16s)**            |
-| **5xx**             | Transient service error                        | Retry with Exponential Backoff (max 5 retries) | **1s → 2s → 4s → 8s → 16s (max 16s)**           |
+| **429**             | IMDS Throttle limit reached                   | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
+| **504**             | Gateway Timeout                               | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
+| **5xx**             | Transient service error                        | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 
 ---
 
@@ -26,7 +26,7 @@ This document defines the error handling and retry strategy for MSAL when intera
 - **Exception Handling:**  
   - If the **IMDS response contains "Identity Not Found"**, retry the request using **exponential backoff**.
   - **Error Code:** **404 (Identity Not Found)**
-  - Recommended retry sequence: **1s → 2s → 4s → 8s → 16s** (max 5 retries)
+  - Recommended retry sequence: **1s → 2s → 4s** (max 3 retries)
   - If still failing, log an error and return the failure.
 
 ---
@@ -38,13 +38,11 @@ The following retry strategy applies to **5xx errors, timeouts, and transient 4x
 |------------------|----------------------|
 | **1st**         | **1 second**         |
 | **2nd**         | **2 seconds**         |
-| **3rd**         | **4 seconds**         |
-| **4th**         | **8 seconds**         |
-| **5th**         | **16 seconds** (max 16s) |
+| **3rd**         | **4 seconds** (max 4s) |
 
-🔹 **For 5xx Errors, 404 Identity Not Found, and Timeouts:** Retry **max 5 times** before failing.  
+🔹 **For 5xx Errors, 404 Identity Not Found, and Timeouts:** Retry **max 3 times** before failing.  
 🔹 **For 410 (IMDS Updates):** **Wait 70 seconds** before retrying.  
-🔹 **For 429 (Throttling):** Backoff **increases on each retry** (2s → 4s → 8s → 16s → 32s, max 32s).  
+🔹 **For 429 (Throttling):** Backoff **increases on each retry** (1s → 2s → 4s - max 4s).  
 
 ---
 
@@ -53,13 +51,17 @@ graph TD;
   
   A[IMDS Request] -->|Success| B[✅ Token Issued]
   A -->|4xx Error?| C{Identity Not Found?}
-  C -- Yes --> D[🔄 Retry: 1s → 2s → 4s → 8s → 16s]
+  C -- Yes --> D[🔄 Retry: 1s → 2s → 4s]
   C -- No --> E[❌ Do Not Retry]
-  A -->|5xx Error?| F[🔄 Retry: 1s → 2s → 4s → 8s → 16s]
-  A -->|429 Throttling?| G[🔄 Retry: 2s → 4s → 8s → 16s → 32s]
+  A -->|5xx Error?| F[🔄 Retry: 1s → 2s → 4s]
+  A -->|429 Throttling?| G[🔄 Retry: 2s → 4s]
   A -->|410 IMDS Updating?| H[⏳ Wait 70s, Then Retry]
 ```
 
 ---
 
-**References:** https://learn.microsoft.com/en-gb/entra/identity/managed-identities-azure-resources/how-to-use-vm-token#error-handling
+**References:** 
+
+1. https://learn.microsoft.com/en-gb/entra/identity/managed-identities-azure-resources/how-to-use-vm-token#error-handling
+2. https://eng.ms/docs/cloud-ai-platform/azure-core/core-compute-and-host/general-purpose-host-arunki/azure-instance-metadata-service/compute-azlinux-metadataserver/troubleshooting/unable-to-reach-imds#mitigate-http-status-code-410
+
