@@ -47,11 +47,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationResult authResult;
 
-            // Skip checking cache when force refresh or claims are specified
+            // Determine the cache refresh reason and log
             if (_clientParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("[ClientCredentialRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set.");
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo =
+                    _clientParameters.ForceRefresh ? CacheRefreshReason.ForceRefresh : CacheRefreshReason.WithClaims;
+
+                logger.Info($"[ClientCredentialRequest] Skipped looking for a cached access token because " +
+                            $"{(_clientParameters.ForceRefresh ? "ForceRefresh" : "Claims")} was set.");
+
                 authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }

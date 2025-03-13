@@ -103,8 +103,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             else
             {
-                logger.Info("[OBO Request] Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
-                cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
+                cacheInfoTelemetry = _onBehalfOfParameters.ForceRefresh ? CacheRefreshReason.ForceRefresh : CacheRefreshReason.WithClaims;
+
+                logger.Info($"[OBO Request] Skipped looking for an Access Token in the cache because " +
+                            $"{(_onBehalfOfParameters.ForceRefresh ? "ForceRefresh" : "Claims")} was set.");
             }
 
             if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.NotApplicable)

@@ -23,9 +23,18 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             string[] splitCsv = telemetryCsv.Split('|');
             string[] splitApiIdAndCacheInfo = splitCsv[1].Split(',');
+
             ApiId.Add(splitApiIdAndCacheInfo[0]);
-            Enum.TryParse(splitApiIdAndCacheInfo[1], out CacheRefreshReason cacheInfoTelemetry);
-            ForceRefresh = CacheRefreshReason.ForceRefreshOrClaims == cacheInfoTelemetry;
+
+            if (Enum.TryParse(splitApiIdAndCacheInfo[1], out CacheRefreshReason cacheInfoTelemetry))
+            {
+                ForceRefresh = cacheInfoTelemetry == CacheRefreshReason.ForceRefresh ||
+                               cacheInfoTelemetry == CacheRefreshReason.WithClaims;
+            }
+            else
+            {
+                ForceRefresh = false;
+            }
         }
     }
 }

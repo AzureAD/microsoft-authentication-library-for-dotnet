@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Trace.WriteLine("Step 4. Acquire Token Silent with force_refresh = true and failure = invalid_grant");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInvalidGrant, forceRefresh: true).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ForceRefreshOrClaims);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ForceRefresh);
 
                 // invalid grant error puts MSAL in a throttled state - simulate some time passing for this
                 _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Guid step4Correlationid = result.Correlationid;
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true and failure = interaction_required");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInteractionRequired, forceRefresh: true).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ForceRefreshOrClaims);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ForceRefresh);
                 Guid step5CorrelationId = result.Correlationid;
 
                 Trace.WriteLine("Step 6. Acquire Token Interactive -  some /authorization error  -> token endpoint not hit");
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh, forceRefresh: true).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ForceRefreshOrClaims, isCacheSerialized: true);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ForceRefresh, isCacheSerialized: true);
             }
         }
 
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     .WithForceRefresh(true)
                     .ExecuteAsync().ConfigureAwait(false);
 
-                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenInLongRunningObo, CacheRefreshReason.ForceRefreshOrClaims);
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenInLongRunningObo, CacheRefreshReason.ForceRefresh);
             }
         }
 
@@ -759,6 +759,59 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(callerSdkId, telemetryCategories[2].Split(',')[3]);
 
             Assert.AreEqual(callerSdkVersion, telemetryCategories[2].Split(',')[4]);
+        }
+
+        [TestMethod]
+        public async Task TelemetryClaimsTestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityUtidTenant,
+                    responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(refreshToken: Guid.NewGuid().ToString()));
+
+                _app = CreatePublicClientApp();
+
+                // For interactive calls, set up a mock web UI
+                _app.ServiceBundle.ConfigureMockWebUI();
+
+                // Ensure the cache has an account
+                TokenCacheHelper.PopulateCache(_app.UserTokenCacheInternal.Accessor, addSecondAt: false);
+
+                var account = (await _app.GetAccountsAsync().ConfigureAwait(false)).FirstOrDefault();
+                Assert.IsNotNull(account, "No account found in cache for silent token acquisition.");
+
+                Trace.WriteLine("Step 1. Acquire Token Silent with Claims - Expecting WithClaims");
+                await _app.AcquireTokenSilent(TestConstants.s_scope, account)
+                    .WithClaims(TestConstants.Claims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                AssertCurrentTelemetry(
+                    requestHandler.ActualRequestMessage,
+                    ApiIds.AcquireTokenSilent,
+                    CacheRefreshReason.WithClaims);
+
+                // 2nd call: interactive
+                requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant);
+
+                // Reset mock web UI in case multiple calls are made
+                _app.ServiceBundle.ConfigureMockWebUI();
+
+                Trace.WriteLine("Step 2. Acquire Token Interactive with Claims - Expecting NotApplicable");
+                await _app.AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithClaims(TestConstants.Claims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                AssertCurrentTelemetry(
+                    requestHandler.ActualRequestMessage,
+                    ApiIds.AcquireTokenInteractive,
+                    CacheRefreshReason.NotApplicable);
+            }
         }
     }
 }

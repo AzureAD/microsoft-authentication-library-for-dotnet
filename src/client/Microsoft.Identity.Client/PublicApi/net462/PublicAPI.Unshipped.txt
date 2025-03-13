@@ -1,0 +1,3 @@
+Microsoft.Identity.Client.CacheRefreshReason.ForceRefresh = 1 -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.CacheRefreshReason.TokenRejected = 6 -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.CacheRefreshReason.WithClaims = 5 -> Microsoft.Identity.Client.CacheRefreshReason

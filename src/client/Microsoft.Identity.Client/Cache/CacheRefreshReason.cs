@@ -13,9 +13,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         NotApplicable = 0,
         /// <summary>
-        /// When the token request goes to the identity provider because force_refresh was set to true. Also occurs if WithClaims() is used.
+        /// When the token request goes to the identity provider because force_refresh was set to true.
         /// </summary>
-        ForceRefreshOrClaims = 1,
+        ForceRefresh = 1,
         /// <summary>
         /// When the token request goes to the identity provider because no cached access token exists
         /// </summary>
@@ -27,6 +27,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// When the token request goes to the identity provider because refresh_in was used and the existing token needs to be refreshed
         /// </summary>
-        ProactivelyRefreshed = 4
+        ProactivelyRefreshed = 4,
+        /// <summary>
+        /// When the token request goes to the identity provider because WithClaims() was used.
+        /// </summary>
+        WithClaims = 5,
+        /// <summary>
+        /// When the token request goes to the identity provider because WithAccessTokenSha256ToRefresh() is used AND the hash matches.
+        /// </summary>
+        TokenRejected = 6
     }
 }

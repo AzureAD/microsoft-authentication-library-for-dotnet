@@ -331,7 +331,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(CacheRefreshReason.ForceRefreshOrClaims, result.AuthenticationResultMetadata.CacheRefreshReason);
+                Assert.AreEqual(CacheRefreshReason.ForceRefresh, result.AuthenticationResultMetadata.CacheRefreshReason);
                 userCacheAccess.AssertAccessCounts(1, 2);
             }
         }
@@ -925,6 +925,48 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await app.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
                     .ExecuteAsync().ConfigureAwait(false);
                 await app.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task LongRunningObo_WithClaims_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // First mock handler for InitiateLongRunningProcessInWebApi
+                AddMockHandlerAadSuccess(httpManager);
+
+                var cca = BuildCCA(httpManager);
+
+                // We'll track the OBO cache key
+                string oboCacheKey = null;
+
+                // STEP 1: Initiate LRO OBO with claims
+                var initResult = await cca
+                    .InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .WithClaims(TestConstants.Claims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Because we used claims, MSAL sets CacheRefreshReason.WithClaims, skipping the cached token
+                Assert.AreEqual(TokenSource.IdentityProvider, initResult.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, initResult.AuthenticationResultMetadata.CacheRefreshReason);
+
+                // STEP 2: Acquire Token in LRO OBO with claims again
+                // We'll add another mock handler to simulate the second call
+                AddMockHandlerAadSuccess(httpManager);
+
+                var acquireResult = await cca
+                    .AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey)
+                    .WithClaims(TestConstants.Claims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Because claims were specified again, MSAL bypasses the existing cache token
+                Assert.AreEqual(TokenSource.IdentityProvider, acquireResult.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(CacheRefreshReason.WithClaims, acquireResult.AuthenticationResultMetadata.CacheRefreshReason);
             }
         }
 

@@ -442,7 +442,6 @@ Microsoft.Identity.Client.CacheOptions.UseSharedCache.get -> bool
 Microsoft.Identity.Client.CacheOptions.UseSharedCache.set -> void
 Microsoft.Identity.Client.CacheRefreshReason
 Microsoft.Identity.Client.CacheRefreshReason.Expired = 3 -> Microsoft.Identity.Client.CacheRefreshReason
-Microsoft.Identity.Client.CacheRefreshReason.ForceRefreshOrClaims = 1 -> Microsoft.Identity.Client.CacheRefreshReason
 Microsoft.Identity.Client.CacheRefreshReason.NoCachedAccessToken = 2 -> Microsoft.Identity.Client.CacheRefreshReason
 Microsoft.Identity.Client.CacheRefreshReason.NotApplicable = 0 -> Microsoft.Identity.Client.CacheRefreshReason
 Microsoft.Identity.Client.CacheRefreshReason.ProactivelyRefreshed = 4 -> Microsoft.Identity.Client.CacheRefreshReason
