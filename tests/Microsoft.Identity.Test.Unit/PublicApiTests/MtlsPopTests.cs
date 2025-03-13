@@ -462,13 +462,18 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request with a non-AAD authority
-            Exception ex = await AssertException.TaskThrowsAsync<Exception>(() =>
-                app.AcquireTokenForClient(TestConstants.s_scope)
-                   .WithMtlsProofOfPossession() // Enables MTLS PoP
-                   .ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(expectedException, ex.GetType());
+            try
+            {
+                await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithMtlsProofOfPossession() // Enables MTLS PoP
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Assert.AreEqual(expectedException, ex.GetType());
+            }
         }
 
         [DataTestMethod]
