@@ -5,7 +5,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_OTEL;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_MTLS;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">
