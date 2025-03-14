@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -15,18 +17,31 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// When the token request goes to the identity provider because force_refresh was set to true. Also occurs if WithClaims() is used.
         /// </summary>
+        [Obsolete("Use ForceRefresh or WithClaims instead.")]
         ForceRefreshOrClaims = 1,
+        /// <summary>
+        /// When the token request goes to the identity provider because force_refresh was set to true.
+        /// </summary>
+        ForceRefresh = 2,
         /// <summary>
         /// When the token request goes to the identity provider because no cached access token exists
         /// </summary>
-        NoCachedAccessToken = 2,
+        NoCachedAccessToken = 3,
         /// <summary>
         /// When the token request goes to the identity provider because cached access token expired
         /// </summary>
-        Expired = 3,
+        Expired = 4,
         /// <summary>
         /// When the token request goes to the identity provider because refresh_in was used and the existing token needs to be refreshed
         /// </summary>
-        ProactivelyRefreshed = 4
+        ProactivelyRefreshed = 5,
+        /// <summary>
+        /// When the token request goes to the identity provider because WithClaims() was used.
+        /// </summary>
+        WithClaims = 6,
+        /// <summary>
+        /// Indicates that the resource (e.g., Microsoft Graph) has rejected the provided token. 
+        /// </summary>
+        TokenRejectedByResource = 7
     }
 }
