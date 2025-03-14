@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -170,23 +169,6 @@ namespace Microsoft.Identity.Client
         {
             if (CommonParameters.MtlsCertificate != null)
             {
-                string authorityUri = ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri;
-
-                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad && 
-                    ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Dsts)
-                {
-                    throw new MsalClientException(
-                        MsalError.InvalidAuthorityType,
-                        MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
-                }
-
-                if (authorityUri.Contains("/common", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new MsalClientException(
-                        MsalError.MissingTenantedAuthority,
-                        MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
-                }
-
                 // Check for Azure region only if the authority is AAD
                 // AzureRegion is by default set to null or set to null when the application is created
                 // with region set to DisableForceRegion (see ConfidentialClientApplicationBuilder.Validate)
