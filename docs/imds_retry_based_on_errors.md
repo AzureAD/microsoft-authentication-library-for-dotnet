@@ -14,7 +14,7 @@ This document defines the error handling and retry strategy for MSAL when intera
 | **403**             | Forbidden                                     | **Do not retry**, verify permissions       | **No retry**                             |
 | **404**             | IMDS endpoint is updating / Identity Not Found | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **408**             | Request Timeout                                | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
-| **410**             | IMDS is undergoing updates                    | Wait up to **70 seconds**, then retry      | **70s (fixed wait)**                    |
+| **410**             | IMDS is undergoing updates                    | Wait up to **70 seconds**, then retry      | **1s → 2s → 4s (max 4s)**            |
 | **429**             | IMDS Throttle limit reached                   | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **504**             | Gateway Timeout                               | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **5xx**             | Transient service error                        | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
@@ -41,8 +41,8 @@ The following retry strategy applies to **5xx errors, timeouts, and transient 4x
 | **3rd**         | **4 seconds** (max 4s) |
 
 🔹 **For 5xx Errors, 404 Identity Not Found, and Timeouts:** Retry **max 3 times** before failing.  
-🔹 **For 410 (IMDS Updates):** **Wait 70 seconds** before retrying.  
-🔹 **For 429 (Throttling):** Backoff **increases on each retry** (1s → 2s → 4s - max 4s).  
+🔹 **For 410 (IMDS Updates):** Backoff **increases on each retry** (1s → 2s → 4s - max 4s).
+🔹 **For 429 (Throttling):** Backoff **increases on each retry** (1s → 2s → 4s - max 4s).
 
 ---
 
@@ -55,7 +55,7 @@ graph TD;
   C -- No --> E[❌ Do Not Retry]
   A -->|5xx Error?| F[🔄 Retry: 1s → 2s → 4s]
   A -->|429 Throttling?| G[🔄 Retry: 1s → 2s → 4s]
-  A -->|410 IMDS Updating?| H[⏳ Wait 70s, Then Retry]
+  A -->|410 IMDS Updating?| H[🔄 Retry: 1s → 2s → 4s]
 ```
 
 ---
