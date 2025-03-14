@@ -203,7 +203,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         /// <summary>
-        /// Checks if the token should be used from the cache.
+        /// Checks if the token should be used from the cache and returns the cached access token if applicable.
         /// </summary>
         /// <returns></returns>
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
