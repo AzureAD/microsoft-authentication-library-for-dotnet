@@ -13,10 +13,10 @@
 ```mermaid
 sequenceDiagram
     participant Resource
-    actor Client/Caller (CX)
-    participant MSAL (Leaf)
-    participant MITS (Proxy)
-    participant SFRP (RP)
+    actor CX as Client/Caller
+    participant MSAL as MSAL on Leaf
+    participant MITS as MITS (Proxy)
+    participant SFRP as SFRP (RP)
     participant eSTS
 
 rect rgb(173, 216, 230)
@@ -30,7 +30,7 @@ rect rgb(215, 234, 132)
     MSAL->>MSAL: 5. Looks up old token T in local cache
     MSAL->>MITS: 6. MITS_endpoint?xms_cc=cp1&token_sha256_to_refresh=SHA256(T)
     MITS->>SFRP: 7. (Forward request w/ cc=cp1, hash=SHA256(T))
-    SFRP->>SFRP: 8. Another MSAL call AcquireTokenForClient(...).WithClientCapabilities(cp1)
+    SFRP->>SFRP: 8. Another MSAL call AcquireTokenForClient(...).WithClientCapabilities(cp1).WithAccessTokenSha256ToRefresh(hash)
     SFRP->>eSTS: 9. eSTS issues a new token
 end
 ```
