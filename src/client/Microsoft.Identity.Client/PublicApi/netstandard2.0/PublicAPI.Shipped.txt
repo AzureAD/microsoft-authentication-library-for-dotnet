@@ -989,3 +989,8 @@ const Microsoft.Identity.Client.MsalError.MtlsPopWithoutRegion = "mtls_pop_witho
 const Microsoft.Identity.Client.MsalError.RegionRequiredForMtlsPop = "region_required_for_mtls_pop" -> string
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.MachineLearning = 7 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithFmiPath(string pathSuffix) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems.Linux = 2 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.set -> void
+Microsoft.Identity.Client.RP.ConfidentialClientApplicationBuilderForResourceProviders
+static Microsoft.Identity.Client.RP.ConfidentialClientApplicationBuilderForResourceProviders.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, bool sendX5C, bool associateTokensWithCertificateSerialNumber) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
