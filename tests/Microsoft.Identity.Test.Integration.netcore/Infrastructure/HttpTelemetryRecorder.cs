@@ -28,8 +28,8 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             if (Enum.TryParse(splitApiIdAndCacheInfo[1], out CacheRefreshReason cacheInfoTelemetry))
             {
-                ForceRefresh = cacheInfoTelemetry == CacheRefreshReason.ForceRefresh ||
-                               cacheInfoTelemetry == CacheRefreshReason.WithClaims;
+                ForceRefresh = cacheInfoTelemetry == 
+                    CacheRefreshReason.ForceRefresh || cacheInfoTelemetry == CacheRefreshReason.WithClaims;
             }
             else
             {
