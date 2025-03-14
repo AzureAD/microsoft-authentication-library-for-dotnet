@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            // Determine the cache refresh reason and log
+            // Determine the cache refresh reason, skip the cache if force refresh or claims is used and log
             if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo =

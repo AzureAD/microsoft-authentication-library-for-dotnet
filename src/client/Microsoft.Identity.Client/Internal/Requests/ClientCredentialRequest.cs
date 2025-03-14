@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationResult authResult;
 
-            // Determine the cache refresh reason and log
+            // Determine if there is a cache refresh reason and log
             if (_clientParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo =
