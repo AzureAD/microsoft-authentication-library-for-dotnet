@@ -14,7 +14,7 @@ This document defines the error handling and retry strategy for MSAL when intera
 | **403**             | Forbidden                                     | **Do not retry**, verify permissions       | **No retry**                             |
 | **404**             | IMDS endpoint is updating / Identity Not Found | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **408**             | Request Timeout                                | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
-| **410**             | IMDS is undergoing updates                    | Wait up to **70 seconds**, then retry      | **1s → 2s → 4s (max 4s)**            |
+| **410**             | IMDS is undergoing updates                    | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **429**             | IMDS Throttle limit reached                   | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **504**             | Gateway Timeout                               | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **5xx**             | Transient service error                        | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
