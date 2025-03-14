@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -53,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             //  };
 
             // Arrange
-            const int NumberOfRequests = 1000;
+            const int NumberOfRequests = 4000;
 
             ParallelRequestMockHandler httpManager = new ParallelRequestMockHandler();
 
@@ -68,9 +69,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             for (int i = 0; i < NumberOfRequests; i++)
             {
+                int copy = i;  // Create local copy of loop variable
                 tasks.Add(Task.Run(async () =>
                 {
-                    string tid = $"tidtid_{i}";
+                    string tid = $"tidtid_{copy}";
                     var res = await cca.AcquireTokenForClient(TestConstants.s_scope)
                         .WithTenantId(tid)
                         //.WithExtraQueryParameters(extraQp)
@@ -78,6 +80,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ConfigureAwait(false);
 
                     //Assert.AreEqual(tid, res.TenantId);
+                    if (res.AuthenticationResultMetadata.TokenEndpoint == null)
+                    {
+                        Debugger.Break();
+                    }
+                    Assert.AreEqual(TokenSource.IdentityProvider, res.AuthenticationResultMetadata.TokenSource);
                     Assert.IsTrue(res.AuthenticationResultMetadata.TokenEndpoint.Contains(tid));
                     Assert.IsTrue(res.AccessToken == $"token_{tid}");
                     return res;
