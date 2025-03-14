@@ -31,7 +31,7 @@ jobs:
         run: cd tests/Microsoft.Identity.Test.Performance && dotnet run -c release -f net8.0 --exporters json 
 
       - name: Download previous benchmark data
-        uses: actions/cache@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache@v3
         with:
           path: ./cache
           key: ${{ runner.os }}-benchmark
