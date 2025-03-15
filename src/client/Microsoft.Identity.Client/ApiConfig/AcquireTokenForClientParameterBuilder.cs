@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client
     public sealed class AcquireTokenForClientParameterBuilder :
         AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenForClientParameterBuilder>
     {
-        private AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
+        internal AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
 
         /// <inheritdoc/>
         internal AcquireTokenForClientParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
@@ -182,6 +182,14 @@ namespace Microsoft.Identity.Client
             }
 
             base.Validate();
+
+            // Force refresh + AccessTokenHashToRefresh APIs cannot be used together
+            if (Parameters.ForceRefresh && !string.IsNullOrEmpty(Parameters.AccessTokenHashToRefresh))
+            {
+                throw new MsalClientException(
+                    MsalError.ForceRefreshNotCompatibleWithTokenHash,
+                    MsalErrorMessage.ForceRefreshAndTokenHasNotCompatible);
+            }
 
             if (Parameters.SendX5C == null)
             {
