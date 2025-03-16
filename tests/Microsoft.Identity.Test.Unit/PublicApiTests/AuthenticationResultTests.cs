@@ -190,5 +190,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             }
         }
+
+        /// <summary>
+        /// Verifies that if no token type is specified, the default is 'Bearer',
+        /// and CreateAuthorizationHeader() uses it.
+        /// </summary>
+        [TestMethod]
+        public void DefaultTokenType_IsBearer_Test()
+        {
+            DateTime now = DateTime.UtcNow;
+
+            var ar = new AuthenticationResult(
+                accessToken: "some-access-token",
+                isExtendedLifeTimeToken: false,
+                uniqueId: "unique-id",
+                expiresOn: now.AddMinutes(15),
+                extendedExpiresOn: now.AddMinutes(30),
+                tenantId: "tid",
+                account: new Account("aid", "user", "env"),
+                idToken: "my-id-token",
+                scopes: new[] { "scope" },
+                correlationId: Guid.NewGuid()
+            );
+
+            Assert.AreEqual("Bearer", ar.TokenType, "Expected default token type to be 'Bearer'");
+            Assert.AreEqual("Bearer some-access-token", ar.CreateAuthorizationHeader());
+        }
     }
 }
