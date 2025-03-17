@@ -2168,7 +2168,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 // 1) First network call: populates the cache with "access-token"
@@ -2212,7 +2211,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 // 1) Populate the cache with "access-token"
@@ -2245,7 +2243,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             ConfidentialClientApplication cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                             .WithClientSecret(TestConstants.ClientSecret)
-                                                            .WithExperimentalFeatures(true)
                                                             .BuildConcrete();
 
             // Attempt to create a request that sets both ForceRefresh and an AccessTokenHash
@@ -2277,7 +2274,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: oldToken);
@@ -2318,7 +2314,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 // First network call: populates the cache with "cache-token"
