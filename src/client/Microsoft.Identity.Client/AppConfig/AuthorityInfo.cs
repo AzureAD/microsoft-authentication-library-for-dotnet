@@ -2,10 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
@@ -65,7 +63,7 @@ namespace Microsoft.Identity.Client
                     CanonicalAuthority = new Uri($"https://{authorityUri.Authority}/{pathSegments[0]}/{pathSegments[1]}/");
 
                     UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                        $"https://{authorityUri.Authority}/{pathSegments[0]}/common/userrealm/",
+                        $"https://{authorityUri.Authority}/{pathSegments[0]}/{Constants.Common}/userrealm/",
                         authorityUri.Port);
                     break;
                 default:
@@ -75,7 +73,7 @@ namespace Microsoft.Identity.Client
                             authorityUri.Port));
 
                     UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                        $"https://{Host}/common/userrealm/",
+                        $"https://{Host}/{Constants.Common}/userrealm/",
                         authorityUri.Port);
                     break;
             }
@@ -273,11 +271,11 @@ namespace Microsoft.Identity.Client
             switch (authorityAudience)
             {
                 case AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount:
-                    return "common";
+                    return Constants.Common;
                 case AadAuthorityAudience.AzureAdMultipleOrgs:
-                    return "organizations";
+                    return Constants.Organizations;
                 case AadAuthorityAudience.PersonalMicrosoftAccount:
-                    return "consumers";
+                    return Constants.Consumers;
                 case AadAuthorityAudience.AzureAdMyOrg:
                     if (string.IsNullOrWhiteSpace(tenantId))
                     {
@@ -451,7 +449,7 @@ namespace Microsoft.Identity.Client
 
         private static string[] GetPathSegments(string absolutePath)
         {
-            string[] pathSegments = absolutePath.Substring(1).Split(
+            string[] pathSegments = absolutePath.Split(
                 new[]
                 {
                     '/'
