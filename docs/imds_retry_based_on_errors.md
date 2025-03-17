@@ -64,10 +64,6 @@ graph TD;
   A -->|410 IMDS Updating?| H[🔄 Retry: 10s up to 7 attempts]
 ```
 
-### Implementation Notes
-For 410 errors, log a message on each retry attempt indicating the status and the total time waited so far.
-For other retriable errors (5xx, 429, 404 Identity Not Found, 408/504), the exponential backoff sequence remains 1s → 2s → 4s (up to 3 retries).
-
 ---
 
 **References:** 
