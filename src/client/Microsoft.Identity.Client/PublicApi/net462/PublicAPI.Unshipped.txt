@@ -1,3 +1,4 @@
+Microsoft.Identity.Client.TokenCacheNotificationArgs.NoDistributedCacheUseReason.get -> string
 const Microsoft.Identity.Client.MsalError.ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible" -> string
 Microsoft.Identity.Client.RP.AcquireTokenForClientParameterBuilderForResourceProviders
 static Microsoft.Identity.Client.RP.AcquireTokenForClientParameterBuilderForResourceProviders.WithAccessTokenSha256ToRefresh(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, string hash) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
