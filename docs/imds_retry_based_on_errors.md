@@ -14,7 +14,7 @@ This document defines the error handling and retry strategy for MSAL when intera
 | **403**             | Forbidden                                     | **Do not retry**, verify permissions       | **No retry**                             |
 | **404**             | IMDS endpoint is updating / Identity Not Found | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **408**             | Request Timeout                                | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
-| **410**             | IMDS is undergoing updates                    | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
+| **410**             | IMDS is undergoing updates                    | Retry every 10 seconds (max 70s / 7 attempts). Log each retry. | **10s → 10s → … (up to 7 attempts)**            |
 | **429**             | IMDS Throttle limit reached                   | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **504**             | Gateway Timeout                               | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
 | **5xx**             | Transient service error                        | Retry with Exponential Backoff (max 3 retries) | **1s → 2s → 4s (max 4s)**            |
@@ -41,7 +41,7 @@ The following retry strategy applies to **5xx errors, timeouts, and transient 4x
 | **3rd**         | **4 seconds** (max 4s) |
 
 🔹 **For 5xx Errors, 404 Identity Not Found, and Timeouts:** Retry **max 3 times** before failing.  
-🔹 **For 410 (IMDS Updates):** Backoff **increases on each retry** (1s → 2s → 4s - max 4s).
+🔹 **For 410 (IMDS Updates):** Retry every 10 seconds for a **maximum of 70 seconds** (i.e., up to 7 attempts). Log a statement on each retry attempt.
 🔹 **For 429 (Throttling):** Backoff **increases on each retry** (1s → 2s → 4s - max 4s).
 
 ---
@@ -55,8 +55,12 @@ graph TD;
   C -- No --> E[❌ Do Not Retry]
   A -->|5xx Error?| F[🔄 Retry: 1s → 2s → 4s]
   A -->|429 Throttling?| G[🔄 Retry: 1s → 2s → 4s]
-  A -->|410 IMDS Updating?| H[🔄 Retry: 1s → 2s → 4s]
+  A -->|410 IMDS Updating?| H[🔄 Retry: 10s up to 7 attempts]
 ```
+
+### Implementation Notes
+For 410 errors, log a message on each retry attempt indicating the status and the total time waited so far.
+For other retriable errors (5xx, 429, 404 Identity Not Found, 408/504), the exponential backoff sequence remains 1s → 2s → 4s (up to 3 retries).
 
 ---
 
