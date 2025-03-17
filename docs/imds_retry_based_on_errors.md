@@ -31,18 +31,24 @@ This document defines the error handling and retry strategy for MSAL when intera
 
 ---
 
-## 3️⃣ Updated Retry Strategy (Exponential Backoff)
-The following retry strategy applies to **5xx errors, timeouts, and transient 4xx errors (e.g., Identity Not Found):**
+## 3️⃣ Summary of the updated retry strategy 
+Below is a summary table showing the retry patterns for each scenario:
 
-| **Retry Attempt** | **Delay Before Retry** |
-|------------------|----------------------|
-| **1st**         | **1 second**         |
-| **2nd**         | **2 seconds**         |
-| **3rd**         | **4 seconds** (max 4s) |
+| **Scenario**                                              | **Attempts**    | **Delay Pattern**                   |
+|-----------------------------------------------------------|-----------------|-------------------------------------|
+| **5xx, 404 (Identity Not Found), 408/504 (Timeout), 429** | Up to **3**     | **Exponential Backoff**: 1s → 2s → 4s |
+| **410 (IMDS Updates)**                                    | Up to **7**     | **Every 10 seconds** (max 70s total) |
 
-🔹 **For 5xx Errors, 404 Identity Not Found, and Timeouts:** Retry **max 3 times** before failing.  
-🔹 **For 410 (IMDS Updates):** Retry every 10 seconds for a **maximum of 70 seconds** (i.e., up to 7 attempts). Log a statement on each retry attempt.
-🔹 **For 429 (Throttling):** Backoff **increases on each retry** (1s → 2s → 4s - max 4s).
+### Key Points
+- **Exponential Backoff** applies to:
+  - 5xx errors  
+  - 404 (*Identity Not Found*)  
+  - 408/504 (*Timeouts*)  
+  - 429 (*Throttling*)
+  - Retries occur **up to 3 times** with delays of **1s → 2s → 4s**.
+- **410 (IMDS Updates)**
+  - Retry **every 10 seconds** for up to **7 attempts** (70s total).
+- **Log a statement on each retry** (for both exponential backoff and 410) indicating the attempt number, the reason for retry, and the total time waited so far.
 
 ---
 
