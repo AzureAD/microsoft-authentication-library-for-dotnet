@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (skipCache)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("[ClientCredentialRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set.");
+                logger.Info("[ClientCredentialRequest] Skipped looking for a cached access token because either of ForceRefresh, Claims or AccessTokenHashToRefresh were set.");
                 authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }
