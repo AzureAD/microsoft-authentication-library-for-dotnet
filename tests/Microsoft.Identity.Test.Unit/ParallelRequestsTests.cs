@@ -105,9 +105,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             for (int i = 0; i < NumberOfRequests; i++)
             {
+                int tempI = i; // Capture the current value of i
                 tasks.Add(Task.Run(async () =>
                 {
-                    string tid = $"tidtid_{i}";
+                    string tid = $"tidtid_{tempI}";
                     AuthenticationResult res = await cca.AcquireTokenForClient(TestConstants.s_scope)
                         .WithTenantId(tid)
                         .ExecuteAsync()
@@ -151,7 +152,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var tasksFirstPass = new List<Task<AuthenticationResult>>();
             for (int i = 0; i < NumberOfRequests; i++)
             {
-                string tid = $"tidtid_{i}";
+                int tempI = i; // Capture the current value of i
+                string tid = $"tidtid_{tempI}";
                 tasksFirstPass.Add(Task.Run(async () =>
                 {
                     AuthenticationResult result = await cca
@@ -183,7 +185,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var tasksSecondPass = new List<Task<AuthenticationResult>>();
             for (int i = 0; i < NumberOfRequests; i++)
             {
-                string tid = $"tidtid_{i}";
+                int tempI = i; // Capture the current value of i
+                string tid = $"tidtid_{tempI}";
                 tasksSecondPass.Add(Task.Run(async () =>
                 {
                     AuthenticationResult result = await cca
