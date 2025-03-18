@@ -2,7 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Reflection.Emit;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
