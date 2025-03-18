@@ -36,15 +36,15 @@ Below is a summary table showing the retry patterns for each scenario:
 
 | **Scenario**                                              | **Attempts**    | **Delay Pattern**                   |
 |-----------------------------------------------------------|-----------------|-------------------------------------|
-| **5xx, 404 (Identity Not Found), 408/504 (Timeout), 429** | Up to **3**     | **Exponential Backoff**: 1s → 2s → 4s |
+| **404 (Identity Not Found), 408/504 (Timeout), 429, 5xx** | Up to **3**     | **Exponential Backoff**: 1s → 2s → 4s |
 | **410 (IMDS Updates)**                                    | Up to **7**     | **Every 10 seconds** (max 70s total) |
 
 ### Key Points
 - **Exponential Backoff** applies to:
-  - 5xx errors  
   - 404 (*Identity Not Found*)  
   - 408/504 (*Timeouts*)  
   - 429 (*Throttling*)
+  - 5xx errors  
   - Retries occur **up to 3 times** with delays of **1s → 2s → 4s**.
 - **410 (IMDS Updates)**
   - Retry **every 10 seconds** for up to **7 attempts** (70s total).
@@ -60,10 +60,9 @@ graph TD;
   C -- Yes --> D[🔄 Retry: 1s → 2s → 4s]
   C -- No --> E[❌ Do Not Retry]
   A -->|5xx Error?| F[🔄 Retry: 1s → 2s → 4s]
-  A -->|429 Throttling?| G[🔄 Retry: 1s → 2s → 4s]
   A -->|410 IMDS Updating?| H[🔄 Retry: 10s up to 7 attempts]
+  A -->|429 Throttling?| G[🔄 Retry: 1s → 2s → 4s]
 ```
-
 ---
 
 **References:** 
