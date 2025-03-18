@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1742275892209,
+  "lastUpdate": 1742276510684,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6826,6 +6826,40 @@ window.BENCHMARK_DATA = {
             "value": 370404.68,
             "unit": "ns",
             "range": "± 33993.33382819566"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Gladwin Johnson",
+            "username": "gladjohn",
+            "email": "90415114+gladjohn@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "ec1adab27ca2574af74b43091ce4634d705f9269",
+          "message": "Update actions/cache to version 3 in workflow",
+          "timestamp": "2025-03-14T03:36:44Z",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/ec1adab27ca2574af74b43091ce4634d705f9269"
+        },
+        "date": 1742276507011,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 279038.6835443038,
+            "unit": "ns",
+            "range": "± 14378.649844380028"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 378412.91,
+            "unit": "ns",
+            "range": "± 32803.32593820297"
           }
         ]
       }
