@@ -1898,7 +1898,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
                     .WithLogging((LogLevel _, string message, bool _) => log += message)
-                    .WithAuthority(TestConstants.AuthorityCommonTenant, true)
+                    .WithAuthority(tenant, true)
                     .BuildConcrete();
 
                 var result = await app
