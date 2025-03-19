@@ -18,6 +18,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string Claims { get; set; }
 
+        public string BadTokenHash { get; set; }
+
         public void LogParameters(ILoggerAdapter logger)
         {
             if (logger.IsLoggingEnabled(LogLevel.Info))

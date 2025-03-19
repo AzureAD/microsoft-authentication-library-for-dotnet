@@ -7,12 +7,15 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Unit;
@@ -427,8 +430,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
             IDictionary<string, string> expectedPostData = null; // Only used for Cloud Shell
 
-            string bypassCacheValue = claimsEnabled ? "true" : "false";  // Set based on claimsEnabled
-
             switch (managedIdentitySourceType)
             {
                 case ManagedIdentitySource.AppService:
@@ -436,31 +437,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("api-version", "2025-03-30");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
-                    expectedQueryParams.Add("bypass_cache", bypassCacheValue);
                     break;
                 case ManagedIdentitySource.AzureArc:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedQueryParams.Add("api-version", "2019-11-01");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("Metadata", "true");
-                    expectedQueryParams.Add("bypass_cache", bypassCacheValue);
                     break;
                 case ManagedIdentitySource.Imds:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedQueryParams.Add("api-version", "2018-02-01");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("Metadata", "true");
-                    expectedQueryParams.Add("bypass_cache", bypassCacheValue);
                     break;
                 case ManagedIdentitySource.CloudShell:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Post;
                     expectedRequestHeaders.Add("Metadata", "true");
                     expectedRequestHeaders.Add("ContentType", "application/x-www-form-urlencoded");
-
                     expectedPostData = new Dictionary<string, string>
                     {
-                        { "resource", resource },
-                        { "bypass_cache", bypassCacheValue }
+                        { "resource", resource }
                     };
                     break;
                 case ManagedIdentitySource.ServiceFabric:
@@ -468,7 +464,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedRequestHeaders.Add("secret", "secret");
                     expectedQueryParams.Add("api-version", "2019-07-01-preview");
                     expectedQueryParams.Add("resource", resource);
-                    expectedQueryParams.Add("bypass_cache", bypassCacheValue);
                     break;
                 case ManagedIdentitySource.MachineLearning:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
@@ -476,21 +471,27 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedRequestHeaders.Add("Metadata", "true");
                     expectedQueryParams.Add("api-version", "2017-09-01");
                     expectedQueryParams.Add("resource", resource);
-                    expectedQueryParams.Add("bypass_cache", bypassCacheValue);
                     break;
             }
 
             // If capabilityEnabled, add "xms_cc": "cp1"
             if (capabilityEnabled)
             {
-                if (managedIdentitySourceType == ManagedIdentitySource.CloudShell)
-                {
-                    expectedPostData ??= new Dictionary<string, string>();
-                    expectedPostData.Add("xms_cc", "cp1,cp2");
-                }
-                else
+                if (managedIdentitySourceType == ManagedIdentitySource.AppService 
+                    || managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
                 {
                     expectedQueryParams.Add("xms_cc", "cp1,cp2");
+                }
+            }
+
+            if (claimsEnabled)
+            {
+                var manager = new CommonCryptographyManager();
+                var value = manager.CreateSha256Hash(TestConstants.ATSecret);
+                if (managedIdentitySourceType == ManagedIdentitySource.AppService
+                    || managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
+                {
+                    expectedQueryParams.Add("token_sha256_to_refresh", manager.CreateSha256Hash(TestConstants.ATSecret));
                 }
             }
 

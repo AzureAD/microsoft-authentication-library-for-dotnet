@@ -83,8 +83,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             request.BodyParameters.Add("resource", resource);
             
-            ApplyClaimsAndCapabilities(request, parameters);
-
             return request;
         }
     }

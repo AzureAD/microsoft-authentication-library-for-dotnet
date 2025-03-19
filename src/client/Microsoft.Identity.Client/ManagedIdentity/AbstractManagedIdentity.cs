@@ -312,23 +312,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             IEnumerable<string> clientCapabilities = _requestContext.ServiceBundle.Config.ClientCapabilities;
 
-            // If claims are present, set bypass_cache=true
+            // Set xms_cc only if clientCapabilities exist
+            if (clientCapabilities != null && clientCapabilities.Any())
+            {
+                SetRequestParameter(request, "xms_cc", string.Join(",", clientCapabilities));
+                _requestContext.Logger.Info("[Managed Identity] Adding client capabilities (xms_cc) to Managed Identity request.");
+            }
+
+            // If claims are present, send the bad token hash to the Managed Identity endpoint.
             if (!string.IsNullOrEmpty(parameters.Claims))
             {
-                SetRequestParameter(request, "bypass_cache", "true");
-                _requestContext.Logger.Info("[Managed Identity] Setting bypass_cache=true in the Managed Identity request due to claims.");
-
-                // Set xms_cc only if clientCapabilities exist
-                if (clientCapabilities != null && clientCapabilities.Any())
+                if (!string.IsNullOrEmpty(parameters.BadTokenHash))
                 {
-                    SetRequestParameter(request, "xms_cc", string.Join(",", clientCapabilities));
-                    _requestContext.Logger.Info("[Managed Identity] Adding client capabilities (xms_cc) to Managed Identity request.");
+                    SetRequestParameter(request, "token_sha256_to_refresh", parameters.BadTokenHash);
+                    _requestContext.Logger.Info(
+                        "[Managed Identity] Passing SHA-256 of the 'bad' token to Managed Identity endpoint."
+                    );
                 }
-            }
-            else
-            {
-                SetRequestParameter(request, "bypass_cache", "false");
-                _requestContext.Logger.Info("[Managed Identity] Setting bypass_cache=false (no claims provided).");
             }
         }
 

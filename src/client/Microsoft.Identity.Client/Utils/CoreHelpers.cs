@@ -75,40 +75,54 @@ namespace Microsoft.Identity.Client.Utils
             return builder.ToString();
         }
 
-        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode,
-            bool lowercaseKeys,
+        public static Dictionary<string, string> ParseKeyValueList(
+            string input, 
+            char delimiter, 
+            bool urlDecode,    
+            bool lowercaseKeys, 
             RequestContext requestContext)
         {
             var response = new Dictionary<string, string>();
 
+            // Split the full query string on & (or any provided delimiter) to get individual k=v pairs.
             var queryPairs = SplitWithQuotes(input, delimiter);
 
             foreach (string queryPair in queryPairs)
             {
-                var pair = SplitWithQuotes(queryPair, '=');
+                // Instead of splitting on *all* '=' characters, find only the first one.
+                // This ensures that if the value itself contains '=', such as a trailing '=' in Base64,
+                // we do not accidentally split the base64 value into extra parts and lose the padding.
+                int idx = queryPair.IndexOf('=');
 
-                if (pair.Count == 2 && !string.IsNullOrWhiteSpace(pair[0]) && !string.IsNullOrWhiteSpace(pair[1]))
+                // idx > 0 means we found an '=' and have a valid key substring before it
+                if (idx > 0)
                 {
-                    string key = pair[0];
-                    string value = pair[1];
+                    // The key is everything before the first '='
+                    string key = queryPair.Substring(0, idx);
 
-                    // Url decoding is needed for parsing OAuth response, but not for parsing WWW-Authenticate header in 401 challenge
+                    // The value is everything after the first '=' (including any trailing '=')
+                    string value = queryPair.Substring(idx + 1);
+
+                    // If urlDecode == true, decode both key and value
                     if (urlDecode)
                     {
                         key = UrlDecode(key);
                         value = UrlDecode(value);
                     }
 
+                    // Optionally convert key to lowercase
                     if (lowercaseKeys)
                     {
                         key = key.Trim().ToLowerInvariant();
                     }
 
+                    // Trim quotes and whitespace around the value
                     value = value.Trim().Trim('\"').Trim();
 
                     if (response.ContainsKey(key))
                     {
-                        requestContext?.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
+                        requestContext?.Logger.Warning(
+                            string.Format(CultureInfo.InvariantCulture,
                             "Key/value pair list contains redundant key '{0}'.", key));
                     }
 
