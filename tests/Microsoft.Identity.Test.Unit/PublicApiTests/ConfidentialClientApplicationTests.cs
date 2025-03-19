@@ -1890,37 +1890,104 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 string log = string.Empty;
 
+                //Check common authority
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
                     .WithLogging((LogLevel _, string message, bool _) => log += message)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant, true)
                     .BuildConcrete();
 
-#pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityCommonTenant, true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
                 Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
 
+                //check organizations authority
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
                 log = string.Empty;
+
+                app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithLogging((LogLevel _, string message, bool _) => log += message)
+                    .WithAuthority(TestConstants.AuthorityOrganizationsTenant, true)
+                    .BuildConcrete();
+
                 result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityOrganizationsTenant, true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
-#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
+
+                //check consumers authority
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                log = string.Empty;
+
+                app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithLogging((LogLevel _, string message, bool _) => log += message)
+                    .WithAuthority(TestConstants.AuthorityConsumersTenant, true)
+                    .BuildConcrete();
+
+                result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsFalse(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
             }
         }
 
         [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant)]
         [DataRow(TestConstants.AuthorityOrganizationsTenant)]
+        [DataRow(TestConstants.AuthorityConsumersTenant)]
+        public async Task AcquireTokenForClientAuthorityCheckTestAsync(string tenant)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                string log = string.Empty;
+
+                //Check common authority
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithLogging((LogLevel _, string message, bool _) => log += message)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant, true)
+                    .BuildConcrete();
+
+                var result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                if (tenant.Equals(TestConstants.AuthorityConsumersTenant))
+                {
+                    Assert.IsFalse(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
+                }
+                else
+                {
+                    Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
+                }
+            }
+        }
+
+        [TestMethod]
+        [DataRow(TestConstants.AuthorityCommonTenant)]
+        [DataRow(TestConstants.AuthorityOrganizationsTenant)]
+        [DataRow(TestConstants.AuthorityConsumersTenant)]
         public async Task AcquireTokenOboAuthorityCheckTestAsync(string tenant)
         {
             using (var httpManager = new MockHttpManager())
@@ -1943,7 +2010,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                Assert.IsTrue(log.Contains(MsalErrorMessage.OnBehalfOfWrongAuthority));
+                if (tenant.Equals(TestConstants.AuthorityConsumersTenant))
+                {
+                    Assert.IsFalse(log.Contains(MsalErrorMessage.OnBehalfOfWrongAuthority));
+                }
+                else
+                {
+                    Assert.IsTrue(log.Contains(MsalErrorMessage.OnBehalfOfWrongAuthority));
+                }
             }
         }
 
