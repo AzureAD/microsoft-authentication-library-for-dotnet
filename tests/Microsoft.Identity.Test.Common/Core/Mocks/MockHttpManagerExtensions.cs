@@ -427,6 +427,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> notExpectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
             IDictionary<string, string> expectedPostData = null; // Only used for Cloud Shell
 
@@ -474,25 +475,34 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     break;
             }
 
+            var manager = new CommonCryptographyManager();
+            var value = manager.CreateSha256Hash(TestConstants.ATSecret);
+
             // If capabilityEnabled, add "xms_cc": "cp1"
             if (capabilityEnabled)
             {
-                if (managedIdentitySourceType == ManagedIdentitySource.AppService 
+                if (managedIdentitySourceType == ManagedIdentitySource.AppService
                     || managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
                 {
                     expectedQueryParams.Add("xms_cc", "cp1,cp2");
                 }
             }
+            else
+            {
+                notExpectedQueryParams.Add("xms_cc", "cp1,cp2");
+            }
 
             if (claimsEnabled)
             {
-                var manager = new CommonCryptographyManager();
-                var value = manager.CreateSha256Hash(TestConstants.ATSecret);
                 if (managedIdentitySourceType == ManagedIdentitySource.AppService
                     || managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
                 {
                     expectedQueryParams.Add("token_sha256_to_refresh", manager.CreateSha256Hash(TestConstants.ATSecret));
                 }
+            }
+            else
+            {
+                notExpectedQueryParams.Add("token_sha256_to_refresh", manager.CreateSha256Hash(TestConstants.ATSecret));
             }
 
             if (managedIdentitySourceType != ManagedIdentitySource.CloudShell)
