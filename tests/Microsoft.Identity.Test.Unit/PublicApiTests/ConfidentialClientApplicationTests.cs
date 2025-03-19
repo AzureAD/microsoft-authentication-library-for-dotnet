@@ -11,6 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.RP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
@@ -24,6 +25,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Client.Extensibility;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -1041,14 +1044,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #pragma warning disable CS0618 // Type or member is obsolete
                 Uri authorizationRequestUrl = confidentialClientApplication
                     .GetAuthorizationRequestUrl(new List<string> { "" })
-                    .WithAuthority(AzureCloudInstance.AzurePublic, Constants.ConsumerTenant)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, Constants.Consumers)
                     .ExecuteAsync()
                     .ConfigureAwait(false)
                     .GetAwaiter()
                     .GetResult();
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Constants.CommonTenant));
+                Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Constants.Common));
             }
         }
 
@@ -2149,6 +2152,209 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority("NotAValidAuthority")
                     .Build();
             });
+        }
+
+        [TestMethod]
+        public async Task WithAccessTokenSha256ToRefresh_MatchingHash_GetsTokenFromIdp_Async()
+        {
+            const string accessToken = "access-token";
+
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // Build the app and request a token to populate the cache
+                ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // 1) First network call: populates the cache with "access-token"
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: accessToken);
+                AuthenticationResult initialResult = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(accessToken, initialResult.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, initialResult.AuthenticationResultMetadata.TokenSource);
+
+                // 2) Second call: re-check the cache. Should see the same token from cache
+                AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(accessToken, secondResult.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
+
+                // 3) Now specify the same token's hash as "bad" => expect a new token from IdP
+                string tokenHash = ComputeSHA256(accessToken);
+
+                // Add another network response to simulate fetching a new token
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "new-access-token");
+
+                // Act: Use matching hash => triggers new token request
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAccessTokenSha256ToRefresh(tokenHash)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("new-access-token", result.AccessToken, "Should fetch a new token if hash matches the 'bad' token in the cache.");
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithAccessTokenSha256ToRefresh_MismatchedHash_UsesCache_Async()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // 1) Populate the cache with "access-token"
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "access-token");
+                AuthenticationResult initialResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("access-token", initialResult.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, initialResult.AuthenticationResultMetadata.TokenSource);
+
+                // 2) Mismatched hash => we expect to keep using the cached token
+                // Act
+                var mismatchHash = ComputeSHA256("some-other-token");
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAccessTokenSha256ToRefresh(mismatchHash)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                // We expect to reuse the cached token
+                Assert.AreEqual("access-token", result.AccessToken,
+                    "Should reuse cached token if the hash does not match the 'bad' token's hash.");
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ForceRefreshAndAccessTokenHash_ThrowsException_Async()
+        {
+            ConfidentialClientApplication cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                            .WithClientSecret(TestConstants.ClientSecret)
+                                                            .BuildConcrete();
+
+            // Attempt to create a request that sets both ForceRefresh and an AccessTokenHash
+            AcquireTokenForClientParameterBuilder builder = cca.AcquireTokenForClient(TestConstants.s_scope)
+                                .WithForceRefresh(true)
+                                .WithAccessTokenSha256ToRefresh("dummyHash");
+
+            // Act & Assert
+            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                builder.ExecuteAsync()
+            ).ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.ForceRefreshNotCompatibleWithTokenHash, ex.ErrorCode);
+            Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ForceRefreshAndTokenHasNotCompatible));            
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_WithClaims_And_MatchingHash_SkipsCache_Async()
+        {
+            const string oldToken = "old-token";
+            const string freshToken = "fresh-token";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // 1) Create app & fetch an initial token
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: oldToken);
+                AuthenticationResult firstResult = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(oldToken, firstResult.AccessToken);
+
+                // 2) We do matching hash => a new token is returned
+                string tokenHash = ComputeSHA256(oldToken);
+
+                // Add second network response for the new token
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: freshToken);
+
+                // Act
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClaims("{\"extra_claim\":\"value\"}")
+                    .WithAccessTokenSha256ToRefresh(tokenHash)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert => new token from the IDP
+                Assert.AreEqual(freshToken, result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_WithClaims_And_MismatchedHash_UsesCache_Async()
+        {
+            const string cacheToken = "cache-token";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // 1) Create app & fetch an initial token
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // First network call: populates the cache with "cache-token"
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: cacheToken);
+
+                var initialResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(cacheToken, initialResult.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, initialResult.AuthenticationResultMetadata.TokenSource);
+
+                // 2) We'll do a mismatched hash => expect to keep using the cached token
+                string mismatchedHash = ComputeSHA256("some-other-token");
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClaims("{\"extra_claim\":\"value\"}")
+                    .WithAccessTokenSha256ToRefresh(mismatchedHash)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert => we keep using the cached token
+                Assert.AreEqual(cacheToken, result.AccessToken,
+                    "We reuse the cache if the hash does not match the 'bad' token’s hash.");
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        private static string ComputeSHA256(string token)
+        {
+#if NET6_0_OR_GREATER
+            byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+            return Convert.ToBase64String(hashBytes);
+#else
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
+                return Convert.ToBase64String(hashBytes);
+            }
+#endif
         }
     }
 }
