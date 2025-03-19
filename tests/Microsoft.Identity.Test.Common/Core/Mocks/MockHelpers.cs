@@ -370,7 +370,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string[] scope,
             bool foci = false,
             string utid = TestConstants.Utid,
-            string accessToken = "some-access-token",
+            string accessToken = TestConstants.ATSecret,
             string refreshToken = "OAAsomethingencrypedQwgAA")
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
@@ -385,7 +385,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string[] scope,
             bool foci = false,
             string utid = TestConstants.Utid,
-            string accessToken = "some-access-token",
+            string accessToken = TestConstants.ATSecret,
             string refreshToken = "OAAsomethingencrypedQwgAA")
         {
             string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);

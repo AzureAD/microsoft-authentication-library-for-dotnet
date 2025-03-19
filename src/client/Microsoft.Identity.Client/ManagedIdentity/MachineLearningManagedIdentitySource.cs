@@ -72,8 +72,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = MachineLearningMsiApiVersion;
             request.QueryParameters["resource"] = resource;
 
-            ApplyClaimsAndCapabilities(request, parameters);
-
             switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
                 case AppConfig.ManagedIdentityIdType.ClientId:
