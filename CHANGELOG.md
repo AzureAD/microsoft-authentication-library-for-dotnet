@@ -2,6 +2,7 @@
 ==========
 ### Features
 - Added a .WithAccessTokenSha256ToRefresh() method to AcquireTokenForClientParameterBuilder for ConfidentialClientApplication, allowing finer control over token refresh scenarios. [Issue #5111](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5111), PR #5179
+- Added `TokenCacheNotificationArgs.NoDistributedCacheUseReason` in order to indicate that the configured serialized cache should not be a distributed cache to prevent issues when acquiring tokens. [Issue #5199](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5199)
 
 ### Bug Fixes
 - Removed invalid tenant checks (/organizations or /common) in MTLS flows for AAD/dSTS authorities. [Issue #5093](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5093)
