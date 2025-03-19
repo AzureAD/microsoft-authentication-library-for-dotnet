@@ -1881,72 +1881,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenForClientAuthorityCheckTestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-
-                string log = string.Empty;
-
-                //Check common authority
-                var app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .WithHttpManager(httpManager)
-                    .WithLogging((LogLevel _, string message, bool _) => log += message)
-                    .WithAuthority(TestConstants.AuthorityCommonTenant, true)
-                    .BuildConcrete();
-
-                var result = await app
-                    .AcquireTokenForClient(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
-
-                //check organizations authority
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                log = string.Empty;
-
-                app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .WithHttpManager(httpManager)
-                    .WithLogging((LogLevel _, string message, bool _) => log += message)
-                    .WithAuthority(TestConstants.AuthorityOrganizationsTenant, true)
-                    .BuildConcrete();
-
-                result = await app
-                    .AcquireTokenForClient(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
-
-                //check consumers authority
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                log = string.Empty;
-
-                app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .WithHttpManager(httpManager)
-                    .WithLogging((LogLevel _, string message, bool _) => log += message)
-                    .WithAuthority(TestConstants.AuthorityConsumersTenant, true)
-                    .BuildConcrete();
-
-                result = await app
-                    .AcquireTokenForClient(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                Assert.IsFalse(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
-            }
-        }
-
-        [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant)]
         [DataRow(TestConstants.AuthorityOrganizationsTenant)]
         [DataRow(TestConstants.AuthorityConsumersTenant)]
@@ -1959,7 +1893,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 string log = string.Empty;
 
-                //Check common authority
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
