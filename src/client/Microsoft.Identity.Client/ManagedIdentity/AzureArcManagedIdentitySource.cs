@@ -88,9 +88,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.Headers.Add("Metadata", "true");
             request.QueryParameters["api-version"] = ArcApiVersion;
             request.QueryParameters["resource"] = resource;
-            request.QueryParameters["bypass_cache"] = "false";
-
-            ApplyClaimsAndCapabilities(request, parameters);
 
             return request;
         }
