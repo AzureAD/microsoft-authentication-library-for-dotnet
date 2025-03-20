@@ -42,12 +42,14 @@ namespace Microsoft.Identity.Client.Internal
         public const string SshCertAuthHeaderPrefix = "SshCert";
 
         public const string ManagedIdentityClientId = "client_id";
+        public const string ManagedIdentityClientId2017 = "clientid";
         public const string ManagedIdentityObjectId = "object_id";
         public const string ManagedIdentityResourceId = "mi_res_id";
         public const string ManagedIdentityDefaultClientId = "system_assigned_managed_identity";
         public const string ManagedIdentityDefaultTenant = "managed_identity";
         public const string CiamAuthorityHostSuffix = ".ciamlogin.com";
         public const string CertSerialNumber = "cert_sn";
+        public const string FmiNodeClientId = "urn:microsoft:identity:fmi";
 
         public const int CallerSdkIdMaxLength = 10;
         public const int CallerSdkVersionMaxLength = 20;

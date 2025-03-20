@@ -219,6 +219,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string Bearer = "Bearer";
         public const string Pop = "PoP";
+        public const string FmiNodeClientId = "urn:microsoft:identity:fmi";
 
         public static IDictionary<string, string> ExtraQueryParameters
         {

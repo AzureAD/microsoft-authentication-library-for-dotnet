@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static bool IsCommonOrOrganizationsTenant(string tenantId)
         {
-            return !string.IsNullOrEmpty(tenantId) && 
+            return !string.IsNullOrEmpty(tenantId) &&
+                   !IsConsumers(tenantId) &&
                 s_tenantlessTenantNames.Contains(tenantId);
         }
 
