@@ -47,6 +47,8 @@ Steps 5-9 are new and show how the RP propagates the revocation signal.
 6. **MITS** is basically a proxy, forwarding the query to **SFRP**.
 7. **SFRP** uses MSAL again to get a **new** token from eSTS.
 
+> [!IMPORTANT]
+> This design is only applicable to MIRP api-version=2025-03-30 (for App Service). api-version for service fabric will be soon made available. 
 
 > [!NOTE]  
 >  ClientCapabilities is an array of capabilities. In case the app developer sends multiple capabilities, these will be sent to the RP as `MITS_endpoint?xms_cc=cp1,cp2,cp3`. The RP MUST pass "cp1" (i.e. the CAE capabilitiy) if it is included.
