@@ -7,12 +7,15 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Unit;
@@ -367,14 +370,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ManagedIdentitySource managedIdentitySourceType,
             string userAssignedId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-            HttpStatusCode statusCode = HttpStatusCode.OK
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            bool capabilityEnabled = false, 
+            bool claimsEnabled = false
             )
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
             HttpContent content = new StringContent(response);
             responseMessage.Content = content;
 
-            MockHttpMessageHandler httpMessageHandler = BuildMockHandlerForManagedIdentitySource(managedIdentitySourceType, resource);
+            MockHttpMessageHandler httpMessageHandler = BuildMockHandlerForManagedIdentitySource(
+                managedIdentitySourceType, 
+                resource,
+                capabilityEnabled, 
+                claimsEnabled
+                );
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
@@ -405,18 +415,24 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             httpManager.AddMockHandler(httpMessageHandler);
         }
-            
-        private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySource managedIdentitySourceType, string resource)
+
+        private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(
+            ManagedIdentitySource managedIdentitySourceType,
+            string resource,
+            bool capabilityEnabled = false,
+            bool claimsEnabled = false)
         {
             MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> notExpectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IDictionary<string, string> expectedPostData = null; // Only used for Cloud Shell
 
             switch (managedIdentitySourceType)
             {
                 case ManagedIdentitySource.AppService:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
-                    expectedQueryParams.Add("api-version", "2019-08-01");
+                    expectedQueryParams.Add("api-version", "2025-03-30");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
                     break;
@@ -436,7 +452,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     httpMessageHandler.ExpectedMethod = HttpMethod.Post;
                     expectedRequestHeaders.Add("Metadata", "true");
                     expectedRequestHeaders.Add("ContentType", "application/x-www-form-urlencoded");
-                    httpMessageHandler.ExpectedPostData = new Dictionary<string, string> { { "resource", resource } };
+                    expectedPostData = new Dictionary<string, string>
+                    {
+                        { "resource", resource }
+                    };
                     break;
                 case ManagedIdentitySource.ServiceFabric:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
@@ -453,11 +472,45 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     break;
             }
 
+            var manager = new CommonCryptographyManager();
+            var value = manager.CreateSha256Hash(TestConstants.ATSecret);
+
+            // If capabilityEnabled, add "xms_cc": "cp1"
+            if (capabilityEnabled)
+            {
+                if (managedIdentitySourceType == ManagedIdentitySource.AppService
+                    || managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
+                {
+                    expectedQueryParams.Add("xms_cc", "cp1,cp2");
+                }
+            }
+            else
+            {
+                notExpectedQueryParams.Add("xms_cc", "cp1,cp2");
+            }
+
+            if (claimsEnabled)
+            {
+                if (managedIdentitySourceType == ManagedIdentitySource.AppService
+                    || managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
+                {
+                    expectedQueryParams.Add("token_sha256_to_refresh", manager.CreateSha256Hash(TestConstants.ATSecret));
+                }
+            }
+            else
+            {
+                notExpectedQueryParams.Add("token_sha256_to_refresh", manager.CreateSha256Hash(TestConstants.ATSecret));
+            }
+
             if (managedIdentitySourceType != ManagedIdentitySource.CloudShell)
             {
                 httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
             }
-            
+            else
+            {
+                httpMessageHandler.ExpectedPostData = expectedPostData;
+            }
+
             httpMessageHandler.ExpectedRequestHeaders = expectedRequestHeaders;
 
             return httpMessageHandler;
