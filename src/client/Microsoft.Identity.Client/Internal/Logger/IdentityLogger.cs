@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
     //This class is used to wrap the functionality of the configured IIdentityLogger to add additional MSAL client information when logging messages.
+    [ExcludeFromCodeCoverage]
     internal class IdentityLogger : IIdentityLogger
     {
         private readonly IIdentityLogger _identityLogger;

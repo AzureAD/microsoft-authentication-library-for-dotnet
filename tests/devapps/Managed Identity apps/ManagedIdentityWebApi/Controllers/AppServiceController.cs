@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -71,6 +72,7 @@ namespace ManagedIdentityWebApi.Controllers
         }
     }
 
+    [ExcludeFromCodeCoverage]
     class MyIdentityLogger : IIdentityLogger
     {
         private readonly ILogger _logger;
