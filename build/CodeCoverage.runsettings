@@ -18,7 +18,10 @@ Each element in the list is a regular expression (ECMAScript syntax). See http:/
 An item must first match at least one entry in the include list to be included.  
 Included items must then not match any entries in the exclude list to remain included.  
 -->
-                        <ModulePaths>
+                            <ExcludeByAttribute>
+                                <Attribute>^System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute$</Attribute>
+                            </ExcludeByAttribute>
+                            <ModulePaths>
                             <Include>
                                 <ModulePath>.*\microsoft.identity.client.dll$</ModulePath>
                             </Include>
