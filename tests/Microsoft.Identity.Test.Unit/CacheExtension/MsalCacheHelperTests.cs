@@ -487,9 +487,9 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             Assert.AreEqual(1, accounts.Count());
         }
 
+        // [Bug] Fix the flaky test EventFires2Async #5198
         [TestMethod]
         [DeploymentItem(@"Resources/token_cache_one_acc_seed.json")]
-
         public async Task EventFires2Async()
         {
             string cacheWithOneUser = File.ReadAllText(
@@ -508,21 +508,22 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             var cache1 = new MockTokenCache();
             helper.RegisterCache(cache1);
 
-            var semaphore = new SemaphoreSlim(0);
+            // Use TaskCompletionSource to handle the event firing
+            var tcs = new TaskCompletionSource<bool>();
             int cacheChangedEventFired = 0;
 
-            // event is fired asynchronously, test has to wait for it for a while
+            // Event is fired asynchronously, test has to wait for it for a while
             helper.CacheChanged += (_, _) =>
             {
-                semaphore.Release();
                 cacheChangedEventFired++;
+                tcs.SetResult(true);
             };
 
             // Act - simulate that an external process writes to the token cache
             helper.CacheStore.WriteData(Encoding.UTF8.GetBytes(cacheWithOneUser));
 
             // Assert
-            await semaphore.WaitAsync(5000).ConfigureAwait(false); // if event isn't fired in 5s, bail out
+            await tcs.Task.ConfigureAwait(false); // if event isn't fired, this will wait indefinitely
             Assert.AreEqual(1, cacheChangedEventFired);
         }
 

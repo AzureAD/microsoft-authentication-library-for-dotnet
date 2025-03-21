@@ -334,6 +334,34 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public void IsCommonOrOrganizationsTenantTest()
+        {
+            //Test for common tenant
+            AadAuthority aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/common").AuthorityInfo);
+
+            Assert.IsNotNull(aadAuthorityInstance);
+            Assert.AreEqual(aadAuthorityInstance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+            Assert.IsTrue(aadAuthorityInstance.IsCommonOrOrganizationsTenant());
+
+            //Test for common Organizations tenant
+            aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/organizations").AuthorityInfo);
+
+            Assert.IsNotNull(aadAuthorityInstance);
+            Assert.AreEqual(aadAuthorityInstance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+            Assert.IsTrue(aadAuthorityInstance.IsCommonOrOrganizationsTenant());
+
+            //Test for common Organizations tenant
+            aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/consumers").AuthorityInfo);
+
+            Assert.IsNotNull(aadAuthorityInstance);
+            Assert.AreEqual(aadAuthorityInstance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+            Assert.IsFalse(aadAuthorityInstance.IsCommonOrOrganizationsTenant());
+        }
+
+        [TestMethod]
         public async Task CreateAuthorityForRequestAsync_MSAPassthroughAsync()
         {
             var testAccount = new Account("TEST_ID.9188040d-6c67-4c5b-b112-36a304b66dad", "username", Authority.CreateAuthority("https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad").AuthorityInfo.Host);

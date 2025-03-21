@@ -378,7 +378,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
+                if (managedIdentitySourceType == ManagedIdentitySource.MachineLearning)
+                {
+                    // For Machine Learning (App Service 2017), the param is "clientid"
+                    httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId2017, userAssignedId);
+                }
+                else
+                {
+                    // For App Service 2019, Azure Arc, IMDS, etc., the param is "client_id"
+                    httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
+                }
             }
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
