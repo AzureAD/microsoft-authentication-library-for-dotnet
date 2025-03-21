@@ -28,7 +28,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                               .WithRedirectUri(TestConstants.RedirectUri)
                                               .WithClientSecret(TestConstants.ClientSecret)
                                               .WithHttpManager(httpManager)
-                                              .WithExperimentalFeatures()
                                               .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
