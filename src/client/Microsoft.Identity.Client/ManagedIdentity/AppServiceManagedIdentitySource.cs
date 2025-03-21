@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class AppServiceManagedIdentitySource : AbstractManagedIdentity
     {
         // MSI Constants. Docs for MSI are available here https://docs.microsoft.com/azure/app-service/overview-managed-identity
-        private const string AppServiceMsiApiVersion = "2019-08-01";
+        private const string AppServiceMsiApiVersion = "2025-03-30";
         private const string SecretHeaderName = "X-IDENTITY-HEADER";
 
         private readonly Uri _endpoint;
