@@ -58,7 +58,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithRedirectUri(TestConstants.RedirectUri)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures()
                                                               .BuildConcrete();
 
                 await RunHappyPathTest(app, httpManager).ConfigureAwait(false);
@@ -75,7 +74,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithRedirectUri(TestConstants.RedirectUri)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures()
                                                               .BuildConcrete();
 
                 app.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
@@ -168,7 +166,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                               .WithRedirectUri(TestConstants.RedirectUri)
                                               .WithClientSecret(TestConstants.ClientSecret)
                                               .WithHttpManager(httpManager)
-                                              .WithExperimentalFeatures()
                                               .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -225,7 +222,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                               .WithRedirectUri(TestConstants.RedirectUri)
                                               .WithClientSecret(TestConstants.ClientSecret)
                                               .WithHttpManager(httpManager)
-                                              .WithExperimentalFeatures()
                                               .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -269,7 +265,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithExperimentalFeatures(true)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
@@ -318,7 +313,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                               .WithRedirectUri(TestConstants.RedirectUri)
                                               .WithClientSecret(TestConstants.ClientSecret)
                                               .WithHttpManager(httpManager)
-                                              .WithExperimentalFeatures()
                                               .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
