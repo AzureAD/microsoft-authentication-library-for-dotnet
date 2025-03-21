@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -20,6 +21,51 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
+    internal static class MsAuth10AtPop
+    {
+        internal class MsAuth10AtPopOperation : IAuthenticationOperation
+        {
+            private readonly string _reqCnf;
+
+            public MsAuth10AtPopOperation(string keyId, string reqCnf)
+            {
+                KeyId = keyId;
+                _reqCnf = reqCnf;
+            }
+            public int TelemetryTokenType => 4; // as per TelemetryTokenTypeConstants
+
+            public string AuthorizationHeaderPrefix => "Bearer"; // these tokens go over bearer
+
+            public string KeyId { get; }
+
+            public string AccessTokenType => "pop"; // eSTS returns token_type=pop and MSAL needs to know
+
+            public void FormatResult(AuthenticationResult authenticationResult)
+            {
+                // no-op, adding the SHR is done by the caller
+            }
+
+            public IReadOnlyDictionary<string, string> GetTokenRequestParams()
+            {
+                return new Dictionary<string, string>()
+                {
+                    {"req_cnf", Base64UrlEncoder.Encode(_reqCnf) },
+                    {"token_type", "pop" }
+                };
+            }
+        }
+
+        internal static AcquireTokenForClientParameterBuilder WithAtPop(
+            this AcquireTokenForClientParameterBuilder builder,
+            string popPublicKey,
+            string jwkClaim)
+        {            
+            MsAuth10AtPopOperation op = new MsAuth10AtPopOperation(popPublicKey, jwkClaim);
+            builder.WithAuthenticationOperation(op);
+            return builder;
+        }
+    }
+
     // These tests run on .NET FWK as well. Use the RunOn attribute to limit this.
     [TestClass]
     public class LegacyPopTests
@@ -343,6 +389,50 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var ats = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens();
             Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == popKey2.KeyId));
             Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == popKey.KeyId));
+        }
+
+        [TestMethod]
+        public async Task LegacyPopUsingNewProtocolAsync()
+        {
+            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            X509Certificate2 clientCredsCert = settings.GetCertificate();
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithAuthority(settings.Authority, true)
+                .WithCertificate(clientCredsCert)
+                .WithExperimentalFeatures(true)
+                .WithTestLogging()
+                .Build();
+
+            var thumbprint = Base64UrlEncoder.Encode(clientCredsCert.GetCertHash(HashAlgorithmName.SHA256));
+            var reqCnf = $@"{{""kty"":""RSA"",""x5t#S256"":""{thumbprint}"",""kid"":""{thumbprint}""}}";
+
+            var result = await cca.AcquireTokenForClient(settings.AppScopes)
+                .WithAtPop(thumbprint, reqCnf)               
+                .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            MsalAccessTokenCacheItem at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
+            Assert.AreEqual(at.KeyId, thumbprint);
+
+            result = await cca.AcquireTokenForClient(settings.AppScopes)
+                .WithAtPop(thumbprint, reqCnf)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
+            Assert.AreEqual(at.KeyId, thumbprint);
+
+            string otherKeyId = thumbprint + "2";
+            result = await cca.AcquireTokenForClient(settings.AppScopes)
+                .WithAtPop(otherKeyId, reqCnf)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            var ats = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens();
+            Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == otherKeyId));
+            Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == thumbprint));
         }
 
         private static void ModifyRequestWithLegacyPop(OnBeforeTokenRequestData data, IConfidentialAppSettings settings, X509Certificate2 clientCredsCert, RsaSecurityKey popKey)
