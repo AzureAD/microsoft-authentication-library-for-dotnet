@@ -265,6 +265,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithExperimentalFeatures()
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
