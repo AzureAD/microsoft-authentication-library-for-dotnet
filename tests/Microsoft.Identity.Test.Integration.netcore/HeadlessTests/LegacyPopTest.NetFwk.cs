@@ -60,8 +60,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string popPublicKey,
             string jwkClaim)
         {            
-            MsAuth10AtPopOperation op = new MsAuth10AtPopOperation(popPublicKey, jwkClaim);
-            builder.WithAuthenticationOperation(op);
+            MsAuth10AtPopOperation op = new MsAuth10AtPopOperation(popPublicKey, jwkClaim);            
+            builder.WithAuthenticationExtension(new MsalAuthenticationExtension()
+            {
+                AuthenticationOperation = op
+            });
             return builder;
         }
     }
@@ -434,7 +437,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == otherKeyId));
             Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == thumbprint));
         }
-
 
         [TestMethod]
         public async Task LegacyPopUsingNewProtocol_RsaKey_Async()
