@@ -19,6 +19,10 @@ An item must first match at least one entry in the include list to be included.
 Included items must then not match any entries in the exclude list to remain included.  
 -->  
   
+            <ExcludeByAttribute>
+                <Attribute>^System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute$</Attribute>
+            </ExcludeByAttribute>
+            
             <!-- Match assembly file paths: -->  
             <ModulePaths>  
               <Include>  
