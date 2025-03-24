@@ -17,6 +17,9 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
     /// <summary>
     /// The tests in this file are demonstrations of the various authentication flows outlined in the "FMI protocol spec v1.0" Section 3.2
     /// https://microsoft.sharepoint.com/:w:/t/aad/protocols/EThMH6es0UNKhsFlVgBiBegByuZQ6CnaCzzAdAV0excHVA?e=m5xXtV
+    /// Test apps are located in MSID Lab 4
+    /// Client app: 4df2cbbb-8612-49c1-87c8-f334d6d065ad
+    /// Resource app: 3091264c-7afb-45d4-b527-39737ee86187
     /// </summary>
     [TestClass]
     public class FmiIntegrationTests
@@ -95,7 +98,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Fmi app/scenario parameters
             var clientId = "4df2cbbb-8612-49c1-87c8-f334d6d065ad";
-            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default"; //Guid for api://AzureFMITokenExchange
+            var scope = "3091264c-7afb-45d4-b527-39737ee86187/.default"; //Guid for api://AzureFMITokenExchange
 
             //Act
             //Create application
@@ -124,8 +127,8 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             //Assert
             AssertResults(authResult,
                           confidentialApp,
-                          "-login.windows.net-atext-4df2cbbb-8612-49c1-87c8-f334d6d065ad-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-022907d3-0f1b-48f7-badc-1ba6abab6d66/.default-zm2n0e62zwtsnnsozptlsooob_c7i-gfpxhyqqinjuw",
-                          "022907d3-0f1b-48f7-badc-1ba6abab6d66",
+                          "-login.windows.net-atext-4df2cbbb-8612-49c1-87c8-f334d6d065ad-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-3091264c-7afb-45d4-b527-39737ee86187/.default-zm2n0e62zwtsnnsozptlsooob_c7i-gfpxhyqqinjuw",
+                          "3091264c-7afb-45d4-b527-39737ee86187",
                           "SomeFmiPath/FmiCredentialPath");
         }
 
@@ -201,7 +204,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
-            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default"; //Guid for api://AzureFMITokenExchange
+            var scope = "3091264c-7afb-45d4-b527-39737ee86187/.default"; //Guid for api://AzureFMITokenExchange
 
             //Act
             //Create application
@@ -254,7 +257,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
-            var scope = "022907d3-0f1b-48f7-badc-1ba6abab6d66/.default"; //Guid for api://AzureFMITokenExchange
+            var scope = "3091264c-7afb-45d4-b527-39737ee86187/.default"; //Guid for api://AzureFMITokenExchange
 
             //Act
             //Create application
@@ -283,8 +286,8 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             //Assert
             AssertResults(authResult,
                           confidentialApp,
-                          "-login.windows.net-atext-urn:microsoft:identity:fmi-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-022907d3-0f1b-48f7-badc-1ba6abab6d66/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
-                          "022907d3-0f1b-48f7-badc-1ba6abab6d66",
+                          "-login.windows.net-atext-urn:microsoft:identity:fmi-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-3091264c-7afb-45d4-b527-39737ee86187/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
+                          "3091264c-7afb-45d4-b527-39737ee86187",
                           "SomeFmiPath/Path");
         }
 
