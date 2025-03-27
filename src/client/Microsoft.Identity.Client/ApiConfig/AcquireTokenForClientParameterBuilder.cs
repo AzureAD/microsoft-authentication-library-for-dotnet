@@ -138,8 +138,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public AcquireTokenForClientParameterBuilder WithFmiPath(string pathSuffix)
         {
-            ValidateUseOfExperimentalFeature();
-
            if (string.IsNullOrWhiteSpace(pathSuffix))
             {
                 throw new ArgumentNullException(nameof(pathSuffix));

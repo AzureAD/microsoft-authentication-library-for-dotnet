@@ -53,7 +53,6 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
-                        .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
                         .BuildConcrete();
 
@@ -106,7 +105,6 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
-                        .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
                         .BuildConcrete();
 
@@ -159,7 +157,6 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
-                        .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
                         .WithClientAssertion((options) => GetParentCredential(options)) //This api acquires the FMI credential needed to authenticate
                         .BuildConcrete();
 
@@ -212,7 +209,6 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
-                        .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
                         .WithClientAssertion((options) => GetParentCredential(options)) //This api acquires the FMI credential needed to authenticate
                         .BuildConcrete();
 
@@ -265,7 +261,6 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
-                        .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
                         .WithClientAssertion((options) => GetParentCredential(options)) //This api acquires the FMI credential needed to authenticate
                         .BuildConcrete();
 
@@ -304,7 +299,6 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1") //Enables MSAL to target ESTS Test slice
-                        .WithExperimentalFeatures(true) //WithFmiPath is experimental so experimental features needs to be enabled on the app
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
                         .BuildConcrete();
 
