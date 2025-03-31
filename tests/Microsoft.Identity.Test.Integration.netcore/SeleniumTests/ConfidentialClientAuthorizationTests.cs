@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            s_secretProvider = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
+            s_secretProvider = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
         }
 
         [TestInitialize]
@@ -98,7 +98,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task<AuthenticationResult> RunTestForUserAsync(string appId, LabResponse labResponse, 
             string authority, bool usePkce = false, string redirectUri = null, bool spaCode = true)
         {
-            var cert = CertificateHelper.FindCertificateByName(CertificateName);
+            var cert = await s_secretProvider.GetCertificateWithPrivateMaterialAsync(
+                CertificateName).ConfigureAwait(false);
 
             redirectUri ??= SeleniumWebUI.FindFreeLocalhostRedirectUri();
 
