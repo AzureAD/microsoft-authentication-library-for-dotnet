@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private static readonly string[] s_scopes = { "User.Read" };
         private const string ConfidentialClientID = "35dc5034-9b65-4a5d-ad81-73cca468c1e0"; //msidlab4.com app
-        private const string CertificateName = "for-cca-testing";
+        private const string CertificateName = "LabAuth";
 
         private static KeyVaultSecretsProvider s_secretProvider;
 
@@ -98,8 +98,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task<AuthenticationResult> RunTestForUserAsync(string appId, LabResponse labResponse, 
             string authority, bool usePkce = false, string redirectUri = null, bool spaCode = true)
         {
-            var cert = await s_secretProvider.GetCertificateWithPrivateMaterialAsync(
-                CertificateName).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(CertificateName);
 
             redirectUri ??= SeleniumWebUI.FindFreeLocalhostRedirectUri();
 
