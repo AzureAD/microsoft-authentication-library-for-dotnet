@@ -233,7 +233,8 @@ namespace Microsoft.Identity.Test.Unit
 
                 IDictionary<string, string> extraAssertionContent = new Dictionary<string, string>
                 {
-                    { "foo", "bar" }
+                    { "foo", "bar" },
+                    
                 };
 
                 var cca = ConfidentialClientApplicationBuilder
@@ -245,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 // Checks the client assertion for x5c and for expiration
                 var handler = harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
-                handler.AdditionalRequestValidation = (r) => ValidateClientAssertion(r, exportedCertificate);
+                handler.AdditionalRequestValidation = (r) => ValidateClientAssertion(r, exportedCertificate, validateStandardClaims: true);
 
                 AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
                     .WithSendX5C(true)
@@ -256,7 +257,44 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private void ValidateClientAssertion(HttpRequestMessage request, string expectedX5cValue)
+        [TestMethod]
+        public async Task ClientAssertionWithClaimOverride()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
+
+                IDictionary<string, string> extraAssertionContent = new Dictionary<string, string>
+                {
+                    { "foo", "bar" },
+                    { "iss", "issuer_override" }
+                };
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/tid")
+                    .WithHttpManager(harness.HttpManager)
+                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: false)
+                    .Build();
+
+                // Checks the client assertion for x5c and for expiration
+                var handler = harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
+                JwtSecurityToken assertion = null;
+                handler.AdditionalRequestValidation = (r) => assertion = ValidateClientAssertion(r, exportedCertificate, validateStandardClaims: false);
+
+                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithSendX5C(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+                assertion.Claims.Single(c => c.Type == "iss").Value.Equals("issuer_override");
+            }
+        }
+
+        private JwtSecurityToken ValidateClientAssertion(HttpRequestMessage request, string expectedX5cValue, bool validateStandardClaims )
         {
             var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
             var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
@@ -266,10 +304,13 @@ namespace Microsoft.Identity.Test.Unit
 
             // Check presence and value of x5c cert claim.
             var handler = new JwtSecurityTokenHandler();
-            var assertionJwt = handler.ReadJwtToken(encodedJwt);
-            Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", assertionJwt.Claims.Single(c => c.Type == "aud").Value);
-            Assert.AreEqual(TestConstants.ClientId, assertionJwt.Claims.Single(c => c.Type == "iss").Value);
-            Assert.AreEqual(TestConstants.ClientId, assertionJwt.Claims.Single(c => c.Type == "sub").Value);
+            JwtSecurityToken assertionJwt = handler.ReadJwtToken(encodedJwt);
+            if (validateStandardClaims)
+            {
+                Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", assertionJwt.Claims.Single(c => c.Type == "aud").Value);
+                Assert.AreEqual(TestConstants.ClientId, assertionJwt.Claims.Single(c => c.Type == "iss").Value);
+                Assert.AreEqual(TestConstants.ClientId, assertionJwt.Claims.Single(c => c.Type == "sub").Value);
+            }
 
             // Assert extra claims
             Assert.AreEqual("bar", assertionJwt.Claims.Single(c => c.Type == "foo").Value);
@@ -289,6 +330,8 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
             Assert.AreEqual(x5c.Value.ToString(), expectedX5cValue);
+
+            return assertionJwt;
         }
 
         [TestMethod]
