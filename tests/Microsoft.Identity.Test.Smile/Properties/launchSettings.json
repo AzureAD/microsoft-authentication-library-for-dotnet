@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Microsoft.Identity.Test.Smile": {
+      "commandName": "Project",
+      "commandLineArgs": "token_sha256_to_refresh.sml"
+    }
+  }
+}
