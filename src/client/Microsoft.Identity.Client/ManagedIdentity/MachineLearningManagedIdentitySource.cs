@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 case AppConfig.ManagedIdentityIdType.ClientId:
                     _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    // Use the new 2017 constant for older ML-based environment
+                    request.QueryParameters[Constants.ManagedIdentityClientId2017] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
 
                 case AppConfig.ManagedIdentityIdType.ResourceId:

@@ -38,14 +38,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string tokenEndpoint,
             CancellationToken cancellationToken)
         {
-            string assertionType = requestParameters.AppConfig.ClientId == Constants.FmiUrnClientId ?
-                                   OAuth2AssertionType.FmiBearer :
-                                   OAuth2AssertionType.JwtBearer;
-            string signedAssertion;
             if (_signedAssertionDelegate != null)
             {
                 // If no "AssertionRequestOptions" delegate is supplied
-                signedAssertion = await _signedAssertionDelegate(cancellationToken).ConfigureAwait(false);
+                string signedAssertion = await _signedAssertionDelegate(cancellationToken).ConfigureAwait(false);
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, signedAssertion);
             }
             else
             {
@@ -68,14 +66,13 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
                 //Set claims
                 assertionOptions.Claims = requestParameters.Claims;
-
+            
                 // Delegate that uses AssertionRequestOptions
-                signedAssertion = await _signedAssertionWithInfoDelegate(assertionOptions).ConfigureAwait(false);
+                string signedAssertion = await _signedAssertionWithInfoDelegate(assertionOptions).ConfigureAwait(false);
 
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, signedAssertion);
             }
-
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, assertionType);
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, signedAssertion);
         }
     }
 }

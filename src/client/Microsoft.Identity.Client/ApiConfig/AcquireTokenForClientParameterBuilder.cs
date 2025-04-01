@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -29,7 +28,7 @@ namespace Microsoft.Identity.Client
     public sealed class AcquireTokenForClientParameterBuilder :
         AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenForClientParameterBuilder>
     {
-        private AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
+        internal AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
 
         /// <inheritdoc/>
         internal AcquireTokenForClientParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
@@ -139,8 +138,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public AcquireTokenForClientParameterBuilder WithFmiPath(string pathSuffix)
         {
-            ValidateUseOfExperimentalFeature();
-
            if (string.IsNullOrWhiteSpace(pathSuffix))
             {
                 throw new ArgumentNullException(nameof(pathSuffix));
@@ -165,30 +162,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
+        /// <seealso cref="ConfidentialClientApplicationBuilder.Validate"/> for a comment inside this function for AzureRegion.
         protected override void Validate()
         {
             if (CommonParameters.MtlsCertificate != null)
             {
-                string authorityUri = ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri;
-
-                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Aad && 
-                    ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType != AuthorityType.Dsts)
-                {
-                    throw new MsalClientException(
-                        MsalError.InvalidAuthorityType,
-                        MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
-                }
-
-                if (authorityUri.Contains("/common", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new MsalClientException(
-                        MsalError.MissingTenantedAuthority,
-                        MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
-                }
-
                 // Check for Azure region only if the authority is AAD
+                // AzureRegion is by default set to null or set to null when the application is created
+                // with region set to DisableForceRegion (see ConfidentialClientApplicationBuilder.Validate)
                 if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                    string.IsNullOrEmpty(ServiceBundle.Config.AzureRegion))
+                    ServiceBundle.Config.AzureRegion == null)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopWithoutRegion,
@@ -197,6 +180,14 @@ namespace Microsoft.Identity.Client
             }
 
             base.Validate();
+
+            // Force refresh + AccessTokenHashToRefresh APIs cannot be used together
+            if (Parameters.ForceRefresh && !string.IsNullOrEmpty(Parameters.AccessTokenHashToRefresh))
+            {
+                throw new MsalClientException(
+                    MsalError.ForceRefreshNotCompatibleWithTokenHash,
+                    MsalErrorMessage.ForceRefreshAndTokenHasNotCompatible);
+            }
 
             if (Parameters.SendX5C == null)
             {

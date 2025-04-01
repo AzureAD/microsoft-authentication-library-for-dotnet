@@ -1,3 +1,24 @@
+4.70.0
+==========
+### Features
+- Added a .WithAccessTokenSha256ToRefresh() method to AcquireTokenForClientParameterBuilder for ConfidentialClientApplication, allowing finer control over token refresh scenarios. [Issue #5111](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5111), PR #5179
+- Added `TokenCacheNotificationArgs.NoDistributedCacheUseReason` in order to indicate that the configured serialized cache should not be a distributed cache to prevent issues when acquiring tokens. [Issue #5199](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5199)
+
+### Bug Fixes
+- Removed invalid tenant checks (/organizations or /common) in MTLS flows for AAD/dSTS authorities. [Issue #5093](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5093)
+- Fixed an issue where specifying a null service config region in MTLS scenarios did not correctly throw an exception. [Issue #5181](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5181)
+
+4.69.1
+==========
+### Features
+- Enabled broker support on the Linux platform. See [Issue #5086](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5086)
+- Added a `WithCertificate(..., bool associateTokensWithCertificateSerialNumber)` overload to enable the use of the certificate's serial number as part of the cache key for tokens. [Issue #5150](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5150)
+
+### Bug Fixes
+- MSAL will now stop replacing "%20" with "+" since it is obsolete. See [Issue #5061](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5061)
+- Exposed client capabilities in AssertionRequestOptions for MSI FIC scenarios [Issue #4948](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4948)
+- Added the missing claims in SignedAssertion when using the AssertionRequestOptions Delegate [Issue #5143](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5143)
+
 4.68.0
 ==========
 ### Features

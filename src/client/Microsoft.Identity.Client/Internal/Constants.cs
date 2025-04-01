@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Globalization;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -21,9 +20,9 @@ namespace Microsoft.Identity.Client.Internal
         public const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
 
         public const string MsaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad";
-        public const string ConsumerTenant = "consumers";
-        public const string OrganizationsTenant = "organizations";
-        public const string CommonTenant = "common";
+        public const string Consumers = "consumers";
+        public const string Organizations = "organizations";
+        public const string Common = "common";
 
         public const string UserRealmMsaDomainName = "live.com";
 
@@ -43,17 +42,17 @@ namespace Microsoft.Identity.Client.Internal
         public const string SshCertAuthHeaderPrefix = "SshCert";
 
         public const string ManagedIdentityClientId = "client_id";
+        public const string ManagedIdentityClientId2017 = "clientid";
         public const string ManagedIdentityObjectId = "object_id";
         public const string ManagedIdentityResourceId = "mi_res_id";
         public const string ManagedIdentityDefaultClientId = "system_assigned_managed_identity";
         public const string ManagedIdentityDefaultTenant = "managed_identity";
         public const string CiamAuthorityHostSuffix = ".ciamlogin.com";
         public const string CertSerialNumber = "cert_sn";
+        public const string FmiNodeClientId = "urn:microsoft:identity:fmi";
 
         public const int CallerSdkIdMaxLength = 10;
         public const int CallerSdkVersionMaxLength = 20;
-
-        public const string FmiUrnClientId = "urn:microsoft:identity:fmi";
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {

@@ -28,7 +28,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                               .WithRedirectUri(TestConstants.RedirectUri)
                                               .WithClientSecret(TestConstants.ClientSecret)
                                               .WithHttpManager(httpManager)
-                                              .WithExperimentalFeatures()
                                               .BuildConcrete();
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
@@ -56,89 +55,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(fmiClientId, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().ClientId);
-            }
-        }
-
-        [TestMethod]
-        [DataRow("urn:microsoft:identity:fmi", "Cert")]
-        [DataRow("urn:microsoft:identity:fmi", "SignedAssertionDelegate")]
-        [DataRow(TestConstants.ClientId, "Cert")]
-        [DataRow(TestConstants.ClientId, "SignedAssertionDelegate")]
-        [DataRow("urn:microsoft:identity:fmi", "SignedAssertionDelegate2")]
-        [DataRow(TestConstants.ClientId, "SignedAssertionDelegate2")]
-        public async Task FmiEnsureWithFmiPathUsesCorrectClientAssertion(string clientId, string clientAssertionType)
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                var jwtClientAssertionType = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
-                var fmiClientAssertionType = "urn:ietf:params:oauth:client-assertion-type:fmi-bearer";
-
-                var certificate = CertHelper.GetOrCreateTestCert();
-                var builder = ConfidentialClientApplicationBuilder.Create(clientId)
-                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                              .WithRedirectUri(TestConstants.RedirectUri);
-
-                switch (clientAssertionType)
-                {
-                    case "Cert":
-                        builder.WithCertificate(certificate);
-                        break;
-                    case "SignedAssertionDelegate":
-                        builder.WithClientAssertion(() => { return TestConstants.DefaultClientAssertion; });
-                        break;
-                    case "SignedAssertionDelegate2":
-                        Func<AssertionRequestOptions, Task<string>> func = (AssertionRequestOptions options) =>
-                        {
-                            return Task.FromResult(TestConstants.DefaultClientAssertion);
-                        };
-                        builder.WithClientAssertion(func);
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
-
-                var app = builder.WithHttpManager(httpManager)
-                .WithExperimentalFeatures()
-                .BuildConcrete();
-
-                var appCacheAccess = app.AppTokenCache.RecordAccess();
-
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                if (string.Equals(clientId, TestConstants.ClientId))
-                {
-                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
-                                expectedPostData: new Dictionary<string, string>()
-                                { { OAuth2Parameter.ClientAssertionType, jwtClientAssertionType } });
-                }
-                else
-                {
-                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
-                                expectedPostData: new Dictionary<string, string>()
-                                { { OAuth2Parameter.ClientAssertionType, fmiClientAssertionType } });
-                }
-
-                //Ensure that the FMI path is set correctly and token is retrieved
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                        .WithFmiPath("fmiPath")
-                                        .ExecuteAsync(CancellationToken.None)
-                                        .ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual("header.payload.signature", result.AccessToken);
-                Assert.AreEqual(clientId, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().ClientId);
-
-                //Assert token can be acquired from cache
-                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                        .WithFmiPath("fmiPath")
-                                        .ExecuteAsync(CancellationToken.None)
-                                        .ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual("header.payload.signature", result.AccessToken);
-                Assert.AreEqual(clientId, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First().ClientId);
             }
         }
     }

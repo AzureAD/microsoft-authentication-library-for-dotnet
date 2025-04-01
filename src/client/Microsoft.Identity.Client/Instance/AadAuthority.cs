@@ -21,9 +21,9 @@ namespace Microsoft.Identity.Client.Instance
         private static readonly ISet<string> s_tenantlessTenantNames = new HashSet<string>(
           new[]
           {
-                Constants.CommonTenant,
-                Constants.OrganizationsTenant,
-                Constants.ConsumerTenant
+                Constants.Common,
+                Constants.Organizations,
+                Constants.Consumers,
           },
           StringComparer.OrdinalIgnoreCase);
 
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal bool IsWorkAndSchoolOnly()
         {
-            return !TenantId.Equals(Constants.CommonTenant, StringComparison.OrdinalIgnoreCase) &&
+            return !TenantId.Equals(Constants.Common, StringComparison.OrdinalIgnoreCase) &&
                    !IsConsumers(TenantId);
         }
 
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static bool IsConsumers(string tenantId)
         {
-            return tenantId.Equals(Constants.ConsumerTenant, StringComparison.OrdinalIgnoreCase) ||
+            return tenantId.Equals(Constants.Consumers, StringComparison.OrdinalIgnoreCase) ||
                    tenantId.Equals(Constants.MsaTenantId, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal bool IsOrganizationsTenantWithMsaPassthroughEnabled(bool isMsaPassthrough, string accountTenantId)
         {
-            return accountTenantId!= null && isMsaPassthrough && TenantId.Equals(Constants.OrganizationsTenant, StringComparison.OrdinalIgnoreCase) &&
+            return accountTenantId!= null && isMsaPassthrough && TenantId.Equals(Constants.Organizations, StringComparison.OrdinalIgnoreCase) &&
                 IsConsumers(accountTenantId);
         }
 
@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static bool IsCommonOrOrganizationsTenant(string tenantId)
         {
-            return !string.IsNullOrEmpty(tenantId) && 
+            return !string.IsNullOrEmpty(tenantId) &&
+                   !IsConsumers(tenantId) &&
                 s_tenantlessTenantNames.Contains(tenantId);
         }
 

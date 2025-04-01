@@ -30,8 +30,6 @@ namespace Microsoft.Identity.Client.Extensibility
         internal static AcquireTokenForClientParameterBuilder WithAdditionalCacheKeyComponents(this AcquireTokenForClientParameterBuilder builder,
             IDictionary<string, string> cacheKeyComponents)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (cacheKeyComponents == null || cacheKeyComponents.Count == 0)
             {
                 //no-op
