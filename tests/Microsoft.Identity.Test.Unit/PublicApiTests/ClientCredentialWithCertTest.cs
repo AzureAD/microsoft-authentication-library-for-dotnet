@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit
                     .Create(TestConstants.ClientId)
                     .WithAuthority("https://login.microsoftonline.com/tid")    
                     .WithHttpManager(harness.HttpManager)                    
-                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: true )
+                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: true) // x5c can also be enabled on the request
                     .Build();
 
                 // Checks the client assertion for x5c and for expiration
