@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit
                     .Create(TestConstants.ClientId)
                     .WithAuthority("https://login.microsoftonline.com/tid")    
                     .WithHttpManager(harness.HttpManager)                    
-                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: false)
+                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: true )
                     .Build();
 
                 // Checks the client assertion for x5c and for expiration
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Test.Unit
                 handler.AdditionalRequestValidation = (r) => ValidateClientAssertion(r, exportedCertificate, validateStandardClaims: true);
 
                 AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithSendX5C(true)
+                    .WithSendX5C(true) // x5c can also be enabled here on the request
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
