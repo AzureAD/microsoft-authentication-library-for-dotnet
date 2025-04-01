@@ -30,6 +30,7 @@
     <PackageVersion Include="System.Xml.XDocument" Version="4.3.0" />
     <PackageVersion Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageVersion Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
+    <PackageVersion Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
   <ItemGroup>
     <!-- Analyzers and dev packages -->
@@ -80,7 +81,6 @@
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="System.Windows.Forms" Version="4.0.0" />
     <PackageVersion Include="CommandLineParser" Version="2.8.0" />
-    <PackageVersion Include="System.Formats.Asn1" Version="9.0.0"/>
-
+    <PackageVersion Include="System.Formats.Asn1" Version="9.0.0" />
   </ItemGroup>
 </Project>
