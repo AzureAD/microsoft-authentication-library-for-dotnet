@@ -22,6 +22,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Client.Internal.JsonWebToken;
 using Microsoft.Identity.Client.RP;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -68,6 +69,7 @@ namespace Microsoft.Identity.Test.Unit
                     var handler = new JwtSecurityTokenHandler();
                     var jsonToken = handler.ReadJwtToken(encodedJwt);
                     var x5c = jsonToken.Header.FirstOrDefault(header => header.Key == "x5c");
+
                     if (expectedX5C != null)
                     {
                         Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
@@ -218,6 +220,75 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.IsNotNull(result.AccessToken);
             }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertionHasExpiration()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
+
+                IDictionary<string, string> extraAssertionContent = new Dictionary<string, string>
+                {
+                    { "foo", "bar" }
+                };
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/tid")    
+                    .WithHttpManager(harness.HttpManager)                    
+                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: false)
+                    .Build();
+
+                // Checks the client assertion for x5c and for expiration
+                var handler = harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
+                handler.AdditionalRequestValidation = (r) => ValidateClientAssertion(r, exportedCertificate);
+
+                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithSendX5C(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+            }
+        }
+
+        private void ValidateClientAssertion(HttpRequestMessage request, string expectedX5cValue)
+        {
+            var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
+
+            // Check presence of client_assertion in request
+            Assert.IsTrue(formsData.TryGetValue("client_assertion", out string encodedJwt), "Missing client_assertion from request");
+
+            // Check presence and value of x5c cert claim.
+            var handler = new JwtSecurityTokenHandler();
+            var assertionJwt = handler.ReadJwtToken(encodedJwt);
+            Assert.AreEqual("https://login.microsoftonline.com/tid/oauth2/v2.0/token", assertionJwt.Claims.Single(c => c.Type == "aud").Value);
+            Assert.AreEqual(TestConstants.ClientId, assertionJwt.Claims.Single(c => c.Type == "iss").Value);
+            Assert.AreEqual(TestConstants.ClientId, assertionJwt.Claims.Single(c => c.Type == "sub").Value);
+
+            // Assert extra claims
+            Assert.AreEqual("bar", assertionJwt.Claims.Single(c => c.Type == "foo").Value);
+
+            // Assert exp and nbf claims 
+            long exp = long.Parse(assertionJwt.Claims.Single(c => c.Type == "exp").Value);
+
+            DateTimeOffset actualExpDate = DateTimeOffset.FromUnixTimeSeconds(exp);
+            DateTimeOffset expectedExpDate = DateTimeOffset.Now + TimeSpan.FromSeconds(JsonWebToken.JwtToAadLifetimeInSeconds);
+            CoreAssert.IsWithinRange(expectedExpDate, actualExpDate, TimeSpan.FromSeconds(5));
+
+            long nbf = long.Parse(assertionJwt.Claims.Single(c => c.Type == "nbf").Value);
+            DateTimeOffset actualNbfDate = DateTimeOffset.FromUnixTimeSeconds(nbf);
+            CoreAssert.IsWithinRange(DateTimeOffset.Now, actualNbfDate, TimeSpan.FromSeconds(5));
+
+            var x5c = assertionJwt.Header.FirstOrDefault(header => header.Key == "x5c");
+
+            Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
+            Assert.AreEqual(x5c.Value.ToString(), expectedX5cValue);
         }
 
         [TestMethod]
@@ -694,8 +765,8 @@ namespace Microsoft.Identity.Test.Unit
 
                 harness.HttpManager.AddMockHandler(
                     CreateTokenResponseHttpHandlerWithX5CValidation(
-                        clientCredentialFlow: false, 
-                        expectedX5C: sendX5C ? exportedCertificate: null));
+                        clientCredentialFlow: false,
+                        expectedX5C: sendX5C ? exportedCertificate : null));
 
                 var result = await (app as IByUsernameAndPassword)
                     .AcquireTokenByUsernamePassword(
@@ -900,7 +971,7 @@ namespace Microsoft.Identity.Test.Unit
                                               .WithExperimentalFeatures()
                                               .BuildConcrete();
                 });
-                
+
                 Assert.IsTrue(exception.Message.Contains("Value cannot be null"));
             }
         }
