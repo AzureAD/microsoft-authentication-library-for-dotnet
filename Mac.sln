@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauiMacAppWithBroker", "tests\devapps\MauiMacAppWithBroker\MauiMacAppWithBroker.csproj", "{C0EBA279-7647-42B1-ACEA-B9CC95E2DE18}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleMacAppWithBroker", "tests\devapps\ConsoleMacAppWithBroker\ConsoleMacAppWithBroker.csproj", "{38C4B598-439A-4AA6-A1C8-E4007B00B52A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,13 @@ Global
 		{C0EBA279-7647-42B1-ACEA-B9CC95E2DE18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0EBA279-7647-42B1-ACEA-B9CC95E2DE18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0EBA279-7647-42B1-ACEA-B9CC95E2DE18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38C4B598-439A-4AA6-A1C8-E4007B00B52A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38C4B598-439A-4AA6-A1C8-E4007B00B52A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38C4B598-439A-4AA6-A1C8-E4007B00B52A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38C4B598-439A-4AA6-A1C8-E4007B00B52A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0D5E4E18-DBDC-4C3D-86EA-70171085932C} = {E1733612-B3EB-4172-8351-3B85A527DABF}
+		{38C4B598-439A-4AA6-A1C8-E4007B00B52A} = {0D5E4E18-DBDC-4C3D-86EA-70171085932C}
 	EndGlobalSection
 EndGlobal
