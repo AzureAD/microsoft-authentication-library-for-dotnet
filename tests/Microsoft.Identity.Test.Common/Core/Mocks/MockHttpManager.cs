@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 mtlsCertificate,
-            HttpClient customHttpClient,
+            HttpClientHandler httpClientHandler,
             CancellationToken cancellationToken,
             int retryCount = 0)
         {
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 logger,
                 doNotThrow,
                 mtlsCertificate,
-                customHttpClient: null,
+                httpClientHandler, 
                 cancellationToken,
                 retryCount);
         }
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
     }
 
-    internal class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory
+    internal class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
     {
         public MockHttpClientFactory(
             Func<MockHttpMessageHandler> messageHandlerFunc,
@@ -205,6 +205,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpClient GetHttpClient(X509Certificate2 mtlsBindingCert)
         {
             return GetHttpClientInternal(mtlsBindingCert);
+        }
+
+        public HttpClient GetHttpClient(HttpClientHandler handler)
+        {
+            return GetHttpClientInternal(null);
         }
     }
 

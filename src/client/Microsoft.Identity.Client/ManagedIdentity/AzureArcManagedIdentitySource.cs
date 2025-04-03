@@ -130,12 +130,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                      request.ComputeUri(),
                      request.Headers,
                      body: null,
-                     System.Net.Http.HttpMethod.Get,
+                     method: System.Net.Http.HttpMethod.Get,
                      logger: _requestContext.Logger,
                      doNotThrow: false,
                      mtlsCertificate: null,
-                     customHttpClient: null,
-                     cancellationToken)
+                     httpClientHandler: GetHttpClientHandlerWithSslValidation(_requestContext.Logger), cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
 
                 return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);

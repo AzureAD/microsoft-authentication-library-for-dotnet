@@ -88,9 +88,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var sf = ServiceFabricManagedIdentitySource.Create(requestContext);
 
                 Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
-                HttpClient httpClient = ((ServiceFabricManagedIdentitySource)sf).GetHttpClientWithSslValidation(requestContext);
-                Assert.IsNotNull(httpClient);
-                var httpClientHandler = ((ServiceFabricManagedIdentitySource)sf).CreateHandlerWithSslValidation(requestContext.Logger);
+                HttpClientHandler httpClientHandler = ((ServiceFabricManagedIdentitySource)sf).GetHttpClientHandlerWithSslValidation(requestContext.Logger);
                 Assert.IsNotNull(httpClientHandler.ServerCertificateCustomValidationCallback);
 
                 var validationResult = httpClientHandler.ServerCertificateCustomValidationCallback(null, certificate, chain, sslPolicyErrors);
