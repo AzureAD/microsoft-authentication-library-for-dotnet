@@ -357,7 +357,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected Task ResolveAuthorityAsync()
         {
-            return AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync();
+            // Only run authority validation for non-broker flows, since brokers has their own authority validation
+            if (!AuthenticationRequestParameters.AppConfig.IsBrokerEnabled)
+            {
+                return AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync();
+            }
+            return Task.CompletedTask;
         }
 
         internal async Task<MsalTokenResponse> SendTokenRequestAsync(
