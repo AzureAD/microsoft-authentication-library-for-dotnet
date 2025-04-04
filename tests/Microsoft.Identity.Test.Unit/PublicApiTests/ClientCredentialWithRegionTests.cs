@@ -367,7 +367,6 @@ namespace Microsoft.Identity.Test.Unit
                 var cca = ConfidentialClientApplicationBuilder
                                 .Create(TestConstants.ClientId)
                                 .WithHttpManager(httpManager)
-                                //.WithAzureRegion(TestConstants.Region)
                                 .WithClientSecret(TestConstants.ClientSecret)
                                 .Build();
 

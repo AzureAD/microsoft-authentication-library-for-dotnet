@@ -387,6 +387,8 @@ namespace Microsoft.Identity.Client
         private void ValidateAndUpdateRegion()
         {
             // master override - do not use region if this env variable is set, as per #5223
+            // this is needed because MSAL is used in other SDKs and it's difficult for apps to 
+            // disable ESTS-R for some calls and to enable it for others
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(DisableRegionEnvVariable)))
             {
                 Config.AzureRegion = null;
