@@ -60,7 +60,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
-        [DataTestMethod]
+        //DISABLED FOR PRIVATE RELEASE - THESE TESTS NEEDS TO BE UNCOMMENTED FOR FINAL RELEASE
+        //[DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
         //[DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
         //[DataRow(MsiAzureResource.VM, "", DisplayName = "System_Identity_Virtual_Machine")]
@@ -128,7 +129,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [TestMethod]
+        //DISABLED FOR PRIVATE RELEASE - THESE TESTS NEEDS TO BE UNCOMMENTED FOR FINAL RELEASE
+        //[TestMethod]
         public async Task AcquireMsiToken_ForTokenExchangeResource_Successfully()
         {
             string resource = "api://AzureAdTokenExchange";
@@ -183,7 +185,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [TestMethod]
+        //DISABLED FOR PRIVATE RELEASE - THESE TESTS NEEDS TO BE UNCOMMENTED FOR FINAL RELEASE
+        //[TestMethod]
         public async Task AcquireMsiToken_ExchangeForEstsToken_Successfully()
         {
            const string resource = "api://AzureAdTokenExchange";
@@ -285,7 +288,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [DataTestMethod]
+        //DISABLED FOR PRIVATE RELEASE - THESE TESTS NEEDS TO BE UNCOMMENTED FOR FINAL RELEASE
+        //[DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
@@ -334,7 +338,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [DataTestMethod]
+        //DISABLED FOR PRIVATE RELEASE - THESE TESTS NEEDS TO BE UNCOMMENTED FOR FINAL RELEASE
+        //[DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", UserAssignedIdentityId.None, DisplayName = "System_Identity_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceId_Web_App")]
