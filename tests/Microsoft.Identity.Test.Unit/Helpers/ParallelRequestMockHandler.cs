@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 mtlsCertificate,
-            HttpClient customHttpClient,
+            HttpClientHandler httpClientHandler,
             CancellationToken cancellationToken,
             int retryCount = 0)
         {

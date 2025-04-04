@@ -42,21 +42,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
-        internal override HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
-        {
-            if (_httpClientLazy == null)
-            {
-                _httpClientLazy = new Lazy<HttpClient>(() =>
-                {
-                    HttpClientHandler handler = CreateHandlerWithSslValidation(requestContext.Logger);
-                    return new HttpClient(handler);
-                });
-            }
-
-            return _httpClientLazy.Value;
-        }
-
-        internal HttpClientHandler CreateHandlerWithSslValidation(ILoggerAdapter logger)
+        internal override HttpClientHandler GetHttpClientHandlerWithSslValidation(ILoggerAdapter logger)
         {
 #if NET471_OR_GREATER || NETSTANDARD || NET
             logger.Info(() => "[Managed Identity] Setting up server certificate validation callback.");
@@ -76,7 +62,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new HttpClientHandler();
 #endif
         }
-
 
         private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
         base(requestContext, ManagedIdentitySource.ServiceFabric)

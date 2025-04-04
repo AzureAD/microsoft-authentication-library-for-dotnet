@@ -47,12 +47,12 @@ namespace Microsoft.Identity.Client.WsTrust
                     uri.Uri,
                     msalIdParams,
                     body: null,
-                    HttpMethod.Get,
+                    method: HttpMethod.Get,
                     logger: requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
-                    customHttpClient: null,
-                    requestContext.UserCancellationToken)
+                    httpClientHandler: null, 
+                    cancellationToken: requestContext.UserCancellationToken)
                 .ConfigureAwait(false);
 
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
@@ -103,12 +103,13 @@ namespace Microsoft.Identity.Client.WsTrust
                     wsTrustEndpoint.Uri,
                     headers,
                     body: body,
-                    HttpMethod.Post,
+                    method: HttpMethod.Post,
                     logger: requestContext.Logger,
                     doNotThrow: true,
                     mtlsCertificate: null,
-                    customHttpClient: null,
-                    requestContext.UserCancellationToken).ConfigureAwait(false);
+                    httpClientHandler: null, 
+                    cancellationToken: requestContext.UserCancellationToken)
+                .ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -175,16 +176,16 @@ namespace Microsoft.Identity.Client.WsTrust
             var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
 
             var httpResponse = await _httpManager.SendRequestAsync(
-               uri,
-               msalIdParams,
-               body: null,
-               HttpMethod.Get,
-               logger: requestContext.Logger,
-               doNotThrow: false,
-               mtlsCertificate: null,
-               customHttpClient: null,
-               requestContext.UserCancellationToken)
-                  .ConfigureAwait(false);
+                   uri,
+                   msalIdParams,
+                   body: null,
+                   method: HttpMethod.Get,
+                   logger: requestContext.Logger,
+                   doNotThrow: false,
+                   mtlsCertificate: null,
+                   httpClientHandler: null, 
+                   cancellationToken: requestContext.UserCancellationToken)
+                .ConfigureAwait(false);
 
             if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)
             {

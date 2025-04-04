@@ -47,8 +47,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 mtlsCertificate,
-            HttpClient customHttpClient,
-            CancellationToken cancellationToken, 
+            HttpClientHandler httpClientHandler,
+            CancellationToken cancellationToken,
             int retryCount = 0)
         {
             //Get token for the MSIHelperService

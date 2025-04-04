@@ -53,13 +53,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
                             headers: null,
                             body: new FormUrlEncodedContent(bodyParameters),
-                            HttpMethod.Post,
+                            method: HttpMethod.Post,
                             logger: Substitute.For<ILoggerAdapter>(),
                             doNotThrow: false,
                             mtlsCertificate: cert,
-                            customHttpClient: null,
-                            default)
-                               .ConfigureAwait(false);
+                            httpClientHandler: null, 
+                            cancellationToken: default)
+                        .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -80,13 +80,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                              new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
                              headers: null,
                              body: null,
-                             HttpMethod.Post,
+                             method: HttpMethod.Post,
                              logger: Substitute.For<ILoggerAdapter>(),
                              doNotThrow: false,
                              mtlsCertificate: null,
-                             customHttpClient: null,
-                             default)
-                                .ConfigureAwait(false);
+                             httpClientHandler: null, 
+                             cancellationToken: default)
+                        .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -121,13 +121,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
                             headers: null,
                             body: new FormUrlEncodedContent(bodyParameters),
-                            HttpMethod.Post,
+                            method: HttpMethod.Post,
                             logger: Substitute.For<ILoggerAdapter>(),
                             doNotThrow: false,
                             mtlsCertificate: null,
-                            customHttpClient: null,
-                            default)
-                               .ConfigureAwait(false);
+                            httpClientHandler: null, 
+                            cancellationToken: default)
+                        .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -152,12 +152,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                      new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                      headers: null,
                      body: null,
-                     HttpMethod.Get,
+                     method: HttpMethod.Get,
                      logger: Substitute.For<ILoggerAdapter>(),
                      doNotThrow: false,
                      mtlsCertificate: null,
-                     customHttpClient: null,
-                     default)
+                     httpClientHandler: null, 
+                     cancellationToken: default)
                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -189,12 +189,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                          new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                          headers: queryParams,
                          body: null,
-                         HttpMethod.Get,
+                         method: HttpMethod.Get,
                          logger: Substitute.For<ILoggerAdapter>(),
                          doNotThrow: false,
                          mtlsCertificate: null,
-                         customHttpClient: null,
-                         cts.Token))
+                         httpClientHandler: null, 
+                         cancellationToken: cts.Token))
                     .ConfigureAwait(false);
             }
         }
@@ -213,12 +213,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: null,
                         body: null,
-                        HttpMethod.Get,
+                        method: HttpMethod.Get,
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: false,
                         mtlsCertificate: null,
-                        customHttpClient: null,
-                        default))
+                        httpClientHandler: null, 
+                        cancellationToken: default))
                    .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
@@ -241,12 +241,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                      new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                      headers: null,
                      body: null,
-                     HttpMethod.Get,
+                     method: HttpMethod.Get,
                      logger: Substitute.For<ILoggerAdapter>(),
                      doNotThrow: false,
                      mtlsCertificate: null,
-                     customHttpClient: null,
-                     default))
+                     httpClientHandler: null, 
+                     cancellationToken: default))
                 .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
@@ -272,12 +272,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                              new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                              headers: null,
                              body: null,
-                             HttpMethod.Get,
+                             method: HttpMethod.Get,
                              logger: Substitute.For<ILoggerAdapter>(),
                              doNotThrow: false,
                              mtlsCertificate: null,
-                             customHttpClient: null,
-                             default))
+                             httpClientHandler: null, 
+                             cancellationToken: default))
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(0, httpManager.QueueSize, "HttpManager must not retry because a RetryAfter header is present");
@@ -297,12 +297,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                             headers: null,
                             body: new StringContent("body"),
-                            HttpMethod.Post,
+                            method: HttpMethod.Post,
                             logger: Substitute.For<ILoggerAdapter>(),
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            customHttpClient: null,
-                            default).ConfigureAwait(false);
+                            httpClientHandler: null, 
+                            cancellationToken: default).ConfigureAwait(false);
 
                 Assert.AreEqual(HttpStatusCode.BadGateway, msalHttpResponse.StatusCode);
             }
@@ -322,12 +322,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: null,
                         body: null,
-                        HttpMethod.Post,
+                        method: HttpMethod.Post,
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: false,
                         mtlsCertificate: null,
-                        customHttpClient: null,
-                        default)).ConfigureAwait(false);
+                        httpClientHandler: null, 
+                        cancellationToken: default)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
             }
@@ -347,12 +347,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                       new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                       headers: null,
                       body: null,
-                      HttpMethod.Get,
+                      method: HttpMethod.Get,
                       logger: Substitute.For<ILoggerAdapter>(),
                       doNotThrow: false,
                       mtlsCertificate: null,
-                      customHttpClient: null,
-                      default)).ConfigureAwait(false);
+                      httpClientHandler: null, 
+                      cancellationToken: default)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
                 Assert.IsTrue(exc.InnerException is TaskCanceledException);
@@ -373,12 +373,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: new Dictionary<string, string>(),
                         body: new FormUrlEncodedContent(new Dictionary<string, string>()),
-                        HttpMethod.Post,
+                        method: HttpMethod.Post,
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: false,
                         mtlsCertificate: null,
-                        customHttpClient: null,
-                        default)).ConfigureAwait(false);
+                        httpClientHandler: null, 
+                        cancellationToken: default)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
                 Assert.IsTrue(exc.InnerException is TaskCanceledException);
             }
@@ -413,12 +413,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: null,
                         body: new StringContent("body"),
-                        HttpMethod.Post,
+                        method: HttpMethod.Post,
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: true,
                         mtlsCertificate: null,
-                        customHttpClient: null,
-                        default).ConfigureAwait(false);
+                        httpClientHandler: null, 
+                        cancellationToken: default).ConfigureAwait(false);
 
                 Assert.IsNotNull(msalHttpResponse);
                 Assert.AreEqual(HttpStatusCode.ServiceUnavailable, msalHttpResponse.StatusCode);

@@ -61,12 +61,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             request.ComputeUri(),
                             request.Headers,
                             body: null,
-                            HttpMethod.Get,
+                            method: HttpMethod.Get,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            GetHttpClientWithSslValidation(_requestContext),
-                            cancellationToken).ConfigureAwait(false);
+                            httpClientHandler: GetHttpClientHandlerWithSslValidation(_requestContext.Logger), 
+                            cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -75,12 +75,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             request.ComputeUri(),
                             request.Headers,
                             body: new FormUrlEncodedContent(request.BodyParameters),
-                            HttpMethod.Post,
+                            method: HttpMethod.Post,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            GetHttpClientWithSslValidation(_requestContext),
-                            cancellationToken)
+                            httpClientHandler: GetHttpClientHandlerWithSslValidation(_requestContext.Logger), 
+                            cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
 
                 }
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // This method is internal for testing purposes.
-        internal virtual HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
+        internal virtual HttpClientHandler GetHttpClientHandlerWithSslValidation(ILoggerAdapter logger)
         {
             return null;
         }
