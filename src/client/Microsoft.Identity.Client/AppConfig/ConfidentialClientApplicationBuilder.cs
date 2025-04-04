@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Client
     public class ConfidentialClientApplicationBuilder : AbstractApplicationBuilder<ConfidentialClientApplicationBuilder>
     {
         internal const string ForceRegionEnvVariable = "MSAL_FORCE_REGION";
+        internal const string DisableRegionEnvVariable = "MSAL_DISABLE_REGION";
         internal const string DisableForceRegion = "DisableMsalForceRegion";
 
         /// <inheritdoc/>
@@ -380,10 +381,16 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
 
-            if (!string.IsNullOrEmpty(Config.AzureRegion) && 
-                (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
+            ValidateAndUpdateRegion();
+        }
+
+        private void ValidateAndUpdateRegion()
+        {
+            // master override - do not use region if this env variable is set, as per #5223
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(DisableRegionEnvVariable)))
             {
-                throw new MsalClientException(MsalError.RegionDiscoveryWithCustomInstanceMetadata, MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata);
+                Config.AzureRegion = null;
+                return;
             }
 
             // use regional if MSAL_FORCE_REGION is used, as per #4930
@@ -398,6 +405,12 @@ namespace Microsoft.Identity.Client
                 {
                     Config.AzureRegion = forcedRegion;
                 }
+            }
+
+            if (!string.IsNullOrEmpty(Config.AzureRegion) &&
+                (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
+            {
+                throw new MsalClientException(MsalError.RegionDiscoveryWithCustomInstanceMetadata, MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata);
             }
         }
 

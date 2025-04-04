@@ -288,7 +288,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
             Guid correlationId = Guid.NewGuid();
             authResult = await confidentialApp
-                .AcquireTokenForClient(settings.AppScopes)
+                .AcquireTokenForClient(settings.AppScopes)                
                 .WithCorrelationId(correlationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
