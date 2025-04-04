@@ -395,6 +395,12 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
+            if (!string.IsNullOrEmpty(Config.AzureRegion) &&
+              (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
+            {
+                throw new MsalClientException(MsalError.RegionDiscoveryWithCustomInstanceMetadata, MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata);
+            }
+
             // use regional if MSAL_FORCE_REGION is used, as per #4930
             if (string.Equals(Config.AzureRegion, DisableForceRegion, StringComparison.OrdinalIgnoreCase))
             {
@@ -407,12 +413,6 @@ namespace Microsoft.Identity.Client
                 {
                     Config.AzureRegion = forcedRegion;
                 }
-            }
-
-            if (!string.IsNullOrEmpty(Config.AzureRegion) &&
-                (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
-            {
-                throw new MsalClientException(MsalError.RegionDiscoveryWithCustomInstanceMetadata, MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata);
             }
         }
 
