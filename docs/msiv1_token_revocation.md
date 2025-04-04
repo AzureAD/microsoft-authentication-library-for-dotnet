@@ -41,18 +41,20 @@ Steps 5-9 are new and show how the RP propagates the revocation signal.
 ### Explanation:
 1. The client (CX) calls some **Resource** with token **T**.
 2. The resource detects **T** is bad (revoked) and returns **401** + **claims C**.
-3. CX parses **C** and calls **MSAL** **Client** with `.WithClientCapabilities(cp1)`.
-4. MSAL calls **AcquireToken** with `.WithClaims(C)`.
-5. MSAL sees the local cached token is "bad" → triggers a refresh flow.
+3. CX creates an **MSAL** **Client** with `.WithClientCapabilities(cp1)`, to let the token issuer that it is capable of handling token revocations.
+4. CX parses the WWW-Authenticate header, extracts the claims **C** and uses MSAL **AcquireToken** with `.WithClaims(C)`.
+5. MSAL inspects its cache first. If it finds a token, the token is considered to have been revoked. MSAL needs to tell the token issuer about it, so that the token issuer can also bypass its own cache.
 6. MSAL calls **MITS** with `xms_cc=cp1&token_sha256_to_refresh=SHA256(T)`.
-7. **MITS** is basically a proxy, forwarding the query to **SFRP**.
+7. The token issuer uses the information to bypass its own caches and to get a new token from eSTS.
 8. **SFRP** uses MSAL again to get a **new** token from eSTS.
 
 > [!IMPORTANT]
 > This design is only applicable to MIRP api-version=2025-03-30 (for App Service). api-version for service fabric will be soon made available. 
 
 > [!NOTE]
-> The `token_sha256_to_refresh=SHA256(T)` here the SHA256 converts the token into a SHA256 string. Example - "examplestring" -> output
+> The SHA256 conversion is done by doing a Base64-encoded SHA-256 hash of the token (UTF-8). For example: Convert.ToBase64String(SHA256(Encoding.UTF8.GetBytes(accessToken))). 
+> Example - "test_token" -> "zAr5codUO2XaLH4UdkJgIYJsqxZvHgY+0BK4Vf+BllY="
+
 
 > [!NOTE]  
 >  ClientCapabilities is an array of capabilities. In case the app developer sends multiple capabilities, these will be sent to the RP as `MITS_endpoint?xms_cc=cp1,cp2,cp3`. The RP MUST pass "cp1" (i.e. the CAE capabilitiy) if it is included.
