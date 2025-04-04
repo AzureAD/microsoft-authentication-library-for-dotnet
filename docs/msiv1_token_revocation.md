@@ -41,14 +41,18 @@ Steps 5-9 are new and show how the RP propagates the revocation signal.
 ### Explanation:
 1. The client (CX) calls some **Resource** with token **T**.
 2. The resource detects **T** is bad (revoked) and returns **401** + **claims C**.
-3. CX parses **C** and calls **MSAL** with `.WithClaims(C).WithClientCapabilities(cp1)`.
-4. MSAL sees the local cached token is "bad" → triggers a refresh flow.
-5. MSAL calls **MITS** with `xms_cc=cp1&token_sha256_to_refresh=SHA256(T)`.
-6. **MITS** is basically a proxy, forwarding the query to **SFRP**.
-7. **SFRP** uses MSAL again to get a **new** token from eSTS.
+3. CX parses **C** and calls **MSAL** **Client** with `.WithClientCapabilities(cp1)`.
+4. MSAL calls **AcquireToken** with `.WithClaims(C)`.
+5. MSAL sees the local cached token is "bad" → triggers a refresh flow.
+6. MSAL calls **MITS** with `xms_cc=cp1&token_sha256_to_refresh=SHA256(T)`.
+7. **MITS** is basically a proxy, forwarding the query to **SFRP**.
+8. **SFRP** uses MSAL again to get a **new** token from eSTS.
 
 > [!IMPORTANT]
 > This design is only applicable to MIRP api-version=2025-03-30 (for App Service). api-version for service fabric will be soon made available. 
+
+> [!NOTE]
+> The `token_sha256_to_refresh=SHA256(T)` here the SHA256 converts the token into a SHA256 string. Example - "examplestring" -> output
 
 > [!NOTE]  
 >  ClientCapabilities is an array of capabilities. In case the app developer sends multiple capabilities, these will be sent to the RP as `MITS_endpoint?xms_cc=cp1,cp2,cp3`. The RP MUST pass "cp1" (i.e. the CAE capabilitiy) if it is included.
