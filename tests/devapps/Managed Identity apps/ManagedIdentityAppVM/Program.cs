@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
@@ -37,6 +38,7 @@ do
     scope = Console.ReadLine();
 } while (!string.IsNullOrEmpty(scope));
 
+[ExcludeFromCodeCoverage]
 class IdentityLogger : IIdentityLogger
 {
     public EventLogLevel MinLogLevel { get; }
