@@ -51,8 +51,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     logger: requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
-                    httpClientHandler: null, 
-                    cancellationToken: requestContext.UserCancellationToken)
+                    validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
                 .ConfigureAwait(false);
 
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
@@ -107,8 +106,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     logger: requestContext.Logger,
                     doNotThrow: true,
                     mtlsCertificate: null,
-                    httpClientHandler: null, 
-                    cancellationToken: requestContext.UserCancellationToken)
+                    validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
                 .ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
@@ -183,8 +181,7 @@ namespace Microsoft.Identity.Client.WsTrust
                    logger: requestContext.Logger,
                    doNotThrow: false,
                    mtlsCertificate: null,
-                   httpClientHandler: null, 
-                   cancellationToken: requestContext.UserCancellationToken)
+                   validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
                 .ConfigureAwait(false);
 
             if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)

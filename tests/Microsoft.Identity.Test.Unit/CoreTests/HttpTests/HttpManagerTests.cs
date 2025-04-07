@@ -5,16 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common;
 using NSubstitute;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using System.Threading;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
@@ -57,8 +57,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             logger: Substitute.For<ILoggerAdapter>(),
                             doNotThrow: false,
                             mtlsCertificate: cert,
-                            httpClientHandler: null, 
-                            cancellationToken: default)
+                            validateServerCert: null, cancellationToken: default)
                         .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -84,8 +83,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                              logger: Substitute.For<ILoggerAdapter>(),
                              doNotThrow: false,
                              mtlsCertificate: null,
-                             httpClientHandler: null, 
-                             cancellationToken: default)
+                             validateServerCert: null, cancellationToken: default)
                         .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -125,8 +123,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             logger: Substitute.For<ILoggerAdapter>(),
                             doNotThrow: false,
                             mtlsCertificate: null,
-                            httpClientHandler: null, 
-                            cancellationToken: default)
+                            validateServerCert: null, cancellationToken: default)
                         .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -156,8 +153,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                      logger: Substitute.For<ILoggerAdapter>(),
                      doNotThrow: false,
                      mtlsCertificate: null,
-                     httpClientHandler: null, 
-                     cancellationToken: default)
+                     validateServerCert: null, cancellationToken: default)
                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -193,8 +189,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                          logger: Substitute.For<ILoggerAdapter>(),
                          doNotThrow: false,
                          mtlsCertificate: null,
-                         httpClientHandler: null, 
-                         cancellationToken: cts.Token))
+                         validateServerCert: null, cancellationToken: cts.Token))
                     .ConfigureAwait(false);
             }
         }
@@ -217,8 +212,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: false,
                         mtlsCertificate: null,
-                        httpClientHandler: null, 
-                        cancellationToken: default))
+                        validateServerCert: null, cancellationToken: default))
                    .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
@@ -245,8 +239,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                      logger: Substitute.For<ILoggerAdapter>(),
                      doNotThrow: false,
                      mtlsCertificate: null,
-                     httpClientHandler: null, 
-                     cancellationToken: default))
+                     validateServerCert: null, cancellationToken: default))
                 .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
@@ -276,8 +269,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                              logger: Substitute.For<ILoggerAdapter>(),
                              doNotThrow: false,
                              mtlsCertificate: null,
-                             httpClientHandler: null, 
-                             cancellationToken: default))
+                             validateServerCert: null, cancellationToken: default))
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(0, httpManager.QueueSize, "HttpManager must not retry because a RetryAfter header is present");
@@ -301,8 +293,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             logger: Substitute.For<ILoggerAdapter>(),
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            httpClientHandler: null, 
-                            cancellationToken: default).ConfigureAwait(false);
+                            validateServerCert: null, cancellationToken: default).ConfigureAwait(false);
 
                 Assert.AreEqual(HttpStatusCode.BadGateway, msalHttpResponse.StatusCode);
             }
@@ -326,8 +317,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: false,
                         mtlsCertificate: null,
-                        httpClientHandler: null, 
-                        cancellationToken: default)).ConfigureAwait(false);
+                        validateServerCert: null, cancellationToken: default)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
             }
@@ -351,8 +341,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                       logger: Substitute.For<ILoggerAdapter>(),
                       doNotThrow: false,
                       mtlsCertificate: null,
-                      httpClientHandler: null, 
-                      cancellationToken: default)).ConfigureAwait(false);
+                      validateServerCert: null, cancellationToken: default)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
                 Assert.IsTrue(exc.InnerException is TaskCanceledException);
@@ -377,8 +366,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: false,
                         mtlsCertificate: null,
-                        httpClientHandler: null, 
-                        cancellationToken: default)).ConfigureAwait(false);
+                        validateServerCert: null, cancellationToken: default)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
                 Assert.IsTrue(exc.InnerException is TaskCanceledException);
             }
@@ -417,8 +405,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: true,
                         mtlsCertificate: null,
-                        httpClientHandler: null, 
-                        cancellationToken: default).ConfigureAwait(false);
+                        validateServerCert: null, cancellationToken: default).ConfigureAwait(false);
 
                 Assert.IsNotNull(msalHttpResponse);
                 Assert.AreEqual(HttpStatusCode.ServiceUnavailable, msalHttpResponse.StatusCode);

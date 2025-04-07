@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Client
         /// This method is useful when custom certificate validation logic is required, 
         /// for the managed identity flow running on a service fabric cluster.
         /// </summary>
-        /// <param name="handler"></param>
+        /// <param name="validateServerCert">Callback to validate the server certificate for the Service Fabric.</param>
         /// <returns>An HTTP client configured with the provided server certificate validation callback.</returns>
-        HttpClient GetHttpClient(HttpClientHandler handler);
+        HttpClient GetHttpClient(Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert);
     }
 }

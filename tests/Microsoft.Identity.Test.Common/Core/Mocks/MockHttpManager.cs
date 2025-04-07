@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -113,7 +114,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 mtlsCertificate,
-            HttpClientHandler httpClientHandler,
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
             int retryCount = 0)
         {
@@ -125,8 +126,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 logger,
                 doNotThrow,
                 mtlsCertificate,
-                httpClientHandler, 
-                cancellationToken,
+                validateServerCert, cancellationToken,
                 retryCount);
         }
     }
@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return GetHttpClientInternal(mtlsBindingCert);
         }
 
-        public HttpClient GetHttpClient(HttpClientHandler handler)
+        public HttpClient GetHttpClient(Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
         {
             return GetHttpClientInternal(null);
         }

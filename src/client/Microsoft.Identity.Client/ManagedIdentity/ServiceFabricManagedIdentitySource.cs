@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Net.Http;
+using System.Net.Security;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -42,25 +43,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
-        internal override HttpClientHandler GetHttpClientHandlerWithSslValidation(ILoggerAdapter logger)
+        internal override bool ValidateServerCertificate(HttpRequestMessage message, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate,
+            System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
         {
-#if NET471_OR_GREATER || NETSTANDARD || NET
-            logger.Info(() => "[Managed Identity] Setting up server certificate validation callback.");
-            return new HttpClientHandler
+            if (sslPolicyErrors == SslPolicyErrors.None)
             {
-                ServerCertificateCustomValidationCallback = (message, certificate, chain, sslPolicyErrors) =>
-                {
-                    if (sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
-                    {
-                        return 0 == string.Compare(certificate.Thumbprint, EnvironmentVariables.IdentityServerThumbprint, StringComparison.OrdinalIgnoreCase);
-                    }
-                    return true;
-                }
-            };
-#else
-            logger.Warning("[Managed Identity] Server certificate validation callback is not supported on .NET Framework.");
-            return new HttpClientHandler();
-#endif
+                return true;
+            }
+
+            return 0 == string.Compare(certificate.GetCertHashString(), EnvironmentVariables.IdentityServerThumbprint, StringComparison.OrdinalIgnoreCase);
         }
 
         private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 

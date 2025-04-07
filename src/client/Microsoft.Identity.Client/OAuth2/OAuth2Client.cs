@@ -139,8 +139,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             logger: requestContext.Logger,
                             doNotThrow: false,
                             mtlsCertificate: _mtlsCertificate,
-                            httpClientHandler: null, 
-                            cancellationToken: requestContext.UserCancellationToken)
+                            validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
                         .ConfigureAwait(false);
                     }
                     else
@@ -153,8 +152,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             logger: requestContext.Logger,
                             doNotThrow: false,
                             mtlsCertificate: null,
-                            httpClientHandler: null, 
-                            cancellationToken: requestContext.UserCancellationToken)
+                            validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
                         .ConfigureAwait(false);
                     }
                 }

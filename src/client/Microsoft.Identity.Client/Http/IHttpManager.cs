@@ -4,11 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Http
         /// <param name="logger">Logger from the request context.</param>
         /// <param name="doNotThrow">Flag to decide if MsalServiceException is thrown or the response is returned in case of 5xx errors.</param>
         /// <param name="mtlsCertificate">Certificate used for MTLS authentication.</param>
-        /// <param name="httpClientHandler"></param>
+        /// <param name="validateServerCertificate">Callback to validate the server cert for service fabric managed identity flow.</param>
         /// <param name="cancellationToken"></param>
         /// <param name="retryCount">Number of retries to be attempted in case of retriable status codes.</param>
         /// <returns></returns>
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Http
            ILoggerAdapter logger,
            bool doNotThrow,
            X509Certificate2 mtlsCertificate,
-           HttpClientHandler httpClientHandler,
+           Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCertificate,
            CancellationToken cancellationToken,
            int retryCount = 0);
     }

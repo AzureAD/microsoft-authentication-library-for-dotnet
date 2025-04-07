@@ -91,15 +91,27 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         // This method is used for Service Fabric scenarios where a custom server certificate validation callback is required.
         // It allows the caller to provide a custom HttpClientHandler with the callback.
         // The server cert rotates so we need a new HttpClient for each call.
-        public HttpClient GetHttpClient(HttpClientHandler handler)
+        public HttpClient GetHttpClient(Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
         {
-            if (handler == null)
+            if (validateServerCert == null)
             {
                 return GetHttpClient();
             }
 
+#if NET471_OR_GREATER || NETSTANDARD || NET
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
+                {
+                    return validateServerCert(message, cert, chain, sslPolicyErrors);
+                }
+            };
+
             string key = handler.GetHashCode().ToString();
             return s_httpClientPool.GetOrAdd(key, new HttpClient(handler));
+#else
+            return GetHttpClient();
+#endif
         }
     }
 }

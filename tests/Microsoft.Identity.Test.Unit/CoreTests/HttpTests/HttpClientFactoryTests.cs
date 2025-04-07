@@ -2,11 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -25,52 +23,46 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        public void TestGetHttpClientWithCustomHandler()
+        public void TestGetHttpClientWithCustomCallback()
         {
             // Arrange
             var factory = new SimpleHttpClientFactory();
-            var customHandler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (sender, cert, chain, errors) => true
-            };
 
             // Act
-            HttpClient client = factory.GetHttpClient(customHandler);
+            HttpClient client = factory.GetHttpClient((sender, cert, chain, errors) => true);
 
             // Assert
             Assert.IsNotNull(client);
-            // You might want to test that the client was properly cached and reused
         }
 
         [TestMethod]
-        public void TestGetHttpClientWithNullHandler()
+        public void TestGetHttpClientWithNoCallback()
         {
             // Arrange
             var factory = new SimpleHttpClientFactory();
 
             // Act
-            HttpClient client = factory.GetHttpClient((HttpClientHandler)null);
+            HttpClient client = factory.GetHttpClient();
 
             // Assert
             Assert.IsNotNull(client);
-            // This should return the default client (non-MTLS)
         }
 
         [TestMethod]
-        public void TestHttpClientCacheReuse()
+        public void TestHttpClientIsNotCached()
         {
             // Arrange
             var factory = new SimpleHttpClientFactory();
-            var customHandler = new HttpClientHandler();
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> customCallback = (sender, cert, chain, errors) => true;
 
             // Act
-            HttpClient client1 = factory.GetHttpClient(customHandler);
-            HttpClient client2 = factory.GetHttpClient(customHandler);
+            HttpClient client1 = factory.GetHttpClient(customCallback);
+            HttpClient client2 = factory.GetHttpClient(customCallback);
 
             // Assert
             Assert.IsNotNull(client1);
             Assert.IsNotNull(client2);
-            Assert.AreSame(client1, client2); // Should be the same instance
+            Assert.AreNotSame(client1, client2); // A new instance should be created each time to ensure callback is applied
         }
 
         [TestMethod]
@@ -83,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             // Act
             HttpClient mtlsClient = factory.GetHttpClient(cert);
-            HttpClient handlerClient = factory.GetHttpClient(customHandler);
+            HttpClient handlerClient = factory.GetHttpClient((sender, cert, chain, errors) => true);
 
             // Assert
             Assert.IsNotNull(mtlsClient);
