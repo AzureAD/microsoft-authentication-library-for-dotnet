@@ -39,9 +39,9 @@ Steps 1-4 fall to the Client (i.e. application using MSI directly or higher leve
 Steps 5-9 are new and show how the RP propagates the revocation signal.
 
 ### Explanation:
-1. The client (CX) calls some **Resource** with token **T**.
-2. The resource detects **T** is bad (revoked) and returns **401** + **claims C**.
-3. CX creates an **MSAL** **Client** with `.WithClientCapabilities(cp1)`, to let the token issuer that it is capable of handling token revocations.
+1. CX creates an **MSAL** **Client** with `.WithClientCapabilities(cp1)`, to let the token issuer that it is capable of handling token revocations.
+2. The client (CX) calls some **Resource** with token **T**.
+3. The resource detects **T** is bad (revoked) and returns **401** + **claims C**.
 4. CX parses the WWW-Authenticate header, extracts the claims **C** and uses MSAL **AcquireToken** with `.WithClaims(C)`.
 5. MSAL inspects its cache first. If it finds a token, the token is considered to have been revoked. MSAL needs to tell the token issuer about it, so that the token issuer can also bypass its own cache.
 6. MSAL calls **MITS** with `xms_cc=cp1&token_sha256_to_refresh=SHA256(T)`.
