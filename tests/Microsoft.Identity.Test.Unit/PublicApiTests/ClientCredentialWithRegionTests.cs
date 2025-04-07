@@ -330,6 +330,89 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        public async Task MsalDisableRegionEnvVariable_API()
+        {
+            using (new EnvVariableContext())
+            using (var harness = base.CreateTestHarness())
+            {
+                Environment.SetEnvironmentVariable(
+                    ConfidentialClientApplicationBuilder.DisableRegionEnvVariable, "1");
+
+                var httpManager = harness.HttpManager;
+
+                var cca = ConfidentialClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .WithHttpManager(httpManager)
+                                .WithAzureRegion(TestConstants.Region)
+                                .WithClientSecret(TestConstants.ClientSecret)
+                                .Build();
+
+                await ExpectNoRegionAsync(httpManager, cca).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task MsalDisableRegionEnvVariable_OtherEnv()
+        {
+            using (new EnvVariableContext())
+            using (var harness = base.CreateTestHarness())
+            {
+                Environment.SetEnvironmentVariable(
+                    ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "someregion");
+                Environment.SetEnvironmentVariable(
+                    ConfidentialClientApplicationBuilder.DisableRegionEnvVariable, "1");
+
+                var httpManager = harness.HttpManager;
+
+                var cca = ConfidentialClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .WithHttpManager(httpManager)
+                                .WithClientSecret(TestConstants.ClientSecret)
+                                .Build();
+
+                await ExpectNoRegionAsync(httpManager, cca).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task MsalDisableRegionEnvVariable_ApiAndOtherEnv()
+        {
+            using (new EnvVariableContext())
+            using (var harness = base.CreateTestHarness())
+            {
+                Environment.SetEnvironmentVariable(
+                    ConfidentialClientApplicationBuilder.DisableRegionEnvVariable, "1");
+
+                Environment.SetEnvironmentVariable(
+                    ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "someregion");
+
+                var httpManager = harness.HttpManager;
+
+                var cca = ConfidentialClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .WithHttpManager(httpManager)
+                                .WithAzureRegion(TestConstants.Region)
+                                .WithClientSecret(TestConstants.ClientSecret)
+                                .Build();
+
+                await ExpectNoRegionAsync(httpManager, cca).ConfigureAwait(false);
+            }
+        }
+
+        private static async Task ExpectNoRegionAsync(MockHttpManager httpManager, IConfidentialClientApplication cca)
+        {
+            httpManager.AddInstanceDiscoveryMockHandler();
+            httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: false));
+
+            AuthenticationResult result = await cca
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+            Assert.IsNull(result.ApiEvent.RegionUsed);
+        }
+
+        [TestMethod]
         public async Task MsalForceRegionIsSet_WithRegionIsSet_WithRegionWins()
         {
             using (new EnvVariableContext())
