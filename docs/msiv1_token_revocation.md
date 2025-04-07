@@ -53,7 +53,7 @@ Steps 5-9 are new and show how the RP propagates the revocation signal.
 
 > [!NOTE]
 > The SHA256 conversion is done by doing a Base64-encoded SHA-256 hash of the token (UTF-8). For example: Convert.ToBase64String(SHA256(Encoding.UTF8.GetBytes(accessToken))). 
-> Example - "test_token" -> "zAr5codUO2XaLH4UdkJgIYJsqxZvHgY+0BK4Vf+BllY="
+> Example - "test_token" -> "cc0af97287543b65da2c7e1476426021826cab166f1e063ed012b855ff819656"
 
 
 > [!NOTE]  
