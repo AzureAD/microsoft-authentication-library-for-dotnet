@@ -2165,6 +2165,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task WithAccessTokenSha256ToRefresh_MatchingHash_GetsTokenFromIdp_Async()
         {
             const string accessToken = "access-token";
+            const string accessTokenHash = "3f16bed7089f4653e5ef21bfd2824d7f3aaaecc7a598e7e89c580e1606a9cc52";
 
             // Arrange
             using (var httpManager = new MockHttpManager())
@@ -2190,14 +2191,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
 
                 // 3) Now specify the same token's hash as "bad" => expect a new token from IdP
-                string tokenHash = ComputeSHA256(accessToken);
-
                 // Add another network response to simulate fetching a new token
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "new-access-token");
 
                 // Act: Use matching hash => triggers new token request
                 AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAccessTokenSha256ToRefresh(tokenHash)
+                    .WithAccessTokenSha256ToRefresh(accessTokenHash)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -2231,7 +2230,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // 2) Mismatched hash => we expect to keep using the cached token
                 // Act
-                var mismatchHash = ComputeSHA256("some-other-token");
+                var mismatchHash = ComputeSHA256Hex("some-other-token");
                 AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithAccessTokenSha256ToRefresh(mismatchHash)
                     .ExecuteAsync()
@@ -2289,7 +2288,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(oldToken, firstResult.AccessToken);
 
                 // 2) We do matching hash => a new token is returned
-                string tokenHash = ComputeSHA256(oldToken);
+                string tokenHash = ComputeSHA256Hex(oldToken);
 
                 // Add second network response for the new token
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: freshToken);
@@ -2334,7 +2333,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.IdentityProvider, initialResult.AuthenticationResultMetadata.TokenSource);
 
                 // 2) We'll do a mismatched hash => expect to keep using the cached token
-                string mismatchedHash = ComputeSHA256("some-other-token");
+                string mismatchedHash = ComputeSHA256Hex("some-other-token");
 
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -2350,18 +2349,26 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private static string ComputeSHA256(string token)
+        private static string ComputeSHA256Hex(string token)
         {
 #if NET6_0_OR_GREATER
-            byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
-            return Convert.ToBase64String(hashBytes);
+    byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
 #else
+            byte[] hashBytes;
             using (var sha256 = SHA256.Create())
             {
-                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
-                return Convert.ToBase64String(hashBytes);
+                hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
             }
 #endif
+
+            // Convert to lowercase hex string (e.g. "a1b2c3...")
+            var sb = new StringBuilder(hashBytes.Length * 2);
+            foreach (byte b in hashBytes)
+            {
+                sb.Append(b.ToString("x2"));
+            }
+
+            return sb.ToString();
         }
     }
 }
