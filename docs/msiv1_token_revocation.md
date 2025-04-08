@@ -39,7 +39,7 @@ Steps 1-4 fall to the Client (i.e. application using MSI directly or higher leve
 Steps 5-9 are new and show how the RP propagates the revocation signal.
 
 ### Explanation:
-1. CX creates an **MSAL** **Client** with `.WithClientCapabilities(cp1)`, to let the token issuer that it is capable of handling token revocations.
+1. CX creates an **MSAL Client** with `.WithClientCapabilities(cp1)`, to let the token issuer that it is capable of handling token revocations.
 2. The client (CX) calls some **Resource** with token **T**.
 3. The resource detects **T** is bad (revoked) and returns **401** + **claims C**.
 4. CX parses the WWW-Authenticate header, extracts the claims **C** and uses MSAL **AcquireToken** with `.WithClaims(C)`.
@@ -52,7 +52,7 @@ Steps 5-9 are new and show how the RP propagates the revocation signal.
 > This design is only applicable to MIRP api-version=2025-03-30 (for App Service). api-version for service fabric will be soon made available. 
 
 > [!NOTE]
-> The SHA256 conversion is done by doing a Base64-encoded SHA-256 hash of the token (UTF-8). For example: Convert.ToBase64String(SHA256(Encoding.UTF8.GetBytes(accessToken))). 
+> The SHA256 conversion is done by doing a Hex-encoded SHA-256 hash of the token (UTF-8). For example: BitConverter.ToString(SHA256(Encoding.UTF8.GetBytes(accessToken))). 
 > Example - "test_token" -> "cc0af97287543b65da2c7e1476426021826cab166f1e063ed012b855ff819656"
 
 
