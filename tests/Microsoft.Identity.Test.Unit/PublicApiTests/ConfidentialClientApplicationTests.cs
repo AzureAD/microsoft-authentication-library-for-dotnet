@@ -2351,24 +2351,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private static string ComputeSHA256Hex(string token)
         {
-#if NET6_0_OR_GREATER
-    byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
-#else
-            byte[] hashBytes;
-            using (var sha256 = SHA256.Create())
-            {
-                hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
-            }
-#endif
-
-            // Convert to lowercase hex string (e.g. "a1b2c3...")
-            var sb = new StringBuilder(hashBytes.Length * 2);
-            foreach (byte b in hashBytes)
-            {
-                sb.Append(b.ToString("x2"));
-            }
-
-            return sb.ToString();
+            var cryptoMgr = new CommonCryptographyManager();
+            return cryptoMgr.CreateSha256HashHex(token);
         }
     }
 }
