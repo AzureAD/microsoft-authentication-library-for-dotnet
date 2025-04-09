@@ -45,7 +45,7 @@ Steps 5-9 are new and show how the RP propagates the revocation signal.
 4. CX parses the WWW-Authenticate header, extracts the claims **C** and uses MSAL **AcquireToken** with `.WithClaims(C)`.
 5. MSAL inspects its cache first. If it finds a token, the token is considered to have been revoked. MSAL needs to tell the token issuer about it, so that the token issuer can also bypass its own cache.
 6. MSAL calls **MITS** with `xms_cc=cp1&token_sha256_to_refresh=SHA256(T)`.
-7. The token issuer uses the information to bypass its own caches and to get a new token from eSTS.
+7. **MITS** uses the information to bypass its own caches and to get a new token from its upstream **SFRP**.
 8. **SFRP** uses MSAL again to get a **new** token from eSTS.
 
 > [!IMPORTANT]
