@@ -3,11 +3,12 @@
 
 ### Bug fixes
 
-- Fix Machine Learning Source to Use "clientid" Instead of "client_id" [#5193](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5193)
-- Fixing IsCommonOrOrganizationsTenant check to not return true for consumers by @trwalke in [#5195](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5195)
-- Fix logger message to accurately reflect skipCache condition by @gladjohn in [#5201](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5201)
-- Removing experimental feature Flag from WithFmiPath by @trwalke in [#5206](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5206)
-- Fix for 5223 - env var to disable ESTS-R by @bgavrilMS in [#5224](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5224)
+- Fixed Machine Learning Source to Use "clientid" Instead of "client_id". See [Issue #5193](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5193)
+- Fixed IsCommonOrOrganizationsTenant check to not return true for consumers. See [Issue #5195](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5195)
+- Fixed logger message to accurately reflect skipCache condition. See [Issue #5201](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5201)
+- Removed experimental feature Flag from WithFmiPath API. [See #5206](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5206)
+- Added an option to disable ESTS-R (1P only). [See #5224](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5224)
+
 4.70.0
 ==========
 ### Features
