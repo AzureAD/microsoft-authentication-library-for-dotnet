@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Net.Http;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -77,7 +78,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 #endif
         }
 
-
         private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
         base(requestContext, ManagedIdentitySource.ServiceFabric)
         {
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override ManagedIdentityRequest CreateRequest(string resource, AcquireTokenForManagedIdentityParameters parameters)
         {
             ManagedIdentityRequest request = new ManagedIdentityRequest(HttpMethod.Get, _endpoint);
 
@@ -98,6 +98,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             request.QueryParameters["api-version"] = ServiceFabricMsiApiVersion;
             request.QueryParameters["resource"] = resource;
+
+            ApplyClaimsAndCapabilities(request, parameters);
 
             switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
