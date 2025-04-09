@@ -2164,8 +2164,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task WithAccessTokenSha256ToRefresh_MatchingHash_GetsTokenFromIdp_Async()
         {
-            const string accessToken = "access-token";
-            const string accessTokenHash = "3f16bed7089f4653e5ef21bfd2824d7f3aaaecc7a598e7e89c580e1606a9cc52";
+            const string accessToken = "test_token";
+            const string accessTokenHash = "cc0af97287543b65da2c7e1476426021826cab166f1e063ed012b855ff819656";
 
             // Arrange
             using (var httpManager = new MockHttpManager())
