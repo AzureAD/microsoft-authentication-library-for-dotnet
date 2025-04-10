@@ -1,3 +1,21 @@
+4.70.2
+=======
+
+### Bug fixes
+
+- Fixed MSIv1 Token Revocation's `token_sha256_to_refresh` parameter to use SHA256's HEX representation. See [Issue #5228](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5228)
+
+4.70.1
+=======
+
+### Bug fixes
+
+- Fixed Machine Learning Source to Use "clientid" instead of "client_id". See [Issue #5193](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5193)
+- Fixed IsCommonOrOrganizationsTenant check to not return true for consumers. See [Issue #5195](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5195)
+- Fixed logger message to accurately reflect skipCache condition. See [Issue #5201](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5201)
+- Removed experimental feature Flag from WithFmiPath API. See [Issue #5206](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5206)
+- Added an option to disable ESTS-R (1P only). See [Issue #5224](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5224)
+
 4.70.0
 ==========
 ### Features
