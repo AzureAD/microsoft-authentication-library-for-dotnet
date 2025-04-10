@@ -1,14 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-/**************************************************************************************
- *  R  E  V  O  G  U  A  R  D    D  E  M  O
- *
- *  Showcasing Managed Identity token acquisition, 
- *  revocation, and claims challenge handling. 
- *  
- **************************************************************************************/
-
 using System;
 using System.Net;
 using System.Net.Http;
