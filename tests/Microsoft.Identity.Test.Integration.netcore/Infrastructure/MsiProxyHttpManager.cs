@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -47,8 +48,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 mtlsCertificate,
-            HttpClient customHttpClient,
-            CancellationToken cancellationToken, 
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
+            CancellationToken cancellationToken,
             int retryCount = 0)
         {
             //Get token for the MSIHelperService

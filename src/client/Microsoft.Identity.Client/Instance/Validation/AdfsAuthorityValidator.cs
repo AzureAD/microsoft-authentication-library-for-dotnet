@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -33,12 +32,11 @@ namespace Microsoft.Identity.Client.Instance.Validation
                     new Uri(webFingerUrl),
                     null,
                     body: null,
-                    System.Net.Http.HttpMethod.Get,
+                    method: System.Net.Http.HttpMethod.Get,
                     logger: _requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
-                    customHttpClient: null,
-                    _requestContext.UserCancellationToken)
+                    validateServerCertificate: null, cancellationToken: _requestContext.UserCancellationToken)
                     .ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)

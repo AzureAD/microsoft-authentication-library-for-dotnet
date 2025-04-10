@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.IMsalSFHttpClientFactory
+Microsoft.Identity.Client.IMsalSFHttpClientFactory.GetHttpClient(System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> validateServerCert) -> System.Net.Http.HttpClient

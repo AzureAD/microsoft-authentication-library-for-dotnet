@@ -135,12 +135,11 @@ namespace Microsoft.Identity.Client.OAuth2
                             endpointUri,
                             _headers,
                             body: new FormUrlEncodedContent(_bodyParameters),
-                            HttpMethod.Post,
+                            method: HttpMethod.Post,
                             logger: requestContext.Logger,
                             doNotThrow: false,
                             mtlsCertificate: _mtlsCertificate,
-                            customHttpClient: null,
-                            requestContext.UserCancellationToken)
+                            validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
                         .ConfigureAwait(false);
                     }
                     else
@@ -149,12 +148,11 @@ namespace Microsoft.Identity.Client.OAuth2
                             endpointUri,
                             _headers,
                             body: null,
-                            HttpMethod.Get,
+                            method: HttpMethod.Get,
                             logger: requestContext.Logger,
                             doNotThrow: false,
                             mtlsCertificate: null,
-                            customHttpClient: null,
-                            requestContext.UserCancellationToken)
+                            validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
                         .ConfigureAwait(false);
                     }
                 }
