@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
+    [ExcludeFromCodeCoverage]
     class TestIdentityLogger : IIdentityLogger
     {
         public EventLogLevel MinLogLevel { get; }
