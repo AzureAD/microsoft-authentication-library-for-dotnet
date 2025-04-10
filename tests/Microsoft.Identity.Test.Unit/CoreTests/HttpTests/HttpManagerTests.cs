@@ -5,11 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -58,6 +60,82 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             doNotThrow: false,
                             mtlsCertificate: cert,
                             validateServerCert: null, cancellationToken: default)
+                        .ConfigureAwait(false);
+
+                Assert.IsNotNull(response);
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                Assert.AreEqual(expectedContent, response.Body);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsCertAndValidateCallbackFailsAsync()
+        {
+            var bodyParameters = new Dictionary<string, string>
+            {
+                ["key1"] = "some value1",
+                ["key2"] = "some value2"
+            };
+            var headers = new Dictionary<string, string>
+            {
+                ["key1"] = "qp1",
+                ["key2"] = "qp2"
+            };
+
+            X509Certificate2 cert = CertHelper.GetOrCreateTestCert();
+
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> customCallback = (sender, cert, chain, errors) => true;
+
+            using (var httpManager = new MockHttpManager())
+            {
+                HttpResponseMessage mock = MockHelpers.CreateSuccessTokenResponseMessage();
+                MockHttpMessageHandler handler = httpManager.AddResponseMockHandlerForPost(mock, bodyParameters, headers);
+                handler.ExpectedMtlsBindingCertificate = cert;
+                string expectedContent = mock.Content.ReadAsStringAsync().Result;
+                await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>  httpManager.SendRequestAsync(
+                            new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
+                            headers: null,
+                            body: new FormUrlEncodedContent(bodyParameters),
+                            method: HttpMethod.Post,
+                            logger: Substitute.For<ILoggerAdapter>(),
+                            doNotThrow: false,
+                            mtlsCertificate: cert,
+                            validateServerCert: customCallback, cancellationToken: default))
+                        .ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestHttpManagerWithValidationCallbackAsync()
+        {
+            var bodyParameters = new Dictionary<string, string>
+            {
+                ["key1"] = "some value1",
+                ["key2"] = "some value2"
+            };
+            var headers = new Dictionary<string, string>
+            {
+                ["key1"] = "qp1",
+                ["key2"] = "qp2"
+            };
+
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> customCallback = (sender, cert, chain, errors) => true;
+
+            using (var httpManager = new MockHttpManager())
+            {
+                HttpResponseMessage mock = MockHelpers.CreateSuccessTokenResponseMessage();
+                MockHttpMessageHandler handler = httpManager.AddResponseMockHandlerForPost(mock, bodyParameters, headers);
+                handler.ServerCertificateCustomValidationCallback = customCallback;
+                string expectedContent = mock.Content.ReadAsStringAsync().Result;
+                var response = await httpManager.SendRequestAsync(
+                            new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
+                            headers: null,
+                            body: new FormUrlEncodedContent(bodyParameters),
+                            method: HttpMethod.Post,
+                            logger: Substitute.For<ILoggerAdapter>(),
+                            doNotThrow: false,
+                            mtlsCertificate: null,
+                            validateServerCert: customCallback, cancellationToken: default)
                         .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
