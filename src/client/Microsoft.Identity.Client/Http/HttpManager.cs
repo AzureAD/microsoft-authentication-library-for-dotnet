@@ -170,6 +170,7 @@ namespace Microsoft.Identity.Client.Http
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
+            requestMessage.Version = HttpVersion.Version20;
             requestMessage.Headers.Accept.Clear();
             if (headers != null)
             {
