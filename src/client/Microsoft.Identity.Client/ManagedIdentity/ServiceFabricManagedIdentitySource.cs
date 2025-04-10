@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return true;
             }
 
-            return 0 == string.Compare(certificate.GetCertHashString(), EnvironmentVariables.IdentityServerThumbprint, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(certificate.GetCertHashString(), EnvironmentVariables.IdentityServerThumbprint, StringComparison.OrdinalIgnoreCase);
         }
 
         private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
