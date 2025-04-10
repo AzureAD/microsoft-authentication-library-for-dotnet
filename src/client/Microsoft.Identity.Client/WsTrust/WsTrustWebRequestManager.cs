@@ -94,6 +94,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 { "SOAPAction", (wsTrustEndpoint.Version == WsTrustVersion.WsTrust2005) ? XmlNamespace.Issue2005.ToString() : XmlNamespace.Issue.ToString() }
             };
 
+            // CodeQL [SM00417] False Positive: wsTrustRequest is a body parameter for HttpRequest that follows WsTrust protocol
             var body = new StringContent(
                 wsTrustRequest,
                 Encoding.UTF8, "application/soap+xml");

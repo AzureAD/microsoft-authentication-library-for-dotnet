@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <returns></returns>
         private bool IsMatchingTokenHash(string tokenSecret, string accessTokenHashToRefresh)
         {
-            string cachedTokenHash = _cryptoManager.CreateSha256Hash(tokenSecret);
+            string cachedTokenHash = _cryptoManager.CreateSha256HashHex(tokenSecret);
             return string.Equals(cachedTokenHash, accessTokenHashToRefresh, StringComparison.Ordinal);
         }
 
