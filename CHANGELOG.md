@@ -1,3 +1,10 @@
+4.70.2
+=======
+
+### Bug fixes
+
+- Fixed MSIv1 Token Revocation's `token_sha256_to_refresh` parameter to use SHA256's HEX representation. See [Issue #5228](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5228)
+
 4.70.1
 =======
 
