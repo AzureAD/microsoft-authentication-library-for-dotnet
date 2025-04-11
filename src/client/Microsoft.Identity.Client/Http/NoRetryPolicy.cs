@@ -2,20 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Http
 {
     internal class NoRetryPolicy : IRetryPolicy
     {
-        public int DelayInMilliseconds { get => throw new NotImplementedException(); }
-
-        public bool PauseForRetry(HttpResponse response, Exception exception, int retryCount)
+        public Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
         {
-            return false;
+            throw new NotImplementedException();
         }
     }
 }
