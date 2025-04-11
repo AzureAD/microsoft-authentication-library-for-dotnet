@@ -102,9 +102,8 @@ namespace Microsoft.Identity.Client.Http
                 timeoutException = exception;
             }
 
-            while (_retryPolicy.pauseForRetry(response, timeoutException, retryCount))
+            while (await _retryPolicy.pauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
             {
-                logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {_retryPolicy.DelayInMilliseconds}ms.");
                 return await SendRequestAsync(
                     endpoint,
                     headers,
@@ -115,7 +114,7 @@ namespace Microsoft.Identity.Client.Http
                     bindingCertificate,
                     customHttpClient,
                     cancellationToken: cancellationToken,
-                    retryCount) // Pass the updated retry count
+                    retryCount++) // increment the retry count
                     .ConfigureAwait(false);
             }
 
