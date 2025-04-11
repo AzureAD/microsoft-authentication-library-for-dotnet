@@ -110,10 +110,11 @@ namespace Microsoft.Identity.Client.Http
                 logger.Error("The HTTP request failed. " + exception.Message);
                 timeoutException = exception;
             }
-
-            while (!_disableInternalRetries && retryPolicy.PauseForRetry(response, timeoutException, retryCount))
+            
+            while (!_disableInternalRetries && await retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
             {
-                logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {retryPolicy.DelayInMilliseconds}ms.");
+                retryCount++;
+
                 return await SendRequestAsync(
                     endpoint,
                     headers,
