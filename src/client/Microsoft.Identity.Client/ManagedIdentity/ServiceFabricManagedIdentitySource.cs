@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Net.Http;
+using System.Net.Security;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -42,41 +43,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
-        internal override HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
+        internal override bool ValidateServerCertificate(HttpRequestMessage message, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate,
+            System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
         {
-            if (_httpClientLazy == null)
+            if (sslPolicyErrors == SslPolicyErrors.None)
             {
-                _httpClientLazy = new Lazy<HttpClient>(() =>
-                {
-                    HttpClientHandler handler = CreateHandlerWithSslValidation(requestContext.Logger);
-                    return new HttpClient(handler);
-                });
+                return true;
             }
 
-            return _httpClientLazy.Value;
+            return string.Equals(certificate.GetCertHashString(), EnvironmentVariables.IdentityServerThumbprint, StringComparison.OrdinalIgnoreCase);
         }
-
-        internal HttpClientHandler CreateHandlerWithSslValidation(ILoggerAdapter logger)
-        {
-#if NET471_OR_GREATER || NETSTANDARD || NET
-            logger.Info(() => "[Managed Identity] Setting up server certificate validation callback.");
-            return new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (message, certificate, chain, sslPolicyErrors) =>
-                {
-                    if (sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
-                    {
-                        return 0 == string.Compare(certificate.Thumbprint, EnvironmentVariables.IdentityServerThumbprint, StringComparison.OrdinalIgnoreCase);
-                    }
-                    return true;
-                }
-            };
-#else
-            logger.Warning("[Managed Identity] Server certificate validation callback is not supported on .NET Framework.");
-            return new HttpClientHandler();
-#endif
-        }
-
 
         private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
         base(requestContext, ManagedIdentitySource.ServiceFabric)

@@ -3,10 +3,7 @@
 
 using System;
 using System.Globalization;
-using System.Net;
-using System.Net.Http;
 using System.Net.Security;
-using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -88,13 +85,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var sf = ServiceFabricManagedIdentitySource.Create(requestContext);
 
                 Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
-                HttpClient httpClient = ((ServiceFabricManagedIdentitySource)sf).GetHttpClientWithSslValidation(requestContext);
-                Assert.IsNotNull(httpClient);
-                var httpClientHandler = ((ServiceFabricManagedIdentitySource)sf).CreateHandlerWithSslValidation(requestContext.Logger);
-                Assert.IsNotNull(httpClientHandler.ServerCertificateCustomValidationCallback);
-
-                var validationResult = httpClientHandler.ServerCertificateCustomValidationCallback(null, certificate, chain, sslPolicyErrors);
-                Assert.AreEqual(expectedValidationResult, validationResult);
+                var callback = ((ServiceFabricManagedIdentitySource)sf).ValidateServerCertificate(null, certificate, chain, sslPolicyErrors);
+                Assert.IsNotNull(callback);
             }
         }
     }

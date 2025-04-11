@@ -61,12 +61,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             request.ComputeUri(),
                             request.Headers,
                             body: null,
-                            HttpMethod.Get,
+                            method: HttpMethod.Get,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            GetHttpClientWithSslValidation(_requestContext),
-                            cancellationToken).ConfigureAwait(false);
+                            validateServerCertificate: null, cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -75,12 +74,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             request.ComputeUri(),
                             request.Headers,
                             body: new FormUrlEncodedContent(request.BodyParameters),
-                            HttpMethod.Post,
+                            method: HttpMethod.Post,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            GetHttpClientWithSslValidation(_requestContext),
-                            cancellationToken)
+                            validateServerCertificate: null, cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
 
                 }
@@ -94,10 +92,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        // This method is internal for testing purposes.
-        internal virtual HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
+        // This method is used to validate the server certificate.
+        // It is overridden in the Service Fabric managed identity source to validate the certificate thumbprint.
+        // The default implementation always returns true.
+        internal virtual bool ValidateServerCertificate(HttpRequestMessage message, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate,
+            System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
         {
-            return null;
+            return true;
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(
