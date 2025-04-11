@@ -88,10 +88,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             using (var httpManager = new MockHttpManager())
             {
-                HttpResponseMessage mock = MockHelpers.CreateSuccessTokenResponseMessage();
-                MockHttpMessageHandler handler = httpManager.AddResponseMockHandlerForPost(mock, bodyParameters, headers);
-                handler.ExpectedMtlsBindingCertificate = cert;
-                string expectedContent = mock.Content.ReadAsStringAsync().Result;
                 await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>  httpManager.SendRequestAsync(
                             new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
                             headers: null,
