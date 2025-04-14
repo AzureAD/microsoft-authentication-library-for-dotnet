@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Http
     {
         public Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(false);
         }
     }
 }
