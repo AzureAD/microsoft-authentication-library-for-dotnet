@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Http
                 timeoutException = exception;
             }
 
-            while (await _retryPolicy.pauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
+            while (await _retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
             {
                 return await SendRequestAsync(
                     endpoint,

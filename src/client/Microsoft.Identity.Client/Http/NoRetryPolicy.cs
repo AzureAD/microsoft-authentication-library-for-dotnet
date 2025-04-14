@@ -9,9 +9,9 @@ namespace Microsoft.Identity.Client.Http
 {
     internal class NoRetryPolicy : IRetryPolicy
     {
-        public Task<bool> pauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
+        public Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(false);
         }
     }
 }

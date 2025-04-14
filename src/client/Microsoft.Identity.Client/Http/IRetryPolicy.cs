@@ -9,6 +9,6 @@ namespace Microsoft.Identity.Client.Http
 {
     internal interface IRetryPolicy
     {
-        Task<bool> pauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger);
+        Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger);
     }
 }

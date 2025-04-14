@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Http
         /// This ensures that the delay increases exponentially with each retry attempt,
         /// but does not exceed the maximum backoff time.
         /// </remarks>
-        public int calculateDelay(int currentRetry)
+        public int CalculateDelay(int currentRetry)
         {
             // Attempt 1
             if (currentRetry == 0)

@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Http
             ImdsRetryPolicy.EXPONENTIAL_DELTA_BACKOFF_MS
         );
 
-        public async Task<bool> pauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
+        public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
         {
             int httpStatusCode = (int)response.StatusCode;
 
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Http
             {
                 int retryAfterDelay = httpStatusCode == (int)HttpStatusCode.Gone
                     ? HTTP_STATUS_GONE_RETRY_AFTER_MS
-                    : _exponentialRetryStrategy.calculateDelay(retryCount);
+                    : _exponentialRetryStrategy.CalculateDelay(retryCount);
 
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
 
