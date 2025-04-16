@@ -27,6 +27,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private readonly IHttpManager _httpManager;
 
+        // Track the number of executed (dequeued) requests
+        public int ExecutedRequestCount { get; set; } = 0;
+
         public MockHttpManager(string testName = null,
             bool isManagedIdentity = false,
             Func<MockHttpMessageHandler> messageHandlerFunc = null,
@@ -45,11 +48,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             _httpManager = invokeNonMtlsHttpManagerFactory
                 ? HttpManagerFactory.GetHttpManager(
-                    new MockNonMtlsHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
+                    new MockNonMtlsHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName, this),
                     retry,
                     isManagedIdentity)
                 : HttpManagerFactory.GetHttpManager(
-                    new MockHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
+                    new MockHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName, this),
                     retry,
                     isManagedIdentity);
 
@@ -105,6 +108,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
         }
 
+        internal void IncrementExecutedRequestCount()
+        {
+            ExecutedRequestCount++;
+        }
+
         public Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
@@ -136,15 +144,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         protected Func<MockHttpMessageHandler> MessageHandlerFunc { get; set; }
         protected ConcurrentQueue<HttpClientHandler> HttpMessageHandlerQueue { get; set; }
         protected string _testName { get; set; }
+        private readonly MockHttpManager _mockHttpManager;
 
         protected MockHttpClientFactoryBase(
             Func<MockHttpMessageHandler> messageHandlerFunc,
             ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue,
-            string testName)
+            string testName,
+            MockHttpManager mockHttpManager)
         {
             MessageHandlerFunc = messageHandlerFunc;
             HttpMessageHandlerQueue = httpMessageHandlerQueue;
             _testName = testName;
+            _mockHttpManager = mockHttpManager;
         }
 
         protected HttpClient GetHttpClientInternal(X509Certificate2 mtlsBindingCert)
@@ -161,6 +172,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 {
                     Assert.Fail("The MockHttpManager's queue is empty. Cannot serve another response");
                 }
+
+                // Increment executed request count here
+                _mockHttpManager?.IncrementExecutedRequestCount();
             }
 
             Trace.WriteLine($"Test {_testName} dequeued a mock handler for {GetExpectedUrlFromHandler(messageHandler)}");
@@ -192,8 +206,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public MockHttpClientFactory(
             Func<MockHttpMessageHandler> messageHandlerFunc,
             ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue,
-            string testName)
-            : base(messageHandlerFunc, httpMessageHandlerQueue, testName)
+            string testName,
+            MockHttpManager mockHttpManager)
+            : base(messageHandlerFunc, httpMessageHandlerQueue, testName, mockHttpManager)
         {
         }
 
@@ -213,8 +228,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public MockNonMtlsHttpClientFactory(
             Func<MockHttpMessageHandler> messageHandlerFunc,
             ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue,
-            string testName)
-            : base(messageHandlerFunc, httpMessageHandlerQueue, testName)
+            string testName,
+            MockHttpManager mockHttpManager)
+            : base(messageHandlerFunc, httpMessageHandlerQueue, testName, mockHttpManager)
         {
         }
 
@@ -223,5 +239,4 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return GetHttpClientInternal(null);
         }
     }
-
 }

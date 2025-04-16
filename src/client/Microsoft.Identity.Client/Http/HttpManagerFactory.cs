@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Http
             }
 
             return isManagedIdentity ?
-                ManagedIdentityApplication.GetManagedIdentitySource() is ManagedIdentity.ManagedIdentitySource.Imds ?
+                (ManagedIdentityApplication.GetManagedIdentitySource() is ManagedIdentity.ManagedIdentitySource.DefaultToImds or ManagedIdentity.ManagedIdentitySource.Imds) ?
                 new HttpManager(httpClientFactory, new ImdsRetryPolicy()) :
                 new HttpManager(httpClientFactory, new DefaultRetryPolicy(DEFAULT_MANAGED_IDENTITY_RETRY_DELAY_MS, DEFAULT_MANAGED_IDENTITY_MAX_RETRIES, HttpRetryConditions.DefaultManagedIdentity)) :
                 new HttpManager(httpClientFactory, new DefaultRetryPolicy(DEFAULT_ESTS_RETRY_DELAY_MS, DEFAULT_ESTS_MAX_RETRIES, HttpRetryConditions.Sts));
