@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Http
             bool doNotThrow,
             X509Certificate2 bindingCertificate,
             HttpClient customHttpClient,
-            CancellationToken cancellationToken, 
+            CancellationToken cancellationToken,
             int retryCount = 0)
         {
             Exception timeoutException = null;
@@ -104,6 +104,7 @@ namespace Microsoft.Identity.Client.Http
 
             while (await _retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
             {
+                retryCount++;
                 return await SendRequestAsync(
                     endpoint,
                     headers,
@@ -114,7 +115,7 @@ namespace Microsoft.Identity.Client.Http
                     bindingCertificate,
                     customHttpClient,
                     cancellationToken: cancellationToken,
-                    retryCount++) // increment the retry count
+                    retryCount)
                     .ConfigureAwait(false);
             }
 
