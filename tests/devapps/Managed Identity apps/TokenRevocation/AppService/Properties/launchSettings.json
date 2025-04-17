@@ -8,7 +8,7 @@
     }
   },
   "profiles": {
-    "ms_activedirectory_managedidentity": {
+    "AppServiceTokenRevocation": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

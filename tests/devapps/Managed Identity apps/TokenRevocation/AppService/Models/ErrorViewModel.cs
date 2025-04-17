@@ -1,4 +1,4 @@
-namespace ms_activedirectory_managedidentity.Models
+namespace AppServiceTokenRevocation.Models
 {
     public class ErrorViewModel
     {

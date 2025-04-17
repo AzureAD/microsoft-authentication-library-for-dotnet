@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ms_activedirectory_managedidentity.Models;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.AspNetCore.Mvc;
+using AppServiceTokenRevocation.Models;
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client;
 using System;
 using Microsoft.Identity.Client.AppConfig;
 
-namespace ms_activedirectory_managedidentity.Controllers
+namespace AppServiceTokenRevocation.Controllers
 {
     public class HomeController : Controller
     {
@@ -62,8 +65,8 @@ namespace ms_activedirectory_managedidentity.Controllers
 
                 //Use the access token to read secrets from the key vault 
                 httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-                var response = await httpClient.GetAsync($"{kvUri}/secrets/{secretName}?api-version=7.2");
-                var secretValue = await response.Content.ReadAsStringAsync();
+                var response = await httpClient.GetAsync($"{kvUri}/secrets/{secretName}?api-version=7.2").ConfigureAwait(false);
+                var secretValue = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                 ViewBag.Message = secretValue;
                 return View();
