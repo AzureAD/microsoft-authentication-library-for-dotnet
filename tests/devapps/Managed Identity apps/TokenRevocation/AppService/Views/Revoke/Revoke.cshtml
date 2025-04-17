@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Revoke UAMI Tokens";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!string.IsNullOrEmpty(ViewBag.Error))
+{
+    <div class="alert alert-danger">
+        <pre>@ViewBag.Error</pre>
+    </div>
+}
+else
+{
+    <h4>GET identity</h4>
+    <p><strong>Status:</strong> @ViewBag.GetStatus</p>
+    <pre>@Html.Raw(JsonBeautify(ViewBag.GetContent))</pre>
+
+    <h4>POST revokeTokens</h4>
+    <p><strong>Status:</strong> @ViewBag.RevokeStatus</p>
+    <pre>@Html.Raw(JsonBeautify(ViewBag.RevokeContent))</pre>
+}
+
+@functions {
+    // quick-and-dirty pretty‑printer
+    private static string JsonBeautify(string json)
+    {
+        try
+        {
+            var j = System.Text.Json.JsonDocument.Parse(json);
+            return System.Text.Json.JsonSerializer.Serialize(j,
+                    new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        }
+        catch { return json; }
+    }
+}
