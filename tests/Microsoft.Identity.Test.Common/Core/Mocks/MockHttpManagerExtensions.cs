@@ -392,7 +392,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityResourceId, userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    managedIdentitySourceType == ManagedIdentitySource.Imds ? 
+                        Constants.ManagedIdentityResourceIdImds : Constants.ManagedIdentityResourceId, 
+                    userAssignedId);
             }
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
