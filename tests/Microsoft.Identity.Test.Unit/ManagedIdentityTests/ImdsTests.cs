@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (new EnvVariableContext())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (new EnvVariableContext())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (new EnvVariableContext())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (new EnvVariableContext())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (new EnvVariableContext())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
@@ -420,7 +420,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (new EnvVariableContext())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
@@ -471,7 +471,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (new EnvVariableContext())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
