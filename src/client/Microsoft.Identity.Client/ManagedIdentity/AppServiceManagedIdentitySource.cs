@@ -85,9 +85,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
 
+                // As per the docs app service requires object id to be passed as principal_id param https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp
                 case AppConfig.ManagedIdentityIdType.ObjectId:
                     _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    request.QueryParameters[Constants.ManagedIdentityPrincipalId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
             }
                 
