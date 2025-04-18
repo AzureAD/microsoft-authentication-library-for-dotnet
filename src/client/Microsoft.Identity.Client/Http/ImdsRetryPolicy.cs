@@ -10,9 +10,11 @@ namespace Microsoft.Identity.Client.Http
 {
     internal class ImdsRetryPolicy : IRetryPolicy
     {
-        public const int EXPONENTIAL_STRATEGY_NUM_RETRIES = 3; // referenced in unit tests
-        public const int LINEAR_STRATEGY_NUM_RETRIES = 7; // referenced in unit tests
         private const int HTTP_STATUS_GONE_RETRY_AFTER_MS_INTERNAL = 10 * 1000; // 10 seconds
+
+        // referenced in unit tests, cannot be private
+        public const int EXPONENTIAL_STRATEGY_NUM_RETRIES = 3;
+        public const int LINEAR_STRATEGY_NUM_RETRIES = 7;
 
         // these will be overridden in the unit tests so that they run faster
         public static int MIN_EXPONENTIAL_BACKOFF_MS { get; set; } = 1000;

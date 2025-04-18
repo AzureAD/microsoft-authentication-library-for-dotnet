@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ImdsTests : TestBase
     {
-        private const double ONE_HUNDRED_TIMES_FASTER = 0.01;
         private const int IMDS_EXPONENTIAL_STRATEGY_TWO_RETRIES_IN_MS = 3000; // 1 second -> 2 seconds
         private const int IMDS_EXPONENTIAL_STRATEGY_MAX_RETRIES_IN_MS = 7000; // 1 second -> 2 seconds -> 4 seconds
 
@@ -38,10 +37,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             _originalGoneRetryAfter = ImdsRetryPolicy.HTTP_STATUS_GONE_RETRY_AFTER_MS;
 
             // Speed up retry delays by 100x
-            ImdsRetryPolicy.MIN_EXPONENTIAL_BACKOFF_MS = (int)(_originalMinBackoff * ONE_HUNDRED_TIMES_FASTER);
-            ImdsRetryPolicy.MAX_EXPONENTIAL_BACKOFF_MS = (int)(_originalMaxBackoff * ONE_HUNDRED_TIMES_FASTER);
-            ImdsRetryPolicy.EXPONENTIAL_DELTA_BACKOFF_MS = (int)(_originalDeltaBackoff * ONE_HUNDRED_TIMES_FASTER);
-            ImdsRetryPolicy.HTTP_STATUS_GONE_RETRY_AFTER_MS = (int)(_originalGoneRetryAfter * ONE_HUNDRED_TIMES_FASTER);
+            ImdsRetryPolicy.MIN_EXPONENTIAL_BACKOFF_MS = (int)(_originalMinBackoff * TestConstants.ONE_HUNDRED_TIMES_FASTER);
+            ImdsRetryPolicy.MAX_EXPONENTIAL_BACKOFF_MS = (int)(_originalMaxBackoff * TestConstants.ONE_HUNDRED_TIMES_FASTER);
+            ImdsRetryPolicy.EXPONENTIAL_DELTA_BACKOFF_MS = (int)(_originalDeltaBackoff * TestConstants.ONE_HUNDRED_TIMES_FASTER);
+            ImdsRetryPolicy.HTTP_STATUS_GONE_RETRY_AFTER_MS = (int)(_originalGoneRetryAfter * TestConstants.ONE_HUNDRED_TIMES_FASTER);
         }
 
         [ClassCleanup]
@@ -60,59 +59,61 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ImdsFails404TwiceThenSucceeds200Async(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
 
-                ManagedIdentityId managedIdentityId = userAssignedId == null
-                    ? ManagedIdentityId.SystemAssigned
-                    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
-                    .WithHttpManager(httpManager);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                // Simulate two 404s (to trigger retries), then a successful response
-                const int NUM_404 = 2;
-                for (int i = 0; i < NUM_404; i++)
+                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
+                    ManagedIdentityId managedIdentityId = userAssignedId == null
+                        ? ManagedIdentityId.SystemAssigned
+                        : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                        .WithHttpManager(httpManager);
+
+                    // Disable cache to avoid pollution
+                    miBuilder.Config.AccessorOptions = null;
+
+                    var mi = miBuilder.Build();
+
+                    // Simulate two 404s (to trigger retries), then a successful response
+                    const int NUM_404 = 2;
+                    for (int i = 0; i < NUM_404; i++)
+                    {
+                        httpManager.AddManagedIdentityMockHandler(
+                            ManagedIdentityTests.ImdsEndpoint,
+                            ManagedIdentityTests.Resource,
+                            MockHelpers.GetMsiImdsErrorResponse(),
+                            ManagedIdentitySource.Imds,
+                            statusCode: HttpStatusCode.NotFound,
+                            userAssignedId: userAssignedId,
+                            userAssignedIdentityId: userAssignedIdentityId);
+                    }
+
+                    // Final success
                     httpManager.AddManagedIdentityMockHandler(
                         ManagedIdentityTests.ImdsEndpoint,
                         ManagedIdentityTests.Resource,
-                        MockHelpers.GetMsiImdsErrorResponse(),
+                        MockHelpers.GetMsiSuccessfulResponse(),
                         ManagedIdentitySource.Imds,
-                        statusCode: HttpStatusCode.NotFound,
                         userAssignedId: userAssignedId,
                         userAssignedIdentityId: userAssignedIdentityId);
+
+                    var stopwatch = Stopwatch.StartNew();
+
+                    var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                         .ExecuteAsync()
+                                         .ConfigureAwait(false);
+
+                    stopwatch.Stop();
+
+                    // exponential backoff (1 second -> 2 seconds)
+                    Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (IMDS_EXPONENTIAL_STRATEGY_TWO_RETRIES_IN_MS * TestConstants.ONE_HUNDRED_TIMES_FASTER));
+
+                    // ensure that exactly 3 requests were made: initial request + 2 retries
+                    Assert.AreEqual(httpManager.QueueSize, 0);
+
+                    Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
                 }
-
-                // Final success
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.ImdsEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.Imds,
-                    userAssignedId: userAssignedId,
-                    userAssignedIdentityId: userAssignedIdentityId);
-
-                var stopwatch = Stopwatch.StartNew();
-
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                                     .ExecuteAsync()
-                                     .ConfigureAwait(false);
-
-                stopwatch.Stop();
-
-                // exponential backoff (1 second -> 2 seconds)
-                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (IMDS_EXPONENTIAL_STRATEGY_TWO_RETRIES_IN_MS * ONE_HUNDRED_TIMES_FASTER));
-
-                // ensure that exactly 3 requests were made: initial request + 2 retries
-                Assert.AreEqual(httpManager.QueueSize, 0);
-
-                Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
             }
         }
 
@@ -122,59 +123,61 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ImdsFails410FourTimesThenSucceeds200Async(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
 
-                ManagedIdentityId managedIdentityId = userAssignedId == null
-                    ? ManagedIdentityId.SystemAssigned
-                    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
-                    .WithHttpManager(httpManager);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                // Simulate four 410s (to trigger retries), then a successful response
-                const int NUM_410 = 4;
-                for (int i = 0; i < NUM_410; i++)
+                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
+                    ManagedIdentityId managedIdentityId = userAssignedId == null
+                        ? ManagedIdentityId.SystemAssigned
+                        : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                        .WithHttpManager(httpManager);
+
+                    // Disable cache to avoid pollution
+                    miBuilder.Config.AccessorOptions = null;
+
+                    var mi = miBuilder.Build();
+
+                    // Simulate four 410s (to trigger retries), then a successful response
+                    const int NUM_410 = 4;
+                    for (int i = 0; i < NUM_410; i++)
+                    {
+                        httpManager.AddManagedIdentityMockHandler(
+                            ManagedIdentityTests.ImdsEndpoint,
+                            ManagedIdentityTests.Resource,
+                            MockHelpers.GetMsiImdsErrorResponse(),
+                            ManagedIdentitySource.Imds,
+                            statusCode: HttpStatusCode.Gone,
+                            userAssignedId: userAssignedId,
+                            userAssignedIdentityId: userAssignedIdentityId);
+                    }
+
+                    // Final success
                     httpManager.AddManagedIdentityMockHandler(
                         ManagedIdentityTests.ImdsEndpoint,
                         ManagedIdentityTests.Resource,
-                        MockHelpers.GetMsiImdsErrorResponse(),
+                        MockHelpers.GetMsiSuccessfulResponse(),
                         ManagedIdentitySource.Imds,
-                        statusCode: HttpStatusCode.Gone,
                         userAssignedId: userAssignedId,
                         userAssignedIdentityId: userAssignedIdentityId);
+
+                    var stopwatch = Stopwatch.StartNew();
+
+                    var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                         .ExecuteAsync()
+                                         .ConfigureAwait(false);
+
+                    stopwatch.Stop();
+
+                    // linear backoff (10 seconds * 4 retries)
+                    Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (ImdsRetryPolicy.HTTP_STATUS_GONE_RETRY_AFTER_MS * NUM_410 * TestConstants.ONE_HUNDRED_TIMES_FASTER));
+
+                    // ensure that exactly 5 requests were made: initial request + 4 retries
+                    Assert.AreEqual(httpManager.QueueSize, 0);
+
+                    Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
                 }
-
-                // Final success
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.ImdsEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.Imds,
-                    userAssignedId: userAssignedId,
-                    userAssignedIdentityId: userAssignedIdentityId);
-
-                var stopwatch = Stopwatch.StartNew();
-
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                                     .ExecuteAsync()
-                                     .ConfigureAwait(false);
-
-                stopwatch.Stop();
-
-                // linear backoff (10 seconds * 4 retries)
-                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (ImdsRetryPolicy.HTTP_STATUS_GONE_RETRY_AFTER_MS * 4 * ONE_HUNDRED_TIMES_FASTER));
-
-                // ensure that exactly 5 requests were made: initial request + 4 retries
-                Assert.AreEqual(httpManager.QueueSize, 0);
-
-                Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
             }
         }
 
@@ -184,53 +187,56 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ImdsFails410PermanentlyAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
 
-                ManagedIdentityId managedIdentityId = userAssignedId == null
-                    ? ManagedIdentityId.SystemAssigned
-                    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
-                    .WithHttpManager(httpManager);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                // Simulate permanent 410s (to trigger the maximum number of retries)
-                const int NUM_410 = ImdsRetryPolicy.LINEAR_STRATEGY_NUM_RETRIES + 1; // initial request + maximum number of retries (7)
-                for (int i = 0; i < NUM_410; i++)
+                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
-                    httpManager.AddManagedIdentityMockHandler(
-                        ManagedIdentityTests.ImdsEndpoint,
-                        ManagedIdentityTests.Resource,
-                        MockHelpers.GetMsiImdsErrorResponse(),
-                        ManagedIdentitySource.Imds,
-                        statusCode: HttpStatusCode.Gone,
-                        userAssignedId: userAssignedId,
-                        userAssignedIdentityId: userAssignedIdentityId);
+                    ManagedIdentityId managedIdentityId = userAssignedId == null
+                        ? ManagedIdentityId.SystemAssigned
+                        : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                        .WithHttpManager(httpManager);
+
+                    // Disable cache to avoid pollution
+                    miBuilder.Config.AccessorOptions = null;
+
+                    var mi = miBuilder.Build();
+
+                    // Simulate permanent 410s (to trigger the maximum number of retries)
+                    const int NUM_410 = ImdsRetryPolicy.LINEAR_STRATEGY_NUM_RETRIES + 1; // initial request + maximum number of retries (7)
+                    for (int i = 0; i < NUM_410; i++)
+                    {
+                        httpManager.AddManagedIdentityMockHandler(
+                            ManagedIdentityTests.ImdsEndpoint,
+                            ManagedIdentityTests.Resource,
+                            MockHelpers.GetMsiImdsErrorResponse(),
+                            ManagedIdentitySource.Imds,
+                            statusCode: HttpStatusCode.Gone,
+                            userAssignedId: userAssignedId,
+                            userAssignedIdentityId: userAssignedIdentityId);
+                    }
+
+                    MsalServiceException msalException = null;
+                    var stopwatch = Stopwatch.StartNew();
+                    try
+                    {
+                        await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        msalException = ex as MsalServiceException;
+                    }
+                    stopwatch.Stop();
+                    Assert.IsNotNull(msalException);
+
+                    // linear backoff (10 seconds * 7 retries)
+                    Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (ImdsRetryPolicy.HTTP_STATUS_GONE_RETRY_AFTER_MS * ImdsRetryPolicy.LINEAR_STRATEGY_NUM_RETRIES * TestConstants.ONE_HUNDRED_TIMES_FASTER));
+
+                    // ensure that exactly 8 requests were made: initial request + 7 retries
+                    Assert.AreEqual(httpManager.QueueSize, 0);
                 }
-
-                MsalServiceException msalException = null;
-                var stopwatch = Stopwatch.StartNew();
-                try
-                {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
-                } catch (Exception ex)
-                {
-                    msalException = ex as MsalServiceException;
-                }
-                stopwatch.Stop();
-                Assert.IsNotNull(msalException);
-
-                // linear backoff (10 seconds * 7 retries)
-                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (ImdsRetryPolicy.HTTP_STATUS_GONE_RETRY_AFTER_MS * 4 * ONE_HUNDRED_TIMES_FASTER));
-
-                // ensure that exactly 8 requests were made: initial request + 7 retries
-                Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }
 
@@ -240,54 +246,56 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ImdsFails504PermanentlyAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
 
-                ManagedIdentityId managedIdentityId = userAssignedId == null
-                    ? ManagedIdentityId.SystemAssigned
-                    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
-                    .WithHttpManager(httpManager);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                // Simulate permanent 504s (to trigger the maximum number of retries)
-                const int NUM_504 = ImdsRetryPolicy.EXPONENTIAL_STRATEGY_NUM_RETRIES + 1; // initial request + maximum number of retries (3)
-                for (int i = 0; i < NUM_504; i++)
+                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
-                    httpManager.AddManagedIdentityMockHandler(
-                        ManagedIdentityTests.ImdsEndpoint,
-                        ManagedIdentityTests.Resource,
-                        MockHelpers.GetMsiImdsErrorResponse(),
-                        ManagedIdentitySource.Imds,
-                        statusCode: HttpStatusCode.GatewayTimeout,
-                        userAssignedId: userAssignedId,
-                        userAssignedIdentityId: userAssignedIdentityId);
-                }
+                    ManagedIdentityId managedIdentityId = userAssignedId == null
+                        ? ManagedIdentityId.SystemAssigned
+                        : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                        .WithHttpManager(httpManager);
 
-                MsalServiceException msalException = null;
-                var stopwatch = Stopwatch.StartNew();
-                try
-                {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    msalException = ex as MsalServiceException;
-                }
-                stopwatch.Stop();
-                Assert.IsNotNull(msalException);
+                    // Disable cache to avoid pollution
+                    miBuilder.Config.AccessorOptions = null;
 
-                // exponential backoff (1 second -> 2 seconds -> 4 seconds)
-                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (IMDS_EXPONENTIAL_STRATEGY_MAX_RETRIES_IN_MS * ONE_HUNDRED_TIMES_FASTER));
+                    var mi = miBuilder.Build();
 
-                // ensure that exactly 4 requests were made: initial request + 3 retries
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                    // Simulate permanent 504s (to trigger the maximum number of retries)
+                    const int NUM_504 = ImdsRetryPolicy.EXPONENTIAL_STRATEGY_NUM_RETRIES + 1; // initial request + maximum number of retries (3)
+                    for (int i = 0; i < NUM_504; i++)
+                    {
+                        httpManager.AddManagedIdentityMockHandler(
+                            ManagedIdentityTests.ImdsEndpoint,
+                            ManagedIdentityTests.Resource,
+                            MockHelpers.GetMsiImdsErrorResponse(),
+                            ManagedIdentitySource.Imds,
+                            statusCode: HttpStatusCode.GatewayTimeout,
+                            userAssignedId: userAssignedId,
+                            userAssignedIdentityId: userAssignedIdentityId);
+                    }
+
+                    MsalServiceException msalException = null;
+                    var stopwatch = Stopwatch.StartNew();
+                    try
+                    {
+                        await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        msalException = ex as MsalServiceException;
+                    }
+                    stopwatch.Stop();
+                    Assert.IsNotNull(msalException);
+
+                    // exponential backoff (1 second -> 2 seconds -> 4 seconds)
+                    Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (IMDS_EXPONENTIAL_STRATEGY_MAX_RETRIES_IN_MS * TestConstants.ONE_HUNDRED_TIMES_FASTER));
+
+                    // ensure that exactly 4 requests were made: initial request + 3 retries
+                    Assert.AreEqual(httpManager.QueueSize, 0);
+                }
             }
         }
 
@@ -297,109 +305,111 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ImdsFails500PermanentlyAndRetryPolicyLifeTimeIsPerRequestAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
 
-                ManagedIdentityId managedIdentityId = userAssignedId == null
-                    ? ManagedIdentityId.SystemAssigned
-                    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
-                    .WithHttpManager(httpManager);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                // Simulate permanent 500s (to trigger the maximum number of retries)
-                const int NUM_500 = ImdsRetryPolicy.EXPONENTIAL_STRATEGY_NUM_RETRIES + 1; // initial request + maximum number of retries (3)
-                for (int i = 0; i < NUM_500; i++)
+                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
-                    httpManager.AddManagedIdentityMockHandler(
-                        ManagedIdentityTests.ImdsEndpoint,
-                        ManagedIdentityTests.Resource,
-                        MockHelpers.GetMsiImdsErrorResponse(),
-                        ManagedIdentitySource.Imds,
-                        statusCode: HttpStatusCode.GatewayTimeout,
-                        userAssignedId: userAssignedId,
-                        userAssignedIdentityId: userAssignedIdentityId);
-                }
+                    ManagedIdentityId managedIdentityId = userAssignedId == null
+                        ? ManagedIdentityId.SystemAssigned
+                        : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                        .WithHttpManager(httpManager);
 
-                MsalServiceException msalException = null;
-                var stopwatch = Stopwatch.StartNew();
-                try
-                {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    msalException = ex as MsalServiceException;
-                }
-                stopwatch.Stop();
-                Assert.IsNotNull(msalException);
+                    // Disable cache to avoid pollution
+                    miBuilder.Config.AccessorOptions = null;
 
-                // ensure that the first request was made and retried 3 times
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                    var mi = miBuilder.Build();
 
-                for (int i = 0; i < NUM_500; i++)
-                {
-                    httpManager.AddManagedIdentityMockHandler(
-                        ManagedIdentityTests.ImdsEndpoint,
-                        ManagedIdentityTests.Resource,
-                        MockHelpers.GetMsiImdsErrorResponse(),
-                        ManagedIdentitySource.Imds,
-                        statusCode: HttpStatusCode.GatewayTimeout,
-                        userAssignedId: userAssignedId,
-                        userAssignedIdentityId: userAssignedIdentityId);
-                }
+                    // Simulate permanent 500s (to trigger the maximum number of retries)
+                    const int NUM_500 = ImdsRetryPolicy.EXPONENTIAL_STRATEGY_NUM_RETRIES + 1; // initial request + maximum number of retries (3)
+                    for (int i = 0; i < NUM_500; i++)
+                    {
+                        httpManager.AddManagedIdentityMockHandler(
+                            ManagedIdentityTests.ImdsEndpoint,
+                            ManagedIdentityTests.Resource,
+                            MockHelpers.GetMsiImdsErrorResponse(),
+                            ManagedIdentitySource.Imds,
+                            statusCode: HttpStatusCode.GatewayTimeout,
+                            userAssignedId: userAssignedId,
+                            userAssignedIdentityId: userAssignedIdentityId);
+                    }
 
-                msalException = null;
-                stopwatch = Stopwatch.StartNew();
-                try
-                {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    msalException = ex as MsalServiceException;
-                }
-                stopwatch.Stop();
-                Assert.IsNotNull(msalException);
+                    MsalServiceException msalException = null;
+                    var stopwatch = Stopwatch.StartNew();
+                    try
+                    {
+                        await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        msalException = ex as MsalServiceException;
+                    }
+                    stopwatch.Stop();
+                    Assert.IsNotNull(msalException);
 
-                // ensure that the second request was made and retried 3 times
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                    // ensure that the first request was made and retried 3 times
+                    Assert.AreEqual(httpManager.QueueSize, 0);
 
-                for (int i = 0; i < NUM_500; i++)
-                {
-                    httpManager.AddManagedIdentityMockHandler(
-                        ManagedIdentityTests.ImdsEndpoint,
-                        ManagedIdentityTests.Resource,
-                        MockHelpers.GetMsiImdsErrorResponse(),
-                        ManagedIdentitySource.Imds,
-                        statusCode: HttpStatusCode.GatewayTimeout,
-                        userAssignedId: userAssignedId,
-                        userAssignedIdentityId: userAssignedIdentityId);
-                }
+                    for (int i = 0; i < NUM_500; i++)
+                    {
+                        httpManager.AddManagedIdentityMockHandler(
+                            ManagedIdentityTests.ImdsEndpoint,
+                            ManagedIdentityTests.Resource,
+                            MockHelpers.GetMsiImdsErrorResponse(),
+                            ManagedIdentitySource.Imds,
+                            statusCode: HttpStatusCode.GatewayTimeout,
+                            userAssignedId: userAssignedId,
+                            userAssignedIdentityId: userAssignedIdentityId);
+                    }
 
-                msalException = null;
-                stopwatch = Stopwatch.StartNew();
-                try
-                {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    msalException = ex as MsalServiceException;
-                }
-                stopwatch.Stop();
-                Assert.IsNotNull(msalException);
+                    msalException = null;
+                    stopwatch = Stopwatch.StartNew();
+                    try
+                    {
+                        await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        msalException = ex as MsalServiceException;
+                    }
+                    stopwatch.Stop();
+                    Assert.IsNotNull(msalException);
 
-                // ensure that the third request was made and retried 3 times
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                    // ensure that the second request was made and retried 3 times
+                    Assert.AreEqual(httpManager.QueueSize, 0);
+
+                    for (int i = 0; i < NUM_500; i++)
+                    {
+                        httpManager.AddManagedIdentityMockHandler(
+                            ManagedIdentityTests.ImdsEndpoint,
+                            ManagedIdentityTests.Resource,
+                            MockHelpers.GetMsiImdsErrorResponse(),
+                            ManagedIdentitySource.Imds,
+                            statusCode: HttpStatusCode.GatewayTimeout,
+                            userAssignedId: userAssignedId,
+                            userAssignedIdentityId: userAssignedIdentityId);
+                    }
+
+                    msalException = null;
+                    stopwatch = Stopwatch.StartNew();
+                    try
+                    {
+                        await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        msalException = ex as MsalServiceException;
+                    }
+                    stopwatch.Stop();
+                    Assert.IsNotNull(msalException);
+
+                    // ensure that the third request was made and retried 3 times
+                    Assert.AreEqual(httpManager.QueueSize, 0);
+                }
             }
         }
 
@@ -409,46 +419,48 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ImdsFails400WhichIsNonRetriableAndRetryPolicyIsNotTriggeredAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
 
-                ManagedIdentityId managedIdentityId = userAssignedId == null
-                    ? ManagedIdentityId.SystemAssigned
-                    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
-                    .WithHttpManager(httpManager);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.ImdsEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySource.Imds,
-                    statusCode: HttpStatusCode.BadRequest,
-                    userAssignedId: userAssignedId,
-                    userAssignedIdentityId: userAssignedIdentityId);
-
-                MsalServiceException msalException = null;
-                var stopwatch = Stopwatch.StartNew();
-                try
+                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    msalException = ex as MsalServiceException;
-                }
-                stopwatch.Stop();
-                Assert.IsNotNull(msalException);
+                    ManagedIdentityId managedIdentityId = userAssignedId == null
+                        ? ManagedIdentityId.SystemAssigned
+                        : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                        .WithHttpManager(httpManager);
 
-                // ensure that only the initial request was made
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                    // Disable cache to avoid pollution
+                    miBuilder.Config.AccessorOptions = null;
+
+                    var mi = miBuilder.Build();
+
+                    httpManager.AddManagedIdentityMockHandler(
+                        ManagedIdentityTests.ImdsEndpoint,
+                        ManagedIdentityTests.Resource,
+                        MockHelpers.GetMsiImdsErrorResponse(),
+                        ManagedIdentitySource.Imds,
+                        statusCode: HttpStatusCode.BadRequest,
+                        userAssignedId: userAssignedId,
+                        userAssignedIdentityId: userAssignedIdentityId);
+
+                    MsalServiceException msalException = null;
+                    var stopwatch = Stopwatch.StartNew();
+                    try
+                    {
+                        await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        msalException = ex as MsalServiceException;
+                    }
+                    stopwatch.Stop();
+                    Assert.IsNotNull(msalException);
+
+                    // ensure that only the initial request was made
+                    Assert.AreEqual(httpManager.QueueSize, 0);
+                }
             }
         }
 
@@ -458,46 +470,48 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ImdsFails500AndRetryPolicyIsDisabledAndNotTriggeredAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsHost);
 
-                ManagedIdentityId managedIdentityId = userAssignedId == null
-                    ? ManagedIdentityId.SystemAssigned
-                    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
-                    .WithHttpManager(httpManager);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.ImdsEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySource.Imds,
-                    statusCode: HttpStatusCode.InternalServerError,
-                    userAssignedId: userAssignedId,
-                    userAssignedIdentityId: userAssignedIdentityId);
-
-                MsalServiceException msalException = null;
-                var stopwatch = Stopwatch.StartNew();
-                try
+                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
                 {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    msalException = ex as MsalServiceException;
-                }
-                stopwatch.Stop();
-                Assert.IsNotNull(msalException);
+                    ManagedIdentityId managedIdentityId = userAssignedId == null
+                        ? ManagedIdentityId.SystemAssigned
+                        : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                        .WithHttpManager(httpManager);
 
-                // ensure that only the initial request was made
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                    // Disable cache to avoid pollution
+                    miBuilder.Config.AccessorOptions = null;
+
+                    var mi = miBuilder.Build();
+
+                    httpManager.AddManagedIdentityMockHandler(
+                        ManagedIdentityTests.ImdsEndpoint,
+                        ManagedIdentityTests.Resource,
+                        MockHelpers.GetMsiImdsErrorResponse(),
+                        ManagedIdentitySource.Imds,
+                        statusCode: HttpStatusCode.InternalServerError,
+                        userAssignedId: userAssignedId,
+                        userAssignedIdentityId: userAssignedIdentityId);
+
+                    MsalServiceException msalException = null;
+                    var stopwatch = Stopwatch.StartNew();
+                    try
+                    {
+                        await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        msalException = ex as MsalServiceException;
+                    }
+                    stopwatch.Stop();
+                    Assert.IsNotNull(msalException);
+
+                    // ensure that only the initial request was made
+                    Assert.AreEqual(httpManager.QueueSize, 0);
+                }
             }
         }
     }
