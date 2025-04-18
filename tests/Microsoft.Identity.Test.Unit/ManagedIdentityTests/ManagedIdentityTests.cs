@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, ManagedIdentitySource.DefaultToImds)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, ManagedIdentitySource.Imds)]
         [DataRow(null, ManagedIdentitySource.Imds, ManagedIdentitySource.DefaultToImds)]
         [DataRow(AzureArcEndpoint, ManagedIdentitySource.AzureArc, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell, ManagedIdentitySource.CloudShell)]
