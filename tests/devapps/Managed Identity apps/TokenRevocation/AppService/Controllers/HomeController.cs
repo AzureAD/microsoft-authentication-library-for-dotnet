@@ -121,8 +121,8 @@ namespace AppServiceTokenRevocation.Controllers
             }
         }
 
-        public async Task<ActionResult> CallArmWithUami(
-            [FromQuery(Name = "userAssignedClientId")] string? userAssignedClientId = null,
+        public async Task<ActionResult> GetSecretWithUami(
+            [FromQuery(Name = "userAssignedClientId")] string? userAssignedClientId = "04ca4d6a-c720-4ba1-aa06-f6634b73fe7a",
             [FromQuery(Name = "userAssignedResourceId")] string? userAssignedResourceId = null,
             [FromQuery(Name = "userAssignedObjectId")] string? userAssignedObjectId = null,
             [FromQuery(Name = "claims")] string? claims = null)
@@ -162,6 +162,71 @@ namespace AppServiceTokenRevocation.Controllers
 
                 ViewBag.Message = secretValue;
                 return View();
+            }
+            catch (MsalServiceException ex)
+            {
+                ViewBag.Title = "MsalServiceException Thrown!!!";
+                ViewBag.Error = "MsalServiceException";
+                ViewBag.Message = ex.Message;
+                return View();
+            }
+            catch (MsalException ex)
+            {
+                ViewBag.Title = "MsalException Thrown!!!";
+                ViewBag.Error = "MsalException";
+                ViewBag.Message = ex.Message;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Title = "Exception Thrown!!!";
+                ViewBag.Error = "Exception";
+                ViewBag.Message = ex.Message;
+                return View();
+            }
+        }
+
+        public async Task<ActionResult> GetSecretWithUamiClaims(
+            [FromQuery(Name = "userAssignedClientId")] string? userAssignedClientId = "04ca4d6a-c720-4ba1-aa06-f6634b73fe7a",
+            [FromQuery(Name = "userAssignedResourceId")] string? userAssignedResourceId = null,
+            [FromQuery(Name = "userAssignedObjectId")] string? userAssignedObjectId = null,
+            [FromQuery(Name = "claims")] string? claims = "claims")
+        {
+            try
+            {
+                string resource = "https://vault.azure.net";
+                var kvUri = "https://revoguardkeyvault.vault.azure.net/";
+                var secretName = "RevoGuardSecret";
+
+                //Get a managed identity token using Microsoft Identity Client
+                IManagedIdentityApplication mi = CreateManagedIdentityApplication(
+                    userAssignedClientId,
+                    userAssignedResourceId,
+                    userAssignedObjectId);
+
+                AuthenticationResult result;
+
+                if (string.IsNullOrEmpty(claims))
+                {
+                    result = await mi.AcquireTokenForManagedIdentity(resource).ExecuteAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    result = await mi.AcquireTokenForManagedIdentity(resource).WithClaims(claims).ExecuteAsync().ConfigureAwait(false);
+                }
+
+                var accessToken = result.AccessToken;
+
+                //create an HttpClient using IHttpClientFactory
+                HttpClient httpClient = _httpClientFactory.CreateClient();
+
+                //Use the access token to read secrets from the key vault 
+                httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+                var response = await httpClient.GetAsync($"{kvUri}/secrets/{secretName}?api-version=7.2").ConfigureAwait(false);
+                var secretValue = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                ViewBag.Message = secretValue;
+                return View("GetSecretWithUami");
             }
             catch (MsalServiceException ex)
             {

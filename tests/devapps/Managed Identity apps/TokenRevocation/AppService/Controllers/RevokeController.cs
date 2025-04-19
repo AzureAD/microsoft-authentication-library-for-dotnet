@@ -97,7 +97,7 @@ namespace AppServiceTokenRevocation.Controllers
             ViewBag.RevokeContent = revokeContent;
             ViewBag.Error = errorMessage;
 
-            return View("Revoke");              
+            return View("Revoke");           
         }
 
         private static X509Certificate2? FindCertificateByThumbprint(string thumbprint)
