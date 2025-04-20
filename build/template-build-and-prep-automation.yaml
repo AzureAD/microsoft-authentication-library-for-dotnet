@@ -53,6 +53,13 @@ steps:
     Contents: '**/bin/**/**'
     TargetFolder: '$(Build.SourcesDirectory)/WAM'
 
+- task: CopyFiles@2
+  displayName: 'Stage Managed Identity App For VM'
+  inputs:
+    SourceFolder: 'tests/devapps/Managed Identity apps/ManagedIdentityAppVM'
+    Contents: '**/bin/**/**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/managedIdentityDevApp'
+
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
   inputs:
