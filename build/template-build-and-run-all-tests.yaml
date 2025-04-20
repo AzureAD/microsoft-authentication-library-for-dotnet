@@ -94,3 +94,15 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-test-on-linux.yaml
+  
+- job: 'RunManagedIdentityDevAppOnCustom'
+  displayName: 'Managed Identity - Azure VM E2E Tests'
+  dependsOn:
+    - 'BuildAndStageProjects'
+  pool:
+    name: 'MSALMSIAZUREVM'
+  variables:
+      runCodesignValidationInjection: false
+      Codeql.SkipTaskAutoInjection: true
+  steps:
+  - template: template-run-managed-identity-e2e-tests.yaml

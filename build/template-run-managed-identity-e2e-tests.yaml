@@ -1,0 +1,21 @@
+# template-run-managed-identity-devapp.yaml
+parameters:
+  artifactName: 'drop'                                
+  tfm: 'net8.0'
+  exeName: 'ManagedIdentityAppVM.exe'
+
+steps:
+# 1. Pull the previously?published artifact
+- task: DownloadPipelineArtifact@2
+  displayName: 'Download MI Dev App'
+  inputs:
+    buildType: current
+    artifactName: ${{ parameters.artifactName }}
+    targetPath: '$(Pipeline.Workspace)/artifacts'
+
+# 2. Run the dev?app
+- powershell: |
+    $exe = "$(Pipeline.Workspace)\artifacts\managedIdentityDevApp\bin\Release\${{ parameters.tfm }}\${{ parameters.exeName }}"
+    Write-Host "Running: $exe"
+    if ($exe -like '*.exe') { & "$exe" } else { dotnet "$exe" }
+  displayName: 'Run Managed Identity E2E Tests on Azure VM'
