@@ -18,4 +18,4 @@ steps:
     $exe = "$(Pipeline.Workspace)\artifacts\managedIdentityDevApp\bin\Release\${{ parameters.tfm }}\${{ parameters.exeName }}"
     Write-Host "Running: $exe"
     if ($exe -like '*.exe') { & "$exe" } else { dotnet "$exe" }
-  displayName: 'Run Managed Identity App Azure ARC'
+  displayName: 'Run Managed Identity E2E Tests on Azure ARC'
