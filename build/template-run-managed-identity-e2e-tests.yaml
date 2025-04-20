@@ -1,0 +1,20 @@
+# template-run-managed-identity-devapp.yaml
+parameters:
+  artifactName: 'drop'                                
+  tfm: 'net8.0'
+  exeName: 'ManagedIdentityAppVM.exe'
+
+steps:
+# 1. Pull the previously‑published artifact
+- task: DownloadPipelineArtifact@2
+  inputs:
+    buildType: current
+    artifactName: ${{ parameters.artifactName }}
+    targetPath: '$(Pipeline.Workspace)/artifacts'
+
+# 2. Run the dev‑app
+- powershell: |
+    $exe = "$(Pipeline.Workspace)\artifacts\managedIdentityDevApp\bin\Release\${{ parameters.tfm }}\${{ parameters.exeName }}"
+    Write‑Host "Running: $dll"
+    dotnet $exe
+  displayName: 'Run ManagedIdentityAppVM'
