@@ -100,7 +100,7 @@ jobs: #Build and stage projects
   dependsOn:
     - 'BuildAndStageProjects'
   pool:
-    name: 'MSALMSIAZUREVM'
+    name: 'ID4SMSIHostedAgent'
   variables:
       runCodesignValidationInjection: false
       Codeql.SkipTaskAutoInjection: true
