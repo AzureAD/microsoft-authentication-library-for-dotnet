@@ -103,4 +103,4 @@ jobs: #Build and stage projects
       runCodesignValidationInjection: false
       Codeql.SkipTaskAutoInjection: true
   steps:
-  - template: template-run-managed-identity-devapp.yaml
+  - template: template-run-managed-identity-e2e-tests.yaml
