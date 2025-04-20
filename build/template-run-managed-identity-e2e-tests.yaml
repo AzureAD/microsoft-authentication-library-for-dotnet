@@ -16,8 +16,6 @@ steps:
 # 2. Run the dev‑app
 - powershell: |
     $exe = "$(Pipeline.Workspace)\artifacts\managedIdentityDevApp\bin\Release\${{ parameters.tfm }}\${{ parameters.exeName }}"
-    Write-Host "Running: $exe"             
-    if ($exe -like '*.exe') { & "$exe" }   
-    else               { dotnet "$exe" }   
-  pwsh: true                               
+    Write-Host "Running: $exe"
+    if ($exe -like '*.exe') { & "$exe" } else { dotnet "$exe" }
   displayName: 'Run Managed Identity App Azure ARC'
