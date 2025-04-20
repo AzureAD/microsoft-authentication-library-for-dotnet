@@ -96,7 +96,9 @@ jobs: #Build and stage projects
   - template: template-test-on-linux.yaml
 
 - job: 'RunManagedIdentityDevAppOnCustom'
-  displayName: 'Execute ManagedIdentityAppVM'
+  displayName: 'Managed Identity - Azure ARC E2E Tests'
+  dependsOn:
+    - 'BuildAndStageProjects'
   pool:
     name: 'MSALMSIAZUREARC'
   variables:
