@@ -23,6 +23,7 @@ do
             .ExecuteAsync().ConfigureAwait(false);
 
         Console.WriteLine("Success");
+        return 0;
         Console.ReadLine();
     }
     catch (MsalServiceException e)
@@ -30,6 +31,7 @@ do
         Console.WriteLine(e.ErrorCode);
         Console.WriteLine(e.Message);
         Console.WriteLine(e.StackTrace);
+        return 1;
         Console.ReadLine();
     }
 
