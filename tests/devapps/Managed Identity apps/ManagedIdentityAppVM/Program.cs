@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
@@ -12,30 +12,28 @@ IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(Manage
                 .Build();
 
 string? scope = "https://management.azure.com";
+int exit; 
 
-do
+Console.WriteLine($"Acquiring token with scope {scope}");
+
+try
 {
-    Console.WriteLine($"Acquiring token with scope {scope}");
+    var result = await mi.AcquireTokenForManagedIdentity(scope)
+        .ExecuteAsync().ConfigureAwait(false);
 
-    try
-    {
-        var result = await mi.AcquireTokenForManagedIdentity(scope)
-            .ExecuteAsync().ConfigureAwait(false);
+    Console.WriteLine("Success");
+    exit = 0;
+}
+catch (MsalServiceException e)
+{
+    Console.WriteLine(e.ErrorCode);
+    Console.WriteLine(e.Message);
+    Console.WriteLine(e.StackTrace);
+    exit = 1;
+}
 
-        Console.WriteLine("Success");
-        return 0;
-    }
-    catch (MsalServiceException e)
-    {
-        Console.WriteLine(e.ErrorCode);
-        Console.WriteLine(e.Message);
-        Console.WriteLine(e.StackTrace);
-        return 1;
-    }
-
-    Console.WriteLine("Enter the scope to acquire token.");
-    scope = Console.ReadLine();
-} while (!string.IsNullOrEmpty(scope));
+return exit;
+    
 
 class IdentityLogger : IIdentityLogger
 {
