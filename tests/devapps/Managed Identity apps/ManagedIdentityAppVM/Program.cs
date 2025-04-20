@@ -24,7 +24,6 @@ do
 
         Console.WriteLine("Success");
         return 0;
-        Console.ReadLine();
     }
     catch (MsalServiceException e)
     {
@@ -32,7 +31,6 @@ do
         Console.WriteLine(e.Message);
         Console.WriteLine(e.StackTrace);
         return 1;
-        Console.ReadLine();
     }
 
     Console.WriteLine("Enter the scope to acquire token.");
