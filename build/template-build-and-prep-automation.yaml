@@ -54,7 +54,7 @@ steps:
     TargetFolder: '$(Build.SourcesDirectory)/WAM'
 
 - task: CopyFiles@2
-  displayName: 'Stage Managed Identity App For VM'
+  displayName: 'Stage Managed Identity App For E2E Tests'
   inputs:
     SourceFolder: 'tests/devapps/Managed Identity apps/ManagedIdentityAppVM'
     Contents: '**/bin/**/**'
