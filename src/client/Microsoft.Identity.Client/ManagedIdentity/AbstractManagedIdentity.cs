@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            validateServerCertificate: null, cancellationToken: cancellationToken).ConfigureAwait(false);
+                            validateServerCertificate: ValidateServerCertificate, 
+                            cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -78,7 +79,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            validateServerCertificate: null, cancellationToken: cancellationToken)
+                            validateServerCertificate: ValidateServerCertificate, 
+                            cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
 
                 }

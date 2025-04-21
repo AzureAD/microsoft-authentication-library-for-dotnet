@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -88,6 +89,44 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var callback = ((ServiceFabricManagedIdentitySource)sf).ValidateServerCertificate(null, certificate, chain, sslPolicyErrors);
                 Assert.IsNotNull(callback);
             }
+        }
+
+        [TestMethod]
+        public async Task SFThrowsWhenGetHttpClientWithValidationIsNotImplementedAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342/metadata/identity/oauth2/token");
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpClientFactory(new MsalSFFactoryNotImplementedException());
+
+                // Disabling the shared cache to avoid the test to pass because of the cache
+                miBuilder.Config.AccessorOptions = null;
+                var mi = miBuilder.BuildConcrete();
+
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                 {
+                     await mi.AcquireTokenForManagedIdentity(Resource)
+                         .ExecuteAsync().ConfigureAwait(false);
+                 }).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.IsInstanceOfType(ex.InnerException, typeof(NotImplementedException));
+            }
+        }
+    }
+
+    internal class MsalSFFactoryNotImplementedException : IMsalSFHttpClientFactory
+    {
+        public HttpClient GetHttpClient(Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
+        {
+            throw new NotImplementedException();
+        }
+
+        public HttpClient GetHttpClient()
+        {
+            return new HttpClient();
         }
     }
 }
