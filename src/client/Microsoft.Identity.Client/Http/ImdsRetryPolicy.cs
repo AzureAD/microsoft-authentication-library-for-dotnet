@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client.Http
         // referenced in unit tests, cannot be private
         public const int EXPONENTIAL_STRATEGY_NUM_RETRIES = 3;
         public const int LINEAR_STRATEGY_NUM_RETRIES = 7;
+        public static int numRetries { get; private set; } = 0;
 
         // these will be overridden in the unit tests so that they run faster
         public static int MIN_EXPONENTIAL_BACKOFF_MS { get; set; } = 1000;
@@ -23,6 +24,8 @@ namespace Microsoft.Identity.Client.Http
         public static int HTTP_STATUS_GONE_RETRY_AFTER_MS { get; set; } = HTTP_STATUS_GONE_RETRY_AFTER_MS_INTERNAL;
 
         private int _maxRetries;
+
+
 
         private ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
             ImdsRetryPolicy.MIN_EXPONENTIAL_BACKOFF_MS,
@@ -46,6 +49,9 @@ namespace Microsoft.Identity.Client.Http
             if (HttpRetryConditions.Imds(response, exception) &&
                 retryCount < _maxRetries)
             {
+                // used below in the log statement, also referenced in the unit tests
+                numRetries = retryCount + 1;
+
                 int retryAfterDelay = httpStatusCode == (int)HttpStatusCode.Gone
                     ? HTTP_STATUS_GONE_RETRY_AFTER_MS
                     : _exponentialRetryStrategy.CalculateDelay(retryCount);
