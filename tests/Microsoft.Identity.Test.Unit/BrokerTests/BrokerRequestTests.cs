@@ -830,6 +830,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 // Arrange
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                await _parameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
                 var builder = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
