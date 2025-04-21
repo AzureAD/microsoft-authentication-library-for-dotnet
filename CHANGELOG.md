@@ -1,3 +1,10 @@
+4.71.0
+=======
+
+### Bug Fixes
+
+- Enable the Service Fabric flow to get a `httpClient` from the factory with ssl validation callback. See [Issue #5220](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5220)
+
 4.70.2
 =======
 
