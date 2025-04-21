@@ -30,7 +30,9 @@ namespace Microsoft.Identity.Client.Http
             // If parsing as seconds fails, try parsing as an HTTP date
             if (DateTime.TryParse(retryHeader, out DateTime retryDate))
             {
-                int millisToSleep = (int)(retryDate - DateTime.UtcNow).TotalMilliseconds;
+                DateTime.TryParse(DateTime.UtcNow.ToString("R"), out DateTime nowDate);
+
+                int millisToSleep = (int)(retryDate - nowDate).TotalMilliseconds;
                 return Math.Max(minimumDelay, millisToSleep);
             }
 
