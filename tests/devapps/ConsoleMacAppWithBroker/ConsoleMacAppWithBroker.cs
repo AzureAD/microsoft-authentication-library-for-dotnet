@@ -11,10 +11,9 @@ class ConsoleMacAppWithBroker
     {
 
         PublicClientApplicationBuilder builder = PublicClientApplicationBuilder
-            .Create("7e5e53b7-864a-40bc-903f-89708a6af755")
-            .WithRedirectUri("msauth.com.msauth.unsignedapp://auth")
-            //.WithRedirectUri("http://localhost")
-            .WithAuthority("https://login.microsoftonline.com/common");
+            .Create("04b07795-8ddb-461a-bbee-02f9e1bf7b46") // Azure CLI client id
+            .WithRedirectUri("msauth.com.msauth.unsignedapp://auth")  // Unsigned app redirect, required by broker team.
+            .WithAuthority("https://login.microsoftonline.com/organizations");
 
         builder = builder.WithLogging(SampleLogging);
 
