@@ -49,7 +49,7 @@ Steps 5-9 are new and show how the RP propagates the revocation signal.
 8. **SFRP** uses MSAL again to get a **new** token from eSTS.
 
 > [!IMPORTANT]
-> This design is only applicable to MIRP api-version=2025-03-30 (for App Service). api-version for service fabric remains unchanged. 
+> This design is only applicable to App Service (with new api-version=2025-03-30) and Service Fabric MI Resource (api-version for service fabric remains unchanged). 
 
 > [!NOTE]
 > The SHA256 conversion is done by doing a Hex-encoded SHA-256 hash of the token (UTF-8). For example: BitConverter.ToString(SHA256(Encoding.UTF8.GetBytes(accessToken))). 
