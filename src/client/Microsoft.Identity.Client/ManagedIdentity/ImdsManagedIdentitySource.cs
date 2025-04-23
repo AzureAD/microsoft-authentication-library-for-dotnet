@@ -82,6 +82,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
             }
 
+            // uncomment in follow-up IMDS retry policy PR
+            // request.RetryPolicy = new ImdsRetryPolicy();
+
             return request;
         }
 
