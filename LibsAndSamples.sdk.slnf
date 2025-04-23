@@ -2,7 +2,6 @@
   "solution": {
     "path": "LibsAndSamples.sln",
     "projects": [
-      "ManagedIdentityTokenRevocation/ManagedIdentityTokenRevocation.csproj",
       "src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj",
       "src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj",
       "src/client/Microsoft.Identity.Client.Extensions.Msal/Microsoft.Identity.Client.Extensions.Msal.csproj",
@@ -16,6 +15,7 @@
       "tests/devapps/Managed Identity apps/MSIHelperService/MSIHelperService.csproj",
       "tests/devapps/Managed Identity apps/ManagedIdentityAppVM/ManagedIdentityAppVM.csproj",
       "tests/devapps/Managed Identity apps/ManagedIdentityWebApi/ManagedIdentityWebApi.csproj",
+      "tests/devapps/Managed Identity apps/ManagedIdentityTokenRevocation/ManagedIdentityTokenRevocation.csproj",
       "tests/devapps/WAM/NetWSLWam/test.csproj",
     ]
   }
