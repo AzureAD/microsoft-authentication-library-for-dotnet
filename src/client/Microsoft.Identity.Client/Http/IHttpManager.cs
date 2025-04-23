@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Client.Http
         /// <param name="mtlsCertificate">Certificate used for MTLS authentication.</param>
         /// <param name="validateServerCertificate">Callback to validate the server cert for service fabric managed identity flow.</param>
         /// <param name="cancellationToken"></param>
+        /// <param name="retryPolicy">Retry policy to be used for the request.</param>
         /// <param name="retryCount">Number of retries to be attempted in case of retriable status codes.</param>
         /// <returns></returns>
         Task<HttpResponse> SendRequestAsync(
@@ -40,6 +41,7 @@ namespace Microsoft.Identity.Client.Http
            X509Certificate2 mtlsCertificate,
            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCertificate,
            CancellationToken cancellationToken,
+           IRetryPolicy retryPolicy = null,
            int retryCount = 0);
     }
 }

@@ -26,22 +26,41 @@ namespace Microsoft.Identity.Client.Http
     /// </remarks>
     internal class HttpManager : IHttpManager
     {
+        // referenced in unit tests, cannot be private
+        public const int DEFAULT_ESTS_MAX_RETRIES = 1;
+        // this will be overridden in the unit tests so that they run faster
+        public static int DEFAULT_ESTS_RETRY_DELAY_MS { get; set; } = 1000;
+
         protected readonly IMsalHttpClientFactory _httpClientFactory;
-        private readonly IRetryPolicy _retryPolicy;
+        private readonly bool _isManagedIdentity;
+        private readonly bool _withRetry;
         public long LastRequestDurationInMs { get; private set; }
 
         /// <summary>
-        /// A new instance of the HTTP manager with a retry *condition*. The retry policy hardcodes: 
-        /// - the number of retries (1)
-        /// - the delay between retries (1 second)
+        /// Initializes a new instance of the <see cref="HttpManager"/> class.
         /// </summary>
+        /// <param name="httpClientFactory">
+        /// An instance of <see cref="IMsalHttpClientFactory"/> used to create and manage <see cref="HttpClient"/> instances.
+        /// This factory ensures proper reuse of <see cref="HttpClient"/> to avoid socket exhaustion.
+        /// </param>
+        /// <param name="isManagedIdentity">
+        /// A boolean flag indicating whether the HTTP manager is being used in a managed identity context.
+        /// </param>
+        /// <param name="withRetry">
+        /// A boolean flag indicating whether the HTTP manager should enable retry logic for transient failures.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="httpClientFactory"/> is null.
+        /// </exception>
         public HttpManager(
             IMsalHttpClientFactory httpClientFactory,
-            IRetryPolicy retryPolicy)
+            bool isManagedIdentity,
+            bool withRetry)
         {
             _httpClientFactory = httpClientFactory ??
                 throw new ArgumentNullException(nameof(httpClientFactory));
-            _retryPolicy = retryPolicy;
+            _isManagedIdentity = isManagedIdentity;
+            _withRetry = withRetry;
         }
 
         public async Task<HttpResponse> SendRequestAsync(
@@ -54,8 +73,20 @@ namespace Microsoft.Identity.Client.Http
             X509Certificate2 bindingCertificate,
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
+            IRetryPolicy retryPolicy = null,
             int retryCount = 0)
         {
+            // Use the default STS retry policy if the request is not for managed identity
+            // and a non-default STS retry policy is not provided.
+            // Skip this if statement the dev indicated that they do not want retry logic.
+            if (!_isManagedIdentity && retryPolicy == null && _withRetry)
+            {
+                retryPolicy = new LinearRetryPolicy(
+                    DEFAULT_ESTS_RETRY_DELAY_MS,
+                    DEFAULT_ESTS_MAX_RETRIES,
+                    HttpRetryConditions.Sts);
+            }
+
             Exception timeoutException = null;
             HttpResponse response = null;
 
@@ -102,9 +133,9 @@ namespace Microsoft.Identity.Client.Http
                 timeoutException = exception;
             }
 
-            while (_retryPolicy.pauseForRetry(response, timeoutException, retryCount))
+            while (_withRetry && retryPolicy.pauseForRetry(response, timeoutException, retryCount))
             {
-                logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {_retryPolicy.DelayInMilliseconds}ms.");
+                logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {retryPolicy.DelayInMilliseconds}ms.");
                 return await SendRequestAsync(
                     endpoint,
                     headers,
@@ -113,8 +144,10 @@ namespace Microsoft.Identity.Client.Http
                     logger,
                     doNotThrow,
                     bindingCertificate,
-                    validateServerCert, cancellationToken: cancellationToken,
-                    retryCount: retryCount) // Pass the updated retry count
+                    validateServerCert,
+                    cancellationToken,
+                    retryPolicy,
+                    retryCount) // Pass the updated retry count
                     .ConfigureAwait(false);
             }
 

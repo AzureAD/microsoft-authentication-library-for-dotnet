@@ -66,7 +66,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             doNotThrow: true,
                             mtlsCertificate: null,
                             validateServerCertificate: ValidateServerCertificate, 
-                            cancellationToken: cancellationToken).ConfigureAwait(false);
+                            cancellationToken: cancellationToken,
+                            retryPolicy: request.RetryPolicy).ConfigureAwait(false);
                 }
                 else
                 {
@@ -80,7 +81,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             doNotThrow: true,
                             mtlsCertificate: null,
                             validateServerCertificate: ValidateServerCertificate, 
-                            cancellationToken: cancellationToken)
+                            cancellationToken: cancellationToken,
+                            retryPolicy: request.RetryPolicy)
                         .ConfigureAwait(false);
 
                 }

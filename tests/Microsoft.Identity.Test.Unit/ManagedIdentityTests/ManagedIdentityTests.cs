@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -1299,6 +1300,110 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Verify the ClientId for each cached entry
                 Assert.AreEqual(UserAssignedClientId, userAssignedTokens[0].ClientId, "User-assigned ClientId mismatch in cache.");
                 Assert.AreEqual(SystemAssignedClientId, systemAssignedTokens[0].ClientId, "System-assigned ClientId mismatch in cache.");
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
+        [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint)]
+        [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint)]
+        [DataRow(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint)]
+        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint)]
+        public async Task SAMIFails500PermanentlyAndRetryPolicyLifeTimeIsPerRequestAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disable cache to avoid pollution
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                // Simulate permanent 500s (to trigger the maximum number of retries)
+                int NUM_500 = ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES + 1; // initial request + maximum number of retries (3)
+                for (int i = 0; i < NUM_500; i++)
+                {
+                    httpManager.AddManagedIdentityMockHandler(
+                        endpoint,
+                        ManagedIdentityTests.Resource,
+                        "",
+                        managedIdentitySource,
+                        statusCode: HttpStatusCode.InternalServerError);
+                }
+
+                MsalServiceException msalException = null;
+                try
+                {
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .ExecuteAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    msalException = ex as MsalServiceException;
+                }
+                Assert.IsNotNull(msalException);
+
+                // ensure that the first request was made and retried 3 times
+                Assert.AreEqual(LinearRetryPolicy.numRetries, ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
+                Assert.AreEqual(httpManager.QueueSize, 0);
+
+                for (int i = 0; i < NUM_500; i++)
+                {
+                    httpManager.AddManagedIdentityMockHandler(
+                        endpoint,
+                        ManagedIdentityTests.Resource,
+                        "",
+                        managedIdentitySource,
+                        statusCode: HttpStatusCode.InternalServerError);
+                }
+
+                msalException = null;
+                try
+                {
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .ExecuteAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    msalException = ex as MsalServiceException;
+                }
+                Assert.IsNotNull(msalException);
+
+                // ensure that the second request was made and retried 3 times
+                // (numRetries would be x2 if retry policy was NOT per request)
+                Assert.AreEqual(LinearRetryPolicy.numRetries, ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
+                Assert.AreEqual(httpManager.QueueSize, 0);
+
+                for (int i = 0; i < NUM_500; i++)
+                {
+                    httpManager.AddManagedIdentityMockHandler(
+                        endpoint,
+                        ManagedIdentityTests.Resource,
+                        "",
+                        managedIdentitySource,
+                        statusCode: HttpStatusCode.InternalServerError);
+                }
+
+                msalException = null;
+                try
+                {
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .ExecuteAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    msalException = ex as MsalServiceException;
+                }
+                Assert.IsNotNull(msalException);
+
+                // ensure that the third request was made and retried 3 times
+                // (numRetries would be x3 if retry policy was NOT per request)
+                Assert.AreEqual(LinearRetryPolicy.numRetries, ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
+                Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }
     }

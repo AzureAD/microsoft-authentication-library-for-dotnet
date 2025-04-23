@@ -50,6 +50,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             X509Certificate2 mtlsCertificate,
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
+            IRetryPolicy retryPolicy = null,
             int retryCount = 0)
         {
             //Get token for the MSIHelperService
