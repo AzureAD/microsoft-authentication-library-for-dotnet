@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange - common stuff
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
-                MockInstanceDiscovery(harness.HttpManager);
+                //MockInstanceDiscovery(harness.HttpManager);
 
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange - common stuff
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
-                MockInstanceDiscovery(harness.HttpManager);
+                //MockInstanceDiscovery(harness.HttpManager);
 
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 

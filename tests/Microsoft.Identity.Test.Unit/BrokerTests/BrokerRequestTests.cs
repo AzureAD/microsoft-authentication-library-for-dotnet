@@ -725,7 +725,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateBrokerHelper())
             {
                 var tokenResponse = CreateTokenResponseForTest();
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                //harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 IBroker broker = Substitute.For<IBroker>();
                 _acquireTokenSilentParameters.Account = PublicClientApplication.OperatingSystemAccount;
                 var brokerSilentAuthStrategy =
@@ -829,8 +829,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateBrokerHelper())
             {
                 // Arrange
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                await _parameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
+                //harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                //await _parameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
                 var builder = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
