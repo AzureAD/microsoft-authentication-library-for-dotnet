@@ -36,16 +36,16 @@ class ConsoleMacAppWithBroker
         Console.WriteLine($"Intaractive call. Access token: {result.AccessToken}");
         Console.WriteLine($"Expires on: {result.ExpiresOn}");
 
-        // IAccount account = result.Account;
-        // AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(new string[] { "https://graph.microsoft.com/.default" }, account);
-        // result = await silentBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-        // Console.WriteLine($"Silent Call. Access token: {result.AccessToken}");
-        // Console.WriteLine($"Expires on: {result.ExpiresOn}");
+        IAccount account = result.Account;
+        AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(new string[] { "https://graph.microsoft.com/.default" }, account);
+        result = await silentBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        Console.WriteLine($"Silent Call. Access token: {result.AccessToken}");
+        Console.WriteLine($"Expires on: {result.ExpiresOn}");
 
-        // result = await interactiveBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        result = await interactiveBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
-        // Console.WriteLine($"Second intaractive call. Access token: {result.AccessToken}");
-        // Console.WriteLine($"Expires on: {result.ExpiresOn}");
+        Console.WriteLine($"Second intaractive call. Access token: {result.AccessToken}");
+        Console.WriteLine($"Expires on: {result.ExpiresOn}");
 
     }
 

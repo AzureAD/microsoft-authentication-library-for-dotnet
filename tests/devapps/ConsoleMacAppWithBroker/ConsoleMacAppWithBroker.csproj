@@ -8,8 +8,8 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<!-- <ProjectReference Include="../../../src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj" /> -->
-    <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.68.5-internal-preview" />
+		<ProjectReference Include="../../../src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj" />
+    <!-- <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.68.5-internal-preview" /> -->
 
     <!-- <ProjectReference Include="../../../../microsoft-authentication-library-for-cpp/msalruntime/interop/net/Microsoft.Identity.Client.NativeInterop.csproj" />
     <None Include="../../../../microsoft-authentication-library-for-cpp/_builds/macOS/msalruntime/lib/Debug/libmsalruntime.dylib">
