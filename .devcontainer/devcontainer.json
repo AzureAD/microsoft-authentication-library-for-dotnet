@@ -1,0 +1,33 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/devcontainers/images/tree/main/src/dotnet
+{
+    "name": "C# (.NET)",
+    "build": {
+      "dockerfile": "Dockerfile"
+    },
+    // Add the IDs of extensions you want installed when the container is created.
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csdevkit"
+            ],
+            "settings": {
+                "dotnet.defaultSolution": "LibsAndSamples.sdk.slnf",
+                "omnisharp.enableRoslynAnalyzers": true,
+                "omnisharp.enableEditorConfigSupport": true,
+                "omnisharp.enableImportCompletion": true
+            }
+        }
+    },
+    // Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "vscode",
+    "hostRequirements": {
+      "cpus": 4
+    },
+    "features": {
+      "ghcr.io/devcontainers/features/dotnet:2": {
+        // This needs to line up with global.json
+        "version": "8.0.404"
+      }
+    }
+  }

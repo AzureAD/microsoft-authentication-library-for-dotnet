@@ -47,12 +47,11 @@ namespace Microsoft.Identity.Client.WsTrust
                     uri.Uri,
                     msalIdParams,
                     body: null,
-                    HttpMethod.Get,
+                    method: HttpMethod.Get,
                     logger: requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
-                    customHttpClient: null,
-                    requestContext.UserCancellationToken)
+                    validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
                 .ConfigureAwait(false);
 
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
@@ -95,6 +94,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 { "SOAPAction", (wsTrustEndpoint.Version == WsTrustVersion.WsTrust2005) ? XmlNamespace.Issue2005.ToString() : XmlNamespace.Issue.ToString() }
             };
 
+            // CodeQL [SM00417] False Positive: wsTrustRequest is a body parameter for HttpRequest that follows WsTrust protocol
             var body = new StringContent(
                 wsTrustRequest,
                 Encoding.UTF8, "application/soap+xml");
@@ -103,12 +103,12 @@ namespace Microsoft.Identity.Client.WsTrust
                     wsTrustEndpoint.Uri,
                     headers,
                     body: body,
-                    HttpMethod.Post,
+                    method: HttpMethod.Post,
                     logger: requestContext.Logger,
                     doNotThrow: true,
                     mtlsCertificate: null,
-                    customHttpClient: null,
-                    requestContext.UserCancellationToken).ConfigureAwait(false);
+                    validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
+                .ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -175,16 +175,15 @@ namespace Microsoft.Identity.Client.WsTrust
             var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
 
             var httpResponse = await _httpManager.SendRequestAsync(
-               uri,
-               msalIdParams,
-               body: null,
-               HttpMethod.Get,
-               logger: requestContext.Logger,
-               doNotThrow: false,
-               mtlsCertificate: null,
-               customHttpClient: null,
-               requestContext.UserCancellationToken)
-                  .ConfigureAwait(false);
+                   uri,
+                   msalIdParams,
+                   body: null,
+                   method: HttpMethod.Get,
+                   logger: requestContext.Logger,
+                   doNotThrow: false,
+                   mtlsCertificate: null,
+                   validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
+                .ConfigureAwait(false);
 
             if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)
             {
