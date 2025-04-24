@@ -19,6 +19,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -651,77 +652,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint, HttpStatusCode.NotFound)]
-        public async Task ManagedIdentityTestRetryAsync(ManagedIdentitySource managedIdentitySource, string endpoint, HttpStatusCode statusCode)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
-            {
-                SetEnvironmentVariables(managedIdentitySource, endpoint);
-
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: statusCode);
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: statusCode);
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: statusCode);
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: statusCode);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(Resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-                Assert.IsTrue(ex.IsRetryable);
-            }
-        }
-
         [TestMethod] 
         public async Task SystemAssignedManagedIdentityApiIdTestAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
+     
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -1304,17 +1241,27 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
-        [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint)]
-        [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint)]
-        [DataRow(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint)]
-        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
-        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint)]
-        public async Task SAMIFails500PermanentlyAndRetryPolicyLifeTimeIsPerRequestAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, 429)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
+        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint, HttpStatusCode.GatewayTimeout)]
+        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint, HttpStatusCode.GatewayTimeout)]
+        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint, HttpStatusCode.GatewayTimeout)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint, HttpStatusCode.GatewayTimeout)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.GatewayTimeout)]
+        public async Task ManagedIdentityRetryPolicyLifeTimeIsPerRequestAsync(
+            ManagedIdentitySource managedIdentitySource,
+            string endpoint,
+            HttpStatusCode statusCode)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
@@ -1323,22 +1270,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                // Simulate permanent 500s (to trigger the maximum number of retries)
-                int NUM_500 = ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES + 1; // initial request + maximum number of retries (3)
-                for (int i = 0; i < NUM_500; i++)
+                // Simulate permanent errors (to trigger the maximum number of retries)
+                const int NUM_ERRORS = ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES + 1; // initial request + maximum number of retries (3)
+                for (int i = 0; i < NUM_ERRORS; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
                         endpoint,
-                        ManagedIdentityTests.Resource,
+                        Resource,
                         "",
                         managedIdentitySource,
-                        statusCode: HttpStatusCode.InternalServerError);
+                        statusCode: statusCode);
                 }
 
                 MsalServiceException msalException = null;
                 try
                 {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    await mi.AcquireTokenForManagedIdentity(Resource)
                         .ExecuteAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -1347,15 +1294,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
                 Assert.IsNotNull(msalException);
 
-                // ensure that the first request was made and retried 3 times
-                Assert.AreEqual(LinearRetryPolicy.numRetries, ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
+                // 4 total: request + 3 retries
+                Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
-                for (int i = 0; i < NUM_500; i++)
+                for (int i = 0; i < NUM_ERRORS; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
                         endpoint,
-                        ManagedIdentityTests.Resource,
+                        Resource,
                         "",
                         managedIdentitySource,
                         statusCode: HttpStatusCode.InternalServerError);
@@ -1364,7 +1311,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 msalException = null;
                 try
                 {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    await mi.AcquireTokenForManagedIdentity(Resource)
                         .ExecuteAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -1373,16 +1320,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
                 Assert.IsNotNull(msalException);
 
-                // ensure that the second request was made and retried 3 times
+                // 4 total: request + 3 retries
                 // (numRetries would be x2 if retry policy was NOT per request)
-                Assert.AreEqual(LinearRetryPolicy.numRetries, ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
+                Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
-                for (int i = 0; i < NUM_500; i++)
+                for (int i = 0; i < NUM_ERRORS; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
                         endpoint,
-                        ManagedIdentityTests.Resource,
+                        Resource,
                         "",
                         managedIdentitySource,
                         statusCode: HttpStatusCode.InternalServerError);
@@ -1391,7 +1338,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 msalException = null;
                 try
                 {
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    await mi.AcquireTokenForManagedIdentity(Resource)
                         .ExecuteAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -1400,9 +1347,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
                 Assert.IsNotNull(msalException);
 
-                // ensure that the third request was made and retried 3 times
+                // 4 total: request + 3 retries
                 // (numRetries would be x3 if retry policy was NOT per request)
-                Assert.AreEqual(LinearRetryPolicy.numRetries, ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
+                Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
                 Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }

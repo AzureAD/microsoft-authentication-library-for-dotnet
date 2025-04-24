@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Http
     {
         public int DelayInMilliseconds { get => throw new NotImplementedException(); }
 
-        public bool pauseForRetry(HttpResponse response, Exception exception, int retryCount)
+        public bool PauseForRetry(HttpResponse response, Exception exception, int retryCount)
         {
             return false;
         }

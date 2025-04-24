@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Http
                 timeoutException = exception;
             }
 
-            while (_withRetry && retryPolicy.pauseForRetry(response, timeoutException, retryCount))
+            while (_withRetry && retryPolicy.PauseForRetry(response, timeoutException, retryCount))
             {
                 logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {retryPolicy.DelayInMilliseconds}ms.");
                 return await SendRequestAsync(

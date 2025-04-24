@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Http
             _retryCondition = retryCondition;
         }
 
-        public bool pauseForRetry(HttpResponse response, Exception exception, int retryCount)
+        public bool PauseForRetry(HttpResponse response, Exception exception, int retryCount)
         {
             // referenced in the unit tests
             numRetries = retryCount + 1;
