@@ -3,6 +3,14 @@
 
 ### Bug Fixes
 
+- Pass the validate function to the http manager. See [Issue #5242](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5242)
+- Change the resource id param for IMDS. See [Issue #5238](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5238)
+
+4.71.0
+=======
+
+### Bug Fixes
+
 - Enable the Service Fabric flow to get a `httpClient` from the factory with ssl validation callback. See [Issue #5220](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5220)
 
 4.70.2
