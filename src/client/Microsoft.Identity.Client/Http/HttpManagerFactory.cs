@@ -11,9 +11,9 @@ namespace Microsoft.Identity.Client.Http
         public static IHttpManager GetHttpManager(
             IMsalHttpClientFactory httpClientFactory,
             bool isManagedIdentity = false,
-            bool withRetry = true)
+            bool disableInternalRetries = false)
         {
-            return new HttpManager(httpClientFactory, isManagedIdentity, withRetry);
+            return new HttpManager(httpClientFactory, isManagedIdentity, disableInternalRetries);
         }
     }
 }

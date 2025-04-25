@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Http
 
         protected readonly IMsalHttpClientFactory _httpClientFactory;
         private readonly bool _isManagedIdentity;
-        private readonly bool _withRetry;
+        private readonly bool _disableInternalRetries;
         public long LastRequestDurationInMs { get; private set; }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Http
         /// <param name="isManagedIdentity">
         /// A boolean flag indicating whether the HTTP manager is being used in a managed identity context.
         /// </param>
-        /// <param name="withRetry">
+        /// <param name="disableInternalRetries">
         /// A boolean flag indicating whether the HTTP manager should enable retry logic for transient failures.
         /// </param>
         /// <exception cref="ArgumentNullException">
@@ -55,12 +55,12 @@ namespace Microsoft.Identity.Client.Http
         public HttpManager(
             IMsalHttpClientFactory httpClientFactory,
             bool isManagedIdentity,
-            bool withRetry)
+            bool disableInternalRetries)
         {
             _httpClientFactory = httpClientFactory ??
                 throw new ArgumentNullException(nameof(httpClientFactory));
             _isManagedIdentity = isManagedIdentity;
-            _withRetry = withRetry;
+            _disableInternalRetries = disableInternalRetries;
         }
 
         public async Task<HttpResponse> SendRequestAsync(
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Http
             // Use the default STS retry policy if the request is not for managed identity
             // and a non-default STS retry policy is not provided.
             // Skip this if statement the dev indicated that they do not want retry logic.
-            if (!_isManagedIdentity && retryPolicy == null && _withRetry)
+            if (!_isManagedIdentity && retryPolicy == null && !_disableInternalRetries)
             {
                 retryPolicy = new LinearRetryPolicy(
                     DEFAULT_ESTS_RETRY_DELAY_MS,
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Http
                 timeoutException = exception;
             }
 
-            while (_withRetry && retryPolicy.PauseForRetry(response, timeoutException, retryCount))
+            while (!_disableInternalRetries && retryPolicy.PauseForRetry(response, timeoutException, retryCount))
             {
                 logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {retryPolicy.DelayInMilliseconds}ms.");
                 return await SendRequestAsync(

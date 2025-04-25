@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Internal
 
             HttpManager = config.HttpManager ?? 
                 HttpManagerFactory.GetHttpManager(config.HttpClientFactory ?? PlatformProxy.CreateDefaultHttpClientFactory(), 
-                config.RetryOnServerErrors, config.IsManagedIdentity);
+                config.IsManagedIdentity, config.DisableInternalRetries);
 
             HttpTelemetryManager = new HttpTelemetryManager();
 

@@ -117,6 +117,7 @@ namespace Microsoft.Identity.Client
         public bool RetryOnServerErrors { get; set; } = true;
 
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
+        public bool DisableInternalRetries { get; internal set; }
 
         public bool IsManagedIdentity { get; }
         public bool IsConfidentialClient { get; }

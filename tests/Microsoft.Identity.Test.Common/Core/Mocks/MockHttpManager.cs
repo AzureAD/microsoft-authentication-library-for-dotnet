@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public MockHttpManager(
-            bool retry,
+            bool disableInternalRetries,
             string testName = null,
             bool isManagedIdentity = false,
             Func<MockHttpMessageHandler> messageHandlerFunc = null,
@@ -47,12 +47,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             _httpManager = invokeNonMtlsHttpManagerFactory
                 ? HttpManagerFactory.GetHttpManager(
                     new MockNonMtlsHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
-                    retry,
-                    isManagedIdentity)
+                    isManagedIdentity,
+                    disableInternalRetries)
                 : HttpManagerFactory.GetHttpManager(
                     new MockHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
-                    retry,
-                    isManagedIdentity);
+                    isManagedIdentity,
+                    disableInternalRetries);
 
             _testName = testName;
         }
