@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Http
             // Use the default STS retry policy if the request is not for managed identity
             // and a non-default STS retry policy is not provided.
             // Skip this if statement the dev indicated that they do not want retry logic.
-            if (!_isManagedIdentity && retryPolicy == null && _withRetry)
+            if (!_isManagedIdentity && retryPolicy == null && !_disableInternalRetries)
             {
                 retryPolicy = new LinearRetryPolicy(
                     DEFAULT_ESTS_RETRY_DELAY_MS,
