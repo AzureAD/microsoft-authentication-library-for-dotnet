@@ -1,4 +1,7 @@
-﻿using Microsoft.Identity.Client;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Test.Common;
