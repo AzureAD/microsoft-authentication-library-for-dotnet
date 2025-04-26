@@ -110,4 +110,4 @@ jobs: #Build and stage projects
     inputs:
       command: 'test'
       projects: 'tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj'
-      arguments: '--configuration Release --verbosity normal'
+      arguments: '--configuration Release --no-restore --framework net8.0 --verbosity normal'
