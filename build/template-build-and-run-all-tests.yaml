@@ -94,3 +94,20 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-test-on-linux.yaml
+  
+- job: 'RunManagedIdentityE2ETestsOnAzureArc'
+  displayName: 'Managed Identity E2E Tests - Azure ARC Agent'
+  dependsOn:
+    - 'BuildAndStageProjects'
+  pool:
+    name: 'MSALMSIAZUREARC'
+  variables:
+    runCodesignValidationInjection: false
+    Codeql.SkipTaskAutoInjection: true
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Managed Identity E2E Tests'
+    inputs:
+      command: 'test'
+      projects: 'tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj'
+      arguments: '--configuration Release --verbosity normal'
