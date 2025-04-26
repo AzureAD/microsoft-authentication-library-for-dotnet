@@ -5,7 +5,7 @@
     <TargetFrameworks>net8</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
-    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,12 +26,6 @@
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="StrongNamer" />
     <PackageReference Include="System.Formats.Asn1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="federationMetadata.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
