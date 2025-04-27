@@ -68,15 +68,15 @@ namespace Microsoft.Identity.Test.E2E
 
             var mi = BuildSami();
 
-            var cached = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
+            var result = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-            var refreshed = await mi.AcquireTokenForManagedIdentity(ArmScope)
+            result = await mi.AcquireTokenForManagedIdentity(ArmScope)
                                     .WithForceRefresh(true)
                                     .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
         }
     }
 }

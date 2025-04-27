@@ -147,6 +147,14 @@ jobs: #Build and stage projects
     Codeql.SkipTaskAutoInjection: true
 
   steps:
+  - task: Bash@3
+    displayName: Install MAUI
+    inputs:
+      targetType: 'inline'
+      script: |
+        dotnet nuget locals all --clear 
+        dotnet workload install android ios macos maui
+
   - task: DotNetCoreCLI@2
     displayName: 'Restore E2E project'
     inputs:
