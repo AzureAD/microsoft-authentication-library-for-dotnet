@@ -97,8 +97,7 @@ jobs: #Build and stage projects
   
 - job: 'RunManagedIdentityE2ETestsOnAzureArc'
   displayName: 'Managed Identity E2E Tests – Azure ARC Agent'
-  dependsOn:
-    - 'BuildAndStageProjects'
+  dependsOn: ['BuildAndStageProjects']
   pool:
     name: 'MSALMSIAZUREARC'
 
@@ -109,12 +108,13 @@ jobs: #Build and stage projects
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'Restore E2E project (net8.0)'
-    env:
-      MSBuildEnableWorkloadResolver: 'false'
     inputs:
       command: restore
       projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
-      arguments: -p:RestoreTargetFrameworks=net8.0
+      arguments: >
+        -p:TargetFrameworks=net8.0          
+        -p:RestoreTargetFrameworks=net8.0   
+        --verbosity minimal
 
   - task: VSTest@2
     displayName: 'Run Managed Identity E2E Tests (.NET Core)'
