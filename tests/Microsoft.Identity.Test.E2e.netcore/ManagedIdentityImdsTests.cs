@@ -5,14 +5,12 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.E2E
 {
-    /// <summary>
-    /// E2E tests that target the IMDS (default / VM) managed-identity endpoint.
-    /// Executed on a hosted build agent by setting RUN_IMDS_E2E=true.
-    /// </summary>
     [TestClass]
     public class ManagedIdentityImdsTests
     {
@@ -24,29 +22,50 @@ namespace Microsoft.Identity.Test.E2E
         private static bool ShouldRunImds() =>
             !IsArc() && Environment.GetEnvironmentVariable("RUN_IMDS_E2E") == "true";
 
-        private static IManagedIdentityApplication BuildSami()
+        private static IManagedIdentityApplication BuildMi(
+           string userAssignedId = null,
+           string idType = null)
         {
-            var builder = ManagedIdentityApplicationBuilder
-                            .Create(ManagedIdentityId.SystemAssigned);
+            ManagedIdentityId miId = userAssignedId is null
+                ? ManagedIdentityId.SystemAssigned
+                : idType.ToLowerInvariant() switch
+                {
+                    "clientid" => ManagedIdentityId.WithUserAssignedClientId(userAssignedId),
+                    "resourceid" => ManagedIdentityId.WithUserAssignedResourceId(userAssignedId),
+                    "objectid" => ManagedIdentityId.WithUserAssignedObjectId(userAssignedId),
+                    _ => throw new ArgumentOutOfRangeException(nameof(idType))
+                };
 
-            builder.Config.AccessorOptions = null;  
+            var builder = ManagedIdentityApplicationBuilder.Create(miId);
+            builder.Config.AccessorOptions = null;
             return builder.Build();
         }
 
-        [TestMethod]
-        public async Task AcquireToken_SystemAssigned_OnImds_Succeeds()
+        [DataTestMethod]
+        [DataRow(null, null,
+            DisplayName = "SAMI")]
+        [DataRow("04ca4d6a-c720-4ba1-aa06-f6634b73fe7a", ManagedIdentityIdType.ClientId, 
+            DisplayName = "UAMI-ClientId")]
+        [DataRow("/subscriptions/ff71c235-108e-4869-9779-5f275ce45c44/resourcegroups/RevoGuard/providers/Microsoft.ManagedIdentity/userAssignedIdentities/RevokeUAMI",
+                 ManagedIdentityIdType.ResourceId, 
+            DisplayName = "UAMI-ResourceId")]
+        [DataRow("bfd0bb74-faf9-4db9-b7e7-784823369e7f", ManagedIdentityIdType.ObjectId, 
+            DisplayName = "UAMI-ObjectId")]
+        public async Task AcquireToken_UserAssignedVariants_OnImds_Succeed(string id, string idType)
         {
             if (!ShouldRunImds())
                 Assert.Inconclusive("IMDS test skipped (RUN_IMDS_E2E not set).");
 
-            var mi = BuildSami();
-            
+            var mi = BuildMi(id, idType);
+
             var result = await mi.AcquireTokenForManagedIdentity(ArmScope)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
-            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken), "AccessToken should not be empty.");
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
+                "First call must hit MSI endpoint.");
         }
 
         [TestMethod]
@@ -55,12 +74,12 @@ namespace Microsoft.Identity.Test.E2E
             if (!ShouldRunImds())
                 Assert.Inconclusive("IMDS test skipped (RUN_IMDS_E2E not set).");
 
-            var mi = BuildSami();
+            var mi = BuildMi();
 
             var first = await mi.AcquireTokenForManagedIdentity(ArmScope)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
-            
+
             var second = await mi.AcquireTokenForManagedIdentity(ArmScope)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -76,7 +95,7 @@ namespace Microsoft.Identity.Test.E2E
             if (!ShouldRunImds())
                 Assert.Inconclusive("IMDS test skipped (RUN_IMDS_E2E not set).");
 
-            var mi = BuildSami();
+            var mi = BuildMi();
             await mi.AcquireTokenForManagedIdentity(ArmScope)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
