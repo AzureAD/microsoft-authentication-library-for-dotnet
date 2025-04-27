@@ -96,11 +96,12 @@ jobs: #Build and stage projects
   - template: template-test-on-linux.yaml
   
 - job: 'RunManagedIdentityE2ETestsOnAzureArc'
-  displayName: 'Managed Identity E2E Tests - Azure ARC Agent'
+  displayName: 'Managed Identity E2E Tests – Azure ARC Agent'
   dependsOn:
     - 'BuildAndStageProjects'
   pool:
     name: 'MSALMSIAZUREARC'
+
   variables:
     runCodesignValidationInjection: false
     Codeql.SkipTaskAutoInjection: true
@@ -109,13 +110,19 @@ jobs: #Build and stage projects
   - task: DotNetCoreCLI@2
     displayName: 'Restore E2E project (net8.0)'
     inputs:
-      command: 'restore'
-      projects: 'tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj'
-      arguments: '--framework net8.0'
+      command: restore
+      projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
+      arguments: '--framework net8.0 -p:IgnoreMissingWorkload=true'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Run Managed Identity E2E Tests'
+  - task: VSTest@2
+    displayName: 'Run Managed Identity E2E Tests (.NET Core)'
     inputs:
-      command: 'test'
-      projects: 'tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj'
-      arguments: '--configuration Release --no-restore --framework net8.0 --verbosity normal'
+      testSelector: 'testAssemblies'
+      testAssemblyVer2: '**/Microsoft.Identity.Test.E2E.NetCore/bin/**/Microsoft.Identity.Test.E2E.NetCore.dll'
+      searchFolder: '$(System.DefaultWorkingDirectory)'
+      rerunFailedTests: true
+      rerunMaxAttempts: '3'
+      runInParallel: false
+      codeCoverageEnabled: false
+      failOnMinTestsNotRun: true
+      minimumExpectedTests: '1'
