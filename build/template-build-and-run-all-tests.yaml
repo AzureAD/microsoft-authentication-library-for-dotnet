@@ -111,10 +111,7 @@ jobs: #Build and stage projects
     inputs:
       command: restore
       projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
-      arguments: >
-        -p:TargetFrameworks=net8.0          
-        -p:MSBuildEnableWorkloadResolver=false
-        --verbosity minimal
+      arguments: '--framework net8.0 -p:MSBuildEnableWorkloadResolver=false --verbosity minimal'
 
   - task: VSTest@2
     displayName: 'Run Managed Identity E2E Tests (.NET Core)'
