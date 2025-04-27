@@ -109,15 +109,17 @@ jobs: #Build and stage projects
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'Restore E2E project (net8.0)'
+    env:
+      MSBuildEnableWorkloadResolver: 'false'
     inputs:
       command: restore
       projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
-      arguments: -p:RestoreTargetFrameworks=net8.0      # restore just the net8 TFM
+      arguments: -p:RestoreTargetFrameworks=net8.0
 
   - task: VSTest@2
     displayName: 'Run Managed Identity E2E Tests (.NET Core)'
     inputs:
-      testSelector: 'testAssemblies'
+      testSelector: testAssemblies
       testAssemblyVer2: '**/Microsoft.Identity.Test.E2E.NetCore/bin/**/Microsoft.Identity.Test.E2E.NetCore.dll'
       searchFolder: '$(System.DefaultWorkingDirectory)'
       rerunFailedTests: true
