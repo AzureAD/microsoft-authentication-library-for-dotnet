@@ -107,18 +107,27 @@ jobs: #Build and stage projects
 
   steps:
   - task: DotNetCoreCLI@2
-    displayName: 'Restore E2E project (net8.0)'
+    displayName: 'Restore E2E project'
     inputs:
       command: restore
       projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
-      arguments: '--framework net8.0 -p:MSBuildEnableWorkloadResolver=false --verbosity minimal'
+      arguments: '--framework net8.0 -p:MSBuildEnableWorkloadResolver=false'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Build E2E project'
+    inputs:
+      command: build
+      projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
+      arguments: '--configuration Release --framework net8.0'
 
   - task: VSTest@2
     displayName: 'Run Managed Identity E2E Tests (.NET Core)'
     inputs:
       testSelector: testAssemblies
-      testAssemblyVer2: '**/Microsoft.Identity.Test.E2E.NetCore/bin/**/Microsoft.Identity.Test.E2E.NetCore.dll'
+      testAssemblyVer2: '**/Microsoft.Identity.Test.E2E.NetCore/bin/Release/**/Microsoft.Identity.Test.E2E.NetCore.dll'
       searchFolder: '$(System.DefaultWorkingDirectory)'
+      vsTestVersion: 'toolsInstaller'           
+      runTestsInIsolation: true
       rerunFailedTests: true
       rerunMaxAttempts: '3'
       runInParallel: false
