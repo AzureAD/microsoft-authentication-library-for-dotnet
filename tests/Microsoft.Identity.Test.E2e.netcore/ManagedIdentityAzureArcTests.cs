@@ -3,8 +3,6 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
@@ -14,28 +12,71 @@ namespace Microsoft.Identity.Test.E2E
     [TestClass]
     public class ManagedIdentityAzureArcTests
     {
+        private const string ArmScope = "https://management.azure.com";
+
+        private static bool IsArc() =>
+            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT"));
+
+        /// <summary>
+        /// Builds a System-Assigned MI app with *per-instance* in-memory cache
+        /// to avoid cross-test pollution.
+        /// </summary>
+        private static IManagedIdentityApplication BuildSami()
+        {
+            var builder = ManagedIdentityApplicationBuilder
+                            .Create(ManagedIdentityId.SystemAssigned);
+
+            builder.Config.AccessorOptions = null;
+
+            return builder.Build();
+        }
+
         [TestMethod]
         public async Task AcquireToken_ForSami_OnAzureArc_Succeeds()
         {
-            string identityEndpoint = Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT");
+            if (!IsArc())
+                Assert.Inconclusive("Arc-specific test skipped.");
 
-            if (string.IsNullOrEmpty(identityEndpoint))
-            {
-                Assert.Inconclusive("IDENTITY_ENDPOINT not set. Skipping test because it is intended to run only on Azure Arc agent.");
-            }
+            var mi = BuildSami();
+            var result = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
 
-            IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
-                .Create(ManagedIdentityId.SystemAssigned)
-                .Build();
-
-            string scope = "https://management.azure.com";
-
-            AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(scope)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(result);
             Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
+        public async Task AcquireToken_SecondCall_ComesFromCache()
+        {
+            if (!IsArc())
+                Assert.Inconclusive("Arc-specific test skipped.");
+
+            var mi = BuildSami();
+
+            var first = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
+            var second = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(first.AccessToken, second.AccessToken, "Expected identical AT from cache.");
+        }
+
+        [TestMethod]
+        public async Task ForceRefresh_BypassesCache_ReturnsNewToken()
+        {
+            if (!IsArc())
+                Assert.Inconclusive("Arc-specific test skipped.");
+
+            var mi = BuildSami();
+
+            var cached = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
+
+            var refreshed = await mi.AcquireTokenForManagedIdentity(ArmScope)
+                                    .WithForceRefresh(true)
+                                    .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
+            Assert.AreNotEqual(cached.AccessToken, refreshed.AccessToken, "Force-refresh should fetch a new AT.");
         }
     }
 }
