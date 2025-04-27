@@ -104,7 +104,15 @@ jobs: #Build and stage projects
   variables:
     runCodesignValidationInjection: false
     Codeql.SkipTaskAutoInjection: true
+
   steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore E2E project (net8.0)'
+    inputs:
+      command: 'restore'
+      projects: 'tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj'
+      arguments: '--framework net8.0'
+
   - task: DotNetCoreCLI@2
     displayName: 'Run Managed Identity E2E Tests'
     inputs:
