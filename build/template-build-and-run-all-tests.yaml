@@ -113,7 +113,8 @@ jobs: #Build and stage projects
       projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
       arguments: >
         -p:TargetFrameworks=net8.0          
-        -p:RestoreTargetFrameworks=net8.0   
+        -p:RestoreTargetFrameworks=net8.0
+        -p:IgnoreMissingWorkload=true
         --verbosity minimal
 
   - task: VSTest@2
