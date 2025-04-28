@@ -43,10 +43,10 @@ namespace Microsoft.Identity.Test.E2E
 
         [DataTestMethod]
         [DataRow(null /*SAMI*/, null, DisplayName = "SAMI")]
-        [DataRow("04ca4d6a-c720-4ba1-aa06-f6634b73fe7a", "clientid", DisplayName = "UAMI-ClientId")]
-        [DataRow("/subscriptions/ff71c235-108e-4869-9779-5f275ce45c44/resourcegroups/RevoGuard/providers/Microsoft.ManagedIdentity/userAssignedIdentities/RevokeUAMI",
+        [DataRow("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6", "clientid", DisplayName = "UAMI-ClientId")]
+        [DataRow("/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/LabVaultAccess_UAMI",
          "resourceid", DisplayName = "UAMI-ResourceId")]
-        [DataRow("bfd0bb74-faf9-4db9-b7e7-784823369e7f", "objectid", DisplayName = "UAMI-ObjectId")]
+        [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "UAMI-ObjectId")]
         public async Task AcquireToken_OnImds_Succeeds(string id, string idType)
         {
             if (!ShouldRunImds())
