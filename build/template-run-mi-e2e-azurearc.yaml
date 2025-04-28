@@ -1,0 +1,39 @@
+# Runs Managed Identity E2E tests on an Azure Arc build agent
+# ----------------------------------------------------------
+parameters:
+  BuildConfiguration: 'Release'
+  TargetFramework: 'net8.0'
+
+steps:
+#
+#  Restore ? Build ? Test
+#
+- task: DotNetCoreCLI@2
+  displayName: 'Restore E2E project'
+  inputs:
+    command: restore
+    projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
+    arguments: '--framework ${{ parameters.TargetFramework }} -p:MSBuildEnableWorkloadResolver=false'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build E2E project'
+  inputs:
+    command: build
+    projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
+    arguments: '--configuration ${{ parameters.BuildConfiguration }} --framework ${{ parameters.TargetFramework }}'
+
+- task: VSTest@2
+  displayName: 'Run Managed Identity E2E Tests (.NET)'
+  inputs:
+    vsTestVersion: '17.0'
+    vstestLocation: 'C:\BuildTools\Common7\IDE\Extensions\TestPlatform\vstest.console.exe'
+    testSelector: testAssemblies
+    testAssemblyVer2: '**/Microsoft.Identity.Test.E2E.NetCore/bin/${{ parameters.BuildConfiguration }}/**/Microsoft.Identity.Test.E2E.NetCore.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    runTestsInIsolation: true
+    rerunFailedTests: true
+    rerunMaxAttempts: '3'
+    runInParallel: false
+    codeCoverageEnabled: false
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
