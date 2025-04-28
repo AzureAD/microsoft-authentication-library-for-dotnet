@@ -94,13 +94,13 @@ jobs: #Build and stage projects
     - template: template-test-on-linux.yaml
 
 # ARC 
-- template: mi-e2e-arc.yml
+- template: mi-e2e-arc.yaml
   parameters:
     dependsOn:
       - BuildAndStageProjects
 
 # IMDS 
-- template: mi-e2e-imds.yml
+- template: mi-e2e-imds.yaml
   parameters:
     dependsOn:
       - BuildAndStageProjects
