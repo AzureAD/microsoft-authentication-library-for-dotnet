@@ -42,16 +42,12 @@ namespace Microsoft.Identity.Test.E2E
         }
 
         [DataTestMethod]
-        [DataRow(null, null,
-            DisplayName = "SAMI")]
-        [DataRow("04ca4d6a-c720-4ba1-aa06-f6634b73fe7a", ManagedIdentityIdType.ClientId, 
-            DisplayName = "UAMI-ClientId")]
+        [DataRow(null /*SAMI*/, null, DisplayName = "SAMI")]
+        [DataRow("04ca4d6a-c720-4ba1-aa06-f6634b73fe7a", "clientid", DisplayName = "UAMI-ClientId")]
         [DataRow("/subscriptions/ff71c235-108e-4869-9779-5f275ce45c44/resourcegroups/RevoGuard/providers/Microsoft.ManagedIdentity/userAssignedIdentities/RevokeUAMI",
-                 ManagedIdentityIdType.ResourceId, 
-            DisplayName = "UAMI-ResourceId")]
-        [DataRow("bfd0bb74-faf9-4db9-b7e7-784823369e7f", ManagedIdentityIdType.ObjectId, 
-            DisplayName = "UAMI-ObjectId")]
-        public async Task AcquireToken_UserAssignedVariants_OnImds_Succeed(string id, string idType)
+         "resourceid", DisplayName = "UAMI-ResourceId")]
+        [DataRow("bfd0bb74-faf9-4db9-b7e7-784823369e7f", "objectid", DisplayName = "UAMI-ObjectId")]
+        public async Task AcquireToken_OnImds_Succeeds(string id, string idType)
         {
             if (!ShouldRunImds())
                 Assert.Inconclusive("IMDS test skipped (RUN_IMDS_E2E not set).");
