@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
-        //[DataTestMethod]
+        [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
         //[DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
         //[DataRow(MsiAzureResource.VM, "", DisplayName = "System_Identity_Virtual_Machine")]
@@ -128,7 +128,69 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        //[TestMethod]
+        [DataTestMethod]
+        [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Web_App")]
+        public async Task AcquireMSITokenWithClaimsAsync(
+        MsiAzureResource azureResource,
+        string userIdentity,
+        UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
+        {
+            using (new EnvVariableContext())
+            {
+                // ---------- Arrange ----------
+                var envVariables = await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+                SetEnvironmentVariables(envVariables);
+
+                string uri = s_baseURL + $"MSIToken?azureresource={azureResource}&uri=";
+
+                IManagedIdentityApplication mia =
+                    CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
+
+                // ---------- Act & Assert 1 ----------
+                AuthenticationResult result1 = await mia
+                                .AcquireTokenForManagedIdentity(s_msi_scopes)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false);
+
+                Assert.AreEqual("Bearer", result1.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider,
+                                result1.AuthenticationResultMetadata.TokenSource);
+                CoreAssert.IsWithinRange(
+                    DateTimeOffset.UtcNow,
+                    result1.ExpiresOn,
+                    TimeSpan.FromHours(24));
+
+                // ---------- Act & Assert 2 (cache hit) ----------
+                AuthenticationResult result2 = await mia
+                                .AcquireTokenForManagedIdentity(s_msi_scopes)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false);
+
+                Assert.IsTrue(result2.Scopes.All(s_msi_scopes.Contains));
+                Assert.AreEqual(TokenSource.Cache,
+                                result2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(result1.AccessToken, result2.AccessToken,   // sanity
+                                "Second call should come from cache");
+
+                // ---------- Act & Assert 3 (claims → bypass_cache) ----------
+                const string claimsJson = TestConstants.Claims;
+
+                AuthenticationResult result3 = await mia
+                                .AcquireTokenForManagedIdentity(s_msi_scopes)
+                                .WithClaims(claimsJson)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false);
+
+                // Token source should now be IdentityProvider again
+                Assert.AreEqual(TokenSource.IdentityProvider,
+                                result3.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
         public async Task AcquireMsiToken_ForTokenExchangeResource_Successfully()
         {
             string resource = "api://AzureAdTokenExchange";
@@ -183,7 +245,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        //[TestMethod]
+        [TestMethod]
         public async Task AcquireMsiToken_ExchangeForEstsToken_Successfully()
         {
            const string resource = "api://AzureAdTokenExchange";
@@ -449,7 +511,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Disabling shared cache options to avoid cross test pollution.
             builder.Config.AccessorOptions = null;
 
-            IManagedIdentityApplication mia = builder
+            IManagedIdentityApplication mia = builder.WithClientCapabilities(new[] { "cp1" })
                 .WithHttpManager(proxyHttpManager).Build();
 
             return mia;

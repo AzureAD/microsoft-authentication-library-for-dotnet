@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string Claims { get; set; }
 
-        public string BadTokenHash { get; set; }
+        public string RevokedTokenHash { get; set; }
 
         public void LogParameters(ILoggerAdapter logger)
         {
