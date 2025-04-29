@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Test.E2E
         [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "UAMI-ObjectId")]
         public async Task AcquireToken_OnImds_Succeeds(string id, string idType)
         {
+            //if you want to run this test, set the environment variable RUN_IMDS_E2E=true
             if (!ShouldRunImds())
                 Assert.Inconclusive("IMDS test skipped (RUN_IMDS_E2E not set).");
 
@@ -90,6 +91,7 @@ namespace Microsoft.Identity.Test.E2E
         [TestMethod]
         public async Task AcquireToken_SecondCall_ComesFromCache()
         {
+            //if you want to run this test, set the environment variable RUN_IMDS_E2E=true
             if (!ShouldRunImds())
                 Assert.Inconclusive("IMDS test skipped (RUN_IMDS_E2E not set).");
 

@@ -118,7 +118,7 @@ jobs: #Build and stage projects
     name: 'ID4SMSIHostedAgent'
 
   variables:
-    RUN_IMDS_E2E: 'true'
+    RUN_IMDS_E2E: 'true' #enables IMDS E2E tests in CI only
     runCodesignValidationInjection: false
     Codeql.SkipTaskAutoInjection: true
 
