@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">net8.0-maccatalyst</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
 
@@ -14,17 +13,17 @@
 		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
 
 		<OutputType>Exe</OutputType>
-		<RootNamespace>MauiMacAppWithBroker</RootNamespace>
+		<RootNamespace>MacMauiAppWithBroker</RootNamespace>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>MauiMacAppWithBroker</ApplicationTitle>
+		<ApplicationTitle>MacMauiAppWithBroker</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.microsoft.mauimacappwithbroker</ApplicationId>
+		<ApplicationId>com.microsoft.MacMauiAppWithBroker</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -68,7 +67,7 @@
         <Content Include="../../../../microsoft-authentication-library-for-cpp/_builds/macOS/msalruntime/lib/Debug/libmsalruntime.dylib">
             <Link>msalruntime.dylib</Link>
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<TargetPath>MauiMacAppWithBroker.app/Contents/MonoBundle/msalruntime_arm64.dylib</TargetPath>
+			<TargetPath>MacMauiAppWithBroker.app/Contents/MonoBundle/msalruntime_arm64.dylib</TargetPath>
         </Content>
     </ItemGroup> -->
 

@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace MauiMacAppWithBroker;
+namespace MacMauiAppWithBroker;
 
 public class Program
 {

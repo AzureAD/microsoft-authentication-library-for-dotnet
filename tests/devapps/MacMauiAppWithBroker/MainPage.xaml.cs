@@ -1,4 +1,4 @@
-﻿namespace MauiMacAppWithBroker;
+﻿namespace MacMauiAppWithBroker;
 
 using Microsoft.Maui.Controls;
 using Microsoft.Identity.Client;
@@ -172,7 +172,7 @@ public partial class MainPage : ContentPage
         {
 			string homeDirectory = Environment.GetEnvironmentVariable("HOME");
             string filePath = Path.Combine(homeDirectory, "msalnet.log");
-			// An example log path could be: /Users/fengga/Library/Containers/com.microsoft.mauimacappwithbroker/Data/msalnet.log
+			// An example log path could be: /Users/fengga/Library/Containers/com.microsoft.MacMauiAppWithBroker/Data/msalnet.log
 			using (StreamWriter writer = new StreamWriter(filePath, append: true))
 			{
 				writer.WriteLine($"{level} {message}");

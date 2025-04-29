@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace MauiMacAppWithBroker;
+namespace MacMauiAppWithBroker;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate
