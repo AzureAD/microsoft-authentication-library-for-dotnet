@@ -63,9 +63,18 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 	</ItemGroup>
 
+	<!-- <ItemGroup>
+		<ProjectReference Include="../../../../microsoft-authentication-library-for-cpp/msalruntime/interop/net/Microsoft.Identity.Client.NativeInterop.csproj"/>
+        <Content Include="../../../../microsoft-authentication-library-for-cpp/_builds/macOS/msalruntime/lib/Debug/libmsalruntime.dylib">
+            <Link>msalruntime.dylib</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<TargetPath>MauiMacAppWithBroker.app/Contents/MonoBundle/msalruntime_arm64.dylib</TargetPath>
+        </Content>
+    </ItemGroup> -->
+
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.0-alpha" />
-		<NativeReference Include="$(HOME)/.nuget/packages/microsoft.identity.client.nativeinterop/0.19.0-alpha/runtimes/macos-arm64/native/msalruntime_arm64.dylib">
+		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.18.2" />
+		<NativeReference Include="$(HOME)/.nuget/packages/microsoft.identity.client.nativeinterop/0.18.2/runtimes/macos-arm64/native/msalruntime_arm64.dylib">
 			<Kind>Dynamic</Kind>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</NativeReference>

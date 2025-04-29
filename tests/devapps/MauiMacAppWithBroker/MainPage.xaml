@@ -37,7 +37,38 @@
                 SemanticProperties.Hint="Get all accounts via mac broker"
                 Clicked="OnGetAllAccountsClicked"
                 HorizontalOptions="Fill" />
+                
+            <Button
+                x:Name="ClearLogBtn"
+                Text="Clear Log" 
+                SemanticProperties.Hint="Clear the log area"
+                Clicked="OnClearLogClicked"
+                HorizontalOptions="Fill"
+                BackgroundColor="#FFD700"
+                TextColor="Black" />
+
+            <!-- Log display area -->
+            <Frame BorderColor="Gray" 
+                   Padding="0"
+                   CornerRadius="5"
+                   HasShadow="True"
+                   Margin="0,10,0,0">
+                <ScrollView x:Name="LogScrollView" 
+                            VerticalScrollBarVisibility="Always" 
+                            HorizontalScrollBarVisibility="Default"
+                            Margin="0"
+                            HeightRequest="300">
+                    <Editor x:Name="LogTextView"
+                            IsReadOnly="True"
+                            BackgroundColor="WhiteSmoke"
+                            TextColor="Black"
+                            FontFamily="Monospace"
+                            AutoSize="TextChanges"
+                            Margin="10"/>
+                </ScrollView>
+            </Frame>
         </VerticalStackLayout>
     </ScrollView>
 
 </ContentPage>
+
