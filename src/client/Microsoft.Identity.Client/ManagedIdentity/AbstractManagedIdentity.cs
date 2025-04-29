@@ -321,9 +321,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             // Only include 'token_sha256_to_refresh' if we have both Claims and the old token's hash
             if (!string.IsNullOrEmpty(parameters.Claims) &&
-                !string.IsNullOrEmpty(parameters.BadTokenHash))
+                !string.IsNullOrEmpty(parameters.RevokedTokenHash))
             {
-                SetRequestParameter(request, "token_sha256_to_refresh", parameters.BadTokenHash);
+                SetRequestParameter(request, "token_sha256_to_refresh", parameters.RevokedTokenHash);
                 _requestContext.Logger.Info(
                     "[Managed Identity] Passing SHA-256 of the 'bad' token to Managed Identity endpoint."
                 );

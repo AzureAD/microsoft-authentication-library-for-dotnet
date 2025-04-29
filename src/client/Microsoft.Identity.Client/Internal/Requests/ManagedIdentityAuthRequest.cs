@@ -62,8 +62,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // If there is a cached token, compute its hash for the “bad token” scenario
                 if (cachedAccessTokenItem != null)
                 {
-                    string cachedTokenHash = _cryptoManager.CreateSha256Hash(cachedAccessTokenItem.Secret);
-                    _managedIdentityParameters.BadTokenHash = cachedTokenHash;
+                    string cachedTokenHash = _cryptoManager.CreateSha256HashHex(cachedAccessTokenItem.Secret);
+                    _managedIdentityParameters.RevokedTokenHash = cachedTokenHash;
 
                     logger.Info("[ManagedIdentityRequest] Claims are present. Computed hash of the cached (bad) token. " +
                                 "Will now request a fresh token from the MI endpoint.");

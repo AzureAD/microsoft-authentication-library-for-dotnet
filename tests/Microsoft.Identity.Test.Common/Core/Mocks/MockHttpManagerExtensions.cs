@@ -476,7 +476,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
 
             var manager = new CommonCryptographyManager();
-            var value = manager.CreateSha256Hash(TestConstants.ATSecret);
+            var value = manager.CreateSha256HashHex(TestConstants.ATSecret);
 
             // If capabilityEnabled, add "xms_cc": "cp1"
             if (capabilityEnabled)
@@ -497,12 +497,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 if (managedIdentitySourceType == ManagedIdentitySource.AppService
                     || managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
                 {
-                    expectedQueryParams.Add("token_sha256_to_refresh", manager.CreateSha256Hash(TestConstants.ATSecret));
+                    expectedQueryParams.Add("token_sha256_to_refresh", manager.CreateSha256HashHex(TestConstants.ATSecret));
                 }
             }
             else
             {
-                notExpectedQueryParams.Add("token_sha256_to_refresh", manager.CreateSha256Hash(TestConstants.ATSecret));
+                notExpectedQueryParams.Add("token_sha256_to_refresh", manager.CreateSha256HashHex(TestConstants.ATSecret));
             }
 
             if (managedIdentitySourceType != ManagedIdentitySource.CloudShell)
