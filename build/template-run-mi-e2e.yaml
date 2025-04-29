@@ -1,7 +1,7 @@
 # Runs both Arc and VM/IMDS E2E suites
 parameters:
   BuildConfiguration: 'Release'
-  TargetFramework: 'net8.0'
+  TargetFramework:   'net8.0'
 
 jobs:
 # ---------- Azure Arc ----------
