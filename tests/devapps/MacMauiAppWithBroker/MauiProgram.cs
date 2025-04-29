@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace MauiMacAppWithBroker;
+namespace MacMauiAppWithBroker;
 
 public static class MauiProgram
 {

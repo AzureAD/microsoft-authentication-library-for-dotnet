@@ -1,4 +1,4 @@
-﻿namespace MauiMacAppWithBroker;
+﻿namespace MacMauiAppWithBroker;
 
 public partial class App : Application
 {
