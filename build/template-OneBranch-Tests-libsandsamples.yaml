@@ -17,10 +17,8 @@ steps:
 - template: template-run-all-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
-    
+
 - template: template-run-mi-e2e.yaml
-  parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
 
 - task: VSTest@2
   displayName: 'Run cache compat tests'
