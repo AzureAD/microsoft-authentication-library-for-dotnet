@@ -26,11 +26,6 @@ namespace Microsoft.Identity.Client.Http
     /// </remarks>
     internal class HttpManager : IHttpManager
     {
-        // referenced in unit tests, cannot be private
-        public const int DEFAULT_ESTS_MAX_RETRIES = 1;
-        // this will be overridden in the unit tests so that they run faster
-        public static int DEFAULT_ESTS_RETRY_DELAY_MS { get; set; } = 1000;
-
         protected readonly IMsalHttpClientFactory _httpClientFactory;
         private readonly bool _disableInternalRetries;
         public long LastRequestDurationInMs { get; private set; }
@@ -70,17 +65,6 @@ namespace Microsoft.Identity.Client.Http
             IRetryPolicy retryPolicy,
             int retryCount = 0)
         {
-            // Use the default STS retry policy if the request is not for managed identity
-            // and a non-default STS retry policy is not provided.
-            // Skip this if statement the dev indicated that they do not want retry logic.
-            if (!_isManagedIdentity && retryPolicy == null && !_disableInternalRetries)
-            {
-                retryPolicy = new LinearRetryPolicy(
-                    DEFAULT_ESTS_RETRY_DELAY_MS,
-                    DEFAULT_ESTS_MAX_RETRIES,
-                    HttpRetryConditions.Sts);
-            }
-
             Exception timeoutException = null;
             HttpResponse response = null;
 
