@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]        
         public async Task RetryPolicyAsync()
         {
-            using (var httpManager = new MockHttpManager(retry: false))
+            using (var httpManager = new MockHttpManager())
             {
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)

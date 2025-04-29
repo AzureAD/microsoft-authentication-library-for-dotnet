@@ -26,13 +26,7 @@ namespace Microsoft.Identity.Client.Http
     /// </remarks>
     internal class HttpManager : IHttpManager
     {
-        // referenced in unit tests, cannot be private
-        public const int DEFAULT_ESTS_MAX_RETRIES = 1;
-        // this will be overridden in the unit tests so that they run faster
-        public static int DEFAULT_ESTS_RETRY_DELAY_MS { get; set; } = 1000;
-
         protected readonly IMsalHttpClientFactory _httpClientFactory;
-        private readonly bool _isManagedIdentity;
         private readonly bool _disableInternalRetries;
         public long LastRequestDurationInMs { get; private set; }
 
@@ -43,9 +37,6 @@ namespace Microsoft.Identity.Client.Http
         /// An instance of <see cref="IMsalHttpClientFactory"/> used to create and manage <see cref="HttpClient"/> instances.
         /// This factory ensures proper reuse of <see cref="HttpClient"/> to avoid socket exhaustion.
         /// </param>
-        /// <param name="isManagedIdentity">
-        /// A boolean flag indicating whether the HTTP manager is being used in a managed identity context.
-        /// </param>
         /// <param name="disableInternalRetries">
         /// A boolean flag indicating whether the HTTP manager should enable retry logic for transient failures.
         /// </param>
@@ -54,12 +45,10 @@ namespace Microsoft.Identity.Client.Http
         /// </exception>
         public HttpManager(
             IMsalHttpClientFactory httpClientFactory,
-            bool isManagedIdentity,
             bool disableInternalRetries)
         {
             _httpClientFactory = httpClientFactory ??
                 throw new ArgumentNullException(nameof(httpClientFactory));
-            _isManagedIdentity = isManagedIdentity;
             _disableInternalRetries = disableInternalRetries;
         }
 
@@ -73,20 +62,9 @@ namespace Microsoft.Identity.Client.Http
             X509Certificate2 bindingCertificate,
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
-            IRetryPolicy retryPolicy = null,
+            IRetryPolicy retryPolicy,
             int retryCount = 0)
         {
-            // Use the default STS retry policy if the request is not for managed identity
-            // and a non-default STS retry policy is not provided.
-            // Skip this if statement the dev indicated that they do not want retry logic.
-            if (!_isManagedIdentity && retryPolicy == null && !_disableInternalRetries)
-            {
-                retryPolicy = new LinearRetryPolicy(
-                    DEFAULT_ESTS_RETRY_DELAY_MS,
-                    DEFAULT_ESTS_MAX_RETRIES,
-                    HttpRetryConditions.Sts);
-            }
-
             Exception timeoutException = null;
             HttpResponse response = null;
 

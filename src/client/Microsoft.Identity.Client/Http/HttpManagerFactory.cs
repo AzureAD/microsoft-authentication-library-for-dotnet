@@ -4,16 +4,15 @@
 namespace Microsoft.Identity.Client.Http
 {
     /// <summary>
-    /// Factory to return the instance of HttpManager based on retry configuration and type of MSAL application.
+    /// Factory to return the instance of HttpManager based on type of MSAL application.
     /// </summary>
     internal sealed class HttpManagerFactory
     {
         public static IHttpManager GetHttpManager(
             IMsalHttpClientFactory httpClientFactory,
-            bool isManagedIdentity = false,
             bool disableInternalRetries = false)
         {
-            return new HttpManager(httpClientFactory, isManagedIdentity, disableInternalRetries);
+            return new HttpManager(httpClientFactory, disableInternalRetries);
         }
     }
 }

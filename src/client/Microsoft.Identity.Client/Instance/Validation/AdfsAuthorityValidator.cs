@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -28,7 +29,12 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 var resource = $"https://{authorityInfo.Host}";
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
-                Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
+                    LinearRetryPolicy.DEFAULT_ESTS_RETRY_DELAY_MS,
+                    LinearRetryPolicy.DEFAULT_ESTS_MAX_RETRIES,
+                    HttpRetryConditions.Sts);
+
+        Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
                     new Uri(webFingerUrl),
                     null,
                     body: null,
@@ -36,7 +42,10 @@ namespace Microsoft.Identity.Client.Instance.Validation
                     logger: _requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
-                    validateServerCertificate: null, cancellationToken: _requestContext.UserCancellationToken)
+                    validateServerCertificate: null,
+                    cancellationToken: _requestContext.UserCancellationToken,
+                    retryPolicy: _linearRetryPolicy
+                    )
                     .ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)

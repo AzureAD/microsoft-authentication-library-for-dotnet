@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Http
            X509Certificate2 mtlsCertificate,
            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCertificate,
            CancellationToken cancellationToken,
-           IRetryPolicy retryPolicy = null,
+           IRetryPolicy retryPolicy,
            int retryCount = 0);
     }
 }

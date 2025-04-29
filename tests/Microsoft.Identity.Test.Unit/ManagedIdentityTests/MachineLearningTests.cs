@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task MachineLearningTestsInvalidEndpointAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.MachineLearning, "127.0.0.1:41564/msi/token");
 

@@ -29,29 +29,25 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         private readonly IHttpManager _httpManager;
 
         public MockHttpManager(string testName = null,
-            bool isManagedIdentity = false,
             Func<MockHttpMessageHandler> messageHandlerFunc = null,
             Func<HttpClient> validateServerCertificateCallback = null,
             bool invokeNonMtlsHttpManagerFactory = false) :
-            this(true, testName, isManagedIdentity, messageHandlerFunc, invokeNonMtlsHttpManagerFactory)
+            this(true, testName, messageHandlerFunc, invokeNonMtlsHttpManagerFactory)
         {
         }
 
         public MockHttpManager(
             bool disableInternalRetries,
             string testName = null,
-            bool isManagedIdentity = false,
             Func<MockHttpMessageHandler> messageHandlerFunc = null,
             bool invokeNonMtlsHttpManagerFactory = false)
         {
             _httpManager = invokeNonMtlsHttpManagerFactory
                 ? HttpManagerFactory.GetHttpManager(
                     new MockNonMtlsHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
-                    isManagedIdentity,
                     disableInternalRetries)
                 : HttpManagerFactory.GetHttpManager(
                     new MockHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
-                    isManagedIdentity,
                     disableInternalRetries);
 
             _testName = testName;
@@ -116,7 +112,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             X509Certificate2 mtlsCertificate,
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
-            IRetryPolicy retryPolicy = null,
+            IRetryPolicy retryPolicy,
             int retryCount = 0)
         {
             return _httpManager.SendRequestAsync(
