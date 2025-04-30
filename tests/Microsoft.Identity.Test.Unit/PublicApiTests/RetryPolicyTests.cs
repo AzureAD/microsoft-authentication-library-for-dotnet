@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .WithHttpClientFactory(
                                                                 httpClientFactory: null,
-                                                                retryOnceOn5xx: false)
+                                                                disableInternalRetries: false)
                                                               .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();

@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
         /// If you only want to configure the retryOnceOn5xx parameter, set httpClientFactory to null and MSAL will use the default http client.
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory, bool retryOnceOn5xx)
+        public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory, bool disableInternalRetries)
         {
             Config.HttpClientFactory = httpClientFactory;
             Config.DisableInternalRetries = !retryOnceOn5xx;
