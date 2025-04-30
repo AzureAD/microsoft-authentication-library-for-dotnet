@@ -114,8 +114,6 @@ namespace Microsoft.Identity.Client
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
         public bool MultiCloudSupportEnabled { get; set; } = false;
 
-        public bool RetryOnServerErrors { get; set; } = true;
-
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
         public bool DisableInternalRetries { get; internal set; }
 

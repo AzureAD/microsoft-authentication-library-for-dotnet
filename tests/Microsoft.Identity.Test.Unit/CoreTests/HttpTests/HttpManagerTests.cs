@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
     [TestClass]
     public class HttpManagerTests
     {
-        LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
+        LinearRetryPolicy _stsLinearRetryPolicy = new LinearRetryPolicy(
             LinearRetryPolicy.DEFAULT_ESTS_RETRY_DELAY_MS,
             LinearRetryPolicy.DEFAULT_ESTS_MAX_RETRIES,
             HttpRetryConditions.Sts);
@@ -66,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     mtlsCertificate: cert,
                     validateServerCert: null,
                     cancellationToken: default,
-                    retryPolicy: _linearRetryPolicy)
+                    retryPolicy: _stsLinearRetryPolicy)
                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -106,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         mtlsCertificate: cert,
                         validateServerCert: customCallback,
                         cancellationToken: default,
-                        retryPolicy: _linearRetryPolicy))
+                        retryPolicy: _stsLinearRetryPolicy))
                     .ConfigureAwait(false);
             }
         }
@@ -143,7 +144,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     mtlsCertificate: null,
                     validateServerCert: customCallback,
                     cancellationToken: default,
-                    retryPolicy: _linearRetryPolicy)
+                    retryPolicy: _stsLinearRetryPolicy)
                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -171,7 +172,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     mtlsCertificate: null,
                     validateServerCert: null,
                     cancellationToken: default,
-                    retryPolicy: _linearRetryPolicy)
+                    retryPolicy: _stsLinearRetryPolicy)
                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -213,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     mtlsCertificate: null,
                     validateServerCert: null,
                     cancellationToken: default,
-                    retryPolicy: _linearRetryPolicy)
+                    retryPolicy: _stsLinearRetryPolicy)
                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -245,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     mtlsCertificate: null,
                     validateServerCert: null,
                     cancellationToken: default,
-                    retryPolicy: _linearRetryPolicy)
+                    retryPolicy: _stsLinearRetryPolicy)
                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
@@ -281,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         mtlsCertificate: null,
                         validateServerCert: null,
                         cancellationToken: cts.Token,
-                        retryPolicy: _linearRetryPolicy))
+                        retryPolicy: _stsLinearRetryPolicy))
                     .ConfigureAwait(false);
             }
         }
@@ -289,7 +290,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [TestMethod]
         public async Task TestSendGetWithRetryFalseHttp500TypeFailureAsync()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
             {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
 
@@ -304,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         mtlsCertificate: null,
                         validateServerCert: null,
                         cancellationToken: default,
-                        retryPolicy: _linearRetryPolicy))
+                        retryPolicy: _stsLinearRetryPolicy))
                    .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
@@ -330,7 +331,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         mtlsCertificate: null,
                         validateServerCert: null,
                         cancellationToken: default,
-                        retryPolicy: _linearRetryPolicy))
+                        retryPolicy: _stsLinearRetryPolicy))
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
@@ -361,7 +362,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         mtlsCertificate: null,
                         validateServerCert: null,
                         cancellationToken: default,
-                        retryPolicy: _linearRetryPolicy))
+                        retryPolicy: _stsLinearRetryPolicy))
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(0, httpManager.QueueSize, "HttpManager must not retry because a RetryAfter header is present");
@@ -387,7 +388,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     mtlsCertificate: null,
                     validateServerCert: null,
                     cancellationToken: default,
-                    retryPolicy: _linearRetryPolicy)
+                    retryPolicy: _stsLinearRetryPolicy)
                 .ConfigureAwait(false);
 
                 Assert.AreEqual(HttpStatusCode.BadGateway, msalHttpResponse.StatusCode);
@@ -413,7 +414,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         mtlsCertificate: null,
                         validateServerCert: null,
                         cancellationToken: default,
-                        retryPolicy: _linearRetryPolicy))
+                        retryPolicy: _stsLinearRetryPolicy))
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
@@ -439,7 +440,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         mtlsCertificate: null,
                         validateServerCert: null,
                         cancellationToken: default,
-                        retryPolicy: _linearRetryPolicy))
+                        retryPolicy: _stsLinearRetryPolicy))
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
@@ -466,7 +467,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         mtlsCertificate: null,
                         validateServerCert: null,
                         cancellationToken: default,
-                        retryPolicy: _linearRetryPolicy))
+                        retryPolicy: _stsLinearRetryPolicy))
                     .ConfigureAwait(false);
                 Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
                 Assert.IsTrue(exc.InnerException is TaskCanceledException);
@@ -480,7 +481,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [DataRow(false, true)]
         public async Task TestRetryConfigWithHttp500TypeFailureAsync(bool disableInternalRetries, bool isManagedIdentity)
         {
-            using (var httpManager = new MockHttpManager(disableInternalRetries))
+            using (var httpManager = new MockHttpManager(disableInternalRetries: disableInternalRetries))
             {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
 
@@ -495,8 +496,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
                         httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
                     }
-
                 }
+
+                LinearRetryPolicy retryPolicy = isManagedIdentity ? new LinearRetryPolicy(
+                    ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES,
+                    ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES,
+                    HttpRetryConditions.ManagedIdentity) : _stsLinearRetryPolicy;
 
                 var msalHttpResponse = await httpManager.SendRequestAsync(
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
@@ -508,7 +513,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     mtlsCertificate: null,
                     validateServerCert: null,
                     cancellationToken: default,
-                    retryPolicy: _linearRetryPolicy)
+                    retryPolicy: retryPolicy)
                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(msalHttpResponse);

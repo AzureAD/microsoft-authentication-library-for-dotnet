@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
         /// or setting the Agent.
         /// </summary>
         /// <param name="httpClientFactory">HTTP client factory</param>
-        /// <param name="retryOnceOn5xx">Configures MSAL to retry on 5xx server errors. When enabled (on by default), MSAL will wait 1 second after receiving
+        /// <param name="disableInternalRetries">Configures MSAL to ignore the provided retry policy.
         /// a 5xx error and then retry the http request again.</param>
         /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.
         /// Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
@@ -70,10 +70,10 @@ namespace Microsoft.Identity.Client
         /// If you only want to configure the retryOnceOn5xx parameter, set httpClientFactory to null and MSAL will use the default http client.
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory, bool retryOnceOn5xx)
+        public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory, bool disableInternalRetries)
         {
             Config.HttpClientFactory = httpClientFactory;
-            Config.RetryOnServerErrors = retryOnceOn5xx;
+            Config.DisableInternalRetries = disableInternalRetries;
             return (T)this;
         }
 

@@ -28,18 +28,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private readonly IHttpManager _httpManager;
 
-        public MockHttpManager(string testName = null,
-            Func<MockHttpMessageHandler> messageHandlerFunc = null,
-            Func<HttpClient> validateServerCertificateCallback = null,
-            bool invokeNonMtlsHttpManagerFactory = false) :
-            this(true, testName, messageHandlerFunc, invokeNonMtlsHttpManagerFactory)
-        {
-        }
-
         public MockHttpManager(
-            bool disableInternalRetries,
+            bool disableInternalRetries = false,
             string testName = null,
             Func<MockHttpMessageHandler> messageHandlerFunc = null,
+            Func<HttpClient> validateServerCertificateCallback = null,
             bool invokeNonMtlsHttpManagerFactory = false)
         {
             _httpManager = invokeNonMtlsHttpManagerFactory

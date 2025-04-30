@@ -17,8 +17,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class RetryPolicyTests : TestBase
     {
-// This test is expensive, as it has to wait 1 second - run it only on latest .NET
-#if NET8_0_OR_GREATER 
+        // This test is expensive, as it has to wait 1 second - run it only on latest .NET
+#if NET8_0_OR_GREATER
         [TestMethod]        
         public async Task RetryPolicyAsync()
         {
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .WithHttpClientFactory(
                                                                 httpClientFactory: null,
-                                                                retryOnceOn5xx: false)
+                                                                disableInternalRetries: false)
                                                               .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
