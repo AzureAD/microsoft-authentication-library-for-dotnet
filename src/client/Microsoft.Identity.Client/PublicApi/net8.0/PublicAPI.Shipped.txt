@@ -393,7 +393,7 @@ Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithClientVersion(st
 Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithDebugLoggingCallback(Microsoft.Identity.Client.LogLevel logLevel = Microsoft.Identity.Client.LogLevel.Info, bool enablePiiLogging = false, bool withDefaultPlatformLoggingEnabled = false) -> T
 Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithExperimentalFeatures(bool enableExperimentalFeatures = true) -> T
 Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithHttpClientFactory(Microsoft.Identity.Client.IMsalHttpClientFactory httpClientFactory) -> T
-Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithHttpClientFactory(Microsoft.Identity.Client.IMsalHttpClientFactory httpClientFactory, bool disableInternalRetries) -> T
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithHttpClientFactory(Microsoft.Identity.Client.IMsalHttpClientFactory httpClientFactory, bool retryOnceOn5xx) -> T
 Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithLogging(Microsoft.Identity.Client.LogCallback loggingCallback, Microsoft.Identity.Client.LogLevel? logLevel = null, bool? enablePiiLogging = null, bool? enableDefaultPlatformLogging = null) -> T
 Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithLogging(Microsoft.IdentityModel.Abstractions.IIdentityLogger identityLogger, bool enablePiiLogging = false) -> T
 Microsoft.Identity.Client.BaseApplicationOptions
