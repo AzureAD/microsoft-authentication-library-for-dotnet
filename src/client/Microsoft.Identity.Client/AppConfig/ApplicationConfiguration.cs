@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client
         public bool MultiCloudSupportEnabled { get; set; } = false;
 
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
-        public bool DisableInternalRetries { get; internal set; }
+        public bool DisableInternalRetries { get; internal set; } = false;
 
         public bool IsManagedIdentity { get; }
         public bool IsConfidentialClient { get; }

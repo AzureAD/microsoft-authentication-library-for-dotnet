@@ -22,14 +22,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]        
         public async Task RetryPolicyAsync()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
             {
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
                                                               .WithHttpClientFactory(
                                                                 httpClientFactory: null,
-                                                                retryOnceOn5xx: false)
+                                                                retryOnceOn5xx: true)
                                                               .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
