@@ -47,8 +47,8 @@ namespace Microsoft.Identity.Client.Region
         private static string s_regionDiscoveryDetails;
 
         private readonly LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-            LinearRetryPolicy.DEFAULT_ESTS_RETRY_DELAY_MS,
-            LinearRetryPolicy.DEFAULT_ESTS_MAX_RETRIES,
+            LinearRetryPolicy.DefaultStsRetryDelayMs,
+            LinearRetryPolicy.DefaultStsMaxRetries,
             HttpRetryConditions.Sts);
 
         public RegionManager(

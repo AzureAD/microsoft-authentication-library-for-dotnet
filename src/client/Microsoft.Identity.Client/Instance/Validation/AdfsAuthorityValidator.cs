@@ -30,8 +30,8 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
                 LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-                    LinearRetryPolicy.DEFAULT_ESTS_RETRY_DELAY_MS,
-                    LinearRetryPolicy.DEFAULT_ESTS_MAX_RETRIES,
+                    LinearRetryPolicy.DefaultStsRetryDelayMs,
+                    LinearRetryPolicy.DefaultStsMaxRetries,
                     HttpRetryConditions.Sts);
 
         Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(

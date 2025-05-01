@@ -1269,7 +1269,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = miBuilder.Build();
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
-                const int NumErrors = ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES + 1; // initial request + maximum number of retries (3)
+                const int NumErrors = ManagedIdentityRequest.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
                 for (int i = 0; i < NumErrors; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
@@ -1286,7 +1286,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
 
                 // 4 total: request + 3 retries
-                Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
+                Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 for (int i = 0; i < NumErrors; i++)
@@ -1306,7 +1306,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // 4 total: request + 3 retries
                 // (numRetries would be x2 if retry policy was NOT per request)
-                Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
+                Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 for (int i = 0; i < NumErrors; i++)
@@ -1326,7 +1326,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // 4 total: request + 3 retries
                 // (numRetries would be x3 if retry policy was NOT per request)
-                Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES);
+                Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }

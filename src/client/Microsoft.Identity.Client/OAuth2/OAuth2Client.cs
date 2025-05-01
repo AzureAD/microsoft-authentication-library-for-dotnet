@@ -42,8 +42,8 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IHttpManager _httpManager;
         private readonly X509Certificate2 _mtlsCertificate;
         private readonly LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-            LinearRetryPolicy.DEFAULT_ESTS_RETRY_DELAY_MS,
-            LinearRetryPolicy.DEFAULT_ESTS_MAX_RETRIES,
+            LinearRetryPolicy.DefaultStsRetryDelayMs,
+            LinearRetryPolicy.DefaultStsMaxRetries,
             HttpRetryConditions.Sts);
 
         public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)

@@ -12,9 +12,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ManagedIdentityRequest
     {
         // referenced in unit tests, cannot be private
-        public const int DEFAULT_MANAGED_IDENTITY_MAX_RETRIES = 3;
+        public const int DefaultManagedIdentityMaxRetries = 3;
         // this will be overridden in the unit tests so that they run faster
-        public static int DEFAULT_MANAGED_IDENTITY_RETRY_DELAY_MS { get; set; } = 1000;
+        public static int DefaultManagedIdentityRetryDelayMs { get; set; } = 1000;
 
         private readonly Uri _baseEndpoint;
 
@@ -37,8 +37,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             QueryParameters = new Dictionary<string, string>();
 
             IRetryPolicy defaultRetryPolicy = new LinearRetryPolicy(
-                DEFAULT_MANAGED_IDENTITY_RETRY_DELAY_MS,
-                DEFAULT_MANAGED_IDENTITY_MAX_RETRIES,
+                DefaultManagedIdentityRetryDelayMs,
+                DefaultManagedIdentityMaxRetries,
                 HttpRetryConditions.ManagedIdentity);
             RetryPolicy = retryPolicy ?? defaultRetryPolicy;
         }

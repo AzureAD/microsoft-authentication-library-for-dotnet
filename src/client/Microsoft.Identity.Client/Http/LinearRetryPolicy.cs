@@ -11,9 +11,9 @@ namespace Microsoft.Identity.Client.Http
     {
         // referenced in unit tests, cannot be private
         public static int numRetries { get; private set; } = 0;
-        public const int DEFAULT_ESTS_MAX_RETRIES = 1;
+        public const int DefaultStsMaxRetries = 1;
         // this will be overridden in the unit tests so that they run faster
-        public static int DEFAULT_ESTS_RETRY_DELAY_MS { get; set; } = 1000;
+        public static int DefaultStsRetryDelayMs { get; set; } = 1000;
 
         private int _maxRetries;
         private readonly Func<HttpResponse, Exception, bool> _retryCondition;

@@ -25,8 +25,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
     public class HttpManagerTests
     {
         LinearRetryPolicy _stsLinearRetryPolicy = new LinearRetryPolicy(
-            LinearRetryPolicy.DEFAULT_ESTS_RETRY_DELAY_MS,
-            LinearRetryPolicy.DEFAULT_ESTS_MAX_RETRIES,
+            LinearRetryPolicy.DefaultStsRetryDelayMs,
+            LinearRetryPolicy.DefaultStsMaxRetries,
             HttpRetryConditions.Sts);
 
         [TestInitialize]
@@ -499,8 +499,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 }
 
                 LinearRetryPolicy retryPolicy = isManagedIdentity ? new LinearRetryPolicy(
-                    ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES,
-                    ManagedIdentityRequest.DEFAULT_MANAGED_IDENTITY_MAX_RETRIES,
+                    ManagedIdentityRequest.DefaultManagedIdentityRetryDelayMs,
+                    ManagedIdentityRequest.DefaultManagedIdentityMaxRetries,
                     HttpRetryConditions.ManagedIdentity) : _stsLinearRetryPolicy;
 
                 var msalHttpResponse = await httpManager.SendRequestAsync(
