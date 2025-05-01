@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Broker
 
         private static void AddRuntimeSupport(PublicClientApplicationBuilder builder)
         {
-            if (DesktopOsHelper.IsWin10OrServerEquivalent() || DesktopOsHelper.IsLinux())
+            if (DesktopOsHelper.IsWin10OrServerEquivalent() || DesktopOsHelper.IsLinux() || DesktopOsHelper.IsMac())
             {
                  builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
@@ -79,13 +79,13 @@ namespace Microsoft.Identity.Client.Broker
                          logger.Info("[Runtime] Broker supported OS.");
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
-            } 
+            }
             else
             {
                 builder.Config.BrokerCreatorFunc =
                    (uiParent, appConfig, logger) =>
                    {
-                       logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. Runtime broker or SsoPolicy support is not available.");
+                       logger.Warning($"[RuntimeBroker] Not available on the current platform.");
                        return new NullBroker(logger);
                    };
             }
