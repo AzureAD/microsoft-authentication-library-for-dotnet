@@ -1,0 +1,1 @@
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems.OSX = 4 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
