@@ -112,7 +112,11 @@ namespace MacMauiAppWithBroker
 }
 			</EmptyClassContent>
 		</PropertyGroup>
-		<WriteLinesToFile File="$(EmptyClassFile)" Lines="$(EmptyClassContent)" Overwrite="true" Condition="!Exists('$(EmptyClassFile)')" />
+		<WriteLinesToFile
+		  File="$(EmptyClassFile)"
+		  Lines="$(EmptyClassContent)"
+		  Overwrite="true"
+		  Condition="!Exists('$(EmptyClassFile)')" />
 	</Target>
 
 	<!-- Clean up empty class file -->
@@ -124,8 +128,5 @@ namespace MacMauiAppWithBroker
 	<Target Name="WarnNonMacBuild" BeforeTargets="Build" Condition="!$([MSBuild]::IsOSPlatform('OSX'))">
 		<Warning Text="MacMauiAppWithBroker is designed for macOS only. Building an empty stub project on this platform." />
 	</Target>
-	<ItemGroup>
-	  <Compile Remove="C:\Users\rginsburg\Projects\msal-dotnet\tests\devapps\MacMauiAppWithBroker\\_EmptyClass.cs" />
-	</ItemGroup>
 
 </Project>
