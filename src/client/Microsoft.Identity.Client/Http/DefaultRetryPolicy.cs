@@ -11,8 +11,13 @@ namespace Microsoft.Identity.Client.Http
     {
         private LinearRetryStrategy linearRetryStrategy = new LinearRetryStrategy();
 
+        public const int DefaultStsMaxRetries = 3;
+        public const int DefaultStsRetryDelayMs = 1000;
+        public const int DefaultManagedIdentityMaxRetries = 3;
+        public static int DefaultManagedIdentityRetryDelayMs { get; set; } = 1000; // this will be overridden in the unit tests so that they run faster
+
         // constants that are defined in the constructor
-        public static int DEFAULT_RETRY_DELAY_MS { get; set; } // this will be overridden in the unit tests so that they run faster
+        public static int DefaultRetryDelayMs { get; set; } // this will be overridden in the unit tests so that they run faster
         private int MAX_RETRIES;
         private readonly Func<HttpResponse, Exception, bool> RETRY_CONDITION;
 
@@ -21,7 +26,7 @@ namespace Microsoft.Identity.Client.Http
 
         public DefaultRetryPolicy(int retryDelayMs, int maxRetries, Func<HttpResponse, Exception, bool> retryCondition)
         {
-            DEFAULT_RETRY_DELAY_MS = retryDelayMs;
+            DefaultRetryDelayMs = retryDelayMs;
             MAX_RETRIES = maxRetries;
             RETRY_CONDITION = retryCondition;
         }
@@ -38,7 +43,7 @@ namespace Microsoft.Identity.Client.Http
                 // Use HeadersAsDictionary to check for "Retry-After" header
                 response.HeadersAsDictionary.TryGetValue("Retry-After", out string retryAfter);
 
-                int retryAfterDelay = linearRetryStrategy.calculateDelay(retryAfter, DEFAULT_RETRY_DELAY_MS);
+                int retryAfterDelay = linearRetryStrategy.calculateDelay(retryAfter, DefaultRetryDelayMs);
 
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {numRetries})");
 

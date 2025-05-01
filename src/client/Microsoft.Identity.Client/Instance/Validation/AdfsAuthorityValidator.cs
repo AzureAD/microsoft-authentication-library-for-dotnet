@@ -29,9 +29,9 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 var resource = $"https://{authorityInfo.Host}";
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
-                LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-                    LinearRetryPolicy.DefaultStsRetryDelayMs,
-                    LinearRetryPolicy.DefaultStsMaxRetries,
+                DefaultRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(
+                    DefaultRetryPolicy.DefaultStsRetryDelayMs,
+                    DefaultRetryPolicy.DefaultStsMaxRetries,
                     HttpRetryConditions.Sts);
 
                 Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                     mtlsCertificate: null,
                     validateServerCertificate: null,
                     cancellationToken: _requestContext.UserCancellationToken,
-                    retryPolicy: _linearRetryPolicy
+                    retryPolicy: defaultRetryPolicy
                     )
                     .ConfigureAwait(false);
 
