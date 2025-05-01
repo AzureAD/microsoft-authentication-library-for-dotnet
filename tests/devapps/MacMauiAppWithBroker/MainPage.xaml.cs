@@ -109,7 +109,7 @@ public partial class MainPage : ContentPage
 
 		builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.OSX)
 			{
-				ListOperatingSystemAccounts = false,
+				ListOperatingSystemAccounts = true,
 				MsaPassthrough = false,
 				Title = "MSAL Dev App .NET FX"
 			}

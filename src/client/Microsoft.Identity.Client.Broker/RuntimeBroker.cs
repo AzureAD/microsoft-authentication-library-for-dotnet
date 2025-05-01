@@ -514,7 +514,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            if (_brokerOptions.EnabledOn == BrokerOptions.OperatingSystems.Windows && !_brokerOptions.ListOperatingSystemAccounts)
+            if (!_brokerOptions.ListOperatingSystemAccounts)
             {
                 _logger.Info("[RuntimeBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
                 return Array.Empty<IAccount>();
