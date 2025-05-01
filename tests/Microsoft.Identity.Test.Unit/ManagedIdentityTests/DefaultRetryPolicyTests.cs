@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     string userAssignedId = TestConstants.ClientId;
                     UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId;
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     string userAssignedId = TestConstants.ClientId;
                     UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId;
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                         .WithHttpManager(httpManager);
@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                         .WithHttpManager(httpManager);
@@ -302,7 +302,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                         .WithHttpManager(httpManager);
@@ -364,7 +364,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                         .WithHttpManager(httpManager);
@@ -417,7 +417,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                         .WithHttpManager(httpManager);
@@ -524,7 +524,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                         .WithHttpManager(httpManager);
@@ -572,7 +572,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                using (var httpManager = new MockHttpManager(retry: false, isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager(disableInternalRetries: true))
                 {
                     var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                         .WithHttpManager(httpManager);

@@ -25,8 +25,6 @@ namespace Microsoft.Identity.Client.Http
 
         private int _maxRetries;
 
-
-
         private ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
             ImdsRetryPolicy.MIN_EXPONENTIAL_BACKOFF_MS,
             ImdsRetryPolicy.MAX_EXPONENTIAL_BACKOFF_MS,

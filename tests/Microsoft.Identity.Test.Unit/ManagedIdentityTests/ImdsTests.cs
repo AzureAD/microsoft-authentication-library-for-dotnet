@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     ManagedIdentityId managedIdentityId = userAssignedId == null
                         ? ManagedIdentityId.SystemAssigned
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     ManagedIdentityId managedIdentityId = userAssignedId == null
                         ? ManagedIdentityId.SystemAssigned
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     ManagedIdentityId managedIdentityId = userAssignedId == null
                         ? ManagedIdentityId.SystemAssigned
@@ -252,7 +252,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     ManagedIdentityId managedIdentityId = userAssignedId == null
                         ? ManagedIdentityId.SystemAssigned
@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     ManagedIdentityId managedIdentityId = userAssignedId == null
                         ? ManagedIdentityId.SystemAssigned
@@ -425,7 +425,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager())
                 {
                     ManagedIdentityId managedIdentityId = userAssignedId == null
                         ? ManagedIdentityId.SystemAssigned
@@ -475,7 +475,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                using (var httpManager = new MockHttpManager(retry: false, isManagedIdentity: true))
+                using (var httpManager = new MockHttpManager(disableInternalRetries: true))
                 {
                     ManagedIdentityId managedIdentityId = userAssignedId == null
                         ? ManagedIdentityId.SystemAssigned
