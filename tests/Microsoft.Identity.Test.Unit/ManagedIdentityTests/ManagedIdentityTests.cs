@@ -57,6 +57,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs = _originalDefaultManagedIdentityRetryDelayMs;
         }
 
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            base.TestInitialize();
+            ImdsRetryPolicy.NumRetries = 0;
+        }
+
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
@@ -1305,7 +1312,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
 
                 // 3 retries
-                Assert.AreEqual(DefaultRetryPolicy.numRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
+                Assert.AreEqual(DefaultRetryPolicy.NumRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 for (int i = 0; i < NumErrors; i++)
@@ -1324,7 +1331,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
 
                 // 3 retries (DefaultRetryPolicy.numRetries would be 6 if retry policy was NOT per request)
-                Assert.AreEqual(DefaultRetryPolicy.numRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
+                Assert.AreEqual(DefaultRetryPolicy.NumRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 for (int i = 0; i < NumErrors; i++)
@@ -1343,7 +1350,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
 
                 // 3 retries (DefaultRetryPolicy.numRetries would be 9 if retry policy was NOT per request)
-                Assert.AreEqual(DefaultRetryPolicy.numRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
+                Assert.AreEqual(DefaultRetryPolicy.NumRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }

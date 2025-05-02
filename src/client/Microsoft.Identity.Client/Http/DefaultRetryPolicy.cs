@@ -11,15 +11,19 @@ namespace Microsoft.Identity.Client.Http
     {
         private LinearRetryStrategy linearRetryStrategy = new LinearRetryStrategy();
 
-        public const int DefaultStsMaxRetries = 3;
-        public const int DefaultStsRetryDelayMs = 1000;
+        // referenced in unit tests
+        public const int DefaultStsMaxRetries = 1;
         public const int DefaultManagedIdentityMaxRetries = 3;
-        public static int DefaultManagedIdentityRetryDelayMs { get; set; } = 1000; // this will be overridden in the unit tests so that they run faster
+
+        // overridden in the unit tests so that they run faster
+        public static int DefaultStsRetryDelayMs { get; set; } = 1000;
+        public static int DefaultManagedIdentityRetryDelayMs { get; set; } = 1000;
 
         // used for comparison, in the unit tests
-        public static int numRetries { get; private set; } = 0;
+        // will be reset after every test
+        public static int NumRetries { get; set; } = 0;
 
-        public static int DefaultRetryDelayMs;// { get; set; } // this will be overridden in the unit tests so that they run faster
+        public static int DefaultRetryDelayMs;
         private int MaxRetries;
         private readonly Func<HttpResponse, Exception, bool> RetryCondition;
 
@@ -40,14 +44,18 @@ namespace Microsoft.Identity.Client.Http
                 retryCount < MaxRetries)
             {
                 // used below in the log statement, also referenced in the unit tests
-                numRetries = retryCount + 1;
+                NumRetries = retryCount + 1;
 
                 // Use HeadersAsDictionary to check for "Retry-After" header
-                response.HeadersAsDictionary.TryGetValue("Retry-After", out string retryAfter);
+                string retryAfter = string.Empty;
+                if (response?.HeadersAsDictionary != null)
+                {
+                    response.HeadersAsDictionary.TryGetValue("Retry-After", out retryAfter);
+                }
 
                 int retryAfterDelay = linearRetryStrategy.calculateDelay(retryAfter, DefaultRetryDelayMs);
 
-                logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {numRetries})");
+                logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {NumRetries})");
 
                 // Pause execution for the calculated delay
                 await Task.Delay(retryAfterDelay).ConfigureAwait(false);
