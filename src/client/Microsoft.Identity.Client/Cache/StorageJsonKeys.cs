@@ -43,5 +43,6 @@ namespace Microsoft.Identity.Client.Cache
         public const string ExtendedExpiresOn_MsalCompat = "ext_expires_on";
 
         public const string CacheExtensions = "ext";
+        public const string PersistedCacheParameters = "persisted_cache_parameters";
     }
 }

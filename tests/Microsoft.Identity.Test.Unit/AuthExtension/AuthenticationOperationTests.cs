@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Test.Unit
     public class AuthenticationOperationTests : TestBase
     {
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
+        private byte[] _serializedCache;
 
         [TestMethod]
         public async Task Should_UseCustomRequestHeaders_And_StoreAdditionalParameters()
@@ -67,7 +68,9 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task Should_UseCustomRequestHeaders_And_StoreAdditionalParametersWithCaching()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task Should_UseCustomRequestHeaders_And_StoreAdditionalParametersWithCaching(bool useSerializedCache)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -100,6 +103,12 @@ namespace Microsoft.Identity.Test.Unit
                     AdditionalCacheParameters = new[] { "additional_param1", "additional_param2" }
                 };
 
+                if (useSerializedCache)
+                {
+                    app.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+                    app.AppTokenCache.SetAfterAccess(AfterCacheAccess);
+                }
+
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
@@ -128,6 +137,16 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsTrue(result.AdditionalResponseParameters.Keys.Contains("additional_param2"));
                 Assert.AreEqual(expectedAt, result.AccessToken);
             }
+        }
+
+        private void BeforeCacheAccess(TokenCacheNotificationArgs args)
+        {
+            args.TokenCache.DeserializeMsalV3(_serializedCache);
+        }
+
+        private void AfterCacheAccess(TokenCacheNotificationArgs args)
+        {
+            _serializedCache = args.TokenCache.SerializeMsalV3();
         }
 
         [TestMethod]
