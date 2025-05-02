@@ -41,6 +41,10 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
         private readonly X509Certificate2 _mtlsCertificate;
+        private readonly LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
+            LinearRetryPolicy.DefaultStsRetryDelayMs,
+            LinearRetryPolicy.DefaultStsMaxRetries,
+            HttpRetryConditions.Sts);
 
         public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
         {
@@ -139,7 +143,9 @@ namespace Microsoft.Identity.Client.OAuth2
                             logger: requestContext.Logger,
                             doNotThrow: false,
                             mtlsCertificate: _mtlsCertificate,
-                            validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
+                            validateServerCertificate: null,
+                            cancellationToken: requestContext.UserCancellationToken,
+                            retryPolicy: _linearRetryPolicy)
                         .ConfigureAwait(false);
                     }
                     else
@@ -152,7 +158,9 @@ namespace Microsoft.Identity.Client.OAuth2
                             logger: requestContext.Logger,
                             doNotThrow: false,
                             mtlsCertificate: null,
-                            validateServerCertificate: null, cancellationToken: requestContext.UserCancellationToken)
+                            validateServerCertificate: null,
+                            cancellationToken: requestContext.UserCancellationToken,
+                            retryPolicy: _linearRetryPolicy)
                         .ConfigureAwait(false);
                     }
                 }

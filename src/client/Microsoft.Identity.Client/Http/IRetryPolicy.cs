@@ -12,6 +12,6 @@ namespace Microsoft.Identity.Client.Http
     internal interface IRetryPolicy
     {
         int DelayInMilliseconds { get; }
-        bool pauseForRetry(HttpResponse response, Exception exception, int retryCount);
+        bool PauseForRetry(HttpResponse response, Exception exception, int retryCount);
     }
 }

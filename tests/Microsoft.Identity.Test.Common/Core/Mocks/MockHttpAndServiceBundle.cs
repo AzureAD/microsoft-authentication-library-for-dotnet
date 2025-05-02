@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             bool isInstanceDiscoveryEnabled = true,
             IPlatformProxy platformProxy = null)
         {
-            HttpManager = new MockHttpManager(testName);
+            HttpManager = new MockHttpManager(testName: testName);
             ServiceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
                 HttpManager,
                 logCallback: logCallback,

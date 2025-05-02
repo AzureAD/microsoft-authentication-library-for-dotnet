@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit
             string resource = "https://management.azure.com/";
 
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 ManagedIdentityTestUtil.SetEnvironmentVariables(ManagedIdentitySource.AppService, appServiceEndpoint);
 
