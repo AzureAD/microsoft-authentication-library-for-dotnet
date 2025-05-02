@@ -10,25 +10,28 @@ namespace Microsoft.Identity.Client.Http
 {
     internal class ImdsRetryPolicy : IRetryPolicy
     {
-        private const int HTTP_STATUS_GONE_RETRY_AFTER_MS_INTERNAL = 10 * 1000; // 10 seconds
+        private const int HttpStatusGoneRetryAfterMsInternal = 10 * 1000; // 10 seconds
 
-        // referenced in unit tests, cannot be private
-        public const int EXPONENTIAL_STRATEGY_NUM_RETRIES = 3;
-        public const int LINEAR_STRATEGY_NUM_RETRIES = 7;
-        public static int numRetries { get; private set; } = 0;
+        // referenced in unit tests
+        public const int ExponentialStrategyNumRetries = 3;
+        public const int LinearStrategyNumRetries = 7;
 
-        // these will be overridden in the unit tests so that they run faster
-        public static int MIN_EXPONENTIAL_BACKOFF_MS { get; set; } = 1000;
-        public static int MAX_EXPONENTIAL_BACKOFF_MS { get; set; } = 4000;
-        public static int EXPONENTIAL_DELTA_BACKOFF_MS { get; set; } = 2000;
-        public static int HTTP_STATUS_GONE_RETRY_AFTER_MS { get; set; } = HTTP_STATUS_GONE_RETRY_AFTER_MS_INTERNAL;
+        // used for comparison, in the unit tests
+        // will be reset after every test
+        public static int NumRetries { get; set; } = 0;
 
-        private int _maxRetries;
+        // overridden in the unit tests so that they run faster
+        public static int MinExponentialBackoffMs { get; set; } = 1000;
+        public static int MaxExponentialBackoffMs { get; set; } = 4000;
+        public static int ExponentialDeltaBackoffMs { get; set; } = 2000;
+        public static int HttpStatusGoneRetryAfterMs { get; set; } = HttpStatusGoneRetryAfterMsInternal;
+
+        private int MaxRetries;
 
         private ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
-            ImdsRetryPolicy.MIN_EXPONENTIAL_BACKOFF_MS,
-            ImdsRetryPolicy.MAX_EXPONENTIAL_BACKOFF_MS,
-            ImdsRetryPolicy.EXPONENTIAL_DELTA_BACKOFF_MS
+            ImdsRetryPolicy.MinExponentialBackoffMs,
+            ImdsRetryPolicy.MaxExponentialBackoffMs,
+            ImdsRetryPolicy.ExponentialDeltaBackoffMs
         );
 
         public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
@@ -38,20 +41,20 @@ namespace Microsoft.Identity.Client.Http
             if (retryCount == 0)
             {
                 // Calculate the maxRetries based on the status code, once per request
-                _maxRetries = httpStatusCode == (int)HttpStatusCode.Gone
-                    ? LINEAR_STRATEGY_NUM_RETRIES
-                    : EXPONENTIAL_STRATEGY_NUM_RETRIES;
+                MaxRetries = httpStatusCode == (int)HttpStatusCode.Gone
+                    ? LinearStrategyNumRetries
+                    : ExponentialStrategyNumRetries;
             }
 
             // Check if the status code is retriable and if the current retry count is less than max retries
             if (HttpRetryConditions.Imds(response, exception) &&
-                retryCount < _maxRetries)
+                retryCount < MaxRetries)
             {
                 // used below in the log statement, also referenced in the unit tests
-                numRetries = retryCount + 1;
+                NumRetries = retryCount + 1;
 
                 int retryAfterDelay = httpStatusCode == (int)HttpStatusCode.Gone
-                    ? HTTP_STATUS_GONE_RETRY_AFTER_MS
+                    ? HttpStatusGoneRetryAfterMs
                     : _exponentialRetryStrategy.CalculateDelay(retryCount);
 
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
