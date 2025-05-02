@@ -61,6 +61,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public override void TestInitialize()
         {
             base.TestInitialize();
+
             ImdsRetryPolicy.NumRetries = 0;
         }
 
