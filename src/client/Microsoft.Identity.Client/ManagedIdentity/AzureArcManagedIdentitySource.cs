@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using static Microsoft.Identity.Client.Http.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -123,10 +124,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Verbose(() => "[Managed Identity] Adding authorization header to the request.");
                 request.Headers.Add("Authorization", authHeaderValue);
 
-                DefaultRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(
-                    DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs,
-                    DefaultRetryPolicy.DefaultManagedIdentityMaxRetries,
-                    HttpRetryConditions.Sts);
+                DefaultRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(RequestType.ManagedIdentity);
 
                 response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
                          request.ComputeUri(),

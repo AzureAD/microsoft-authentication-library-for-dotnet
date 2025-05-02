@@ -17,6 +17,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using static Microsoft.Identity.Client.Http.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
@@ -50,10 +51,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             TestCommon.ResetInternalStaticCaches();
 
             DefaultRetryPolicy.NumRetries = 0;
-            StsRetryPolicy = new DefaultRetryPolicy(
-                DefaultRetryPolicy.DefaultStsRetryDelayMs,
-                DefaultRetryPolicy.DefaultStsMaxRetries,
-                HttpRetryConditions.Sts);
+            StsRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
         }
 
         [TestMethod]

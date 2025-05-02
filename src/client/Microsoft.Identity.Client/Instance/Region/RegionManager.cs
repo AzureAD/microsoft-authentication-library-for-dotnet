@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.Http.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Client.Region
 {
@@ -46,10 +47,7 @@ namespace Microsoft.Identity.Client.Region
         private static bool s_failedAutoDiscovery = false;
         private static string s_regionDiscoveryDetails;
 
-        private readonly DefaultRetryPolicy _defaultRetryPolicy = new DefaultRetryPolicy(
-            DefaultRetryPolicy.DefaultStsRetryDelayMs,
-            DefaultRetryPolicy.DefaultStsMaxRetries,
-            HttpRetryConditions.Sts);
+        private readonly DefaultRetryPolicy _defaultRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
 
         public RegionManager(
             IHttpManager httpManager,

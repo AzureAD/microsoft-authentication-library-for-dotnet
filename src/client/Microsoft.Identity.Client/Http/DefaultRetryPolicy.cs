@@ -9,6 +9,12 @@ namespace Microsoft.Identity.Client.Http
 {
     class DefaultRetryPolicy : IRetryPolicy
     {
+        public enum RequestType
+        {
+            STS,
+            ManagedIdentity
+        }
+
         private LinearRetryStrategy linearRetryStrategy = new LinearRetryStrategy();
 
         // referenced in unit tests
@@ -27,14 +33,23 @@ namespace Microsoft.Identity.Client.Http
         private int MaxRetries;
         private readonly Func<HttpResponse, Exception, bool> RetryCondition;
 
-        public DefaultRetryPolicy(
-            int retryDelayMs,
-            int maxRetries,
-            Func<HttpResponse, Exception, bool> retryCondition)
+        public DefaultRetryPolicy(RequestType requestType)
         {
-            DefaultRetryDelayMs = retryDelayMs;
-            MaxRetries = maxRetries;
-            RetryCondition = retryCondition;
+            switch (requestType)
+            {
+                case RequestType.ManagedIdentity:
+                    DefaultRetryDelayMs = DefaultManagedIdentityRetryDelayMs;
+                    MaxRetries = DefaultManagedIdentityMaxRetries;
+                    RetryCondition = HttpRetryConditions.DefaultManagedIdentity;
+                    break;
+                case RequestType.STS:
+                    DefaultRetryDelayMs = DefaultStsRetryDelayMs;
+                    MaxRetries = DefaultStsMaxRetries;
+                    RetryCondition = HttpRetryConditions.Sts;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(requestType), requestType, "Unknown request type");
+            }
         }
 
         public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)

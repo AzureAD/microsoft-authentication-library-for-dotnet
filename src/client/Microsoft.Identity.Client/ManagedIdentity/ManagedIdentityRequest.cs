@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.Http.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -31,10 +32,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             BodyParameters = new Dictionary<string, string>();
             QueryParameters = new Dictionary<string, string>();
 
-            IRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(
-                DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs,
-                DefaultRetryPolicy.DefaultManagedIdentityMaxRetries,
-                HttpRetryConditions.DefaultManagedIdentity);
+            IRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(RequestType.ManagedIdentity);
             RetryPolicy = retryPolicy ?? defaultRetryPolicy;
         }
 

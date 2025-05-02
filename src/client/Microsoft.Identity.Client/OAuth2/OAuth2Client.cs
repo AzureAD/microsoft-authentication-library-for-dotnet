@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Security.Cryptography.X509Certificates;
+using static Microsoft.Identity.Client.Http.DefaultRetryPolicy;
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
@@ -119,10 +120,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
             {
-                DefaultRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(
-                    DefaultRetryPolicy.DefaultStsRetryDelayMs,
-                    DefaultRetryPolicy.DefaultStsMaxRetries,
-                    HttpRetryConditions.Sts);
+                DefaultRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
 
                 try
                 {
