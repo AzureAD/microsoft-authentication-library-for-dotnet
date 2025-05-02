@@ -340,7 +340,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             using (var httpManager = new MockHttpManager())
             {
                 // Simulate permanent errors (to trigger the maximum number of retries)
-                const int NumErrors = DefaultRetryPolicy.DefaultStsMaxRetries + 1; // initial request + maximum number of retries (3)
+                const int NumErrors = DefaultRetryPolicy.DefaultStsMaxRetries + 1; // initial request + maximum number of retries (1)
                 for (int i = 0; i < NumErrors; i++)
                 {
                     httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
@@ -431,7 +431,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             using (var httpManager = new MockHttpManager())
             {
                 // Simulate permanent errors (to trigger the maximum number of retries)
-                const int NumErrors = DefaultRetryPolicy.DefaultStsMaxRetries + 1; // initial request + maximum number of retries (3)
+                const int NumErrors = DefaultRetryPolicy.DefaultStsMaxRetries + 1; // initial request + maximum number of retries (1)
                 for (int i = 0; i < NumErrors; i++)
                 {
                     httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.BadGateway);
@@ -462,7 +462,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             using (var httpManager = new MockHttpManager())
             {
                 // Simulate permanent errors (to trigger the maximum number of retries)
-                const int NumErrors = DefaultRetryPolicy.DefaultStsMaxRetries + 1; // initial request + maximum number of retries (3)
+                const int NumErrors = DefaultRetryPolicy.DefaultStsMaxRetries + 1; // initial request + maximum number of retries (1)
                 for (int i = 0; i < NumErrors; i++)
                 {
                     httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
@@ -493,8 +493,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Get);
-                httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Get);
+                // Simulate permanent errors (to trigger the maximum number of retries)
+                const int NumErrors = DefaultRetryPolicy.DefaultStsMaxRetries + 1; // initial request + maximum number of retries (1)
+                for (int i = 0; i < NumErrors; i++)
+                {
+                    httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Get);
+                }
 
                 var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
@@ -521,8 +525,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
-                httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
+                // Simulate permanent errors (to trigger the maximum number of retries)
+                const int NumErrors = DefaultRetryPolicy.DefaultStsMaxRetries + 1; // initial request + maximum number of retries (1)
+                for (int i = 0; i < NumErrors; i++)
+                {
+                    httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
+                }
 
                 var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
