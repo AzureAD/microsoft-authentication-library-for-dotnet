@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                     DefaultRetryPolicy.DefaultStsMaxRetries,
                     HttpRetryConditions.Sts);
 
-        Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
                     new Uri(webFingerUrl),
                     null,
                     body: null,
