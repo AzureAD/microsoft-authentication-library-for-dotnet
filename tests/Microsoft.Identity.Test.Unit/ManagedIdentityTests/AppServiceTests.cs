@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task AppServiceInvalidEndpointAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, "127.0.0.1:41564/msi/token");
 
