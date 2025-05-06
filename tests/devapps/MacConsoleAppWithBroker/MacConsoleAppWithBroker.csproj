@@ -8,28 +8,23 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<!-- <ProjectReference Include="../../../src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj" /> -->
+		<ProjectReference Include="../../../src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj" />
 
-    <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.68.6-internal-preview" />
+    <!-- <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.68.6-internal-preview" /> -->
 
-    <!-- <ProjectReference Include="../../../../microsoft-authentication-library-for-cpp/msalruntime/interop/net/Microsoft.Identity.Client.NativeInterop.csproj" />
-    <None Include="../../../../microsoft-authentication-library-for-cpp/_builds/macOS/msalruntime/lib/Debug/libmsalruntime.dylib">
+    <ProjectReference Include="../../../../OneAuth/msal/msalruntime/interop/net/Microsoft.Identity.Client.NativeInterop.csproj" />
+    <None Include="../../../../OneAuth/msal/_builds/macOS/msalruntime/lib/Debug/libmsalruntime.dylib">
       <Link>msalruntime.dylib</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>msalruntime_arm64.dylib</TargetPath>
-    </None> -->
+    </None>
 
-		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.0-alpha3" />
+		<!-- <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.0-alpha3" />
 		<Content Include="/Users/fengga/.nuget/packages/microsoft.identity.client.nativeinterop/0.19.0-alpha3/runtimes/macos-arm64/native/msalruntime_arm64.dylib">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>msalruntime_arm64.dylib</Link>
-		</Content>
+		</Content> -->
 
 	</ItemGroup>
-
-
-
-
-
 
 </Project>

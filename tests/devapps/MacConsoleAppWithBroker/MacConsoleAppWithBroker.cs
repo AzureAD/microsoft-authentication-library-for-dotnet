@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
 
-class ConsoleMacAppWithBroker
+class MacConsoleAppWithBroker
 {
     private static readonly int MainThreadId = Thread.CurrentThread.ManagedThreadId;
     
