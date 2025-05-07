@@ -36,8 +36,6 @@ At runtime the Orchestrator handles:
 | **Test (CI)** | Uses the token and calls in to the DownStream API and gets a 401. |
 | **Test (CI)** | Gets a new token using claims on DownStream API. **Microsoft.Identity.Web** → **MSAL** |
 | **Test (CI)** | Uses the token and calls in to the DownStream API. |
-| **Deploy**   | Helm chart publishes Orchestrator and Web API behind the internal gateway with **mTLS** enforced.                   |
-
 
 ## End‑to‑End Token Lifecycle
 
