@@ -23,7 +23,7 @@ At runtime the Orchestrator handles:
 | **Lab Helper Service**| Control-plane utility that forcibly revokes tokens in test labs | Internal helper service                  |
 | **Custom Web API**   | Resource server that trusts MISE validation                      | Runs behind the Orchestrator             |
 
-## 4 CI / CD Integration
+## CI / CD Integration
 
 | Stage        | Action                                                                                                              |
 |--------------|---------------------------------------------------------------------------------------------------------------------|
