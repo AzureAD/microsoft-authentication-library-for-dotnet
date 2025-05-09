@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.Http.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Client.Region
 {
@@ -46,10 +47,7 @@ namespace Microsoft.Identity.Client.Region
         private static bool s_failedAutoDiscovery = false;
         private static string s_regionDiscoveryDetails;
 
-        private readonly LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-            LinearRetryPolicy.DefaultStsRetryDelayMs,
-            LinearRetryPolicy.DefaultStsMaxRetries,
-            HttpRetryConditions.Sts);
+        private readonly DefaultRetryPolicy _defaultRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
 
         public RegionManager(
             IHttpManager httpManager,
@@ -213,7 +211,7 @@ namespace Microsoft.Identity.Client.Region
                                     mtlsCertificate: null,
                                     validateServerCertificate: null,
                                     cancellationToken: GetCancellationToken(requestCancellationToken),
-                                    retryPolicy: _linearRetryPolicy)
+                                    retryPolicy: _defaultRetryPolicy)
                                 .ConfigureAwait(false);
 
                             // A bad request occurs when the version in the IMDS call is no longer supported.
@@ -231,7 +229,7 @@ namespace Microsoft.Identity.Client.Region
                                     mtlsCertificate: null,
                                     validateServerCertificate: null,
                                     cancellationToken: GetCancellationToken(requestCancellationToken),
-                                    retryPolicy: _linearRetryPolicy)
+                                    retryPolicy: _defaultRetryPolicy)
                                     .ConfigureAwait(false); // Call again with updated version
                             }
 
@@ -334,7 +332,7 @@ namespace Microsoft.Identity.Client.Region
                     mtlsCertificate: null,
                     validateServerCertificate: null,
                     cancellationToken: GetCancellationToken(userCancellationToken),
-                    retryPolicy: _linearRetryPolicy)
+                    retryPolicy: _defaultRetryPolicy)
                 .ConfigureAwait(false);
 
             // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
