@@ -84,6 +84,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.MSA)]
+        [Ignore("Currently failing due to environment")] //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5264
         public async Task DeviceCodeFlowMsaTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
