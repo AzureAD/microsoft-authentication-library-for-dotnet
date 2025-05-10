@@ -8,19 +8,26 @@ steps:
 #
 #  Restore ? Build ? Test
 #
+# Restore ????????????????????????????????????????????????????????
 - task: DotNetCoreCLI@2
-  displayName: 'Restore E2E project'
+  displayName: Restore E2E project
   inputs:
     command: restore
     projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
-    arguments: '--framework ${{ parameters.TargetFramework }} -p:MSBuildEnableWorkloadResolver=false'
+    restoreArguments: >
+      /p:RestoreTargetFrameworks=net8.0
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
 
+# Build ??????????????????????????????????????????????????????????
 - task: DotNetCoreCLI@2
-  displayName: 'Build E2E project'
+  displayName: Build E2E project
   inputs:
     command: build
     projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
-    arguments: '--configuration ${{ parameters.BuildConfiguration }} --framework ${{ parameters.TargetFramework }}'
+    arguments: >
+      --configuration $(BuildConfiguration)
+      --framework net8.0
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
 
 - task: VSTest@2
   displayName: 'Run Managed Identity E2E Tests (.NET)'
