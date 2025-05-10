@@ -50,8 +50,8 @@ jobs:
   - task: VSTest@2
     displayName: 'Run Managed Identity E2E'
     inputs:
-      vsTestVersion: '17.0'
-      vstestLocation: 'C:\BuildTools\Common7\IDE\Extensions\TestPlatform\vstest.console.exe'
+      #vsTestVersion: '17.0'
+      #vstestLocation: 'C:\BuildTools\Common7\IDE\Extensions\TestPlatform\vstest.console.exe'
       testSelector: testAssemblies
       testAssemblyVer2: '**/Microsoft.Identity.Test.E2E.NetCore/bin/Release/**/Microsoft.Identity.Test.E2E.NetCore.dll'
       searchFolder: '$(System.DefaultWorkingDirectory)'
