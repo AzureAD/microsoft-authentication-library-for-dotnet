@@ -12,7 +12,6 @@ jobs:
   pool:
     name: 'MSALMSIAZUREARC'
   variables:
-    runCodesignValidationInjection: false
     Codeql.SkipTaskAutoInjection: true
   steps:
   - template: template-run-mi-e2e-azurearc.yaml
@@ -30,8 +29,6 @@ jobs:
   variables:
     RUN_IMDS_E2E: 'true'
     MSBuildEnableWorkloadResolver: 'false'
-    runCodesignValidationInjection: false
-    Codeql.SkipTaskAutoInjection: true
   steps:
   - template: template-run-mi-e2e-imds.yaml
     parameters:
