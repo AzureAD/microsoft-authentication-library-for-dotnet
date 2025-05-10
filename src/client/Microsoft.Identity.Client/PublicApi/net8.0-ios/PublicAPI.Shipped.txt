@@ -1006,3 +1006,4 @@ Microsoft.Identity.Client.RP.AcquireTokenForClientParameterBuilderForResourcePro
 static Microsoft.Identity.Client.RP.AcquireTokenForClientParameterBuilderForResourceProviders.WithAccessTokenSha256ToRefresh(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, string hash) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.IMsalSFHttpClientFactory
 Microsoft.Identity.Client.IMsalSFHttpClientFactory.GetHttpClient(System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> validateServerCert) -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems.OSX = 4 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
