@@ -6,16 +6,7 @@ parameters:
 
 steps:
 
-# ? Install MAUI workloads (needed for broker bits used in tests)
-- task: Bash@3
-  displayName: Install MAUI workloads
-  inputs:
-    targetType: inline
-    script: |
-      dotnet nuget locals all --clear
-      dotnet workload install android ios macos maui
-
-# ? Restore
+# Restore
 - task: DotNetCoreCLI@2
   displayName: Restore E2E project
   inputs:
@@ -23,13 +14,13 @@ steps:
     projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
     arguments: '--framework ${{ parameters.TargetFramework }} -p:MSBuildEnableWorkloadResolver=false'
 
-# ? Build
+# Build
 - task: DotNetCoreCLI@2
   displayName: Build E2E project
   inputs:
     command: build
     projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
-    arguments: '--configuration ${{ parameters.BuildConfiguration }} --framework ${{ parameters.TargetFramework }}'
+    arguments: '--configuration ${{ parameters.BuildConfiguration }} --framework ${{ parameters.TargetFramework }} -p:MSBuildEnableWorkloadResolver=false'
 
 # ? Test
 - task: VSTest@2

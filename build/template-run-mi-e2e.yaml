@@ -29,6 +29,7 @@ jobs:
     name: 'ID4SMSIHostedAgent'
   variables:
     RUN_IMDS_E2E: 'true'
+    MSBuildEnableWorkloadResolver: 'false'
     runCodesignValidationInjection: false
     Codeql.SkipTaskAutoInjection: true
   steps:
