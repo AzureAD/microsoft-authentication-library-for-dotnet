@@ -12,7 +12,7 @@ steps:
   inputs:
     command: restore
     projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
-    arguments: '--framework ${{ parameters.TargetFramework }} -p:MSBuildEnableWorkloadResolver=false'
+    arguments: '--framework ${{ parameters.TargetFramework }} -p:RestoreTargetFrameworks=${{ parameters.TargetFramework }} -p:MSBuildEnableWorkloadResolver=false'
 
 # Build
 - task: DotNetCoreCLI@2
