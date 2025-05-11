@@ -33,7 +33,7 @@ jobs:
     displayName: 'Restore E2E project'
     inputs:
       command: restore
-      projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
+      projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.csproj
       arguments: '--framework net8.0 -p:MSBuildEnableWorkloadResolver=false'
 
   # ---------- build -------------
@@ -41,7 +41,7 @@ jobs:
     displayName: 'Build E2E project'
     inputs:
       command: build
-      projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
+      projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.csproj
       arguments: '--configuration Release --framework net8.0'
 
   # ---------- test --------------
@@ -49,7 +49,7 @@ jobs:
     displayName: 'Run Managed Identity E2E'
     inputs:
       testSelector: testAssemblies
-      testAssemblyVer2: '**/Microsoft.Identity.Test.E2E.NetCore/bin/Release/**/Microsoft.Identity.Test.E2E.NetCore.dll'
+      testAssemblyVer2: '**/Microsoft.Identity.Test.E2E/bin/Release/**/Microsoft.Identity.Test.E2E.dll'
       searchFolder: '$(System.DefaultWorkingDirectory)'
       runTestsInIsolation: true
       rerunFailedTests: true

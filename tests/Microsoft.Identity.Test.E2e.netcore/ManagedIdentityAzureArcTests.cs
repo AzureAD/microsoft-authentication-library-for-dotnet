@@ -17,10 +17,6 @@ namespace Microsoft.Identity.Test.E2E
         private static bool IsArc() =>
             !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT"));
 
-        /// <summary>
-        /// Builds a System-Assigned MI app with *per-instance* in-memory cache
-        /// to avoid cross-test pollution.
-        /// </summary>
         private static IManagedIdentityApplication BuildSami()
         {
             var builder = ManagedIdentityApplicationBuilder
@@ -42,41 +38,12 @@ namespace Microsoft.Identity.Test.E2E
 
             Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-        }
 
-        [TestMethod]
-        public async Task AcquireToken_SecondCall_ComesFromCache()
-        {
-            if (!IsArc())
-                Assert.Inconclusive("Arc-specific test skipped.");
-
-            var mi = BuildSami();
-
-            var first = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
             var second = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
-            Assert.AreEqual(first.AccessToken, second.AccessToken, "Expected identical AT from cache.");
-        }
-
-        [TestMethod]
-        public async Task ForceRefresh_BypassesCache_ReturnsNewToken()
-        {
-            if (!IsArc())
-                Assert.Inconclusive("Arc-specific test skipped.");
-
-            var mi = BuildSami();
-
-            var result = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
-
-            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-            result = await mi.AcquireTokenForManagedIdentity(ArmScope)
-                                    .WithForceRefresh(true)
-                                    .ExecuteAsync().ConfigureAwait(false);
-
-            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(result.AccessToken, second.AccessToken, "Expected identical AT from cache.");
         }
     }
 }

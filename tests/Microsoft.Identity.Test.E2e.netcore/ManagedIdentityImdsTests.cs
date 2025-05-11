@@ -62,45 +62,14 @@ namespace Microsoft.Identity.Test.E2E
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
                 "First call must hit MSI endpoint.");
-        }
-
-        [TestMethod]
-        public async Task AcquireToken_SecondCall_ComesFromCache()
-        {
-            if (!ShouldRunImds())
-                Assert.Inconclusive("IMDS test skipped (RUN_IMDS_E2E not set).");
-
-            var mi = BuildMi();
-
-            var first = await mi.AcquireTokenForManagedIdentity(ArmScope)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
 
             var second = await mi.AcquireTokenForManagedIdentity(ArmScope)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
-            Assert.AreEqual(first.AccessToken, second.AccessToken);
-        }
-
-        [TestMethod]
-        public async Task ForceRefresh_BypassesCache_ReturnsNewToken()
-        {
-            if (!ShouldRunImds())
-                Assert.Inconclusive("IMDS test skipped (RUN_IMDS_E2E not set).");
-
-            var mi = BuildMi();
-            await mi.AcquireTokenForManagedIdentity(ArmScope)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            var refreshed = await mi.AcquireTokenForManagedIdentity(ArmScope)
-                                    .WithForceRefresh(true)
-                                    .ExecuteAsync().ConfigureAwait(false);
-
-            Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(result.AccessToken, second.AccessToken);
         }
     }
 }

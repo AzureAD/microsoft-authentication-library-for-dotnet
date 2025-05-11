@@ -12,7 +12,7 @@ steps:
   displayName: Restore E2E project
   inputs:
     command: restore
-    projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
+    projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.csproj
     restoreArguments: >
       /p:RestoreTargetFrameworks=net8.0
       /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
@@ -22,7 +22,7 @@ steps:
   displayName: Build E2E project
   inputs:
     command: build
-    projects: tests/Microsoft.Identity.Test.E2E.NetCore/Microsoft.Identity.Test.E2E.NetCore.csproj
+    projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.csproj
     arguments: >
       --configuration $(BuildConfiguration)
       --framework net8.0
@@ -33,7 +33,7 @@ steps:
   displayName: Run Managed Identity E2E Tests (.NET)
   inputs:
     testSelector: testAssemblies
-    testAssemblyVer2: '**/Microsoft.Identity.Test.E2E.NetCore/bin/${{ parameters.BuildConfiguration }}/**/Microsoft.Identity.Test.E2E.NetCore.dll'
+    testAssemblyVer2: '**/Microsoft.Identity.Test.E2E/bin/${{ parameters.BuildConfiguration }}/**/Microsoft.Identity.Test.E2E.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
     runTestsInIsolation: true
     rerunFailedTests: true
