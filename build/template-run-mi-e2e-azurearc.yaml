@@ -30,7 +30,7 @@ steps:
   displayName: 'Run Managed Identity E2E Tests (.NET)'
   inputs:
     testSelector: testAssemblies
-    testAssemblyVer2: '**/Microsoft.Identity.Test.E2E/bin/${{ parameters.BuildConfiguration }}/**/Microsoft.Identity.Test.E2E.dll'
+    testAssemblyVer2: '**/Microsoft.Identity.Test.E2E/bin/${{ parameters.BuildConfiguration }}/**/Microsoft.Identity.Test.E2E.MSI.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
     runTestsInIsolation: true
     rerunFailedTests: true
