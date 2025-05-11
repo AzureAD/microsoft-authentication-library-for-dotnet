@@ -10,7 +10,7 @@ steps:
   displayName: Restore E2E project
   inputs:
     command: restore
-    projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.csproj
+    projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.MSI.csproj
     restoreArguments: >
       /p:RestoreTargetFrameworks=net8.0
       /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
@@ -20,7 +20,7 @@ steps:
   displayName: Build E2E project
   inputs:
     command: build
-    projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.csproj
+    projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.MSI.csproj
     arguments: >
       --configuration $(BuildConfiguration)
       --framework net8.0

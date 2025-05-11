@@ -183,7 +183,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "tests\devapps\WAM\N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedIdentityTokenRevocation", "tests\devapps\Managed Identity apps\ManagedIdentityTokenRevocation\ManagedIdentityTokenRevocation.csproj", "{DA9C3258-DEF6-7794-9762-20CF7B826839}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.E2E", "tests\Microsoft.Identity.Test.E2e\Microsoft.Identity.Test.E2E.csproj", "{773EF816-E6AA-497C-3DE1-2D3F0CA6B103}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.E2E.MSI", "tests\Microsoft.Identity.Test.E2e\Microsoft.Identity.Test.E2E.MSI.csproj", "{773EF816-E6AA-497C-3DE1-2D3F0CA6B103}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
