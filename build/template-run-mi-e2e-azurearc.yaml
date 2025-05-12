@@ -39,4 +39,4 @@ steps:
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    vsTestFilter: 'TestCategory=MI_E2E_AzureArc&RunOnAzureDevOps'
+    vsTestFilter: 'TestCategory=MI_E2E_AzureArc'
