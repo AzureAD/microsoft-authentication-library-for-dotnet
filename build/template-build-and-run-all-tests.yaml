@@ -101,10 +101,6 @@ jobs: #Build and stage projects
   pool:
     name: 'MSALMSIAZUREARC'
 
-  variables:
-    runCodesignValidationInjection: false
-    Codeql.SkipTaskAutoInjection: true
-
   steps:
   - template: template-run-mi-e2e-azurearc.yaml
     parameters:
@@ -116,11 +112,6 @@ jobs: #Build and stage projects
   dependsOn: ['BuildAndStageProjects']
   pool:
     name: 'ID4SMSIHostedAgent'
-
-  variables:
-    RUN_IMDS_E2E: 'true' #enables IMDS E2E tests in CI only
-    runCodesignValidationInjection: false
-    Codeql.SkipTaskAutoInjection: true
 
   steps:
   - template: template-run-mi-e2e-imds.yaml
