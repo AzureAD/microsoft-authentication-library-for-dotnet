@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.E2E
 {
-    [TestCategory("MI_E2E_AzureArc")]
     [TestClass]
     public class ManagedIdentityAzureArcTests
     {
@@ -26,6 +25,7 @@ namespace Microsoft.Identity.Test.E2E
             return builder.Build();
         }
 
+        [TestCategory("MI_E2E_AzureArc")]
         [RunOnAzureDevOps]
         [TestMethod]
         public async Task AcquireToken_ForSami_OnAzureArc_Succeeds()

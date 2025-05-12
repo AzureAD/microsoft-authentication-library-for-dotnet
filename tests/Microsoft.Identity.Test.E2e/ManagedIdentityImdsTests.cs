@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.E2E
 {
-    [TestCategory("MI_E2E_Imds")]
     [TestClass]
     public class ManagedIdentityImdsTests
     {
@@ -36,6 +35,7 @@ namespace Microsoft.Identity.Test.E2E
         }
 
         [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_Imds")]
         [DataTestMethod]
         [DataRow(null /*SAMI*/, null, DisplayName = "SAMI")]
         [DataRow("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6", "clientid", DisplayName = "UAMI-ClientId")]
