@@ -3,24 +3,18 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.E2E
 {
+    [TestCategory("MI_E2E_Imds")]
     [TestClass]
     public class ManagedIdentityImdsTests
     {
         private const string ArmScope = "https://management.azure.com";
-
-        private static bool IsArc() =>
-            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT"));
-
-        private static bool ShouldRunImds() =>
-            !IsArc() && Environment.GetEnvironmentVariable("RUN_IMDS_E2E") == "true";
 
         private static IManagedIdentityApplication BuildMi(
            string userAssignedId = null,
@@ -41,6 +35,7 @@ namespace Microsoft.Identity.Test.E2E
             return builder.Build();
         }
 
+        [RunOnAzureDevOps]
         [DataTestMethod]
         [DataRow(null /*SAMI*/, null, DisplayName = "SAMI")]
         [DataRow("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6", "clientid", DisplayName = "UAMI-ClientId")]
@@ -49,9 +44,6 @@ namespace Microsoft.Identity.Test.E2E
         [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "UAMI-ObjectId")]
         public async Task AcquireToken_OnImds_Succeeds(string id, string idType)
         {
-            if (!ShouldRunImds())
-                Assert.Inconclusive("IMDS test skipped (RUN_IMDS_E2E not set).");
-
             var mi = BuildMi(id, idType);
 
             var result = await mi.AcquireTokenForManagedIdentity(ArmScope)

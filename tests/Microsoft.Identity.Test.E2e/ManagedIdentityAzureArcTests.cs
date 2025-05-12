@@ -3,19 +3,18 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.E2E
 {
+    [TestCategory("MI_E2E_AzureArc")]
     [TestClass]
     public class ManagedIdentityAzureArcTests
     {
         private const string ArmScope = "https://management.azure.com";
-
-        private static bool IsArc() =>
-            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT"));
 
         private static IManagedIdentityApplication BuildSami()
         {
@@ -27,14 +26,14 @@ namespace Microsoft.Identity.Test.E2E
             return builder.Build();
         }
 
+        [RunOnAzureDevOps]
         [TestMethod]
         public async Task AcquireToken_ForSami_OnAzureArc_Succeeds()
         {
-            if (!IsArc())
-                Assert.Inconclusive("Arc-specific test skipped.");
-
             var mi = BuildSami();
-            var result = await mi.AcquireTokenForManagedIdentity(ArmScope).ExecuteAsync().ConfigureAwait(false);
+            var result = await mi.AcquireTokenForManagedIdentity(ArmScope)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
