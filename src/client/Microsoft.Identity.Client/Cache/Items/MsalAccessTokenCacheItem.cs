@@ -321,6 +321,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string tokenType = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer;
             string scopes = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target);
             var additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.CacheExtensions);
+            var persistedCacheParameters = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.PersistedCacheParameters);
 
             var item = new MsalAccessTokenCacheItem(
                 scopes: scopes,
@@ -338,6 +339,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 item.CredentialType = StorageJsonValues.CredentialTypeAccessTokenExtended;
             }
 
+            item.PersistedCacheParameters = persistedCacheParameters;
             item.OboCacheKey = oboCacheKey;
             item.PopulateFieldsFromJObject(j);
 
@@ -367,22 +369,29 @@ namespace Microsoft.Identity.Client.Cache.Items
             // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compatibility
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn_MsalCompat, extExpiresUnixTimestamp);
-            if (AdditionalCacheKeyComponents != null)
+
+            StoreDictionaryInJson(json, StorageJsonKeys.CacheExtensions, AdditionalCacheKeyComponents);
+            StoreDictionaryInJson(json, StorageJsonKeys.PersistedCacheParameters, PersistedCacheParameters);
+            return json;
+        }
+
+        private void StoreDictionaryInJson(JObject json, string key, IDictionary<string, string> values)
+        {
+            if (values != null)
             {
 #if SUPPORTS_SYSTEM_TEXT_JSON
                 var obj = new JsonObject();
 
-                foreach (KeyValuePair<string, string> accId in AdditionalCacheKeyComponents)
+                foreach (KeyValuePair<string, string> value in values)
                 {
-                    obj[accId.Key] = accId.Value;
+                    obj[value.Key] = value.Value;
                 }
 
-                json[StorageJsonKeys.CacheExtensions] = obj;
+                json[key] = obj;
 #else
-                SetItemIfValueNotNull(json, StorageJsonKeys.CacheExtensions, JObject.FromObject(AdditionalCacheKeyComponents));
+                SetItemIfValueNotNull(json, key, JObject.FromObject(values));
 #endif
             }
-            return json;
         }
 
         internal string ToJsonString()

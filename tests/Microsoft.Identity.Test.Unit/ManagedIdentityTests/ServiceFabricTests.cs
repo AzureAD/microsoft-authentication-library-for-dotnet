@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ServiceFabricInvalidEndpointAsync()
         {
             using(new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "localhost/token");
 
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             string thumbprint, SslPolicyErrors sslPolicyErrors, bool expectedValidationResult)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342/metadata/identity/oauth2/token", thumbprint: thumbprint);
                 var certificate = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task SFThrowsWhenGetHttpClientWithValidationIsNotImplementedAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342/metadata/identity/oauth2/token");
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)

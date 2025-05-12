@@ -1,3 +1,11 @@
+4.71.1
+=======
+
+### Bug Fixes
+
+- Pass the validate function to the http manager. See [Issue #5242](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5242)
+- Change the resource id param for IMDS. See [Issue #5238](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5238)
+
 4.71.0
 =======
 

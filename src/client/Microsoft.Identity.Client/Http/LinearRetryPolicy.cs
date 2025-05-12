@@ -9,7 +9,12 @@ namespace Microsoft.Identity.Client.Http
 {
     internal class LinearRetryPolicy : IRetryPolicy
     {
-        
+        // referenced in unit tests, cannot be private
+        public static int numRetries { get; private set; } = 0;
+        public const int DefaultStsMaxRetries = 1;
+        // this will be overridden in the unit tests so that they run faster
+        public static int DefaultStsRetryDelayMs { get; set; } = 1000;
+
         private int _maxRetries;
         private readonly Func<HttpResponse, Exception, bool> _retryCondition;
         public int DelayInMilliseconds { private set; get; }
@@ -21,8 +26,11 @@ namespace Microsoft.Identity.Client.Http
             _retryCondition = retryCondition;
         }
 
-        public bool pauseForRetry(HttpResponse response, Exception exception, int retryCount)
+        public bool PauseForRetry(HttpResponse response, Exception exception, int retryCount)
         {
+            // referenced in the unit tests
+            numRetries = retryCount + 1;
+
             return retryCount < _maxRetries && _retryCondition(response, exception);
         }
     }
