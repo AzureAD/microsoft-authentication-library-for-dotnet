@@ -1,3 +1,11 @@
+4.72.0
+=======
+### Features
+- Added MacOs Broker support. See [Issue #5051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5051)
+
+### Bug Fixes
+- Ensure additional cache parameters are persisted in cache serialization[Issue #5261](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5261)
+
 4.71.1
 =======
 
