@@ -725,7 +725,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateBrokerHelper())
             {
                 var tokenResponse = CreateTokenResponseForTest();
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 IBroker broker = Substitute.For<IBroker>();
                 _acquireTokenSilentParameters.Account = PublicClientApplication.OperatingSystemAccount;
                 var brokerSilentAuthStrategy =
@@ -828,9 +827,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var harness = CreateBrokerHelper())
             {
-                // Arrange
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
-
                 var builder = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
                    .WithAuthority("https://login.microsoftonline.com/common")

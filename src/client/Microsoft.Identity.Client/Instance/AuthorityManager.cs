@@ -47,7 +47,15 @@ namespace Microsoft.Identity.Client.Instance
 
         public async Task RunInstanceDiscoveryAndValidationAsync()
         {
-            if (!_instanceDiscoveryAndValidationExecuted)
+            if (_requestContext.ServiceBundle.Config.IsBrokerEnabled)
+            {
+                // For broker flows we should avoid authority validation. Internally, we should avoid any network requests to prevent context switch.
+                // On macOS, interactive calls need to happen in the main thread, making network calls will switch to another thread and not easy to go back.
+                _metadata = _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAvoidNetwork(
+                                _initialAuthority.AuthorityInfo,
+                                _requestContext);
+            }
+            else if (!_instanceDiscoveryAndValidationExecuted)
             {
                 // This will make a network call unless instance discovery is cached, but this OK
                 // GetAccounts and AcquireTokenSilent do not need this

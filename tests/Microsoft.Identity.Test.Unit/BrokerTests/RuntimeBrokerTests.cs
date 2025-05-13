@@ -100,7 +100,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var handle = base.CreateTestHarness())
             {
-                handle.HttpManager.AddInstanceDiscoveryMockHandler();
                 var pcaBuilder = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
                    .WithHttpManager(handle.HttpManager)
