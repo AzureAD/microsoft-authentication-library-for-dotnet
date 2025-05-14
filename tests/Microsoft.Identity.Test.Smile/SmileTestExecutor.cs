@@ -112,6 +112,32 @@ namespace SmileTestRunner
                 {
                     // TODO: Properly parse the parameters and set up SAMI or UAMI accordingly
                     var appBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+                    
+                    //// Disabling shared cache options to avoid cross test pollution.
+                    //appBuilder.Config.AccessorOptions = null;
+
+                    // Use reflection to access the private or internal `Config` property
+                    var configProperty = typeof(BaseAbstractApplicationBuilder<ManagedIdentityApplicationBuilder>)
+                        .GetProperty("Config", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (configProperty != null)
+                    {
+                        var appConfig = configProperty.GetValue(appBuilder); // as ApplicationConfiguration;
+
+                        if (appConfig != null)
+                        {
+                            //appConfig.AccessorOptions = null; // Disabling shared cache options to avoid cross-test pollution
+
+                            // Use reflection to access the 'AccessorOptions' property
+                            var accessorOptionsProperty = appConfig.GetType()
+                                .GetProperty("AccessorOptions", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                            if (accessorOptionsProperty != null)
+                            {
+                                accessorOptionsProperty.SetValue(appConfig, null); // Disabling shared cache options to avoid cross-test pollution
+                            }
+                        }
+                    }
+
                     if (parameters.TryGetProperty("client_capabilities", out JsonElement clientCapabilitiesElement))
                     {
                         var clientCapabilities = JsonSerializer.Deserialize<string[]>(clientCapabilitiesElement.GetRawText());
