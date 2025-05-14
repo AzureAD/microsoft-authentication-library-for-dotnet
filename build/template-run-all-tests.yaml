@@ -17,3 +17,13 @@ steps:
 - template: template-run-integration-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
+
+# IMDS (VM / VMSS)
+- template: template-run-mi-e2e-imds.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
+
+# Azure Arc (custom self-hosted agent)
+- template: template-run-mi-e2e-azurearc.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
