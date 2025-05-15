@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.IdentityModel.Abstractions;
 
 /// <summary>
 /// Performs validation on logs
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class WamLoggerValidator : IIdentityLogger
 {
     // string that is part of MSAL logs
