@@ -108,35 +108,52 @@ namespace SmileTestRunner
         {
             if (className == "ManagedIdentityClient")
             {
-                if (parameters.TryGetProperty("managed_identity", out _))
+                if (parameters.TryGetProperty("managed_identity", out JsonElement managedIdentityElement))
                 {
-                    // TODO: Properly parse the parameters and set up SAMI or UAMI accordingly
-                    var appBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
-                    
-                    //// Disabling shared cache options to avoid cross test pollution.
-                    //appBuilder.Config.AccessorOptions = null;
-
-                    // Use reflection to access the private or internal `Config` property
-                    var configProperty = typeof(BaseAbstractApplicationBuilder<ManagedIdentityApplicationBuilder>)
-                        .GetProperty("Config", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    if (configProperty != null)
+                    ManagedIdentityApplicationBuilder appBuilder;
+                    // Check if the managed_identity element is an object with ManagedIdentityIdType property
+                    if (managedIdentityElement.ValueKind == JsonValueKind.Object &&
+                        managedIdentityElement.TryGetProperty("ManagedIdentityIdType", out JsonElement idTypeElement) &&
+                        managedIdentityElement.TryGetProperty("Id", out JsonElement idValueElement))
                     {
-                        var appConfig = configProperty.GetValue(appBuilder); // as ApplicationConfiguration;
+                        string? idTypeString = idTypeElement.GetString();
+                        string? idValue = idValueElement.GetString();
 
-                        if (appConfig != null)
+                        switch (idTypeString)
                         {
-                            //appConfig.AccessorOptions = null; // Disabling shared cache options to avoid cross-test pollution
+                            case "ResourceId":
+                                Console.WriteLine($"Creating User-Assigned Managed Identity with Resource ID: {idValue}");
+                                appBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedResourceId(idValue));
+                                break;
 
-                            // Use reflection to access the 'AccessorOptions' property
-                            var accessorOptionsProperty = appConfig.GetType()
-                                .GetProperty("AccessorOptions", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                            case "ObjectId":
+                                Console.WriteLine($"Creating User-Assigned Managed Identity with Object ID: {idValue}");
+                                appBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedObjectId(idValue));
+                                break;
 
-                            if (accessorOptionsProperty != null)
-                            {
-                                accessorOptionsProperty.SetValue(appConfig, null); // Disabling shared cache options to avoid cross-test pollution
-                            }
+                            case "ClientId":
+                                Console.WriteLine($"Creating User-Assigned Managed Identity with Client ID: {idValue}");
+                                appBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(idValue));
+                                break;
+
+                            case "SystemAssigned":
+                                Console.WriteLine("Creating System-Assigned Managed Identity");
+                                appBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+                                break;
+
+                            default:
+                                throw new ArgumentException($"Unknown Managed Identity ID Type: {idTypeString}");
                         }
                     }
+                    else
+                    {
+                        // Default to system-assigned managed identity
+                        Console.WriteLine("Creating System-Assigned Managed Identity");
+                        appBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+                    }
+
+                    //// Disabling shared cache options to avoid cross test pollution.
+                    //appBuilder.Config.AccessorOptions = null;
 
                     if (parameters.TryGetProperty("client_capabilities", out JsonElement clientCapabilitiesElement))
                     {
@@ -145,6 +162,11 @@ namespace SmileTestRunner
                     }
                     IManagedIdentityApplication managedIdentityApp = appBuilder.Build();
                     return managedIdentityApp;
+                }
+                else
+                {
+                    Console.WriteLine("ManagedIdentityClient requires a 'managed_identity' property");
+                    throw new ArgumentException("ManagedIdentityClient requires a 'managed_identity' property");
                 }
             }
             throw new NotImplementedException($"{className} is not implemented yet.");
