@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var sf = ServiceFabricManagedIdentitySource.Create(requestContext);
 
                 Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
-                var callback = ((ServiceFabricManagedIdentitySource)sf).ValidateServerCertificate(null, certificate, chain, sslPolicyErrors);
+                var callback = sf.GetValidationCallback();
                 Assert.IsNotNull(callback);
             }
         }
