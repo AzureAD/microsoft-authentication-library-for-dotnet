@@ -15,7 +15,7 @@ steps:
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
-    MsalClientSemVer: $(MsalClientSemVer)
+    MicrosoftIdentityClientVersion: $(MicrosoftIdentityClientVersion)
     Solution: 'LibsAndSamples.sln'    
 
 - task: CopyFiles@2
