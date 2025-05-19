@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Net.Http;
 using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -45,8 +46,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
-        private bool ValidateServerCertificateCallback(HttpRequestMessage message, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate,
-            System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
+        internal override Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> GetValidationCallback()
+        {
+            return ValidateServerCertificateCallback;
+        }
+
+        private bool ValidateServerCertificateCallback(HttpRequestMessage message, X509Certificate2 certificate,
+            X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {
@@ -61,8 +67,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
             _identityHeaderValue = identityHeaderValue;
-
-            ValidateServerCertificate = ValidateServerCertificateCallback;
 
             if (requestContext.ServiceBundle.Config.ManagedIdentityId.IsUserAssigned)
             {

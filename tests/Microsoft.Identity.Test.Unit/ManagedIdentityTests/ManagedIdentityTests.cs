@@ -1350,7 +1350,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                     // Check if ValidateServerCertificate is set based on the source type
                     bool shouldHaveCallback = sourceType == ManagedIdentitySource.ServiceFabric;
-                    bool hasCallback = managedIdentity.ValidateServerCertificate != null;
+                    bool hasCallback = managedIdentity.GetValidationCallback() != null;
 
                     Assert.AreEqual(
                         shouldHaveCallback,
@@ -1360,7 +1360,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     // For ServiceFabric, verify it's set to the right method
                     if (sourceType == ManagedIdentitySource.ServiceFabric)
                     {
-                        Assert.IsNotNull(managedIdentity.ValidateServerCertificate,
+                        Assert.IsNotNull(managedIdentity.GetValidationCallback(),
                             "ServiceFabric should have ValidateServerCertificate set");
 
                         Assert.IsInstanceOfType(managedIdentity, typeof(ServiceFabricManagedIdentitySource),
@@ -1368,7 +1368,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     }
                     else
                     {
-                        Assert.IsNull(managedIdentity.ValidateServerCertificate,
+                        Assert.IsNull(managedIdentity.GetValidationCallback(),
                             $"Non-ServiceFabric source type {sourceType} should not have ValidateServerCertificate set");
                     }
                 }

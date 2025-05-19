@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
-        internal Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ValidateServerCertificate = null;
         
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            validateServerCertificate: ValidateServerCertificate, 
+                            validateServerCertificate: GetValidationCallback(), 
                             cancellationToken: cancellationToken,
                             retryPolicy: request.RetryPolicy).ConfigureAwait(false);
                 }
@@ -86,7 +85,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            validateServerCertificate: ValidateServerCertificate, 
+                            validateServerCertificate: GetValidationCallback(), 
                             cancellationToken: cancellationToken,
                             retryPolicy: request.RetryPolicy)
                         .ConfigureAwait(false);
@@ -100,6 +99,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 HandleException(ex);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Method to be overridden in the derived classes to provide a custom validation callback for the server certificate.
+        /// This validation is needed for service fabric managed identity endpoints.
+        /// </summary>
+        /// <returns>Callback to validate the server certificate.</returns>
+        internal virtual Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> GetValidationCallback()
+        {
+            return null;
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(
