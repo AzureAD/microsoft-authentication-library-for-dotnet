@@ -14,7 +14,7 @@ The following table lists MSAL.NET versions no longer supported and no longer re
 
 | Major Version | Latest Patch Version| Patch Release Date | End of Support Date|
 | --------------|--------------|--------|--------|
-| 4.x           |    4.64.0      | August 23, 2024        | May 15, 2025    |
+| 4.x           |    4.61.1      | August 23, 2024        | May 15, 2025    |
 | 3.x           |    3.0.9       | July 31, 2019          | May 15, 2025    |
 | 2.x           |    2.7.1       | February 21, 2019      | May 15, 2025    |
 | 1.x           |    1.1.4-preview0002      | June 1, 2018         | May 15, 2025   |
