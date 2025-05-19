@@ -3,9 +3,12 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -1329,6 +1332,90 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(LinearRetryPolicy.numRetries, 1 + ManagedIdentityRequest.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
             }
+        }
+
+        [TestMethod]
+        public void ValidateServerCertificate_OnlySetForServiceFabric()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Test all managed identity sources
+                foreach (ManagedIdentitySource sourceType in Enum.GetValues(typeof(ManagedIdentitySource))
+                    .Cast<ManagedIdentitySource>()
+                    .Where(s => s != ManagedIdentitySource.None && s != ManagedIdentitySource.DefaultToImds))
+                {
+                    // Create a managed identity source for each type
+                    AbstractManagedIdentity managedIdentity = CreateManagedIdentitySource(sourceType, httpManager);
+
+                    // Check if ValidateServerCertificate is set based on the source type
+                    bool shouldHaveCallback = sourceType == ManagedIdentitySource.ServiceFabric;
+                    bool hasCallback = managedIdentity.ValidateServerCertificate != null;
+
+                    Assert.AreEqual(
+                        shouldHaveCallback,
+                        hasCallback,
+                        $"For source type {sourceType}, ValidateServerCertificate should {(shouldHaveCallback ? "" : "not ")}be set");
+
+                    // For ServiceFabric, verify it's set to the right method
+                    if (sourceType == ManagedIdentitySource.ServiceFabric)
+                    {
+                        Assert.IsNotNull(managedIdentity.ValidateServerCertificate,
+                            "ServiceFabric should have ValidateServerCertificate set");
+
+                        Assert.IsInstanceOfType(managedIdentity, typeof(ServiceFabricManagedIdentitySource),
+                            "ServiceFabric managed identity should be of type ServiceFabricManagedIdentitySource");
+                    }
+                    else
+                    {
+                        Assert.IsNull(managedIdentity.ValidateServerCertificate,
+                            $"Non-ServiceFabric source type {sourceType} should not have ValidateServerCertificate set");
+                    }
+                }
+            }
+        }
+
+        private AbstractManagedIdentity CreateManagedIdentitySource(ManagedIdentitySource sourceType, MockHttpManager httpManager)
+        {
+            string endpoint = "https://identity.endpoint.com";
+
+            // Setup environment based on the source type
+            SetEnvironmentVariables(sourceType, endpoint);
+
+            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                .WithHttpManager(httpManager);
+
+            var managedIdentityApp = miBuilder.BuildConcrete();
+            RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+
+            // Create the correct managed identity source based on the type
+            AbstractManagedIdentity managedIdentity = null;
+
+            switch (sourceType)
+            {
+                case ManagedIdentitySource.ServiceFabric:
+                    managedIdentity = ServiceFabricManagedIdentitySource.Create(requestContext);
+                    break;
+                case ManagedIdentitySource.AppService:
+                    managedIdentity = AppServiceManagedIdentitySource.Create(requestContext);
+                    break;
+                case ManagedIdentitySource.AzureArc:
+                    managedIdentity = AzureArcManagedIdentitySource.Create(requestContext);
+                    break;
+                case ManagedIdentitySource.CloudShell:
+                    managedIdentity = CloudShellManagedIdentitySource.Create(requestContext);
+                    break;
+                case ManagedIdentitySource.Imds:
+                    managedIdentity = new ImdsManagedIdentitySource(requestContext);
+                    break;
+                case ManagedIdentitySource.MachineLearning:
+                    managedIdentity = MachineLearningManagedIdentitySource.Create(requestContext);
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported managed identity source type: {sourceType}");
+            }
+
+            return managedIdentity;
         }
     }
 }
