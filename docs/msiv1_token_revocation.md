@@ -19,20 +19,18 @@ sequenceDiagram
     participant SFRP as SFRP (RP)
     participant eSTS
 
-rect rgb(173, 216, 230)
+    %% ───────── Client detects revocation ─────────
     CX->>Resource: 1. Call resource with "bad" token T
-    Resource->>CX: 2. HTTP 401 + claims C
-    CX->>CX: 3. Parse response, extract claims C
-    CX->>MSAL: 4. MSI.AcquireToken(...).WithClaims(C).WithClientCapabilities("cp1")
-end
+    Resource-->>CX: 2. HTTP 401 + claims C
+    CX->>CX: 3. Parse response, extract C
+    CX->>MSAL: 4. MSI.AcquireToken(...)\n   .WithClaims(C)\n   .WithClientCapabilities("cp1")
 
-rect rgb(215, 234, 132)
-    MSAL->>MSAL: 5. Looks up old token T in local cache
-    MSAL->>MITS: 6. MITS_endpoint?xms_cc=cp1&token_sha256_to_refresh=SHA256(T)
-    MITS->>SFRP: 7. (Forward request w/ cc=cp1, hash=SHA256(T))
-    SFRP->>SFRP: 8. Another MSAL call AcquireTokenForClient(...).WithClientCapabilities(cp1).WithAccessTokenSha256ToRefresh(hash)
-    SFRP->>eSTS: 9. eSTS issues a new token
-end
+    %% ───────── Token refresh path ───────────────
+    MSAL->>MSAL: 5. Look up old token T in cache
+    MSAL->>MITS: 6. POST …xms_cc=cp1&token_sha256=SHA256(T)
+    MITS->>SFRP: 7. Forward request (cc=cp1, hash)
+    SFRP->>eSTS: 8. AcquireTokenForClient(..., hash)
+    eSTS-->>SFRP: 9. Return new token
 ```
 
 Steps 1-4 fall to the Client (i.e. application using MSI directly or higher level SDK like Azure KeyVault). This is the **standard CAE flow**.
@@ -69,27 +67,23 @@ The client "enlightment" status is still propagated via the client capability "c
 
 ```mermaid
 sequenceDiagram
-    actor CX
-    participant MSAL
-    participant MITS
-    participant SFRP        
+    participant Resource
+    actor CX as Client/Caller
+    participant MSAL as MSAL on Leaf
+    participant MITS as MITS (Proxy)
+    participant SFRP as SFRP (RP)
     participant eSTS
 
-rect rgb(173, 216, 230)   
-    CX->>MSAL: 1. MSI.AcquireToken <br/> WithClientCapabilities("cp1")
-    MSAL->>MSAL: 2. Find and return token T in cache. <br/>If not found, goto next step.
-end
-rect rgb(215, 234, 132)    
-    MSAL->>MITS: 3. Call MITS_endpoint?xms_cc=cp1
-    MITS->>SFRP: 4. Forward request to SFRP
-    alt Cache Hit
-        SFRP->>MSAL: 5a. Return cached token
-    else Cache Miss
-        SFRP->>eSTS: 5b. Call CCA.AcquireTokenForClient SN/I cert <br/> WithClientCapabilities(cp1)
-        eSTS->>SFRP: 6. Return new token
-        SFRP->>MSAL: 7. Return token to MSAL
-    end
-end
+    CX->>Resource: 1. Call resource with "bad" token T
+    Resource-->>CX: 2. HTTP 401 + claims C
+    CX->>CX: 3. Parse claims C
+    CX->>MSAL: 4. MSI.AcquireToken(...)\n   .WithClaims(C)\n   .WithClientCapabilities("cp1")
+
+    MSAL->>MSAL: 5. Look up token T in cache
+    MSAL->>MITS: 6. POST …xms_cc=cp1&token_sha256=SHA256(T)
+    MITS->>SFRP: 7. Forward request (cc=cp1, hash)
+    SFRP->>eSTS: 8. AcquireTokenForClient(..., hash)
+    eSTS-->>SFRP: 9. Return new token
 ```
 
 ### New MSAL API - WithAccessTokenToRefresh()
