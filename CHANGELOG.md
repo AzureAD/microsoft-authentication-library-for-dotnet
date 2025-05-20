@@ -1,5 +1,11 @@
 4.72.0
 =======
+ 
+### Bug Fixes
+- Ensure instance of IMsalHttpClientFactory passed by the user is used for managed identity flows that do not require cert validation. See [Issue #5286](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5286)
+
+4.72.0
+=======
 ### Features
 - Added MacOs Broker support. See [Issue #5051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5051)
 
