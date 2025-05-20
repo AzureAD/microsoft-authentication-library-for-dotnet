@@ -1,10 +1,18 @@
+4.72.0
+=======
+### Features
+- Added MacOs Broker support. See [Issue #5051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5051)
+
+### Bug Fixes
+- Ensure additional cache parameters are persisted in cache serialization[Issue #5261](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5261)
+
 4.71.1
 =======
 
 ### Bug Fixes
 
-- Pass the validate function to the http manager. See [Issue #5242](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5242)
-- Change the resource id param for IMDS. See [Issue #5238](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5238)
+- Expose Service Fabric's custom SSL validation callback in the HTTP extensibility. See [Issue #5242](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5242)
+- Fix a bug in MSI around Azure Container. See [Issue #5238](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5238)
 
 4.71.0
 =======

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -92,6 +93,28 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     {
                         Outcome = UnitTestOutcome.Inconclusive,
                         TestFailureException = new AssertInconclusiveException("Skipped on platform")
+                    }
+                };
+            }
+
+            return base.Execute(testMethod);
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
+    public sealed class RunOnAzureDevOpsAttribute : TestMethodAttribute
+    {
+        public override TestResult[] Execute(ITestMethod testMethod)
+        {
+            // TF_BUILD is true for all Azure DevOps agents
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TF_BUILD")))
+            {
+                return new[]
+                {
+                    new TestResult
+                    {
+                        Outcome = UnitTestOutcome.Inconclusive,
+                        TestFailureException = new AssertInconclusiveException("Skipped outside Azure DevOps")
                     }
                 };
             }

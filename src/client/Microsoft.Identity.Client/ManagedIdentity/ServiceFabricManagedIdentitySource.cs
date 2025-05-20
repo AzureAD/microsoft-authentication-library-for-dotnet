@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Net.Http;
 using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -15,6 +16,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
+
         internal static Lazy<HttpClient> _httpClientLazy;
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
@@ -40,11 +42,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);
+           
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
-        internal override bool ValidateServerCertificate(HttpRequestMessage message, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate,
-            System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
+        internal override Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> GetValidationCallback()
+        {
+            return ValidateServerCertificateCallback;
+        }
+
+        private bool ValidateServerCertificateCallback(HttpRequestMessage message, X509Certificate2 certificate,
+            X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {

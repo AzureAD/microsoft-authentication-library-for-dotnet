@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>
         /// Experimental on public clients.
-        /// Do not use this method with Entra ID authorities (e.g. https://login.microsfoftonline.com/common).
+        /// Do not use this method with Entra ID authorities (e.g. https://login.microsoftonline.com/common).
         /// Use WithAuthority(string) instead.
         /// </remarks>
         public PublicClientApplicationBuilder WithOidcAuthority(string authorityUri) 

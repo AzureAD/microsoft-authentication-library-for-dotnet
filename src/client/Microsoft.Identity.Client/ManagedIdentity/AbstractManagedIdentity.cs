@@ -12,6 +12,9 @@ using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using System.Text;
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Security;
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -22,11 +25,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal abstract class AbstractManagedIdentity
     {
-        protected readonly RequestContext _requestContext;
-        internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
-        internal readonly ManagedIdentitySource _sourceType;
         private const string ManagedIdentityPrefix = "[Managed Identity] ";
 
+        protected readonly RequestContext _requestContext;
+
+        internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
+        internal readonly ManagedIdentitySource _sourceType;
+        
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
             _requestContext = requestContext;
@@ -65,7 +70,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            validateServerCertificate: ValidateServerCertificate, 
+                            validateServerCertificate: GetValidationCallback(), 
                             cancellationToken: cancellationToken,
                             retryPolicy: request.RetryPolicy).ConfigureAwait(false);
                 }
@@ -80,7 +85,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            validateServerCertificate: ValidateServerCertificate, 
+                            validateServerCertificate: GetValidationCallback(), 
                             cancellationToken: cancellationToken,
                             retryPolicy: request.RetryPolicy)
                         .ConfigureAwait(false);
@@ -96,13 +101,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        // This method is used to validate the server certificate.
-        // It is overridden in the Service Fabric managed identity source to validate the certificate thumbprint.
-        // The default implementation always returns true.
-        internal virtual bool ValidateServerCertificate(HttpRequestMessage message, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate,
-            System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
+        /// <summary>
+        /// Method to be overridden in the derived classes to provide a custom validation callback for the server certificate.
+        /// This validation is needed for service fabric managed identity endpoints.
+        /// </summary>
+        /// <returns>Callback to validate the server certificate.</returns>
+        internal virtual Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> GetValidationCallback()
         {
-            return true;
+            return null;
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(
