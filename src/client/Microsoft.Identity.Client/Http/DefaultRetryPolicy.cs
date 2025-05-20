@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Http
         public static int NumRetries { get; set; } = 0;
 
         public static int DefaultRetryDelayMs;
-        private int MaxRetries;
+        private int _maxRetries;
         private readonly Func<HttpResponse, Exception, bool> RetryCondition;
 
         public DefaultRetryPolicy(RequestType requestType)
@@ -39,12 +39,12 @@ namespace Microsoft.Identity.Client.Http
             {
                 case RequestType.ManagedIdentity:
                     DefaultRetryDelayMs = DefaultManagedIdentityRetryDelayMs;
-                    MaxRetries = DefaultManagedIdentityMaxRetries;
+                    _maxRetries = DefaultManagedIdentityMaxRetries;
                     RetryCondition = HttpRetryConditions.DefaultManagedIdentity;
                     break;
                 case RequestType.STS:
                     DefaultRetryDelayMs = DefaultStsRetryDelayMs;
-                    MaxRetries = DefaultStsMaxRetries;
+                    _maxRetries = DefaultStsMaxRetries;
                     RetryCondition = HttpRetryConditions.Sts;
                     break;
                 default:
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Http
         {
             // Check if the status code is retriable and if the current retry count is less than max retries
             if (RetryCondition(response, exception) &&
-                retryCount < MaxRetries)
+                retryCount < _maxRetries)
             {
                 // used below in the log statement, also referenced in the unit tests
                 NumRetries = retryCount + 1;
