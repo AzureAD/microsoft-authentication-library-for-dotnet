@@ -19,14 +19,14 @@ sequenceDiagram
     participant SFRP as SFRP (RP)
     participant eSTS
 
-rect rgb(173, 216, 230)
+rect rgba(0,0,0,0)
     CX->>Resource: 1. Call resource with "bad" token T
     Resource->>CX: 2. HTTP 401 + claims C
     CX->>CX: 3. Parse response, extract claims C
     CX->>MSAL: 4. MSI.AcquireToken(...).WithClaims(C).WithClientCapabilities("cp1")
 end
 
-rect rgb(215, 234, 132)
+rect rgba(0,0,0,0)
     MSAL->>MSAL: 5. Looks up old token T in local cache
     MSAL->>MITS: 6. MITS_endpoint?xms_cc=cp1&token_sha256_to_refresh=SHA256(T)
     MITS->>SFRP: 7. (Forward request w/ cc=cp1, hash=SHA256(T))
@@ -75,11 +75,12 @@ sequenceDiagram
     participant SFRP        
     participant eSTS
 
-rect rgb(173, 216, 230)   
+rect rgba(0,0,0,0)   
     CX->>MSAL: 1. MSI.AcquireToken <br/> WithClientCapabilities("cp1")
     MSAL->>MSAL: 2. Find and return token T in cache. <br/>If not found, goto next step.
 end
-rect rgb(215, 234, 132)    
+
+rect rgba(0,0,0,0)    
     MSAL->>MITS: 3. Call MITS_endpoint?xms_cc=cp1
     MITS->>SFRP: 4. Forward request to SFRP
     alt Cache Hit
