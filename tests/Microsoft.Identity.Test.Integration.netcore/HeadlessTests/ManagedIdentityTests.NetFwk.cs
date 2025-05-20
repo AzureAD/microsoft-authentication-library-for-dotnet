@@ -278,12 +278,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
-        //[DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Function_App")]
-        //[DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Function_App")]
-        //[DataRow(MsiAzureResource.Function, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
-        //[DataRow(MsiAzureResource.VM, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_VM")]
-        //[DataRow(MsiAzureResource.VM, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_VM")]
-        //[DataRow(MsiAzureResource.VM, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_VM")]
         public async Task ManagedIdentityRequestFailureCheckAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId)
         {
             RunOnHelper.AssertFramework(TargetFrameworks.NetCore);
