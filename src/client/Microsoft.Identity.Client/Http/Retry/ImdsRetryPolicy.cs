@@ -6,7 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.Http
+namespace Microsoft.Identity.Client.Http.Retry
 {
     internal class ImdsRetryPolicy : IRetryPolicy
     {
@@ -29,9 +29,9 @@ namespace Microsoft.Identity.Client.Http
         private int MaxRetries;
 
         private ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
-            ImdsRetryPolicy.MinExponentialBackoffMs,
-            ImdsRetryPolicy.MaxExponentialBackoffMs,
-            ImdsRetryPolicy.ExponentialDeltaBackoffMs
+            MinExponentialBackoffMs,
+            MaxExponentialBackoffMs,
+            ExponentialDeltaBackoffMs
         );
 
         public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
