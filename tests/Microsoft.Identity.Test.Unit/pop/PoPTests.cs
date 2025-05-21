@@ -192,6 +192,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
             // Arrange
             using (var harness = CreateTestHarness())
             {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
                 mockBroker.IsPopSupported.Returns(true);
@@ -296,6 +298,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
             // Arrange
             using (var harness = CreateTestHarness())
             {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
                 mockBroker.IsPopSupported.Returns(true);
@@ -345,6 +349,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 mockBroker.AcquireTokenSilentAsync(
                     Arg.Any<AuthenticationRequestParameters>(),
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse(brokerAccessToken));
+
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithTestBroker(mockBroker)

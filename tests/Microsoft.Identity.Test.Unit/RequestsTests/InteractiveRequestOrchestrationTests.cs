@@ -108,6 +108,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange - common stuff
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
+                MockInstanceDiscovery(harness.HttpManager);
+
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var requestParams = harness.CreateAuthenticationRequestParameters(
@@ -165,6 +167,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange - common stuff
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
+                MockInstanceDiscovery(harness.HttpManager);
+
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var requestParams = harness.CreateAuthenticationRequestParameters(

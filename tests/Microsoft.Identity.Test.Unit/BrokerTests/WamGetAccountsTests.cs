@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             using (var httpManager = new MockHttpManager())
             {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
 
@@ -72,6 +74,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var httpManager = new MockHttpManager())
             {
                 var cache = new InMemoryTokenCache();
+                httpManager.AddInstanceDiscoveryMockHandler();
+
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
 
@@ -127,6 +131,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             using (var httpManager = new MockHttpManager())
             {
+                httpManager.AddInstanceDiscoveryMockHandler();
                 string commonAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
                 Account brokerAccount1 = new Account(commonAccId, "commonAccount", "login.windows.net");
                 Account brokerAccount2 = new Account("other.account", "brokerAcc2", "login.windows.net");

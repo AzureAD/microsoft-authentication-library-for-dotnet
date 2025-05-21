@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.AuthorityInfo;
 
@@ -47,10 +48,10 @@ namespace Microsoft.Identity.Client.Instance
 
         public async Task RunInstanceDiscoveryAndValidationAsync()
         {
-            if (_requestContext.ServiceBundle.Config.IsBrokerEnabled)
+            if (DesktopOsHelper.IsMac() && _requestContext.ServiceBundle.Config.IsBrokerEnabled)
             {
-                // For broker flows we should avoid authority validation. Internally, we should avoid any network requests to prevent context switch.
-                // On macOS, interactive calls need to happen in the main thread, making network calls will switch to another thread and not easy to go back.
+                // On macOS, for broker flows we should avoid authority validation. Internally, we should avoid any network requests to prevent context switch.
+                // Interactive calls need to happen in the main thread, making network calls will switch to another thread and not easy to go back.
                 _metadata = _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAvoidNetwork(
                                 _initialAuthority.AuthorityInfo,
                                 _requestContext);
