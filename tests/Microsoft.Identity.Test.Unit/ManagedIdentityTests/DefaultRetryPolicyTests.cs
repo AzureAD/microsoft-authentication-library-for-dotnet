@@ -319,7 +319,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // this test can not be made one hundred times faster because it is based on a date
                 const int retryAfterMilliseconds = 3000;
-                var retryAfterHttpDate = DateTime.UtcNow.AddMilliseconds(retryAfterMilliseconds).ToString("R");
+                // an extra second has been added to account for this date operation
+                var retryAfterHttpDate = DateTime.UtcNow.AddMilliseconds(retryAfterMilliseconds + 1000).ToString("R");
 
                 // Initial request fails with 500
                 httpManager.AddManagedIdentityMockHandler(
