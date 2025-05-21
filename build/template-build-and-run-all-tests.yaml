@@ -94,3 +94,29 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-test-on-linux.yaml
+  
+- job: 'RunManagedIdentityE2ETestsOnAzureArc'
+  displayName: 'Managed Identity E2E Tests – Azure ARC Agent'
+  dependsOn: ['BuildAndStageProjects']
+  pool:
+    name: 'MSALMSIAZUREARC'
+  condition: and(succeeded(), eq(variables['RunManagedIdentityE2EArcTests'], 'true'))
+
+  steps:
+  - template: template-run-mi-e2e-azurearc.yaml
+    parameters:
+      BuildConfiguration: 'Release'
+      TargetFramework: 'net8.0'
+
+- job: 'RunManagedIdentityE2ETestsOnImds'
+  displayName: 'Managed Identity E2E Tests – VM / IMDS'
+  dependsOn: ['BuildAndStageProjects']
+  pool:
+    name: 'ID4SMSIHostedAgent'
+  condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
+
+  steps:
+  - template: template-run-mi-e2e-imds.yaml
+    parameters:
+      BuildConfiguration: 'Release'
+      TargetFramework:   'net8.0'
