@@ -102,10 +102,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                                         .ConfigureAwait(false);
 
                 stopwatch.Stop();
-
+                
                 // linear backoff (1 second * 1 retry)
+                Debug.Assert(
+                    stopwatch.ElapsedMilliseconds >= (DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs),
+                    $"stopwatch.ElapsedMilliseconds: {stopwatch.ElapsedMilliseconds},\nDefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs: {DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs}");
                 Assert.IsTrue(stopwatch.ElapsedMilliseconds >= DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs);
-
+                
                 // ensure that exactly 2 requests were made: initial request + 1 retry
                 Assert.AreEqual(DefaultRetryPolicy.NumRetries, 1);
                 Assert.AreEqual(httpManager.QueueSize, 0);
@@ -168,6 +171,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(msalException);
 
                 // linear backoff (1 second * 3 retries)
+                Debug.Assert(
+                    stopwatch.ElapsedMilliseconds >= (DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs * DefaultRetryPolicy.DefaultManagedIdentityMaxRetries),
+                    $"stopwatch.ElapsedMilliseconds: {stopwatch.ElapsedMilliseconds},\nDefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs: {DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs},\nDefaultRetryPolicy.DefaultManagedIdentityMaxRetries: {DefaultRetryPolicy.DefaultManagedIdentityMaxRetries}");
                 Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs * DefaultRetryPolicy.DefaultManagedIdentityMaxRetries));
 
                 // ensure that exactly 4 requests were made: initial request + 3 retries
@@ -223,6 +229,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 stopwatch.Stop();
 
                 // linear backoff (1 second * 1 retry)
+                Debug.Assert(
+                    stopwatch.ElapsedMilliseconds >= DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs,
+                    $"stopwatch.ElapsedMilliseconds: {stopwatch.ElapsedMilliseconds},\nDefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs: {DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs}");
                 Assert.IsTrue(stopwatch.ElapsedMilliseconds >= DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs);
 
                 // ensure that exactly 2 requests were made: initial request + 1 retry
@@ -284,6 +293,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 stopwatch.Stop();
 
                 // ensure that the number of seconds in the retry-after header elapsed before the second network request was made
+                Debug.Assert(
+                    stopwatch.ElapsedMilliseconds >= (retryAfterSeconds * 1000),
+                    $"stopwatch.ElapsedMilliseconds: {stopwatch.ElapsedMilliseconds},\nretryAfterSeconds * 1000: {retryAfterSeconds * 1000}");
                 Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (retryAfterSeconds * 1000)); // convert to milliseconds
 
                 // ensure that exactly 2 requests were made: initial request + 1 retry
@@ -347,6 +359,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 stopwatch.Stop();
 
                 // ensure that the number of seconds in the retry-after header elapsed before the second network request was made
+                Debug.Assert(
+                    stopwatch.ElapsedMilliseconds >= retryAfterMilliseconds,
+                    $"stopwatch.ElapsedMilliseconds: {stopwatch.ElapsedMilliseconds},\nretryAfterMilliseconds: {retryAfterMilliseconds}");
                 Assert.IsTrue(stopwatch.ElapsedMilliseconds >= retryAfterMilliseconds);
 
                 // ensure that exactly 2 requests were made: initial request + 1 retry
