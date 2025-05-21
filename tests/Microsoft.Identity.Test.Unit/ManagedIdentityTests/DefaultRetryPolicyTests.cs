@@ -24,23 +24,23 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class DefaultRetryPolicyTests : TestBase
     {
-        private static int _originalManagedIdentityRetryDelay;
+        private static int s_originalManagedIdentityRetryDelay;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext _)
         {
             // Backup original retry delay values
-            _originalManagedIdentityRetryDelay = DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs;
+            s_originalManagedIdentityRetryDelay = DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs;
 
             // Speed up retry delays by 100x
-            DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs = (int)(_originalManagedIdentityRetryDelay * TestConstants.ONE_HUNDRED_TIMES_FASTER);
+            DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs = (int)(s_originalManagedIdentityRetryDelay * TestConstants.ONE_HUNDRED_TIMES_FASTER);
         }
 
         [ClassCleanup]
         public static void ClassCleanup()
         {
             // Restore retry policy values after each test
-            DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs = _originalManagedIdentityRetryDelay;
+            DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs = s_originalManagedIdentityRetryDelay;
         }
 
         [TestInitialize]
@@ -68,13 +68,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId;
 
                 ManagedIdentityId managedIdentityId = ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Initial request fails with 500
                 httpManager.AddManagedIdentityMockHandler(
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var stopwatch = Stopwatch.StartNew();
 
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                         .ExecuteAsync()
                                         .ConfigureAwait(false);
 
@@ -131,13 +131,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId;
 
                 ManagedIdentityId managedIdentityId = ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate permanent 500s (to trigger the maximum number of retries)
                 const int NUM_500 = DefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
@@ -190,14 +190,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
-                
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Initial request fails with 500
                 httpManager.AddManagedIdentityMockHandler(
@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var stopwatch = Stopwatch.StartNew();
 
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                         .ExecuteAsync()
                                         .ConfigureAwait(false);
 
@@ -247,14 +247,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
-                
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // make it one hundred times faster so the test completes quickly
                 double retryAfterSeconds = 3 * TestConstants.ONE_HUNDRED_TIMES_FASTER;
@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var stopwatch = Stopwatch.StartNew();
 
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                         .ExecuteAsync()
                                         .ConfigureAwait(false);
 
@@ -308,14 +308,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
-                
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // this test can not be made one hundred times faster because it is based on a date
                 const int retryAfterMilliseconds = 3000;
@@ -340,7 +340,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var stopwatch = Stopwatch.StartNew();
 
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                         .ExecuteAsync()
                                         .ConfigureAwait(false);
 
@@ -372,13 +372,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate permanent 500s (to trigger the maximum number of retries)
                 int NUM_500 = DefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
@@ -425,13 +425,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -473,13 +473,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
