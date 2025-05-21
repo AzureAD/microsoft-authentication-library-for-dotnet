@@ -20,35 +20,35 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ImdsTests : TestBase
     {
-        private static int _originalMinBackoff;
-        private static int _originalMaxBackoff;
-        private static int _originalDeltaBackoff;
-        private static int _originalGoneRetryAfter;
+        private static int s_originalMinBackoff;
+        private static int s_originalMaxBackoff;
+        private static int s_originalDeltaBackoff;
+        private static int s_originalGoneRetryAfter;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext _)
         {
             // Backup original retry delay values
-            _originalMinBackoff = ImdsRetryPolicy.MinExponentialBackoffMs;
-            _originalMaxBackoff = ImdsRetryPolicy.MaxExponentialBackoffMs;
-            _originalDeltaBackoff = ImdsRetryPolicy.ExponentialDeltaBackoffMs;
-            _originalGoneRetryAfter = ImdsRetryPolicy.HttpStatusGoneRetryAfterMs;
+            s_originalMinBackoff = ImdsRetryPolicy.MinExponentialBackoffMs;
+            s_originalMaxBackoff = ImdsRetryPolicy.MaxExponentialBackoffMs;
+            s_originalDeltaBackoff = ImdsRetryPolicy.ExponentialDeltaBackoffMs;
+            s_originalGoneRetryAfter = ImdsRetryPolicy.HttpStatusGoneRetryAfterMs;
 
             // Speed up retry delays by 100x
-            ImdsRetryPolicy.MinExponentialBackoffMs = (int)(_originalMinBackoff * TestConstants.ONE_HUNDRED_TIMES_FASTER);
-            ImdsRetryPolicy.MaxExponentialBackoffMs = (int)(_originalMaxBackoff * TestConstants.ONE_HUNDRED_TIMES_FASTER);
-            ImdsRetryPolicy.ExponentialDeltaBackoffMs = (int)(_originalDeltaBackoff * TestConstants.ONE_HUNDRED_TIMES_FASTER);
-            ImdsRetryPolicy.HttpStatusGoneRetryAfterMs = (int)(_originalGoneRetryAfter * TestConstants.ONE_HUNDRED_TIMES_FASTER);
+            ImdsRetryPolicy.MinExponentialBackoffMs = (int)(s_originalMinBackoff * TestConstants.ONE_HUNDRED_TIMES_FASTER);
+            ImdsRetryPolicy.MaxExponentialBackoffMs = (int)(s_originalMaxBackoff * TestConstants.ONE_HUNDRED_TIMES_FASTER);
+            ImdsRetryPolicy.ExponentialDeltaBackoffMs = (int)(s_originalDeltaBackoff * TestConstants.ONE_HUNDRED_TIMES_FASTER);
+            ImdsRetryPolicy.HttpStatusGoneRetryAfterMs = (int)(s_originalGoneRetryAfter * TestConstants.ONE_HUNDRED_TIMES_FASTER);
         }
 
         [ClassCleanup]
         public static void ClassCleanup()
         {
             // Restore retry policy values after each test
-            ImdsRetryPolicy.MinExponentialBackoffMs = _originalMinBackoff;
-            ImdsRetryPolicy.MaxExponentialBackoffMs = _originalMaxBackoff;
-            ImdsRetryPolicy.ExponentialDeltaBackoffMs = _originalDeltaBackoff;
-            ImdsRetryPolicy.HttpStatusGoneRetryAfterMs = _originalGoneRetryAfter;
+            ImdsRetryPolicy.MinExponentialBackoffMs = s_originalMinBackoff;
+            ImdsRetryPolicy.MaxExponentialBackoffMs = s_originalMaxBackoff;
+            ImdsRetryPolicy.ExponentialDeltaBackoffMs = s_originalDeltaBackoff;
+            ImdsRetryPolicy.HttpStatusGoneRetryAfterMs = s_originalGoneRetryAfter;
         }
 
         [TestInitialize]
@@ -74,13 +74,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate two 404s (to trigger retries), then a successful response
                 const int NUM_404 = 2;
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var stopwatch = Stopwatch.StartNew();
 
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                         .ExecuteAsync()
                                         .ConfigureAwait(false);
 
@@ -140,13 +140,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate four 410s (to trigger retries), then a successful response
                 const int NUM_410 = 4;
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var stopwatch = Stopwatch.StartNew();
 
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                         .ExecuteAsync()
                                         .ConfigureAwait(false);
 
@@ -205,13 +205,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate permanent 410s (to trigger the maximum number of retries)
                 const int NUM_410 = ImdsRetryPolicy.LinearStrategyNumRetries + 1; // initial request + maximum number of retries (7)
@@ -265,13 +265,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate permanent 504s (to trigger the maximum number of retries)
                 const int NUM_504 = ImdsRetryPolicy.ExponentialStrategyNumRetries + 1; // initial request + maximum number of retries (3)
@@ -326,13 +326,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
@@ -376,13 +376,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
