@@ -123,6 +123,7 @@ namespace Microsoft.Identity.Client
         public string CertificateIdToAssociateWithToken { get; set; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
+        public bool IsFmiServiceFabric { get; set; }
 
         #region ClientCredentials
 

@@ -92,6 +92,29 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public void ValidateThatFmiEndpointIsUsed()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342/metadata/identity/oauth2/token", fmiEndpoint: "http://localhost:40343/metadata/identity/oauth2/token");
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithServiceFabricFmi()
+                    .WithHttpManager(httpManager);
+
+                var mi = miBuilder.BuildConcrete();
+
+                RequestContext requestContext = new RequestContext(mi.ServiceBundle, Guid.NewGuid(), null);
+
+                ServiceFabricManagedIdentitySource sf = ServiceFabricManagedIdentitySource.Create(requestContext) as ServiceFabricManagedIdentitySource;
+
+                Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
+                Assert.AreEqual("http://localhost:40343/metadata/identity/oauth2/token", sf.GetEndpointForTesting());
+            }
+        }
+
+        [TestMethod]
         public async Task SFThrowsWhenGetHttpClientWithValidationIsNotImplementedAsync()
         {
             using (new EnvVariableContext())
