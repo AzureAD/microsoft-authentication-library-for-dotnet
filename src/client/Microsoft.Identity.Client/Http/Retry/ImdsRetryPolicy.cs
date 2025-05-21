@@ -29,9 +29,9 @@ namespace Microsoft.Identity.Client.Http.Retry
         private int MaxRetries;
 
         private ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
-            MinExponentialBackoffMs,
-            MaxExponentialBackoffMs,
-            ExponentialDeltaBackoffMs
+            ImdsRetryPolicy.MinExponentialBackoffMs,
+            ImdsRetryPolicy.MaxExponentialBackoffMs,
+            ImdsRetryPolicy.ExponentialDeltaBackoffMs
         );
 
         public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
