@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         private readonly ILoggerAdapter _logger;
         private readonly Uri _startUri;
         private readonly Uri _endUri;
+        //dharshanb
         private WebView2 _webView2;
         private const string WebView2UserDataFolder = "%UserProfile%/.msal/webview2/data";
 
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             }
 
             InitializeComponent();
-
+            //dharshanb
             _webView2.CreationProperties = new CoreWebView2CreationProperties()
             {
                 UserDataFolder = Environment.ExpandEnvironmentVariables(WebView2UserDataFolder)
@@ -170,6 +171,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 webBrowserPanel.SuspendLayout();
                 SuspendLayout();
 
+                // dharshanb
                 // webBrowser
                 _webView2 = new WebView2();
                 _webView2.Dock = DockStyle.Fill;
@@ -262,6 +264,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             return readyToClose;
         }
 
+        // dharshanb
         private void WebView2Control_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
         {
             _logger.Verbose(() => "[WebView2Control] CoreWebView2InitializationCompleted ");
