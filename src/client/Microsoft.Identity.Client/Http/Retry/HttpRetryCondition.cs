@@ -4,7 +4,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Http
+namespace Microsoft.Identity.Client.Http.Retry
 {
     internal static class HttpRetryConditions
     {

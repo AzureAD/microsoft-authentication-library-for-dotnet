@@ -11,13 +11,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using static Microsoft.Identity.Client.Http.DefaultRetryPolicy;
+using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {

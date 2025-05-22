@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Client.Http
+namespace Microsoft.Identity.Client.Http.Retry
 {
     internal class LinearRetryStrategy
     {

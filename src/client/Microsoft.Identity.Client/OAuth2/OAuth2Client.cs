@@ -17,7 +17,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Security.Cryptography.X509Certificates;
-using static Microsoft.Identity.Client.Http.DefaultRetryPolicy;
+using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
+using Microsoft.Identity.Client.Http.Retry;
+
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;

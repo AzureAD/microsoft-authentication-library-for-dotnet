@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Utils;
-using static Microsoft.Identity.Client.Http.DefaultRetryPolicy;
+using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {

@@ -5,7 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.Http
+namespace Microsoft.Identity.Client.Http.Retry
 {
     class DefaultRetryPolicy : IRetryPolicy
     {

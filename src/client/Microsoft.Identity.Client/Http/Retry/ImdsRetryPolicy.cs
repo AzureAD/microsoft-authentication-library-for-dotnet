@@ -6,7 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.Http
+namespace Microsoft.Identity.Client.Http.Retry
 {
     internal class ImdsRetryPolicy : IRetryPolicy
     {
