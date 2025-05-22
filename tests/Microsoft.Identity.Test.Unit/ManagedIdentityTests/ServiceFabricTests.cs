@@ -100,6 +100,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342/metadata/identity/oauth2/token", fmiEndpoint: "http://localhost:40343/metadata/identity/oauth2/token");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures()
                     .WithServiceFabricFmi()
                     .WithHttpManager(httpManager);
 

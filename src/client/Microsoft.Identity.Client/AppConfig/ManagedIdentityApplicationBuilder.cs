@@ -111,6 +111,7 @@ namespace Microsoft.Identity.Client
         public ManagedIdentityApplicationBuilder WithServiceFabricFmi()
         {
             Config.IsFmiServiceFabric = true;
+            ValidateUseOfExperimentalFeature("WithServiceFabricFmi");
             return this;
         }
 
