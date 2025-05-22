@@ -23,10 +23,10 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="builder">The builder to chain options to</param>
         /// <param name="onBeforeTokenRequestHandler">An async delegate which gets invoked just before MSAL makes a token request</param>
         /// <returns>The builder to chain other options to.</returns>
-        public static AbstractAcquireTokenParameterBuilder<T> OnBeforeTokenRequest<T>(
-            this AbstractAcquireTokenParameterBuilder<T> builder, 
+        public static BaseAbstractAcquireTokenParameterBuilder<T> OnBeforeTokenRequest<T>(
+            this BaseAbstractAcquireTokenParameterBuilder<T> builder, 
             Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler) 
-            where T : AbstractAcquireTokenParameterBuilder<T>
+            where T : BaseAbstractAcquireTokenParameterBuilder<T>
         {
             if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && onBeforeTokenRequestHandler != null)
             {
