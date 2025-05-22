@@ -82,6 +82,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
             }
 
+            request.RetryPolicy = new ImdsRetryPolicy();
+
             return request;
         }
 
