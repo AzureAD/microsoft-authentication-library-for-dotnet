@@ -7,17 +7,17 @@ The following table lists MSAL.NET versions currently supported and receiving se
 
 | Major Version | Last Release | Patch Release Date  | Support Phase|End of Support |
 | --------------|--------------|--------|------------|--------|
-| 4.x           | [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)   |Monthly| Active | Not planned.<br/>✅Supported versions: from 4.64.1 to [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)<br/>⚠️Unsupported versions `< 4.64.1`.|
+| 4.x           | [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)   |Monthly| Active | Not planned.<br/>✅Supported versions: from 4.61.2 to [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)<br/>⚠️Unsupported versions `< 4.61.2`.|
 
 ## Out of support versions
 The following table lists MSAL.NET versions no longer supported and no longer receiving security fixes.
 
 | Major Version | Latest Patch Version| Patch Release Date | End of Support Date|
 | --------------|--------------|--------|--------|
-| 4.x           | <= 4.64.0      | August 23, 2024        | May 15, 2025    |
-| 3.x           | <= 3.0.9       | July 31, 2019          | May 15, 2025    |
-| 2.x           | <= 2.7.1       | February 21, 2019      | May 15, 2025    |
-| 1.x           | <= 1.1.4-preview0002      | June 1, 2018         | May 15, 2025   |
+| 4.x           |    4.61.1      | August 23, 2024        | May 15, 2025    |
+| 3.x           |    3.0.9       | July 31, 2019          | May 15, 2025    |
+| 2.x           |    2.7.1       | February 21, 2019      | May 15, 2025    |
+| 1.x           |    1.1.4-preview0002      | June 1, 2018         | May 15, 2025   |
 
 ## Overview
 
