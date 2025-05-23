@@ -12,6 +12,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     /// </summary>
     internal interface IInstanceDiscoveryManager
     {
+        InstanceDiscoveryMetadataEntry GetMetadataEntryAvoidNetwork(
+            AuthorityInfo authorityInfo,
+            RequestContext requestContext);
         Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryTryAvoidNetworkAsync(
             AuthorityInfo authorityinfo,
             IEnumerable<string> existingEnvironmentsInCache,
