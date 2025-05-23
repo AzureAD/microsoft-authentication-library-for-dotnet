@@ -13,10 +13,10 @@
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">$(MsalInternalVersion)</MsalClientSemVer>
-    <MsalClientSemVer>$(MsalClientSemVer)</MsalClientSemVer>
+    <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">$(MsalInternalVersion)</MicrosoftIdentityClientVersion>
+    <MicrosoftIdentityClientVersion>$(MicrosoftIdentityClientVersion)</MicrosoftIdentityClientVersion>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
-    <Version>$(MsalClientSemVer)</Version>
+    <Version>$(MicrosoftIdentityClientVersion)</Version>
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Title>MSAL.NET extension for desktop scenarios for older .NET platforms</Title>
     <Description>

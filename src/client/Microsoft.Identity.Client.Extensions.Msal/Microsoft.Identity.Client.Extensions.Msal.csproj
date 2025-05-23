@@ -7,9 +7,9 @@
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!-- most of the properties are in Directory.Build.props-->
     <!--This should be passed from the VSTS build-->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">$(MsalInternalVersion)</MsalClientSemVer>
+    <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">$(MsalInternalVersion)</MicrosoftIdentityClientVersion>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
-    <Version>$(MsalClientSemVer)</Version>
+    <Version>$(MicrosoftIdentityClientVersion)</Version>
     <Description>This package contains the public client (desktop) caching to Microsoft Authentication Library for .NET (MSAL.NET)</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>

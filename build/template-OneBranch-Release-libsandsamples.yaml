@@ -5,7 +5,7 @@
 parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
-  MsalClientSemVer: '4.55.0-devopsbuild'
+  MicrosoftIdentityClientVersion: '4.55.0-devopsbuild'
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
 
 steps:
@@ -13,7 +13,7 @@ steps:
 - template: template-OneBranch-CI-libsandsamples.yaml
   parameters:
     Solution: 'microsoft-authentication-library-for-dotnet/LibsAndSamples.sln'
-    MsalClientSemVer: $(MsalClientSemVer) #Default MSAL package version
+    MicrosoftIdentityClientVersion: $(MicrosoftIdentityClientVersion) #Default MSAL package version
     MsalSourceDir: $(MsalSourceDir) #Default MSAL root directory
     PipelineType: $(PipelineType) #Build type
 
