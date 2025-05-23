@@ -55,14 +55,11 @@ namespace MSIHelperService.Controllers
                 MSIHelper.AzureResource.WebApp => await MSIHelper.GetWebAppEnvironmentVariablesAsync(
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.Function => await MSIHelper.GetFunctionAppEnvironmentVariablesAsync(httpClient,
-                    _logger).ConfigureAwait(false),
+                MSIHelper.AzureResource.Function => throw new NotImplementedException(),
 
-                MSIHelper.AzureResource.VM => await MSIHelper.GetVirtualMachineEnvironmentVariables(
-                    _logger).ConfigureAwait(false),
+                MSIHelper.AzureResource.VM => throw new NotImplementedException(),
 
-                MSIHelper.AzureResource.AzureArc => await MSIHelper.GetAzureArcEnvironmentVariables(
-                    _logger).ConfigureAwait(false),
+                MSIHelper.AzureResource.AzureArc => throw new NotImplementedException(),
 
                 MSIHelper.AzureResource.ServiceFabric => throw new NotImplementedException(),
 
