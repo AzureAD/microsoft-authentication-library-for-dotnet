@@ -24,9 +24,6 @@ namespace MSIHelperService.Helper
         internal static readonly string? s_requestAppSecret = Environment.GetEnvironmentVariable("requestAppSecret");
         internal static readonly string? s_webAppCertThumbprint = Environment.GetEnvironmentVariable("WebAppCertThumbprint");
 
-        //Microsoft authority endpoint
-        internal const string Authority = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47";
-
         //Azure Resources
         internal enum AzureResource
         {
