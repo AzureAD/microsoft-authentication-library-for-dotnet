@@ -28,14 +28,14 @@ version="[1.1,1.2)"
 
 ## Serviceability
 
-When we release a new MINOR version, the previous MINOR version is abandoned.
+When we release a new MINOR version, the previous MINOR versions shipped within one year MAY still accept bug report and receive patches. MINOR versions more than one year old will not receive any support. If you suspect there is an issue in a 1+ year old version that you are using, please upgrade to latest MINOR version and retry, before you send out a bug report.
 
-When we release a new MAJOR version, we will continue to apply bug fixes to the existing features in the previous MAJOR version for up to the 2 year support cycle for Azure.
-Example: We release MSALiOS 2.0 in the future which supports unified Auth for AAD and MSA. Later, we then have a fix in Conditional Access for MSALiOS. Since that feature exists both in MSALiOS 1.1 and MSALiOS 2.0, we will fix both. It will roll up in a PATCH number for each. Customers that are still locked down on MSALiOS 1.1 will receive the benefit of this fix.
+When we release a new MAJOR version, we will continue to apply bug fixes to the existing features in the previous MAJOR version for up to the 1 year support cycle for Azure.
+Example: We release MSALiOS 2.0 in the future which supports unified Auth for Microsoft Entra. Later, we then have a fix in Conditional Access for MSALiOS. Since that feature exists both in MSALiOS 1.1 and MSALiOS 2.0, we will fix both. It will roll up in a PATCH number for each. Customers that are still locked down on MSALiOS 1.1 will receive the benefit of this fix.
 
-## Microsoft Authentication SDKs and Azure Active Directory
+## Microsoft Authentication SDKs and Microsoft Entra
 
-Microsoft Authentication SDKs major versions will maintain backwards compatibility with Azure Active Directory web services through the support period. This means that the API surface area defined in a MAJOR version will continue to work for 2 years after release.
+Microsoft Authentication SDKs major versions will maintain backwards compatibility with Microsoft Entra web services through the support period. This means that the API surface area defined in a MAJOR version will continue to work for 1 year after release.
 
 We will respond to bugs quickly from our partners and customers submitted through GitHub and through our private alias (tellaad@microsoft.com) for security issues and update the PATCH version number. We will also submit a change summary for each PATCH number.
 Occasionally, there will be security bugs or breaking bugs from our partners that will require an immediate fix and a publish of an update to all partners and customers. When this occurs, we will do an emergency roll up to a PATCH version number and update all our distribution methods to the latest.
