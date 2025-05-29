@@ -101,6 +101,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        [Ignore("Tracking here: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5305")]
         public async Task ExtractNonceFromWwwAuthHeadersAsync()
         {
             //Arrange & Act
@@ -125,6 +126,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        [Ignore("Tracking here: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5305")]
         public async Task ExtractNonceFromAuthInfoHeadersAsync()
         {
             //Arrange & Act
@@ -141,6 +143,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        [Ignore("Tracking here: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5305")]
         public async Task ExtractNonceWithAuthParserAsync()
         {
             //Arrange & Act
