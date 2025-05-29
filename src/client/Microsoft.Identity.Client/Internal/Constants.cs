@@ -73,5 +73,11 @@ namespace Microsoft.Identity.Client.Internal
         {
             return $"https://{host}/.well-known/webfinger?rel={DefaultRealm}&resource={resource}";
         }
+        public enum RequestType
+        {
+            STS,
+            ManagedIdentityDefault,
+            Imds
+        }
     }
 }

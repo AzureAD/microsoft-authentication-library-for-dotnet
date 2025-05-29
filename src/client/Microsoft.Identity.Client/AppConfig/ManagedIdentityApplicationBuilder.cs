@@ -5,15 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -60,9 +54,14 @@ namespace Microsoft.Identity.Client
             var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
 
             config.ManagedIdentityId = managedIdentityId;
-
             config.CacheSynchronizationEnabled = false;
             config.AccessorOptions = CacheOptions.EnableSharedCacheOptions;
+
+            // Ensure the default retry policy factory is set if the test factory was not provided
+            if (config.RetryPolicyFactory == null)
+            {
+                config.RetryPolicyFactory = new RetryPolicyFactory();
+            }
 
             return config;
         }
@@ -80,6 +79,17 @@ namespace Microsoft.Identity.Client
         internal ManagedIdentityApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {
             Config.AppTokenCacheInternalForTest = tokenCacheInternal;
+            return this;
+        }
+
+        /// <summary>
+        /// Internal only: Allows tests to inject a custom retry policy factory.
+        /// </summary>
+        /// <param name="factory">The retry policy factory to use.</param>
+        /// <returns>The builder for chaining.</returns>
+        internal ManagedIdentityApplicationBuilder WithRetryPolicyFactory(IRetryPolicyFactory factory)
+        {
+            Config.RetryPolicyFactory = factory;
             return this;
         }
 
@@ -116,6 +126,13 @@ namespace Microsoft.Identity.Client
         internal ManagedIdentityApplication BuildConcrete()
         {
             DefaultConfiguration();
+
+            // Ensure the default retry policy factory is set if the test factory was not provided
+            if (Config.RetryPolicyFactory == null)
+            {
+                Config.RetryPolicyFactory = new RetryPolicyFactory();
+            }
+
             return new ManagedIdentityApplication(BuildConfiguration());
         }
 

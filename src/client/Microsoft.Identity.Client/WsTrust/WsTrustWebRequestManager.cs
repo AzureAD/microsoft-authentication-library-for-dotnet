@@ -13,14 +13,13 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
+using static Microsoft.Identity.Client.Internal.Constants;
 
 namespace Microsoft.Identity.Client.WsTrust
 {
     internal class WsTrustWebRequestManager : IWsTrustWebRequestManager
     {
         private readonly IHttpManager _httpManager;
-        private readonly DefaultRetryPolicy _defaultRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
 
         public WsTrustWebRequestManager(IHttpManager httpManager)
         {
@@ -43,6 +42,9 @@ namespace Microsoft.Identity.Client.WsTrust
 
             var uri = new UriBuilder(federationMetadataUrl);
 
+            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+
             HttpResponse httpResponse = await _httpManager.SendRequestAsync(
                 uri.Uri,
                 msalIdParams,
@@ -53,7 +55,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 mtlsCertificate: null,
                 validateServerCertificate: null,
                 cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: _defaultRetryPolicy)
+                retryPolicy: retryPolicy)
             .ConfigureAwait(false);
 
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
@@ -101,6 +103,9 @@ namespace Microsoft.Identity.Client.WsTrust
                 wsTrustRequest,
                 Encoding.UTF8, "application/soap+xml");
 
+            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+
             HttpResponse resp = await _httpManager.SendRequestAsync(
                 wsTrustEndpoint.Uri,
                 headers,
@@ -111,7 +116,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 mtlsCertificate: null,
                 validateServerCertificate: null,
                 cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: _defaultRetryPolicy)
+                retryPolicy: retryPolicy)
             .ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
@@ -178,6 +183,9 @@ namespace Microsoft.Identity.Client.WsTrust
 
             var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
 
+            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+
             var httpResponse = await _httpManager.SendRequestAsync(
                 uri,
                 msalIdParams,
@@ -188,7 +196,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 mtlsCertificate: null,
                 validateServerCertificate: null,
                 cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: _defaultRetryPolicy)
+                retryPolicy: retryPolicy)
             .ConfigureAwait(false);
 
             if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)

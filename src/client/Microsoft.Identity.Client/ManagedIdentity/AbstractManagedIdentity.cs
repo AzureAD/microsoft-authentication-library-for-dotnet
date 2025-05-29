@@ -14,6 +14,8 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using System.Text;
 using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
+using Microsoft.Identity.Client.Http.Retry;
+
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
@@ -57,6 +59,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             _requestContext.Logger.Info("[Managed Identity] Sending request to managed identity endpoints.");
 
+            IRetryPolicy retryPolicy = _requestContext.ServiceBundle.Config.RetryPolicyFactory.GetRetryPolicy(request.RequestType);
+
             try
             {
                 if (request.Method == HttpMethod.Get)
@@ -72,7 +76,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             mtlsCertificate: null,
                             validateServerCertificate: GetValidationCallback(), 
                             cancellationToken: cancellationToken,
-                            retryPolicy: request.RetryPolicy).ConfigureAwait(false);
+                            retryPolicy: retryPolicy).ConfigureAwait(false);
                 }
                 else
                 {
@@ -87,7 +91,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             mtlsCertificate: null,
                             validateServerCertificate: GetValidationCallback(), 
                             cancellationToken: cancellationToken,
-                            retryPolicy: request.RetryPolicy)
+                            retryPolicy: retryPolicy)
                         .ConfigureAwait(false);
 
                 }

@@ -4,30 +4,24 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using static Microsoft.Identity.Client.Internal.Constants;
 
 namespace Microsoft.Identity.Client.Http.Retry
 {
     class DefaultRetryPolicy : IRetryPolicy
     {
-        public enum RequestType
-        {
-            STS,
-            ManagedIdentity
-        }
-
         private LinearRetryStrategy linearRetryStrategy = new LinearRetryStrategy();
 
         // referenced in unit tests
         public const int DefaultStsMaxRetries = 1;
         public const int DefaultManagedIdentityMaxRetries = 3;
 
-        // overridden in the unit tests so that they run faster
-        public static int DefaultStsRetryDelayMs { get; set; } = 1000;
-        public static int DefaultManagedIdentityRetryDelayMs { get; set; } = 1000;
-
         // used for comparison, in the unit tests
         // will be reset after every test
         public static int NumRetries { get; set; } = 0;
+
+        private const int _DefaultStsRetryDelayMs = 1000;
+        private const int _DefaultManagedIdentityRetryDelayMs = 1000;
 
         public static int DefaultRetryDelayMs;
         private int _maxRetries;
@@ -37,19 +31,24 @@ namespace Microsoft.Identity.Client.Http.Retry
         {
             switch (requestType)
             {
-                case RequestType.ManagedIdentity:
-                    DefaultRetryDelayMs = DefaultManagedIdentityRetryDelayMs;
+                case RequestType.ManagedIdentityDefault:
+                    DefaultRetryDelayMs = _DefaultManagedIdentityRetryDelayMs;
                     _maxRetries = DefaultManagedIdentityMaxRetries;
                     RetryCondition = HttpRetryConditions.DefaultManagedIdentity;
                     break;
                 case RequestType.STS:
-                    DefaultRetryDelayMs = DefaultStsRetryDelayMs;
+                    DefaultRetryDelayMs = _DefaultStsRetryDelayMs;
                     _maxRetries = DefaultStsMaxRetries;
                     RetryCondition = HttpRetryConditions.Sts;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(requestType), requestType, "Unknown request type");
             }
+        }
+
+        internal virtual Task DelayAsync(int milliseconds)
+        {
+            return Task.Delay(milliseconds);
         }
 
         public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
@@ -73,7 +72,7 @@ namespace Microsoft.Identity.Client.Http.Retry
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {NumRetries})");
 
                 // Pause execution for the calculated delay
-                await Task.Delay(retryAfterDelay).ConfigureAwait(false);
+                await DelayAsync(retryAfterDelay).ConfigureAwait(false);
 
                 return true;
             }

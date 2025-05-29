@@ -15,11 +15,9 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.Internal.Broker;
 using System.Security.Cryptography.X509Certificates;
-using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
 using Microsoft.Identity.Client.Http.Retry;
-
+using static Microsoft.Identity.Client.Internal.Constants;
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
@@ -122,7 +120,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
             using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
             {
-                DefaultRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
+                IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+                IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
 
                 try
                 {
@@ -146,7 +145,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             mtlsCertificate: _mtlsCertificate,
                             validateServerCertificate: null,
                             cancellationToken: requestContext.UserCancellationToken,
-                            retryPolicy: defaultRetryPolicy)
+                            retryPolicy: retryPolicy)
                         .ConfigureAwait(false);
                     }
                     else
@@ -161,7 +160,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             mtlsCertificate: null,
                             validateServerCertificate: null,
                             cancellationToken: requestContext.UserCancellationToken,
-                            retryPolicy: defaultRetryPolicy)
+                            retryPolicy: retryPolicy)
                         .ConfigureAwait(false);
                     }
                 }

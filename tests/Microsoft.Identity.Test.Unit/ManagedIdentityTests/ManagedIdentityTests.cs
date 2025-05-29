@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
@@ -39,24 +40,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string ExpectedErrorCode = "ErrorCode";
         internal const string ExpectedCorrelationId = "Some GUID";
 
-        private static int _originalDefaultManagedIdentityRetryDelayMs;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext _)
-        {
-            // Backup original retry delay values
-            _originalDefaultManagedIdentityRetryDelayMs = DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs;
-
-            // Speed up retry delays by 100x
-            DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs = (int)(_originalDefaultManagedIdentityRetryDelayMs * TestConstants.ONE_HUNDRED_TIMES_FASTER);
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-            // Restore retry delay values after all tests
-            DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs = _originalDefaultManagedIdentityRetryDelayMs;
-        }
+        private TestRetryPolicyFactory TestRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [TestInitialize]
         public override void TestInitialize()
@@ -1275,7 +1259,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint, HttpStatusCode.GatewayTimeout)]
         [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint, HttpStatusCode.GatewayTimeout)]
-        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint, HttpStatusCode.GatewayTimeout)]
         [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint, HttpStatusCode.GatewayTimeout)]
         [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.GatewayTimeout)]
         public async Task ManagedIdentityRetryPolicyLifeTimeIsPerRequestAsync(
@@ -1289,7 +1272,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -1297,7 +1281,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = miBuilder.Build();
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
-                const int NumErrors = DefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
+                const int NumErrors = TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
                 for (int i = 0; i < NumErrors; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
@@ -1308,13 +1292,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: statusCode);
                 }
                 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(Resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                MsalServiceException ex =
+                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                        await mi.AcquireTokenForManagedIdentity(Resource)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false))
+                    .ConfigureAwait(false);
                 Assert.IsNotNull(ex);
 
                 // 3 retries
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 for (int i = 0; i < NumErrors; i++)
@@ -1324,16 +1311,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         Resource,
                         "",
                         managedIdentitySource,
-                        statusCode: HttpStatusCode.InternalServerError);
+                        statusCode: statusCode);
                 }
 
                 ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(Resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                        await mi.AcquireTokenForManagedIdentity(Resource)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false))
+                    .ConfigureAwait(false);
                 Assert.IsNotNull(ex);
 
-                // 3 retries (DefaultRetryPolicy.numRetries would be 6 if retry policy was NOT per request)
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
+                // 3 retries (TestDefaultRetryPolicy.numRetries would be 6 if retry policy was NOT per request)
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 for (int i = 0; i < NumErrors; i++)
@@ -1343,16 +1332,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         Resource,
                         "",
                         managedIdentitySource,
-                        statusCode: HttpStatusCode.InternalServerError);
+                        statusCode: statusCode);
                 }
 
                 ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(Resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                        await mi.AcquireTokenForManagedIdentity(Resource)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false))
+                    .ConfigureAwait(false);
                 Assert.IsNotNull(ex);
 
-                // 3 retries (DefaultRetryPolicy.numRetries would be 9 if retry policy was NOT per request)
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
+                // 3 retries (TestDefaultRetryPolicy.numRetries would be 9 if retry policy was NOT per request)
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }
