@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
+using static Microsoft.Identity.Client.Internal.Constants;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
             }
 
-            request.RetryPolicy = new ImdsRetryPolicy();
+            request.RequestType = RequestType.Imds;
 
             return request;
         }

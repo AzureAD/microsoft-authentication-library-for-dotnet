@@ -10,8 +10,6 @@ namespace Microsoft.Identity.Client.Http.Retry
 {
     internal class ImdsRetryPolicy : IRetryPolicy
     {
-        private const int HttpStatusGoneRetryAfterMsInternal = 10 * 1000; // 10 seconds
-
         // referenced in unit tests
         public const int ExponentialStrategyNumRetries = 3;
         public const int LinearStrategyNumRetries = 7;
@@ -20,11 +18,10 @@ namespace Microsoft.Identity.Client.Http.Retry
         // will be reset after every test
         public static int NumRetries { get; set; } = 0;
 
-        // overridden in the unit tests so that they run faster
-        public static int MinExponentialBackoffMs { get; set; } = 1000;
-        public static int MaxExponentialBackoffMs { get; set; } = 4000;
-        public static int ExponentialDeltaBackoffMs { get; set; } = 2000;
-        public static int HttpStatusGoneRetryAfterMs { get; set; } = HttpStatusGoneRetryAfterMsInternal;
+        private const int MinExponentialBackoffMs = 1000;
+        private const int MaxExponentialBackoffMs = 4000;
+        private const int ExponentialDeltaBackoffMs = 2000;
+        private const int HttpStatusGoneRetryAfterMs = 10000;
 
         private int MaxRetries;
 
@@ -33,6 +30,11 @@ namespace Microsoft.Identity.Client.Http.Retry
             ImdsRetryPolicy.MaxExponentialBackoffMs,
             ImdsRetryPolicy.ExponentialDeltaBackoffMs
         );
+
+        internal virtual Task DelayAsync(int milliseconds)
+        {
+            return Task.Delay(milliseconds);
+        }
 
         public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
         {
@@ -60,7 +62,7 @@ namespace Microsoft.Identity.Client.Http.Retry
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
 
                 // Pause execution for the calculated delay
-                await Task.Delay(retryAfterDelay).ConfigureAwait(false);
+                await DelayAsync(retryAfterDelay).ConfigureAwait(false);
 
                 return true;
             }

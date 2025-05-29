@@ -2,15 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
@@ -24,31 +23,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class DefaultRetryPolicyTests : TestBase
     {
-        private static int s_originalManagedIdentityRetryDelay;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext _)
-        {
-            // Backup original retry delay values
-            s_originalManagedIdentityRetryDelay = DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs;
-
-            // Speed up retry delays by 100x
-            DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs = (int)(s_originalManagedIdentityRetryDelay * TestConstants.ONE_HUNDRED_TIMES_FASTER);
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-            // Restore retry policy values after each test
-            DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs = s_originalManagedIdentityRetryDelay;
-        }
+        private TestRetryPolicyFactory TestRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [TestInitialize]
         public override void TestInitialize()
         {
             base.TestInitialize();
 
-            DefaultRetryPolicy.NumRetries = 0;
+            TestDefaultRetryPolicy.NumRetries = 0;
         }
 
         [DataTestMethod] // see test class header: all sources that allow UAMI
@@ -69,7 +51,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityId managedIdentityId = ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -95,20 +78,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     userAssignedId: userAssignedId,
                     userAssignedIdentityId: userAssignedIdentityId);
 
-                var stopwatch = Stopwatch.StartNew();
+                AuthenticationResult result =
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
 
-                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                                        .ExecuteAsync()
-                                        .ConfigureAwait(false);
-
-                stopwatch.Stop();
-
-                // linear backoff (1 second * 1 retry)
-                Console.WriteLine($"{stopwatch.ElapsedMilliseconds} >= {DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs}");
-                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs);
-                
                 // ensure that exactly 2 requests were made: initial request + 1 retry
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, 1);
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 1);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
@@ -133,7 +109,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityId managedIdentityId = ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -141,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate permanent 500s (to trigger the maximum number of retries)
-                const int NUM_500 = DefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
+                const int NUM_500 = TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
                 for (int i = 0; i < NUM_500; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
@@ -155,25 +132,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
 
                 MsalServiceException msalException = null;
-                var stopwatch = Stopwatch.StartNew();
                 try
                 {
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     msalException = ex as MsalServiceException;
                 }
-                stopwatch.Stop();
                 Assert.IsNotNull(msalException);
 
-                // linear backoff (1 second * 3 retries)
-                Console.WriteLine($"{stopwatch.ElapsedMilliseconds} >= {DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs} * {DefaultRetryPolicy.DefaultManagedIdentityMaxRetries}");
-                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs * DefaultRetryPolicy.DefaultManagedIdentityMaxRetries));
-
                 // ensure that exactly 4 requests were made: initial request + 3 retries
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }
@@ -194,7 +166,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -216,20 +189,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     MockHelpers.GetMsiSuccessfulResponse(),
                     managedIdentitySource);
 
-                var stopwatch = Stopwatch.StartNew();
-
-                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                                        .ExecuteAsync()
-                                        .ConfigureAwait(false);
-
-                stopwatch.Stop();
-
-                // linear backoff (1 second * 1 retry)
-                Console.WriteLine($"{stopwatch.ElapsedMilliseconds} >= {DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs}");
-                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= DefaultRetryPolicy.DefaultManagedIdentityRetryDelayMs);
+                AuthenticationResult result =
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
 
                 // ensure that exactly 2 requests were made: initial request + 1 retry
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, 1);
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 1);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
@@ -252,7 +218,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -278,20 +245,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     MockHelpers.GetMsiSuccessfulResponse(),
                     managedIdentitySource);
 
-                var stopwatch = Stopwatch.StartNew();
-
-                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                                        .ExecuteAsync()
-                                        .ConfigureAwait(false);
-
-                stopwatch.Stop();
-
-                // ensure that the number of seconds in the retry-after header elapsed before the second network request was made
-                Console.WriteLine($"{stopwatch.ElapsedMilliseconds} >= {retryAfterSeconds} * 1000");
-                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= (retryAfterSeconds * 1000)); // convert to milliseconds
+                AuthenticationResult result =
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
 
                 // ensure that exactly 2 requests were made: initial request + 1 retry
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, 1);
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 1);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
@@ -314,7 +274,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -342,20 +303,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     MockHelpers.GetMsiSuccessfulResponse(),
                     managedIdentitySource);
 
-                var stopwatch = Stopwatch.StartNew();
-
-                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                                        .ExecuteAsync()
-                                        .ConfigureAwait(false);
-
-                stopwatch.Stop();
-
-                // ensure that the number of seconds in the retry-after header elapsed before the second network request was made
-                Console.WriteLine($"{stopwatch.ElapsedMilliseconds} >= {retryAfterMilliseconds}");
-                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= retryAfterMilliseconds);
+                AuthenticationResult result =
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
 
                 // ensure that exactly 2 requests were made: initial request + 1 retry
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, 1);
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 1);
                 Assert.AreEqual(httpManager.QueueSize, 0);
 
                 Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
@@ -378,7 +332,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -386,7 +341,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate permanent 500s (to trigger the maximum number of retries)
-                int NUM_500 = DefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
+                int NUM_500 = TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
                 for (int i = 0; i < NUM_500; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
@@ -401,7 +356,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 try
                 {
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -410,7 +366,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(msalException);
 
                 // ensure that the first request was made and retried 3 times
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, DefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
                 Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }
@@ -431,7 +387,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -449,7 +406,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 try
                 {
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -458,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(msalException);
 
                 // ensure that only the initial request was made
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, 0);
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 0);
                 Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }
@@ -479,7 +437,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -497,7 +456,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 try
                 {
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync().ConfigureAwait(false);
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -506,7 +466,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(msalException);
 
                 // ensure that only the initial request was made
-                Assert.AreEqual(DefaultRetryPolicy.NumRetries, 0);
+                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 0);
                 Assert.AreEqual(httpManager.QueueSize, 0);
             }
         }
