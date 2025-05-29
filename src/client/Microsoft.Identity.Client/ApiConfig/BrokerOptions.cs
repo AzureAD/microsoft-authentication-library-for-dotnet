@@ -79,8 +79,8 @@ namespace Microsoft.Identity.Client
         public bool MsaPassthrough { get; set; } = false;
 
         /// <summary>
-        /// Currently supported on Windows, Linux and macOS
-        /// Allows the Windows broker to list MSA, Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
+        /// Currently supported on Windows, Linux and macOS.
+        /// Allows the Windows broker to list MSA, Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>.
         /// Linux and macOS broker will discover accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
