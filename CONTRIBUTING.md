@@ -144,5 +144,5 @@ For MAUI, edit the .csproj and enable the mobile targets.
 You can create a package from Visual Studio or from the command line with custom version parameters:
 
 ```bash
-msbuild <msal>.csproj /t:pack /p:MsalClientSemVer=1.2.3-preview
+msbuild <msal>.csproj /t:pack /p:MicrosoftIdentityClientVersion=1.2.3-preview
 ```
