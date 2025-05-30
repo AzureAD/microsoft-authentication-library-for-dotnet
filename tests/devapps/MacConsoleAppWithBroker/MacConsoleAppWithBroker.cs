@@ -169,14 +169,15 @@ class MacConsoleAppWithBroker
             // Make an HTTP request to switch to a background thread
             await SwitchToBackgroundThreadViaHttpRequest().ConfigureAwait(false);
 
-            // Second interactive call on main thread
+            interactiveBuilder.WithAccount(account);
+            // Second interactive call with account on main thread
             await RunOnMainThreadAsync(async () =>
             {
                 try
                 {
                     // Execute the authentication request on the main thread
                     result = await interactiveBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                    Console.WriteLine("Second interactive authentication completed successfully.");
+                    Console.WriteLine("Second interactive authentication with account completed successfully.");
                 }
                 catch (Exception ex)
                 {

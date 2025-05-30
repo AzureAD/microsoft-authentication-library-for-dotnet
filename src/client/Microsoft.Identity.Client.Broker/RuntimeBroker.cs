@@ -186,15 +186,33 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     {
                         if (readAccountResult.IsSuccess)
                         {
-                            using (var result = await s_lazyCore.Value.AcquireTokenInteractivelyAsync(
-                            _parentHandle,
-                            authParams,
-                            authenticationRequestParameters.CorrelationId.ToString("D"),
-                            readAccountResult.Account,
-                            cancellationToken).ConfigureAwait(false))
+                            if (DesktopOsHelper.IsMac())
                             {
+                                AuthResult result = null;
+                                await MacMainThreadScheduler.Instance.RunOnMainThreadAsync(async () =>
+                                {
+                                    result = await s_lazyCore.Value.AcquireTokenInteractivelyAsync(
+                                        _parentHandle,
+                                        authParams,
+                                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                                        readAccountResult.Account,
+                                        cancellationToken).ConfigureAwait(false);
+                                }).ConfigureAwait(false);
                                 var errorMessage = "Could not acquire token interactively.";
                                 msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                            }
+                            else // Non macOS
+                            {
+                                using (var result = await s_lazyCore.Value.AcquireTokenInteractivelyAsync(
+                                    _parentHandle,
+                                    authParams,
+                                    authenticationRequestParameters.CorrelationId.ToString("D"),
+                                    readAccountResult.Account,
+                                    cancellationToken).ConfigureAwait(false))
+                                {
+                                    var errorMessage = "Could not acquire token interactively.";
+                                    msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                                }
                             }
                         }
                         else
@@ -238,15 +256,33 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
                 _logger?.Verbose(() => "[RuntimeBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
 
-                using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
-                    _parentHandle,
-                    authParams,
-                    authenticationRequestParameters.CorrelationId.ToString("D"),
-                    loginHint,
-                    cancellationToken).ConfigureAwait(false))
+                if (DesktopOsHelper.IsMac())
                 {
+                    AuthResult result = null;
+                    await MacMainThreadScheduler.Instance.RunOnMainThreadAsync(async () =>
+                    {
+                        result = await s_lazyCore.Value.SignInInteractivelyAsync(
+                            _parentHandle,
+                            authParams,
+                            authenticationRequestParameters.CorrelationId.ToString("D"),
+                            loginHint,
+                            cancellationToken).ConfigureAwait(false);
+                    }).ConfigureAwait(false);
                     var errorMessage = "Could not sign in interactively.";
                     msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                }
+                else // Non macOS
+                {
+                    using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
+                        _parentHandle,
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        loginHint,
+                        cancellationToken).ConfigureAwait(true))
+                    {
+                        var errorMessage = "Could not sign in interactively.";
+                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    }
                 }
             }
 
@@ -268,14 +304,31 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 _brokerOptions,
                 _logger))
             {
-                using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInAsync(
+                if (DesktopOsHelper.IsMac())
+                {
+                    AuthResult result = null;
+                    await MacMainThreadScheduler.Instance.RunOnMainThreadAsync(async () =>
+                    {
+                        result = await s_lazyCore.Value.SignInAsync(
+                            _parentHandle,
+                            authParams,
+                            authenticationRequestParameters.CorrelationId.ToString("D"),
+                            cancellationToken).ConfigureAwait(false);
+                    }).ConfigureAwait(false);
+                    var errorMessage = "Could not sign in interactively with the default OS account.";
+                    msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                }
+                else // Non macOS
+                {
+                    using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInAsync(
                         _parentHandle,
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
-                {
-                    var errorMessage = "Could not sign in interactively with the default OS account.";
-                    msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    {
+                        var errorMessage = "Could not sign in interactively with the default OS account.";
+                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    }
                 }
             }
 
