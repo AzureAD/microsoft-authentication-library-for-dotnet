@@ -14,18 +14,14 @@ namespace Microsoft.Identity.Client.Http.Retry
         public const int ExponentialStrategyNumRetries = 3;
         public const int LinearStrategyNumRetries = 7;
 
-        // used for comparison, in the unit tests
-        // will be reset after every test
-        public static int NumRetries { get; set; } = 0;
-
         private const int MinExponentialBackoffMs = 1000;
         private const int MaxExponentialBackoffMs = 4000;
         private const int ExponentialDeltaBackoffMs = 2000;
         private const int HttpStatusGoneRetryAfterMs = 10000;
 
-        private int MaxRetries;
+        private int _maxRetries;
 
-        private ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
+        private readonly ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
             ImdsRetryPolicy.MinExponentialBackoffMs,
             ImdsRetryPolicy.MaxExponentialBackoffMs,
             ImdsRetryPolicy.ExponentialDeltaBackoffMs
@@ -43,18 +39,15 @@ namespace Microsoft.Identity.Client.Http.Retry
             if (retryCount == 0)
             {
                 // Calculate the maxRetries based on the status code, once per request
-                MaxRetries = httpStatusCode == (int)HttpStatusCode.Gone
+                _maxRetries = httpStatusCode == (int)HttpStatusCode.Gone
                     ? LinearStrategyNumRetries
                     : ExponentialStrategyNumRetries;
             }
 
             // Check if the status code is retriable and if the current retry count is less than max retries
             if (HttpRetryConditions.Imds(response, exception) &&
-                retryCount < MaxRetries)
+                retryCount < _maxRetries)
             {
-                // used below in the log statement, also referenced in the unit tests
-                NumRetries = retryCount + 1;
-
                 int retryAfterDelay = httpStatusCode == (int)HttpStatusCode.Gone
                     ? HttpStatusGoneRetryAfterMs
                     : _exponentialRetryStrategy.CalculateDelay(retryCount);

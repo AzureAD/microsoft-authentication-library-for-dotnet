@@ -23,15 +23,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class DefaultRetryPolicyTests : TestBase
     {
-        private TestRetryPolicyFactory TestRetryPolicyFactory = new TestRetryPolicyFactory();
-
-        [TestInitialize]
-        public override void TestInitialize()
-        {
-            base.TestInitialize();
-
-            TestDefaultRetryPolicy.NumRetries = 0;
-        }
+        private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [DataTestMethod] // see test class header: all sources that allow UAMI
         [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
@@ -52,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityId managedIdentityId = ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -82,12 +74,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                             .ExecuteAsync()
                             .ConfigureAwait(false);
-
-                // ensure that exactly 2 requests were made: initial request + 1 retry
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 1);
-                Assert.AreEqual(httpManager.QueueSize, 0);
-
                 Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
+
+                const int NumRequests = 2; // initial request + 1 retry
+                int requestsMade = NumRequests - httpManager.QueueSize;
+                Assert.AreEqual(NumRequests, requestsMade);
             }
         }
 
@@ -110,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityId managedIdentityId = ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -118,8 +109,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate permanent 500s (to trigger the maximum number of retries)
-                const int NUM_500 = TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
-                for (int i = 0; i < NUM_500; i++)
+                const int Num500Errors = 1 + TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries; // initial request + maximum number of retries
+                for (int i = 0; i < Num500Errors; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
                         endpoint,
@@ -144,21 +135,31 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
                 Assert.IsNotNull(msalException);
 
-                // ensure that exactly 4 requests were made: initial request + 3 retries
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                int requestsMade = Num500Errors - httpManager.QueueSize;
+                Assert.AreEqual(Num500Errors, requestsMade);
             }
         }
 
-        [DataTestMethod] // see test class header: all sources allow SAMI
-        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
-        [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint)]
-        [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint)]
-        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
-        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint)]
-        public async Task SAMIFails500OnceWithNoRetryAfterHeaderThenSucceeds200Async(
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint, null)]
+        [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint, null)]
+        [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint, null)]
+        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint, null)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint, null)]
+        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint, "3")]
+        [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint, "3")]
+        [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint, "3")]
+        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint, "3")]
+        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint, "3")]
+        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint, "date")]
+        [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint, "date")]
+        [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint, "date")]
+        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint, "date")]
+        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint, "date")]
+        public async Task SAMIFails500OnceWithVariousRetryAfterHeaderValuesThenSucceeds200Async(
             ManagedIdentitySource managedIdentitySource,
-            string endpoint)
+            string endpoint,
+            string retryAfterHeader)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -167,67 +168,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
 
                 IManagedIdentityApplication mi = miBuilder.Build();
-
-                // Initial request fails with 500
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    ManagedIdentityTests.Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: HttpStatusCode.InternalServerError);
-
-                // Final success
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
-
-                AuthenticationResult result =
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                            .ExecuteAsync()
-                            .ConfigureAwait(false);
-
-                // ensure that exactly 2 requests were made: initial request + 1 retry
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 1);
-                Assert.AreEqual(httpManager.QueueSize, 0);
-
-                Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
-            }
-        }
-
-        [DataTestMethod] // see test class header: all sources allow SAMI
-        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
-        [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint)]
-        [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint)]
-        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
-        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint)]
-        public async Task SAMIFails500OnceWithRetryAfterHeader3SecondsThenSucceeds200Async(
-            ManagedIdentitySource managedIdentitySource,
-            string endpoint)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(managedIdentitySource, endpoint);
-
-                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
-                IManagedIdentityApplication mi = miBuilder.Build();
-
-                // make it one hundred times faster so the test completes quickly
-                double retryAfterSeconds = 3 * TestConstants.ONE_HUNDRED_TIMES_FASTER;
 
                 // Initial request fails with 500
                 httpManager.AddManagedIdentityMockHandler(
@@ -236,7 +182,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "",
                     managedIdentitySource,
                     statusCode: HttpStatusCode.InternalServerError,
-                    retryAfterHeader: retryAfterSeconds.ToString());
+                    retryAfterHeader: retryAfterHeader == "date" ? DateTime.UtcNow.AddSeconds(3).ToString("R") : retryAfterHeader);
 
                 // Final success
                 httpManager.AddManagedIdentityMockHandler(
@@ -249,70 +195,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                             .ExecuteAsync()
                             .ConfigureAwait(false);
-
-                // ensure that exactly 2 requests were made: initial request + 1 retry
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 1);
-                Assert.AreEqual(httpManager.QueueSize, 0);
-
                 Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
-            }
-        }
 
-        [DataTestMethod] // see test class header: all sources allow SAMI
-        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
-        [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint)]
-        [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint)]
-        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
-        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint)]
-        public async Task SAMIFails500OnceWithRetryAfterHeader3SecondsAsHttpDateThenSucceeds200Async(
-            ManagedIdentitySource managedIdentitySource,
-            string endpoint)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(managedIdentitySource, endpoint);
-
-                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
-                IManagedIdentityApplication mi = miBuilder.Build();
-
-                // this test can not be made one hundred times faster because it is based on a date
-                const int retryAfterMilliseconds = 3000;
-                // an extra second has been added to account for this date operation
-                var retryAfterHttpDate = DateTime.UtcNow.AddMilliseconds(retryAfterMilliseconds + 1000).ToString("R");
-
-                // Initial request fails with 500
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    ManagedIdentityTests.Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: HttpStatusCode.InternalServerError,
-                    retryAfterHeader: retryAfterHttpDate);
-
-                // Final success
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
-
-                AuthenticationResult result =
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                            .ExecuteAsync()
-                            .ConfigureAwait(false);
-
-                // ensure that exactly 2 requests were made: initial request + 1 retry
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 1);
-                Assert.AreEqual(httpManager.QueueSize, 0);
-
-                Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
+                const int NumRequests = 2; // initial request + 1 retry
+                int requestsMade = NumRequests - httpManager.QueueSize;
+                Assert.AreEqual(NumRequests, requestsMade);
             }
         }
 
@@ -333,7 +220,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -341,8 +228,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Simulate permanent 500s (to trigger the maximum number of retries)
-                int NUM_500 = TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
-                for (int i = 0; i < NUM_500; i++)
+                int Num500Errors = 1 + TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries; // initial request + maximum number of retries
+                for (int i = 0; i < Num500Errors; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
                         endpoint,
@@ -365,9 +252,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
                 Assert.IsNotNull(msalException);
 
-                // ensure that the first request was made and retried 3 times
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                int requestsMade = Num500Errors - httpManager.QueueSize;
+                Assert.AreEqual(Num500Errors, requestsMade);
             }
         }
 
@@ -388,7 +274,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -415,9 +301,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
                 Assert.IsNotNull(msalException);
 
-                // ensure that only the initial request was made
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 0);
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                const int NumRequests = 1; // initial request + 0 retries
+                int requestsMade = NumRequests - httpManager.QueueSize;
+                Assert.AreEqual(NumRequests, requestsMade);
             }
         }
 
@@ -438,7 +324,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -465,9 +351,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
                 Assert.IsNotNull(msalException);
 
-                // ensure that only the initial request was made
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, 0);
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                const int NumRequests = 1; // initial request + 0 retries
+                int requestsMade = NumRequests - httpManager.QueueSize;
+                Assert.AreEqual(NumRequests, requestsMade);
             }
         }
     }
