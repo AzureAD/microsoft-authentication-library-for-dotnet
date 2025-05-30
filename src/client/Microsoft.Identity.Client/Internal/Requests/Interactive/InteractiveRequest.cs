@@ -9,7 +9,9 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -63,8 +65,45 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            MsalTokenResponse tokenResponse = await GetTokenResponseAsync(cancellationToken)
-                .ConfigureAwait(false);
+            MsalTokenResponse tokenResponse = null;
+            if (DesktopOsHelper.IsMac() && ServiceBundle.Config.IsBrokerEnabled)
+            {
+                var macMainThreadScheduler = MacMainThreadScheduler.Instance;
+                if (!macMainThreadScheduler.IsCurrentlyOnMainThread)
+                {
+                    throw new MsalClientException(
+                        MsalError.WamUiThread,
+                        "Interactive requests with mac broker enabled must be executed on the main thread on macOS.");
+                }
+                bool messageLoopStarted = macMainThreadScheduler.IsRunning;
+                var tcs = new TaskCompletionSource<MsalTokenResponse>();
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        MsalTokenResponse response = await GetTokenResponseAsync(cancellationToken).ConfigureAwait(false);
+                        tcs.SetResult(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error($"Error in background GetTokenResponseAsync: {ex}");
+                        tcs.SetException(ex);
+                    }
+                    finally
+                    {
+                        if (!messageLoopStarted)
+                            macMainThreadScheduler.Stop();
+                    }
+                });
+                if (!messageLoopStarted)
+                    macMainThreadScheduler.StartMessageLoop();
+                tokenResponse = await tcs.Task.ConfigureAwait(false);
+            }
+            else
+            {
+                tokenResponse = await GetTokenResponseAsync(cancellationToken)
+                    .ConfigureAwait(false);
+            }
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(tokenResponse)
                 .ConfigureAwait(false);
         }
