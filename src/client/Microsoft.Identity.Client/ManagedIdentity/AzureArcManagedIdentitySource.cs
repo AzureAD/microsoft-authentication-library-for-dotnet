@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -123,10 +125,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Verbose(() => "[Managed Identity] Adding authorization header to the request.");
                 request.Headers.Add("Authorization", authHeaderValue);
 
-                LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-                    LinearRetryPolicy.DefaultStsRetryDelayMs,
-                    LinearRetryPolicy.DefaultStsMaxRetries,
-                    HttpRetryConditions.Sts);
+                DefaultRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(RequestType.ManagedIdentity);
 
                 response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
                          request.ComputeUri(),
@@ -138,7 +137,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                          mtlsCertificate: null,
                          validateServerCertificate: null,
                          cancellationToken: cancellationToken,
-                         retryPolicy: _linearRetryPolicy)
+                         retryPolicy: defaultRetryPolicy)
                     .ConfigureAwait(false);
 
                 return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);

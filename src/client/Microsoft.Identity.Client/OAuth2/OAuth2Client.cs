@@ -17,6 +17,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Security.Cryptography.X509Certificates;
+using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
+using Microsoft.Identity.Client.Http.Retry;
+
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
@@ -41,10 +44,6 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
         private readonly X509Certificate2 _mtlsCertificate;
-        private readonly LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-            LinearRetryPolicy.DefaultStsRetryDelayMs,
-            LinearRetryPolicy.DefaultStsMaxRetries,
-            HttpRetryConditions.Sts);
 
         public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
         {
@@ -123,6 +122,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
             using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
             {
+                DefaultRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
+
                 try
                 {
                     if (method == HttpMethod.Post)
@@ -145,7 +146,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             mtlsCertificate: _mtlsCertificate,
                             validateServerCertificate: null,
                             cancellationToken: requestContext.UserCancellationToken,
-                            retryPolicy: _linearRetryPolicy)
+                            retryPolicy: defaultRetryPolicy)
                         .ConfigureAwait(false);
                     }
                     else
@@ -160,7 +161,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             mtlsCertificate: null,
                             validateServerCertificate: null,
                             cancellationToken: requestContext.UserCancellationToken,
-                            retryPolicy: _linearRetryPolicy)
+                            retryPolicy: defaultRetryPolicy)
                         .ConfigureAwait(false);
                     }
                 }

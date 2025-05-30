@@ -4,18 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class ManagedIdentityRequest
     {
-        // referenced in unit tests, cannot be private
-        public const int DefaultManagedIdentityMaxRetries = 3;
-        // this will be overridden in the unit tests so that they run faster
-        public static int DefaultManagedIdentityRetryDelayMs { get; set; } = 1000;
-
         private readonly Uri _baseEndpoint;
 
         public HttpMethod Method { get; }
@@ -36,10 +32,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             BodyParameters = new Dictionary<string, string>();
             QueryParameters = new Dictionary<string, string>();
 
-            IRetryPolicy defaultRetryPolicy = new LinearRetryPolicy(
-                DefaultManagedIdentityRetryDelayMs,
-                DefaultManagedIdentityMaxRetries,
-                HttpRetryConditions.ManagedIdentity);
+            IRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(RequestType.ManagedIdentity);
             RetryPolicy = retryPolicy ?? defaultRetryPolicy;
         }
 

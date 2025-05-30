@@ -4,27 +4,23 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
 
 namespace Microsoft.Identity.Client.WsTrust
 {
     internal class WsTrustWebRequestManager : IWsTrustWebRequestManager
     {
         private readonly IHttpManager _httpManager;
-        private readonly LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-            LinearRetryPolicy.DefaultStsRetryDelayMs,
-            LinearRetryPolicy.DefaultStsMaxRetries,
-            HttpRetryConditions.Sts);
+        private readonly DefaultRetryPolicy _defaultRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
 
         public WsTrustWebRequestManager(IHttpManager httpManager)
         {
@@ -57,7 +53,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 mtlsCertificate: null,
                 validateServerCertificate: null,
                 cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: _linearRetryPolicy)
+                retryPolicy: _defaultRetryPolicy)
             .ConfigureAwait(false);
 
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
@@ -115,7 +111,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 mtlsCertificate: null,
                 validateServerCertificate: null,
                 cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: _linearRetryPolicy)
+                retryPolicy: _defaultRetryPolicy)
             .ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
@@ -192,7 +188,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 mtlsCertificate: null,
                 validateServerCertificate: null,
                 cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: _linearRetryPolicy)
+                retryPolicy: _defaultRetryPolicy)
             .ConfigureAwait(false);
 
             if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)
