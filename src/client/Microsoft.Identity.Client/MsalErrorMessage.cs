@@ -421,6 +421,7 @@ namespace Microsoft.Identity.Client
         public const string ManagedIdentityUnexpectedErrorResponse = "[Managed Identity] The error response was either empty or could not be parsed.";
 
         public const string ManagedIdentityEndpointInvalidUriError = "[Managed Identity] The environment variable {0} contains an invalid Uri {1} in {2} managed identity source.";
+        public const string ManagedIdentityFmiInvalidEnvVariableError = "[Managed Identity] The environment variable {0} is null or empty in {2} managed identity source.";
         public const string ManagedIdentityNoChallengeError = "[Managed Identity] Did not receive expected WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint.";
         public const string ManagedIdentityInvalidChallenge = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
         public const string ManagedIdentityInvalidFile = "[Managed Identity] The file on the file path in the WWW-Authenticate header is not secure.";

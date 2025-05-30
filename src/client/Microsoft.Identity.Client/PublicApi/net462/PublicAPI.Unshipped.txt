@@ -1,2 +1,3 @@
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ServiceFabricFederated = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithServiceFabricFmi() -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.OnBeforeTokenRequest<T>(this Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T> builder, System.Func<Microsoft.Identity.Client.Extensibility.OnBeforeTokenRequestData, System.Threading.Tasks.Task> onBeforeTokenRequestHandler) -> Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>
