@@ -194,9 +194,12 @@ namespace Microsoft.Identity.Client.Http
             return _httpClientFactory.GetHttpClient();
         }
 
+        private static readonly Version s_http2Version = new Version(2, 0);
+
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
+            requestMessage.Version = s_http2Version;
             requestMessage.Headers.Accept.Clear();
             if (headers != null)
             {
