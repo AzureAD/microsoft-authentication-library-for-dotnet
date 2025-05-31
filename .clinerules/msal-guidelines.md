@@ -7,7 +7,6 @@ Microsoft Authentication Library (MSAL) for .NET is a highly scalable authentica
 - Token acquisition for service-to-service calls
 - Flexible token caching with distributed cache support
 - Managed identity integration for Azure workloads
-- Certificate and client credential management
 - On-behalf-of flow for service-to-service delegated access
 
 Through its comprehensive feature set and proven reliability, MSAL.NET simplifies the implementation of secure authentication in server-side applications while maintaining optimal performance and security.
@@ -31,12 +30,11 @@ Through its comprehensive feature set and proven reliability, MSAL.NET simplifie
 ### Confidential Client Features
 - Microsoft.Identity.Client - Main MSAL library with confidential client support
 - Token cache implementations with extensible serialization
-- Certificate and client credential management
 - Managed identity integration for Azure environments
 
 ### Authentication Components
 - IConfidentialClientApplication - Primary interface for confidential clients
-- Token cache providers and serialization
+- Token cache providers and serialization extensibility
 - Client credential builders and configurations
 - Custom assertion providers (certificates, managed identity)
 
