@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.IdentityModel.Abstractions;
 
@@ -109,12 +108,6 @@ namespace Microsoft.Identity.Client
         internal ManagedIdentityApplication BuildConcrete()
         {
             DefaultConfiguration();
-
-            // Ensure the default retry policy factory is set if the test factory was not provided
-            if (Config.RetryPolicyFactory == null)
-            {
-                Config.RetryPolicyFactory = new RetryPolicyFactory();
-            }
 
             return new ManagedIdentityApplication(BuildConfiguration());
         }
