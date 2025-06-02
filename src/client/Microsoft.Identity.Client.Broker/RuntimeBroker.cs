@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                             if (DesktopOsHelper.IsMac())
                             {
                                 AuthResult result = null;
-                                await MacMainThreadScheduler.Instance.RunOnMainThreadAsync(async () =>
+                                await MacMainThreadScheduler.Instance().RunOnMainThreadAsync(async () =>
                                 {
                                     result = await s_lazyCore.Value.AcquireTokenInteractivelyAsync(
                                         _parentHandle,
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 if (DesktopOsHelper.IsMac())
                 {
                     AuthResult result = null;
-                    await MacMainThreadScheduler.Instance.RunOnMainThreadAsync(async () =>
+                    await MacMainThreadScheduler.Instance().RunOnMainThreadAsync(async () =>
                     {
                         result = await s_lazyCore.Value.SignInInteractivelyAsync(
                             _parentHandle,
@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 if (DesktopOsHelper.IsMac())
                 {
                     AuthResult result = null;
-                    await MacMainThreadScheduler.Instance.RunOnMainThreadAsync(async () =>
+                    await MacMainThreadScheduler.Instance().RunOnMainThreadAsync(async () =>
                     {
                         result = await s_lazyCore.Value.SignInAsync(
                             _parentHandle,

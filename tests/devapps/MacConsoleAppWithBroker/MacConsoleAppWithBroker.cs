@@ -9,7 +9,7 @@ using Microsoft.Identity.Client.Utils;
 
 class MacConsoleAppWithBroker
 {
-    private static MacMainThreadScheduler macMainThreadScheduler = MacMainThreadScheduler.Instance;
+    private static MacMainThreadScheduler macMainThreadScheduler = MacMainThreadScheduler.Instance();
 
     static void Main(string[] args)
     {

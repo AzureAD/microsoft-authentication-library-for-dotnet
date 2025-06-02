@@ -68,14 +68,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalTokenResponse tokenResponse = null;
             if (DesktopOsHelper.IsMac() && ServiceBundle.Config.IsBrokerEnabled)
             {
-                var macMainThreadScheduler = MacMainThreadScheduler.Instance;
-                if (!macMainThreadScheduler.IsCurrentlyOnMainThread)
+                var macMainThreadScheduler = MacMainThreadScheduler.Instance();
+                if (!macMainThreadScheduler.IsCurrentlyOnMainThread())
                 {
                     throw new MsalClientException(
                         MsalError.WamUiThread,
                         "Interactive requests with mac broker enabled must be executed on the main thread on macOS.");
                 }
-                bool messageLoopStarted = macMainThreadScheduler.IsRunning;
+                bool messageLoopStarted = macMainThreadScheduler.IsRunning();
                 var tcs = new TaskCompletionSource<MsalTokenResponse>();
                 _ = Task.Run(async () =>
                 {

@@ -43,7 +43,10 @@ namespace Microsoft.Identity.Client.Utils
         /// <summary>
         /// Gets the singleton instance of MacMainThreadScheduler
         /// </summary>
-        public static MacMainThreadScheduler Instance => _instance.Value;
+        public static MacMainThreadScheduler Instance()
+        {
+            return _instance.Value;
+        }
 
         /// <summary>
         /// Private constructor for MacMainThreadScheduler (singleton pattern)
@@ -58,13 +61,19 @@ namespace Microsoft.Identity.Client.Utils
         /// <summary>
         /// Check if the current thread is the main thread.
         /// </summary>
-        public bool IsCurrentlyOnMainThread => Environment.CurrentManagedThreadId == 1; // Main thread id is always 1 on macOS.
-
+        public bool IsCurrentlyOnMainThread()
+        {
+            return Environment.CurrentManagedThreadId == 1; // Main thread id is always 1 on macOS.
+        }
+        
         /// <summary>
         /// Check if the message loop is currently running.
         /// </summary>
-        public bool IsRunning => _isRunning;
-
+        public bool IsRunning()
+        {
+            return _isRunning;
+        }
+        
         /// <summary>
         /// Stop the main thread message loop
         /// </summary>
@@ -115,7 +124,7 @@ namespace Microsoft.Identity.Client.Utils
         /// </summary>
         public void StartMessageLoop()
         {
-            if (!IsCurrentlyOnMainThread)
+            if (!IsCurrentlyOnMainThread())
                 throw new InvalidOperationException("Message loop must be started on the main thread.");
 
             if (_isRunning)
