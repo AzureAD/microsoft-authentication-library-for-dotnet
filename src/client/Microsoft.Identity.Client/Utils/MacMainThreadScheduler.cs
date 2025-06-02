@@ -22,12 +22,20 @@ namespace Microsoft.Identity.Client.Utils
         }
     }
 
-    internal class MacMainThreadScheduler
+    /// <summary>
+    /// This class implements a main thread scheduler for macOS applications. It should be also working on other platforms, but it is primarily designed for macOS.
+    /// It is mainly designed for internal use to support the MSAL library in "switching to the main thread anytime". 
+    /// However, external users can also call it if needed.
+    /// </summary>
+    public class MacMainThreadScheduler
     {
         private readonly ConcurrentQueue<MainThreadActionItem> _mainThreadActions;
 
         private volatile bool _workerFinished;
         private volatile bool _isRunning;
+
+        // Configurable sleep time in milliseconds in the message loop.
+        private const int WorkerSleepInMilliseconds = 10;
 
         // Singleton mode
         private static readonly Lazy<MacMainThreadScheduler> _instance = new Lazy<MacMainThreadScheduler>(() => new MacMainThreadScheduler());
@@ -134,7 +142,8 @@ namespace Microsoft.Identity.Client.Utils
                             actionItem.Completion.TrySetException(ex);
                         }
                     }
-                    Thread.Sleep(10);
+                    // Sleep for a short interval to avoid busy-waiting and reduce CPU usage while waiting for new actions in the queue.
+                    Thread.Sleep(WorkerSleepInMilliseconds);
                 }
             }
             finally

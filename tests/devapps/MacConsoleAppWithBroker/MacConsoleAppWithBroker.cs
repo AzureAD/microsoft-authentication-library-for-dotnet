@@ -5,66 +5,19 @@ using System;
 using System.Collections.Concurrent;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using System.IO;
+using Microsoft.Identity.Client.Utils;
 
 class MacConsoleAppWithBroker
 {
-    private static readonly int MainThreadId = Thread.CurrentThread.ManagedThreadId;
+    private static MacMainThreadScheduler macMainThreadScheduler = MacMainThreadScheduler.Instance;
 
-    private static readonly ConcurrentQueue<(Action Action, TaskCompletionSource<bool> Completion, bool IsAsyncAction)> MainThreadActions = 
-        new ConcurrentQueue<(Action, TaskCompletionSource<bool>, bool)>();
-    
-    private static volatile bool _workerFinished = false;
-    
-    static async Task Main(string[] args)
+    static void Main(string[] args)
     {
-
         _ = Task.Run(() => BackgroundWorker());
 
-        while (!_workerFinished)
-        {
-            while (MainThreadActions.TryDequeue(out var actionItem))
-            {
-                try
-                {
-                    actionItem.Action();
-                    if (!actionItem.IsAsyncAction)
-                    {
-                        actionItem.Completion.TrySetResult(true);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    actionItem.Completion.TrySetException(ex);
-                }
-            }
+        macMainThreadScheduler.StartMessageLoop();
 
-            Thread.Sleep(10);
-        }
-        
         Console.WriteLine("Background worker completed. Application exiting.");
-    }
-
-    public static Task RunOnMainThreadAsync(Func<Task> asyncAction)
-    {
-        var tcs = new TaskCompletionSource<bool>();
-        Action wrapper = async () => 
-        {
-            try 
-            {
-                await asyncAction().ConfigureAwait(false);
-                tcs.TrySetResult(true);
-            }
-            catch (Exception ex) 
-            {
-                tcs.TrySetException(ex);
-            }
-        };
-        MainThreadActions.Enqueue((wrapper, tcs, true));
-        return tcs.Task;
     }
 
     private static string TruncateToken(string token)
@@ -77,7 +30,7 @@ class MacConsoleAppWithBroker
 
     private static async Task SwitchToBackgroundThreadViaHttpRequest()
     {
-        Console.WriteLine($"Current thread ID before HTTP request: {Thread.CurrentThread.ManagedThreadId}");
+        Console.WriteLine($"Current thread ID before HTTP request: {Environment.CurrentManagedThreadId}");
         using (HttpClient client = new HttpClient())
         {
             try
@@ -93,7 +46,7 @@ class MacConsoleAppWithBroker
             }
         }
         
-        Console.WriteLine($"Current thread ID (after HTTP request): {Thread.CurrentThread.ManagedThreadId}");
+        Console.WriteLine($"Current thread ID (after HTTP request): {Environment.CurrentManagedThreadId}");
     }
 
     private static async Task BackgroundWorker()
@@ -119,10 +72,10 @@ class MacConsoleAppWithBroker
 
             AcquireTokenInteractiveParameterBuilder interactiveBuilder = pca.AcquireTokenInteractive(new string[] { "https://graph.microsoft.com/.default" });
 
-            AuthenticationResult result = null;
+            AuthenticationResult? result = null;
 
             // Acquire token interactively on main thread
-            await RunOnMainThreadAsync(async () =>
+            await macMainThreadScheduler.RunOnMainThreadAsync(async () =>
             {
                 try
                 {
@@ -137,7 +90,6 @@ class MacConsoleAppWithBroker
                 }
             }).ConfigureAwait(false);
 
-
             Console.WriteLine($"Interactive call. Access token: {TruncateToken(result.AccessToken)}");
             Console.WriteLine($"Expires on: {result.ExpiresOn}");
             
@@ -148,7 +100,7 @@ class MacConsoleAppWithBroker
             AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(new string[] { "https://graph.microsoft.com/.default" }, account);
 
             // Silent call on main thread
-            await RunOnMainThreadAsync(async () =>
+            await macMainThreadScheduler.RunOnMainThreadAsync(async () =>
             {
                 try
                 {
@@ -171,7 +123,7 @@ class MacConsoleAppWithBroker
 
             interactiveBuilder.WithAccount(account);
             // Second interactive call with account on main thread
-            await RunOnMainThreadAsync(async () =>
+            await macMainThreadScheduler.RunOnMainThreadAsync(async () =>
             {
                 try
                 {
@@ -181,7 +133,7 @@ class MacConsoleAppWithBroker
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Second interactive authentication error: {ex}");
+                    Console.WriteLine($"Second interactive authentication with account error: {ex}");
                     throw;
                 }
             }).ConfigureAwait(false);
@@ -208,7 +160,7 @@ class MacConsoleAppWithBroker
         finally
         {
             // Signal that the worker has finished, regardless of success or failure
-            _workerFinished = true;
+            macMainThreadScheduler.Stop();
         }
     }
 
@@ -216,7 +168,7 @@ class MacConsoleAppWithBroker
 	{
 		try
         {
-			string homeDirectory = Environment.GetEnvironmentVariable("HOME");
+            string homeDirectory = Environment.GetEnvironmentVariable("HOME") ?? "/tmp";
             string filePath = Path.Combine(homeDirectory, "msalnet.log");
 			using (StreamWriter writer = new StreamWriter(filePath, append: true))
 			{

@@ -1,0 +1,7 @@
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.Instance() -> MacMainThreadScheduler
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.IsCurrentlyOnMainThread() -> bool
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.IsRunning() -> bool
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.Stop() -> void
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.RunOnMainThreadAsync(Func<Task> asyncAction) -> Task
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.StartMessageLoop() -> void
