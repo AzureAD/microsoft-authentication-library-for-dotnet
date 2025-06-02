@@ -31,6 +31,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using NSubstitute;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
+using Microsoft.Identity.Client.Http.Retry;
 
 namespace Microsoft.Identity.Test.Common
 {
@@ -90,7 +91,8 @@ namespace Microsoft.Identity.Test.Common
                 LegacyCacheCompatibilityEnabled = isLegacyCacheEnabled,
                 MultiCloudSupportEnabled = isMultiCloudSupportEnabled,
                 IsInstanceDiscoveryEnabled = isInstanceDiscoveryEnabled,
-                PlatformProxy = platformProxy
+                PlatformProxy = platformProxy,
+                RetryPolicyFactory = new RetryPolicyFactory()
             };
             return new ServiceBundle(appConfig, clearCaches);
         }
