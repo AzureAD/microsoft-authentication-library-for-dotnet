@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -40,15 +39,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string ExpectedErrorCode = "ErrorCode";
         internal const string ExpectedCorrelationId = "Some GUID";
 
-        private TestRetryPolicyFactory TestRetryPolicyFactory = new TestRetryPolicyFactory();
-
-        [TestInitialize]
-        public override void TestInitialize()
-        {
-            base.TestInitialize();
-
-            ImdsRetryPolicy.NumRetries = 0;
-        }
+        private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
@@ -1273,7 +1264,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(TestRetryPolicyFactory);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
                 miBuilder.Config.AccessorOptions = null;
@@ -1281,8 +1272,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = miBuilder.Build();
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
-                const int NumErrors = TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries + 1; // initial request + maximum number of retries (3)
-                for (int i = 0; i < NumErrors; i++)
+                const int Num504Errors = 1 + TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries; // initial request + maximum number of retries
+                for (int i = 0; i < Num504Errors; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
                         endpoint,
@@ -1300,11 +1291,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ConfigureAwait(false);
                 Assert.IsNotNull(ex);
 
-                // 3 retries
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                int requestsMade = Num504Errors - httpManager.QueueSize;
+                Assert.AreEqual(Num504Errors, requestsMade);
 
-                for (int i = 0; i < NumErrors; i++)
+                for (int i = 0; i < Num504Errors; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
                         endpoint,
@@ -1321,11 +1311,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ConfigureAwait(false);
                 Assert.IsNotNull(ex);
 
-                // 3 retries (TestDefaultRetryPolicy.numRetries would be 6 if retry policy was NOT per request)
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                // 3 retries (requestsMade would be 6 if retry policy was NOT per request)
+                requestsMade = Num504Errors - httpManager.QueueSize;
+                Assert.AreEqual(Num504Errors, requestsMade);
 
-                for (int i = 0; i < NumErrors; i++)
+                for (int i = 0; i < Num504Errors; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
                         endpoint,
@@ -1342,9 +1332,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ConfigureAwait(false);
                 Assert.IsNotNull(ex);
 
-                // 3 retries (TestDefaultRetryPolicy.numRetries would be 9 if retry policy was NOT per request)
-                Assert.AreEqual(TestDefaultRetryPolicy.NumRetries, TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries);
-                Assert.AreEqual(httpManager.QueueSize, 0);
+                // 3 retries (requestsMade would be 9 if retry policy was NOT per request)
+                requestsMade = Num504Errors - httpManager.QueueSize;
+                Assert.AreEqual(Num504Errors, requestsMade);
             }
         }
 
