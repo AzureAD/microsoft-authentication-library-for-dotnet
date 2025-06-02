@@ -57,12 +57,6 @@ namespace Microsoft.Identity.Client
             config.CacheSynchronizationEnabled = false;
             config.AccessorOptions = CacheOptions.EnableSharedCacheOptions;
 
-            // Ensure the default retry policy factory is set if the test factory was not provided
-            if (config.RetryPolicyFactory == null)
-            {
-                config.RetryPolicyFactory = new RetryPolicyFactory();
-            }
-
             return config;
         }
 
@@ -79,17 +73,6 @@ namespace Microsoft.Identity.Client
         internal ManagedIdentityApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {
             Config.AppTokenCacheInternalForTest = tokenCacheInternal;
-            return this;
-        }
-
-        /// <summary>
-        /// Internal only: Allows tests to inject a custom retry policy factory.
-        /// </summary>
-        /// <param name="factory">The retry policy factory to use.</param>
-        /// <returns>The builder for chaining.</returns>
-        internal ManagedIdentityApplicationBuilder WithRetryPolicyFactory(IRetryPolicyFactory factory)
-        {
-            Config.RetryPolicyFactory = factory;
             return this;
         }
 

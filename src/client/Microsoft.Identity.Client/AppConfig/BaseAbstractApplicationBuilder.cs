@@ -14,6 +14,8 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Http.Retry;
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -31,6 +33,12 @@ namespace Microsoft.Identity.Client
         internal BaseAbstractApplicationBuilder(ApplicationConfiguration configuration)
         {
             Config = configuration;
+
+            // Ensure the default retry policy factory is set if the test factory was not provided
+            if (Config.RetryPolicyFactory == null)
+            {
+                Config.RetryPolicyFactory = new RetryPolicyFactory();
+            }
         }
 
         internal ApplicationConfiguration Config { get; }
@@ -322,6 +330,17 @@ namespace Microsoft.Identity.Client
         internal static string GetValueIfNotEmpty(string original, string value)
         {
             return string.IsNullOrWhiteSpace(value) ? original : value;
+        }
+
+        /// <summary>
+        /// Internal only: Allows tests to inject a custom retry policy factory.
+        /// </summary>
+        /// <param name="factory">The retry policy factory to use.</param>
+        /// <returns>The builder for chaining.</returns>
+        internal T WithRetryPolicyFactory(IRetryPolicyFactory factory)
+        {
+            Config.RetryPolicyFactory = factory;
+            return (T)this;
         }
     }
 }
