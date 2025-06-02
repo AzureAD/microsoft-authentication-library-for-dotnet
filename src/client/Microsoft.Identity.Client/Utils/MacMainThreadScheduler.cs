@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Utils
         /// <summary>
         /// Check if the current thread is the main thread.
         /// </summary>
-        public bool IsCurrentlyOnMainThread => Environment.CurrentManagedThreadId == 1; // Main thread id is always 1 on amcOS.
+        public bool IsCurrentlyOnMainThread => Environment.CurrentManagedThreadId == 1; // Main thread id is always 1 on macOS.
 
         /// <summary>
         /// Check if the message loop is currently running.
