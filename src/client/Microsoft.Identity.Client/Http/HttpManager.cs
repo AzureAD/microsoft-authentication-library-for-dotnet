@@ -199,7 +199,15 @@ namespace Microsoft.Identity.Client.Http
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
+            
             requestMessage.Headers.Accept.Clear();
+
+#if NET5_0_OR_GREATER
+            // On .NET 5.0 and later, HTTP2 is supported by default and Entra is HTTP2 compatible
+            // Note that HttpClient.DefaultRequestVersion does not work when using HttpRequestMessage objects
+            requestMessage.Version = HttpVersion.Version20; // Default to HTTP/2
+            requestMessage.VersionPolicy = HttpVersionPolicy.RequestVersionOrLower; // Allow fallback to HTTP/1.1
+#endif
             if (headers != null)
             {
                 foreach (KeyValuePair<string, string> kvp in headers)
@@ -222,7 +230,7 @@ namespace Microsoft.Identity.Client.Http
             CancellationToken cancellationToken = default)
         {
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
-            {
+            {                
                 requestMessage.Method = method;
                 requestMessage.Content = body;
 
