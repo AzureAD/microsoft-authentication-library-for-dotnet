@@ -3,7 +3,7 @@
 
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http.Retry;
-using static Microsoft.Identity.Client.Internal.Constants;
+using static Microsoft.Identity.Client.Http.Retry.IRetryPolicyFactory;
 
 namespace Microsoft.Identity.Test.Unit.Helpers
 {

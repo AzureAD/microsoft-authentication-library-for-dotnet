@@ -4,10 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Utils;
-using static Microsoft.Identity.Client.Http.Retry.DefaultRetryPolicy;
-using static Microsoft.Identity.Client.Internal.Constants;
+using static Microsoft.Identity.Client.Http.Retry.IRetryPolicyFactory;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
