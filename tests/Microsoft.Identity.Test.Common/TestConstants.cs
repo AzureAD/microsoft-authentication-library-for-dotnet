@@ -240,10 +240,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret";
         public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string MsalArlingtonOBOKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
-        public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/";
-        public const string FociApp1KeyVaultSecretName = "automation-foci-app1";
-        public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/";
-        public const string FociApp2KeyVaultSecretName = "automation-foci-app2";
         public const string MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string MsalArlingtonCCAKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
 
