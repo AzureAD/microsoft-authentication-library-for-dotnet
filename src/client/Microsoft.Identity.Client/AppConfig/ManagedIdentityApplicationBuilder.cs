@@ -5,8 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -53,6 +60,7 @@ namespace Microsoft.Identity.Client
             var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
 
             config.ManagedIdentityId = managedIdentityId;
+
             config.CacheSynchronizationEnabled = false;
             config.AccessorOptions = CacheOptions.EnableSharedCacheOptions;
 
@@ -108,7 +116,6 @@ namespace Microsoft.Identity.Client
         internal ManagedIdentityApplication BuildConcrete()
         {
             DefaultConfiguration();
-
             return new ManagedIdentityApplication(BuildConfiguration());
         }
 
