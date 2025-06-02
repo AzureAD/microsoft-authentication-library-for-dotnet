@@ -13,11 +13,17 @@ namespace Microsoft.Identity.Client.Http
         public const int MaxConnections = 50; // default depends on runtime but it is much smaller
         public static readonly TimeSpan ConnectionLifeTime = TimeSpan.FromMinutes(1);
 
-        public static void ConfigureRequestHeadersAndSize(HttpClient httpClient)
+        public static void Configure(HttpClient httpClient)
         {
             httpClient.MaxResponseContentBufferSize = MaxResponseContentBufferSizeInBytes;
             httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+#if NET5_0_OR_GREATER
+            // Enable HTTP/2 with fallback to HTTP/1.1
+            httpClient.DefaultRequestVersion = new Version(2, 0);
+            httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower;
+#endif
         }
     }
 }

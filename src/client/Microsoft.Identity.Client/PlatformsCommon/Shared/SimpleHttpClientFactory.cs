@@ -33,7 +33,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 /* important for IWA */
                 UseDefaultCredentials = true
             });
-            HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
+            HttpClientConfig.Configure(httpClient);
+
+#if NET5_0_OR_GREATER
+            // Enable HTTP/2 with fallback to HTTP/1.1
+            httpClient.DefaultRequestVersion = new Version(2, 0);
+            httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower;
+#endif
 
             return httpClient;
         }
@@ -53,7 +59,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             handler.ClientCertificates.Add(bindingCertificate);
             var httpClient = new HttpClient(handler);
-            HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
+            HttpClientConfig.Configure(httpClient);
 
             return httpClient;
 #else
@@ -107,8 +113,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 }
             };
 
+            var httpClient = new HttpClient(handler);
+            HttpClientConfig.Configure(httpClient);
+
             string key = handler.GetHashCode().ToString();
-            return s_httpClientPool.GetOrAdd(key, new HttpClient(handler));
+            return s_httpClientPool.GetOrAdd(key, httpClient);
 #else
             return GetHttpClient();
 #endif

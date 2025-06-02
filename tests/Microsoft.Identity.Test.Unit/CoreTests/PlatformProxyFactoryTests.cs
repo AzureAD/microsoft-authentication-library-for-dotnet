@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -72,6 +73,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 client1.DefaultRequestHeaders.Accept.Single().MediaType);
             Assert.AreEqual(HttpClientConfig.MaxResponseContentBufferSizeInBytes,
                 client1.MaxResponseContentBufferSize);
+
+#if NET5_0_OR_GREATER
+            Assert.AreEqual(new Version(2, 0), client1.DefaultRequestVersion, "DefaultRequestVersion should be HTTP/2.0");
+            Assert.AreEqual(System.Net.Http.HttpVersionPolicy.RequestVersionOrLower, client1.DefaultVersionPolicy, "DefaultVersionPolicy should be RequestVersionOrLower");
+#endif
         }
 
 #if NET_CORE || NETFRAMEWORK
@@ -146,9 +152,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
           Constants.LocalHostRedirectUri,
           proxy.GetDefaultRedirectUri("cid", true));
 #endif
-
-
         }
-
     }
 }
