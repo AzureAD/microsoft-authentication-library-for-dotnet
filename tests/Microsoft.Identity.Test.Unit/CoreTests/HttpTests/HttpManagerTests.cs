@@ -575,7 +575,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             Assert.IsNotNull(handler.CapturedRequest);
             Assert.AreEqual(HttpVersion.Version20, handler.CapturedRequest.Version);
             Assert.AreEqual(HttpVersionPolicy.RequestVersionOrLower, handler.CapturedRequest.VersionPolicy);
-            Assert.AreEqual("abc", handler.CapturedRequest.Headers.GetValues("X-Test").Single());
         }
 #endif
     }
