@@ -1039,3 +1039,5 @@ static Microsoft.Identity.Client.RP.AcquireTokenForClientParameterBuilderForReso
 Microsoft.Identity.Client.IMsalSFHttpClientFactory
 Microsoft.Identity.Client.IMsalSFHttpClientFactory.GetHttpClient(System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> validateServerCert) -> System.Net.Http.HttpClient
 Microsoft.Identity.Client.BrokerOptions.OperatingSystems.OSX = 4 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+virtual Microsoft.Identity.Client.LogCallback.Invoke(Microsoft.Identity.Client.LogLevel level, string message, bool containsPii) -> void
+virtual Microsoft.Identity.Client.TokenCacheCallback.Invoke(Microsoft.Identity.Client.TokenCacheNotificationArgs args) -> void
