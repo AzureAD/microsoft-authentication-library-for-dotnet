@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using static Microsoft.Identity.Client.Http.Retry.IRetryPolicyFactory;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {

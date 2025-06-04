@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using Microsoft.Identity.Client.Utils;
-using static Microsoft.Identity.Client.Http.Retry.IRetryPolicyFactory;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {

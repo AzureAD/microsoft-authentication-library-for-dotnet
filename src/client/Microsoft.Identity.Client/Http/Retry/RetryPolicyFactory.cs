@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using static Microsoft.Identity.Client.Http.Retry.IRetryPolicyFactory;
 
 namespace Microsoft.Identity.Client.Http.Retry
 {

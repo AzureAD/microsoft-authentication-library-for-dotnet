@@ -5,13 +5,6 @@ namespace Microsoft.Identity.Client.Http.Retry
 {
     internal interface IRetryPolicyFactory
     {
-        public enum RequestType
-        {
-            STS,
-            ManagedIdentityDefault,
-            Imds
-        }
-
         IRetryPolicy GetRetryPolicy(RequestType requestType);
     }
 }
