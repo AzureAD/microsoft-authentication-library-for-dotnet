@@ -13,6 +13,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http.Retry;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -110,10 +111,11 @@ namespace Microsoft.Identity.Client.Http
                 logger.Error("The HTTP request failed. " + exception.Message);
                 timeoutException = exception;
             }
-
-            while (!_disableInternalRetries && retryPolicy.PauseForRetry(response, timeoutException, retryCount))
+            
+            while (!_disableInternalRetries && await retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
             {
-                logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {retryPolicy.DelayInMilliseconds}ms.");
+                retryCount++;
+
                 return await SendRequestAsync(
                     endpoint,
                     headers,
