@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Http.Retry
 {
+    // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/docs/imds_retry_based_on_errors.md
     internal class ImdsRetryPolicy : IRetryPolicy
     {
         // referenced in unit tests
