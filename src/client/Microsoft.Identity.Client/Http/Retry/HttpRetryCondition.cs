@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Http.Retry
     {
         /// <summary>
         /// Retry policy specific to managed identity flow.
-        /// Avoid changing this, as it's breaking change.
+        /// Avoid changing this, as it's a breaking change.
         /// </summary>
         public static bool DefaultManagedIdentity(HttpResponse response, Exception exception)
         {

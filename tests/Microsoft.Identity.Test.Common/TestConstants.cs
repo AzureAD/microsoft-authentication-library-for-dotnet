@@ -205,8 +205,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string ImdsHost = "169.254.169.254";
         public const string ImdsUrl = $"http://{ImdsHost}/metadata/instance/compute/location";
 
-        public const double ONE_HUNDRED_TIMES_FASTER = 0.01;
-
         public const string AppServiceEndpoint = "http://127.0.0.1:41564/msi/token";
         public const string AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         public const string CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";

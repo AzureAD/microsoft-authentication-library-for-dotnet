@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Http.Retry
                     response.HeadersAsDictionary.TryGetValue("Retry-After", out retryAfter);
                 }
 
-                int retryAfterDelay = _linearRetryStrategy.calculateDelay(retryAfter, _defaultRetryDelayMs);
+                int retryAfterDelay = _linearRetryStrategy.CalculateDelay(retryAfter, _defaultRetryDelayMs);
 
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
 

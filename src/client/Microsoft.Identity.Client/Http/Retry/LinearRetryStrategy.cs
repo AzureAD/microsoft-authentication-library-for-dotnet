@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Http.Retry
         /// <param name="retryHeader">The value of the `Retry-After` HTTP header. This can be either a number of seconds or an HTTP date string.</param>
         /// <param name="minimumDelay">The minimum delay in milliseconds to return if the header is not present or invalid.</param>
         /// <returns>The number of milliseconds to sleep before retrying the request.</returns>
-        public int calculateDelay(string retryHeader, int minimumDelay)
+        public int CalculateDelay(string retryHeader, int minimumDelay)
         {
             if (string.IsNullOrEmpty(retryHeader))
             {
