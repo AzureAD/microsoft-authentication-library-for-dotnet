@@ -231,7 +231,8 @@ namespace Microsoft.Identity.Client.Http
                 Stopwatch sw = Stopwatch.StartNew();
 
                 HttpClient client = GetHttpClient(bindingCertificate, validateServerCert);
-
+                
+                // dharshanb
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                 {
