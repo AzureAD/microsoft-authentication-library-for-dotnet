@@ -101,16 +101,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithExperimentalFeatures()
-                    .WithServiceFabricFmi()
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.BuildConcrete();
 
                 RequestContext requestContext = new RequestContext(mi.ServiceBundle, Guid.NewGuid(), null);
 
-                ServiceFabricManagedIdentitySource sf = ServiceFabricManagedIdentitySource.Create(requestContext) as ServiceFabricManagedIdentitySource;
+                ServiceFabricFederatedManagedIdentitySource sf = ServiceFabricFederatedManagedIdentitySource.Create(requestContext) as ServiceFabricFederatedManagedIdentitySource;
 
-                Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
+                Assert.IsInstanceOfType(sf, typeof(ServiceFabricFederatedManagedIdentitySource));
                 Assert.AreEqual("http://localhost:40343/metadata/identity/oauth2/token", sf.GetEndpointForTesting());
             }
         }
@@ -128,12 +127,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithExperimentalFeatures()
-                    .WithServiceFabricFmi()
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.BuildConcrete();
 
-                var result = await mi.AcquireTokenForManagedIdentity(TestConstants.MsiResource)
+                var result = await mi.AcquireTokenForManagedIdentity("api://AzureFMITokenExchange/.default")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

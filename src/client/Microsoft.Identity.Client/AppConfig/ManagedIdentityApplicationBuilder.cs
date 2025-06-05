@@ -103,19 +103,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Configures the application to use the FMI service fabric managed identity endpoint.
-        /// </summary>
-        /// <remarks>
-        /// This is used only for Service Fabric applications that are using the FMI managed identity endpoint.
-        /// </remarks>
-        public ManagedIdentityApplicationBuilder WithServiceFabricFmi()
-        {
-            Config.IsFmiServiceFabric = true;
-            ValidateUseOfExperimentalFeature("WithServiceFabricFmi");
-            return this;
-        }
-
-        /// <summary>
         /// Builds an instance of <see cref="IManagedIdentityApplication"/> 
         /// from the parameters set in the <see cref="ManagedIdentityApplicationBuilder"/>.
         /// </summary>
