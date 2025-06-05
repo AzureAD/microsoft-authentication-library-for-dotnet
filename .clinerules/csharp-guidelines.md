@@ -27,7 +27,7 @@
 
 * We use mstest SDK v3 for tests
 * Emit "Act", "Arrange" or "Assert" comments
-* Use Moq 4.14.x for mocking in tests
+* Use NSubstitute for mocking in tests
 * Copy existing style in nearby files for test method names and capitalization
 
 ## Running tests
