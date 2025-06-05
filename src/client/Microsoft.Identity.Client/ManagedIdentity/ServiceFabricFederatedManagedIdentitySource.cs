@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (string.IsNullOrEmpty(EnvironmentVariables.FmiServiceFabricApiVersion))
             {
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityFmiInvalidEnvVariableError,
-                         "IDENTITY_API_VERSION"));
+                         "IDENTITY_API_VERSION", "FMI Service Fabric"));
             }
         }
 

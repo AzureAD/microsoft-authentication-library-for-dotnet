@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342/metadata/identity/oauth2/token", fmiEndpoint: "http://localhost:40343/metadata/identity/oauth2/token");
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabricFederated, "http://localhost:40342/metadata/identity/oauth2/token");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithExperimentalFeatures()
@@ -112,6 +112,32 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
                 Assert.AreEqual("http://localhost:40343/metadata/identity/oauth2/token", sf.GetEndpointForTesting());
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateThatFmiCredentialCanBeAcquiredFromMits()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(managedIdentitySource: ManagedIdentitySource.ServiceFabricFederated,
+                                        endpoint: "http://localhost:40343");
+
+                httpManager.CreateFmiCredentialForMitsHandler(requestUri: "http://localhost:40343/metadata/identity/oauth2/fmi/credential");
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures()
+                    .WithServiceFabricFmi()
+                    .WithHttpManager(httpManager);
+
+                var mi = miBuilder.BuildConcrete();
+
+                var result = await mi.AcquireTokenForManagedIdentity(TestConstants.MsiResource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
             }
         }
 

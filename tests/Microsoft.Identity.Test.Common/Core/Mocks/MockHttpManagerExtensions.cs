@@ -486,6 +486,43 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
+        public static void CreateFmiCredentialForMitsHandler(
+            this MockHttpManager httpManager,
+            string secret = "secret",
+            string version = "version",
+            string requestUri = "SomeUri",
+            string accessToken = "header.payload.signature",
+            bool expiredResponse = false
+            )
+        {
+            string expiresOn;
+            DateTimeOffset dto = DateTimeOffset.UtcNow;
+
+            if (expiredResponse)
+            {
+                long unixTimeSeconds = dto.ToUnixTimeSeconds() - 3600;
+                expiresOn = unixTimeSeconds.ToString();
+            }
+            else
+            {
+                long unixTimeSeconds = dto.ToUnixTimeSeconds() + 3600;
+                expiresOn = unixTimeSeconds.ToString();
+            }
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = requestUri,
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessageForMits(accessToken: accessToken, expiresOn: expiresOn),
+                ExpectedRequestHeaders = new Dictionary<string, string>
+                {
+                    { "Secret", secret },
+                },
+            };
+
+            httpManager.AddMockHandler(handler);
+        }
+
         public static void AddRegionDiscoveryMockHandlerNotFound(
             this MockHttpManager httpManager)
         {

@@ -32,7 +32,12 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             ServiceFabric
         }
 
-        public static void SetEnvironmentVariables(ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint", string fmiEndpoint = "")
+        public static void SetEnvironmentVariables(
+            ManagedIdentitySource managedIdentitySource, 
+            string endpoint, 
+            string secret = "secret", 
+            string thumbprint = "thumbprint",
+            string version = "version")
         {
             switch (managedIdentitySource)
             {
@@ -56,9 +61,14 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
                 case ManagedIdentitySource.ServiceFabric:
                     Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
-                    Environment.SetEnvironmentVariable("APP_IDENTITY_ENDPOINT", fmiEndpoint);
                     Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
                     Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", thumbprint);
+                    break;
+                case ManagedIdentitySource.ServiceFabricFederated:
+                    Environment.SetEnvironmentVariable("APP_IDENTITY_ENDPOINT", endpoint);
+                    Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
+                    Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", thumbprint);
+                    Environment.SetEnvironmentVariable("IDENTITY_API_VERSION", version);
                     break;
                 case ManagedIdentitySource.MachineLearning:
                     Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);

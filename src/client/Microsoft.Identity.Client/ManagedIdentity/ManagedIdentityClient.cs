@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             if (requestContext.ServiceBundle.Config.IsFmiServiceFabric)
             {
-                return ServiceFabricManagedIdentitySource.Create(requestContext);
+                return ServiceFabricFederatedManagedIdentitySource.Create(requestContext);
             }
 
             return GetManagedIdentitySource(requestContext.Logger) switch

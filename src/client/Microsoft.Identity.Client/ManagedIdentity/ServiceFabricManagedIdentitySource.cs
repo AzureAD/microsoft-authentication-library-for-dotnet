@@ -25,29 +25,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
 
             requestContext.Logger.Info(() => "[Managed Identity] Service fabric managed identity is available.");
-
-            if (requestContext.ServiceBundle.Config.IsFmiServiceFabric)
-            {
-                identityEndpoint = EnvironmentVariables.FmiServiceFabricEndpoint;
-                requestContext.Logger.Info(() => "[Managed Identity] Using FMI Service fabric endpoint.");
-
-                if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out endpointUri))
-                {
-                    string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
-                            "APP_IDENTITY_ENDPOINT", identityEndpoint, "FMI Service Fabric");
-
-                    // Use the factory to create and throw the exception
-                    var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                        MsalError.InvalidManagedIdentityEndpoint,
-                        errorMessage,
-                        null,
-                        ManagedIdentitySource.ServiceFabric,
-                        null);
-
-                    throw exception;
-                }
-            }
-            else if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out endpointUri))
+        
+            if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out endpointUri))
             {
                 string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
                         "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric");
