@@ -25,7 +25,7 @@
 
 ### Testing
 
-* We use xUnit SDK v2 for tests
+* We use mstest SDK v3 for tests
 * Emit "Act", "Arrange" or "Assert" comments
 * Use Moq 4.14.x for mocking in tests
 * Copy existing style in nearby files for test method names and capitalization
