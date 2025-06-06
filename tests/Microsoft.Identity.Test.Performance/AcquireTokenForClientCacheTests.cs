@@ -44,8 +44,8 @@ namespace Microsoft.Identity.Test.Performance
             (10000, 10),
         };
 
-        [ParamsAllValues]
-        public bool EnableCacheSerialization { get; set; }
+        //[ParamsAllValues]
+        public bool EnableCacheSerialization { get; set; } = true;
 
         //[Params(false)]
         public bool UseMicrosoftIdentityWebCache { get; set; }
@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Test.Performance
                 .Create(TestConstants.ClientId)
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
+                .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                 .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 
