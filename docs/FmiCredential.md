@@ -2,7 +2,7 @@
 # Proposal: Migrating HTTP Client Logic from MISE's FMI Credential to MSAL's Managed Identity
 
 ## Overview
-This proposal outlines the rationale and design for moving the HTTP client logic used to acquire an FMI credential currently implemented in MISE to the MSAL Managed Identity application. The credential is retrieved from an endpoint specified by the `APP_IDENTITY_ENDPOINT` and is used as a client credential for another MSAL application. This credential is an implementation of IdWebs `ClientAssertionProviderBase`. This logic can be seen here: [ServiceFabricFmiClientAssertionProvider.cd](https://identitydivision.visualstudio.com/DevEx/_git/MISE?path=/src/Fmi/ServiceFabricFmiClientAssertionProvider.cs) The credential logic from this file will be moved to MSAL so that MSAL can acquire the FMi credential using its existing service fabric managed identity source and handle issues related to the http client.
+This proposal outlines the rationale and design for moving the HTTP client logic used to acquire an FMI credential currently implemented in MISE to the MSAL Managed Identity application. The credential is retrieved from an endpoint specified by the `APP_IDENTITY_ENDPOINT` and is used as a client credential for another MSAL application. This credential is an implementation of IdWebs `ClientAssertionProviderBase`. This logic can be seen here: [ServiceFabricFmiClientAssertionProvider.cd](https://identitydivision.visualstudio.com/DevEx/_git/MISE?path=/src/Fmi/ServiceFabricFmiClientAssertionProvider.cs) The credential logic from this file will be moved to MSAL so that MSAL can acquire the FMi credential using its existing service fabric managed identity source and handle issues related to the http client. A new managed identity source can be added to the application that is based to the already existing service faric managed identity source since the logic is very similar. 
 
 ## Motivation
 - **Low-Level HTTP Handling**: The existing logic is implemented at a low level, which is inconsistent with the abstraction provided by MSAL and its service fabric integration.
@@ -11,7 +11,8 @@ This proposal outlines the rationale and design for moving the HTTP client logic
 - **Code Consolidation**: Centralizing the logic within MSAL ensures a cleaner, more maintainable architecture and aligns with the principle of single responsibility.
 
 ## Proposed Design
-To support this migration, I propose two approaches:
+MSAL will provide the FMI credential through MITS from the RMA node by crafting request based on the FMI env variables on the machine. The credential and its expiration, 2 things needed by MISE to craft the client assertion, will be in the authenticaiton result provided by MSAL.
+To support this migration, I propose two approaches to trigger this flow in MSAL:
 
 ### 1. Explicit API
 Introduce a dedicated API in MSAL to enable this flow explicitly, such as `WithServiceFabricFmi()`. This makes the integration clear and controlled. This will be chained off of the AcquireTokenParameterBuilder for MI apps.
