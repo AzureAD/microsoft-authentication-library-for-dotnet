@@ -44,9 +44,8 @@ namespace Microsoft.Identity.Test.Performance
             (10000, 10),
         };
 
-        //[ParamsAllValues]
-        public bool EnableCacheSerialization { get; set; } = true;
-
+        [ParamsAllValues]
+        public bool EnableCacheSerialization { get; set; };
         //[Params(false)]
         public bool UseMicrosoftIdentityWebCache { get; set; }
 
