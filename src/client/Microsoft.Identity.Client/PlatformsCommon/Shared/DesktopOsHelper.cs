@@ -202,5 +202,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DISPLAY"));
         }
 #endif
+
+        private static readonly Lazy<bool> _isMacConsoleApp = new Lazy<bool>(() => !LibObjc.IsNsApplicationRunning());
+        public static bool IsMacConsoleApp()
+        {
+            if (!DesktopOsHelper.IsMac())
+                return false;
+            // Checking if NsApplication is running for one time would be enough.
+            return _isMacConsoleApp.Value;
+        }
     }
 }
