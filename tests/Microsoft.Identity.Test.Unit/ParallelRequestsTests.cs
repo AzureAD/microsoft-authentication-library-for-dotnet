@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.AreEqual(NumberOfRequests, results.Length, "Number of AuthenticationResult objects does not match the number of requests.");
 
             var expected = Enumerable.Range(1, NumberOfRequests).ToArray();
-            CollectionAssert.AreEquivalent(expected, accessTokenCounts);
+            CollectionAssert.AreEquivalent(expected, accessTokenCounts, "Each result should have a different number of tokens, because no cache hit occurs");
         }
 
         [TestMethod]
