@@ -4,15 +4,15 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Http
+namespace Microsoft.Identity.Client.Http.Retry
 {
     internal static class HttpRetryConditions
     {
         /// <summary>
         /// Retry policy specific to managed identity flow.
-        /// Avoid changing this, as it's breaking change.
+        /// Avoid changing this, as it's a breaking change.
         /// </summary>
-        public static bool ManagedIdentity(HttpResponse response, Exception exception)
+        public static bool DefaultManagedIdentity(HttpResponse response, Exception exception)
         {
             if (exception != null)
             {
@@ -21,8 +21,28 @@ namespace Microsoft.Identity.Client.Http
 
             return (int)response.StatusCode switch
             {
-                //Not Found
+                // Not Found, Request Timeout, Too Many Requests, Server Error, Service Unavailable, Gateway Timeout
                 404 or 408 or 429 or 500 or 503 or 504 => true,
+                _ => false,
+            };
+        }
+
+        /// <summary>
+        /// Retry policy specific to IMDS Managed Identity.
+        /// </summary>
+        public static bool Imds(HttpResponse response, Exception exception)
+        {
+            if (exception != null)
+            {
+                return exception is TaskCanceledException ? true : false;
+            }
+
+            return (int)response.StatusCode switch
+            {
+                // Not Found, Request Timeout, Gone, Too Many Requests
+                404 or 408 or 410 or 429 => true,
+                // Server Error range
+                >= 500 and <= 599 => true,
                 _ => false,
             };
         }

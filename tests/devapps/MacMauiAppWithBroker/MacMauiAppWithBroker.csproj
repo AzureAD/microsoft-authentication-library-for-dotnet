@@ -126,7 +126,7 @@ namespace MacMauiAppWithBroker
 
 	<!-- Display warning when building on non-Mac -->
 	<Target Name="WarnNonMacBuild" BeforeTargets="Build" Condition="!$([MSBuild]::IsOSPlatform('OSX'))">
-		<Warning Text="MacMauiAppWithBroker is designed for macOS only. Building an empty stub project on this platform." />
+		<Message Importance="high" Text="MacMauiAppWithBroker is designed for macOS only. Building an empty stub project on this platform." />
 	</Target>
 
 </Project>

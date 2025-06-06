@@ -94,7 +94,18 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-test-on-linux.yaml
-  
+
+- job: 'BuilMacConsoleAppWithBroker'
+  pool:
+      vmImage: macOS-14
+
+  variables:
+      runCodesignValidationInjection: false
+      Codeql.SkipTaskAutoInjection: true
+
+  steps:
+  - template: template-build-on-mac.yaml
+
 - job: 'RunManagedIdentityE2ETestsOnAzureArc'
   displayName: 'Managed Identity E2E Tests – Azure ARC Agent'
   dependsOn: ['BuildAndStageProjects']

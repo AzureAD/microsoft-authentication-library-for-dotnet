@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -124,6 +125,8 @@ namespace Microsoft.Identity.Client
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
+        internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
+
         #region ClientCredentials
 
         // Indicates if claims or assertions are used within the configuration
@@ -207,6 +210,5 @@ namespace Microsoft.Identity.Client
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }        
         public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
         #endregion
-
     }
 }
