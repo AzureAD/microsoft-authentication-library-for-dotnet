@@ -41,8 +41,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> s_appMetadataDictionary =
             new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
 
+        private static int s_entryCount = 0;
+
         protected readonly ILoggerAdapter _logger;
         private readonly CacheOptions _tokenCacheAccessorOptions;
+
+        private int _entryCount = 0;
+
+        public int EntryCount => _tokenCacheAccessorOptions.UseSharedCache ? s_entryCount : _entryCount;
 
         public InMemoryPartitionedUserTokenCacheAccessor(ILoggerAdapter logger, CacheOptions tokenCacheAccessorOptions)
         {
@@ -73,8 +79,23 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
-            AccessTokenCacheDictionary
-                .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccessTokenCacheItem>())[itemKey] = item; // if a conflict occurs, pick the latest value
+            var partition = AccessTokenCacheDictionary.GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalAccessTokenCacheItem>());
+            bool added = partition.TryAdd(itemKey, item);
+            if (added)
+            {
+                if (_tokenCacheAccessorOptions.UseSharedCache)
+                {
+                    System.Threading.Interlocked.Increment(ref s_entryCount);
+                }
+                else
+                {
+                    System.Threading.Interlocked.Increment(ref _entryCount);
+                }
+            }
+            else
+            {
+                partition[itemKey] = item;
+            }
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
@@ -151,12 +172,26 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
-            AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.CacheKey, out _))
+            if (AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition))
             {
-                _logger.InfoPii(
-                    () => $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
-                    () => "[Internal cache] Cannot delete access token because it was not found in the cache.");
+                bool removed = partition.TryRemove(item.CacheKey, out _);
+                if (removed)
+                {
+                    if (_tokenCacheAccessorOptions.UseSharedCache)
+                    {
+                        System.Threading.Interlocked.Decrement(ref s_entryCount);
+                    }
+                    else
+                    {
+                        System.Threading.Interlocked.Decrement(ref _entryCount);
+                    }
+                }
+                else
+                {
+                    _logger.InfoPii(
+                        () => $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
+                        () => "[Internal cache] Cannot delete access token because it was not found in the cache.");
+                }
             }
         }
 
@@ -326,6 +361,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             RefreshTokenCacheDictionary.Clear();
             IdTokenCacheDictionary.Clear();
             AccountCacheDictionary.Clear();
+            if (_tokenCacheAccessorOptions.UseSharedCache)
+            {
+                System.Threading.Interlocked.Exchange(ref s_entryCount, 0);
+            }
+            else
+            {
+                System.Threading.Interlocked.Exchange(ref _entryCount, 0);
+            }
             // app metadata isn't removable
         }
 

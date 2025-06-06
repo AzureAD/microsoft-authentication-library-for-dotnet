@@ -96,13 +96,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                                       .BuildConcrete();
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                await ClientCredsAcquireAndAssertTokenSourceAsync(app1, "S1", TokenSource.IdentityProvider).ConfigureAwait(false);
+                await ClientCredsAcquireAndAssertTokenSourceAsync(app1, "S1", TokenSource.IdentityProvider, 1).ConfigureAwait(false);
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                await ClientCredsAcquireAndAssertTokenSourceAsync(app1, "S2", TokenSource.IdentityProvider).ConfigureAwait(false);
+                await ClientCredsAcquireAndAssertTokenSourceAsync(app1, "S2", TokenSource.IdentityProvider, 2).ConfigureAwait(false);
 
-                await ClientCredsAcquireAndAssertTokenSourceAsync(app2, "S1", TokenSource.Cache).ConfigureAwait(false);
-                await ClientCredsAcquireAndAssertTokenSourceAsync(app2, "S2", TokenSource.Cache).ConfigureAwait(false);
+                await ClientCredsAcquireAndAssertTokenSourceAsync(app2, "S1", TokenSource.Cache, 2).ConfigureAwait(false);
+                await ClientCredsAcquireAndAssertTokenSourceAsync(app2, "S2", TokenSource.Cache, 2).ConfigureAwait(false);
 
                 ConfidentialClientApplication app3 =
                      ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -111,14 +111,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                                          .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                                                          .BuildConcrete();
 
-                await ClientCredsAcquireAndAssertTokenSourceAsync(app3, "S1", TokenSource.Cache).ConfigureAwait(false);
-                await ClientCredsAcquireAndAssertTokenSourceAsync(app3, "S2", TokenSource.Cache).ConfigureAwait(false);
+                await ClientCredsAcquireAndAssertTokenSourceAsync(app3, "S1", TokenSource.Cache, 2).ConfigureAwait(false);
+                await ClientCredsAcquireAndAssertTokenSourceAsync(app3, "S2", TokenSource.Cache, 2).ConfigureAwait(false);
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                await ClientCredsAcquireAndAssertTokenSourceAsync(app3, "S3", TokenSource.IdentityProvider, 3).ConfigureAwait(false);
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                await ClientCredsAcquireAndAssertTokenSourceAsync(app_withoutStaticCache, "S1", TokenSource.IdentityProvider).ConfigureAwait(false);
+                await ClientCredsAcquireAndAssertTokenSourceAsync(app_withoutStaticCache, "S1", TokenSource.IdentityProvider, 1).ConfigureAwait(false);
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                await ClientCredsAcquireAndAssertTokenSourceAsync(app_withoutStaticCache, "S2", TokenSource.IdentityProvider).ConfigureAwait(false);
+                await ClientCredsAcquireAndAssertTokenSourceAsync(app_withoutStaticCache, "S2", TokenSource.IdentityProvider, 2).ConfigureAwait(false);
 
             }
         }
@@ -145,9 +147,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync().ConfigureAwait(false);
 
+                Assert.AreEqual(1, result.AuthenticationResultMetadata.CachedAccessTokenCount);
+
                 var accounts = await app1.GetAccountsAsync().ConfigureAwait(false);
                 Assert.AreEqual(1, accounts.Count());
                 result = await app1.AcquireTokenSilent(TestConstants.s_scope, accounts.Single()).ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(1, result.AuthenticationResultMetadata.CachedAccessTokenCount);
 
                 var app2 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
@@ -159,17 +164,29 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 accounts = await app2.GetAccountsAsync().ConfigureAwait(false);
                 Assert.AreEqual(1, accounts.Count());
                 result = await app2.AcquireTokenSilent(TestConstants.s_scope, accounts.Single()).ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(1, result.AuthenticationResultMetadata.CachedAccessTokenCount);
             }
         }
 
-        private async Task ClientCredsAcquireAndAssertTokenSourceAsync(IConfidentialClientApplication app, string scope, TokenSource expectedSource)
+        private async Task<AuthenticationResult> ClientCredsAcquireAndAssertTokenSourceAsync(
+            IConfidentialClientApplication app, 
+            string scope, 
+            TokenSource expectedSource, 
+            int expectedAccessTokenCount)
         {
             var result = await app.AcquireTokenForClient(new[] { scope })
                  .WithTenantId(TestConstants.Utid)
                  .ExecuteAsync().ConfigureAwait(false);
+
             Assert.AreEqual(
                expectedSource,
                result.AuthenticationResultMetadata.TokenSource);
+               
+
+            Assert.AreEqual(expectedAccessTokenCount, 
+                result.AuthenticationResultMetadata.CachedAccessTokenCount);
+
+            return result;
         }
     }
 }

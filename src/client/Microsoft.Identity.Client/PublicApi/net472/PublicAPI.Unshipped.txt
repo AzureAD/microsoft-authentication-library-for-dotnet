@@ -1,3 +1,5 @@
+Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.get -> int
+Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.set -> void
 Microsoft.Identity.Client.Utils.MacMainThreadScheduler
 static Microsoft.Identity.Client.Utils.MacMainThreadScheduler.Instance() -> Microsoft.Identity.Client.Utils.MacMainThreadScheduler
 Microsoft.Identity.Client.Utils.MacMainThreadScheduler.IsCurrentlyOnMainThread() -> bool
