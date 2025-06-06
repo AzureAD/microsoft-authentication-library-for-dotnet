@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
@@ -34,6 +35,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected readonly ILoggerAdapter _logger;
         private readonly CacheOptions _tokenCacheAccessorOptions;
 
+        private int _entryCount = 0;
+        private static int s_entryCount = 0;
+
+        public int EntryCount => _tokenCacheAccessorOptions.UseSharedCache ? s_entryCount : _entryCount;
+
         public InMemoryPartitionedAppTokenCacheAccessor(
             ILoggerAdapter logger,
             CacheOptions tokenCacheAccessorOptions)
@@ -59,9 +65,25 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(item.ClientId, item.TenantId, item.KeyId, item.AdditionalCacheKeyComponents);
 
-            // if a conflict occurs, pick the latest value
-            AccessTokenCacheDictionary
-                .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccessTokenCacheItem>())[itemKey] = item;
+            var partition = AccessTokenCacheDictionary.GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalAccessTokenCacheItem>());
+            bool added = partition.TryAdd(itemKey, item);
+            if (added)
+            {
+                if (_tokenCacheAccessorOptions.UseSharedCache)
+                {
+                    Interlocked.Increment(ref s_entryCount);
+                }
+                else
+                {
+                    Interlocked.Increment(ref _entryCount);
+                }
+            }
+            else
+            {
+                // If not added, it means it was replaced. Only increment if it was a new key.
+                // If you want to treat replacement as not changing the count, do nothing here.
+                partition[itemKey] = item;
+            }
         }
 
         /// <summary>
@@ -129,12 +151,26 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             var partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(item.ClientId, item.TenantId, item.KeyId);
 
-            AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.CacheKey, out _))
+            if (AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition))
             {
-                _logger.InfoPii(
-                    () => $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
-                    () => "[Internal cache] Cannot delete access token because it was not found in the cache.");
+                bool removed = partition.TryRemove(item.CacheKey, out _);
+                if (removed)
+                {
+                    if (_tokenCacheAccessorOptions.UseSharedCache)
+                    {
+                        Interlocked.Decrement(ref s_entryCount);
+                    }
+                    else
+                    {
+                        Interlocked.Decrement(ref _entryCount);
+                    }
+                }
+                else
+                {
+                    _logger.InfoPii(
+                        () => $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
+                        () => "[Internal cache] Cannot delete access token because it was not found in the cache.");
+                }
             }
         }
 
@@ -219,6 +255,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             var logger = requestlogger ?? _logger;
             AccessTokenCacheDictionary.Clear();
+            if (_tokenCacheAccessorOptions.UseSharedCache)
+            {
+                Interlocked.Exchange(ref s_entryCount, 0);
+            }
+            else
+            {
+                Interlocked.Exchange(ref _entryCount, 0);
+            }
             logger.Always("[Internal cache] Clearing app token cache accessor.");
             // app metadata isn't removable
         }

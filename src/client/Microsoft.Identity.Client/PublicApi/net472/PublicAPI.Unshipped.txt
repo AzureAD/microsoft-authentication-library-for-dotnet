@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.get -> int
+Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.set -> void

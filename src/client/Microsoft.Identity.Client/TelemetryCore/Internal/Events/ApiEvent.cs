@@ -62,6 +62,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public string ApiErrorCode { get; set; }
 
+        public int CacheAccessTokenCount { get; set; }
+
         #region Region
         public string RegionUsed { get; set; }
 
