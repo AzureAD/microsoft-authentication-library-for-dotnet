@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             MsalTokenResponse tokenResponse = null;
-            if (DesktopOsHelper.IsMac() && ServiceBundle.Config.IsBrokerEnabled)
+            if (ServiceBundle.Config.IsBrokerEnabled && DesktopOsHelper.IsMacConsoleApp())
             {
                 var macMainThreadScheduler = MacMainThreadScheduler.Instance();
                 if (!macMainThreadScheduler.IsCurrentlyOnMainThread())

@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     {
                         if (readAccountResult.IsSuccess)
                         {
-                            if (DesktopOsHelper.IsMac())
+                            if (DesktopOsHelper.IsMacConsoleApp())
                             {
                                 AuthResult result = null;
                                 await MacMainThreadScheduler.Instance().RunOnMainThreadAsync(async () =>
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                                 var errorMessage = "Could not acquire token interactively.";
                                 msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                             }
-                            else // Non macOS
+                            else // Not mac console app scenaro
                             {
                                 using (var result = await s_lazyCore.Value.AcquireTokenInteractivelyAsync(
                                     _parentHandle,
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
                 _logger?.Verbose(() => "[RuntimeBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
 
-                if (DesktopOsHelper.IsMac())
+                if (DesktopOsHelper.IsMacConsoleApp())
                 {
                     AuthResult result = null;
                     await MacMainThreadScheduler.Instance().RunOnMainThreadAsync(async () =>
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     var errorMessage = "Could not sign in interactively.";
                     msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
-                else // Non macOS
+                else // Not mac console app scenaro
                 {
                     using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
                         _parentHandle,
@@ -304,7 +304,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 _brokerOptions,
                 _logger))
             {
-                if (DesktopOsHelper.IsMac())
+                if (DesktopOsHelper.IsMacConsoleApp())
                 {
                     AuthResult result = null;
                     await MacMainThreadScheduler.Instance().RunOnMainThreadAsync(async () =>
@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     var errorMessage = "Could not sign in interactively with the default OS account.";
                     msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
-                else // Non macOS
+                else // Not mac console app scenaro
                 {
                     using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInAsync(
                         _parentHandle,
