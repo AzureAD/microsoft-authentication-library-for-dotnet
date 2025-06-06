@@ -167,6 +167,7 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
+            AuthenticationResultMetadata.CachedAccessTokenCount = apiEvent.CacheAccessTokenCount;
             AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
                                                                     (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
                                                                     additionalResponseParameters;
