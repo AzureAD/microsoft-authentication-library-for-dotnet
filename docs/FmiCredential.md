@@ -50,6 +50,6 @@ Automatically trigger the logic when a specific FMI resource is detected. This a
 
 ## Other Considerations
 
-- The tokens should not be cached. Caching will be handled in the other MSAL applicaiton that uses this token. MISE will expect to get a new token each time this flow is used.
+- The tokens should not be cached? Caching will be handled in the other MSAL applicaiton that uses this token. MISE will expect to get a new token each time this flow is used.
 - To reduce the footprint of this logic, the managed identity application used to create this can use a system assigned identity.
 - Should this logic stay behind the expiremental features flag as it will only be used by MISE and is not intended for public use.
