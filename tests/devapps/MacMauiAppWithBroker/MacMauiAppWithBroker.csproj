@@ -20,6 +20,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
+		<!-- Disable strong naming for MAUI app -->
+		<SignAssembly>false</SignAssembly>
+
 		<!-- Display name -->
 		<ApplicationTitle>MacMauiAppWithBroker</ApplicationTitle>
 
@@ -74,10 +77,6 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
-
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 	</ItemGroup>
 
 	<!-- <ItemGroup>
@@ -90,7 +89,7 @@
     </ItemGroup> -->
 
 	<ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.0" />
+		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.1" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
