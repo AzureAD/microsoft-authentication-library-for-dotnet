@@ -90,7 +90,7 @@ class MacConsoleAppWithBroker
                 }
             }).ConfigureAwait(false);
 
-            Console.WriteLine($"Interactive call. Access token: {TruncateToken(result.AccessToken)}");
+            Console.WriteLine($"Interactive call. Access token: {TruncateToken(result!.AccessToken)}");
             Console.WriteLine($"Expires on: {result.ExpiresOn}");
             
             // Make an HTTP request to switch to a background thread
