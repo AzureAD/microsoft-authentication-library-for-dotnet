@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             // ---------- Chrome launch flags ----------
             var options = new ChromeOptions();
             options.AddArguments(
-                "--headless=new",          // modern headless mode (works on GUI-less agents)
+                "--headless=new",          // modern headless mode (remove this for debugging)
                 "--disable-gpu",
                 "--window-size=1920,1080",
                 "--remote-allow-origins=*",
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
             catch (WebDriverException e)
             {
-                Trace.WriteLine("Failed to maximize: " + e.Message);
+                Trace.WriteLine("Failed to maximize the window : " + e.Message);
             }
         }
 
