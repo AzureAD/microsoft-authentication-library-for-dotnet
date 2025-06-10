@@ -8,11 +8,13 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
@@ -459,7 +461,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
 
             const int NumRequests = 1 + Num404Errors; // initial request + two retries
-            int requestsMade = NumRequests - httpManager.QueueSize;
+            int requestsMade = NumRequests - _httpManager.QueueSize;
             Assert.AreEqual(NumRequests, requestsMade);
         }
 
@@ -486,7 +488,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
 
             const int NumRequests = 1 + Num410Errors; // initial request + eight retries
-            int requestsMade = NumRequests - httpManager.QueueSize;
+            int requestsMade = NumRequests - _httpManager.QueueSize;
             Assert.AreEqual(NumRequests, requestsMade);
         }
     }
