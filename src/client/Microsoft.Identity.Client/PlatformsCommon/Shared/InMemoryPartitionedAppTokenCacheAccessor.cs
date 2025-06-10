@@ -38,8 +38,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private int _entryCount = 0;
         private static int s_entryCount = 0;
 
-        public int EntryCount => _tokenCacheAccessorOptions.UseSharedCache ? s_entryCount : _entryCount;
-
+        public int EntryCount => GetEntryCountRef();
+       
         public InMemoryPartitionedAppTokenCacheAccessor(
             ILoggerAdapter logger,
             CacheOptions tokenCacheAccessorOptions)
@@ -67,21 +67,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             var partition = AccessTokenCacheDictionary.GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalAccessTokenCacheItem>());
             bool added = partition.TryAdd(itemKey, item);
+
+            // only increment the entry count if the item was added, not updated
             if (added)
             {
-                if (_tokenCacheAccessorOptions.UseSharedCache)
-                {
-                    Interlocked.Increment(ref s_entryCount);
-                }
-                else
-                {
-                    Interlocked.Increment(ref _entryCount);
-                }
+                Interlocked.Increment(ref GetEntryCountRef());
             }
             else
             {
-                // If not added, it means it was replaced. Only increment if it was a new key.
-                // If you want to treat replacement as not changing the count, do nothing here.
                 partition[itemKey] = item;
             }
         }
@@ -156,14 +149,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 bool removed = partition.TryRemove(item.CacheKey, out _);
                 if (removed)
                 {
-                    if (_tokenCacheAccessorOptions.UseSharedCache)
-                    {
-                        Interlocked.Decrement(ref s_entryCount);
-                    }
-                    else
-                    {
-                        Interlocked.Decrement(ref _entryCount);
-                    }
+                    Interlocked.Decrement(ref GetEntryCountRef());
                 }
                 else
                 {
@@ -255,14 +241,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             var logger = requestlogger ?? _logger;
             AccessTokenCacheDictionary.Clear();
-            if (_tokenCacheAccessorOptions.UseSharedCache)
-            {
-                Interlocked.Exchange(ref s_entryCount, 0);
-            }
-            else
-            {
-                Interlocked.Exchange(ref _entryCount, 0);
-            }
+            Interlocked.Exchange(ref GetEntryCountRef(), 0);
             logger.Always("[Internal cache] Clearing app token cache accessor.");
             // app metadata isn't removable
         }
@@ -271,5 +250,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
         }
+
+        private ref int GetEntryCountRef()
+        {
+            return ref _tokenCacheAccessorOptions.UseSharedCache ? ref s_entryCount : ref _entryCount;
+        }
+
     }
 }
