@@ -256,12 +256,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
             client.AddBodyParameter(OAuth2Parameter.ClientId, credentialResponse.ClientId);
             client.AddBodyParameter(OAuth2Parameter.ClientAssertion, credentialResponse.Credential);
-            
+            //client.AddQueryParameter("dc", "ESTSR-PUB-WUS-LZ1-TEST");
+
             client.AddBodyParameter(
             OAuth2Parameter.ClientAssertionType,
             AuthenticationRequestParameters.UseMtlsPop
                 ? OAuth2AssertionType.JwtPop          // when we’re doing mTLS-PoP
                 : OAuth2AssertionType.JwtBearer);     // otherwise regular bearer
+
+            client.AddBodyParameter(
+            OAuth2Parameter.TokenType,
+            AuthenticationRequestParameters.UseMtlsPop
+                ? Constants.MtlsPoPTokenType          // when we’re doing mTLS-PoP
+                : Constants.BearerTokenType);     // otherwise regular bearer
 
             // Add optional claims and client capabilities parameter if provided.
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.ClaimsAndClientCapabilities))

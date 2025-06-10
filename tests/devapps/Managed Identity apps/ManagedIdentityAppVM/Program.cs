@@ -13,7 +13,7 @@ IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
                 .WithLogging(identityLogger, true)
                 .Build();
 
-string? scope = "https://management.azure.com";
+string? scope = "https://vault.azure.net/";
 
 do
 {

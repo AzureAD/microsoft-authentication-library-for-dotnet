@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Utilities
         private static X509Certificate2 CreateNewCertificate(string certificateName)
         {
 #if SUPPORTS_MTLS
-            // Create an RSA key pair (using RSA since the test machine has issues with ECD).
+            // Create an RSA key pair
             using (var rsa = RSA.Create(2048))
             {
                 // Create a certificate request.
