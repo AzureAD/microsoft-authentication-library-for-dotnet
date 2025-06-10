@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         private ApiEvent _apiEvent;
         private CancellationTokenSource _userCancellationTokenSource;
         private IRegionDiscoveryProvider _regionDiscoveryProvider;
+        private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [TestInitialize]
         public override void TestInitialize()
@@ -35,6 +36,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             base.TestInitialize();
 
             _harness = base.CreateTestHarness();
+            _harness.ServiceBundle.Config.RetryPolicyFactory = _testRetryPolicyFactory;
             _httpManager = _harness.HttpManager;
             _userCancellationTokenSource = new CancellationTokenSource();
             _testRequestContext = new RequestContext(
@@ -432,6 +434,60 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             CollectionAssert.AreEquivalent(expectedEntry.Aliases, entry.Aliases);
             Assert.AreEqual(expectedEntry.PreferredCache, entry.PreferredCache);
             Assert.AreEqual(expectedEntry.PreferredNetwork, entry.PreferredNetwork);
+        }
+
+        [TestMethod]
+        public async Task ImdsExponentiallyRetriesOnTimeoutThenSucceedsAsync()
+        {
+            // Simulate three 404s (initial request + two retries), then a successful response
+            const int Num404Errors = 3;
+            for (int i = 0; i < Num404Errors; i++)
+            {
+                AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            }
+
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            ValidateInstanceMetadata(regionalMetadata);
+            Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.AreEqual(RegionAutodetectionSource.Imds, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+
+            const int NumRequests = 1 + Num404Errors; // initial request + two retries
+            int requestsMade = NumRequests - httpManager.QueueSize;
+            Assert.AreEqual(NumRequests, requestsMade);
+        }
+
+        [TestMethod]
+        public async Task ImdsLinearRetriesExceedMaximumAttemptsAsync()
+        {
+            // Simulate eight 410s (initial request + seven retries), then a successful response
+            const int Num410Errors = 1 + ImdsRetryPolicy.LinearStrategyNumRetries; // More than the max retry limit
+            for (int i = 0; i < Num410Errors; i++)
+            {
+                AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.Gone));
+            }
+
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
+            // Act
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNull(regionalMetadata, "Discovery should fail after max retries");
+            Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
+
+            const int NumRequests = 1 + Num410Errors; // initial request + eight retries
+            int requestsMade = NumRequests - httpManager.QueueSize;
+            Assert.AreEqual(NumRequests, requestsMade);
         }
     }
 }
