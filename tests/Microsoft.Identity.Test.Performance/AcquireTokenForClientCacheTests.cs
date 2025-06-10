@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Performance
             _cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithRedirectUri(TestConstants.RedirectUri)
-                .WithClientSecret(TestConstants.ClientSecret)                
+                .WithClientSecret(TestConstants.ClientSecret)
                 .WithLegacyCacheCompatibility(false)
                 .BuildConcrete();
 

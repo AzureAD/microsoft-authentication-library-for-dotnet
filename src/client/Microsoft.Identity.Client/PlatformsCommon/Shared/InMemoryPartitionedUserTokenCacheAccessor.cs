@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         private int _entryCount = 0;
 
-        public int EntryCount => _tokenCacheAccessorOptions.UseSharedCache ? s_entryCount : _entryCount;
+        public int EntryCount => GetEntryCountRef();
 
         public InMemoryPartitionedUserTokenCacheAccessor(ILoggerAdapter logger, CacheOptions tokenCacheAccessorOptions)
         {
@@ -81,16 +81,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             var partition = AccessTokenCacheDictionary.GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalAccessTokenCacheItem>());
             bool added = partition.TryAdd(itemKey, item);
+            // only increment the entry count if this is a new item
             if (added)
             {
-                if (_tokenCacheAccessorOptions.UseSharedCache)
-                {
-                    System.Threading.Interlocked.Increment(ref s_entryCount);
-                }
-                else
-                {
-                    System.Threading.Interlocked.Increment(ref _entryCount);
-                }
+                System.Threading.Interlocked.Increment(ref GetEntryCountRef());
             }
             else
             {
@@ -174,17 +168,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             if (AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition))
             {
-                bool removed = partition.TryRemove(item.CacheKey, out _);
+                bool removed = partition.TryRemove(item.CacheKey, out _);                
                 if (removed)
                 {
-                    if (_tokenCacheAccessorOptions.UseSharedCache)
-                    {
-                        System.Threading.Interlocked.Decrement(ref s_entryCount);
-                    }
-                    else
-                    {
-                        System.Threading.Interlocked.Decrement(ref _entryCount);
-                    }
+                    System.Threading.Interlocked.Decrement(ref GetEntryCountRef());
                 }
                 else
                 {
@@ -281,7 +268,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                     if (RefreshTokenCacheDictionary.Count == 1 && result.Count == 0)
                     {
                         logger.VerbosePii(
-                            () => $"[Internal cache] 0 RTs and 1 partition. Partition in cache is {RefreshTokenCacheDictionary.Keys.First()}", 
+                            () => $"[Internal cache] 0 RTs and 1 partition. Partition in cache is {RefreshTokenCacheDictionary.Keys.First()}",
                             () => "[Internal cache] 0 RTs and 1 partition] 0 RTs and 1 partition.");
                     }
                 }
@@ -325,7 +312,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             {
                 AccountCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccountCacheItem> partition);
                 result = partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalAccountCacheItem>();
-                
+
                 if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
                     logger.Verbose(() => $"[Internal cache] GetAllAccounts (with partition - exists? {partition != null}) found {result.Count} accounts.");
@@ -361,15 +348,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             RefreshTokenCacheDictionary.Clear();
             IdTokenCacheDictionary.Clear();
             AccountCacheDictionary.Clear();
-            if (_tokenCacheAccessorOptions.UseSharedCache)
-            {
-                System.Threading.Interlocked.Exchange(ref s_entryCount, 0);
-            }
-            else
-            {
-                System.Threading.Interlocked.Exchange(ref _entryCount, 0);
-            }
             // app metadata isn't removable
+            System.Threading.Interlocked.Exchange(ref GetEntryCountRef(), 0);
+
         }
 
         /// WARNING: this API is slow as it loads all tokens, not just from 1 partition. 
@@ -378,6 +359,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return RefreshTokenCacheDictionary.Any(partition => partition.Value.Count > 0) ||
                     AccessTokenCacheDictionary.Any(partition => partition.Value.Any(token => !token.Value.IsExpiredWithBuffer()));
+        }
+
+        private ref int GetEntryCountRef()
+        {
+            return ref _tokenCacheAccessorOptions.UseSharedCache ? ref s_entryCount : ref _entryCount;
         }
     }
 }
