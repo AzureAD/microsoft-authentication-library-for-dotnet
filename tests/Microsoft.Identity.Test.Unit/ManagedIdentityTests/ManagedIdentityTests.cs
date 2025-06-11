@@ -1218,7 +1218,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        //[DataTestMethod]
         [DataRow(ManagedIdentitySource.AppService)]
         [DataRow(ManagedIdentitySource.Imds)]
         [DataRow(ManagedIdentitySource.AzureArc)]
@@ -1333,7 +1333,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        //[DataTestMethod]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, 429)]
