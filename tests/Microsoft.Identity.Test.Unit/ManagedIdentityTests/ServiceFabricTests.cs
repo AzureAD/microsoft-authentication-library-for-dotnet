@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabricFederated, "http://localhost:40342/metadata/identity/oauth2/token");
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabricFederated, "http://localhost:40342");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithExperimentalFeatures()
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ServiceFabricFederatedManagedIdentitySource sf = ServiceFabricFederatedManagedIdentitySource.Create(requestContext) as ServiceFabricFederatedManagedIdentitySource;
 
                 Assert.IsInstanceOfType(sf, typeof(ServiceFabricFederatedManagedIdentitySource));
-                Assert.AreEqual("http://localhost:40343/metadata/identity/oauth2/token", sf.GetEndpointForTesting());
+                Assert.AreEqual("http://localhost:40342/metadata/identity/oauth2/fmi/credential", sf.GetEndpointForTesting());
             }
         }
 
@@ -131,12 +131,38 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.BuildConcrete();
 
+                //Ensure token is acquired from MITS
                 var result = await mi.AcquireTokenForManagedIdentity("api://AzureFMITokenExchange/.default")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+
+                //Ensure token is acquired from cache
+                result = await mi.AcquireTokenForManagedIdentity("api://AzureFMITokenExchange/.default")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
             }
+        }
+
+        [TestMethod]
+        public async Task ValidateThatFmiCredentialIsExpiremental()
+        {
+            var miApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                            .Build();
+
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => miApp.AcquireTokenForManagedIdentity("api://AzureFMITokenExchange/.default")
+                            .ExecuteAsync()).ConfigureAwait(false);
+
+            Assert.IsNotNull(ex);
+            Assert.IsTrue(ex.Message.Contains("The API WithResource is marked as experimental"));
         }
 
         [TestMethod]

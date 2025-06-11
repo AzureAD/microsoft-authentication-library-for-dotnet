@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Client
             if (resource.Equals("api://AzureFMITokenExchange/.default"))
             {
                 Parameters.IsFmiServiceFabric = true;
+                ValidateUseOfExperimentalFeature();
             }
 
             return this;
