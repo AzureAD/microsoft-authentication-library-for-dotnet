@@ -161,6 +161,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
         #endregion
 
+        public int EntryCount { get; } = 0; // not implemented for Android
+
         public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
             return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountCacheItem.CacheKey, null));
