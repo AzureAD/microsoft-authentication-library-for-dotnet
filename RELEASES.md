@@ -4,14 +4,14 @@ We have adopted the semantic versioning flow that is industry standard for OSS p
 
 ## Semantic Versioning and API stability promises
 
-Microsoft Authentication libraries are independent open source libraries that are used by partners both internal and external to Microsoft. As with the rest of Microsoft, we have moved to a rapid iteration model where bugs are fixed daily and new versions are produced as required. To communicate these frequent changes to external partners and customers, we use semantic versioning for all our public Microsoft Authentication SDK libraries. This follows the practices of other open source libraries on the internet. This allows us to support our downstream partners which will lock on certain versions for stability purposes, as well as providing for the distribution over NuGet, CocoaPods, and Maven. 
+Microsoft Authentication libraries are independent open source libraries that are used by partners both internal and external to Microsoft. As with the rest of Microsoft, we have moved to a rapid iteration model where bugs are fixed daily and new versions are produced as required. To communicate these frequent changes to external partners and customers, we use semantic versioning for all our public Microsoft Authentication SDK libraries. This follows the practices of other open source libraries on the internet. This allows us to support our downstream partners which will lock on certain versions for stability purposes, as well as providing for the distribution over NuGet, CocoaPods, and Maven.
 
 The semantics are: MAJOR.MINOR.PATCH (example 1.1.5)
 
 We will update our code distributions to use the latest PATCH semantic version number in order to make sure our customers and partners get the latest bug fixes. Downstream partner needs to pull the latest PATCH version. Most partners should try lock on the latest MINOR version number in their builds and accept any updates in the PATCH number.
 
 Example:
-Using NuGet, this ensures all 1.1.0 to 1.1.x updates are included when building your code, but not 1.2. 
+Using NuGet, this ensures all 1.1.0 to 1.1.x updates are included when building your code, but not 1.2.
 
 ```
 <dependency
@@ -28,14 +28,11 @@ version="[1.1,1.2)"
 
 ## Serviceability
 
-When we release a new MINOR version, the previous MINOR version is abandoned.
+Please refer to https://aka.ms/msal/LTS .
 
-When we release a new MAJOR version, we will continue to apply bug fixes to the existing features in the previous MAJOR version for up to the 2 year support cycle for Azure.
-Example: We release MSALiOS 2.0 in the future which supports unified Auth for AAD and MSA. Later, we then have a fix in Conditional Access for MSALiOS. Since that feature exists both in MSALiOS 1.1 and MSALiOS 2.0, we will fix both. It will roll up in a PATCH number for each. Customers that are still locked down on MSALiOS 1.1 will receive the benefit of this fix.
+## Microsoft Authentication SDKs and Microsoft Entra ID
 
-## Microsoft Authentication SDKs and Azure Active Directory
-
-Microsoft Authentication SDKs major versions will maintain backwards compatibility with Azure Active Directory web services through the support period. This means that the API surface area defined in a MAJOR version will continue to work for 2 years after release.
+Microsoft Authentication SDKs major versions will maintain backwards compatibility with Microsoft Entra ID web services through the support period. This means that the API surface area defined in a MAJOR version will continue to work for 2 years after release.
 
 We will respond to bugs quickly from our partners and customers submitted through GitHub and through our private alias (tellaad@microsoft.com) for security issues and update the PATCH version number. We will also submit a change summary for each PATCH number.
 Occasionally, there will be security bugs or breaking bugs from our partners that will require an immediate fix and a publish of an update to all partners and customers. When this occurs, we will do an emergency roll up to a PATCH version number and update all our distribution methods to the latest.
