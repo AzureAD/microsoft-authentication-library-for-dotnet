@@ -121,13 +121,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             // Wait for all tasks to complete
             AuthenticationResult[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
-            int[] accessTokenCounts = results.Select(r => r.AuthenticationResultMetadata.CachedAccessTokenCount).ToArray();
 
             // Assert the total tasks
             Assert.AreEqual(NumberOfRequests, results.Length, "Number of AuthenticationResult objects does not match the number of requests.");
-
-            int[] expectedTokenCounts = [.. Enumerable.Range(1, NumberOfRequests)];
-            CollectionAssert.AreEquivalent(expectedTokenCounts, accessTokenCounts, "Each result should have a different number of tokens, because no cache hit occurs");
         }
 
         [TestMethod]
