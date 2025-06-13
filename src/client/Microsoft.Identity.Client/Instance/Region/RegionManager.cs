@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -46,11 +47,6 @@ namespace Microsoft.Identity.Client.Region
         private static bool s_failedAutoDiscovery = false;
         private static string s_regionDiscoveryDetails;
 
-        private readonly LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-            LinearRetryPolicy.DefaultStsRetryDelayMs,
-            LinearRetryPolicy.DefaultStsMaxRetries,
-            HttpRetryConditions.Sts);
-
         public RegionManager(
             IHttpManager httpManager,
             int imdsCallTimeout = 2000,
@@ -81,9 +77,12 @@ namespace Microsoft.Identity.Client.Region
                 requestContext.ApiEvent != null,
                 "Do not call GetAzureRegionAsync outside of a request. This can happen if you perform instance discovery outside a request, for example as part of validating input params.");
 
+            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+
             // MSAL always performs region auto-discovery, even if the user configured an actual region
             // in order to detect inconsistencies and report via telemetry
-            var discoveredRegion = await DiscoverAndCacheAsync(logger, requestContext.UserCancellationToken).ConfigureAwait(false);
+            var discoveredRegion = await DiscoverAndCacheAsync(logger, requestContext.UserCancellationToken, retryPolicy).ConfigureAwait(false);
 
             RecordTelemetry(requestContext.ApiEvent, azureRegionConfig, discoveredRegion);
 
@@ -158,7 +157,7 @@ namespace Microsoft.Identity.Client.Region
                  apiEvent.RegionOutcome == default);
         }
 
-        private async Task<RegionInfo> DiscoverAndCacheAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAndCacheAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken, IRetryPolicy retryPolicy)
         {
             var regionInfo = GetCachedRegion(logger);
             if (regionInfo != null)
@@ -166,12 +165,12 @@ namespace Microsoft.Identity.Client.Region
                 return regionInfo;
             }
 
-            var result = await DiscoverAsync(logger, requestCancellationToken).ConfigureAwait(false);
+            var result = await DiscoverAsync(logger, requestCancellationToken, retryPolicy).ConfigureAwait(false);
 
             return result;
         }
 
-        private async Task<RegionInfo> DiscoverAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
+        private async Task<RegionInfo> DiscoverAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken, IRetryPolicy retryPolicy)
         {
             RegionInfo result = null;
 
@@ -213,14 +212,15 @@ namespace Microsoft.Identity.Client.Region
                                     mtlsCertificate: null,
                                     validateServerCertificate: null,
                                     cancellationToken: GetCancellationToken(requestCancellationToken),
-                                    retryPolicy: _linearRetryPolicy)
+                                    retryPolicy: retryPolicy)
                                 .ConfigureAwait(false);
 
                             // A bad request occurs when the version in the IMDS call is no longer supported.
                             if (response.StatusCode == HttpStatusCode.BadRequest)
                             {
-                                string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestCancellationToken).ConfigureAwait(false); // Get the latest version
+                                string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestCancellationToken, retryPolicy).ConfigureAwait(false); // Get the latest version
                                 imdsUri = BuildImdsUri(apiVersion);
+
                                 response = await _httpManager.SendRequestAsync(
                                     imdsUri,
                                     headers,
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client.Region
                                     mtlsCertificate: null,
                                     validateServerCertificate: null,
                                     cancellationToken: GetCancellationToken(requestCancellationToken),
-                                    retryPolicy: _linearRetryPolicy)
+                                    retryPolicy: retryPolicy)
                                     .ConfigureAwait(false); // Call again with updated version
                             }
 
@@ -320,7 +320,7 @@ namespace Microsoft.Identity.Client.Region
             return true;
         }
 
-        private async Task<string> GetImdsUriApiVersionAsync(ILoggerAdapter logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
+        private async Task<string> GetImdsUriApiVersionAsync(ILoggerAdapter logger, Dictionary<string, string> headers, CancellationToken userCancellationToken, IRetryPolicy retryPolicy)
         {
             Uri imdsErrorUri = new(ImdsEndpoint);
 
@@ -334,7 +334,7 @@ namespace Microsoft.Identity.Client.Region
                     mtlsCertificate: null,
                     validateServerCertificate: null,
                     cancellationToken: GetCancellationToken(userCancellationToken),
-                    retryPolicy: _linearRetryPolicy)
+                    retryPolicy: retryPolicy)
                 .ConfigureAwait(false);
 
             // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
