@@ -169,7 +169,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
         #endregion
 
-        int EntryCount { get; } = 0; // not implemented for iOS
+        public int EntryCount { get; } = 0; // not implemented for iOS
+        
 
         internal SecStatusCode TryGetBrokerApplicationToken(string clientId, out string appToken)
         {
