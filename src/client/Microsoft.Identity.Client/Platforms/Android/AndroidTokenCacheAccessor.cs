@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
         #endregion
 
-        int EntryCount { get; } = 0; // not implemented for Android
+        public int EntryCount { get; } = 0; // not implemented for Android
 
         public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
