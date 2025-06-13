@@ -24,35 +24,54 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static IWebDriver CreateDefaultWebDriver()
         {
-            ChromeOptions options = new ChromeOptions();
-            ChromeDriver driver;
+            // ---------- Chrome launch flags ----------
+            var options = new ChromeOptions();
+            options.AddArguments(
+                "--headless=new",          // modern headless mode (remove this for debugging)
+                "--disable-gpu",
+                "--window-size=1920,1080",
+                "--remote-allow-origins=*",
+                "--disable-dev-shm-usage"); // avoids crashes in low-memory containers
 
-            // ~2x faster, no visual rendering
-            // remove when debugging to see the UI automation
-            options.AddArguments("headless");
+            // ---------- Pick a driver binary ----------
+            // 1) Prefer explicit env-var so devs can override locally
+            var driverDir = Environment.GetEnvironmentVariable("CHROMEWEBDRIVER");
 
-            var env = Environment.GetEnvironmentVariable("CHROMEWEBDRIVER");
-            if (string.IsNullOrEmpty(env))
+            // 2) Otherwise use the folder where CI drops a matching chromedriver
+            if (string.IsNullOrEmpty(driverDir))
             {
-                driver = new ChromeDriver(options);
+                driverDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "drivers");
             }
-            else
-            {
-                driver = new ChromeDriver(env, options);
-            }
+
+            // 3) Fallback: let Selenium look on PATH
+            ChromeDriverService service = string.IsNullOrEmpty(driverDir)
+                ? ChromeDriverService.CreateDefaultService()
+                : ChromeDriverService.CreateDefaultService(driverDir);
+
+            service.HideCommandPromptWindow = true;
+            service.EnableVerboseLogging = true;
+
+            var driver = new ChromeDriver(
+                service,
+                options,
+                TimeSpan.FromSeconds(120));       // generous startup timeout
 
             driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
 
+            TryMaximize(driver);
+            return driver;
+        }
+
+        private static void TryMaximize(IWebDriver driver)
+        {
             try
             {
                 driver.Manage().Window.Maximize();
             }
             catch (WebDriverException e)
             {
-                Trace.WriteLine("Failed to maximize the window: " + e.Message);
+                Trace.WriteLine("Failed to maximize the window : " + e.Message);
             }
-            
-            return driver;
         }
 
         #region ScreenShot support

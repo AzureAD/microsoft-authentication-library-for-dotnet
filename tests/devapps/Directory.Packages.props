@@ -2,7 +2,7 @@
   <PropertyGroup>
     <!-- Disable central package management for dev apps -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
   </PropertyGroup>
   <ItemGroup>
