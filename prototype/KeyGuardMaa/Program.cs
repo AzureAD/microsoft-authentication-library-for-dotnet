@@ -1,5 +1,8 @@
-﻿using System.Security.Cryptography;
-using KeyGuard.Attestation;               
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System.Security.Cryptography;
+using KeyGuard.Attestation;
 
 class Program
 {
@@ -17,11 +20,25 @@ class Program
 
         /* Attest it through the managed wrapper */
         using var client = new AttestationClient();          // auto-initializes native DLL
+        var result = client.Attest(MaaEndpoint, key.Handle);
 
-        if (client.TryAttest(MaaEndpoint, key.Handle, out var jwt))
-            Console.WriteLine($"\nAttestation JWT:\n{jwt}");
-        else
-            Console.WriteLine("\nAttestation failed");
+        switch (result.Status)
+        {
+            case AttestationStatus.Success:
+                Console.WriteLine($"\nAttestation JWT:\n{result.Jwt}");
+                break;
+
+            case AttestationStatus.NativeError:
+                var rc = (AttestationResultErrorCode)result.NativeCode;
+                Console.WriteLine(
+                    $"❌ Native error {rc} (0x{result.NativeCode:X}):\n" +
+                    $"{AttestationErrors.Describe(rc)}");
+                break;
+
+            default:
+                Console.WriteLine($"❌ {result.Status}: {result.Message}");
+                break;
+        }
 
         /* Quick signature sanity-check */ // this is not part of the attestation flow
         using RSA rsa = new RSACng(key);
