@@ -223,6 +223,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             authenticationResult.AuthenticationResultMetadata.CacheLevel = GetCacheLevel(authenticationResult);
             authenticationResult.AuthenticationResultMetadata.Telemetry = apiEvent.MsalRuntimeTelemetry;
             authenticationResult.AuthenticationResultMetadata.RegionDetails = CreateRegionDetails(apiEvent);
+            authenticationResult.AuthenticationResultMetadata.CachedAccessTokenCount = apiEvent.CachedAccessTokenCount;
 
             Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
         }
