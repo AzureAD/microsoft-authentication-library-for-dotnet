@@ -203,7 +203,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 #endif
 
-        private static readonly Lazy<bool> _isMacConsoleApp = new Lazy<bool>(() => !LibObjc.IsNsApplicationRunning());
+        private static readonly Lazy<bool> _isMacConsoleApp = new Lazy<bool>(() => {
+#if SUPPORTS_WIN32
+            return !LibObjc.IsNsApplicationRunning();
+#else
+            return true;
+#endif
+        });
+
         public static bool IsMacConsoleApp()
         {
             if (!DesktopOsHelper.IsMac())
