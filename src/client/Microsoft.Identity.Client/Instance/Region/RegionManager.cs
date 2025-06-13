@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Region
                 "Do not call GetAzureRegionAsync outside of a request. This can happen if you perform instance discovery outside a request, for example as part of validating input params.");
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
-            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
 
             // MSAL always performs region auto-discovery, even if the user configured an actual region
             // in order to detect inconsistencies and report via telemetry
