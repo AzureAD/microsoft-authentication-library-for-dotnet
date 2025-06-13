@@ -1,5 +1,9 @@
-﻿using Microsoft.Win32.SafeHandles;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
+using static KeyGuard.Attestation.AttestationErrors;
 
 namespace KeyGuard.Attestation
 {
@@ -11,6 +15,11 @@ namespace KeyGuard.Attestation
     {
         private bool _initialized;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AttestationClient"/> class.
+        /// Ensures the native library is loaded and initializes the attestation library.
+        /// Throws an <see cref="InvalidOperationException"/> if initialization fails.
+        /// </summary>
         public AttestationClient()
         {
             NativeDllResolver.EnsureLoaded();                            // step 0
@@ -29,39 +38,50 @@ namespace KeyGuard.Attestation
         /// <summary>
         /// Calls the native <c>AttestKeyGuardImportKey</c> and—on success—returns the JWT.
         /// </summary>
-        public bool TryAttest(string endpoint,
-                              SafeNCryptKeyHandle keyHandle,
-                              out string? jwt,
-                              string clientId = "kg-sample-client")
+        public AttestationResult Attest(string endpoint,
+                                SafeNCryptKeyHandle keyHandle,
+                                string clientId = "kg-sample-client")
         {
-            jwt = null;
-            IntPtr buf = IntPtr.Zero;
+            if (!_initialized)
+                return new(AttestationStatus.NotInitialized, null, -1,
+                           "Native library not initialised.");
 
+            IntPtr buf = IntPtr.Zero;
             bool addRef = false;
-            keyHandle.DangerousAddRef(ref addRef);
 
             try
             {
+                keyHandle.DangerousAddRef(ref addRef);
+
                 int rc = NativeMethods.AttestKeyGuardImportKey(
-                             endpoint,
-                             authToken: null,
-                             clientPayload: null,
-                             keyHandle,
-                             out buf,
-                             clientId);
+                             endpoint, null, null, keyHandle, out buf, clientId);
 
-                if (rc == 0 && buf != IntPtr.Zero)
-                    jwt = Marshal.PtrToStringAnsi(buf);
+                if (rc != 0)
+                    return new(AttestationStatus.NativeError, null, rc, null);
 
-                return rc == 0;
+                if (buf == IntPtr.Zero)
+                    return new(AttestationStatus.TokenEmpty, null, 0,
+                               "rc==0 but token buffer null.");
+
+                string jwt = Marshal.PtrToStringAnsi(buf)!;
+                return new(AttestationStatus.Success, jwt, 0, null);
+            }
+            catch (Exception ex)
+            {
+                return new(AttestationStatus.Exception, null, -1, ex.Message);
             }
             finally
             {
-                if (buf != IntPtr.Zero) NativeMethods.FreeAttestationToken(buf);
-                if (addRef) keyHandle.DangerousRelease();
+                if (buf != IntPtr.Zero)
+                    NativeMethods.FreeAttestationToken(buf);
+                if (addRef)
+                    keyHandle.DangerousRelease();
             }
         }
 
+        /// <summary>
+        /// Disposes the <see cref="AttestationClient"/> instance, releasing any resources
+        /// </summary>
         public void Dispose()
         {
             if (_initialized)

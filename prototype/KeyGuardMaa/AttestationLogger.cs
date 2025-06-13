@@ -1,4 +1,7 @@
-﻿namespace KeyGuard.Attestation
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+namespace KeyGuard.Attestation
 {
     internal static class AttestationLogger
     {
