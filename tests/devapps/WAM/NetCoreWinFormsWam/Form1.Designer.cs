@@ -69,6 +69,7 @@
             cbxCacheEncryption = new System.Windows.Forms.CheckBox();
             btn_ATSDeviceCodeFlow = new System.Windows.Forms.Button();
             atiSshBtn = new System.Windows.Forms.Button();
+            btn_wia = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)nudAutocancelSeconds).BeginInit();
             SuspendLayout();
             // 
@@ -461,20 +462,31 @@
             // 
             // atiSshBtn
             // 
-            atiSshBtn.Location = new System.Drawing.Point(411, 270);
+            atiSshBtn.Location = new System.Drawing.Point(411, 269);
             atiSshBtn.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             atiSshBtn.Name = "atiSshBtn";
-            atiSshBtn.Size = new System.Drawing.Size(172, 25);
+            atiSshBtn.Size = new System.Drawing.Size(172, 26);
             atiSshBtn.TabIndex = 38;
             atiSshBtn.Text = "ATI w/ SSHAuth";
             atiSshBtn.UseVisualStyleBackColor = true;
             atiSshBtn.Click += atiSshBtn_Click;
+            // 
+            // btn_wia
+            // 
+            btn_wia.Location = new System.Drawing.Point(589, 269);
+            btn_wia.Name = "btn_wia";
+            btn_wia.Size = new System.Drawing.Size(123, 26);
+            btn_wia.TabIndex = 40;
+            btn_wia.Text = "WIA";
+            btn_wia.UseVisualStyleBackColor = true;
+            btn_wia.Click += btn_wia_Click;
             // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(821, 794);
+            Controls.Add(btn_wia);
             Controls.Add(cbxCacheEncryption);
             Controls.Add(atiSshBtn);
             Controls.Add(btn_ATSDeviceCodeFlow);
@@ -565,6 +577,7 @@
         private System.Windows.Forms.Button btn_ATSDeviceCodeFlow;
         private System.Windows.Forms.Button atiSshBtn;
         private System.Windows.Forms.CheckBox cbxCacheEncryption;
+        private System.Windows.Forms.Button btn_wia;
     }
 }
 
