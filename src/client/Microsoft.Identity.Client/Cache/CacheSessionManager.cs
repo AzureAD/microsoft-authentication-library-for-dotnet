@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Cache
         public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
         {
             var result = await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
-            RequestContext.ApiEvent.CacheAccessTokenCount = TokenCacheInternal.Accessor.EntryCount;
+            RequestContext.ApiEvent.CachedAccessTokenCount = TokenCacheInternal.Accessor.EntryCount;
             return result;
         }
 
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.Cache
                 RequestContext.ApiEvent.CacheLevel = CacheLevel.L1Cache;
             }
 
-            RequestContext.ApiEvent.CacheAccessTokenCount = TokenCacheInternal.Accessor.EntryCount;
+            RequestContext.ApiEvent.CachedAccessTokenCount = TokenCacheInternal.Accessor.EntryCount;
         }
     }
 }
