@@ -184,6 +184,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedIdentityTokenRevocation", "tests\devapps\Managed Identity apps\ManagedIdentityTokenRevocation\ManagedIdentityTokenRevocation.csproj", "{DA9C3258-DEF6-7794-9762-20CF7B826839}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.E2E.MSI", "tests\Microsoft.Identity.Test.E2e\Microsoft.Identity.Test.E2E.MSI.csproj", "{97995B86-AA0F-3AF9-DA40-85A6263E4391}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacMauiAppWithBroker", "tests\devapps\MacMauiAppWithBroker\MacMauiAppWithBroker.csproj", "{AEF6BB00-931F-4638-955D-24D735625C34}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacConsoleAppWithBroker", "tests\devapps\MacConsoleAppWithBroker\MacConsoleAppWithBroker.csproj", "{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}"
@@ -1841,7 +1842,6 @@ Global
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Debug + MobileApps|x86.ActiveCfg = Debug|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Debug + MobileApps|x86.Build.0 = Debug|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AEF6BB00-931F-4638-955D-24D735625C34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Debug|ARM.ActiveCfg = Debug|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Debug|ARM.Build.0 = Debug|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Debug|ARM64.ActiveCfg = Debug|Any CPU
@@ -1855,7 +1855,6 @@ Global
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Debug|x86.Build.0 = Debug|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AEF6BB00-931F-4638-955D-24D735625C34}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Release|ARM.ActiveCfg = Release|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Release|ARM.Build.0 = Release|Any CPU
 		{AEF6BB00-931F-4638-955D-24D735625C34}.Release|ARM64.ActiveCfg = Release|Any CPU
@@ -1883,7 +1882,6 @@ Global
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Debug + MobileApps|x86.ActiveCfg = Debug|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Debug + MobileApps|x86.Build.0 = Debug|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Debug|ARM.ActiveCfg = Debug|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Debug|ARM.Build.0 = Debug|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Debug|ARM64.ActiveCfg = Debug|Any CPU
@@ -1897,7 +1895,6 @@ Global
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Debug|x86.Build.0 = Debug|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Release|ARM.ActiveCfg = Release|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Release|ARM.Build.0 = Release|Any CPU
 		{DBD18BC8-72E4-47D4-BD79-8DEBD9F2C0D0}.Release|ARM64.ActiveCfg = Release|Any CPU
