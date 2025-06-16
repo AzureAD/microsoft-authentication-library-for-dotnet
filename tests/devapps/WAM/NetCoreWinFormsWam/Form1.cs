@@ -938,6 +938,27 @@ namespace NetDesktopWinForms
 
             return result;
         }
+
+        private async void btn_wia_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var cancellationTokenSource = new CancellationTokenSource();
+
+                var pca = await CreatePca(GetAuthMethod()).ConfigureAwait(false);
+                AuthenticationResult authenticationResult = await pca
+                    .AcquireTokenByIntegratedWindowsAuth(
+                        GetScopes())
+                    .ExecuteAsync(cancellationTokenSource.Token)
+                    .ConfigureAwait(true);
+
+                await LogResultAndRefreshAccountsAsync(authenticationResult).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log("Exception: " + ex);
+            }
+        }
     }
 
     public class ClientEntry

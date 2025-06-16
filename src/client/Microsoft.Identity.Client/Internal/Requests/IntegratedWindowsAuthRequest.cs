@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.WsTrust;
 
@@ -20,6 +22,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
         private readonly AcquireTokenByIntegratedWindowsAuthParameters _integratedWindowsAuthParameters;
+        private readonly Lazy<ISilentAuthRequestStrategy> _brokerStrategyLazy;
 
         public IntegratedWindowsAuthRequest(
             IServiceBundle serviceBundle,
@@ -31,10 +34,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
                 serviceBundle);
+
+            var silentParameters = new AcquireTokenSilentParameters();
+            var silentRequest = new SilentRequest(ServiceBundle, authenticationRequestParameters, silentParameters);
+            _brokerStrategyLazy = new Lazy<ISilentAuthRequestStrategy>(() =>  new BrokerSilentStrategy(silentRequest,
+                                                                                               serviceBundle,
+                                                                                               authenticationRequestParameters,
+                                                                                               silentParameters,
+                                                                                               serviceBundle.PlatformProxy.CreateBroker(
+                                                                                                   serviceBundle.Config, null)));
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+            bool isBrokerConfigured = AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
+                                      ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
+
+            if(isBrokerConfigured)
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Info("IWA called with broker. Routing to broker default user sign in");
+                AuthenticationRequestParameters.Account = PublicClientApplication.OperatingSystemAccount;
+                return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+            }
+
             await ResolveAuthorityAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
             var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
