@@ -1,101 +1,94 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Security.Cryptography;
 using KeyGuard.Attestation;
+using KeyGuard.Security;
 
 class Program
 {
-    private const string ProviderName = "Microsoft Software Key Storage Provider";
-    private const string KeyName = "KeyGuardRSAKey";
-    private const CngKeyCreationOptions NCryptUseVirtualIsolationFlag = (CngKeyCreationOptions)0x00020000;
-    private const CngKeyCreationOptions NCryptUsePerBootKeyFlag = (CngKeyCreationOptions)0x00040000;
-
-    private const string MaaEndpoint = "";
-
     static void Main()
     {
-        /* Create a fresh KeyGuard-protected key */
-        using CngKey key = CreateFreshKey();
-
-        /* Attest it through the managed wrapper */
-        using var client = new AttestationClient();          // auto-initializes native DLL
-        var result = client.Attest(MaaEndpoint, key.Handle);
-
-        switch (result.Status)
+        /* ── Ask for the attestation endpoint ────────────────────── */
+        string maaEndpoint;
+        do
         {
-            case AttestationStatus.Success:
-                Console.WriteLine($"\nAttestation JWT:\n{result.Jwt}");
-                break;
+            Console.Write("Enter Azure Attestation endpoint: ");
+            maaEndpoint = Console.ReadLine()?.Trim() ?? string.Empty;
+        }
+        while (string.IsNullOrWhiteSpace(maaEndpoint));
 
-            case AttestationStatus.NativeError:
-                var rc = (AttestationResultErrorCode)result.NativeCode;
-                Console.WriteLine(
-                    $"❌ Native error {rc} (0x{result.NativeCode:X}):\n" +
-                    $"{AttestationErrors.Describe(rc)}");
-                break;
+        Console.WriteLine($"Using endpoint: {maaEndpoint}\n");
 
-            default:
-                Console.WriteLine($"❌ {result.Status}: {result.Message}");
-                break;
+        /* ── Decide if Key Guard is supported on this host ───────── */
+        bool hasKeyGuard = OsSupport.IsServer2022OrLater();
+
+        Console.WriteLine(hasKeyGuard
+            ? "Server 2022/2025 detected – Key Guard path enabled."
+            : "Non-server or pre-2022 build – using software RSA key.");
+
+        /* ── Create the key (Key Guard if possible) ───────────────── */
+        CngKey key;
+        if (hasKeyGuard)
+        {
+            try
+            {
+                key = KeyGuardKey.CreateFresh();
+            }
+            catch (PlatformNotSupportedException ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Error -  {ex.Message}");
+                Console.ResetColor();
+                Console.WriteLine("Using software RSA key instead.");
+                key = CngKey.Create(CngAlgorithm.Rsa, null);
+                hasKeyGuard = false;              // no attestation
+            }
+        }
+        else
+        {
+            key = CngKey.Create(CngAlgorithm.Rsa, null);
         }
 
-        /* Quick signature sanity-check */ // this is not part of the attestation flow
-        using RSA rsa = new RSACng(key);
-        byte[] sig = rsa.SignData(
-            System.Text.Encoding.UTF8.GetBytes("hello keyguard"),
-            HashAlgorithmName.SHA256,
-            RSASignaturePadding.Pkcs1);
-
-        Console.WriteLine($"\nSignature length: {sig.Length} bytes");
-    }
-
-    // ────────────────────────────────────────────────────────────────────────
-    /// <summary>
-    /// creates a new KeyGuard-protected RSA key.
-    /// </summary>
-    /// <returns></returns>
-    private static CngKey CreateFreshKey()
-    {
-        Console.WriteLine($"Creating NEW '{KeyName}' with KeyGuard protection…");
-
-        var p = new CngKeyCreationParameters
+        using (key)
         {
-            Provider = new CngProvider(ProviderName),
-            KeyUsage = CngKeyUsages.AllUsages,
-            ExportPolicy = CngExportPolicies.None,
-            KeyCreationOptions =
-                  CngKeyCreationOptions.OverwriteExistingKey
-                | NCryptUseVirtualIsolationFlag
-                | NCryptUsePerBootKeyFlag
-        };
+            /* ── Attest only when we really have a Key Guard key ──── */
+            if (hasKeyGuard && KeyGuardKey.IsKeyGuardProtected(key))
+            {
+                using var client = new AttestationClient();
+                var r = client.Attest(maaEndpoint, key.Handle);
 
-        p.Parameters.Add(
-            new CngProperty("Length",
-                            BitConverter.GetBytes(2048),
-                            CngPropertyOptions.None));
+                switch (r.Status)
+                {
+                    case AttestationStatus.Success:
+                        Console.WriteLine($"\nAttestation JWT:\n{r.Jwt}");
+                        break;
 
-        CngKey key = CngKey.Create(CngAlgorithm.Rsa, KeyName, p);
+                    case AttestationStatus.NativeError:
+                        var rc = (AttestationResultErrorCode)r.NativeCode;
+                        Console.WriteLine($"Native error {rc} (0x{r.NativeCode:X}):");
+                        Console.WriteLine(AttestationErrors.Describe(rc));
+                        break;
 
-        Console.WriteLine($"Key created, size {key.KeySize} bits");
-        Console.WriteLine(IsKeyGuardProtected(key)
-            ? "KeyGuard flag set."
-            : "KeyGuard flag missing!");
+                    default:
+                        Console.WriteLine($"Error - {r.Status}: {r.Message}");
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Attestation skipped (Key Guard not available).");
+            }
 
-        return key;
-    }
+            /* ── Optional sign demo ───────────────────────────────── */
+            using RSA rsa = new RSACng(key);
+            byte[] sig = rsa.SignData(
+                System.Text.Encoding.UTF8.GetBytes("Hello KeyGuard"),
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
 
-    /// <summary>
-    /// is the KeyGuard flag set on the key?
-    /// </summary>
-    /// <param name="key"></param>
-    /// <returns></returns>
-    private static bool IsKeyGuardProtected(CngKey key)
-    {
-        if (!key.HasProperty("Virtual Iso", CngPropertyOptions.None))
-            return false;
-
-        byte[]? val = key.GetProperty("Virtual Iso", CngPropertyOptions.None).GetValue();
-        return val is { Length: > 0 } && val[0] != 0;
+            Console.WriteLine($"\nSignature length: {sig.Length} bytes");
+        }
     }
 }

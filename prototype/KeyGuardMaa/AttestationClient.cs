@@ -2,13 +2,14 @@
 // Licensed under the MIT License.
 
 using Microsoft.Win32.SafeHandles;
+using System;
 using System.Runtime.InteropServices;
 using static KeyGuard.Attestation.AttestationErrors;
 
 namespace KeyGuard.Attestation
 {
     /// <summary>
-    /// Managed facade for <c>AttestationClientLib.dll</c>.  Holds initialization state,
+    /// Managed façade for <c>AttestationClientLib.dll</c>.  Holds initialisation state,
     /// does ref-count hygiene on <see cref="SafeNCryptKeyHandle"/>, and returns a JWT.
     /// </summary>
     public sealed class AttestationClient : IDisposable
@@ -16,13 +17,18 @@ namespace KeyGuard.Attestation
         private bool _initialized;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AttestationClient"/> class.
-        /// Ensures the native library is loaded and initializes the attestation library.
-        /// Throws an <see cref="InvalidOperationException"/> if initialization fails.
+        /// AttestationClient constructor.  Pro-actively verifies the native DLL,
         /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
         public AttestationClient()
         {
-            NativeDllResolver.EnsureLoaded();                            // step 0
+            /* step 0 ── pro-actively verify the native DLL */
+            string? dllError = NativeDiagnostics.ProbeNativeDll();
+            if (dllError is not null)
+                throw new InvalidOperationException(dllError);
+
+            /* step 1 ── load & initialise */
+            NativeDllResolver.EnsureLoaded();
 
             var info = new NativeMethods.AttestationLogInfo
             {
@@ -32,15 +38,15 @@ namespace KeyGuard.Attestation
 
             _initialized = NativeMethods.InitAttestationLib(ref info) == 0;
             if (!_initialized)
-                throw new InvalidOperationException("Failed to initialize AttestationClientLib.");
+                throw new InvalidOperationException("Failed to initialise AttestationClientLib.");
         }
 
         /// <summary>
-        /// Calls the native <c>AttestKeyGuardImportKey</c> and—on success—returns the JWT.
+        /// Calls the native <c>AttestKeyGuardImportKey</c> and returns a structured result.
         /// </summary>
         public AttestationResult Attest(string endpoint,
-                                SafeNCryptKeyHandle keyHandle,
-                                string clientId = "kg-sample-client")
+                                        SafeNCryptKeyHandle keyHandle,
+                                        string clientId = "kg-sample-client")
         {
             if (!_initialized)
                 return new(AttestationStatus.NotInitialized, null, -1,
@@ -61,10 +67,25 @@ namespace KeyGuard.Attestation
 
                 if (buf == IntPtr.Zero)
                     return new(AttestationStatus.TokenEmpty, null, 0,
-                               "rc==0 but token buffer null.");
+                               "rc==0 but token buffer was null.");
 
                 string jwt = Marshal.PtrToStringAnsi(buf)!;
                 return new(AttestationStatus.Success, jwt, 0, null);
+            }
+            catch (DllNotFoundException ex)
+            {
+                return new(AttestationStatus.Exception, null, -1,
+                    $"Native DLL not found: {ex.Message}");
+            }
+            catch (BadImageFormatException ex)
+            {
+                return new(AttestationStatus.Exception, null, -1,
+                    $"Architecture mismatch (x86/x64) or corrupted DLL: {ex.Message}");
+            }
+            catch (SEHException ex)
+            {
+                return new(AttestationStatus.Exception, null, -1,
+                    $"Native library raised SEHException: {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -80,7 +101,7 @@ namespace KeyGuard.Attestation
         }
 
         /// <summary>
-        /// Disposes the <see cref="AttestationClient"/> instance, releasing any resources
+        /// Disposes the client, releasing any resources and un-initializing the native library.
         /// </summary>
         public void Dispose()
         {

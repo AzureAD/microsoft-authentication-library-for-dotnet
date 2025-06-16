@@ -19,11 +19,5 @@ namespace KeyGuard.Attestation
                 => "Native logger setup failed (rare).",
             _ => rc.ToString()         // default: enum name
         };
-
-        public record AttestationResult(
-        AttestationStatus Status,
-        string? Jwt,
-        int NativeCode,
-        string? Message);
     }
 }
