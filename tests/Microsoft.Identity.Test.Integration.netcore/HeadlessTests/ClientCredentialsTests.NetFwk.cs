@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
-        //[DataRow(Cloud.Arlington, TargetFrameworks.NetCore)] TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4905
+        [DataRow(Cloud.Arlington, TargetFrameworks.NetCore)]
         //[DataRow(Cloud.PPE)] - secret not setup
         public async Task WithSecret_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {

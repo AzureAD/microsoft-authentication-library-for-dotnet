@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string Environment => "login.microsoftonline.us";
 
-            public string[] AppScopes => new[] { "https://vault.azure.net/.default" };
+            public string[] AppScopes => new[] { "https://graph.microsoft.com/.default" };
 
             public X509Certificate2 GetCertificate()
             {
