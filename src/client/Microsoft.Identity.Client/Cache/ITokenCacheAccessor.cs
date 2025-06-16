@@ -10,6 +10,8 @@ namespace Microsoft.Identity.Client.Cache
 {
     internal interface ITokenCacheAccessor
     {
+        int EntryCount { get; }
+
         void SaveAccessToken(MsalAccessTokenCacheItem item);
 
         void SaveRefreshToken(MsalRefreshTokenCacheItem item);

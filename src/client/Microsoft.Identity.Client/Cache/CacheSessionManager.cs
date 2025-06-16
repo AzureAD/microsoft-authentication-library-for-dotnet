@@ -48,9 +48,11 @@ namespace Microsoft.Identity.Client.Cache
             return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
-        public Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
+        public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
         {
-            return TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse);
+            var result = await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
+            RequestContext.ApiEvent.CachedAccessTokenCount = TokenCacheInternal.Accessor.EntryCount;
+            return result;
         }
 
         public async Task<Account> GetAccountAssociatedWithAccessTokenAsync(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
@@ -181,6 +183,8 @@ namespace Microsoft.Identity.Client.Cache
             {
                 RequestContext.ApiEvent.CacheLevel = CacheLevel.L1Cache;
             }
+
+            RequestContext.ApiEvent.CachedAccessTokenCount = TokenCacheInternal.Accessor.EntryCount;
         }
     }
 }
