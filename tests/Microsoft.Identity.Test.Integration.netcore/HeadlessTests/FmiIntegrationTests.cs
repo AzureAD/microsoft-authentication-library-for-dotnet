@@ -25,9 +25,8 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
     public class FmiIntegrationTests
     {
         private byte[] _serializedCache;
-        private const string _testslice1 = "dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1"; //Enables MSAL to target ESTS Test slice
-        private const string _testslice2 = "dc=ESTSR-PUB-WUS-LZ1-TEST"; //Updated slice for regional tests
-
+        private const string Testslice = "dc=ESTSR-PUB-WUS-LZ1-TEST"; //Updated slice for regional tests
+        private const string AzureRegion = "westus3";
 
         [TestMethod]
         //RMA getting FMI cred for a leaf entity or sub-RMA
@@ -54,9 +53,9 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters(_testslice2) //Enables MSAL to target ESTS Test slice
+                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
-                        .WithAzureRegion("westus3")
+                        .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
             //Configure token cache serialization
@@ -106,9 +105,9 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters(_testslice2) //Enables MSAL to target ESTS Test slice
+                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
-                        .WithAzureRegion("westus3")
+                        .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
             //Configure token cache serialization
@@ -158,9 +157,9 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters(_testslice2) //Enables MSAL to target ESTS Test slice
-                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, _testslice2)) //This api acquires the FMI credential needed to authenticate
-                        .WithAzureRegion("westus3")
+                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
+                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice)) //This api acquires the FMI credential needed to authenticate
+                        .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
             //FOR TESTING ONLY: Configure token cache serialization
@@ -211,9 +210,9 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters(_testslice2) //Enables MSAL to target ESTS Test slice
-                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, _testslice2)) //This api acquires the FMI credential needed to authenticate
-                        .WithAzureRegion("westus3")
+                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
+                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice)) //This api acquires the FMI credential needed to authenticate
+                        .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
             //Configure token cache serialization
@@ -263,9 +262,9 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters(_testslice2) //Enables MSAL to target ESTS Test slice
-                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, _testslice2)) //This api acquires the FMI credential needed to authenticate
-                        .WithAzureRegion("westus3")
+                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
+                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice)) //This api acquires the FMI credential needed to authenticate
+                        .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
             //Configure token cache serialization
@@ -304,7 +303,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
                         .WithExtraQueryParameters(eqParameters) //Enables MSAL to target ESTS Test slice
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
-                        .WithAzureRegion("westus3")
+                        .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
             //Acquire Token
@@ -344,7 +343,5 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             Assert.IsTrue(subject.Contains(expectedFmiPath));
             Assert.AreEqual(expectedInternalCacheKey, token.CacheKey);
         }
-
-      
     }
 }
