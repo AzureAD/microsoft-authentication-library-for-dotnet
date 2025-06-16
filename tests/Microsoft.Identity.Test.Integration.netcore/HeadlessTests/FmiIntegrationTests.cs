@@ -27,22 +27,14 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         private byte[] _serializedCache;
         private const string Testslice = "dc=ESTSR-PUB-WUS-LZ1-TEST"; //Updated slice for regional tests
         private const string AzureRegion = "westus3";
-
+        private const string TenantId = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca"; //Tenant Id for the test app
+     
         [TestMethod]
         //RMA getting FMI cred for a leaf entity or sub-RMA
         public async Task Flow1_Credential_From_Cert()
         {
             //Arrange
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-            string expectedExternalCacheKey = null;
-
-            Action<TokenCacheNotificationArgs> extCacheKeyEvaluator = (args) =>
-            {
-                if (expectedExternalCacheKey != null)
-                {
-                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedExternalCacheKey));
-                }
-            };
 
             //Fmi app/scenario parameters
             var clientId = "4df2cbbb-8612-49c1-87c8-f334d6d065ad";
@@ -52,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             //Create application
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
-                        .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
+                        .WithAuthority("https://login.microsoftonline.com/", TenantId)
                         .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
                         .WithAzureRegion(AzureRegion)
@@ -63,8 +55,10 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
+            string expectedFmiPathHash = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
+            var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache"; // last part is the SHA256 of the fmi path
+            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
+                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
 
             //Acquire Fmi Cred
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
@@ -73,9 +67,10 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                                                     .ConfigureAwait(false);
 
             //Assert
+            var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{clientId}-{TenantId}-{scope}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
                           confidentialApp,
-                          "-login.microsoftonline.com-atext-4df2cbbb-8612-49c1-87c8-f334d6d065ad-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-api://azurefmitokenexchange/.default-zm2n0e62zwtsnnsozptlsooob_c7i-gfpxhyqqinjuw",
+                          expectedInternalCacheKey,
                           "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265",
                           "SomeFmiPath/FmiCredentialPath");
         }
@@ -86,48 +81,38 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         {
             //Arrange
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-            string expectedExternalCacheKey = null;
-
-            Action<TokenCacheNotificationArgs> extCacheKeyEvaluator = (args) =>
-            {
-                if (expectedExternalCacheKey != null)
-                {
-                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedExternalCacheKey));
-                }
-            };
 
             //Fmi app/scenario parameters
             var clientId = "4df2cbbb-8612-49c1-87c8-f334d6d065ad";
             var scope = "3091264c-7afb-45d4-b527-39737ee86187/.default";
 
             //Act
-            //Create application
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
-                        .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
-                        .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
+                        .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                        .WithExtraQueryParameters(Testslice)
+                        .WithCertificate(cert, sendX5C: true)
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
-            //Configure token cache serialization
             confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
+            string expectedFmiPathHash = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
+            var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
+            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
+                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
 
-            //Acquire Token
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
-                                                    .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
+                                                    .WithFmiPath("SomeFmiPath/FmiCredentialPath")
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
 
-            //Assert
+            var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{clientId}-{TenantId}-{scope}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
                           confidentialApp,
-                          "-login.microsoftonline.com-atext-4df2cbbb-8612-49c1-87c8-f334d6d065ad-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-3091264c-7afb-45d4-b527-39737ee86187/.default-zm2n0e62zwtsnnsozptlsooob_c7i-gfpxhyqqinjuw",
+                          expectedInternalCacheKey,
                           "3091264c-7afb-45d4-b527-39737ee86187",
                           "SomeFmiPath/FmiCredentialPath");
         }
@@ -138,48 +123,36 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         {
             //Arrange
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-            string expectedExternalCacheKey = null;
 
-            Action<TokenCacheNotificationArgs> extCacheKeyEvaluator = (args) =>
-            {
-                if (expectedExternalCacheKey != null)
-                {
-                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedExternalCacheKey));
-                }
-            };
-
-            //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
             var scope = "api://AzureFMITokenExchange/.default";
 
-            //Act
-            //Create application
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
-                        .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
-                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice)) //This api acquires the FMI credential needed to authenticate
+                        .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                        .WithExtraQueryParameters(Testslice)
+                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice))
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
-            //FOR TESTING ONLY: Configure token cache serialization
             confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
+            string expectedFmiPathHash = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
+            var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
+            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
+                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
 
-            //Acquire Fmi Cred
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
-                                                    .WithFmiPath("SomeFmiPath/Path") //Sets fmi path in client credential request.
+                                                    .WithFmiPath("SomeFmiPath/Path")
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
 
-            //Assert
+            var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{clientId}-{TenantId}-{scope}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
                           confidentialApp,
-                          "-login.microsoftonline.com-atext-urn:microsoft:identity:fmi-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-api://azurefmitokenexchange/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
+                          expectedInternalCacheKey,
                           "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265",
                           "SomeFmiPath/Path");
         }
@@ -191,48 +164,36 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         {
             //Arrange
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-            string expectedExternalCacheKey = null;
 
-            Action<TokenCacheNotificationArgs> extCacheKeyEvaluator = (args) =>
-            {
-                if (expectedExternalCacheKey != null)
-                {
-                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedExternalCacheKey));
-                }
-            };
-
-            //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
-            var scope = "api://AzureADTokenExchange/.default"; 
+            var scope = "api://AzureADTokenExchange/.default";
 
-            //Act
-            //Create application
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
-                        .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
-                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice)) //This api acquires the FMI credential needed to authenticate
+                        .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                        .WithExtraQueryParameters(Testslice)
+                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice))
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
-            //Configure token cache serialization
             confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "";
+            string expectedFmiPathHash = ""; // If you have a value, replace accordingly
+            var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
+            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
+                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
 
-            //Acquire Fmi Cred
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
-                                                    .WithFmiPath("SomeFmiPath/Path") //Sets fmi path in client credential request.
+                                                    .WithFmiPath("SomeFmiPath/Path")
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
 
-            //Assert
+            var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{clientId}-{TenantId}-{scope}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
                           confidentialApp,
-                          "-login.microsoftonline.com-atext-urn:microsoft:identity:fmi-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-3091264c-7afb-45d4-b527-39737ee86187/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
+                          expectedInternalCacheKey,
                           "3091264c-7afb-45d4-b527-39737ee86187",
                           "SomeFmiPath/Path");
         }
@@ -243,48 +204,36 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         {
             //Arrange
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-            string expectedExternalCacheKey = null;
 
-            Action<TokenCacheNotificationArgs> extCacheKeyEvaluator = (args) =>
-            {
-                if (expectedExternalCacheKey != null)
-                {
-                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedExternalCacheKey));
-                }
-            };
-
-            //Fmi app/scenario parameters
             var clientId = "urn:microsoft:identity:fmi";
-            var scope = "3091264c-7afb-45d4-b527-39737ee86187/.default"; 
+            var scope = "3091264c-7afb-45d4-b527-39737ee86187/.default";
 
-            //Act
-            //Create application
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
-                        .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
-                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
-                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice)) //This api acquires the FMI credential needed to authenticate
+                        .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                        .WithExtraQueryParameters(Testslice)
+                        .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice))
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
 
-            //Configure token cache serialization
             confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(extCacheKeyEvaluator);
-            expectedExternalCacheKey = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
+            string expectedFmiPathHash = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
+            var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
+            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
+                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
 
-            //Acquire Fmi Cred
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
-                                                    .WithFmiPath("SomeFmiPath/Path") //Sets fmi path in client credential request.
+                                                    .WithFmiPath("SomeFmiPath/Path")
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
 
-            //Assert
+            var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{clientId}-{TenantId}-{scope}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
                           confidentialApp,
-                          "-login.microsoftonline.com-atext-urn:microsoft:identity:fmi-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-3091264c-7afb-45d4-b527-39737ee86187/.default-7cx57q63os7benq6er0sxgjptnqsv7tgb5zexcidfoi",
+                          expectedInternalCacheKey,
                           "3091264c-7afb-45d4-b527-39737ee86187",
                           "SomeFmiPath/Path");
         }
