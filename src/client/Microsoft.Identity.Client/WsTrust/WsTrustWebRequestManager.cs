@@ -98,8 +98,7 @@ namespace Microsoft.Identity.Client.WsTrust
             };
 
             var body = new StringContent(
-                // CodeQL [SM00417] False Positive: wsTrustRequest is a body parameter for HttpRequest that follows WsTrust protocol
-                wsTrustRequest,
+                wsTrustRequest, // CodeQL [SM00417] False Positive: wsTrustRequest is a body parameter for HttpRequest that follows WsTrust protocol
                 Encoding.UTF8, "application/soap+xml");
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
