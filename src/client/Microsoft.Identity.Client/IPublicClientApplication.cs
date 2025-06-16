@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>
-        /// This API is no longer recommended. If your applicaiton requires single sign-on (SSO) with the Windows OS's default account, 
+        /// This API is no longer recommended. If your application requires single sign-on (SSO) with the Windows OS's default account, 
         /// please transition to using WAM, which provides similar functionality 
         /// via <see href="https://aka.ms/msal-net-wam">the Windows broker (WAM)</see>.
         /// WAM does not require any setup for desktop apps to login with the Windows account.
