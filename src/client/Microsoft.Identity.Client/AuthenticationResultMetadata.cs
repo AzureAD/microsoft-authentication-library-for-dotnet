@@ -99,8 +99,7 @@ namespace Microsoft.Identity.Client
         public string Telemetry { get; set; }
 
         /// <summary>
-        /// The number of entries in the token cache. For app tokens, this is the number of access tokens cached. 
-        /// For users tokens, an entry contains all tokens for a user, including refresh token and id tokens.
+        /// The number of access tokens in the cache.       
         /// </summary>
         public int CachedAccessTokenCount { get; set; }
     }
