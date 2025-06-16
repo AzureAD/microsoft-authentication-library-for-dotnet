@@ -59,7 +59,7 @@ The project contains two assemblies:
 
 | Project | Purpose |
 |---------|---------|
-| **KeyGuard.Attestation** | Managed façade around *AttestationClientLib.dll* (initialises the native DLL, exposes `TryAttest` etc.). |
+| **KeyGuard.Attestation** | Managed façade around *AttestationClientLib.dll* (initializes the native DLL, exposes `TryAttest` etc.). |
 | **KeyGuardDemo** | Console driver that creates the RSA key, calls the façade, and prints the resulting JWT. |
 
 ---
@@ -90,7 +90,7 @@ Signature length: 256 bytes
 ## 4️⃣ What Happens Internally
 
 1. **Key creation** – `CngKey.Create()` sets `NCryptUseVirtualIsolationFlag` & `NCryptUsePerBootKeyFlag`, producing an RSA key that lives in Virtual ISO (KeyGuard) storage.  
-2. **DLL initialisation** – `AttestationClient`’s constructor registers a custom DLL resolver and calls `InitAttestationLib()` with a managed log callback.  
+2. **DLL initialization** – `AttestationClient`’s constructor registers a custom DLL resolver and calls `InitAttestationLib()` with a managed log callback.  
 3. **Attestation** – The native library collects TPM & KeyGuard evidence and posts it to the MAA `/attest/keyguard` endpoint. On **HTTP 200** it decrypts the inner token and returns a JWT.  
 4. **JWT display** – The console prints the raw token so you can paste it into [jwt.ms](https://jwt.ms) for inspection.  
 

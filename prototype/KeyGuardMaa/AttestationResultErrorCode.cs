@@ -13,7 +13,7 @@ namespace KeyGuard.Attestation
         /// <summary>The operation completed successfully.</summary>
         SUCCESS = 0,
 
-        /// <summary>libcurl could not be initialised inside the native library.</summary>
+        /// <summary>libcurl could not be initialized inside the native library.</summary>
         ERRORCURLINITIALIZATION = -1,
 
         /// <summary>The HTTP response body could not be parsed (malformed JSON, invalid JWT, etc.).</summary>
@@ -82,7 +82,7 @@ namespace KeyGuard.Attestation
         /// <summary>Failed converting a JWK structure to an RSA public key.</summary>
         ERRORCONVERTINGJWKTORSAPUB = -23,
 
-        /// <summary>EVP initialisation for RSA encryption failed (OpenSSL).</summary>
+        /// <summary>EVP initialization for RSA encryption failed (OpenSSL).</summary>
         ERROREVPPKEYENCRYPTINITFAILED = -24,
 
         /// <summary>EVP encryption failed when building the attestation claim.</summary>

@@ -17,7 +17,7 @@ public enum AttestationStatus
     /// <summary>rc == 0 but the token buffer was null/empty.</summary>
     TokenEmpty = 2,
 
-    /// <summary><see cref="AttestationClient"/> could not initialise the native DLL.</summary>
+    /// <summary><see cref="AttestationClient"/> could not initialize the native DLL.</summary>
     NotInitialized = 3,
 
     /// <summary>Any managed exception thrown while attempting the call.</summary>

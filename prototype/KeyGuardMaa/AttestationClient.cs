@@ -9,7 +9,7 @@ using static KeyGuard.Attestation.AttestationErrors;
 namespace KeyGuard.Attestation
 {
     /// <summary>
-    /// Managed façade for <c>AttestationClientLib.dll</c>.  Holds initialisation state,
+    /// Managed façade for <c>AttestationClientLib.dll</c>.  Holds initialization state,
     /// does ref-count hygiene on <see cref="SafeNCryptKeyHandle"/>, and returns a JWT.
     /// </summary>
     public sealed class AttestationClient : IDisposable
@@ -27,7 +27,7 @@ namespace KeyGuard.Attestation
             if (dllError is not null)
                 throw new InvalidOperationException(dllError);
 
-            /* step 1 ── load & initialise */
+            /* step 1 ── load & initialize */
             NativeDllResolver.EnsureLoaded();
 
             var info = new NativeMethods.AttestationLogInfo
@@ -38,7 +38,7 @@ namespace KeyGuard.Attestation
 
             _initialized = NativeMethods.InitAttestationLib(ref info) == 0;
             if (!_initialized)
-                throw new InvalidOperationException("Failed to initialise AttestationClientLib.");
+                throw new InvalidOperationException("Failed to initialize AttestationClientLib.");
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace KeyGuard.Attestation
         {
             if (!_initialized)
                 return new(AttestationStatus.NotInitialized, null, -1,
-                           "Native library not initialised.");
+                           "Native library not initialized.");
 
             IntPtr buf = IntPtr.Zero;
             bool addRef = false;

@@ -8,7 +8,7 @@ namespace KeyGuard.Attestation
         internal static string Describe(AttestationResultErrorCode rc) => rc switch
         {
             AttestationResultErrorCode.ERRORCURLINITIALIZATION
-                => "libcurl failed to initialise (DLL missing or version mismatch).",
+                => "libcurl failed to initialize (DLL missing or version mismatch).",
             AttestationResultErrorCode.ERRORHTTPREQUESTFAILED
                 => "Could not reach the attestation service (network / proxy?).",
             AttestationResultErrorCode.ERRORATTESTATIONFAILED
