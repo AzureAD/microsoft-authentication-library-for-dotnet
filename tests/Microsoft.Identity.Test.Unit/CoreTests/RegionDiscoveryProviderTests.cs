@@ -152,7 +152,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task SuccessfulResponseFromUserProvidedRegionAsync()
         {
-            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            // Add multiple mock responses for retry attempts (initial request + retries)
+            for (int i = 0; i < 3; i++)
+            {
+                AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            }
 
             _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
 
@@ -167,6 +171,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.UserProvidedAutodetectionFailed, _testRequestContext.ApiEvent.RegionOutcome);
             Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionAutoDetectNotFoundFailureMessage));
+
+            // Verify all mock responses were consumed
+            Assert.AreEqual(0, _httpManager.QueueSize);
         }
 
         [TestMethod]
@@ -310,7 +317,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task ErrorResponseFromLocalImdsAsync()
         {
-            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            // Add multiple mock responses for retry attempts (initial request + retries)
+            for (int i = 0; i < 3; i++)
+            {
+                AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            }
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
 
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.
@@ -323,6 +334,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
             Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionAutoDetectNotFoundFailureMessage));
+
+            // Verify all mock responses were consumed
+            Assert.AreEqual(0, _httpManager.QueueSize);
         }
 
         [TestMethod]
