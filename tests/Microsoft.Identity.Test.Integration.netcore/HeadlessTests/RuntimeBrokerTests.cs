@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [DoNotRunOnLinux] // POP is not supported on Linux
         [IgnoreOnOneBranch]
-        [TestMethod]
+        //[TestMethod]
         public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);

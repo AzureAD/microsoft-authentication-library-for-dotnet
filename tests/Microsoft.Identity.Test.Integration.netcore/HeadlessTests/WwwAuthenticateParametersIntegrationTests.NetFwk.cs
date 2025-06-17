@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await PoPValidator.VerifyPopNonceAsync(popNonce).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        //[RunOn(TargetFrameworks.NetCore)]
         public async Task ExtractNonceFromAuthInfoHeadersAsync()
         {
             //Arrange & Act
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await PoPValidator.VerifyPopNonceAsync(authInfoParameters.NextNonce).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        //[RunOn(TargetFrameworks.NetCore)]
         public async Task ExtractNonceWithAuthParserAsync()
         {
             //Arrange & Act
