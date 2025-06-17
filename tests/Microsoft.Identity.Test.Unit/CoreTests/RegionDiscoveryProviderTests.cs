@@ -152,8 +152,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task SuccessfulResponseFromUserProvidedRegionAsync()
         {
-            // Add multiple mock responses for retry attempts (initial request + max retries (3))
-            for (int i = 0; i < 4; i++)
+            // Add multiple mock responses: initial request + max retry attempts
+            for (int i = 0; i < (1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries); i++)
             {
                 AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
             }
@@ -317,8 +317,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task ErrorResponseFromLocalImdsAsync()
         {
-            // Add multiple mock responses for retry attempts (initial request + max retries (3))
-            for (int i = 0; i < 4; i++)
+            // Add multiple mock responses: initial request + max retry attempts
+            for (int i = 0; i < (1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries); i++)
             {
                 AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
             }
