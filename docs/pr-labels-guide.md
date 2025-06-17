@@ -1,7 +1,7 @@
 # Pull-Request Label Guide
 
 > **Purpose**  
-> Quick reference for **when** and **why** to apply the  workflow-blocking labels used in MSAL repositories.
+> Quick reference for **when** and **why** to apply the workflow-blocking labels used in MSAL repositories.
 
 ---
 
