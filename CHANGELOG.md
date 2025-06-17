@@ -1,3 +1,16 @@
+4.73.0
+=======
+
+### Features
+* Add mac broker console app support by @fengga in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5274
+* Use HTTP 2 on .NET where possible by @bgavrilMS in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5314
+* Expose access token cache count by @bgavrilMS in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5330
+* Add an extensibility API - WithFmiPathForClientAssertion … by @bgavrilMS in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5347
+
+### Bug Fixes
+* Hide ListOperatingSystemAccounts in intellisense by @ashok672 in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5304
+* Reworked retry policy functionality & Created IMDS retry policy by @Robbie-Microsoft in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5231
+
 4.72.1
 =======
  
