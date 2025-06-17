@@ -19,7 +19,7 @@
       <TargetPath>msalruntime_arm64.dylib</TargetPath>
     </None> -->
 
-		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.0" />
+		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.1" />
 
 	</ItemGroup>
 
