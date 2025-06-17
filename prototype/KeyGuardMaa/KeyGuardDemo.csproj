@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<PlatformTarget>x64</PlatformTarget>
+
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<EnableNativeCopyLocalItems>true</EnableNativeCopyLocalItems>
+
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<!-- managed packages -->
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Azure.Security.KeyGuardAttestation"
+						  Version="1.1.1"
+						  GeneratePathProperty="true" />
+		<PackageReference Include="Microsoft.Identity.Client"
+						  Version="4.72.1" />
+	</ItemGroup>
+
+	<!-- copy every native DLL from the package to the output ROOT -->
+	<ItemGroup>
+		<None Include="$(PkgMicrosoft_Azure_Security_KeyGuardAttestation)\build\native\lib\x64\*.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>
