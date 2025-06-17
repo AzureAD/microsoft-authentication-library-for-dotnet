@@ -91,8 +91,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [IgnoreOnOneBranch]
+        //[DoNotRunOnLinux] // POP is not supported on Linux
+        //[IgnoreOnOneBranch]
         //[TestMethod]
         public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
         {
