@@ -96,7 +96,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
                 });
                 if (!messageLoopStarted)
+                {
+                    _logger?.Verbose(() => "Mac broker console app scenario needs to start a message loop internally.");
                     macMainThreadScheduler.StartMessageLoop();
+                }
                 tokenResponse = await tcs.Task.ConfigureAwait(false);
             }
             else

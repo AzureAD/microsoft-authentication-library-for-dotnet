@@ -188,6 +188,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         {
                             if (DesktopOsHelper.IsMacConsoleApp())
                             {
+                                _logger?.Verbose(() => "Mac console app calling AcquireTokenInteractivelyAsync from the main thread.");
                                 AuthResult result = null;
                                 await MacMainThreadScheduler.Instance().RunOnMainThreadAsync(async () =>
                                 {
@@ -258,6 +259,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
                 if (DesktopOsHelper.IsMacConsoleApp())
                 {
+                    _logger?.Verbose(() => "Mac console app calling SignInInteractivelyAsync from the main thread.");
                     AuthResult result = null;
                     await MacMainThreadScheduler.Instance().RunOnMainThreadAsync(async () =>
                     {
@@ -306,6 +308,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 if (DesktopOsHelper.IsMacConsoleApp())
                 {
+                    _logger?.Verbose(() => "Mac console app calling SignInAsync from the main thread.");
                     AuthResult result = null;
                     await MacMainThreadScheduler.Instance().RunOnMainThreadAsync(async () =>
                     {
