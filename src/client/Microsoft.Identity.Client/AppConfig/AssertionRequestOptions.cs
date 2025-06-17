@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading;
+
 namespace Microsoft.Identity.Client
 {
         /// <summary>
@@ -38,5 +39,10 @@ namespace Microsoft.Identity.Client
         /// (e.g. ManagedIdentityApplication or ConfidentialClientApplication), the same capabilities should be used there.
         /// </summary>
         public IEnumerable<string> ClientCapabilities { get; set; }
+
+        /// <summary>
+        /// FMI path to be used for client assertion. Tokens are assocaited with this path in the cache.
+        /// </summary>
+        public string ClientAssertionFmiPath { get; set; }
     }
 }

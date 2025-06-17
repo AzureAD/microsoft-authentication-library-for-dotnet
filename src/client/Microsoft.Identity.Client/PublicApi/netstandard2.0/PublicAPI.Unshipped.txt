@@ -1,4 +1,5 @@
 Microsoft.Identity.Client.Utils.MacMainThreadScheduler
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithFmiPathForClientAssertion<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, string fmiPath) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
 static Microsoft.Identity.Client.Utils.MacMainThreadScheduler.Instance() -> Microsoft.Identity.Client.Utils.MacMainThreadScheduler
 Microsoft.Identity.Client.Utils.MacMainThreadScheduler.IsCurrentlyOnMainThread() -> bool
 Microsoft.Identity.Client.Utils.MacMainThreadScheduler.IsRunning() -> bool
@@ -7,3 +8,5 @@ Microsoft.Identity.Client.Utils.MacMainThreadScheduler.RunOnMainThreadAsync(Syst
 Microsoft.Identity.Client.Utils.MacMainThreadScheduler.StartMessageLoop() -> void
 Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.get -> int
 Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.set -> void
+Microsoft.Identity.Client.AssertionRequestOptions.ClientAssertionFmiPath.get -> string
+Microsoft.Identity.Client.AssertionRequestOptions.ClientAssertionFmiPath.set -> void

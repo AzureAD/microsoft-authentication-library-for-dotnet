@@ -32,5 +32,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public List<string> AdditionalCacheParameters { get; set; }
         public SortedList<string, string> CacheKeyComponents { get; internal set; }
         public string FmiPathSuffix { get; internal set; }
+        public string ClientAssertionFmiPath { get; internal set; }
     }
 }

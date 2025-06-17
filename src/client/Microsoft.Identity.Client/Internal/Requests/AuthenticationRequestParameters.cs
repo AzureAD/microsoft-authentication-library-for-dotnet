@@ -177,6 +177,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
 
         public string FmiPathSuffix => _commonParameters.FmiPathSuffix;
+
+        public string ClientAssertionFmiPath => _commonParameters.ClientAssertionFmiPath;
         #endregion
 
         public void LogParameters()
@@ -206,6 +208,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
                 builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
                 builder.AppendLine("Region configured: " + AppConfig.AzureRegion);
+                builder.AppendLine("FMI Path: " + FmiPathSuffix);
+                builder.AppendLine("Credential FMI Path: " + ClientAssertionFmiPath);
 
                 string messageWithPii = builder.ToString();
 
@@ -226,6 +230,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
                 builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
                 builder.AppendLine("Region configured: " + AppConfig.AzureRegion);
+                builder.AppendLine("FMI Path: " + FmiPathSuffix);
+                builder.AppendLine("Credential FMI Path: " + ClientAssertionFmiPath);
 
                 logger.InfoPii(messageWithPii, builder.ToString());
             }
