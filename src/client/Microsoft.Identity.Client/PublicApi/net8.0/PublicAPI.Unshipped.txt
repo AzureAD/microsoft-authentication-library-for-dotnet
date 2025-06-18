@@ -1,10 +1,1 @@
-Microsoft.Identity.Client.Utils.MacMainThreadScheduler
-static Microsoft.Identity.Client.Utils.MacMainThreadScheduler.Instance() -> Microsoft.Identity.Client.Utils.MacMainThreadScheduler
-Microsoft.Identity.Client.Utils.MacMainThreadScheduler.IsCurrentlyOnMainThread() -> bool
-Microsoft.Identity.Client.Utils.MacMainThreadScheduler.IsRunning() -> bool
-Microsoft.Identity.Client.Utils.MacMainThreadScheduler.Stop() -> void
-Microsoft.Identity.Client.Utils.MacMainThreadScheduler.RunOnMainThreadAsync(System.Func<System.Threading.Tasks.Task> asyncAction) -> System.Threading.Tasks.Task
-Microsoft.Identity.Client.Utils.MacMainThreadScheduler.StartMessageLoop() -> void
-Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.get -> int
-Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.set -> void
-const Microsoft.Identity.Client.MsalError.InvalidManagedIdentityIdType = "invalid_managed_identity_id_type" -> string
+
