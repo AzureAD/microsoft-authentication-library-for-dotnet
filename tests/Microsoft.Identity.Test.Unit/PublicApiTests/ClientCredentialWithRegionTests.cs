@@ -268,7 +268,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                httpManager.AddRegionDiscoveryMockHandlerNotFound();
+                httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(false));
 
@@ -507,7 +507,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                httpManager.AddRegionDiscoveryMockHandlerNotFound();
+                httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
 
                 var discoveryHandler = MockHelpers.CreateInstanceDiscoveryMockHandler(
                      "https://login.microsoftonline.com/common/discovery/instance",
@@ -899,7 +899,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                httpManager.AddRegionDiscoveryMockHandlerNotFound();
+                httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(false));
 

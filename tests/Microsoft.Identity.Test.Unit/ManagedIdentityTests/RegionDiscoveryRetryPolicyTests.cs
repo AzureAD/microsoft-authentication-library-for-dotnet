@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Region;
@@ -31,12 +33,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .BuildConcrete();
 
                 // Initial request fails with 500
-                httpManager.AddRegionDiscoveryMockHandler(
-                    statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddRegionDiscoveryMockHandler(HttpStatusCode.InternalServerError);
 
                 // Final success
-                httpManager.AddRegionDiscoveryMockHandler(
-                    TestConstants.Region);
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
 
                 var result = await app.GetAzureRegionAsync().ConfigureAwait(false);
                 Assert.AreEqual(TestConstants.Region, result);
@@ -63,8 +63,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 const int Num500Errors = 1 + RegionDiscoveryRetryPolicy.NumRetries; // initial request + maximum number of retries
                 for (int i = 0; i < Num500Errors; i++)
                 {
-                    httpManager.AddRegionDiscoveryMockHandler(
-                        statusCode: HttpStatusCode.InternalServerError);
+                    httpManager.AddRegionDiscoveryMockHandler(HttpStatusCode.InternalServerError);
                 }
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
@@ -93,8 +92,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .BuildConcrete();
 
                 // Add response with non-retryable status code
-                httpManager.AddRegionDiscoveryMockHandler(
-                    statusCode: statusCode);
+                httpManager.AddRegionDiscoveryMockHandler(statusCode);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
                     async () => await app.GetAzureRegionAsync().ConfigureAwait(false))
