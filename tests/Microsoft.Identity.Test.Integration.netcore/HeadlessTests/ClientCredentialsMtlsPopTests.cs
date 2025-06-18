@@ -38,9 +38,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Build Confidential Client Application with SNI certificate at App level
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3") //test slice region 
-                .WithCertificate(cert, true)  
-                .WithExperimentalFeatures()
+                .WithAzureRegion("westus3") //test slice region
+                .WithCertificate(cert, true)
                 .WithTestLogging()
                 .Build();
 
@@ -65,7 +64,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ConfigureAwait(false);
 
             // Assert: Verify that the token was fetched from cache on the second request
-            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, 
+                "Token should be retrieved from cache");
         }
     }
 }

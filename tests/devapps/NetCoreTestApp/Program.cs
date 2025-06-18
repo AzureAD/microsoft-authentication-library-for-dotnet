@@ -432,11 +432,7 @@ namespace NetCoreTestApp
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion(region);
 
-
             ccaBuilder = ccaBuilder.WithCertificate(s_confidentialClientCertificate, true);
-
-            //Add Experimental feature for MTLS PoP
-            ccaBuilder = ccaBuilder.WithExperimentalFeatures();
 
             IConfidentialClientApplication ccapp = ccaBuilder.Build();
 

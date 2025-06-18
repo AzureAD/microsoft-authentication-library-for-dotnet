@@ -17,21 +17,5 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
     [TestClass]
     public class ExperimentalFeatureTests
     {
-        private static readonly string[] s_scopes = ["scope"];
-#if NETFRAMEWORK
-        [TestMethod]
-        public async Task ExperimentalFeatureExceptionAsync()
-        {
-            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                .Create(Guid.NewGuid().ToString())
-                .WithCertificate(CertHelper.GetOrCreateTestCert()).Build();
-
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => cca.AcquireTokenForClient(s_scopes).WithMtlsProofOfPossession().ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.ExperimentalFeature, ex.ErrorCode);
-        }
-#endif
     }
 }
