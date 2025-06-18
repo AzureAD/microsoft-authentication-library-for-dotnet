@@ -9,6 +9,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Unit.CoreTests;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,78 +18,55 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     [TestClass]
-    public class RegionDiscoveryRetryPolicyTests : TestBase
+    public class RegionDiscoveryRetryPolicyTests : RegionDiscoveryProviderTests
     {
-        private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
-        private IRegionDiscoveryProvider _regionDiscoveryProvider;
-        private MockHttpManager _httpManager;
-        private RequestContext _requestContext;
-        private MockHttpAndServiceBundle _harness;
-
-        [TestInitialize]
-        public override void TestInitialize()
-        {
-            base.TestInitialize();
-            _harness = base.CreateTestHarness();
-            _harness.ServiceBundle.Config.RetryPolicyFactory = _testRetryPolicyFactory;
-            _httpManager = _harness.HttpManager;
-            _regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager, true);
-            _requestContext = new RequestContext(
-                _harness.ServiceBundle,
-                Guid.NewGuid(),
-                null,
-                CancellationToken.None);
-        }
-
-        [TestCleanup]
-        public override void TestCleanup()
-        {
-            _harness?.Dispose();
-            base.TestCleanup();
-        }
-
         [TestMethod]
         public async Task RegionDiscoveryFails500OnceThenSucceeds200Async()
         {
+            // Configure the test to use region auto-discovery  
+            GetTestRequestContext().ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
             // Initial request fails with 500
-            _httpManager.AddRegionDiscoveryMockHandlerWithError(
-                statusCode: HttpStatusCode.InternalServerError);
+            AddMockedResponse(MockHelpers.CreateFailureMessage(HttpStatusCode.InternalServerError, "Internal Server Error"));
 
             // Final success
-            _httpManager.AddRegionDiscoveryMockHandler(
-                TestConstants.Region);
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
 
-            var metadata = await _regionDiscoveryProvider.GetMetadataAsync(
+            var metadata = await GetRegionDiscoveryProvider().GetMetadataAsync(
                 new Uri("https://login.microsoftonline.com/common/"),
-                _requestContext).ConfigureAwait(false);
+                GetTestRequestContext()).ConfigureAwait(false);
 
+            Assert.IsNotNull(metadata, "Metadata should not be null");
             Assert.AreEqual(TestConstants.Region, metadata.PreferredNetwork.Split('.')[0]);
 
             const int NumRequests = 2; // initial request + 1 retry
-            int requestsMade = NumRequests - _httpManager.QueueSize;
+            int requestsMade = NumRequests - GetHttpManager().QueueSize;
             Assert.AreEqual(NumRequests, requestsMade);
         }
+
 
         [TestMethod]
         public async Task RegionDiscoveryFails500PermanentlyAsync()
         {
+            // Configure the test to use region auto-discovery
+            GetTestRequestContext().ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
             // Simulate permanent 500s (to trigger the maximum number of retries)
             const int Num500Errors = 1 + RegionDiscoveryRetryPolicy.NumRetries; // initial request + maximum number of retries
             for (int i = 0; i < Num500Errors; i++)
             {
-                _httpManager.AddRegionDiscoveryMockHandlerWithError(
-                    statusCode: HttpStatusCode.InternalServerError);
+                AddMockedResponse(MockHelpers.CreateFailureMessage(HttpStatusCode.InternalServerError, "Internal Server Error"));
             }
 
             MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
-                async () => await _regionDiscoveryProvider.GetMetadataAsync(
+                async () => await GetRegionDiscoveryProvider().GetMetadataAsync(
                     new Uri("https://login.microsoftonline.com/common/"),
-                    _requestContext).ConfigureAwait(false))
+                    GetTestRequestContext()).ConfigureAwait(false))
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(ex);
 
-            int requestsMade = Num500Errors - _httpManager.QueueSize;
+            int requestsMade = Num500Errors - GetHttpManager().QueueSize;
             Assert.AreEqual(Num500Errors, requestsMade);
         }
 
@@ -96,21 +75,23 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(HttpStatusCode.RequestTimeout, "408 Request Timeout")]
         public async Task RegionDiscoveryDoesNotRetryOnNonRetryableStatusCodesAsync(HttpStatusCode statusCode, string description)
         {
+            // Configure the test to use region auto-discovery
+            GetTestRequestContext().ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
             // Add response with non-retryable status code
-            _httpManager.AddRegionDiscoveryMockHandlerWithError(
-                statusCode: statusCode);
+            AddMockedResponse(MockHelpers.CreateFailureMessage(statusCode, $"Error {(int)statusCode}"));
 
             MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
-                async () => await _regionDiscoveryProvider.GetMetadataAsync(
+                async () => await GetRegionDiscoveryProvider().GetMetadataAsync(
                     new Uri("https://login.microsoftonline.com/common/"),
-                    _requestContext).ConfigureAwait(false))
+                    GetTestRequestContext()).ConfigureAwait(false))
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(ex);
             Assert.AreEqual((int)statusCode, ex.StatusCode);
 
             const int NumRequests = 1; // initial request + 0 retries (non-retryable status codes should not trigger retry)
-            int requestsMade = NumRequests - _httpManager.QueueSize;
+            int requestsMade = NumRequests - GetHttpManager().QueueSize;
             Assert.AreEqual(NumRequests, requestsMade, $"Expected single request without retry for {description}");
         }
     }
