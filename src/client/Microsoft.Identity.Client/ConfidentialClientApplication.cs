@@ -171,6 +171,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
+        [Obsolete("This API has been deprecated, please use a more secure flow", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder IByUsernameAndPassword.AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
             string username,

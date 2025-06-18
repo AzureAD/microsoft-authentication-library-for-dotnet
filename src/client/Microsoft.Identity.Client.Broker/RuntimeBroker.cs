@@ -456,6 +456,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return msalTokenResponse;
         }
 
+        [Obsolete("This API has been deprecated, please use a more secure flow", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         public async Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
@@ -476,7 +478,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
                 authParams.Properties["MSALRuntime_Password"] = acquireTokenByUsernamePasswordParameters.Password;
                 // For Linux broker, use the interactive flow with username password to get the token
-                if (Environment.GetEnvironmentVariable("TF_BUILD") != null && DesktopOsHelper.IsLinux()) {
+                if (Environment.GetEnvironmentVariable("TF_BUILD") != null && DesktopOsHelper.IsLinux())
+                {
                     using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInInteractivelyAsync(
                         XOpenDisplay(":1"),
                         authParams,
@@ -487,7 +490,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         var errorMessage = "Could not acquire token with username and password.";
                         msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                     }
-                } else {
+                }
+                else
+                {
                     using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
                         authParams,
                         authenticationRequestParameters.CorrelationId.ToString("D"),
@@ -497,7 +502,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                     }
                 }
-                
+
             }
 
             return msalTokenResponse;
