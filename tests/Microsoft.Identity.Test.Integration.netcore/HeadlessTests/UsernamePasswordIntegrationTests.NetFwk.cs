@@ -389,13 +389,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
             else
             {
-                #pragma warning disable CS0618 // Type or member is obsolete
                 authResult = await (((IConfidentialClientApplication)clientApp) as IByUsernameAndPassword)
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithCorrelationId(testCorrelationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-                #pragma warning restore CS0618
             }
 
 

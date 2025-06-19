@@ -314,12 +314,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
             popConfig.HttpMethod = HttpMethod.Get;
 
-            #pragma warning disable CS0618 // Type or member is obsolete
             var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(

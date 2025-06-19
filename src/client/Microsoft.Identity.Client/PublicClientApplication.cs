@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
-        [Obsolete("This API has been deprecated, please use a more secure flow", false)]
+        [Obsolete("This API has been deprecated, please use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
         [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
-        [Obsolete("This API has been deprecated, please use a more secure flow", false)]
+        [Obsolete("This API has been deprecated, please use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
         [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
