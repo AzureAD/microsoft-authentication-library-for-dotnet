@@ -424,7 +424,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 using (var httpManager = new MockHttpManager())
                 {
-                    httpManager.AddRegionDiscoveryMockHandlerNotFound();
+                    httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
 
                     ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithCertificate(s_testCertificate)

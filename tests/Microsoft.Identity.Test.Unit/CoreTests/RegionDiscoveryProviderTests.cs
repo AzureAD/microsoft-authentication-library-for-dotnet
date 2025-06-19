@@ -400,43 +400,40 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionDiscoveryNotSupportedErrorMessage));
         }
 
-        private void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true)
+        protected void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true, bool throwException = false)
         {
-            var queryParams = new Dictionary<string, string>();
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = TestConstants.ImdsUrl,
+                ExpectedRequestHeaders = new Dictionary<string, string>
+                {
+                    { "Metadata", "true" }
+                },
+                ResponseMessage = responseMessage
+            };
 
             if (expectedParams)
             {
-                queryParams.Add("api-version", apiVersion);
-                queryParams.Add("format", "text");
+                var queryParams = new Dictionary<string, string>
+                {
+                    { "api-version", apiVersion },
+                    { "format", "text" }
+                };
+                handler.ExpectedQueryParams = queryParams;
+            }
 
-                _httpManager.AddMockHandler(
-                   new MockHttpMessageHandler
-                   {
-                       ExpectedMethod = HttpMethod.Get,
-                       ExpectedUrl = TestConstants.ImdsUrl,
-                       ExpectedRequestHeaders = new Dictionary<string, string>
-                        {
-                            { "Metadata", "true" }
-                        },
-                       ExpectedQueryParams = queryParams,
-                       ResponseMessage = responseMessage
-                   });
-            }
-            else
+            if (throwException)
             {
-                _httpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = TestConstants.ImdsUrl,
-                        ExpectedRequestHeaders = new Dictionary<string, string>
-                            {
-                            { "Metadata", "true" }
-                            },
-                        ResponseMessage = responseMessage
-                    });
+                handler.ExceptionToThrow = new TaskCanceledException();
             }
+
+            _httpManager.AddMockHandler(handler);
         }
+
+        internal RequestContext GetTestRequestContext() => _testRequestContext;
+        internal IRegionDiscoveryProvider GetRegionDiscoveryProvider() => _regionDiscoveryProvider;
+        internal MockHttpManager GetHttpManager() => _httpManager;
 
         private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = "centralus")
         {
