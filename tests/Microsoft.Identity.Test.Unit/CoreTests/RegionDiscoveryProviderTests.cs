@@ -425,7 +425,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             if (throwException)
             {
-                handler.ExceptionToThrow = new MsalServiceException("error", "message");
+                handler.ExceptionToThrow = new TaskCanceledException();
             }
 
             _httpManager.AddMockHandler(handler);

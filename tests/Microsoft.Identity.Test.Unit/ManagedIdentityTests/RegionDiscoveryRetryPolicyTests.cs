@@ -58,20 +58,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     MockHelpers.CreateFailureMessage(HttpStatusCode.InternalServerError, "Internal Server Error"),
                     throwException: i == Num500Errors - 1); // Throw exception on the last retry
             }
-            
-            MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
-                async () => await GetRegionDiscoveryProvider().GetMetadataAsync(
-                    new Uri("https://login.microsoftonline.com/common/"),
-                    GetTestRequestContext()).ConfigureAwait(false))
-                .ConfigureAwait(false);
 
-            Assert.IsNotNull(ex);
+            var response = await GetRegionDiscoveryProvider().GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"),
+                GetTestRequestContext()).ConfigureAwait(false);
 
-            int requestsMade = Num500Errors - GetHttpManager().QueueSize;
-            Assert.AreEqual(Num500Errors, requestsMade);
+            Assert.IsNull(response, "Response should be null after failing all retries");
+
+            const int ExpectedRequests = RegionDiscoveryRetryPolicy.NumRetries + 1; // retries + initial request
+            int requestsMade = ExpectedRequests - GetHttpManager().QueueSize;
+            Assert.AreEqual(ExpectedRequests, requestsMade, "Number of requests should match retry policy");
         }
 
-        /*[DataTestMethod]
+        [DataTestMethod]
         [DataRow(HttpStatusCode.NotFound, "404 Not Found")]
         [DataRow(HttpStatusCode.RequestTimeout, "408 Request Timeout")]
         public async Task RegionDiscoveryDoesNotRetryOnNonRetryableStatusCodesAsync(HttpStatusCode statusCode, string description)
@@ -94,6 +93,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             const int NumRequests = 1; // initial request + 0 retries (non-retryable status codes should not trigger retry)
             int requestsMade = NumRequests - GetHttpManager().QueueSize;
             Assert.AreEqual(NumRequests, requestsMade, $"Expected single request without retry for {description}");
-        }*/
+        }
     }
 }
