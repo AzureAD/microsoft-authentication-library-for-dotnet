@@ -811,6 +811,7 @@ namespace Microsoft.Identity.Test.Unit
                         clientCredentialFlow: false,
                         expectedX5C: sendX5C ? exportedCertificate : null));
 
+                #pragma warning disable CS0618 // Type or member is obsolete
                 var result = await (app as IByUsernameAndPassword)
                     .AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
@@ -818,6 +819,7 @@ namespace Microsoft.Identity.Test.Unit
                         TestConstants.DefaultPassword)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+                #pragma warning restore CS0618
             }
         }
 

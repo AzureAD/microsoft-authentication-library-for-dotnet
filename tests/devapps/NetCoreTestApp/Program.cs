@@ -179,7 +179,9 @@ namespace NetCoreTestApp
 
                         case 2: // acquire token u/p
                             string password = GetPasswordFromConsole();
+#pragma warning disable CS0618 // Type or member is obsolete
                             authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
+#pragma warning restore CS0618
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;

@@ -314,10 +314,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
             popConfig.HttpMethod = HttpMethod.Get;
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
@@ -728,6 +730,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var result = await pca
                 .AcquireTokenByUsernamePassword(
                     scopes,
@@ -735,6 +738,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
                 .ExecuteAsync().ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes, true);
 
