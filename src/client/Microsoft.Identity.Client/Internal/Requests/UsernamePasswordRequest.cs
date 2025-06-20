@@ -76,11 +76,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     _logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                     MsalTokenResponse brokerTokenResponse = await broker.AcquireTokenByUsernamePasswordAsync(
                         _requestParameters,
                         _usernamePasswordParameters)
                         .ConfigureAwait(false);
-
+#pragma warning restore CS0618
                     if (brokerTokenResponse != null)
                     {
                         _logger.Info("Broker attempt completed successfully. ");

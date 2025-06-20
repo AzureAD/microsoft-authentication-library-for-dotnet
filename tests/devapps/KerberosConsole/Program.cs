@@ -374,10 +374,12 @@ namespace KerberosConsole
                 // 2. Acquire the authentication token.
                 // Kerberos Ticket will be contained in Id Token or Access Token
                 // according to specified ticket container parameter.
+                #pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult result = app.AcquireTokenByUsernamePassword(_publicAppScopes, _Username, _UserPassword)
                         .ExecuteAsync()
                         .GetAwaiter()
                         .GetResult();
+                #pragma warning restore CS0618
 
                 ShowAuthenticationResult(result);
                 return result;

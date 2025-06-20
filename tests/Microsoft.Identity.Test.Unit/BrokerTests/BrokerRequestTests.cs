@@ -250,9 +250,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 // Act
+                #pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app.AcquireTokenByUsernamePassword(new[] { "User.Read" }, "username", "password")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+                #pragma warning restore CS0618
 
                 // Assert
                 Assert.IsNotNull(result);

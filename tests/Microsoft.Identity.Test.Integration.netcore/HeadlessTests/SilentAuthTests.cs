@@ -39,10 +39,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             Trace.WriteLine("Part 1 - Acquire a token with U/P");
+            #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await pca
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync(new CancellationTokenSource().Token)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             await ValidateAuthResultAsync(authResult, labResponse).ConfigureAwait(false);
         }
@@ -66,10 +68,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 SetCacheSerializationToFile(pca1, cacheFilePath);
 
+                #pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult authResult = await pca1
                     .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+                #pragma warning restore CS0618
 
                 MsalAssert.AssertAuthResult(authResult, user);
                 Assert.AreEqual(

@@ -626,9 +626,9 @@ namespace NetDesktopWinForms
 
             AuthenticationResult result = null;
             var scopes = GetScopes();
-
+#pragma warning disable CS0618 // Type or member is obsolete
             var builder = pca.AcquireTokenByUsernamePassword(scopes, username, password);
-
+#pragma warning restore CS0618
             if (cbxPOP.Checked)
             {
                 builder = builder.WithProofOfPossession(

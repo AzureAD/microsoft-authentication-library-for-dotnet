@@ -58,10 +58,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var userAuthResult = await pca
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             var cca = BuildCCA(userAuthResult.TenantId);
 
@@ -108,10 +110,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var userAuthResult = await pca
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             var cca = BuildCCA(userAuthResult.TenantId);
 
@@ -180,10 +184,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             // Acquire a token for the user via user name/password
+            #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult userAuthResult = await pca
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             // Build the ConfidentialClient for OBO
             ConfidentialClientApplication cca = BuildCCA(userAuthResult.TenantId);
@@ -248,10 +254,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var userAuthResult = await pca
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             var cca = BuildCCA(userAuthResult.TenantId);
 
@@ -317,10 +325,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var userAuthResult = await pca
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             var cca = BuildCCA(userAuthResult.TenantId);
 
@@ -373,10 +383,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var userAuthResult = await pca
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             var cca = BuildCCA(userAuthResult.TenantId);
 
