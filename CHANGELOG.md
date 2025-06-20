@@ -8,8 +8,8 @@
 * Add an extensibility API - WithFmiPathForClientAssertion in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5347
 
 ### Bug Fixes
-* Hide ListOperatingSystemAccounts in intellisense by @ashok672 in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5304
-* Reworked retry policy functionality & Created IMDS retry policy by @Robbie-Microsoft in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5231
+* Hide ListOperatingSystemAccounts in intellisense in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5304
+* Reworked retry policy functionality & Created IMDS retry policy in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5231
 
 4.72.1
 =======
