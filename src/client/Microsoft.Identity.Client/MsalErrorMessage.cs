@@ -415,6 +415,7 @@ namespace Microsoft.Identity.Client
 
         public const string ManagedIdentityNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
         public const string ManagedIdentityInvalidResponse = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
+        public const string ManagedIdentityInvalidIdType = "Only {0} supported for user-assigned managed identity in {1}";
         public const string ManagedIdentityJsonParseFailure = "[Managed Identity] MSI returned 200 OK, but the response could not be parsed.";
         public const string ManagedIdentityUnexpectedResponse = "[Managed Identity] Unexpected exception occurred when parsing the response. See the inner exception for details.";
         public const string ManagedIdentityExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope must be passed.";

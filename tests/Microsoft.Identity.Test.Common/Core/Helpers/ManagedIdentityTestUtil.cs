@@ -62,6 +62,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 case ManagedIdentitySource.MachineLearning:
                     Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
                     Environment.SetEnvironmentVariable("MSI_SECRET", secret);
+                    Environment.SetEnvironmentVariable("DEFAULT_IDENTITY_CLIENT_ID", "fake_DEFAULT_IDENTITY_CLIENT_ID");
                     break;
             }
         }

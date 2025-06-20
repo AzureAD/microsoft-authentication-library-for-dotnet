@@ -10,11 +10,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class MachineLearningManagedIdentitySource : AbstractManagedIdentity
     {
+        private const string MachineLearning = "Machine Learning";
+
         private const string MachineLearningMsiApiVersion = "2017-09-01";
         private const string SecretHeaderName = "secret";
 
         private readonly Uri _endpoint;
         private readonly string _secret;
+
+        public const string UnsupportedIdTypeError = "Only client id is supported for user-assigned managed identity in Machine Learning."; // referenced in unit test
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
@@ -73,21 +77,33 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
+                case AppConfig.ManagedIdentityIdType.SystemAssigned:
+                    _requestContext.Logger.Info("[Managed Identity] Adding system assigned client id to the request.");
+                    // Use the new 2017 constant for older ML-based environment
+                    request.QueryParameters[Constants.ManagedIdentityClientId2017] = EnvironmentVariables.MachineLearningDefaultClientId; // this environment variable is always set in an Azure Machine Learning source
+                    break;
+
                 case AppConfig.ManagedIdentityIdType.ClientId:
                     _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
                     // Use the new 2017 constant for older ML-based environment
                     request.QueryParameters[Constants.ManagedIdentityClientId2017] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
 
-                case AppConfig.ManagedIdentityIdType.ResourceId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
-                    break;
+                default:
+                    string errorMessage = string.Format(
+                        CultureInfo.InvariantCulture,
+                        MsalErrorMessage.ManagedIdentityInvalidIdType,
+                        "client id is",
+                        MachineLearning);
 
-                case AppConfig.ManagedIdentityIdType.ObjectId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
-                    break;
+                    var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                        MsalError.InvalidManagedIdentityIdType,
+                        errorMessage,
+                        null, // configuration error
+                        ManagedIdentitySource.MachineLearning,
+                        null); // statusCode is null in this case
+
+                    throw exception;
             }
                 
             return request;
