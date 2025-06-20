@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Client
     public class ConfidentialClientApplicationBuilder : AbstractApplicationBuilder<ConfidentialClientApplicationBuilder>
     {
         internal const string ForceRegionEnvVariable = "MSAL_FORCE_REGION";
+        internal const string DisableRegionEnvVariable = "MSAL_DISABLE_REGION";
         internal const string DisableForceRegion = "DisableMsalForceRegion";
 
         /// <inheritdoc/>
@@ -338,7 +339,7 @@ namespace Microsoft.Identity.Client
         /// See https://openid.net/specs/openid-connect-core-1_0.html#Terminology
         /// </summary>
         /// <remarks>
-        /// Do not use this method with Entra ID authorities (e.g. https://login.microsfoftonline.com/common).
+        /// Do not use this method with Entra ID authorities (e.g. https://login.microsoftonline.com/common).
         /// Use WithAuthority(string) instead.
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithOidcAuthority(string authorityUri)
@@ -380,8 +381,22 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
 
-            if (!string.IsNullOrEmpty(Config.AzureRegion) && 
-                (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
+            ValidateAndUpdateRegion();
+        }
+
+        private void ValidateAndUpdateRegion()
+        {
+            // master override - do not use region if this env variable is set, as per #5223
+            // this is needed because MSAL is used in other SDKs and it's difficult for apps to 
+            // disable ESTS-R for some calls and to enable it for others
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(DisableRegionEnvVariable)))
+            {
+                Config.AzureRegion = null;
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(Config.AzureRegion) &&
+              (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
             {
                 throw new MsalClientException(MsalError.RegionDiscoveryWithCustomInstanceMetadata, MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata);
             }

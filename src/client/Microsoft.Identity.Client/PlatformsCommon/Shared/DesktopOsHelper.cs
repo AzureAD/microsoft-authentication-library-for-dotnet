@@ -47,14 +47,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public static bool IsMac()
         {
-#if MAC
-            return true;
+#if __MOBILE__
+            return false;
 #elif NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.MacOSX;
-#elif !__MOBILE__ 
-            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+#elif NET8_0_OR_GREATER
+            string OSDescription = RuntimeInformation.OSDescription;
+            return OSDescription.Contains("Darwin", StringComparison.OrdinalIgnoreCase);
 #else
-            return false;
+            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 #endif
         }
 
@@ -201,5 +202,21 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DISPLAY"));
         }
 #endif
+
+        private static readonly Lazy<bool> _isMacConsoleApp = new Lazy<bool>(() => {
+#if SUPPORTS_WIN32
+            return !LibObjc.IsNsApplicationRunning();
+#else
+            return true;
+#endif
+        });
+
+        public static bool IsMacConsoleApp()
+        {
+            if (!DesktopOsHelper.IsMac())
+                return false;
+            // Checking if NsApplication is running for one time would be enough.
+            return _isMacConsoleApp.Value;
+        }
     }
 }

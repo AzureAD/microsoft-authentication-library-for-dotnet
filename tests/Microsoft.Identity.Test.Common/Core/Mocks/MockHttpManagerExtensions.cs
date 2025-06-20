@@ -367,23 +367,42 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ManagedIdentitySource managedIdentitySourceType,
             string userAssignedId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-            HttpStatusCode statusCode = HttpStatusCode.OK
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            string retryAfterHeader = null // A number of seconds (e.g., "120"), or an HTTP-date in RFC1123 format (e.g., "Fri, 19 Apr 2025 15:00:00 GMT")
             )
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
-            HttpContent content = new StringContent(response);
-            responseMessage.Content = content;
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode)
+            {
+                Content = new StringContent(response)
+            };
+
+            if (retryAfterHeader != null)
+            {
+                responseMessage.Headers.TryAddWithoutValidation("Retry-After", retryAfterHeader);
+            }
 
             MockHttpMessageHandler httpMessageHandler = BuildMockHandlerForManagedIdentitySource(managedIdentitySourceType, resource);
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
+                if (managedIdentitySourceType == ManagedIdentitySource.MachineLearning)
+                {
+                    // For Machine Learning (App Service 2017), the param is "clientid"
+                    httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId2017, userAssignedId);
+                }
+                else
+                {
+                    // For App Service 2019, Azure Arc, IMDS, etc., the param is "client_id"
+                    httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
+                }
             }
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityResourceId, userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    managedIdentitySourceType == ManagedIdentitySource.Imds ? 
+                        Constants.ManagedIdentityResourceIdImds : Constants.ManagedIdentityResourceId, 
+                    userAssignedId);
             }
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)

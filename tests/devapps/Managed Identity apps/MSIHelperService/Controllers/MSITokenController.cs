@@ -63,23 +63,11 @@ namespace MSIHelperService.Controllers
                     httpClient,
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.Function => await MSIHelper.GetFunctionAppMSIToken(
-                    identityHeader,
-                    uri,
-                    httpClient,
-                    _logger).ConfigureAwait(false),
+                MSIHelper.AzureResource.Function => throw new NotImplementedException(),
 
-                MSIHelper.AzureResource.VM => await MSIHelper.GetVirtualMachineMSIToken(
-                    identityHeader, 
-                    uri, 
-                    httpClient,
-                    _logger).ConfigureAwait(false),
+                MSIHelper.AzureResource.VM => throw new NotImplementedException(),
 
-                MSIHelper.AzureResource.AzureArc => await MSIHelper.GetAzureArcMSIToken(
-                    identityHeader,
-                    uri,
-                    httpClient,
-                    _logger).ConfigureAwait(false),
+                MSIHelper.AzureResource.AzureArc => throw new NotImplementedException(),
 
                 MSIHelper.AzureResource.ServiceFabric => throw new NotImplementedException(),
 

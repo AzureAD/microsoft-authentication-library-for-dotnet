@@ -1027,3 +1027,27 @@ const Microsoft.Identity.Client.MsalError.MtlsPopWithoutRegion = "mtls_pop_witho
 const Microsoft.Identity.Client.MsalError.RegionRequiredForMtlsPop = "region_required_for_mtls_pop" -> string
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.MachineLearning = 7 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithFmiPath(string pathSuffix) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems.Linux = 2 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.get -> System.Collections.Generic.IEnumerable<string>
+Microsoft.Identity.Client.AssertionRequestOptions.ClientCapabilities.set -> void
+Microsoft.Identity.Client.RP.ConfidentialClientApplicationBuilderForResourceProviders
+static Microsoft.Identity.Client.RP.ConfidentialClientApplicationBuilderForResourceProviders.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, bool sendX5C, bool associateTokensWithCertificateSerialNumber) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.TokenCacheNotificationArgs.NoDistributedCacheUseReason.get -> string
+const Microsoft.Identity.Client.MsalError.ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible" -> string
+Microsoft.Identity.Client.RP.AcquireTokenForClientParameterBuilderForResourceProviders
+static Microsoft.Identity.Client.RP.AcquireTokenForClientParameterBuilderForResourceProviders.WithAccessTokenSha256ToRefresh(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, string hash) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.IMsalSFHttpClientFactory
+Microsoft.Identity.Client.IMsalSFHttpClientFactory.GetHttpClient(System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> validateServerCert) -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.BrokerOptions.OperatingSystems.OSX = 4 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithFmiPathForClientAssertion<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, string fmiPath) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
+static Microsoft.Identity.Client.Utils.MacMainThreadScheduler.Instance() -> Microsoft.Identity.Client.Utils.MacMainThreadScheduler
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.IsCurrentlyOnMainThread() -> bool
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.IsRunning() -> bool
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.Stop() -> void
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.RunOnMainThreadAsync(System.Func<System.Threading.Tasks.Task> asyncAction) -> System.Threading.Tasks.Task
+Microsoft.Identity.Client.Utils.MacMainThreadScheduler.StartMessageLoop() -> void
+Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.get -> int
+Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.set -> void
+Microsoft.Identity.Client.AssertionRequestOptions.ClientAssertionFmiPath.get -> string
+Microsoft.Identity.Client.AssertionRequestOptions.ClientAssertionFmiPath.set -> void

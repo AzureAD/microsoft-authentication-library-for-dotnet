@@ -3,10 +3,8 @@
 
 using System;
 using System.Globalization;
-using System.Net;
 using System.Net.Http;
 using System.Net.Security;
-using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -36,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ServiceFabricInvalidEndpointAsync()
         {
             using(new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "localhost/token");
 
@@ -69,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             string thumbprint, SslPolicyErrors sslPolicyErrors, bool expectedValidationResult)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342/metadata/identity/oauth2/token", thumbprint: thumbprint);
                 var certificate = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
@@ -88,14 +86,47 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var sf = ServiceFabricManagedIdentitySource.Create(requestContext);
 
                 Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
-                HttpClient httpClient = ((ServiceFabricManagedIdentitySource)sf).GetHttpClientWithSslValidation(requestContext);
-                Assert.IsNotNull(httpClient);
-                var httpClientHandler = ((ServiceFabricManagedIdentitySource)sf).CreateHandlerWithSslValidation(requestContext.Logger);
-                Assert.IsNotNull(httpClientHandler.ServerCertificateCustomValidationCallback);
-
-                var validationResult = httpClientHandler.ServerCertificateCustomValidationCallback(null, certificate, chain, sslPolicyErrors);
-                Assert.AreEqual(expectedValidationResult, validationResult);
+                var callback = sf.GetValidationCallback();
+                Assert.IsNotNull(callback);
             }
+        }
+
+        [TestMethod]
+        public async Task SFThrowsWhenGetHttpClientWithValidationIsNotImplementedAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342/metadata/identity/oauth2/token");
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpClientFactory(new MsalSFFactoryNotImplementedException());
+
+                // Disabling the shared cache to avoid the test to pass because of the cache
+                miBuilder.Config.AccessorOptions = null;
+                var mi = miBuilder.BuildConcrete();
+
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                 {
+                     await mi.AcquireTokenForManagedIdentity(Resource)
+                         .ExecuteAsync().ConfigureAwait(false);
+                 }).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.IsInstanceOfType(ex.InnerException, typeof(NotImplementedException));
+            }
+        }
+    }
+
+    internal class MsalSFFactoryNotImplementedException : IMsalSFHttpClientFactory
+    {
+        public HttpClient GetHttpClient(Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
+        {
+            throw new NotImplementedException();
+        }
+
+        public HttpClient GetHttpClient()
+        {
+            return new HttpClient();
         }
     }
 }

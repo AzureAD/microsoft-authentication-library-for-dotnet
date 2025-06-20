@@ -19,6 +19,7 @@ using Microsoft.Identity.Client.Desktop;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.SSHCertificates;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace NetDesktopWinForms
 {
@@ -95,10 +96,64 @@ namespace NetDesktopWinForms
             throw new NotImplementedException();
         }
 
-        public static readonly string UserCacheFile =
-            System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.user.json";
+        private const string CacheFileName = "myapp_msal_cache.txt";
+        private static readonly string CacheDir = MsalCacheHelper.UserRootDirectory;
+        private const string TraceSourceName = "MSAL.Contoso.CacheExtension";
 
-        private IPublicClientApplication CreatePca(AuthMethod? authMethod)
+        private async Task<MsalCacheHelper> CreateCacheHelperAsync()
+        {
+            StorageCreationProperties storageProperties = null;
+            MsalCacheHelper cacheHelper;
+            try
+            {
+                storageProperties = ConfigureSecureStorage(!cbxCacheEncryption.Checked);
+                cacheHelper = await MsalCacheHelper.CreateAsync(
+                            storageProperties,
+                            new TraceSource(TraceSourceName))
+                         .ConfigureAwait(false);
+
+                cacheHelper.VerifyPersistence();
+
+                return cacheHelper;
+            }
+            catch (MsalCachePersistenceException ex)
+            {
+                Console.WriteLine("Cannot persist data securely. ");
+                Console.WriteLine("Details: " + ex);
+
+                Console.WriteLine($"Falling back on using a plaintext " +
+                        $"file located at {storageProperties?.CacheFilePath} Users are responsible for securing this file!");
+
+                storageProperties = ConfigureSecureStorage(usePlaintextFile: true);
+                cacheHelper = await MsalCacheHelper.CreateAsync(
+                       storageProperties,
+                       new TraceSource(TraceSourceName))
+                    .ConfigureAwait(false);
+
+                return cacheHelper;
+                throw;
+            }
+        }
+
+        private StorageCreationProperties ConfigureSecureStorage(bool usePlaintextFile)
+        {
+            if (!usePlaintextFile)
+            {
+                return new StorageCreationPropertiesBuilder(
+                                   CacheFileName,
+                                   CacheDir)
+                               .Build();
+            }
+
+            return new StorageCreationPropertiesBuilder(
+                                     CacheFileName + "plaintext", // do not use the same file name so as not to overwrite the encrypted version
+                                     CacheDir)
+                                 .WithUnprotectedFile()
+                                 .Build();
+
+        }
+
+        private async Task<IPublicClientApplication> CreatePca(AuthMethod? authMethod)
         {
             string clientId = GetClientId();
             string authority = GetAuthority();
@@ -137,31 +192,10 @@ namespace NetDesktopWinForms
             }
 
             builder.WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true, true);
-
             var pca = builder.Build();
-
-            BindCache(pca.UserTokenCache, UserCacheFile);
+            var cacheHelper = await CreateCacheHelperAsync().ConfigureAwait(false);
+            cacheHelper.RegisterCache(pca.UserTokenCache);
             return pca;
-        }
-
-        private static void BindCache(ITokenCache tokenCache, string file)
-        {
-            tokenCache.SetBeforeAccess(notificationArgs =>
-            {
-                notificationArgs.TokenCache.DeserializeMsalV3(File.Exists(file)
-                    ? File.ReadAllBytes(UserCacheFile)
-                    : null);
-            });
-
-            tokenCache.SetAfterAccess(notificationArgs =>
-            {
-                // if the access operation resulted in a cache update
-                if (notificationArgs.HasStateChanged)
-                {
-                    // reflect changes in the persistent store
-                    File.WriteAllBytes(file, notificationArgs.TokenCache.SerializeMsalV3());
-                }
-            });
         }
 
         private async void atsBtn_Click(object sender, EventArgs e)
@@ -169,7 +203,7 @@ namespace NetDesktopWinForms
             try
             {
                 var pca = CreatePca(GetAuthMethod());
-                AuthenticationResult result = await RunAtsAsync(pca).ConfigureAwait(false);
+                AuthenticationResult result = await RunAtsAsync(await pca.ConfigureAwait(false)).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
             }
@@ -317,7 +351,10 @@ namespace NetDesktopWinForms
             Log("Refreshing accounts");
 
             if (refreshAccounts)
-                await RefreshAccountsAsync().ConfigureAwait(true);
+            {
+                var pca = await CreatePca(GetAuthMethod()).ConfigureAwait(false);
+                await RefreshAccountsAsync(pca).ConfigureAwait(true);
+            }
         }
 
         private void Log(string message)
@@ -333,7 +370,7 @@ namespace NetDesktopWinForms
             try
             {
                 var pca = CreatePca(GetAuthMethod());
-                AuthenticationResult result = await RunAtiAsync(pca).ConfigureAwait(false);
+                AuthenticationResult result = await RunAtiAsync(await pca.ConfigureAwait(false)).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
@@ -493,14 +530,14 @@ namespace NetDesktopWinForms
 
         private async void getAccountsBtn_Click(object sender, EventArgs e)
         {
-            await RefreshAccountsAsync().ConfigureAwait(false);
+            var pca = await CreatePca(GetAuthMethod()).ConfigureAwait(false);
+            await RefreshAccountsAsync(pca).ConfigureAwait(false);
         }
 
-        private async Task RefreshAccountsAsync()
+        private async Task RefreshAccountsAsync(IPublicClientApplication pca)
         {
             try
             {
-                var pca = CreatePca(GetAuthMethod());
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
 
                 s_accounts.Clear();
@@ -531,7 +568,7 @@ namespace NetDesktopWinForms
 
             try
             {
-                var result = await RunAtsAsync(pca).ConfigureAwait(false);
+                var result = await RunAtsAsync(await pca.ConfigureAwait(false)).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
@@ -543,7 +580,7 @@ namespace NetDesktopWinForms
                 Log("UI required Exception! " + ex.ErrorCode + " " + ex.Message);
                 try
                 {
-                    var result = await RunAtiAsync(pca).ConfigureAwait(false);
+                    var result = await RunAtiAsync(await pca.ConfigureAwait(false)).ConfigureAwait(false);
                     await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                 }
                 catch (Exception ex3)
@@ -564,7 +601,7 @@ namespace NetDesktopWinForms
 
             try
             {
-                var result = await RunAtUsernamePwdAsync(pca).ConfigureAwait(false);
+                var result = await RunAtUsernamePwdAsync(await pca.ConfigureAwait(false)).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
@@ -635,7 +672,7 @@ namespace NetDesktopWinForms
         private async void btnClearCache_Click(object sender, EventArgs e)
         {
             Log("Clearing the cache ...");
-            var pca = CreatePca(GetAuthMethod());
+            var pca = await CreatePca(GetAuthMethod()).ConfigureAwait(false);
             foreach (var acc in (await pca.GetAccountsAsync().ConfigureAwait(false)))
             {
                 await pca.RemoveAsync(acc).ConfigureAwait(false);
@@ -683,7 +720,7 @@ namespace NetDesktopWinForms
         {
             Log("Expiring tokens.");
 
-            var pca = CreatePca(GetAuthMethod());
+            var pca = await CreatePca(GetAuthMethod()).ConfigureAwait(false);
 
             // do something that loads the cache first
             await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -709,7 +746,7 @@ namespace NetDesktopWinForms
                     throw new InvalidOperationException("[TEST APP FAILURE] Please select an account");
                 }
 
-                var pca = CreatePca(GetAuthMethod());
+                var pca = await CreatePca(GetAuthMethod()).ConfigureAwait(false);
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 await pca.RemoveAsync(acc).ConfigureAwait(false);
@@ -745,7 +782,7 @@ namespace NetDesktopWinForms
                 btnExpire_Click(sender, e);
                 var pca = CreatePca(AuthMethod.WAM);
                 brokerTimer.Start();
-                AuthenticationResult result1 = await RunAtsAsync(pca).ConfigureAwait(false);
+                AuthenticationResult result1 = await RunAtsAsync(await pca.ConfigureAwait(false)).ConfigureAwait(false);
                 brokerTimer.Stop();
 
                 var elapsedMilliseconds = brokerTimer.ElapsedMilliseconds;
@@ -758,7 +795,7 @@ namespace NetDesktopWinForms
                 pca = CreatePca(AuthMethod.WAMRuntime);
                 brokerTimer.Reset();
                 brokerTimer.Start();
-                AuthenticationResult result2 = await RunAtsAsync(pca).ConfigureAwait(false);
+                AuthenticationResult result2 = await RunAtsAsync(await pca.ConfigureAwait(false)).ConfigureAwait(false);
                 brokerTimer.Stop();
 
                 await LogResultAndRefreshAccountsAsync(result2).ConfigureAwait(false);
@@ -783,9 +820,9 @@ namespace NetDesktopWinForms
             {
                 var cancellationTokenSource = new CancellationTokenSource();
 
-                var pca = CreatePca(GetAuthMethod());
+                var pca = await CreatePca(GetAuthMethod()).ConfigureAwait(false);
                 AuthenticationResult authenticationResult = await pca
-                .AcquireTokenWithDeviceCode(
+                    .AcquireTokenWithDeviceCode(
                         GetScopes(),
                         dcr =>
                         {
@@ -819,7 +856,7 @@ namespace NetDesktopWinForms
             try
             {
                 var pca = CreatePca(GetAuthMethod());
-                AuthenticationResult result = await RunAtiSshBtnAsync(pca).ConfigureAwait(false);
+                AuthenticationResult result = await RunAtiSshBtnAsync(await pca.ConfigureAwait(false)).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
@@ -838,7 +875,7 @@ namespace NetDesktopWinForms
                 throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account, but not both");
             }
 
-            AuthenticationResult result = null; 
+            AuthenticationResult result = null;
             var scopes = GetScopes();
             var guid = Guid.NewGuid();
             string jwk = CreateJwk();
@@ -900,6 +937,27 @@ namespace NetDesktopWinForms
             result = await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
 
             return result;
+        }
+
+        private async void btn_wia_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var cancellationTokenSource = new CancellationTokenSource();
+
+                var pca = await CreatePca(GetAuthMethod()).ConfigureAwait(false);
+                AuthenticationResult authenticationResult = await pca
+                    .AcquireTokenByIntegratedWindowsAuth(
+                        GetScopes())
+                    .ExecuteAsync(cancellationTokenSource.Token)
+                    .ConfigureAwait(true);
+
+                await LogResultAndRefreshAccountsAsync(authenticationResult).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log("Exception: " + ex);
+            }
         }
     }
 

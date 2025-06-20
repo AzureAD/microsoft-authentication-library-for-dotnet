@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
@@ -27,31 +28,20 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private readonly IHttpManager _httpManager;
 
-        public MockHttpManager(string testName = null,
-            bool isManagedIdentity = false,
+        public MockHttpManager(
+            bool disableInternalRetries = false,
+            string testName = null,
             Func<MockHttpMessageHandler> messageHandlerFunc = null,
             Func<HttpClient> validateServerCertificateCallback = null,
-            bool invokeNonMtlsHttpManagerFactory = false) :
-            this(true, testName, isManagedIdentity, messageHandlerFunc, invokeNonMtlsHttpManagerFactory)
-        {
-        }
-
-        public MockHttpManager(
-            bool retry,
-            string testName = null,
-            bool isManagedIdentity = false,
-            Func<MockHttpMessageHandler> messageHandlerFunc = null,
             bool invokeNonMtlsHttpManagerFactory = false)
         {
             _httpManager = invokeNonMtlsHttpManagerFactory
                 ? HttpManagerFactory.GetHttpManager(
                     new MockNonMtlsHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
-                    retry,
-                    isManagedIdentity)
+                    disableInternalRetries)
                 : HttpManagerFactory.GetHttpManager(
                     new MockHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
-                    retry,
-                    isManagedIdentity);
+                    disableInternalRetries);
 
             _testName = testName;
         }
@@ -113,8 +103,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 mtlsCertificate,
-            HttpClient customHttpClient,
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
+            IRetryPolicy retryPolicy,
             int retryCount = 0)
         {
             return _httpManager.SendRequestAsync(
@@ -125,8 +116,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 logger,
                 doNotThrow,
                 mtlsCertificate,
-                customHttpClient: null,
-                cancellationToken,
+                validateServerCert, cancellationToken,
+                retryPolicy,
                 retryCount);
         }
     }
@@ -187,7 +178,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
     }
 
-    internal class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory
+    internal class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
     {
         public MockHttpClientFactory(
             Func<MockHttpMessageHandler> messageHandlerFunc,
@@ -205,6 +196,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpClient GetHttpClient(X509Certificate2 mtlsBindingCert)
         {
             return GetHttpClientInternal(mtlsBindingCert);
+        }
+
+        public HttpClient GetHttpClient(Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
+        {
+            return GetHttpClientInternal(null);
         }
     }
 

@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net.Http;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
@@ -16,7 +18,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// .NET should use the IHttpClientFactory, but MSAL cannot take a dependency on it.
     /// .NET should use SocketHandler, but UseDefaultCredentials doesn't work with it 
     /// </remarks>
-    internal class SimpleHttpClientFactory : IMsalMtlsHttpClientFactory
+    internal class SimpleHttpClientFactory : IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
@@ -47,7 +49,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
 
             //Create an HttpClientHandler and configure it to use the client certificate
-            HttpClientHandler handler = new HttpClientHandler();
+            HttpClientHandler handler = new();
 
             handler.ClientCertificates.Add(bindingCertificate);
             var httpClient = new HttpClient(handler);
@@ -84,6 +86,32 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                     s_httpClientPool.Clear();
                 }
             }
+        }
+
+        // This method is used for Service Fabric scenarios where a custom server certificate validation callback is required.
+        // It allows the caller to provide a custom HttpClientHandler with the callback.
+        // The server cert rotates so we need a new HttpClient for each call.
+        public HttpClient GetHttpClient(Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
+        {
+            if (validateServerCert == null)
+            {
+                return GetHttpClient();
+            }
+
+#if NET471_OR_GREATER || NETSTANDARD || NET
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
+                {
+                    return validateServerCert(message, cert, chain, sslPolicyErrors);
+                }
+            };
+
+            string key = handler.GetHashCode().ToString();
+            return s_httpClientPool.GetOrAdd(key, new HttpClient(handler));
+#else
+            return GetHttpClient();
+#endif
         }
     }
 }

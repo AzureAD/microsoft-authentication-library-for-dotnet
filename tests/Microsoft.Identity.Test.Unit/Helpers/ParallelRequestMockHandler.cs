@@ -5,11 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.RequestsTests;
@@ -26,6 +28,8 @@ namespace Microsoft.Identity.Test.Unit.Helpers
     internal class ParallelRequestMockHandler : IHttpManager
     {
         public long LastRequestDurationInMs => 50;
+        private int _requestCount = 0;
+        public int RequestsMade => _requestCount;
 
         public async Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
@@ -35,10 +39,13 @@ namespace Microsoft.Identity.Test.Unit.Helpers
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 mtlsCertificate,
-            HttpClient customHttpClient,
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
+            IRetryPolicy retryPolicy,
             int retryCount = 0)
         {
+            Interlocked.Increment(ref _requestCount);
+
             // simulate delay and also add complexity due to thread context switch
             await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
 
@@ -53,10 +60,13 @@ namespace Microsoft.Identity.Test.Unit.Helpers
             }
 
             if (HttpMethod.Post == method &&
-                UriWithoutQuery(endpoint).AbsoluteUri.Equals("https://login.microsoftonline.com/my-utid/oauth2/v2.0/token"))
+                UriWithoutQuery(endpoint).AbsoluteUri.EndsWith("oauth2/v2.0/token"))
             {
                 var bodyString = await (body as FormUrlEncodedContent).ReadAsStringAsync().ConfigureAwait(false);
-                var bodyDict = bodyString.Replace("?", "").Split('&').ToDictionary(x => x.Split('=')[0], x => x.Split('=')[1]);
+                var bodyDict = bodyString
+                    .Replace("?", "")
+                    .Split('&')
+                    .ToDictionary(x => x.Split('=')[0], x => x.Split('=')[1]);
 
                 if (bodyDict["grant_type"] == "refresh_token")
                 {
@@ -71,7 +81,12 @@ namespace Microsoft.Identity.Test.Unit.Helpers
 
                 if (bodyDict["grant_type"] == "client_credentials")
                 {
-                    HttpResponseMessage response = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage();
+                    var segments = endpoint.AbsolutePath.Split('/');
+                    string tid = segments.Length > 1 ? segments[1] : "unknown_tid";
+
+                    HttpResponseMessage response =
+                        MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage($"token_{tid}");
+
                     string payload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                     return new HttpResponse()

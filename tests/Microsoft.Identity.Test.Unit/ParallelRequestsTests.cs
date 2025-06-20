@@ -1,25 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute.Core;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -83,6 +74,141 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             // Assert
             Assert.AreEqual(NumberOfRequests, results.Length);
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_ConcurrentTenantRequests_Test()
+        {
+            // Arrange
+            const int NumberOfRequests = 1000;
+
+            // Custom HTTP manager that counts the number of requests
+            ParallelRequestMockHandler httpManager = new();
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority("https://login.microsoftonline.com/common")
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(httpManager)
+                .Build();
+
+            var tasks = new List<Task<AuthenticationResult>>();
+
+            for (int i = 0; i < NumberOfRequests; i++)
+            {
+                int tempI = i; // Capture the current value of i
+                tasks.Add(Task.Run(async () =>
+                {
+                    string tid = $"tidtid_{tempI}";
+                    AuthenticationResult res = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithTenantId(tid)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.IsFalse(
+                        string.IsNullOrEmpty(res.AuthenticationResultMetadata.TokenEndpoint),
+                        "TokenEndpoint is null/empty!"
+                    );
+                    Assert.IsTrue(
+                        res.AuthenticationResultMetadata.TokenEndpoint.Contains(tid),
+                        "TokenEndpoint should contain the tenant ID."
+                    );
+                    Assert.AreEqual($"token_{tid}", res.AccessToken, "Access token did not match the expected value.");
+
+                    return res;
+                }));
+            }
+
+            // Wait for all tasks to complete
+            AuthenticationResult[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            // Assert the total tasks
+            Assert.AreEqual(NumberOfRequests, results.Length, "Number of AuthenticationResult objects does not match the number of requests.");
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_PerTenantCaching_Test()
+        {
+            const int NumberOfRequests = 5000;
+
+            var httpManager = new ParallelRequestMockHandler();
+            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority("https://login.microsoftonline.com/common")
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(httpManager)
+                .Build();
+
+            // First pass: tokens should come from the network
+            var tasksFirstPass = new List<Task<AuthenticationResult>>();
+            for (int i = 0; i < NumberOfRequests; i++)
+            {
+                int tempI = i; // Capture the current value of i
+                string tid = $"tidtid_{tempI}";
+                tasksFirstPass.Add(Task.Run(async () =>
+                {
+                    AuthenticationResult result = await cca
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithTenantId(tid)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.IsNotNull(result, $"First-pass result is null for TID '{tid}'.");
+                    Assert.IsFalse(
+                        string.IsNullOrEmpty(result.AccessToken),
+                        $"First-pass access token is null/empty for TID '{tid}'.");
+                    Assert.AreEqual(
+                        $"token_{tid}",
+                        result.AccessToken,
+                        $"First-pass AccessToken mismatch for TID '{tid}'.");
+                    Assert.IsTrue(
+                        result.AuthenticationResultMetadata.TokenEndpoint.Contains(tid),
+                        $"First-pass TokenEndpoint '{result.AuthenticationResultMetadata.TokenEndpoint}' does not contain TID '{tid}'.");
+
+                    return result;
+                }));
+            }
+
+            AuthenticationResult[] firstPassResults = await Task.WhenAll(tasksFirstPass).ConfigureAwait(false);
+            int firstPassRequestsMade = httpManager.RequestsMade;
+
+            // Second pass: tokens should come from the cache
+            var tasksSecondPass = new List<Task<AuthenticationResult>>();
+            for (int i = 0; i < NumberOfRequests; i++)
+            {
+                int tempI = i; // Capture the current value of i
+                string tid = $"tidtid_{tempI}";
+                tasksSecondPass.Add(Task.Run(async () =>
+                {
+                    AuthenticationResult result = await cca
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithTenantId(tid)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.IsNotNull(result, $"Second-pass result is null for TID '{tid}'.");
+                    Assert.IsFalse(
+                        string.IsNullOrEmpty(result.AccessToken),
+                        $"Second-pass access token is null/empty for TID '{tid}'.");
+                    Assert.AreEqual(
+                        $"token_{tid}",
+                        result.AccessToken,
+                        $"Second-pass AccessToken mismatch for TID '{tid}'.");
+
+                    return result;
+                }));
+            }
+
+            AuthenticationResult[] secondPassResults = await Task.WhenAll(tasksSecondPass).ConfigureAwait(false);
+            int totalRequestsMade = httpManager.RequestsMade;
+            int secondPassRequestsMade = totalRequestsMade - firstPassRequestsMade;
+
+            // Verifying no new network calls on the second pass if caching is working properly
+            Assert.AreEqual(
+                0,
+                secondPassRequestsMade,
+                $"Expected zero new requests in second pass, but found {secondPassRequestsMade}."
+            );
         }
 
         [TestMethod]

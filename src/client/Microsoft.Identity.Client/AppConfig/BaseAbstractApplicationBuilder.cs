@@ -14,6 +14,8 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Http.Retry;
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -31,6 +33,12 @@ namespace Microsoft.Identity.Client
         internal BaseAbstractApplicationBuilder(ApplicationConfiguration configuration)
         {
             Config = configuration;
+
+            // Ensure the default retry policy factory is set if the test factory was not provided
+            if (Config.RetryPolicyFactory == null)
+            {
+                Config.RetryPolicyFactory = new RetryPolicyFactory();
+            }
         }
 
         internal ApplicationConfiguration Config { get; }
@@ -61,7 +69,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="httpClientFactory">HTTP client factory</param>
         /// <param name="retryOnceOn5xx">Configures MSAL to retry on 5xx server errors. When enabled (on by default), MSAL will wait 1 second after receiving
-        /// a 5xx error and then retry the http request again.</param>
+        /// a 5xx error and then retry the http request again.
+        /// When disabled, the developer will be responsible for configuring their own retry policy in their custom IMsalHttpClientFactory.</param>
         /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.
         /// Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
         /// the httpClient had the possibility of throwing an exception stating "Properties can only be modified before sending the first request".
@@ -73,7 +82,7 @@ namespace Microsoft.Identity.Client
         public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory, bool retryOnceOn5xx)
         {
             Config.HttpClientFactory = httpClientFactory;
-            Config.RetryOnServerErrors = retryOnceOn5xx;
+            Config.DisableInternalRetries = !retryOnceOn5xx;
             return (T)this;
         }
 
@@ -224,6 +233,17 @@ namespace Microsoft.Identity.Client
         {
             Config.ClientVersion = GetValueIfNotEmpty(Config.ClientVersion, clientVersion);
             return this as T;
+        }
+
+        /// <summary>
+        /// Internal only: Allows tests to inject a custom retry policy factory.
+        /// </summary>
+        /// <param name="factory">The retry policy factory to use.</param>
+        /// <returns>The builder for chaining.</returns>
+        internal T WithRetryPolicyFactory(IRetryPolicyFactory factory)
+        {
+            Config.RetryPolicyFactory = factory;
+            return (T)this;
         }
 
         internal virtual ApplicationConfiguration BuildConfiguration()

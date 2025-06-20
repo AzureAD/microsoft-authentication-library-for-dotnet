@@ -15,8 +15,8 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.Internal.Broker;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Http.Retry;
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
@@ -119,6 +119,9 @@ namespace Microsoft.Identity.Client.OAuth2
 
             using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
             {
+                IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+                IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+
                 try
                 {
                     if (method == HttpMethod.Post)
@@ -135,12 +138,13 @@ namespace Microsoft.Identity.Client.OAuth2
                             endpointUri,
                             _headers,
                             body: new FormUrlEncodedContent(_bodyParameters),
-                            HttpMethod.Post,
+                            method: HttpMethod.Post,
                             logger: requestContext.Logger,
                             doNotThrow: false,
                             mtlsCertificate: _mtlsCertificate,
-                            customHttpClient: null,
-                            requestContext.UserCancellationToken)
+                            validateServerCertificate: null,
+                            cancellationToken: requestContext.UserCancellationToken,
+                            retryPolicy: retryPolicy)
                         .ConfigureAwait(false);
                     }
                     else
@@ -149,12 +153,13 @@ namespace Microsoft.Identity.Client.OAuth2
                             endpointUri,
                             _headers,
                             body: null,
-                            HttpMethod.Get,
+                            method: HttpMethod.Get,
                             logger: requestContext.Logger,
                             doNotThrow: false,
                             mtlsCertificate: null,
-                            customHttpClient: null,
-                            requestContext.UserCancellationToken)
+                            validateServerCertificate: null,
+                            cancellationToken: requestContext.UserCancellationToken,
+                            retryPolicy: retryPolicy)
                         .ConfigureAwait(false);
                     }
                 }

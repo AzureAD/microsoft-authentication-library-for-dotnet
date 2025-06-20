@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -44,9 +45,9 @@ namespace Microsoft.Identity.Test.Unit
         public const string Utid = "my-utid";
         public const string Utid2 = "my-utid2";
 
-        public const string Common = "common";
-        public const string Organizations = "organizations";
-        public const string Consumers = "consumers";
+        public const string Common = Constants.Common;
+        public const string Organizations = Constants.Organizations;
+        public const string Consumers = Constants.Consumers;
         public const string Guest = "guest";
         public const string Home = "home";
         public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
@@ -112,6 +113,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
         public const string DstsAuthorityTenanted = DstsAuthorityTenantless + TenantId + "/";
         public const string DstsAuthorityCommon = DstsAuthorityTenantless + Common + "/";
+        public const string DstsAuthorityOrganizations = DstsAuthorityTenantless + Organizations + "/";
+        public const string DstsAuthorityConsumers = DstsAuthorityTenantless + Consumers + "/";
 
         public const string GenericAuthority = "https://demo.duendesoftware.com";
 
@@ -199,7 +202,15 @@ namespace Microsoft.Identity.Test.Unit
         public const string Region = "centralus";
         public const string InvalidRegion = "invalidregion";
         public const int TimeoutInMs = 2000;
-        public const string ImdsUrl = "http://169.254.169.254/metadata/instance/compute/location";
+        public const string ImdsHost = "169.254.169.254";
+        public const string ImdsUrl = $"http://{ImdsHost}/metadata/instance/compute/location";
+
+        public const string AppServiceEndpoint = "http://127.0.0.1:41564/msi/token";
+        public const string AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
+        public const string CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
+        public const string ImdsEndpoint = $"http://{ImdsHost}/metadata/identity/oauth2/token";
+        public const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
+        public const string ServiceFabricEndpoint = "https://localhost:2377/metadata/identity/oauth2/token";
 
         public const string UserAssertion = "fake_access_token";
         public const string CodeVerifier = "someCodeVerifier";
@@ -216,6 +227,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string Bearer = "Bearer";
         public const string Pop = "PoP";
+        public const string FmiNodeClientId = "urn:microsoft:identity:fmi";
 
         public static IDictionary<string, string> ExtraQueryParameters
         {
@@ -236,10 +248,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret";
         public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string MsalArlingtonOBOKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
-        public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/";
-        public const string FociApp1KeyVaultSecretName = "automation-foci-app1";
-        public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/";
-        public const string FociApp2KeyVaultSecretName = "automation-foci-app2";
         public const string MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string MsalArlingtonCCAKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
 

@@ -33,6 +33,10 @@ namespace Microsoft.Identity.Client
             /// Use broker on Linux
             /// </summary>
             Linux = 0b_0000_0010,  // 2
+            /// <summary>
+            /// Use broker on OSX
+            /// </summary>
+            OSX = 0b_0000_0100,  // 4
         }
 
         /// <summary>
@@ -75,10 +79,11 @@ namespace Microsoft.Identity.Client
         public bool MsaPassthrough { get; set; } = false;
 
         /// <summary>
-        /// Currently only supported on Windows and Linux
-        /// Allows the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
-        /// Linux broker will discover accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
-        /// </summary>        
+        /// Currently supported on Windows, Linux and macOS.
+        /// Allows the Windows broker to list MSA, Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>.
+        /// Linux and macOS broker will discover accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public bool ListOperatingSystemAccounts { get; set; }
 
         internal bool IsBrokerEnabledOnCurrentOs()
@@ -87,6 +92,11 @@ namespace Microsoft.Identity.Client
             {
                 return true;
             } else if (EnabledOn.HasFlag(OperatingSystems.Linux) && DesktopOsHelper.IsLinux()) {
+                return true;
+            }
+
+            if (EnabledOn.HasFlag(OperatingSystems.OSX) && DesktopOsHelper.IsMac())
+            {
                 return true;
             }
 

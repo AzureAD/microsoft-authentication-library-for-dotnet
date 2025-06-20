@@ -8,10 +8,12 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http.Retry;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -26,21 +28,29 @@ namespace Microsoft.Identity.Client.Http
     internal class HttpManager : IHttpManager
     {
         protected readonly IMsalHttpClientFactory _httpClientFactory;
-        private readonly IRetryPolicy _retryPolicy;
+        private readonly bool _disableInternalRetries;
         public long LastRequestDurationInMs { get; private set; }
 
         /// <summary>
-        /// A new instance of the HTTP manager with a retry *condition*. The retry policy hardcodes: 
-        /// - the number of retries (1)
-        /// - the delay between retries (1 second)
+        /// Initializes a new instance of the <see cref="HttpManager"/> class.
         /// </summary>
+        /// <param name="httpClientFactory">
+        /// An instance of <see cref="IMsalHttpClientFactory"/> used to create and manage <see cref="HttpClient"/> instances.
+        /// This factory ensures proper reuse of <see cref="HttpClient"/> to avoid socket exhaustion.
+        /// </param>
+        /// <param name="disableInternalRetries">
+        /// A boolean flag indicating whether the HTTP manager should enable retry logic for transient failures.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="httpClientFactory"/> is null.
+        /// </exception>
         public HttpManager(
             IMsalHttpClientFactory httpClientFactory,
-            IRetryPolicy retryPolicy)
+            bool disableInternalRetries)
         {
             _httpClientFactory = httpClientFactory ??
                 throw new ArgumentNullException(nameof(httpClientFactory));
-            _retryPolicy = retryPolicy;
+            _disableInternalRetries = disableInternalRetries;
         }
 
         public async Task<HttpResponse> SendRequestAsync(
@@ -51,8 +61,9 @@ namespace Microsoft.Identity.Client.Http
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 bindingCertificate,
-            HttpClient customHttpClient,
-            CancellationToken cancellationToken, 
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
+            CancellationToken cancellationToken,
+            IRetryPolicy retryPolicy,
             int retryCount = 0)
         {
             Exception timeoutException = null;
@@ -76,8 +87,7 @@ namespace Microsoft.Identity.Client.Http
                         clonedBody,
                         method,
                         bindingCertificate,
-                        customHttpClient,
-                        logger,
+                        validateServerCert, logger,
                         cancellationToken).ConfigureAwait(false);
                 }
 
@@ -101,10 +111,11 @@ namespace Microsoft.Identity.Client.Http
                 logger.Error("The HTTP request failed. " + exception.Message);
                 timeoutException = exception;
             }
-
-            while (_retryPolicy.pauseForRetry(response, timeoutException, retryCount))
+            
+            while (!_disableInternalRetries && await retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
             {
-                logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {_retryPolicy.DelayInMilliseconds}ms.");
+                retryCount++;
+
                 return await SendRequestAsync(
                     endpoint,
                     headers,
@@ -113,8 +124,9 @@ namespace Microsoft.Identity.Client.Http
                     logger,
                     doNotThrow,
                     bindingCertificate,
-                    customHttpClient,
-                    cancellationToken: cancellationToken,
+                    validateServerCert,
+                    cancellationToken,
+                    retryPolicy,
                     retryCount) // Pass the updated retry count
                     .ConfigureAwait(false);
             }
@@ -146,15 +158,32 @@ namespace Microsoft.Identity.Client.Http
             return response;
         }
 
-        private HttpClient GetHttpClient(X509Certificate2 x509Certificate2, HttpClient customHttpClient) {
-            if (x509Certificate2 != null && customHttpClient != null)
+        private HttpClient GetHttpClient(X509Certificate2 x509Certificate2, Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
+        {
+            if (x509Certificate2 != null && validateServerCert != null)
             {
                 throw new NotImplementedException("Mtls certificate cannot be used with service fabric. A custom http client is used for service fabric managed identity to validate the server certificate.");
             }
 
-            if (customHttpClient != null)
+            if (validateServerCert != null)
             {
-                return customHttpClient;
+                // If the factory is an IMsalSFHttpClientFactory, use it to get an HttpClient with the custom handler
+                // that validates the server certificate.
+                if (_httpClientFactory is IMsalSFHttpClientFactory msalSFHttpClientFactory)
+                {
+                    return msalSFHttpClientFactory.GetHttpClient(validateServerCert);
+                }
+
+#if NET471_OR_GREATER || NETSTANDARD || NET
+                // If the factory is not an IMsalSFHttpClientFactory, use it to get a default HttpClient
+                return new HttpClient(new HttpClientHandler()
+                {
+
+                    ServerCertificateCustomValidationCallback = validateServerCert
+                });
+#else
+                return _httpClientFactory.GetHttpClient();
+#endif
             }
 
             if (_httpClientFactory is IMsalMtlsHttpClientFactory msalMtlsHttpClientFactory)
@@ -170,7 +199,15 @@ namespace Microsoft.Identity.Client.Http
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
+            
             requestMessage.Headers.Accept.Clear();
+
+#if NET5_0_OR_GREATER
+            // On .NET 5.0 and later, HTTP2 is supported through the SDK and Entra is HTTP2 compatible
+            // Note that HttpClient.DefaultRequestVersion does not work when using HttpRequestMessage objects
+            requestMessage.Version = HttpVersion.Version20; // Default to HTTP/2
+            requestMessage.VersionPolicy = HttpVersionPolicy.RequestVersionOrLower; // Allow fallback to HTTP/1.1
+#endif
             if (headers != null)
             {
                 foreach (KeyValuePair<string, string> kvp in headers)
@@ -188,7 +225,7 @@ namespace Microsoft.Identity.Client.Http
             HttpContent body,
             HttpMethod method,
             X509Certificate2 bindingCertificate,
-            HttpClient customHttpClient,
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default)
         {
@@ -203,7 +240,7 @@ namespace Microsoft.Identity.Client.Http
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                HttpClient client = GetHttpClient(bindingCertificate, customHttpClient);
+                HttpClient client = GetHttpClient(bindingCertificate, validateServerCert);
 
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))

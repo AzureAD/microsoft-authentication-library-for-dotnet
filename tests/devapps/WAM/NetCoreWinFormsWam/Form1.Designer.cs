@@ -66,28 +66,30 @@
             label9 = new System.Windows.Forms.Label();
             cbxMultiCloud2 = new System.Windows.Forms.CheckBox();
             cbxWithForceRefresh = new System.Windows.Forms.CheckBox();
+            cbxCacheEncryption = new System.Windows.Forms.CheckBox();
             btn_ATSDeviceCodeFlow = new System.Windows.Forms.Button();
             atiSshBtn = new System.Windows.Forms.Button();
+            btn_wia = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)nudAutocancelSeconds).BeginInit();
             SuspendLayout();
             // 
             // resultTbx
             // 
-            resultTbx.Location = new System.Drawing.Point(14, 421);
-            resultTbx.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            resultTbx.Location = new System.Drawing.Point(13, 335);
+            resultTbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             resultTbx.Multiline = true;
             resultTbx.Name = "resultTbx";
             resultTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            resultTbx.Size = new System.Drawing.Size(810, 519);
+            resultTbx.Size = new System.Drawing.Size(783, 413);
             resultTbx.TabIndex = 0;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(25, 69);
-            label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label1.Location = new System.Drawing.Point(22, 52);
+            label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(70, 20);
+            label1.Size = new System.Drawing.Size(57, 15);
             label1.TabIndex = 2;
             label1.Text = "Authority";
             // 
@@ -95,20 +97,20 @@
             // 
             authorityCbx.FormattingEnabled = true;
             authorityCbx.Items.AddRange(new object[] { "https://login.microsoftonline.com/common", "https://login.microsoftonline.com/organizations", "https://login.microsoftonline.com/consumers", "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462", "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47", "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a", "https://login.windows-ppe.net/organizations", "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47", "https://login.partner.microsoftonline.cn/organizations", "https://login.microsoftonline.us/organizations" });
-            authorityCbx.Location = new System.Drawing.Point(97, 64);
-            authorityCbx.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            authorityCbx.Location = new System.Drawing.Point(85, 48);
+            authorityCbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             authorityCbx.Name = "authorityCbx";
-            authorityCbx.Size = new System.Drawing.Size(649, 28);
+            authorityCbx.Size = new System.Drawing.Size(568, 23);
             authorityCbx.TabIndex = 3;
             authorityCbx.Text = "https://login.microsoftonline.com/common";
             // 
             // clientIdCbx
             // 
             clientIdCbx.FormattingEnabled = true;
-            clientIdCbx.Location = new System.Drawing.Point(97, 23);
-            clientIdCbx.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            clientIdCbx.Location = new System.Drawing.Point(85, 17);
+            clientIdCbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             clientIdCbx.Name = "clientIdCbx";
-            clientIdCbx.Size = new System.Drawing.Size(649, 28);
+            clientIdCbx.Size = new System.Drawing.Size(568, 23);
             clientIdCbx.TabIndex = 4;
             clientIdCbx.Text = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
             clientIdCbx.SelectedIndexChanged += clientIdCbx_SelectedIndexChanged;
@@ -116,47 +118,47 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(33, 28);
-            label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label2.Location = new System.Drawing.Point(29, 21);
+            label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(60, 20);
+            label2.Size = new System.Drawing.Size(48, 15);
             label2.TabIndex = 5;
             label2.Text = "ClientId";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(11, 151);
-            label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label3.Location = new System.Drawing.Point(10, 113);
+            label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label3.Name = "label3";
-            label3.Size = new System.Drawing.Size(82, 20);
+            label3.Size = new System.Drawing.Size(66, 15);
             label3.TabIndex = 7;
             label3.Text = "Login Hint ";
             // 
             // loginHintTxt
             // 
-            loginHintTxt.Location = new System.Drawing.Point(97, 148);
-            loginHintTxt.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            loginHintTxt.Location = new System.Drawing.Point(85, 111);
+            loginHintTxt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             loginHintTxt.Name = "loginHintTxt";
-            loginHintTxt.Size = new System.Drawing.Size(292, 27);
+            loginHintTxt.Size = new System.Drawing.Size(256, 23);
             loginHintTxt.TabIndex = 8;
             // 
             // promptCbx
             // 
             promptCbx.FormattingEnabled = true;
             promptCbx.Items.AddRange(new object[] { "", "select_account", "force_login", "no_prompt", "consent", "never" });
-            promptCbx.Location = new System.Drawing.Point(663, 199);
-            promptCbx.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            promptCbx.Location = new System.Drawing.Point(580, 149);
+            promptCbx.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             promptCbx.Name = "promptCbx";
-            promptCbx.Size = new System.Drawing.Size(159, 28);
+            promptCbx.Size = new System.Drawing.Size(140, 23);
             promptCbx.TabIndex = 10;
             // 
             // atsBtn
             // 
-            atsBtn.Location = new System.Drawing.Point(11, 329);
-            atsBtn.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            atsBtn.Location = new System.Drawing.Point(10, 269);
+            atsBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             atsBtn.Name = "atsBtn";
-            atsBtn.Size = new System.Drawing.Size(144, 36);
+            atsBtn.Size = new System.Drawing.Size(126, 27);
             atsBtn.TabIndex = 11;
             atsBtn.Text = "ATS";
             atsBtn.UseVisualStyleBackColor = true;
@@ -164,10 +166,10 @@
             // 
             // atiBtn
             // 
-            atiBtn.Location = new System.Drawing.Point(165, 329);
-            atiBtn.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            atiBtn.Location = new System.Drawing.Point(144, 269);
+            atiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             atiBtn.Name = "atiBtn";
-            atiBtn.Size = new System.Drawing.Size(144, 36);
+            atiBtn.Size = new System.Drawing.Size(126, 27);
             atiBtn.TabIndex = 12;
             atiBtn.Text = "ATI";
             atiBtn.UseVisualStyleBackColor = true;
@@ -175,10 +177,10 @@
             // 
             // atsAtiBtn
             // 
-            atsAtiBtn.Location = new System.Drawing.Point(318, 329);
-            atsAtiBtn.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            atsAtiBtn.Location = new System.Drawing.Point(278, 269);
+            atsAtiBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             atsAtiBtn.Name = "atsAtiBtn";
-            atsAtiBtn.Size = new System.Drawing.Size(144, 36);
+            atsAtiBtn.Size = new System.Drawing.Size(126, 27);
             atsAtiBtn.TabIndex = 13;
             atsAtiBtn.Text = "ATS + ATI";
             atsAtiBtn.UseVisualStyleBackColor = true;
@@ -186,10 +188,10 @@
             // 
             // accBtn
             // 
-            accBtn.Location = new System.Drawing.Point(261, 373);
-            accBtn.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            accBtn.Location = new System.Drawing.Point(228, 302);
+            accBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             accBtn.Name = "accBtn";
-            accBtn.Size = new System.Drawing.Size(144, 36);
+            accBtn.Size = new System.Drawing.Size(126, 27);
             accBtn.TabIndex = 15;
             accBtn.Text = "Get Accounts";
             accBtn.UseVisualStyleBackColor = true;
@@ -197,10 +199,10 @@
             // 
             // clearBtn
             // 
-            clearBtn.Location = new System.Drawing.Point(734, 1005);
-            clearBtn.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            clearBtn.Location = new System.Drawing.Point(720, 757);
+            clearBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             clearBtn.Name = "clearBtn";
-            clearBtn.Size = new System.Drawing.Size(90, 36);
+            clearBtn.Size = new System.Drawing.Size(79, 27);
             clearBtn.TabIndex = 16;
             clearBtn.Text = "Clear Log";
             clearBtn.UseVisualStyleBackColor = true;
@@ -208,10 +210,10 @@
             // 
             // btnClearCache
             // 
-            btnClearCache.Location = new System.Drawing.Point(581, 1005);
-            btnClearCache.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            btnClearCache.Location = new System.Drawing.Point(586, 757);
+            btnClearCache.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             btnClearCache.Name = "btnClearCache";
-            btnClearCache.Size = new System.Drawing.Size(144, 36);
+            btnClearCache.Size = new System.Drawing.Size(126, 27);
             btnClearCache.TabIndex = 17;
             btnClearCache.Text = "Clear MSAL Cache";
             btnClearCache.UseVisualStyleBackColor = true;
@@ -221,69 +223,69 @@
             // 
             cbxScopes.FormattingEnabled = true;
             cbxScopes.Items.AddRange(new object[] { "User.Read", "User.Read User.Read.All", "https://management.core.windows.net//.default", "https://graph.microsoft.com/.default", "499b84ac-1321-427f-aa17-267ca6975798/vso.code_full", "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess", "https://management.core.chinacloudapi.cn//.default", "https://management.core.usgovcloudapi.net//.default" });
-            cbxScopes.Location = new System.Drawing.Point(97, 107);
-            cbxScopes.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            cbxScopes.Location = new System.Drawing.Point(85, 80);
+            cbxScopes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             cbxScopes.Name = "cbxScopes";
-            cbxScopes.Size = new System.Drawing.Size(725, 28);
+            cbxScopes.Size = new System.Drawing.Size(635, 23);
             cbxScopes.TabIndex = 18;
             cbxScopes.Text = "User.Read";
             // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point(32, 111);
-            label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label5.Location = new System.Drawing.Point(28, 83);
+            label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label5.Name = "label5";
-            label5.Size = new System.Drawing.Size(56, 20);
+            label5.Size = new System.Drawing.Size(44, 15);
             label5.TabIndex = 19;
             label5.Text = "Scopes";
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(601, 204);
-            label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label4.Location = new System.Drawing.Point(526, 153);
+            label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(58, 20);
+            label4.Size = new System.Drawing.Size(47, 15);
             label4.TabIndex = 9;
             label4.Text = "Prompt";
             // 
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(399, 151);
-            label6.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label6.Location = new System.Drawing.Point(349, 113);
+            label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(83, 20);
+            label6.Size = new System.Drawing.Size(68, 15);
             label6.TabIndex = 21;
             label6.Text = "Or Account";
             // 
             // cbxAccount
             // 
             cbxAccount.FormattingEnabled = true;
-            cbxAccount.Location = new System.Drawing.Point(488, 147);
-            cbxAccount.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            cbxAccount.Location = new System.Drawing.Point(427, 110);
+            cbxAccount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             cbxAccount.Name = "cbxAccount";
-            cbxAccount.Size = new System.Drawing.Size(334, 28);
+            cbxAccount.Size = new System.Drawing.Size(293, 23);
             cbxAccount.TabIndex = 22;
             // 
             // cbxMsaPt
             // 
             cbxMsaPt.AutoSize = true;
-            cbxMsaPt.Location = new System.Drawing.Point(242, 263);
-            cbxMsaPt.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            cbxMsaPt.Location = new System.Drawing.Point(212, 197);
+            cbxMsaPt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             cbxMsaPt.Name = "cbxMsaPt";
-            cbxMsaPt.Size = new System.Drawing.Size(147, 24);
+            cbxMsaPt.Size = new System.Drawing.Size(122, 19);
             cbxMsaPt.TabIndex = 23;
             cbxMsaPt.Text = "MSA-Passthrough";
             cbxMsaPt.UseVisualStyleBackColor = true;
             // 
             // btnExpire
             // 
-            btnExpire.Location = new System.Drawing.Point(427, 1007);
-            btnExpire.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            btnExpire.Location = new System.Drawing.Point(452, 758);
+            btnExpire.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             btnExpire.Name = "btnExpire";
-            btnExpire.Size = new System.Drawing.Size(144, 36);
+            btnExpire.Size = new System.Drawing.Size(126, 27);
             btnExpire.TabIndex = 24;
             btnExpire.Text = "Expire ATs";
             btnExpire.UseVisualStyleBackColor = true;
@@ -291,10 +293,10 @@
             // 
             // btnRemoveAccount
             // 
-            btnRemoveAccount.Location = new System.Drawing.Point(414, 373);
-            btnRemoveAccount.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            btnRemoveAccount.Location = new System.Drawing.Point(362, 302);
+            btnRemoveAccount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             btnRemoveAccount.Name = "btnRemoveAccount";
-            btnRemoveAccount.Size = new System.Drawing.Size(144, 36);
+            btnRemoveAccount.Size = new System.Drawing.Size(126, 27);
             btnRemoveAccount.TabIndex = 25;
             btnRemoveAccount.Text = "Remove Acc";
             btnRemoveAccount.UseVisualStyleBackColor = true;
@@ -303,10 +305,10 @@
             // cbxBackgroundThread
             // 
             cbxBackgroundThread.AutoSize = true;
-            cbxBackgroundThread.Location = new System.Drawing.Point(399, 263);
-            cbxBackgroundThread.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            cbxBackgroundThread.Location = new System.Drawing.Point(349, 197);
+            cbxBackgroundThread.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             cbxBackgroundThread.Name = "cbxBackgroundThread";
-            cbxBackgroundThread.Size = new System.Drawing.Size(197, 24);
+            cbxBackgroundThread.Size = new System.Drawing.Size(159, 19);
             cbxBackgroundThread.TabIndex = 26;
             cbxBackgroundThread.Text = "Force background thread";
             cbxBackgroundThread.UseVisualStyleBackColor = true;
@@ -314,10 +316,10 @@
             // cbxListOsAccounts
             // 
             cbxListOsAccounts.AutoSize = true;
-            cbxListOsAccounts.Location = new System.Drawing.Point(242, 296);
-            cbxListOsAccounts.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            cbxListOsAccounts.Location = new System.Drawing.Point(212, 222);
+            cbxListOsAccounts.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             cbxListOsAccounts.Name = "cbxListOsAccounts";
-            cbxListOsAccounts.Size = new System.Drawing.Size(138, 24);
+            cbxListOsAccounts.Size = new System.Drawing.Size(113, 19);
             cbxListOsAccounts.TabIndex = 27;
             cbxListOsAccounts.Text = "List OS accounts";
             cbxListOsAccounts.UseVisualStyleBackColor = true;
@@ -325,66 +327,66 @@
             // cbxUseWam
             // 
             cbxUseWam.FormattingEnabled = true;
-            cbxUseWam.Location = new System.Drawing.Point(11, 257);
-            cbxUseWam.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
+            cbxUseWam.Location = new System.Drawing.Point(10, 193);
+            cbxUseWam.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             cbxUseWam.Name = "cbxUseWam";
-            cbxUseWam.Size = new System.Drawing.Size(214, 28);
+            cbxUseWam.Size = new System.Drawing.Size(188, 23);
             cbxUseWam.TabIndex = 28;
             // 
             // cbxPOP
             // 
             cbxPOP.AutoSize = true;
-            cbxPOP.Location = new System.Drawing.Point(399, 296);
-            cbxPOP.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
+            cbxPOP.Location = new System.Drawing.Point(349, 222);
+            cbxPOP.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             cbxPOP.Name = "cbxPOP";
-            cbxPOP.Size = new System.Drawing.Size(191, 24);
+            cbxPOP.Size = new System.Drawing.Size(156, 19);
             cbxPOP.TabIndex = 29;
             cbxPOP.Text = "With Proof-of-Possesion";
             cbxPOP.UseVisualStyleBackColor = true;
             // 
             // UsernameTxt
             // 
-            UsernameTxt.Location = new System.Drawing.Point(97, 197);
-            UsernameTxt.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            UsernameTxt.Location = new System.Drawing.Point(85, 148);
+            UsernameTxt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             UsernameTxt.Name = "UsernameTxt";
-            UsernameTxt.Size = new System.Drawing.Size(175, 27);
+            UsernameTxt.Size = new System.Drawing.Size(154, 23);
             UsernameTxt.TabIndex = 30;
             // 
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(11, 203);
-            label7.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label7.Location = new System.Drawing.Point(10, 152);
+            label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label7.Name = "label7";
-            label7.Size = new System.Drawing.Size(75, 20);
+            label7.Size = new System.Drawing.Size(60, 15);
             label7.TabIndex = 31;
             label7.Text = "Username";
             // 
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new System.Drawing.Point(282, 201);
-            label8.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label8.Location = new System.Drawing.Point(247, 151);
+            label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label8.Name = "label8";
-            label8.Size = new System.Drawing.Size(70, 20);
+            label8.Size = new System.Drawing.Size(57, 15);
             label8.TabIndex = 32;
             label8.Text = "Password";
             // 
             // PasswordTxt
             // 
-            PasswordTxt.Location = new System.Drawing.Point(367, 199);
-            PasswordTxt.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            PasswordTxt.Location = new System.Drawing.Point(321, 149);
+            PasswordTxt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             PasswordTxt.Name = "PasswordTxt";
-            PasswordTxt.Size = new System.Drawing.Size(175, 27);
+            PasswordTxt.Size = new System.Drawing.Size(154, 23);
             PasswordTxt.TabIndex = 33;
             PasswordTxt.UseSystemPasswordChar = true;
             // 
             // atUsernamePwdBtn
             // 
-            atUsernamePwdBtn.Location = new System.Drawing.Point(165, 373);
-            atUsernamePwdBtn.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            atUsernamePwdBtn.Location = new System.Drawing.Point(144, 302);
+            atUsernamePwdBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             atUsernamePwdBtn.Name = "atUsernamePwdBtn";
-            atUsernamePwdBtn.Size = new System.Drawing.Size(87, 36);
+            atUsernamePwdBtn.Size = new System.Drawing.Size(76, 27);
             atUsernamePwdBtn.TabIndex = 34;
             atUsernamePwdBtn.Text = "AT U/P";
             atUsernamePwdBtn.UseVisualStyleBackColor = true;
@@ -392,10 +394,10 @@
             // 
             // btnATSperf
             // 
-            btnATSperf.Location = new System.Drawing.Point(11, 373);
-            btnATSperf.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            btnATSperf.Location = new System.Drawing.Point(10, 302);
+            btnATSperf.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             btnATSperf.Name = "btnATSperf";
-            btnATSperf.Size = new System.Drawing.Size(144, 36);
+            btnATSperf.Size = new System.Drawing.Size(126, 27);
             btnATSperf.TabIndex = 30;
             btnATSperf.Text = "ATS Perf";
             btnATSperf.UseVisualStyleBackColor = true;
@@ -403,29 +405,27 @@
             // 
             // nudAutocancelSeconds
             // 
-            nudAutocancelSeconds.Location = new System.Drawing.Point(167, 292);
-            nudAutocancelSeconds.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            nudAutocancelSeconds.Location = new System.Drawing.Point(146, 219);
             nudAutocancelSeconds.Maximum = new decimal(new int[] { 120, 0, 0, 0 });
             nudAutocancelSeconds.Name = "nudAutocancelSeconds";
-            nudAutocancelSeconds.Size = new System.Drawing.Size(66, 27);
+            nudAutocancelSeconds.Size = new System.Drawing.Size(58, 23);
             nudAutocancelSeconds.TabIndex = 30;
             // 
             // label9
             // 
             label9.AutoSize = true;
-            label9.Location = new System.Drawing.Point(11, 297);
+            label9.Location = new System.Drawing.Point(10, 223);
             label9.Name = "label9";
-            label9.Size = new System.Drawing.Size(142, 20);
+            label9.Size = new System.Drawing.Size(114, 15);
             label9.TabIndex = 31;
             label9.Text = "Autocancel Seconds";
             // 
             // cbxMultiCloud2
             // 
             cbxMultiCloud2.AutoSize = true;
-            cbxMultiCloud2.Location = new System.Drawing.Point(590, 265);
-            cbxMultiCloud2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            cbxMultiCloud2.Location = new System.Drawing.Point(516, 199);
             cbxMultiCloud2.Name = "cbxMultiCloud2";
-            cbxMultiCloud2.Size = new System.Drawing.Size(165, 24);
+            cbxMultiCloud2.Size = new System.Drawing.Size(134, 19);
             cbxMultiCloud2.TabIndex = 35;
             cbxMultiCloud2.Text = "Multi Cloud Support";
             cbxMultiCloud2.UseVisualStyleBackColor = true;
@@ -433,20 +433,28 @@
             // cbxWithForceRefresh
             // 
             cbxWithForceRefresh.AutoSize = true;
-            cbxWithForceRefresh.Location = new System.Drawing.Point(590, 299);
-            cbxWithForceRefresh.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            cbxWithForceRefresh.Location = new System.Drawing.Point(516, 224);
             cbxWithForceRefresh.Name = "cbxWithForceRefresh";
-            cbxWithForceRefresh.Size = new System.Drawing.Size(147, 24);
+            cbxWithForceRefresh.Size = new System.Drawing.Size(119, 19);
             cbxWithForceRefresh.TabIndex = 36;
             cbxWithForceRefresh.Text = "WithForceRefresh";
             cbxWithForceRefresh.UseVisualStyleBackColor = true;
             // 
+            // cbxCacheEncryption
+            // 
+            cbxCacheEncryption.AutoSize = true;
+            cbxCacheEncryption.Location = new System.Drawing.Point(212, 246);
+            cbxCacheEncryption.Name = "cbxCacheEncryption";
+            cbxCacheEncryption.Size = new System.Drawing.Size(119, 19);
+            cbxCacheEncryption.TabIndex = 39;
+            cbxCacheEncryption.Text = "Cache Encryption";
+            cbxCacheEncryption.UseVisualStyleBackColor = true;
+            // 
             // btn_ATSDeviceCodeFlow
             // 
-            btn_ATSDeviceCodeFlow.Location = new System.Drawing.Point(566, 373);
-            btn_ATSDeviceCodeFlow.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            btn_ATSDeviceCodeFlow.Location = new System.Drawing.Point(495, 302);
             btn_ATSDeviceCodeFlow.Name = "btn_ATSDeviceCodeFlow";
-            btn_ATSDeviceCodeFlow.Size = new System.Drawing.Size(160, 36);
+            btn_ATSDeviceCodeFlow.Size = new System.Drawing.Size(140, 27);
             btn_ATSDeviceCodeFlow.TabIndex = 37;
             btn_ATSDeviceCodeFlow.Text = "AT DeviceCodeFlow";
             btn_ATSDeviceCodeFlow.UseVisualStyleBackColor = true;
@@ -454,19 +462,32 @@
             // 
             // atiSshBtn
             // 
-            atiSshBtn.Location = new System.Drawing.Point(470, 331);
+            atiSshBtn.Location = new System.Drawing.Point(411, 269);
+            atiSshBtn.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             atiSshBtn.Name = "atiSshBtn";
-            atiSshBtn.Size = new System.Drawing.Size(196, 33);
+            atiSshBtn.Size = new System.Drawing.Size(172, 26);
             atiSshBtn.TabIndex = 38;
             atiSshBtn.Text = "ATI w/ SSHAuth";
             atiSshBtn.UseVisualStyleBackColor = true;
             atiSshBtn.Click += atiSshBtn_Click;
             // 
+            // btn_wia
+            // 
+            btn_wia.Location = new System.Drawing.Point(589, 269);
+            btn_wia.Name = "btn_wia";
+            btn_wia.Size = new System.Drawing.Size(123, 26);
+            btn_wia.TabIndex = 40;
+            btn_wia.Text = "WIA";
+            btn_wia.UseVisualStyleBackColor = true;
+            btn_wia.Click += btn_wia_Click;
+            // 
             // Form1
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(843, 1059);
+            ClientSize = new System.Drawing.Size(821, 794);
+            Controls.Add(btn_wia);
+            Controls.Add(cbxCacheEncryption);
             Controls.Add(atiSshBtn);
             Controls.Add(btn_ATSDeviceCodeFlow);
             Controls.Add(cbxWithForceRefresh);
@@ -505,7 +526,7 @@
             Controls.Add(authorityCbx);
             Controls.Add(label1);
             Controls.Add(resultTbx);
-            Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            Margin = new System.Windows.Forms.Padding(2);
             Name = "Form1";
             Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)nudAutocancelSeconds).EndInit();
@@ -555,6 +576,8 @@
         private System.Windows.Forms.CheckBox cbxWithForceRefresh;
         private System.Windows.Forms.Button btn_ATSDeviceCodeFlow;
         private System.Windows.Forms.Button atiSshBtn;
+        private System.Windows.Forms.CheckBox cbxCacheEncryption;
+        private System.Windows.Forms.Button btn_wia;
     }
 }
 

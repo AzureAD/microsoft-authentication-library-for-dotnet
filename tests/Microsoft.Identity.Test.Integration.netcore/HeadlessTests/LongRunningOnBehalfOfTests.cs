@@ -169,6 +169,71 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
         }
 
+        [TestMethod]
+        public async Task InitiateLRWithCustomKey_ThenAcquireLRWithSameKey_Succeeds_TestAsync()
+        {
+            // Arrange
+            LabUser user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+                .Create(PublicClientID)
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .Build();
+
+            // Acquire a token for the user via user name/password
+            AuthenticationResult userAuthResult = await pca
+                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Build the ConfidentialClient for OBO
+            ConfidentialClientApplication cca = BuildCCA(userAuthResult.TenantId);
+
+            // We'll use a *non-empty* custom key (NOT null, NOT empty).
+            // In raw MSAL, this means MSAL *will NOT* overwrite it with the assertion hash.
+            string oboCacheKey = "MyCustomKey";
+
+            // Act #1: Initiate the long running session.
+            // MSAL associates the "MyCustomKey" partition in its cache with the new LR token.
+            AuthenticationResult initiateResult = await cca
+                .InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert #1: MSAL does NOT overwrite a non-empty key with the assertion hash.
+            // The user-provided key remains "MyCustomKey"
+            Assert.AreEqual("MyCustomKey", oboCacheKey,
+                "Expected MSAL to respect custom OBO key exactly, not to overwrite it.");
+
+            // Act #2: Acquire a token from that same long-running process,
+            // re-using the same custom key but passing *no* user assertion.
+            // Because we are in the same session, MSAL should find the token in
+            // the LR OBO partition or use the RT if the AT is expired.
+            AuthenticationResult lrAcquireResult = await cca
+                .AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert #2: We should get a valid token and no exception
+            Assert.IsNotNull(lrAcquireResult.AccessToken,
+                "AcquireTokenInLongRunningProcess should succeed using the same custom key.");
+            Assert.AreNotEqual("", lrAcquireResult.AccessToken);
+
+            // Force an RT flow by expiring ALL access tokens 
+            TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);
+
+            // Act #3 – call again; MSAL must redeem the RT
+            AuthenticationResult lrAcquireAfterExpiry = await cca
+                .AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert #3 -  call should succeed after RT redemption.
+            Assert.IsFalse(string.IsNullOrEmpty(lrAcquireAfterExpiry.AccessToken),
+                "Second call should succeed after RT redemption.");
+            Assert.AreNotEqual(lrAcquireResult.AccessToken, lrAcquireAfterExpiry.AccessToken,
+                "Access token should differ, proving MSAL used the refresh-token path.");
+        }
+
         /// <summary>
         /// Tests the behavior when calling both, long-running and normal OBO methods.
         /// Both methods should return the same tokens, since the cache key is the same.

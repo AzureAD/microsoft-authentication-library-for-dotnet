@@ -12,6 +12,11 @@ using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using System.Text;
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Security;
+using Microsoft.Identity.Client.Http.Retry;
+
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -22,11 +27,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal abstract class AbstractManagedIdentity
     {
-        protected readonly RequestContext _requestContext;
-        internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
-        internal readonly ManagedIdentitySource _sourceType;
         private const string ManagedIdentityPrefix = "[Managed Identity] ";
 
+        protected readonly RequestContext _requestContext;
+
+        internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
+        internal readonly ManagedIdentitySource _sourceType;
+        
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
             _requestContext = requestContext;
@@ -52,6 +59,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             _requestContext.Logger.Info("[Managed Identity] Sending request to managed identity endpoints.");
 
+            IRetryPolicy retryPolicy = _requestContext.ServiceBundle.Config.RetryPolicyFactory.GetRetryPolicy(request.RequestType);
+
             try
             {
                 if (request.Method == HttpMethod.Get)
@@ -61,12 +70,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             request.ComputeUri(),
                             request.Headers,
                             body: null,
-                            HttpMethod.Get,
+                            method: HttpMethod.Get,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            GetHttpClientWithSslValidation(_requestContext),
-                            cancellationToken).ConfigureAwait(false);
+                            validateServerCertificate: GetValidationCallback(), 
+                            cancellationToken: cancellationToken,
+                            retryPolicy: retryPolicy).ConfigureAwait(false);
                 }
                 else
                 {
@@ -75,12 +85,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             request.ComputeUri(),
                             request.Headers,
                             body: new FormUrlEncodedContent(request.BodyParameters),
-                            HttpMethod.Post,
+                            method: HttpMethod.Post,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
-                            GetHttpClientWithSslValidation(_requestContext),
-                            cancellationToken)
+                            validateServerCertificate: GetValidationCallback(), 
+                            cancellationToken: cancellationToken,
+                            retryPolicy: retryPolicy)
                         .ConfigureAwait(false);
 
                 }
@@ -94,8 +105,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        // This method is internal for testing purposes.
-        internal virtual HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
+        /// <summary>
+        /// Method to be overridden in the derived classes to provide a custom validation callback for the server certificate.
+        /// This validation is needed for service fabric managed identity endpoints.
+        /// </summary>
+        /// <returns>Callback to validate the server certificate.</returns>
+        internal virtual Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> GetValidationCallback()
         {
             return null;
         }

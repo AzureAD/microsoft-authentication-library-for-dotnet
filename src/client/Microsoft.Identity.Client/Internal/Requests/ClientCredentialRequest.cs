@@ -1,7 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -10,6 +14,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -18,6 +23,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly AcquireTokenForClientParameters _clientParameters;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly ICryptographyManager _cryptoManager;
 
         public ClientCredentialRequest(
             IServiceBundle serviceBundle,
@@ -26,6 +32,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, clientParameters)
         {
             _clientParameters = clientParameters;
+            _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -44,14 +51,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
             }
-
             AuthenticationResult authResult;
 
-            // Skip checking cache when force refresh or claims are specified
-            if (_clientParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+            // Skip cache if either:
+            // 1) ForceRefresh is set, or
+            // 2) Claims are specified and there is no AccessTokenHashToRefresh.
+            // This ensures that when both claims and AccessTokenHashToRefresh are set,
+            // we do NOT skip the cache, allowing MSAL to attempt retrieving a matching
+            // cached token by the provided hash before requesting a new token.
+            bool skipCache = _clientParameters.ForceRefresh || 
+                (!string.IsNullOrEmpty(AuthenticationRequestParameters.Claims) && 
+                string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh));
+
+            if (skipCache)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("[ClientCredentialRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set.");
+                logger.Info("[ClientCredentialRequest] Skipped looking for a cached access token because ForceRefresh was requested, or there are Claims but no AccessTokenHashToRefresh.");
                 authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }
@@ -187,20 +202,78 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return authResult;
         }
 
+        /// <summary>
+        /// Checks if the token should be used from the cache and returns the cached access token if applicable.
+        /// </summary>
+        /// <returns></returns>
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
         {
-            MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+            // Fetch the cache item (could be null if none found).
+            MsalAccessTokenCacheItem cacheItem =
+                await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
-            if (cachedAccessTokenItem != null && !_clientParameters.ForceRefresh)
+            // If the item fails any checks (null, or hash mismatch),
+            if (!ShouldUseCachedToken(cacheItem))
             {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-                Metrics.IncrementTotalAccessTokensFromCache();
-                return cachedAccessTokenItem;
+                return null;
             }
 
-            return null;
+            // Otherwise, record a successful cache hit and return the token.
+            MarkAccessTokenAsCacheHit();
+            return cacheItem;
         }
 
+        /// <summary>
+        /// Checks if the token should be used from the cache.
+        /// </summary>
+        /// <param name="cacheItem"></param>
+        /// <returns></returns>
+        private bool ShouldUseCachedToken(MsalAccessTokenCacheItem cacheItem)
+        {
+            // 1) No cached item 
+            if (cacheItem == null)
+            {
+                return false;
+            }
+
+            // 2) If the token’s hash matches AccessTokenHashToRefresh, ignore it
+            if (!string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh) &&
+                IsMatchingTokenHash(cacheItem.Secret, _clientParameters.AccessTokenHashToRefresh))
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    "[ClientCredentialRequest] A cached token was found and its hash matches AccessTokenHashToRefresh, so it is ignored.");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if the token hash matches the hash provided in AccessTokenHashToRefresh.
+        /// </summary>
+        /// <param name="tokenSecret"></param>
+        /// <param name="accessTokenHashToRefresh"></param>
+        /// <returns></returns>
+        private bool IsMatchingTokenHash(string tokenSecret, string accessTokenHashToRefresh)
+        {
+            string cachedTokenHash = _cryptoManager.CreateSha256HashHex(tokenSecret);
+            return string.Equals(cachedTokenHash, accessTokenHashToRefresh, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Marks the request as a cache hit and increments the cache hit count.
+        /// </summary>
+        private void MarkAccessTokenAsCacheHit()
+        {
+            AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+            Metrics.IncrementTotalAccessTokensFromCache();
+        }
+
+        /// <summary>
+        /// returns the cached access token item 
+        /// </summary>
+        /// <param name="cachedAccessTokenItem"></param>
+        /// <returns></returns>
         private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
             AuthenticationResult authResult = new AuthenticationResult(
@@ -216,6 +289,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return authResult;
         }
 
+        /// <summary>
+        /// Gets overriden scopes for client credentials flow
+        /// </summary>
+        /// <param name="inputScopes"></param>
+        /// <returns></returns>
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
             // Client credentials should not add the reserved scopes
@@ -224,6 +302,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return new SortedSet<string>(inputScopes);
         }
 
+        /// <summary>
+        /// Gets the body parameters for the client credentials flow
+        /// </summary>
+        /// <returns></returns>
         private Dictionary<string, string> GetBodyParameters()
         {
             var dict = new Dictionary<string, string>
@@ -235,6 +317,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return dict;
         }
 
+        /// <summary>
+        /// Gets the CCS header for the client credentials flow
+        /// </summary>
+        /// <param name="additionalBodyParameters"></param>
+        /// <returns></returns>
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
             return null;

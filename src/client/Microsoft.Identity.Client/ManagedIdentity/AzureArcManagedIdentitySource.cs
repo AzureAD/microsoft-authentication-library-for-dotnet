@@ -4,16 +4,14 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -126,17 +124,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Verbose(() => "[Managed Identity] Adding authorization header to the request.");
                 request.Headers.Add("Authorization", authHeaderValue);
 
+                IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
+                IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.ManagedIdentityDefault);
+
                 response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
-                     request.ComputeUri(),
-                     request.Headers,
-                     body: null,
-                     System.Net.Http.HttpMethod.Get,
-                     logger: _requestContext.Logger,
-                     doNotThrow: false,
-                     mtlsCertificate: null,
-                     customHttpClient: null,
-                     cancellationToken)
-                        .ConfigureAwait(false);
+                         request.ComputeUri(),
+                         request.Headers,
+                         body: null,
+                         method: System.Net.Http.HttpMethod.Get,
+                         logger: _requestContext.Logger,
+                         doNotThrow: false,
+                         mtlsCertificate: null,
+                         validateServerCertificate: null,
+                         cancellationToken: cancellationToken,
+                         retryPolicy: retryPolicy)
+                    .ConfigureAwait(false);
 
                 return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }

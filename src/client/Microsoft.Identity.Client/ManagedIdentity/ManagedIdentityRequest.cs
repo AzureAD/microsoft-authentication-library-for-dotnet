@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
@@ -23,13 +20,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public IDictionary<string, string> QueryParameters { get; }
 
-        public ManagedIdentityRequest(HttpMethod method, Uri endpoint)
+        public RequestType RequestType { get; set; }
+
+        public ManagedIdentityRequest(HttpMethod method, Uri endpoint, RequestType requestType = RequestType.ManagedIdentityDefault)
         {
             Method = method;
             _baseEndpoint = endpoint;
             Headers = new Dictionary<string, string>();
             BodyParameters = new Dictionary<string, string>();
             QueryParameters = new Dictionary<string, string>();
+            RequestType = requestType;
         }
 
         public Uri ComputeUri()

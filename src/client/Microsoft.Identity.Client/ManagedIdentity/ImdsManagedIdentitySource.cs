@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 
@@ -73,7 +72,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 case AppConfig.ManagedIdentityIdType.ResourceId:
                     _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    request.QueryParameters[Constants.ManagedIdentityResourceIdImds] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
 
                 case AppConfig.ManagedIdentityIdType.ObjectId:
@@ -81,6 +80,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
             }
+
+            request.RequestType = RequestType.Imds;
 
             return request;
         }

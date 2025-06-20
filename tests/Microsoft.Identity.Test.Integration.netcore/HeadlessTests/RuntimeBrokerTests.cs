@@ -93,6 +93,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [DoNotRunOnLinux] // POP is not supported on Linux
         [IgnoreOnOneBranch]
+        [Ignore("Tracking here: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5305")]
         [TestMethod]
         public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
         {

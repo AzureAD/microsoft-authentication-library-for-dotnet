@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -16,8 +17,8 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenTelemetry.Resources;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -37,6 +38,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string ExpectedErrorMessage = "Expected error message.";
         internal const string ExpectedErrorCode = "ErrorCode";
         internal const string ExpectedCorrelationId = "Some GUID";
+
+        private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
@@ -80,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             ManagedIdentitySource managedIdentitySource)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -133,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -180,7 +183,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             ManagedIdentitySource managedIdentitySource)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -240,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             ManagedIdentitySource managedIdentitySource)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -301,7 +304,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             ManagedIdentitySource managedIdentitySource)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -363,7 +366,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             ManagedIdentitySource managedIdentitySource)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -434,7 +437,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityTestWrongScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -477,7 +480,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityTestErrorResponseParsing(string errorResponse, string[] expectedInErrorResponse)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
@@ -520,7 +523,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityTestNullOrEmptyScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -542,7 +545,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityErrorResponseNoPayloadTestAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -584,7 +587,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityNullResponseAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -624,7 +627,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityUnreachableNetworkAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -650,77 +653,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint, HttpStatusCode.NotFound)]
-        public async Task ManagedIdentityTestRetryAsync(ManagedIdentitySource managedIdentitySource, string endpoint, HttpStatusCode statusCode)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
-            {
-                SetEnvironmentVariables(managedIdentitySource, endpoint);
-
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: statusCode);
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: statusCode);
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: statusCode);
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    Resource,
-                    "",
-                    managedIdentitySource,
-                    statusCode: statusCode);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(Resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-                Assert.IsTrue(ex.IsRetryable);
-            }
-        }
-
         [TestMethod] 
         public async Task SystemAssignedManagedIdentityApiIdTestAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
+     
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -752,7 +691,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task UserAssignedManagedIdentityApiIdTestAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
@@ -787,7 +726,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityCacheTestAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
@@ -833,7 +772,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours, bool refreshOnHasValue, bool useIsoFormat)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
@@ -869,7 +808,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityInvalidRefreshOnThrowsAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
@@ -895,10 +834,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task ManagedIdentityIsProactivelyRefreshedAsync()
+        public async Task ManagedIdentityIsProActivelyRefreshedAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
@@ -967,7 +906,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             bool wasErrorLogged = false;
 
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
@@ -1024,7 +963,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             int cacheHits = 0;
 
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
@@ -1101,7 +1040,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task InvalidJsonResponseHandling(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
@@ -1144,7 +1083,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             string endpoint)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(source, endpoint);
 
@@ -1226,7 +1165,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task MixedUserAndSystemAssignedManagedIdentityTestAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
@@ -1300,6 +1239,187 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(UserAssignedClientId, userAssignedTokens[0].ClientId, "User-assigned ClientId mismatch in cache.");
                 Assert.AreEqual(SystemAssignedClientId, systemAssignedTokens[0].ClientId, "System-assigned ClientId mismatch in cache.");
             }
+        }
+
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, 429)] // not defined in HttpStatusCode enum
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
+        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint, HttpStatusCode.GatewayTimeout)]
+        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint, HttpStatusCode.GatewayTimeout)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint, HttpStatusCode.GatewayTimeout)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.GatewayTimeout)]
+        public async Task ManagedIdentityRetryPolicyLifeTimeIsPerRequestAsync(
+            ManagedIdentitySource managedIdentitySource,
+            string endpoint,
+            HttpStatusCode statusCode)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
+
+                // Disable cache to avoid pollution
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                // Simulate permanent errors (to trigger the maximum number of retries)
+                const int Num504Errors = 1 + TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries; // initial request + maximum number of retries
+                for (int i = 0; i < Num504Errors; i++)
+                {
+                    httpManager.AddManagedIdentityMockHandler(
+                        endpoint,
+                        Resource,
+                        "",
+                        managedIdentitySource,
+                        statusCode: statusCode);
+                }
+                
+                MsalServiceException ex =
+                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                        await mi.AcquireTokenForManagedIdentity(Resource)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false))
+                    .ConfigureAwait(false);
+                Assert.IsNotNull(ex);
+
+                int requestsMade = Num504Errors - httpManager.QueueSize;
+                Assert.AreEqual(Num504Errors, requestsMade);
+
+                for (int i = 0; i < Num504Errors; i++)
+                {
+                    httpManager.AddManagedIdentityMockHandler(
+                        endpoint,
+                        Resource,
+                        "",
+                        managedIdentitySource,
+                        statusCode: statusCode);
+                }
+
+                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                        await mi.AcquireTokenForManagedIdentity(Resource)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false))
+                    .ConfigureAwait(false);
+                Assert.IsNotNull(ex);
+
+                // 3 retries (requestsMade would be 6 if retry policy was NOT per request)
+                requestsMade = Num504Errors - httpManager.QueueSize;
+                Assert.AreEqual(Num504Errors, requestsMade);
+
+                for (int i = 0; i < Num504Errors; i++)
+                {
+                    httpManager.AddManagedIdentityMockHandler(
+                        endpoint,
+                        Resource,
+                        "",
+                        managedIdentitySource,
+                        statusCode: statusCode);
+                }
+
+                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                        await mi.AcquireTokenForManagedIdentity(Resource)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false))
+                    .ConfigureAwait(false);
+                Assert.IsNotNull(ex);
+
+                // 3 retries (requestsMade would be 9 if retry policy was NOT per request)
+                requestsMade = Num504Errors - httpManager.QueueSize;
+                Assert.AreEqual(Num504Errors, requestsMade);
+            }
+        }
+
+        [TestMethod]
+        public void ValidateServerCertificate_OnlySetForServiceFabric()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Test all managed identity sources
+                foreach (ManagedIdentitySource sourceType in Enum.GetValues(typeof(ManagedIdentitySource))
+                    .Cast<ManagedIdentitySource>()
+                    .Where(s => s != ManagedIdentitySource.None && s != ManagedIdentitySource.DefaultToImds))
+                {
+                    // Create a managed identity source for each type
+                    AbstractManagedIdentity managedIdentity = CreateManagedIdentitySource(sourceType, httpManager);
+
+                    // Check if ValidateServerCertificate is set based on the source type
+                    bool shouldHaveCallback = sourceType == ManagedIdentitySource.ServiceFabric;
+                    bool hasCallback = managedIdentity.GetValidationCallback() != null;
+
+                    Assert.AreEqual(
+                        shouldHaveCallback,
+                        hasCallback,
+                        $"For source type {sourceType}, ValidateServerCertificate should {(shouldHaveCallback ? "" : "not ")}be set");
+
+                    // For ServiceFabric, verify it's set to the right method
+                    if (sourceType == ManagedIdentitySource.ServiceFabric)
+                    {
+                        Assert.IsNotNull(managedIdentity.GetValidationCallback(),
+                            "ServiceFabric should have ValidateServerCertificate set");
+
+                        Assert.IsInstanceOfType(managedIdentity, typeof(ServiceFabricManagedIdentitySource),
+                            "ServiceFabric managed identity should be of type ServiceFabricManagedIdentitySource");
+                    }
+                    else
+                    {
+                        Assert.IsNull(managedIdentity.GetValidationCallback(),
+                            $"Non-ServiceFabric source type {sourceType} should not have ValidateServerCertificate set");
+                    }
+                }
+            }
+        }
+
+        private AbstractManagedIdentity CreateManagedIdentitySource(ManagedIdentitySource sourceType, MockHttpManager httpManager)
+        {
+            string endpoint = "https://identity.endpoint.com";
+
+            // Setup environment based on the source type
+            SetEnvironmentVariables(sourceType, endpoint);
+
+            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                .WithHttpManager(httpManager);
+
+            var managedIdentityApp = miBuilder.BuildConcrete();
+            RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+
+            // Create the correct managed identity source based on the type
+            AbstractManagedIdentity managedIdentity = null;
+
+            switch (sourceType)
+            {
+                case ManagedIdentitySource.ServiceFabric:
+                    managedIdentity = ServiceFabricManagedIdentitySource.Create(requestContext);
+                    break;
+                case ManagedIdentitySource.AppService:
+                    managedIdentity = AppServiceManagedIdentitySource.Create(requestContext);
+                    break;
+                case ManagedIdentitySource.AzureArc:
+                    managedIdentity = AzureArcManagedIdentitySource.Create(requestContext);
+                    break;
+                case ManagedIdentitySource.CloudShell:
+                    managedIdentity = CloudShellManagedIdentitySource.Create(requestContext);
+                    break;
+                case ManagedIdentitySource.Imds:
+                    managedIdentity = new ImdsManagedIdentitySource(requestContext);
+                    break;
+                case ManagedIdentitySource.MachineLearning:
+                    managedIdentity = MachineLearningManagedIdentitySource.Create(requestContext);
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported managed identity source type: {sourceType}");
+            }
+
+            return managedIdentity;
         }
     }
 }

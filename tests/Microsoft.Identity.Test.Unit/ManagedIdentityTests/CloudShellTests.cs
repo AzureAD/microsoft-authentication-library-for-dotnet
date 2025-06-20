@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task CloudShellUserAssignedManagedIdentityNotSupportedAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.CloudShell, ManagedIdentityTests.CloudShellEndpoint);
 
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task CloudShellInvalidEndpointAsync()
         {
             using(new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.CloudShell, "localhost/token");
 

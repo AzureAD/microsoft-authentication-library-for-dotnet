@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -29,16 +29,21 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 var resource = $"https://{authorityInfo.Host}";
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
+                IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
+                IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+
                 Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
                     new Uri(webFingerUrl),
                     null,
                     body: null,
-                    System.Net.Http.HttpMethod.Get,
+                    method: System.Net.Http.HttpMethod.Get,
                     logger: _requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
-                    customHttpClient: null,
-                    _requestContext.UserCancellationToken)
+                    validateServerCertificate: null,
+                    cancellationToken: _requestContext.UserCancellationToken,
+                    retryPolicy: retryPolicy
+                    )
                     .ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)

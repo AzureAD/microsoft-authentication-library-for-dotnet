@@ -1,3 +1,71 @@
+4.72.1
+=======
+ 
+### Bug Fixes
+- Ensure instance of IMsalHttpClientFactory passed by the user is used for managed identity flows that do not require cert validation. See [Issue #5286](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5286)
+
+4.72.0
+=======
+### Features
+- Added MacOs Broker support. See [Issue #5051](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5051)
+
+### Bug Fixes
+- Ensure additional cache parameters are persisted in cache serialization[Issue #5261](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5261)
+
+4.71.1
+=======
+
+### Bug Fixes
+
+- Expose Service Fabric's custom SSL validation callback in the HTTP extensibility. See [Issue #5242](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5242)
+- Fix a bug in MSI around Azure Container. See [Issue #5238](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5238)
+
+4.71.0
+=======
+
+### Bug Fixes
+
+- Enable the Service Fabric flow to get a `httpClient` from the factory with ssl validation callback. See [Issue #5220](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5220)
+
+4.70.2
+=======
+
+### Bug fixes
+
+- Fixed MSIv1 Token Revocation's `token_sha256_to_refresh` parameter to use SHA256's HEX representation. See [Issue #5228](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5228)
+
+4.70.1
+=======
+
+### Bug fixes
+
+- Fixed Machine Learning Source to Use "clientid" instead of "client_id". See [Issue #5193](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5193)
+- Fixed IsCommonOrOrganizationsTenant check to not return true for consumers. See [Issue #5195](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5195)
+- Fixed logger message to accurately reflect skipCache condition. See [Issue #5201](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5201)
+- Removed experimental feature Flag from WithFmiPath API. See [Issue #5206](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5206)
+- Added an option to disable ESTS-R (1P only). See [Issue #5224](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5224)
+
+4.70.0
+==========
+### Features
+- Added a .WithAccessTokenSha256ToRefresh() method to AcquireTokenForClientParameterBuilder for ConfidentialClientApplication, allowing finer control over token refresh scenarios. [Issue #5111](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5111), PR #5179
+- Added `TokenCacheNotificationArgs.NoDistributedCacheUseReason` in order to indicate that the configured serialized cache should not be a distributed cache to prevent issues when acquiring tokens. [Issue #5199](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5199)
+
+### Bug Fixes
+- Removed invalid tenant checks (/organizations or /common) in MTLS flows for AAD/dSTS authorities. [Issue #5093](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5093)
+- Fixed an issue where specifying a null service config region in MTLS scenarios did not correctly throw an exception. [Issue #5181](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5181)
+
+4.69.1
+==========
+### Features
+- Enabled broker support on the Linux platform. See [Issue #5086](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5086)
+- Added a `WithCertificate(..., bool associateTokensWithCertificateSerialNumber)` overload to enable the use of the certificate's serial number as part of the cache key for tokens. [Issue #5150](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5150)
+
+### Bug Fixes
+- MSAL will now stop replacing "%20" with "+" since it is obsolete. See [Issue #5061](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5061)
+- Exposed client capabilities in AssertionRequestOptions for MSI FIC scenarios [Issue #4948](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4948)
+- Added the missing claims in SignedAssertion when using the AssertionRequestOptions Delegate [Issue #5143](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5143)
+
 4.68.0
 ==========
 ### Features

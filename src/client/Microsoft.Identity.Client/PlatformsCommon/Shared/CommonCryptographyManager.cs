@@ -56,6 +56,19 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
+        public string CreateSha256HashHex(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
+            byte[] hashBytes = CreateSha256HashBytes(input);
+
+            // Convert to hex using BitConverter, removing dashes and forcing lowercase
+            return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+        }
+
         /// <remarks>AAD only supports RSA certs for client credentials </remarks>
         public virtual byte[] SignWithCertificate(string message, X509Certificate2 certificate, RSASignaturePadding signaturePadding)
         {

@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -114,9 +115,8 @@ namespace Microsoft.Identity.Client
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
         public bool MultiCloudSupportEnabled { get; set; } = false;
 
-        public bool RetryOnServerErrors { get; set; } = true;
-
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
+        public bool DisableInternalRetries { get; internal set; } = false;
 
         public bool IsManagedIdentity { get; }
         public bool IsConfidentialClient { get; }
@@ -124,6 +124,8 @@ namespace Microsoft.Identity.Client
         public string CertificateIdToAssociateWithToken { get; set; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
+
+        internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
 
         #region ClientCredentials
 
@@ -208,6 +210,5 @@ namespace Microsoft.Identity.Client
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }        
         public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
         #endregion
-
     }
 }

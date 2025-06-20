@@ -17,12 +17,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class RetryPolicyTests : TestBase
     {
-// This test is expensive, as it has to wait 1 second - run it only on latest .NET
-#if NET8_0_OR_GREATER 
+        // This test is expensive, as it has to wait 1 second - run it only on latest .NET
+#if NET8_0_OR_GREATER
         [TestMethod]        
         public async Task RetryPolicyAsync()
         {
-            using (var httpManager = new MockHttpManager(retry: false))
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
             {
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)

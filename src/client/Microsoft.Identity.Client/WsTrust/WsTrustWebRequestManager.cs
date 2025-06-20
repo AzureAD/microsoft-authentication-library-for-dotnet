@@ -4,16 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.WsTrust
@@ -43,17 +41,21 @@ namespace Microsoft.Identity.Client.WsTrust
 
             var uri = new UriBuilder(federationMetadataUrl);
 
+            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+
             HttpResponse httpResponse = await _httpManager.SendRequestAsync(
-                    uri.Uri,
-                    msalIdParams,
-                    body: null,
-                    HttpMethod.Get,
-                    logger: requestContext.Logger,
-                    doNotThrow: false,
-                    mtlsCertificate: null,
-                    customHttpClient: null,
-                    requestContext.UserCancellationToken)
-                .ConfigureAwait(false);
+                uri.Uri,
+                msalIdParams,
+                body: null,
+                method: HttpMethod.Get,
+                logger: requestContext.Logger,
+                doNotThrow: false,
+                mtlsCertificate: null,
+                validateServerCertificate: null,
+                cancellationToken: requestContext.UserCancellationToken,
+                retryPolicy: retryPolicy)
+            .ConfigureAwait(false);
 
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -96,19 +98,25 @@ namespace Microsoft.Identity.Client.WsTrust
             };
 
             var body = new StringContent(
+                // CodeQL [SM00417] False Positive: wsTrustRequest is a body parameter for HttpRequest that follows WsTrust protocol
                 wsTrustRequest,
                 Encoding.UTF8, "application/soap+xml");
 
+            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+
             HttpResponse resp = await _httpManager.SendRequestAsync(
-                    wsTrustEndpoint.Uri,
-                    headers,
-                    body: body,
-                    HttpMethod.Post,
-                    logger: requestContext.Logger,
-                    doNotThrow: true,
-                    mtlsCertificate: null,
-                    customHttpClient: null,
-                    requestContext.UserCancellationToken).ConfigureAwait(false);
+                wsTrustEndpoint.Uri,
+                headers,
+                body: body,
+                method: HttpMethod.Post,
+                logger: requestContext.Logger,
+                doNotThrow: true,
+                mtlsCertificate: null,
+                validateServerCertificate: null,
+                cancellationToken: requestContext.UserCancellationToken,
+                retryPolicy: retryPolicy)
+            .ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -174,17 +182,21 @@ namespace Microsoft.Identity.Client.WsTrust
 
             var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
 
+            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+
             var httpResponse = await _httpManager.SendRequestAsync(
-               uri,
-               msalIdParams,
-               body: null,
-               HttpMethod.Get,
-               logger: requestContext.Logger,
-               doNotThrow: false,
-               mtlsCertificate: null,
-               customHttpClient: null,
-               requestContext.UserCancellationToken)
-                  .ConfigureAwait(false);
+                uri,
+                msalIdParams,
+                body: null,
+                method: HttpMethod.Get,
+                logger: requestContext.Logger,
+                doNotThrow: false,
+                mtlsCertificate: null,
+                validateServerCertificate: null,
+                cancellationToken: requestContext.UserCancellationToken,
+                retryPolicy: retryPolicy)
+            .ConfigureAwait(false);
 
             if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)
             {
