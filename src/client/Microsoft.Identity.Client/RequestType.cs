@@ -21,6 +21,11 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Instance Metadata Service (IMDS) request, used for obtaining tokens from the Azure VM metadata endpoint.
         /// </summary>
-        Imds
+        Imds,
+
+        /// <summary>
+        /// Region Discovery request, used for region discovery operations with exponential backoff retry strategy.
+        /// </summary>
+        RegionDiscovery
     }
 }
