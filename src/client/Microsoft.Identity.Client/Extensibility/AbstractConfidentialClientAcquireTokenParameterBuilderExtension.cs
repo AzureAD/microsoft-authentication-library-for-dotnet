@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -119,6 +120,80 @@ namespace Microsoft.Identity.Client.Extensibility
             {
                 builder.CommonParameters.AdditionalCacheParameters = cacheParameters.ToList<string>();
             }
+            return builder;
+        }
+
+        /// <summary>
+        /// Specifies additional cache key components to use when caching and retrieving tokens.
+        /// </summary>
+        /// <param name="cacheKeyComponents">The list of additional cache key components.</param>
+        /// <param name="builder"></param>
+        /// <returns>The builder.</returns>
+        /// <remarks>
+        /// <list type="bullet">
+        /// <item><description>This api can be used to associate certificate key identifiers along with other keys with a particular token.</description></item>
+        /// <item><description>In order for the tokens to be successfully retrieved from the cache, all components used to cache the token must be provided.</description></item>
+        /// </list>
+        /// </remarks>
+        internal static AbstractAcquireTokenParameterBuilder<T> WithAdditionalCacheKeyComponents<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            IDictionary<string, string> cacheKeyComponents)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (cacheKeyComponents == null || cacheKeyComponents.Count == 0)
+            {
+                //no-op
+                return builder;
+            }
+
+            if (builder.CommonParameters.CacheKeyComponents == null)
+            {
+                builder.CommonParameters.CacheKeyComponents = new SortedList<string, string>(cacheKeyComponents);
+            }
+            else
+            {
+                foreach (var kvp in cacheKeyComponents)
+                {
+                    // Key conflicts are not allowed, it is expected for this method to fail.
+                    builder.CommonParameters.CacheKeyComponents.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Specifies an FMI path to be used for the client assertion. This lets higher level APIs like Id.Web 
+        /// provide credentials which are FMI sensitive.
+        /// Important: tokens are associated with the credential FMI path, which impacts cache lookups
+        /// This is an extensibility API and should not be used by applications.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="fmiPath">The FMI path to use for client assertion.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <exception cref="ArgumentNullException">Thrown when fmiPath is null or whitespace.</exception>
+        public static AbstractAcquireTokenParameterBuilder<T> WithFmiPathForClientAssertion<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            string fmiPath)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            builder.ValidateUseOfExperimentalFeature();
+
+            if (string.IsNullOrWhiteSpace(fmiPath))
+            {
+                throw new ArgumentNullException(nameof(fmiPath));
+            }
+
+            builder.CommonParameters.ClientAssertionFmiPath = fmiPath;
+
+            // Add the fmi_path to the cache key so that it is used for cache lookups
+            var cacheKey = new SortedList<string, string>
+            {
+                { "credential_fmi_path", fmiPath }
+            };
+
+            WithAdditionalCacheKeyComponents(builder, cacheKey);
+
             return builder;
         }
     }   
