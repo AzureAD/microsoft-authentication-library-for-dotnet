@@ -1106,6 +1106,11 @@ namespace Microsoft.Identity.Client
         public const string InvalidManagedIdentityResponse = "invalid_managed_identity_response";
 
         /// <summary>
+        /// The managed identity's source does not select a specific id type.
+        /// </summary>
+        public const string InvalidManagedIdentityIdType = "invalid_managed_identity_id_type";
+
+        /// <summary>
         /// Managed Identity error response was received.
         /// </summary>
         public const string ManagedIdentityRequestFailed = "managed_identity_request_failed";
