@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -29,10 +29,8 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 var resource = $"https://{authorityInfo.Host}";
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
-                LinearRetryPolicy _linearRetryPolicy = new LinearRetryPolicy(
-                    LinearRetryPolicy.DefaultStsRetryDelayMs,
-                    LinearRetryPolicy.DefaultStsMaxRetries,
-                    HttpRetryConditions.Sts);
+                IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
+                IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
 
                 Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
                     new Uri(webFingerUrl),
@@ -44,7 +42,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                     mtlsCertificate: null,
                     validateServerCertificate: null,
                     cancellationToken: _requestContext.UserCancellationToken,
-                    retryPolicy: _linearRetryPolicy
+                    retryPolicy: retryPolicy
                     )
                     .ConfigureAwait(false);
 

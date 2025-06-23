@@ -13,6 +13,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http.Retry;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -110,10 +111,11 @@ namespace Microsoft.Identity.Client.Http
                 logger.Error("The HTTP request failed. " + exception.Message);
                 timeoutException = exception;
             }
-
-            while (!_disableInternalRetries && retryPolicy.PauseForRetry(response, timeoutException, retryCount))
+            
+            while (!_disableInternalRetries && await retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
             {
-                logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {retryPolicy.DelayInMilliseconds}ms.");
+                retryCount++;
+
                 return await SendRequestAsync(
                     endpoint,
                     headers,
@@ -197,7 +199,15 @@ namespace Microsoft.Identity.Client.Http
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
+            
             requestMessage.Headers.Accept.Clear();
+
+#if NET5_0_OR_GREATER
+            // On .NET 5.0 and later, HTTP2 is supported through the SDK and Entra is HTTP2 compatible
+            // Note that HttpClient.DefaultRequestVersion does not work when using HttpRequestMessage objects
+            requestMessage.Version = HttpVersion.Version20; // Default to HTTP/2
+            requestMessage.VersionPolicy = HttpVersionPolicy.RequestVersionOrLower; // Allow fallback to HTTP/1.1
+#endif
             if (headers != null)
             {
                 foreach (KeyValuePair<string, string> kvp in headers)

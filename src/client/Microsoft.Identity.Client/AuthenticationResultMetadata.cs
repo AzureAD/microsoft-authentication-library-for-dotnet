@@ -97,5 +97,10 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-logging for more details about logging.
         /// </remarks>
         public string Telemetry { get; set; }
+
+        /// <summary>
+        /// The number of access tokens in the cache.       
+        /// </summary>
+        public int CachedAccessTokenCount { get; set; }
     }
 }
