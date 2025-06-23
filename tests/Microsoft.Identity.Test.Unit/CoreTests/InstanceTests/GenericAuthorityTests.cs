@@ -333,6 +333,44 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
+        [TestMethod]
+        public async Task OidcIssuerValidation_ThrowsForNonMatchingIssuer_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                string authority = "https://demo.duendesoftware.com";
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                // Create OIDC document with non-matching issuer
+                string validOidcDocumentWithWrongIssuer = TestConstants.GenericOidcResponse.Replace(
+                        "\"issuer\":\"https://demo.duendesoftware.com\"",
+                        "\"issuer\":\"https://wrong.issuer.com\"");
+
+                // Mock OIDC endpoint response
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = authority + "/.well-known/openid-configuration",
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(validOidcDocumentWithWrongIssuer)
+                });
+
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual("authority_validation_failed", ex.ErrorCode);
+                Assert.IsTrue(ex.Message.Contains("Issuer validation failed"),
+                    $"Expected error message to contain 'Issuer validation failed', but was: {ex.Message}");
+                Assert.IsTrue(ex.Message.Contains("https://wrong.issuer.com"),
+                    "Error message should include the non-matching issuer value");
+            }
+        }
+
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(
             string tokenEndpoint,
             string scopesInRequest,

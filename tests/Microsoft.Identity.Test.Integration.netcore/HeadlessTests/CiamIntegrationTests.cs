@@ -213,6 +213,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.Cache, resultObo.AuthenticationResultMetadata.TokenSource);
         }
 
+        [TestMethod]
+        public async Task WithOidcAuthority_ValidatesIssuerSuccessfully()
+        {
+            //Get lab details
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
+            {
+                FederationProvider = FederationProvider.CIAMCUD,
+                SignInAudience = SignInAudience.AzureAdMyOrg
+            }).ConfigureAwait(false);
+
+            //Test with different CIAM authority formats
+            string[] authorities =
+            {
+                string.Format("https://{0}.ciamlogin.com/", labResponse.User.LabName),
+                string.Format("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", labResponse.User.LabName, labResponse.User.LabName),
+                string.Format("https://{0}.ciamlogin.com/{1}", labResponse.User.LabName, labResponse.Lab.TenantId),
+                string.Format("https://login.msidlabsciam.com/{0}/v2.0/", labResponse.Lab.TenantId)
+            };
+
+            foreach (var authority in authorities)
+            {
+                await RunCiamCCATest(authority, labResponse.App.AppId).ConfigureAwait(false);
+            }
+        }
+
         private string GetCiamSecret()
         {
             KeyVaultSecretsProvider provider = new KeyVaultSecretsProvider();
