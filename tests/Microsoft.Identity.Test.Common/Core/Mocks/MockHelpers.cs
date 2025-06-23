@@ -113,6 +113,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
+        public static string GetCsrMetadataSuccessfulResponse()
+        {
+            return
+                "{\"client_id\":\"fake_client_id\"," +
+                "\"tenant_id\":\"fake_tenant_id\"," +
+                "\"CUID\":\"fake_CUID\"," +
+                "\"attestation_endpoint\":\"fake_attestation_endpoint\"}";
+        }
+
         public static string GetMsiSuccessfulResponse(int expiresInHours = 1, bool useIsoFormat = false)
         {
             string expiresOn;

@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, ManagedIdentitySource.ServiceFabric)]
         [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
-        public void GetManagedIdentityTests(
+        public async Task GetManagedIdentityTests(
             string endpoint,
             ManagedIdentitySource managedIdentitySource, 
             ManagedIdentitySource expectedManagedIdentitySource)
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                Assert.AreEqual(expectedManagedIdentitySource, ManagedIdentityApplication.GetManagedIdentitySource());
+                Assert.AreEqual(expectedManagedIdentitySource, await ManagedIdentityApplication.GetManagedIdentitySourceAsync().ConfigureAwait(false));
             }
         }
 
