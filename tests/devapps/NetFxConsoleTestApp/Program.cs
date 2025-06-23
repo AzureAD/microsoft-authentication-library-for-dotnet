@@ -223,8 +223,10 @@ namespace NetFx
                     switch (selection)
                     {
                         case '1': // acquire token
+#pragma warning disable CS0618 // Type or member is obsolete
                             var iwaBuilder =
                                 pca.AcquireTokenByIntegratedWindowsAuth(s_scopes)
+#pragma warning restore CS0618 // Type or member is obsolete
                                 .WithUsername(s_username);
 
                             var result = await iwaBuilder.ExecuteAsync().ConfigureAwait(false);

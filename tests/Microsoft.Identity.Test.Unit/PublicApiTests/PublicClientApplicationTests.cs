@@ -1159,7 +1159,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #endif
             CheckBuilderCommonMethods(interactiveBuilder);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var iwaBuilder = app.AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
+#pragma warning restore CS0618 // Type or member is obsolete
                .WithUsername("upn@live.com");
             CheckBuilderCommonMethods(iwaBuilder);
 
