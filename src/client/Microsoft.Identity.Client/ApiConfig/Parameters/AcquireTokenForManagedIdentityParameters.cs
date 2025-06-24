@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string Resource { get; set; }
 
-        public bool IsFmiServiceFabric { get; set; }
+        public bool IsFmiCredential { get; set; }
 
         public void LogParameters(ILoggerAdapter logger)
         {

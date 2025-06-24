@@ -53,11 +53,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <summary>
         /// The source to acquire token for managed identity is Machine Learning Service.
         /// </summary>
-        MachineLearning,
-
-        /// <summary>
-        /// The source to acquire token for managed identity is Service Fabric Federated.
-        /// </summary>
-        ServiceFabricFederated
+        MachineLearning
     }
 }

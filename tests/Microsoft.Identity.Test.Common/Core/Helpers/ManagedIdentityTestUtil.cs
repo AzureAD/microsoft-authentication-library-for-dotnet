@@ -63,11 +63,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
                     Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
                     Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", thumbprint);
-                    break;
-                case ManagedIdentitySource.ServiceFabricFederated:
                     Environment.SetEnvironmentVariable("APP_IDENTITY_ENDPOINT", endpoint);
-                    Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
-                    Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", thumbprint);
                     Environment.SetEnvironmentVariable("IDENTITY_API_VERSION", version);
                     break;
                 case ManagedIdentitySource.MachineLearning:

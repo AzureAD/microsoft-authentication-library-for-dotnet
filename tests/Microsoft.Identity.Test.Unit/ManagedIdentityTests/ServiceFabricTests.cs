@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabricFederated, "http://localhost:40342");
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithExperimentalFeatures()
@@ -107,9 +107,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 RequestContext requestContext = new RequestContext(mi.ServiceBundle, Guid.NewGuid(), null);
 
-                ServiceFabricFederatedManagedIdentitySource sf = ServiceFabricFederatedManagedIdentitySource.Create(requestContext) as ServiceFabricFederatedManagedIdentitySource;
+                ServiceFabricManagedIdentitySource sf = ServiceFabricManagedIdentitySource.Create(requestContext, true) as ServiceFabricManagedIdentitySource;
 
-                Assert.IsInstanceOfType(sf, typeof(ServiceFabricFederatedManagedIdentitySource));
+                Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
                 Assert.AreEqual("http://localhost:40342/metadata/identity/oauth2/fmi/credential", sf.GetEndpointForTesting());
             }
         }
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(managedIdentitySource: ManagedIdentitySource.ServiceFabricFederated,
+                SetEnvironmentVariables(managedIdentitySource: ManagedIdentitySource.ServiceFabric,
                                         endpoint: "http://localhost:40343");
 
                 httpManager.CreateFmiCredentialForMitsHandler(requestUri: "http://localhost:40343/metadata/identity/oauth2/fmi/credential");

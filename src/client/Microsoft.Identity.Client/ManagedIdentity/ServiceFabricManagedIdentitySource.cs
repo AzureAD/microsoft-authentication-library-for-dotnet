@@ -16,35 +16,79 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
+        private readonly bool _isFederated;
+        private static string _mitsEndpointFmiPath => "/metadata/identity/oauth2/fmi/credential";
 
-        internal static Lazy<HttpClient> _httpClientLazy;
-
-        public static AbstractManagedIdentity Create(RequestContext requestContext)
+        public static AbstractManagedIdentity Create(RequestContext requestContext, bool isFmiServiceFabric = false)
         {
             Uri endpointUri;
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
 
-            requestContext.Logger.Info(() => "[Managed Identity] Service fabric managed identity is available.");
-        
-            if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out endpointUri))
+            if (isFmiServiceFabric)
             {
-                string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
-                        "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric");
+                VerifyFederatedEnvVariablesAreAvailable();
+                requestContext.Logger.Info(() => "[Managed Identity] Service fabric federated managed identity is available.");
+                identityEndpoint = EnvironmentVariables.FmiServiceFabricEndpoint;
+                requestContext.Logger.Info(() => "[Managed Identity] Using FMI Service fabric endpoint.");
 
-                // Use the factory to create and throw the exception
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.InvalidManagedIdentityEndpoint,
-                    errorMessage,
-                    null, 
-                    ManagedIdentitySource.ServiceFabric,
-                    null); 
+                if (!Uri.TryCreate(identityEndpoint + _mitsEndpointFmiPath, UriKind.Absolute, out endpointUri))
+                {
+                    string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
+                            "APP_IDENTITY_ENDPOINT", identityEndpoint, "FMI Service Fabric");
 
-                throw exception;
+                    throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                        MsalError.InvalidManagedIdentityEndpoint,
+                        errorMessage,
+                        null,
+                        ManagedIdentitySource.ServiceFabric,
+                        null);
+                }
+            }
+            else
+            {
+                requestContext.Logger.Info(() => "[Managed Identity] Service fabric managed identity is available.");
+
+                if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out endpointUri))
+                {
+                    string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
+                            "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric");
+
+                    throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                        MsalError.InvalidManagedIdentityEndpoint,
+                        errorMessage,
+                        null,
+                        ManagedIdentitySource.ServiceFabric,
+                        null);
+                }
             }
 
-            requestContext.Logger.Verbose(() => "[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);
-           
-            return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
+            requestContext.Logger.Verbose(() => $"[Managed Identity] Creating Service Fabric {(isFmiServiceFabric ? "federated" : "")} managed identity. Endpoint URI: {identityEndpoint}");
+
+            return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader, isFmiServiceFabric);
+        }
+
+        private static void VerifyFederatedEnvVariablesAreAvailable()
+        {
+            if (string.IsNullOrEmpty(EnvironmentVariables.IdentityServerThumbprint))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityFmiInvalidEnvVariableError,
+                         "IDENTITY_SERVER_THUMBPRINT"));
+            }
+            if (string.IsNullOrEmpty(EnvironmentVariables.FmiServiceFabricEndpoint))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityFmiInvalidEnvVariableError,
+                         "APP_IDENTITY_ENDPOINT"));
+            }
+            if (string.IsNullOrEmpty(EnvironmentVariables.IdentityHeader))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityFmiInvalidEnvVariableError,
+                         "IDENTITY_HEADER"));
+            }
+            if (string.IsNullOrEmpty(EnvironmentVariables.FmiServiceFabricApiVersion))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityFmiInvalidEnvVariableError,
+                         "IDENTITY_API_VERSION", "FMI Service Fabric"));
+            }
         }
 
         internal override Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> GetValidationCallback()
@@ -63,11 +107,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return string.Equals(certificate.GetCertHashString(), EnvironmentVariables.IdentityServerThumbprint, StringComparison.OrdinalIgnoreCase);
         }
 
-        private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
-        base(requestContext, ManagedIdentitySource.ServiceFabric)
+        private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue, bool isFmi) :
+            base(requestContext, ManagedIdentitySource.ServiceFabric)
         {
             _endpoint = endpoint;
             _identityHeaderValue = identityHeaderValue;
+            _isFederated = isFmi;
 
             if (requestContext.ServiceBundle.Config.ManagedIdentityId.IsUserAssigned)
             {
@@ -78,28 +123,35 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             ManagedIdentityRequest request = new ManagedIdentityRequest(HttpMethod.Get, _endpoint);
-
             request.Headers["secret"] = _identityHeaderValue;
 
-            request.QueryParameters["api-version"] = ServiceFabricMsiApiVersion;
-            request.QueryParameters["resource"] = resource;
-
-            switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
+            if (_isFederated)
             {
-                case AppConfig.ManagedIdentityIdType.ClientId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
-                    break;
+                _requestContext.Logger.Info("[Managed Identity] Request is for FMI, no ids or resource will be added to the request.");
+                request.QueryParameters["api-version"] = EnvironmentVariables.FmiServiceFabricApiVersion;
+            }
+            else
+            {
+                request.QueryParameters["api-version"] = ServiceFabricMsiApiVersion;
+                request.QueryParameters["resource"] = resource;
 
-                case AppConfig.ManagedIdentityIdType.ResourceId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
-                    break;
+                switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
+                {
+                    case AppConfig.ManagedIdentityIdType.ClientId:
+                        _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                        request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                        break;
 
-                case AppConfig.ManagedIdentityIdType.ObjectId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
-                    break;
+                    case AppConfig.ManagedIdentityIdType.ResourceId:
+                        _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                        request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                        break;
+
+                    case AppConfig.ManagedIdentityIdType.ObjectId:
+                        _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
+                        request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                        break;
+                }
             }
 
             return request;
