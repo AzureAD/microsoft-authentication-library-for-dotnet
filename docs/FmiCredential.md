@@ -2,7 +2,7 @@
 # Proposal: Migrating HTTP Client Logic for FMI Credential from ServiceFabricFmiClientAssertionProvider's to MSAL's Managed Identity
 
 ## Overview
-This proposal outlines the rationale and design for moving the HTTP client logic used to acquire an FMI credential currently implemented in MISE to the MSAL Managed Identity application. The credential is retrieved from an endpoint specified by the `APP_IDENTITY_ENDPOINT` and is used as a client credential for another MSAL application. This credential is an implementation of IdWebs `ClientAssertionProviderBase`. This logic can be seen in ServiceFabricFmiClientAssertionProvider.cs. The credential logic from this file will be moved to MSAL so that MSAL can acquire the FMi credential using its existing service fabric managed identity source and handle issues related to the http client. A new managed identity source can be added to the application that is based to the already existing service faric managed identity source since the logic is very similar. 
+This proposal outlines the rationale and design for moving the HTTP client logic used to acquire an FMI credential currently implemented in MISE to the MSAL Managed Identity application. The credential is retrieved from an endpoint specified by the `APP_IDENTITY_ENDPOINT` and is used as a client credential for another MSAL application. This credential is an implementation of IdWebs `ClientAssertionProviderBase`. This logic can be seen in ServiceFabricFmiClientAssertionProvider.cs. The credential logic from this file will be moved to MSAL so that MSAL can acquire the FMI credential using its existing service fabric managed identity source and handle issues related to the http client. A new managed identity source can be added to the application that is based on the already existing service fabric managed identity source since the logic is very similar. 
 
 ## Motivation
 - **Low-Level HTTP Handling**: The existing logic is implemented at a low level, which is inconsistent with the abstraction provided by MSAL and its service fabric integration.
@@ -11,7 +11,7 @@ This proposal outlines the rationale and design for moving the HTTP client logic
 - **Code Consolidation**: Centralizing the logic within MSAL ensures a cleaner, more maintainable architecture and aligns with the principle of single responsibility.
 
 ## Proposed Design
-MSAL will provide the FMI credential through MITS from the RMA node by crafting request based on the FMI env variables on the machine. The credential and its expiration, 2 things needed by MISE to craft the client assertion, will be in the authenticaiton result provided by MSAL.
+MSAL will provide the FMI credential through MITS from the RMA node by crafting a request based on the FMI env variables on the machine. The credential and its expiration, 2 things needed by MISE to craft the client assertion, will be in the authentication result provided by MSAL.
 To support this migration, I propose two approaches to trigger this flow in MSAL:
 
 ### 1. Explicit API
@@ -41,7 +41,7 @@ Automatically trigger the logic when a specific FMI resource is detected. This a
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 ```
-
+#### NOTE Based on our discussion, we decided to go with approach 2. This flow will be triggered by passing in "api://AzureFMITokenExchange/.default", which is an FMI specific resource.
 ## Benefits
 - **Improved Maintainability**: Reduces duplication and isolates credential acquisition logic within MSAL.
 - **Enhanced Reliability**: Leverages MSAL’s robust HTTP handling and retry mechanisms.
@@ -50,6 +50,6 @@ Automatically trigger the logic when a specific FMI resource is detected. This a
 
 ## Other Considerations
 
-- The tokens should not be cached? Caching will be handled in the other MSAL applicaiton that uses this token. MISE will expect to get a new token each time this flow is used.
+- The tokens should not be cached? Caching will be handled in the other MSAL application that uses this token. MISE will expect to get a new token each time this flow is used.
 - To reduce the footprint of this logic, the managed identity application used to create this can use a system assigned identity.
-- Should this logic stay behind the expiremental features flag as it will only be used by MISE and is not intended for public use.
+- Should this logic stay behind the experimental features flag as it will only be used by MISE and is not intended for public use.
