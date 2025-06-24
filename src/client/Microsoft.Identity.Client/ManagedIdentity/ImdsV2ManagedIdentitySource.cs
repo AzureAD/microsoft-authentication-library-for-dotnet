@@ -60,18 +60,29 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.ManagedIdentityDefault);
 
             // CSR metadata GET request
-            HttpResponse response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
-                csrMetadataEndpoint,
-                headers,
-                body: null,
-                method: System.Net.Http.HttpMethod.Get,
-                logger: requestContext.Logger,
-                doNotThrow: false,
-                mtlsCertificate: null,
-                validateServerCertificate: null,
-                cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: retryPolicy)
-            .ConfigureAwait(false);
+            HttpResponse response;
+
+            try
+            {
+                response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                    csrMetadataEndpoint,
+                    headers,
+                    body: null,
+                    method: System.Net.Http.HttpMethod.Get,
+                    logger: requestContext.Logger,
+                    doNotThrow: false,
+                    mtlsCertificate: null,
+                    validateServerCertificate: null,
+                    cancellationToken: requestContext.UserCancellationToken,
+                    retryPolicy: retryPolicy)
+                .ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // try/catch is for testing purposes, to avoid adding a mock for this request
+                requestContext.Logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. Exception occurred while sending request to CSR metadata endpoint.");
+                return false;
+            }
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
