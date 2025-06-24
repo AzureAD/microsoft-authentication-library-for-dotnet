@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Extensibility
 {

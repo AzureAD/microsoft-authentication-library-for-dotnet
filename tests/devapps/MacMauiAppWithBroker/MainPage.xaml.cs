@@ -17,7 +17,12 @@ public partial class MainPage : ContentPage
 	private void AppendLog(string message)
 	{
 		string newEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {message}{Environment.NewLine}";
-		MainThread.BeginInvokeOnMainThread(async () =>
+		MainThread.BeginInvokeOnMainThread(() => _ = AppendLogAsync(newEntry));
+	}
+
+	private async Task AppendLogAsync(string newEntry)
+	{
+		try
 		{
 			if (LogTextView.Text == null)
 			{
@@ -43,43 +48,48 @@ public partial class MainPage : ContentPage
 			await Task.Delay(50).ConfigureAwait(false);
 			
 			await LogScrollView.ScrollToAsync(0, LogTextView.Height, true).ConfigureAwait(false);
-		});
+		}
+		catch (Exception ex)
+		{
+			// Log any exceptions to prevent crashes
+			Console.WriteLine($"Error in AppendLogAsync: {ex.Message}");
+		}
 	}
 
 	private async void OnACIACSClicked(object sender, EventArgs e)
 	{
 		// Disable button to prevent multiple clicks
 		SetButtonEnabled(CACIACSBtn, false);
-		
+
 		SemanticScreenReader.Announce(CACIACSBtn.Text);
 
-        PublicClientApplicationBuilder builder = PublicClientApplicationBuilder
+		PublicClientApplicationBuilder builder = PublicClientApplicationBuilder
 			.Create("04b07795-8ddb-461a-bbee-02f9e1bf7b46") // Azure CLI client id
 			.WithRedirectUri("msauth.com.msauth.unsignedapp://auth")
 			.WithAuthority("https://login.microsoftonline.com/organizations");
-		
+
 		builder = builder.WithLogging(SampleLogging);
 
 		builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.OSX)
-			{
-				ListOperatingSystemAccounts = false,
-				MsaPassthrough = false,
-				Title = "MSAL Dev App .NET FX"
-			}
+		{
+			ListOperatingSystemAccounts = false,
+			MsaPassthrough = false,
+			Title = "MSAL Dev App .NET FX"
+		}
 		);
 
-        IPublicClientApplication pca = builder.Build();
-		
-		try 
+		IPublicClientApplication pca = builder.Build();
+
+		try
 		{
 			AppendLog("Starting interactive authentication...");
-			AcquireTokenInteractiveParameterBuilder interactiveBuilder = pca.AcquireTokenInteractive(new string[]{"https://graph.microsoft.com/.default"});
+			AcquireTokenInteractiveParameterBuilder interactiveBuilder = pca.AcquireTokenInteractive(new string[] { "https://graph.microsoft.com/.default" });
 			AuthenticationResult result = await interactiveBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 			AppendLog($"Interactive auth successful. User: {result.Account.Username}");
 
 			IAccount account = result.Account;
 			AppendLog("Starting silent authentication...");
-			AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(new string[]{"https://graph.microsoft.com/.default"}, account);
+			AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(new string[] { "https://graph.microsoft.com/.default" }, account);
 			// AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(new string[]{"service::ssl.live.com::MBI_SSL"}, account);
 			result = await silentBuilder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 			AppendLog($"Silent auth successful. Access token length: {result.AccessToken.Length}");
@@ -144,7 +154,12 @@ public partial class MainPage : ContentPage
 		// Disable the button temporarily
 		SetButtonEnabled(ClearLogBtn, false);
 		
-		MainThread.BeginInvokeOnMainThread(async () =>
+		MainThread.BeginInvokeOnMainThread(() => _ = ClearLogAsync());
+	}
+
+	private async Task ClearLogAsync()
+	{
+		try
 		{
 			LogTextView.Text = string.Empty;
 			AppendLog("Log cleared");
@@ -154,13 +169,19 @@ public partial class MainPage : ContentPage
 			
 			// Re-enable the button
 			SetButtonEnabled(ClearLogBtn, true);
-		});
+		}
+		catch (Exception ex)
+		{
+			// Log any exceptions and ensure button is re-enabled
+			Console.WriteLine($"Error in ClearLogAsync: {ex.Message}");
+			SetButtonEnabled(ClearLogBtn, true);
+		}
 	}
 	
 	// Helper method to enable or disable a button on the UI thread
 	private void SetButtonEnabled(Button button, bool enabled)
 	{
-		MainThread.BeginInvokeOnMainThread(() => 
+		MainThread.BeginInvokeOnMainThread(() =>
 		{
 			button.IsEnabled = enabled;
 		});
@@ -170,8 +191,8 @@ public partial class MainPage : ContentPage
 	{
 		try
         {
-			string homeDirectory = Environment.GetEnvironmentVariable("HOME");
-            string filePath = Path.Combine(homeDirectory, "msalnet.log");
+			string? homeDirectory = Environment.GetEnvironmentVariable("HOME");
+			string filePath = Path.Combine(homeDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "msalnet.log");
 			// An example log path could be: /Users/fengga/Library/Containers/com.microsoft.MacMauiAppWithBroker/Data/msalnet.log
 			using (StreamWriter writer = new StreamWriter(filePath, append: true))
 			{

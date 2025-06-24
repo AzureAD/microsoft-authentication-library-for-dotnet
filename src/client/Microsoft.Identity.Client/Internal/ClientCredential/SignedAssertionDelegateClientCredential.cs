@@ -66,6 +66,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
                 //Set claims
                 assertionOptions.Claims = requestParameters.Claims;
+
+                //Set client assertion FMI path
+                assertionOptions.ClientAssertionFmiPath = requestParameters.ClientAssertionFmiPath;
             
                 // Delegate that uses AssertionRequestOptions
                 string signedAssertion = await _signedAssertionWithInfoDelegate(assertionOptions).ConfigureAwait(false);
