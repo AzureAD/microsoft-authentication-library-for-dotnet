@@ -205,4 +205,64 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             return Marshal.PtrToStructure<IntPtr>(ptr);
         }
     }
+
+    internal static class LibObjc
+    {
+        private const string LibObjcLib = "/usr/lib/libobjc.dylib";
+
+        public static bool IsNsApplicationRunning()
+        {
+            // This function equals to calling objc code: `[[NSApplication sharedApplication] isRunning]`
+            // The result indicates if there is an official Apple message loop running, we can use it as
+            // whether it is UI-based app (MAUI) or console app.
+            try
+            {
+                IntPtr nsApplicationClass = objc_getClass("NSApplication");
+                if (nsApplicationClass == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                IntPtr sharedApplicationSelector = sel_registerName("sharedApplication");
+                if (sharedApplicationSelector == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                IntPtr sharedApplication = objc_msgSend(nsApplicationClass, sharedApplicationSelector);
+                if (sharedApplication == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                IntPtr isRunningSelector = sel_registerName("isRunning");
+                if (isRunningSelector == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                IntPtr isRunningResult = objc_msgSend(sharedApplication, isRunningSelector);
+                bool isRunning = isRunningResult != IntPtr.Zero;
+                return isRunning;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        [DllImport(LibObjcLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr objc_getClass(string name);
+
+        [DllImport(LibObjcLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr sel_registerName(string name);
+
+        [DllImport(LibObjcLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector);
+
+        [DllImport(LibObjcLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool objc_msgSend_bool(IntPtr receiver, IntPtr selector);
+
+    }
+
 }

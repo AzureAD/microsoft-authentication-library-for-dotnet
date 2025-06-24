@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../../../src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj" />
+
+    <!-- <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.68.6-internal-preview" /> -->
+
+    <!-- <ProjectReference Include="../../../../OneAuth/msal/msalruntime/interop/net/Microsoft.Identity.Client.NativeInterop.csproj" />
+    <None Include="../../../../OneAuth/msal/_builds/macOS/msalruntime/lib/Debug/libmsalruntime.dylib">
+      <Link>msalruntime.dylib</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>msalruntime_arm64.dylib</TargetPath>
+    </None> -->
+
+		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.1" />
+
+	</ItemGroup>
+
+</Project>

@@ -367,12 +367,19 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ManagedIdentitySource managedIdentitySourceType,
             string userAssignedId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-            HttpStatusCode statusCode = HttpStatusCode.OK
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            string retryAfterHeader = null // A number of seconds (e.g., "120"), or an HTTP-date in RFC1123 format (e.g., "Fri, 19 Apr 2025 15:00:00 GMT")
             )
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
-            HttpContent content = new StringContent(response);
-            responseMessage.Content = content;
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode)
+            {
+                Content = new StringContent(response)
+            };
+
+            if (retryAfterHeader != null)
+            {
+                responseMessage.Headers.TryAddWithoutValidation("Retry-After", retryAfterHeader);
+            }
 
             MockHttpMessageHandler httpMessageHandler = BuildMockHandlerForManagedIdentitySource(managedIdentitySourceType, resource);
 

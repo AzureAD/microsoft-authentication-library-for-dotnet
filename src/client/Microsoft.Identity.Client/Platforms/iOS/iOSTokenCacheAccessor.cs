@@ -167,7 +167,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 .Select(x => MsalAccountCacheItem.FromJsonString(x))
                 .ToList();
         }
-#endregion
+        #endregion
+
+        public int EntryCount { get; } = 0; // not implemented for iOS
+        
 
         internal SecStatusCode TryGetBrokerApplicationToken(string clientId, out string appToken)
         {
