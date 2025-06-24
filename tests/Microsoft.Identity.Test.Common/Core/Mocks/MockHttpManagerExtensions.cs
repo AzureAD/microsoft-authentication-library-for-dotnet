@@ -368,7 +368,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string userAssignedId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             HttpStatusCode statusCode = HttpStatusCode.OK,
-            string retryAfterHeader = null // A number of seconds (e.g., "120"), or an HTTP-date in RFC1123 format (e.g., "Fri, 19 Apr 2025 15:00:00 GMT")
+            string retryAfterHeader = null, // A number of seconds (e.g., "120"), or an HTTP-date in RFC1123 format (e.g., "Fri, 19 Apr 2025 15:00:00 GMT")
+            string serverHeaderImdsVersion = null // e.g., "IMDS/150.870.65.1325" for IMDSV2
             )
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode)
@@ -410,6 +411,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
             }
 
+            if (serverHeaderImdsVersion != null)
+            {
+                responseMessage.Headers.TryAddWithoutValidation("server", serverHeaderImdsVersion);
+            }
+
             httpMessageHandler.ResponseMessage = responseMessage;
             httpMessageHandler.ExpectedUrl = expectedUrl;
 
@@ -441,6 +447,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("api-version", "2018-02-01");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("Metadata", "true");
+                    break;
+                case ManagedIdentitySource.ImdsV2:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    // uaid query param is only required for UAMI
+                    expectedQueryParams.Add("api-version", "2018-02-01");
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    expectedRequestHeaders.Add("x-ms-client-request-id", Guid.NewGuid().ToString());
                     break;
                 case ManagedIdentitySource.CloudShell:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Post;

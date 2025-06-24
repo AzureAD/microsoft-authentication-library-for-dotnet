@@ -59,9 +59,9 @@ namespace Microsoft.Identity.Client
         /// Detects and returns the managed identity source available on the environment.
         /// </summary>
         /// <returns>Managed identity source detected on the environment if any.</returns>
-        public static ManagedIdentitySource GetManagedIdentitySource()
+        public static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync()
         {
-            return ManagedIdentityClient.GetManagedIdentitySource();
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync().ConfigureAwait(false);
         }
     }
 }
