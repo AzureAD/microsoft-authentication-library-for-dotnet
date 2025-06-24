@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             MsalTokenResponse tokenResponse = null;
-            if (DesktopOsHelper.IsMac() && ServiceBundle.Config.IsBrokerEnabled)
+            if (ServiceBundle.Config.IsBrokerEnabled && DesktopOsHelper.IsMacConsoleApp())
             {
                 var macMainThreadScheduler = MacMainThreadScheduler.Instance();
                 if (!macMainThreadScheduler.IsCurrentlyOnMainThread())
@@ -96,7 +96,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
                 });
                 if (!messageLoopStarted)
+                {
+                    _logger?.Verbose(() => "Mac broker console app scenario needs to start a message loop internally.");
                     macMainThreadScheduler.StartMessageLoop();
+                }
                 tokenResponse = await tcs.Task.ConfigureAwait(false);
             }
             else
