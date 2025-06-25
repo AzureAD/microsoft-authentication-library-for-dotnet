@@ -1,3 +1,13 @@
+4.73.1
+======
+
+### Features
+Deprecate AcquireTokenByIntegratedWindowsAuth API by @ashok672 in #5345
+
+### Bug fixes
+Update native interop to 0.19.2 by @fengga in #5362
+update the deprecated openURL(:) api to openURL(:options:completionHandler) by @DharshanBJ in #5354
+
 4.73.0
 =======
 
