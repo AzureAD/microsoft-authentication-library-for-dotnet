@@ -136,13 +136,19 @@ namespace Microsoft.Identity.Client.Http
             if (timeoutException != null)
             {
                 //If the correlation id is available, include it in the exception message
-                string correlationId = headers.ContainsKey(OAuth2Header.CorrelationId) ?
-                    $" CorrelationId: {headers[OAuth2Header.CorrelationId]}" :
-                    string.Empty;
+                string msg = "Request to the endpoint timed out.";
+
+                if (headers != null && headers.Count > 0)
+                {
+                    string correlationId = headers.ContainsKey(OAuth2Header.CorrelationId) ?
+                                                $" CorrelationId: {headers[OAuth2Header.CorrelationId]}" :
+                                                string.Empty;
+                    msg += correlationId;
+                }
 
                 throw new MsalServiceException(
                     MsalError.RequestTimeout,
-                    $"Request to the endpoint timed out.{correlationId}",
+                    msg,
                     timeoutException);
             }
 
