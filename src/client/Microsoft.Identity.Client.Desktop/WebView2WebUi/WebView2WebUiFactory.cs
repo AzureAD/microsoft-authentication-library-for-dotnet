@@ -66,10 +66,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString();
                 return !string.IsNullOrEmpty(wv2Version);
             }
+#if !WINRT
             catch (WebView2RuntimeNotFoundException)
             {
                 return false;
             }
+#endif
             catch (Exception ex) when (ex is BadImageFormatException || ex is DllNotFoundException)
             {
                 throw new MsalClientException(MsalError.WebView2LoaderNotFound, MsalErrorMessage.WebView2LoaderNotFound, ex);

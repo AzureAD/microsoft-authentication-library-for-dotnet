@@ -109,6 +109,9 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 
         private AuthorizationResult InvokeEmbeddedWebview(Uri startUri, Uri endUri, CancellationToken cancellationToken)
         {
+#if WINRT
+            throw new NotSupportedException("winforms embedded webview is not supported on WinRT platforms.");
+#else
             using (var form = new WinFormsPanelWithWebView2(
                 _parent.OwnerWindow,
                 _parent?.EmbeddedWebviewOptions,
@@ -118,6 +121,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             {
                 return form.DisplayDialogAndInterceptUri(cancellationToken);
             }
+#endif
         }
 
     }

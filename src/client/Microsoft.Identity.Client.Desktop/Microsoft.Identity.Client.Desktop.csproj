@@ -3,14 +3,21 @@
 
     <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
-    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
+    <TargetFrameworkModernTFM>net8.0-windows10.0.17763.0</TargetFrameworkModernTFM>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore);$(TargetFrameworkModernTFM)</TargetFrameworks>
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
+    
     <UseWindowsForms>true</UseWindowsForms>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
+    <DebugType>portable</DebugType>
   </PropertyGroup>
 
+  <!--<PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>-->
+  
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
     <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">$(MsalInternalVersion)</MicrosoftIdentityClientVersion>
@@ -30,7 +37,7 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
 
@@ -43,6 +50,21 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\StaTaskScheduler.cs" LinkBase="Features\DesktopOS" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
+    <DefineConstants>$(DefineConstants);WINRT</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
+    <Compile Remove="WebView2WebUi/WinFormsPanelWithWebView2.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
+    <UseWinUI>true</UseWinUI>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
   </ItemGroup>
