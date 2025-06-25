@@ -8,11 +8,13 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
@@ -28,6 +30,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         private ApiEvent _apiEvent;
         private CancellationTokenSource _userCancellationTokenSource;
         private IRegionDiscoveryProvider _regionDiscoveryProvider;
+        private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [TestInitialize]
         public override void TestInitialize()
@@ -35,6 +38,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             base.TestInitialize();
 
             _harness = base.CreateTestHarness();
+            _harness.ServiceBundle.Config.RetryPolicyFactory = _testRetryPolicyFactory;
             _httpManager = _harness.HttpManager;
             _userCancellationTokenSource = new CancellationTokenSource();
             _testRequestContext = new RequestContext(
@@ -148,7 +152,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task SuccessfulResponseFromUserProvidedRegionAsync()
         {
-            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            // Add multiple mock responses: initial request + max retry attempts
+            for (int i = 0; i < (1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries); i++)
+            {
+                AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            }
 
             _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
 
@@ -163,6 +171,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.UserProvidedAutodetectionFailed, _testRequestContext.ApiEvent.RegionOutcome);
             Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionAutoDetectNotFoundFailureMessage));
+
+            // Verify all mock responses were consumed
+            Assert.AreEqual(0, _httpManager.QueueSize);
         }
 
         [TestMethod]
@@ -306,7 +317,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task ErrorResponseFromLocalImdsAsync()
         {
-            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            // Add multiple mock responses: initial request + max retry attempts
+            for (int i = 0; i < (1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries); i++)
+            {
+                AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            }
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
 
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.
@@ -319,6 +334,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
             Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionAutoDetectNotFoundFailureMessage));
+
+            // Verify all mock responses were consumed
+            Assert.AreEqual(0, _httpManager.QueueSize);
         }
 
         [TestMethod]
@@ -382,43 +400,40 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionDiscoveryNotSupportedErrorMessage));
         }
 
-        private void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true)
+        protected void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true, bool throwException = false)
         {
-            var queryParams = new Dictionary<string, string>();
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedUrl = TestConstants.ImdsUrl,
+                ExpectedRequestHeaders = new Dictionary<string, string>
+                {
+                    { "Metadata", "true" }
+                },
+                ResponseMessage = responseMessage
+            };
 
             if (expectedParams)
             {
-                queryParams.Add("api-version", apiVersion);
-                queryParams.Add("format", "text");
+                var queryParams = new Dictionary<string, string>
+                {
+                    { "api-version", apiVersion },
+                    { "format", "text" }
+                };
+                handler.ExpectedQueryParams = queryParams;
+            }
 
-                _httpManager.AddMockHandler(
-                   new MockHttpMessageHandler
-                   {
-                       ExpectedMethod = HttpMethod.Get,
-                       ExpectedUrl = TestConstants.ImdsUrl,
-                       ExpectedRequestHeaders = new Dictionary<string, string>
-                        {
-                            { "Metadata", "true" }
-                        },
-                       ExpectedQueryParams = queryParams,
-                       ResponseMessage = responseMessage
-                   });
-            }
-            else
+            if (throwException)
             {
-                _httpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = TestConstants.ImdsUrl,
-                        ExpectedRequestHeaders = new Dictionary<string, string>
-                            {
-                            { "Metadata", "true" }
-                            },
-                        ResponseMessage = responseMessage
-                    });
+                handler.ExceptionToThrow = new TaskCanceledException();
             }
+
+            _httpManager.AddMockHandler(handler);
         }
+
+        internal RequestContext GetTestRequestContext() => _testRequestContext;
+        internal IRegionDiscoveryProvider GetRegionDiscoveryProvider() => _regionDiscoveryProvider;
+        internal MockHttpManager GetHttpManager() => _httpManager;
 
         private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = "centralus")
         {
@@ -432,6 +447,60 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             CollectionAssert.AreEquivalent(expectedEntry.Aliases, entry.Aliases);
             Assert.AreEqual(expectedEntry.PreferredCache, entry.PreferredCache);
             Assert.AreEqual(expectedEntry.PreferredNetwork, entry.PreferredNetwork);
+        }
+
+        [TestMethod]
+        public async Task ImdsExponentiallyRetriesOnTimeoutThenSucceedsAsync()
+        {
+            // Simulate three 404s (initial request + two retries), then a successful response
+            const int Num404Errors = 3;
+            for (int i = 0; i < Num404Errors; i++)
+            {
+                AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
+            }
+
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            ValidateInstanceMetadata(regionalMetadata);
+            Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.AreEqual(RegionAutodetectionSource.Imds, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+
+            const int NumRequests = 1 + Num404Errors; // initial request + two retries
+            int requestsMade = NumRequests - _httpManager.QueueSize;
+            Assert.AreEqual(NumRequests, requestsMade);
+        }
+
+        [TestMethod]
+        public async Task ImdsLinearRetriesExceedMaximumAttemptsAsync()
+        {
+            // Simulate eight 410s (initial request + seven retries), then a successful response
+            const int Num410Errors = 1 + ImdsRetryPolicy.LinearStrategyNumRetries; // More than the max retry limit
+            for (int i = 0; i < Num410Errors; i++)
+            {
+                AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.Gone));
+            }
+
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
+            // Act
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNull(regionalMetadata, "Discovery should fail after max retries");
+            Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
+
+            const int NumRequests = 1 + Num410Errors; // initial request + eight retries
+            int requestsMade = NumRequests - _httpManager.QueueSize;
+            Assert.AreEqual(NumRequests, requestsMade);
         }
     }
 }
