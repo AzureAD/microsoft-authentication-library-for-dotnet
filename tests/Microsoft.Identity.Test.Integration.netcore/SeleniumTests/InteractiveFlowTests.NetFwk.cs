@@ -48,14 +48,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             const int maxAttempts = 20;
             Exception lastException = null;
+            Console.WriteLine($"Starting Interactive_AADAsync_Multiple");
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
+                Console.WriteLine($"Starting Interactive_AADAsync attempt {attempt} of {maxAttempts}");
+
                 try
                 {
-                    Trace.WriteLine($"Starting Interactive_AADAsync attempt {attempt} of {maxAttempts}");
                     await Interactive_AADAsync().ConfigureAwait(false);
-                    Trace.WriteLine($"Completed Interactive_AADAsync successfully on attempt {attempt}");
                     return; // Success, exit the method
                 }
                 catch (Exception ex)
@@ -82,14 +83,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             // Call the original test method
             const int maxAttempts = 20;
             Exception lastException = null;
+            Console.WriteLine($"Starting Kerberos_Interactive_AADAsync_Multiple");
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
+                Console.WriteLine($"Starting Kerberos_Interactive_AADAsync attempt {attempt} of {maxAttempts}");
+
                 try
                 {
-                    Trace.WriteLine($"Starting Interactive_AADAsync attempt {attempt} of {maxAttempts}");
                     await Kerberos_Interactive_AADAsync().ConfigureAwait(false);
-                    Trace.WriteLine($"Completed Interactive_AADAsync successfully on attempt {attempt}");
                     return; // Success, exit the method
                 }
                 catch (Exception ex)
@@ -113,6 +115,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task Interactive_AADAsync()
         {
             // Arrange
+            Console.WriteLine("==Starting Interactive_AADAsync test");
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
@@ -468,6 +471,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
        // [IgnoreOnOneBranch]
         public async Task Kerberos_Interactive_AADAsync()
         {
+            Console.WriteLine("==Starting Kerberos_Interactive_AADAsync test");
+
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
             await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
