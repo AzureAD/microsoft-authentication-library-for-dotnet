@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http.Retry;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -134,9 +135,14 @@ namespace Microsoft.Identity.Client.Http
             logger.Warning("Request retry failed.");
             if (timeoutException != null)
             {
+                //If the correlation id is available, include it in the exception message
+                string correlationId = headers.ContainsKey(OAuth2Header.CorrelationId) ?
+                    $" CorrelationId: {headers[OAuth2Header.CorrelationId]}" :
+                    string.Empty;
+
                 throw new MsalServiceException(
                     MsalError.RequestTimeout,
-                    "Request to the endpoint timed out.",
+                    $"Request to the endpoint timed out.{correlationId}",
                     timeoutException);
             }
 
