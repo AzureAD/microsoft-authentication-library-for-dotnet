@@ -54,9 +54,23 @@
   
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkWinRT)'">
     <Compile Remove="WebView2WebUi/WinFormsPanelWithWebView2.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" /> 
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
     <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkWinRT)'">
+    <UseWinUI>true</UseWinUI>
+  </PropertyGroup>
+  
+    <!-- XAML compilation for WinUI 3 -->
+  <!-- <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkWinRT)'">
+    <None Remove="**\*.xaml" />
+    <Page Include="**\*.xaml" />
+    <Compile Update="**\*.xaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+  </ItemGroup> -->
 
   <ItemGroup>
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />

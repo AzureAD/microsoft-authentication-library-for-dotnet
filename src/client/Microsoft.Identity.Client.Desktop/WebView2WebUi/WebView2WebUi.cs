@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,39 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             CancellationToken cancellationToken)
         {
             AuthorizationResult result = null;
+// #if WINRT
+//         // Check if we're on the UI thread
+//         if (Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread() != null)
+//         {
+//             // We're on the UI thread, call directly
+//             result = await InvokeWinUIEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken);
+//         }
+//         else
+//         {
+//             // We're on a background thread, marshal to UI thread
+//             var tcs = new TaskCompletionSource<AuthorizationResult>();
+
+//             // Get the main window's dispatcher queue
+//             var mainDispatcher = GetMainDispatcherQueue();
+            
+//             mainDispatcher.TryEnqueue(async () =>
+//             {
+//                 try
+//                 {
+//                     var authResult = await InvokeWinUIEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken);
+//                     tcs.SetResult(authResult);
+//                 }
+//                 catch (Exception ex)
+//                 {
+//                     tcs.SetException(ex);
+//                 }
+//             });
+
+//             result = await tcs.Task.ConfigureAwait(false);
+//         }
+
+//         return result;
+// #else           
             var sendAuthorizeRequest = new Action(() =>
             {
                 result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
@@ -98,7 +132,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             }
 
             return result;
-
+// #endif
         }
 
         public Uri UpdateRedirectUri(Uri redirectUri)
@@ -107,13 +141,48 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             return redirectUri;
         }
 
+// #if WINRT
+//         private async Task<AuthorizationResult> InvokeWinUIEmbeddedWebviewAsync(Uri startUri, Uri endUri, CancellationToken cancellationToken)
+//         {
+//             var window = new WinUI3WindowWithWebView2(
+//                 _parent.OwnerWindow as Window,
+//                 _parent?.EmbeddedWebviewOptions,
+//                 _requestContext.Logger,
+//                 startUri,
+//                 endUri);
+
+//             try
+//             {
+//                 return await window.DisplayDialogAndInterceptUriAsync(cancellationToken);
+//             }
+//             finally
+//             {
+//                 // Ensure window is properly closed
+//                 window?.Close();
+//             }
+//         }
+
+//         private Microsoft.UI.Dispatching.DispatcherQueue GetMainDispatcherQueue()
+//         {
+//             // Try to get dispatcher from parent window first
+//             if (_parent.OwnerWindow is Window parentWindow)
+//             {
+//                 return parentWindow.DispatcherQueue;
+//             }
+
+//             // If no parent window, we'll need to create the auth window on a UI thread
+//             // The simplest approach is to let the caller ensure they're on the UI thread
+//             // or handle this at a higher level in your application
+//             throw new InvalidOperationException(
+//                 "No parent window available and not on UI thread. " +
+//                 "Ensure AcquireAuthorizationAsync is called from the UI thread or provide a parent window.");
+//         }
+// #else
         private AuthorizationResult InvokeEmbeddedWebview(Uri startUri, Uri endUri, CancellationToken cancellationToken)
         {
-            //dharshan 
-#if WINRT
-            throw new PlatformNotSupportedException("No supported embedded webview implementation for this platform.");
-
-#else
+// #if WINRT
+//             throw new NotSupportedException("WebView2 is not supported in WinRT. Use WinUI3WebView2WebUi instead.");
+// #else
             using (var form = new WinFormsPanelWithWebView2(
                 _parent.OwnerWindow,
                 _parent?.EmbeddedWebviewOptions,
@@ -123,8 +192,9 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             {
                 return form.DisplayDialogAndInterceptUri(cancellationToken);
             }
-#endif
+// #endif
         }
 
+// #endif
     }
 }
