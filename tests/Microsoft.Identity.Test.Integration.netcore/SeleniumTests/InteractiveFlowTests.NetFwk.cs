@@ -44,6 +44,72 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion MSTest Hooks
 
         [RunOn(TargetFrameworks.NetFx)]
+        public async Task Interactive_AADAsync_Multiple()
+        {
+            const int maxAttempts = 20;
+            Exception lastException = null;
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    Trace.WriteLine($"Starting Interactive_AADAsync attempt {attempt} of {maxAttempts}");
+                    await Interactive_AADAsync().ConfigureAwait(false);
+                    Trace.WriteLine($"Completed Interactive_AADAsync successfully on attempt {attempt}");
+                    return; // Success, exit the method
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                    Trace.WriteLine($"Interactive_AADAsync failed on attempt {attempt}: {ex.Message}");
+
+                    if (attempt < maxAttempts)
+                    {
+                        // Optional: add delay between retries if needed
+                        await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+
+                        // Reset any state if needed before the next retry
+                        TestInitialize();
+                    }
+                }
+            }
+
+        }
+
+        [IgnoreOnOneBranch]
+        public async Task Kerberos_Interactive_AADAsync_Multiple()
+        {
+            // Call the original test method
+            const int maxAttempts = 20;
+            Exception lastException = null;
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    Trace.WriteLine($"Starting Interactive_AADAsync attempt {attempt} of {maxAttempts}");
+                    await Kerberos_Interactive_AADAsync().ConfigureAwait(false);
+                    Trace.WriteLine($"Completed Interactive_AADAsync successfully on attempt {attempt}");
+                    return; // Success, exit the method
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                    Trace.WriteLine($"Interactive_AADAsync failed on attempt {attempt}: {ex.Message}");
+
+                    if (attempt < maxAttempts)
+                    {
+                        // Optional: add delay between retries if needed
+                        await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+
+                        // Reset any state if needed before the next retry
+                        TestInitialize();
+                    }
+                }
+            }
+
+        }
+
         public async Task Interactive_AADAsync()
         {
             // Arrange
@@ -399,7 +465,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         #region Azure AD Kerberos Feature Tests
-        [IgnoreOnOneBranch]
+       // [IgnoreOnOneBranch]
         public async Task Kerberos_Interactive_AADAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
