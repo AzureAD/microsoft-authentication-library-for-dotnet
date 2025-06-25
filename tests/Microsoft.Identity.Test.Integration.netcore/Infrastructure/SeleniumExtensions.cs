@@ -22,43 +22,30 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         private static readonly TimeSpan ExplicitTimespan = TimeSpan.FromSeconds(20);
         private static readonly TimeSpan ShortExplicitTimespan = TimeSpan.FromSeconds(5);
 
-        public static IWebDriver CreateDefaultWebDriver()
+        public static IWebDriver CreateDefaultWebDriver(int timeoutSeconds = 20)
         {
-            // ---------- Chrome launch flags ----------
             var options = new ChromeOptions();
-            options.AddArguments(
-                "--headless=new",          // modern headless mode (remove this for debugging)
-                "--disable-gpu",
-                "--window-size=1920,1080",
-                "--remote-allow-origins=*",
-                "--disable-dev-shm-usage"); // avoids crashes in low-memory containers
+            // Performance improvements
+            options.AddArgument("--headless");
+            options.AddArgument("--no-sandbox");
+            options.AddArgument("--disable-dev-shm-usage");
+            options.AddArgument("--disable-extensions");
+            options.AddArgument("--disable-gpu");
+            options.AddArgument("--window-size=1200,800");
+            options.AddArgument("--disable-infobars");
+            options.AddArgument("--disable-notifications");
+            options.PageLoadStrategy = PageLoadStrategy.Eager;
 
-            // ---------- Pick a driver binary ----------
-            // 1) Prefer explicit env-var so devs can override locally
-            var driverDir = Environment.GetEnvironmentVariable("CHROMEWEBDRIVER");
-
-            // 2) Otherwise use the folder where CI drops a matching chromedriver
-            if (string.IsNullOrEmpty(driverDir))
-            {
-                driverDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "drivers");
-            }
-
-            // 3) Fallback: let Selenium look on PATH
-            ChromeDriverService service = string.IsNullOrEmpty(driverDir)
-                ? ChromeDriverService.CreateDefaultService()
-                : ChromeDriverService.CreateDefaultService(driverDir);
-
+            var service = ChromeDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
-            service.EnableVerboseLogging = true;
 
-            var driver = new ChromeDriver(
-                service,
-                options,
-                TimeSpan.FromSeconds(120));       // generous startup timeout
+            // Shorter timeout for driver creation
+            var driver = new ChromeDriver(service, options, TimeSpan.FromSeconds(timeoutSeconds));
 
-            driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
+            // Set explicit timeouts
+            driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(timeoutSeconds);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
-            TryMaximize(driver);
             return driver;
         }
 
