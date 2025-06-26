@@ -578,12 +578,51 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 if (addCorrelationId)
                 {
                     Assert.AreEqual($"Request to the endpoint timed out. CorrelationId: {correlationId.ToString()}", exc.Message);
+                    Assert.AreEqual(correlationId.ToString(), exc.CorrelationId);
                 }
                 else
                 {
                     Assert.AreEqual("Request to the endpoint timed out.", exc.Message);
                 }
+            }
+        }
 
+        [TestMethod]
+        public async Task TestWithCorrelationId_RetryOnTimeoutFailureAsync()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // Simulate permanent errors (to trigger the maximum number of retries)
+                const int Num500Errors = 1 + TestDefaultRetryPolicy.DefaultStsMaxRetries; // initial request + maximum number of retries
+                for (int i = 0; i < Num500Errors; i++)
+                {
+                    httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
+                }
+                Guid correlationId = Guid.NewGuid();
+
+                var app = ConfidentialClientApplicationBuilder
+                            .Create(TestConstants.ClientId)
+                            .WithAuthority(TestConstants.AuthorityTestTenant)
+                            .WithHttpManager(httpManager)
+                            .WithExperimentalFeatures(true)
+                            .WithClientSecret(TestConstants.ClientSecret)
+                            .Build();
+
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                // Act
+                var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                                    app.AcquireTokenForClient(TestConstants.s_scope)
+                                    .WithCorrelationId(correlationId)
+                                    .ExecuteAsync())
+                                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual($"Request to the endpoint timed out. CorrelationId: {correlationId.ToString()}", exc.Message);
+                Assert.AreEqual(correlationId.ToString(), exc.CorrelationId);
             }
         }
 
