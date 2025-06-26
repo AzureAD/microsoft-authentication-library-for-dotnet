@@ -180,7 +180,9 @@ namespace FociTestApp
         {
             if (s_useIWA)
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 return pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).ExecuteAsync();
+#pragma warning restore CS0618 // Type or member is obsolete
             }
             return pca.AcquireTokenInteractive(s_scopes).WithUseEmbeddedWebView(false).ExecuteAsync();
         }

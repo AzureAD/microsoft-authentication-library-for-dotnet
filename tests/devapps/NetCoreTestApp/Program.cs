@@ -36,7 +36,6 @@ namespace NetCoreTestApp
         // Confidential client app with access to https://graph.microsoft.com/.default
         private static string s_clientIdForConfidentialApp;
 
-
         // App certificate for app above 
         private static X509Certificate2 s_confidentialClientCertificate;
 
@@ -172,7 +171,9 @@ namespace NetCoreTestApp
                     switch (selection)
                     {
                         case 1: // acquire token
+#pragma warning disable CS0618 // Type or member is obsolete
                             authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
+#pragma warning restore CS0618 // Type or member is obsolete
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
@@ -433,7 +434,6 @@ namespace NetCoreTestApp
                 .Create("163ffef9-a313-45b4-ab2f-c7e2f5e0e23e")
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion(region);
-
 
             ccaBuilder = ccaBuilder.WithCertificate(s_confidentialClientCertificate, true);
 
