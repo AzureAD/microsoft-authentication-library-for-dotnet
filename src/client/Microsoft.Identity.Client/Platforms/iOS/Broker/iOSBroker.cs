@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1422:Validate platform compatibility", Justification = "<Pending>")]
         public void HandleInstallUrl(string appLink)
         {
-            DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(appLink)));
+            DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(appLink), new UIApplicationOpenUrlOptions(), null));
 
             throw new MsalClientException(
                 MsalError.BrokerApplicationRequired,

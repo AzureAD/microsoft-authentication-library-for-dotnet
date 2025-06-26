@@ -80,6 +80,25 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
         }
 
+        public InstanceDiscoveryMetadataEntry GetMetadataEntryAvoidNetwork(
+            AuthorityInfo authorityInfo,
+            RequestContext requestContext)
+        {
+            string environment = authorityInfo.Host;
+            InstanceDiscoveryMetadataEntry entry = null;
+            if (requestContext.ServiceBundle.Config.IsInstanceDiscoveryEnabled)
+            {
+                entry = _networkCacheMetadataProvider.GetMetadata(environment, requestContext.Logger) ??
+                    _knownMetadataProvider.GetMetadata(environment, null, requestContext.Logger);
+            }
+            if (entry == null)
+            {
+                requestContext.Logger.Info(() => $"Skipping Instance discovery for {authorityInfo.AuthorityType} authority and use single authority.");
+                entry = CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
+            }
+            return entry;
+        }
+
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryTryAvoidNetworkAsync(
             AuthorityInfo authorityInfo,
             IEnumerable<string> existingEnvironmentsInCache,

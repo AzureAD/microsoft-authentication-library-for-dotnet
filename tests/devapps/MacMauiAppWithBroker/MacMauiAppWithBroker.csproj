@@ -20,6 +20,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
+		<!-- Disable strong naming for MAUI app -->
+		<SignAssembly>false</SignAssembly>
+
 		<!-- Display name -->
 		<ApplicationTitle>MacMauiAppWithBroker</ApplicationTitle>
 
@@ -74,10 +77,6 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
-
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 	</ItemGroup>
 
 	<!-- <ItemGroup>
@@ -90,11 +89,7 @@
     </ItemGroup> -->
 
 	<ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.18.2" />
-		<NativeReference Include="$(HOME)/.nuget/packages/microsoft.identity.client.nativeinterop/0.18.2/runtimes/macos-arm64/native/msalruntime_arm64.dylib">
-			<Kind>Dynamic</Kind>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</NativeReference>
+		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.2" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
@@ -126,7 +121,7 @@ namespace MacMauiAppWithBroker
 
 	<!-- Display warning when building on non-Mac -->
 	<Target Name="WarnNonMacBuild" BeforeTargets="Build" Condition="!$([MSBuild]::IsOSPlatform('OSX'))">
-		<Warning Text="MacMauiAppWithBroker is designed for macOS only. Building an empty stub project on this platform." />
+		<Message Importance="high" Text="MacMauiAppWithBroker is designed for macOS only. Building an empty stub project on this platform." />
 	</Target>
 
 </Project>
