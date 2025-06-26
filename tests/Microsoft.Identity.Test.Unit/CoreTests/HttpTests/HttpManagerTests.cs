@@ -607,7 +607,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             .Create(TestConstants.ClientId)
                             .WithAuthority(TestConstants.AuthorityTestTenant)
                             .WithHttpManager(httpManager)
-                            .WithExperimentalFeatures(true)
                             .WithClientSecret(TestConstants.ClientSecret)
                             .Build();
 

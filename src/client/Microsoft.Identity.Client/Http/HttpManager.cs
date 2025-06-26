@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Http
             if (timeoutException != null)
             {
                 //If the correlation id is available, include it in the exception message
-                string msg = "Request to the endpoint timed out.";
+                string msg = MsalErrorMessage.RequestTimeOut;
 
                 if (headers != null && headers.Count > 0)
                 {
