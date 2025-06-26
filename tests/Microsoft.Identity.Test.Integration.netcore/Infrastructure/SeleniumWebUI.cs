@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         private readonly Action<IWebDriver> _seleniumAutomationLogic;
         private readonly TestContext _testContext;
         private readonly ILoggerAdapter _logger;
+        private readonly bool _useWebDriverPool;
 
         private readonly TimeSpan tcpTimeoutAfterSelenium = TimeSpan.FromSeconds(3);
 
@@ -44,11 +45,12 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
   </body>
 </html>";
 
-        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext, ILoggerAdapter logger = null)
+        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext, ILoggerAdapter logger = null, bool useWebDriverPool = true)
         {
             _seleniumAutomationLogic = seleniumAutomationLogic;
             _testContext = testContext;
             _logger = logger ?? new TraceLogger("[SeleniumWebUi]");
+            _useWebDriverPool = useWebDriverPool;
         }
 
         public async Task<Uri> AcquireAuthorizationCodeAsync(
@@ -77,6 +79,46 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             int port = ((IPEndPoint)l.LocalEndpoint).Port;
             l.Stop();
             return "http://localhost:" + port;
+        }
+
+        private IWebDriver GetWebDriver(string url, int maxRetries = 1, int timeoutSeconds = 20)
+        {
+            if (!_useWebDriverPool)
+            {
+                return InitDriverAndGoToUrl(url, maxRetries, timeoutSeconds);
+            }
+
+            IWebDriver driver = null;
+            Exception lastException = null;
+
+            for (int attempt = 0; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    driver = WebDriverPool.Instance.AcquireDriver();
+                    driver.Navigate().GoToUrl(url);
+                    return driver;
+                }
+                catch (WebDriverException ex)
+                {
+                    lastException = ex;
+                    _logger.Warning($"WebDriver navigation failed: {ex.Message}");
+
+                    if (driver != null)
+                    {
+                        WebDriverPool.Instance.ReleaseDriver(driver);
+                        driver = null;
+                    }
+
+                    if (attempt < maxRetries)
+                    {
+                        Thread.Sleep(1000);
+                    }
+                }
+            }
+
+            _logger.Error("Failed to navigate with web driver.");
+            throw new WebDriverException("Could not navigate with WebDriver", lastException);
         }
 
         private IWebDriver InitDriverAndGoToUrl(string url, int maxRetries = 1, int timeoutSeconds = 20)
@@ -117,8 +159,12 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Uri redirectUri,
             CancellationToken externalCancellationToken)
         {
-            using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
+            IWebDriver driver = null;
+            bool isPooledDriver = _useWebDriverPool;
+
+            try
             {
+                driver = GetWebDriver(authorizationUri.OriginalString);
                 var listener = new HttpListenerInterceptor(_logger);
                 Uri authCodeUri = null;
 
@@ -126,7 +172,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 // but make sure to start the TCP listener first
                 CancellationTokenSource innerSource = new CancellationTokenSource();
                 var tcpCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(
-                    innerSource.Token, 
+                    innerSource.Token,
                     externalCancellationToken);
 
                 Task<Uri> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
@@ -141,13 +187,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     },
                     tcpCancellationToken.Token);
 
-                //_ = Task.Run(async () => await listenForAuthCodeTask.ConfigureAwait(false));                
-
                 var seleniumAutomationTask = Task.Factory.StartNew(() =>
-                    {
-                        _seleniumAutomationLogic(driver);
-                        _logger.Info("Selenium automation finished");
-                    });
+                {
+                    _seleniumAutomationLogic(driver);
+                    _logger.Info("Selenium automation finished");
+                });
 
                 Trace.WriteLine($"Before WhenAny: seleniumAutomationTask {seleniumAutomationTask.Status} listenForAuthCodeTask {listenForAuthCodeTask.Status}");
 
@@ -191,7 +235,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
                 _logger.Info($"Selenium finished, but TCP listener is still going. " +
                     $"Selenium status: {seleniumAutomationTask.Status} " +
-                    $"TCP listener status: { listenForAuthCodeTask.Status}. ");
+                    $"TCP listener status: {listenForAuthCodeTask.Status}. ");
 
                 // At this point we need to give the TcpListener some time to complete
                 // but not too much as it should be fast
@@ -207,13 +251,27 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 if (listenForAuthCodeTask.IsCanceled)
                 {
                     throw new OperationCanceledException();
-
                 }
 
                 throw new InvalidOperationException(
                     $"Unknown exception: selenium status: {seleniumAutomationTask.Status} TCP listener status: {listenForAuthCodeTask.Status}. " +
                     $"Possible cause - the redirect Uri used is not the one configured." +
                     $" A screen shot will be stored in the test results for you to inspect.");
+            }
+            finally
+            {
+                if (driver != null)
+                {
+                    if (isPooledDriver)
+                    {
+                        WebDriverPool.Instance.ReleaseDriver(driver);
+                    }
+                    else
+                    {
+                        driver.Quit();
+                        driver.Dispose();
+                    }
+                }
             }
         }
 
