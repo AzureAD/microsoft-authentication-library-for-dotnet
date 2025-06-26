@@ -58,7 +58,8 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 _webView2.NavigationStarting += WebView2Control_NavigationStarting;
 
                 // Ensure WebView2 is initialized
-                await _webView2.EnsureCoreWebView2Async();
+                var webView2Environment = await CoreWebView2Environment.CreateAsync();
+                await _webView2.EnsureCoreWebView2Async(webView2Environment);
                 ConfigureWebView2();
 
                 // Start navigation
