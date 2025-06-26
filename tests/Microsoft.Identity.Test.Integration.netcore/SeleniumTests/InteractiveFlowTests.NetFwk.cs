@@ -44,78 +44,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion MSTest Hooks
 
         [RunOn(TargetFrameworks.NetFx)]
-        public async Task Interactive_AADAsync_Multiple()
-        {
-            const int maxAttempts = 20;
-            Exception lastException = null;
-            Console.WriteLine($"Starting Interactive_AADAsync_Multiple");
-
-            for (int attempt = 1; attempt <= maxAttempts; attempt++)
-            {
-                Console.WriteLine($"Starting Interactive_AADAsync attempt {attempt} of {maxAttempts}");
-
-                try
-                {
-                    await Interactive_AADAsync().ConfigureAwait(false);
-                    return; // Success, exit the method
-                }
-                catch (Exception ex)
-                {
-                    lastException = ex;
-                    Trace.WriteLine($"Interactive_AADAsync failed on attempt {attempt}: {ex.Message}");
-
-                    if (attempt < maxAttempts)
-                    {
-                        // Optional: add delay between retries if needed
-                        await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
-
-                        // Reset any state if needed before the next retry
-                        TestInitialize();
-                    }
-                }
-            }
-
-        }
-
-        [IgnoreOnOneBranch]
-        public async Task Kerberos_Interactive_AADAsync_Multiple()
-        {
-            // Call the original test method
-            const int maxAttempts = 20;
-            Exception lastException = null;
-            Console.WriteLine($"Starting Kerberos_Interactive_AADAsync_Multiple");
-
-            for (int attempt = 1; attempt <= maxAttempts; attempt++)
-            {
-                Console.WriteLine($"Starting Kerberos_Interactive_AADAsync attempt {attempt} of {maxAttempts}");
-
-                try
-                {
-                    await Kerberos_Interactive_AADAsync().ConfigureAwait(false);
-                    return; // Success, exit the method
-                }
-                catch (Exception ex)
-                {
-                    lastException = ex;
-                    Trace.WriteLine($"Interactive_AADAsync failed on attempt {attempt}: {ex.Message}");
-
-                    if (attempt < maxAttempts)
-                    {
-                        // Optional: add delay between retries if needed
-                        await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
-
-                        // Reset any state if needed before the next retry
-                        TestInitialize();
-                    }
-                }
-            }
-
-        }
-
         public async Task Interactive_AADAsync()
         {
             // Arrange
-            Console.WriteLine("==Starting Interactive_AADAsync test");
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
@@ -229,7 +160,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
-        }      
+        }
 
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
@@ -369,7 +300,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .AcquireTokenSilent(s_scopes, account)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-            
+
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
             Trace.WriteLine("Part 5 - Acquire a token silently with force refresh");
@@ -468,11 +399,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         #region Azure AD Kerberos Feature Tests
-       // [IgnoreOnOneBranch]
+        [IgnoreOnOneBranch]
         public async Task Kerberos_Interactive_AADAsync()
         {
-            Console.WriteLine("==Starting Kerberos_Interactive_AADAsync test");
-
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
             await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);

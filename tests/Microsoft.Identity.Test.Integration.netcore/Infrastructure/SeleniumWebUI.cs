@@ -88,10 +88,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             {
                 try
                 {
-                    _logger.Info($"Creating web driver (attempt {attempt + 1}/{maxRetries + 1})");
                     driver = SeleniumExtensions.CreateDefaultWebDriver(timeoutSeconds);
-
-                    _logger.Info($"Navigating to URL: {url}");
                     driver.Navigate().GoToUrl(url);
 
                     return driver;
@@ -111,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 }
             }
 
-            _logger.Error("Failed to create web driver");
+            _logger.Error("Failed to create web driver.");
             throw new WebDriverException("Could not initialize WebDriver", lastException);
         }
 

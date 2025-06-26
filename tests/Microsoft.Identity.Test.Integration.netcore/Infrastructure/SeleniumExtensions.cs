@@ -25,26 +25,35 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         public static IWebDriver CreateDefaultWebDriver(int timeoutSeconds = 20)
         {
             var options = new ChromeOptions();
-            // Performance improvements
-            options.AddArgument("--headless");
-            options.AddArgument("--no-sandbox");
-            options.AddArgument("--disable-dev-shm-usage");
-            options.AddArgument("--disable-extensions");
-            options.AddArgument("--disable-gpu");
-            options.AddArgument("--window-size=1200,800");
-            options.AddArgument("--disable-infobars");
-            options.AddArgument("--disable-notifications");
+            options.AddArguments(
+                "--headless=new",          // modern headless mode (remove this for debugging)
+                "--disable-gpu",
+                "--window-size=1920,1080",
+                "--remote-allow-origins=*",
+                "--disable-dev-shm-usage");
+
+            // ---------- Pick a driver binary ----------
+            // 1) Prefer explicit env-var so devs can override locally
+            var driverDir = Environment.GetEnvironmentVariable("CHROMEWEBDRIVER");
+
+            // 2) Otherwise use the folder where CI drops a matching chromedriver
+            if (string.IsNullOrEmpty(driverDir))
+            {
+                driverDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "drivers");
+            }
+
             options.PageLoadStrategy = PageLoadStrategy.Eager;
 
             var service = ChromeDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
+            service.EnableVerboseLogging = true;
 
             // Shorter timeout for driver creation
             var driver = new ChromeDriver(service, options, TimeSpan.FromSeconds(timeoutSeconds));
 
             // Set explicit timeouts
             driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(timeoutSeconds);
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+            driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
 
             return driver;
         }
