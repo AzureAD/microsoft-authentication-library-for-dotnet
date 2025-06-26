@@ -1,1 +1,1 @@
-
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.Credential = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource

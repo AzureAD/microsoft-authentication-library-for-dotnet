@@ -274,6 +274,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(ManagedIdentitySource.Imds, httpManager);
+
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
                     ManagedIdentityTests.Resource,
@@ -371,6 +373,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(ManagedIdentitySource.Imds, httpManager);
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
                 const int Num504Errors = 1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries; // initial request + maximum number of retries

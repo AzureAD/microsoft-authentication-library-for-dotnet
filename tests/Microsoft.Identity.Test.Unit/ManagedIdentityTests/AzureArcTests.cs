@@ -98,6 +98,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(ManagedIdentitySource.AzureArc, httpManager);
+
                 httpManager.AddManagedIdentityWSTrustMockHandler(ManagedIdentityTests.AzureArcEndpoint, filename);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>

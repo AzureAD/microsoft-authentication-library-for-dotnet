@@ -64,6 +64,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(ManagedIdentitySource.CloudShell, httpManager);
+
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
