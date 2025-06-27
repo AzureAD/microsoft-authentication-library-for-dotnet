@@ -92,6 +92,80 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public void ValidateThatFmiEndpointIsUsed()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342");
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager);
+
+                var mi = miBuilder.BuildConcrete();
+
+                RequestContext requestContext = new RequestContext(mi.ServiceBundle, Guid.NewGuid(), null);
+
+                ServiceFabricManagedIdentitySource sf = ServiceFabricManagedIdentitySource.Create(requestContext, true) as ServiceFabricManagedIdentitySource;
+
+                Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
+                Assert.AreEqual("http://localhost:40342/metadata/identity/oauth2/fmi/credential", sf.GetEndpointForTesting());
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateThatFmiCredentialCanBeAcquiredFromMits()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(managedIdentitySource: ManagedIdentitySource.ServiceFabric,
+                                        endpoint: "http://localhost:40343");
+
+                httpManager.CreateFmiCredentialForMitsHandler(requestUri: "http://localhost:40343/metadata/identity/oauth2/fmi/credential");
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager);
+
+                var mi = miBuilder.BuildConcrete();
+
+                //Ensure token is acquired from MITS
+                var result = await mi.AcquireTokenForManagedIdentity("api://AzureFMITokenExchange/.default")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+
+                //Ensure token is acquired from cache
+                result = await mi.AcquireTokenForManagedIdentity("api://AzureFMITokenExchange/.default")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateThatFmiCredentialIsExpiremental()
+        {
+            var miApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                            .Build();
+
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => miApp.AcquireTokenForManagedIdentity("api://AzureFMITokenExchange/.default")
+                            .ExecuteAsync()).ConfigureAwait(false);
+
+            Assert.IsNotNull(ex);
+            Assert.IsTrue(ex.Message.Contains("The API WithResource is marked as experimental"));
+        }
+
+        [TestMethod]
         public async Task SFThrowsWhenGetHttpClientWithValidationIsNotImplementedAsync()
         {
             using (new EnvVariableContext())

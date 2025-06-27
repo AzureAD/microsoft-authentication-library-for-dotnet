@@ -170,6 +170,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"correlation_id\":\"77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\",\"error_uri\":\"https://westus2.login.microsoft.com/error?code=500011\"}";
         }
 
+        public static HttpResponseMessage CreateSuccessTokenResponseMessageForMits(
+            string accessToken = "some-access-token",
+            string expiresOn = "1744887386")
+        {
+            var stringContent = $"{{\"token_type\":\"Bearer\",\"access_token\":\"{accessToken}\",\"expires_on\":{expiresOn},\"resource\":\"api://AzureFMITokenExchange/.default\"}}";
+
+            return CreateSuccessResponseMessage(stringContent);
+        }
+
         public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)
         {
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");

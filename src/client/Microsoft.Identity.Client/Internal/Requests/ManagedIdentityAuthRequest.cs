@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
             ManagedIdentityClient managedIdentityClient = 
-                new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
+                new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters);
 
             ManagedIdentityResponse managedIdentityResponse =
                 await managedIdentityClient
