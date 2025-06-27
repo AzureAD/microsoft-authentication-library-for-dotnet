@@ -58,9 +58,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 _webView2.NavigationStarting += WebView2Control_NavigationStarting;
 
                 // Ensure WebView2 is initialized
-                var webView2Environment = await CoreWebView2Environment.CreateAsync();
-                await _webView2.EnsureCoreWebView2Async(webView2Environment);
-                ConfigureWebView2();
+                _webView2.CoreWebView2Initialized += WebView2Control_CoreWebView2Initialized;
 
                 // Start navigation
                 _webView2.Source = _startUri;
@@ -78,6 +76,20 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
                 }
             }
+        }
+
+        private void WebView2Control_CoreWebView2Initialized(WebView2 sender, CoreWebView2InitializedEventArgs args)
+        {
+            if (args.Exception != null)
+            {
+                // Handle initialization error
+                _dialogCompletionSource?.TrySetResult(
+                    AuthorizationResult.FromStatus(AuthorizationStatus.ErrorHttp));
+                return;
+            }
+            
+            // Configure WebView2 after successful initialization
+            ConfigureWebView2();
         }
 
         private void CloseIfOpen()
