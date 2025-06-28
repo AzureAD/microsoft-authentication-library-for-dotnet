@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Client.Http.Retry
                     return new DefaultRetryPolicy(requestType);
                 case RequestType.Imds:
                     return new ImdsRetryPolicy();
+                case RequestType.ImdsProbe:
+                    return new ImdsRetryPolicy(isProbe: true);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(requestType), requestType, "Unknown request type.");
             }

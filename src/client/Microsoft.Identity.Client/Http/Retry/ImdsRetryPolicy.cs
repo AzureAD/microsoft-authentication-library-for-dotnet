@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Client.Http.Retry
         private const int HttpStatusGoneRetryAfterMs = 10000;
 
         private int _maxRetries;
+        private readonly bool _isProbe;
 
         private readonly ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
             ImdsRetryPolicy.MinExponentialBackoffMs,
@@ -28,40 +29,56 @@ namespace Microsoft.Identity.Client.Http.Retry
             ImdsRetryPolicy.ExponentialDeltaBackoffMs
         );
 
+        /// <summary>
+        /// Creates the standard IMDS retry policy.
+        /// </summary>
+        /// <param name="isProbe">
+        ///     <c>false</c> (default) → use <see cref="HttpRetryConditions.Imds"/>.<br/>
+        ///     <c>true </c>          → use <see cref="HttpRetryConditions.ImdsProbe"/>.
+        /// </param>
+        public ImdsRetryPolicy(bool isProbe = false)
+        {
+            _isProbe = isProbe;
+        }
+
         internal virtual Task DelayAsync(int milliseconds)
         {
             return Task.Delay(milliseconds);
         }
 
-        public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
+        public async Task<bool> PauseForRetryAsync(
+            HttpResponse response,
+            Exception exception,
+            int retryCount,
+            ILoggerAdapter logger)
         {
-            int httpStatusCode = (int)response.StatusCode;
+            int statusCode = (int)response.StatusCode;
 
             if (retryCount == 0)
             {
-                // Calculate the maxRetries based on the status code, once per request
-                _maxRetries = httpStatusCode == (int)HttpStatusCode.Gone
+                // compute once per request
+                _maxRetries = statusCode == (int)HttpStatusCode.Gone
                     ? LinearStrategyNumRetries
                     : ExponentialStrategyNumRetries;
             }
 
-            // Check if the status code is retriable and if the current retry count is less than max retries
-            if (HttpRetryConditions.Imds(response, exception) &&
-                retryCount < _maxRetries)
+            /* -------------- choose predicate based on _isProbe -------------- */
+            bool shouldRetry = _isProbe
+                ? HttpRetryConditions.ImdsProbe(response, exception)
+                : HttpRetryConditions.Imds(response, exception);
+
+            if (shouldRetry && retryCount < _maxRetries)
             {
-                int retryAfterDelay = httpStatusCode == (int)HttpStatusCode.Gone
+                int delay = statusCode == (int)HttpStatusCode.Gone
                     ? HttpStatusGoneRetryAfterMs
                     : _exponentialRetryStrategy.CalculateDelay(retryCount);
 
-                logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
-
-                // Pause execution for the calculated delay
-                await DelayAsync(retryAfterDelay).ConfigureAwait(false);
-
+                logger.Warning($"Retrying request in {delay}ms (retry attempt: {retryCount + 1})");
+                await DelayAsync(delay).ConfigureAwait(false);
                 return true;
             }
 
-            // If the status code is not retriable or max retries have been reached, do not retry
+            // not retriable or max retries reached
             return false;
         }
     }

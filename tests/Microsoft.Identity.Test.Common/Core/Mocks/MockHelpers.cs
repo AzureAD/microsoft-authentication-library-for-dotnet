@@ -603,7 +603,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         internal static void AddCredentialProbeBadRequestHandler(
             MockHttpManager httpManager,
             string endpoint = "http://169.254.169.254/metadata/identity/issuecredential",
-            string serverHeader = "IMDS/2023-02-01")
+            string serverHeader = "IMDS/150.870.65.2000")
         {
             var probeUrl = $"{endpoint}?cred-api-version=1.0";
 

@@ -4,6 +4,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -20,6 +21,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string ImdsHeader = "IMDS/";
         private readonly ILoggerAdapter _logger;
         private readonly RequestContext _requestContext;
+        private static readonly Regex s_serverRegex = new(@"^IMDS/\d+\.\d+\.\d+\.(\d+)$", RegexOptions.Compiled);
 
         public CredentialProbeManager(RequestContext requestContext)
         {
@@ -33,8 +35,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             var request = new ManagedIdentityRequest(HttpMethod.Post, new Uri($"{CredentialEndpoint}?cred-api-version=1.0"))
             {
-                Content = ProbeBody
+                Content = ProbeBody,
             };
+
+            request.Headers.Add("Metadata", "true");
 
             HttpContent httpContent = request.CreateHttpContent();
 
@@ -45,7 +49,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             try
             {
                 IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
-                IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.ManagedIdentityDefault);
+                IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.ImdsProbe);
 
                 HttpResponse response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
                     request.ComputeUri(),
@@ -75,7 +79,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             if (response == null)
             {
-                _logger.Error("[Probe] No response received from the server.");
+                _logger.Warning("[Probe] No response received from the server.");
                 return;
             }
 
@@ -92,21 +96,37 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             if (response == null)
             {
-                _logger.Error("[Probe] No response received from the server.");
+                _logger.Warning("[Probe] No response received from the server.");
                 return false;
             }
 
-            _logger.Info($"[Probe] Evaluating response from credential endpoint. Status Code: {response.StatusCode}");
+            _logger.Info($"[Probe] Evaluating response. Status: {(int)response.StatusCode} {response.StatusCode}");
 
-            if (response.HeadersAsDictionary.TryGetValue("Server", out string serverHeader) &&
-                serverHeader.StartsWith(ImdsHeader, StringComparison.OrdinalIgnoreCase))
+            // --- 1. Short-circuit on non-400 -------------------------------------------------
+            if (response.StatusCode != HttpStatusCode.BadRequest)
             {
-                _logger.Info($"[Probe] Credential endpoint supported. Server: {serverHeader}");
-                return true;
+                _logger.Info($"[Probe] Rejected – status code is {response.StatusCode}, expected 400.");
+                return false;
             }
 
-            _logger.Warning($"[Probe] Credential endpoint not supported. Status Code: {response.StatusCode}");
-            return false;
+            // --- 2. Must have Server header --------------------------------------------------
+            if (!response.HeadersAsDictionary.TryGetValue("Server", out var serverHeader) ||
+                !serverHeader.StartsWith(ImdsHeader, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.Info("[Probe] Rejected – missing or malformed Server header.");
+                return false;
+            }
+
+            // --- 3. Extract build number and ensure it’s > 1324 ------------------------------
+            var m = s_serverRegex.Match(serverHeader);
+            if (!m.Success || !int.TryParse(m.Groups[1].Value, out int build) || build <= 1324)
+            {
+                _logger.Info($"[Probe] Rejected – IMDS build {m.Groups[1].Value} does not support CSR metadata.");
+                return false;
+            }
+
+            _logger.Info($"[Probe] Credential endpoint supported – IMDS build {build}.");
+            return true;
         }
     }
 }
