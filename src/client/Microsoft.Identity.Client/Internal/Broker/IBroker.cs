@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters);
 
-        [Obsolete("This API has been deprecated, please use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
+        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
         [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(
             AuthenticationRequestParameters authenticationRequestParameters,

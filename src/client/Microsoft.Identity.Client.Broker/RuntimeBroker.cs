@@ -457,7 +457,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return msalTokenResponse;
         }
 
-        [Obsolete("This API has been deprecated, please use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
+        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
         [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         public async Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -503,7 +503,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                     }
                 }
-
             }
 
             return msalTokenResponse;
