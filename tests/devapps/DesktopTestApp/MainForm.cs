@@ -222,7 +222,7 @@ namespace DesktopTestApp
                 userPasswordTextBox.PasswordChar = '*';
 
                 string username = loginHintTextBox.Text; //Can be blank for U/P
-
+ #pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication
                     .AcquireTokenByUsernamePassword(
                         SplitScopeString(scopes.Text),
@@ -230,6 +230,7 @@ namespace DesktopTestApp
                         userPasswordTextBox.Text)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(true);
+#pragma warning restore CS0618
 
                 SetResultPageInfo(authResult);
                 RefreshUserList();

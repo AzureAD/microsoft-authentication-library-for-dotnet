@@ -356,9 +356,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 var pca = CreatePublicClientApp();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 await pca.AcquireTokenByUsernamePassword(TestConstants.s_scope, "username", TestConstants.DefaultPassword)
                     .ExecuteAsync().ConfigureAwait(false);
-
+#pragma warning restore CS0618
                 AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenByUsernamePassword, CacheRefreshReason.NotApplicable);
             }
         }

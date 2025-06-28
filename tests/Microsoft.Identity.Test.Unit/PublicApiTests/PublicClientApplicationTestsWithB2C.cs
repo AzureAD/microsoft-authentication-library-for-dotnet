@@ -327,11 +327,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     responseMessage: MockHelpers.CreateSuccessResponseMessage("non json response"));
 
                 // Act 
+#pragma warning disable CS0618 // Type or member is obsolete 
                 var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => 
                     app.AcquireTokenByUsernamePassword(new[] { "user.read" }, "username", "password" ) // no scopes -> no Access Token!
                     .ExecuteAsync())
                     .ConfigureAwait(false);
-
+#pragma warning restore CS0618
                 // Assert
                 Assert.AreEqual(MsalError.JsonParseError, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.JsonParseErrorMessage, ex.Message);

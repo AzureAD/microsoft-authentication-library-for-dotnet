@@ -118,10 +118,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.IsNotNull(authResult);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
@@ -147,11 +149,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(Authority)
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var result = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                     .ExecuteAsync(CancellationToken.None))
                     .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.AreEqual(MsalError.RopcDoesNotSupportMsaAccounts, result.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.RopcDoesNotSupportMsaAccounts, result.Message);
@@ -190,12 +194,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .WithAuthority(Authority).Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var result = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
                 msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectPassword)
                     .ExecuteAsync(CancellationToken.None)
                     )
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.AreEqual(result.ErrorCode, "invalid_grant");
         }
@@ -220,11 +226,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                     .WithCorrelationId(CorrelationId)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.IsNotNull(authResult);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
@@ -240,12 +248,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             try
             {
+                #pragma warning disable CS0618 // Type or member is obsolete
                 var result = await msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, userName, "incorrectPass")
 
                     .WithCorrelationId(CorrelationId)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+                #pragma warning restore CS0618
             }
             catch (MsalServiceException ex)
             {
@@ -333,12 +343,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithHttpClientFactory(factory)
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_b2cScopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithCorrelationId(CorrelationId)
                 .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.IsNotNull(authResult);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
@@ -366,12 +378,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             if (clientApp is IPublicClientApplication publicClientApp)
             {
+                #pragma warning disable CS0618 // Type or member is obsolete
                 authResult = await publicClientApp
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithCorrelationId(testCorrelationId)
                 .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+                #pragma warning restore CS0618
             }
             else
             {
