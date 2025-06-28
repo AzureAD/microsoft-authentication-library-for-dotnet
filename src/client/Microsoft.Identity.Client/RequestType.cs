@@ -21,6 +21,11 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Instance Metadata Service (IMDS) request, used for obtaining tokens from the Azure VM metadata endpoint.
         /// </summary>
-        Imds
+        Imds,
+
+        /// <summary>
+        /// Probe, used for verifying the availability of the IMDS v2 endpoint.
+        /// </summary>
+        ImdsProbe
     }
 }

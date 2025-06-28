@@ -48,6 +48,26 @@ namespace Microsoft.Identity.Client.Http.Retry
         }
 
         /// <summary>
+        /// Retry policy specific to IMDS Probe - 404 is not retried
+        /// </summary>
+        public static bool ImdsProbe(HttpResponse response, Exception exception)
+        {
+            if (exception != null)
+            {
+                return exception is TaskCanceledException ? true : false;
+            }
+
+            return (int)response.StatusCode switch
+            {
+                // Not Found, Request Timeout, Gone, Too Many Requests
+                408 or 410 or 429 => true,
+                // Server Error range
+                >= 500 and <= 599 => true,
+                _ => false,
+            };
+        }
+
+        /// <summary>
         /// Retry condition for /token and /authorize endpoints
         /// </summary>
         /// <param name="response"></param>

@@ -32,6 +32,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using NSubstitute;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 using Microsoft.Identity.Client.Http.Retry;
+using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Test.Common
 {
@@ -46,6 +47,7 @@ namespace Microsoft.Identity.Test.Common
             OidcRetrieverWithCache.ResetCacheForTest();
             AuthorityManager.ClearValidationCache();
             SingletonThrottlingManager.GetInstance().ResetCache();
+            ManagedIdentityClient.ResetManagedIdentitySourceCache();
         }
 
         public static object GetPropValue(object src, string propName)

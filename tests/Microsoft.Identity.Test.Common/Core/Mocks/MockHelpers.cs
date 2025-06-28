@@ -582,5 +582,43 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 TokenSource = TokenSource.Broker
             };
         }
+
+        public static void AddCredentialEndpointNotFoundHandlers(
+            ManagedIdentitySource managedIdentitySource,
+            MockHttpManager httpManager,
+            string endpoint = "",
+            int count = 1)
+        {
+            if (managedIdentitySource != ManagedIdentitySource.Imds)
+            {
+                return; // Only add handlers for IMDS
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: endpoint);
+            }
+        }
+
+        internal static void AddCredentialProbeBadRequestHandler(
+            MockHttpManager httpManager,
+            string endpoint = "http://169.254.169.254/metadata/identity/issuecredential",
+            string serverHeader = "IMDS/150.870.65.2000")
+        {
+            var probeUrl = $"{endpoint}?cred-api-version=1.0";
+
+            var response = new HttpResponseMessage(HttpStatusCode.BadRequest)   // 400
+            {
+                Content = new StringContent(string.Empty)
+            };
+            response.Headers.TryAddWithoutValidation("Server", serverHeader);
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedUrl = probeUrl,
+                ResponseMessage = response
+            });
+        }
     }
 }

@@ -51,6 +51,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 // Initial request fails with 500
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -107,6 +109,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
 
                 // Simulate permanent 500s (to trigger the maximum number of retries)
                 const int Num500Errors = 1 + TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries; // initial request + maximum number of retries
@@ -175,6 +179,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 // Initial request fails with 500
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -226,6 +232,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
 
                 // Simulate permanent 500s (to trigger the maximum number of retries)
                 int Num500Errors = 1 + TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries; // initial request + maximum number of retries
@@ -281,6 +289,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
+
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     ManagedIdentityTests.Resource,
@@ -330,6 +340,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                MockHelpers.AddCredentialEndpointNotFoundHandlers(managedIdentitySource, httpManager);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
