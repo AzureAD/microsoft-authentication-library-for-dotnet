@@ -587,7 +587,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ManagedIdentitySource managedIdentitySource,
             MockHttpManager httpManager,
             string endpoint = "",
-            int count = 4)
+            int count = 1)
         {
             if (managedIdentitySource != ManagedIdentitySource.Imds)
             {

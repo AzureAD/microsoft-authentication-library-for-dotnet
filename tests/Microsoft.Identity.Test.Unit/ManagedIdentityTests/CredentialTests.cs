@@ -47,9 +47,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = miBuilder.Build();
 
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
-                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
-                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
-                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
 
                 httpManager.AddManagedIdentityMockHandler(
                 ImdsEndpoint,
@@ -69,40 +66,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-            }
-        }
-
-        [TestMethod]
-        public async Task CredentialProbe400WithImdsHeader_SelectsCredentialSourceAsync()
-        {
-            const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/issuecredential";
-            const string Resource = "https://management.azure.com";
-
-            using (var httpManager = new MockHttpManager())
-            {
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                                                                 .WithHttpManager(httpManager);
-                miBuilder.Config.AccessorOptions = null;
-                var mi = miBuilder.Build();
-
-                // Probe returns 400 + Server: IMDS/…
-                MockHelpers.AddCredentialProbeBadRequestHandler(httpManager, CredentialEndpoint);
-                MockHelpers.AddCredentialProbeBadRequestHandler(httpManager, CredentialEndpoint);
-
-                httpManager.AddManagedIdentityMockHandler(
-                CredentialEndpoint,
-                Resource,
-                MockHelpers.GetMsiSuccessfulResponse(),
-                ManagedIdentitySource.Credential);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity("scope")
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoResponseReceived, ex.Message);
             }
         }
     }

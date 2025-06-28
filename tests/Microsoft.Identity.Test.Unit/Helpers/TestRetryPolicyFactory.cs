@@ -18,6 +18,8 @@ namespace Microsoft.Identity.Test.Unit.Helpers
                     return new TestDefaultRetryPolicy(requestType);
                 case RequestType.Imds:
                     return new TestImdsRetryPolicy();
+                case RequestType.ImdsProbe:
+                    return new ImdsRetryPolicy(isProbe: true);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(requestType), requestType, "Unknown request type.");
             }
