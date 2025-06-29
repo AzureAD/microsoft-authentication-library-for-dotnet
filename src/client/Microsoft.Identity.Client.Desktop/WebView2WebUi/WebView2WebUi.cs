@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         {
 #if WINRT
             // Use the WinUI 3 implementation
-            var window = new WinUI3WindowWithWebview2(
+            var window = new WinUI3WindowWithWebView2(
                 _parent.OwnerWindow as Window,
                 _parent?.EmbeddedWebviewOptions,
                 _requestContext.Logger,

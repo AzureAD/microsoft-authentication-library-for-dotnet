@@ -5,7 +5,9 @@ using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+#if !WINRT
 using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
+#endif
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
@@ -41,6 +43,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     coreUIParent.SystemWebViewOptions);
             }
 
+#if !WINRT
             AuthorityType authorityType = requestContext.ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType;
 
             if (authorityType == AuthorityType.Aad)
@@ -54,7 +57,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 requestContext.Logger.Info("Using WebView1 embedded browser because WebView2 is not available.");
                 return new InteractiveWebUI(coreUIParent, requestContext);
             }
-
+#endif
             requestContext.Logger.Info("Using WebView2 embedded browser.");
             return new WebView2WebUi(coreUIParent, requestContext);
         }

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
 
     <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
@@ -8,16 +8,22 @@
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
     
-    <UseWindowsForms>true</UseWindowsForms>
+    <!--<UseWindowsForms>true</UseWindowsForms>-->
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
 
-  <!--<PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <UseWindowsForms>true</UseWindowsForms>
-  </PropertyGroup>-->
+  </PropertyGroup>
   
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
+    <UseWinUI>true</UseWinUI>
+    <!--<EnableMsixTooling>true</EnableMsixTooling>-->
+    <!--<DisableEmbeddedXbf>false</DisableEmbeddedXbf>-->
+    <!--<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>-->
+  </PropertyGroup>
+     
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
     <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">$(MsalInternalVersion)</MicrosoftIdentityClientVersion>
@@ -53,20 +59,27 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
     <DefineConstants>$(DefineConstants);WINRT</DefineConstants>
   </PropertyGroup>
-
+  
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
     <Compile Remove="WebView2WebUi/WinFormsPanelWithWebView2.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
+    <Compile Remove="WebView2WebUi/Win32Window.cs" />
+    <Compile Remove="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
     <PackageReference Include="Microsoft.WindowsAppSDK" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <!-- Include XAML file only for WinUI 3 target -->
+    <Page Include="WebView2WebUi/WinUI3WindowWithWebView2.xaml" />
+    <!--<Content Include="WebView2WebUi/WinUI3WindowWithWebView2.xaml" />-->
+    <!--<Compile Include="WebView2WebUi/WinUI3WindowWithWebView2.xaml" />-->
   </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
-    <UseWinUI>true</UseWinUI>
-  </PropertyGroup>
   
   <ItemGroup>
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
+  </ItemGroup>
+
+  <!-- Exclude XAML files from non-WinUI targets -->
+  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkModernTFM)'">
+    <Page Remove="WebView2WebUi\WinUI3WindowWithWebView2.xaml" />
+    <Compile Remove="WebView2WebUi\WinUI3WindowWithWebView2.xaml.cs" />
   </ItemGroup>
 
   <ItemGroup>
