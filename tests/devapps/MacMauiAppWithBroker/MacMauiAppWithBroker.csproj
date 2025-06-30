@@ -89,7 +89,7 @@
     </ItemGroup> -->
 
 	<ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.1" />
+		<PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.19.2" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 
 #pragma warning disable CA1422 // Validate platform compatibility
                 DispatchQueue.MainQueue.DispatchAsync(
-                    () => UIApplication.SharedApplication.OpenUrl(new NSUrl(requestUrlString)));
+                    () => UIApplication.SharedApplication.OpenUrl(new NSUrl(requestUrlString), new UIApplicationOpenUrlOptions(), null));
 #pragma warning restore CA1422 // Validate platform compatibility
                 _authenticationAgentUIViewController.DismissViewController(true, null);
                 decisionHandler(WKNavigationActionPolicy.Cancel);
