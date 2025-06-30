@@ -79,8 +79,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 case AppConfig.ManagedIdentityIdType.SystemAssigned:
                     _requestContext.Logger.Info("[Managed Identity] Adding system assigned client id to the request.");
+
+                    // this environment variable is always set in an Azure Machine Learning source, but check if null just in case
+                    if (EnvironmentVariables.MachineLearningDefaultClientId == null)
+                    {
+                        throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                            MsalError.InvalidManagedIdentityIdType,
+                            "The DEFAULT_IDENTITY_CLIENT_ID environment variable is null.",
+                            null, // configuration error
+                            ManagedIdentitySource.MachineLearning,
+                            null); // statusCode is null in this case
+                    }
+
                     // Use the new 2017 constant for older ML-based environment
-                    request.QueryParameters[Constants.ManagedIdentityClientId2017] = EnvironmentVariables.MachineLearningDefaultClientId; // this environment variable is always set in an Azure Machine Learning source
+                    request.QueryParameters[Constants.ManagedIdentityClientId2017] = EnvironmentVariables.MachineLearningDefaultClientId;
                     break;
 
                 case AppConfig.ManagedIdentityIdType.ClientId:

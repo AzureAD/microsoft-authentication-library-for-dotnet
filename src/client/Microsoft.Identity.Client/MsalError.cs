@@ -1111,6 +1111,11 @@ namespace Microsoft.Identity.Client
         public const string InvalidManagedIdentityIdType = "invalid_managed_identity_id_type";
 
         /// <summary>
+        /// The managed identity is missing a required environment variable.
+        /// </summary>
+        public const string MissingManagedIdentityEnvVar = "missing_managed_identity_env_var";
+
+        /// <summary>
         /// Managed Identity error response was received.
         /// </summary>
         public const string ManagedIdentityRequestFailed = "managed_identity_request_failed";
