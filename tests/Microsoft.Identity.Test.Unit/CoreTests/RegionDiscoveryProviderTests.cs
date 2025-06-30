@@ -459,16 +459,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
-        public async Task RegionDiscoveryRetriesOn500ThenSucceedsAsync()
+        public async Task RegionDiscoveryFails500OnceThenSucceeds200Async()
         {
-            // Simulate three 500s (initial request + two retries), then a successful response
-            const int Num500Errors = 3;
-            for (int i = 0; i < Num500Errors; i++)
-            {
-                AddMockedResponse(MockHelpers.CreateNullMessage(HttpStatusCode.InternalServerError));
-            }
-
+            AddMockedResponse(MockHelpers.CreateNullMessage(HttpStatusCode.InternalServerError));
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
 
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
@@ -480,16 +475,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(RegionOutcome.AutodetectSuccess, _testRequestContext.ApiEvent.RegionOutcome);
             Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
 
-            const int NumRequests = Num500Errors + 1; // initial request + two retries + successful response
+            const int NumRequests = 2; // initial request + one retry
             int requestsMade = NumRequests - _httpManager.QueueSize;
             Assert.AreEqual(NumRequests, requestsMade);
         }
 
         [TestMethod]
-        public async Task RegionDiscoveryRetriesMaximumAttemptsAsync()
+        public async Task RegionDiscoveryFails500PermanentlyAsync()
         {
-            // Simulate four 500s (initial request + three retries)
-            const int Num500Errors = 1 + RegionDiscoveryRetryPolicy.NumRetries;
+            // Simulate permanent 500s (to trigger the maximum number of retries)
+            const int Num500Errors = 1 + RegionDiscoveryRetryPolicy.NumRetries; // initial request + maximum number of retries
             for (int i = 0; i < Num500Errors; i++)
             {
                 AddMockedResponse(MockHelpers.CreateNullMessage(HttpStatusCode.InternalServerError));
@@ -497,11 +492,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
 
-            // Act
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
                 new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            // Assert
             Assert.IsNull(regionalMetadata, "Discovery should fail after max retries");
             Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
@@ -509,6 +502,28 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             const int NumRequests = Num500Errors; // initial request + three retries
             int requestsMade = NumRequests - _httpManager.QueueSize;
+            Assert.AreEqual(NumRequests, requestsMade);
+        }
+
+        [DataTestMethod]
+        [DataRow(HttpStatusCode.NotFound)]
+        [DataRow(HttpStatusCode.RequestTimeout)]
+        public async Task RegionDiscoveryDoesNotRetryOnNonRetryableStatusCodesAsync(HttpStatusCode statusCode)
+        {
+            AddMockedResponse(MockHelpers.CreateNullMessage(statusCode));
+
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            Assert.IsNull(regionalMetadata, "Discovery should fail and not retry");
+            Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
+
+            const int NumRequests = 1; // initial request + 0 retries (non-retryable status codes should not trigger retry)
+            int requestsMade = NumRequests - GetHttpManager().QueueSize;
             Assert.AreEqual(NumRequests, requestsMade);
         }
     }
