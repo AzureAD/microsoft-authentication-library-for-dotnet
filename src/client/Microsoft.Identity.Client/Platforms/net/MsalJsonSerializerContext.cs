@@ -40,6 +40,8 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(ManagedIdentityResponse))]
     [JsonSerializable(typeof(ManagedIdentityErrorResponse))]
     [JsonSerializable(typeof(OidcMetadata))]
+    [JsonSerializable(typeof(ManagedIdentityCredentialResponse))]
+    [JsonSerializable(typeof(PlatformMetadataResponse))]
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {

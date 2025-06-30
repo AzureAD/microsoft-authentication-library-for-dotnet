@@ -17,7 +17,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Http.Retry;
-
+using System.Threading;
+using Microsoft.Identity.Client.ManagedIdentity;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -357,6 +358,16 @@ namespace Microsoft.Identity.Client.OAuth2
             endpointUri.AppendQueryParameters(extraQp);
 
             return endpointUri.Uri;
+        }
+
+        public async Task<ManagedIdentityCredentialResponse> GetCredentialResponseAsync(
+            Uri endpoint,
+            RequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            return await ExecuteRequestAsync<ManagedIdentityCredentialResponse>(
+                endpoint, HttpMethod.Post, requestContext)
+                       .ConfigureAwait(false);
         }
 
         private static void VerifyCorrelationIdHeaderInResponse(

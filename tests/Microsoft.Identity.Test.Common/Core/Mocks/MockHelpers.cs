@@ -603,6 +603,27 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         internal static void AddCredentialProbeBadRequestHandler(
             MockHttpManager httpManager,
             string endpoint = "http://169.254.169.254/metadata/identity/issuecredential",
+            string serverHeader = "IMDS/150.870.65.1000")
+        {
+            var probeUrl = $"{endpoint}?cred-api-version=1.0";
+
+            var response = new HttpResponseMessage(HttpStatusCode.BadRequest)   // 400
+            {
+                Content = new StringContent(string.Empty)
+            };
+            response.Headers.TryAddWithoutValidation("Server", serverHeader);
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedUrl = probeUrl,
+                ResponseMessage = response
+            });
+        }
+
+        internal static void AddCredentialProbeSuccessHandler(
+            MockHttpManager httpManager, 
+            string endpoint = "http://169.254.169.254/metadata/identity/issuecredential", 
             string serverHeader = "IMDS/150.870.65.2000")
         {
             var probeUrl = $"{endpoint}?cred-api-version=1.0";
@@ -620,5 +641,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ResponseMessage = response
             });
         }
+
     }
 }
