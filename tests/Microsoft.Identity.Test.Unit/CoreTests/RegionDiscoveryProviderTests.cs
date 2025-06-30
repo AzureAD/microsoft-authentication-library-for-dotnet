@@ -409,55 +409,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionDiscoveryNotSupportedErrorMessage));
         }
 
-        protected void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true, bool throwException = false)
-        {
-            var handler = new MockHttpMessageHandler
-            {
-                ExpectedMethod = HttpMethod.Get,
-                ExpectedUrl = TestConstants.ImdsUrl,
-                ExpectedRequestHeaders = new Dictionary<string, string>
-                {
-                    { "Metadata", "true" }
-                },
-                ResponseMessage = responseMessage
-            };
-
-            if (expectedParams)
-            {
-                var queryParams = new Dictionary<string, string>
-                {
-                    { "api-version", apiVersion },
-                    { "format", "text" }
-                };
-                handler.ExpectedQueryParams = queryParams;
-            }
-
-            if (throwException)
-            {
-                handler.ExceptionToThrow = new TaskCanceledException();
-            }
-
-            _httpManager.AddMockHandler(handler);
-        }
-
-        internal RequestContext GetTestRequestContext() => _testRequestContext;
-        internal IRegionDiscoveryProvider GetRegionDiscoveryProvider() => _regionDiscoveryProvider;
-        internal MockHttpManager GetHttpManager() => _httpManager;
-
-        private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = "centralus")
-        {
-            InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { $"{region}.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", "login.microsoftonline.com" },
-                PreferredCache = "login.microsoftonline.com",
-                PreferredNetwork = $"{region}.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}"
-            };
-
-            CollectionAssert.AreEquivalent(expectedEntry.Aliases, entry.Aliases);
-            Assert.AreEqual(expectedEntry.PreferredCache, entry.PreferredCache);
-            Assert.AreEqual(expectedEntry.PreferredNetwork, entry.PreferredNetwork);
-        }
-
         [TestMethod]
         public async Task RegionDiscoveryFails500OnceThenSucceeds200Async()
         {
@@ -523,8 +474,60 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
 
             const int NumRequests = 1; // initial request + 0 retries (non-retryable status codes should not trigger retry)
-            int requestsMade = NumRequests - GetHttpManager().QueueSize;
+            int requestsMade = NumRequests - _httpManager.QueueSize;
             Assert.AreEqual(NumRequests, requestsMade);
+        }
+
+        private void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true)
+        {
+            var queryParams = new Dictionary<string, string>();
+
+            if (expectedParams)
+            {
+                queryParams.Add("api-version", apiVersion);
+                queryParams.Add("format", "text");
+
+                _httpManager.AddMockHandler(
+                   new MockHttpMessageHandler
+                   {
+                       ExpectedMethod = HttpMethod.Get,
+                       ExpectedUrl = TestConstants.ImdsUrl,
+                       ExpectedRequestHeaders = new Dictionary<string, string>
+                        {
+                            { "Metadata", "true" }
+                        },
+                       ExpectedQueryParams = queryParams,
+                       ResponseMessage = responseMessage
+                   });
+            }
+            else
+            {
+                _httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = TestConstants.ImdsUrl,
+                        ExpectedRequestHeaders = new Dictionary<string, string>
+                            {
+                            { "Metadata", "true" }
+                            },
+                        ResponseMessage = responseMessage
+                    });
+            }
+        }
+
+        private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = "centralus")
+        {
+            InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { $"{region}.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", "login.microsoftonline.com" },
+                PreferredCache = "login.microsoftonline.com",
+                PreferredNetwork = $"{region}.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}"
+            };
+
+            CollectionAssert.AreEquivalent(expectedEntry.Aliases, entry.Aliases);
+            Assert.AreEqual(expectedEntry.PreferredCache, entry.PreferredCache);
+            Assert.AreEqual(expectedEntry.PreferredNetwork, entry.PreferredNetwork);
         }
     }
 }
