@@ -946,9 +946,11 @@ namespace NetDesktopWinForms
                 var cancellationTokenSource = new CancellationTokenSource();
 
                 var pca = await CreatePca(GetAuthMethod()).ConfigureAwait(false);
+#pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult authenticationResult = await pca
                     .AcquireTokenByIntegratedWindowsAuth(
                         GetScopes())
+#pragma warning restore CS0618 // Type or member is obsolete
                     .ExecuteAsync(cancellationTokenSource.Token)
                     .ConfigureAwait(true);
 
