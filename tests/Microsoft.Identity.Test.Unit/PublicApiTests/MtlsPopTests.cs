@@ -19,6 +19,7 @@ using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
@@ -423,7 +424,11 @@ namespace Microsoft.Identity.Test.Unit
                 Environment.SetEnvironmentVariable("REGION_NAME", null);  // Ensure no region is set
 
                 using (var httpManager = new MockHttpManager())
+                using (var harness = new MockHttpAndServiceBundle())
                 {
+                    harness.ServiceBundle.Config.RetryPolicyFactory = new TestRetryPolicyFactory();
+
+                    // for simplicity, return 404 so retry is not triggered
                     httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
 
                     ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)

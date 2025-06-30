@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
@@ -266,8 +267,10 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (var harness = base.CreateTestHarness())
             {
+                harness.ServiceBundle.Config.RetryPolicyFactory = new TestRetryPolicyFactory();
                 var httpManager = harness.HttpManager;
 
+                // for simplicity, return 404 so retry is not triggered
                 httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(false));
@@ -505,8 +508,10 @@ namespace Microsoft.Identity.Test.Unit
 
             using (var harness = base.CreateTestHarness())
             {
+                harness.ServiceBundle.Config.RetryPolicyFactory = new TestRetryPolicyFactory();
                 var httpManager = harness.HttpManager;
 
+                // for simplicity, return 404 so retry is not triggered
                 httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
 
                 var discoveryHandler = MockHelpers.CreateInstanceDiscoveryMockHandler(
@@ -897,8 +902,10 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (var harness = base.CreateTestHarness())
             {
+                harness.ServiceBundle.Config.RetryPolicyFactory = new TestRetryPolicyFactory();
                 var httpManager = harness.HttpManager;
 
+                // for simplicity, return 404 so retry is not triggered
                 httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(CreateTokenResponseHttpHandler(false));

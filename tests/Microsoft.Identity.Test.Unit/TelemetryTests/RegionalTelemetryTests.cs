@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -114,11 +113,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         {
             Trace.WriteLine("Acquire token for client with region detection fails.");
 
-            // Add mock responses for retry attempts (initial request + retries)
-            for (int i = 0; i < 3; i++)
-            {
-                _harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get, TestConstants.ImdsUrl);
-            }
+            // for simplicity, return 404 so retry is not triggered
+            _harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get, TestConstants.ImdsUrl);
 
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.FallbackToGlobal).ConfigureAwait(false);
             AssertCurrentTelemetry(
@@ -138,11 +134,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         {
             Trace.WriteLine("Acquire token for client with region provided by user and region detection fails.");
 
-            // Add mock responses for retry attempts (initial request + retries)
-            for (int i = 0; i < 3; i++)
-            {
-                _harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get, TestConstants.ImdsUrl);
-            }
+            // for simplicity, return 404 so retry is not triggered
+            _harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get, TestConstants.ImdsUrl);
 
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
             AssertCurrentTelemetry(

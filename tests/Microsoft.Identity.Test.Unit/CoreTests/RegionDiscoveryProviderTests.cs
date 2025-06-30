@@ -158,7 +158,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             int expectedRetries,
             string expectedFailureMessage)
         {
-            // Add multiple mock responses: initial request + max retry attempts
             for (int i = 0; i < (1 + expectedRetries); i++)
             {
                 AddMockedResponse(MockHelpers.CreateNullMessage(statusCode));
@@ -328,7 +327,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             int expectedRetries,
             string expectedFailureMessage)
         {
-            // Add multiple mock responses: initial request + max retry attempts
             for (int i = 0; i < (1 + expectedRetries); i++)
             {
                 AddMockedResponse(MockHelpers.CreateNullMessage(statusCode));
