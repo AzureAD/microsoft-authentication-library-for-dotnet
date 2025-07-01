@@ -494,8 +494,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
-        public static void AddRegionDiscoveryMockHandlerNotFound(
-            this MockHttpManager httpManager)
+        public static void AddRegionDiscoveryMockHandlerWithError(
+            this MockHttpManager httpManager,
+            HttpStatusCode statusCode)
         {
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -506,7 +507,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                          {
                             {"Metadata", "true"}
                          },
-                        ResponseMessage = MockHelpers.CreateFailureMessage(HttpStatusCode.NotFound, "")
+                        ResponseMessage = MockHelpers.CreateFailureMessage(statusCode, "")
                     });
         }
     }

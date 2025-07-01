@@ -6,7 +6,9 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Broker
@@ -27,6 +29,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters);
 
+        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters);
