@@ -37,13 +37,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
-                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
-
-                IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Disabling shared cache options to avoid cross test pollution.
                 miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 MockHttpMessageHandler mockHandler = httpManager.AddManagedIdentityMockHandler(
                     MachineLearningEndpoint,
@@ -80,11 +80,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint);
 
-                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
-                miBuilder
+                var miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId)
                     .WithHttpManager(httpManager);
 
-                IManagedIdentityApplication mi = miBuilder.Build();
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
