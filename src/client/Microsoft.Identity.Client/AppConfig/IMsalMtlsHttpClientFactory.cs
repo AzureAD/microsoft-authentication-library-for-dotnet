@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
     /// If your application requires Integrated Windows Authentication, set <see cref="HttpClientHandler.UseDefaultCredentials"/> to true.
     /// This interface is intended for internal use by MSAL only and is designed to support MTLS scenarios.
     /// </remarks>
-    internal interface IMsalMtlsHttpClientFactory : IMsalHttpClientFactory
+    public interface IMsalMtlsHttpClientFactory : IMsalHttpClientFactory
     {
         /// <summary>
         /// Returns an HttpClient configured with a certificate for mutual TLS authentication.

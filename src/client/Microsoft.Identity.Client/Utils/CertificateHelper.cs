@@ -145,8 +145,8 @@ namespace Microsoft.Identity.Client.Internal.Utilities
                     new OidCollection { new Oid("1.3.6.1.5.5.7.3.2") }, true));
                 req.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, true));
 
-                // Create the certificate valid for 90 days.
-                X509Certificate2 cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddDays(90));
+                // Create the certificate valid for 7 days.
+                X509Certificate2 cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddDays(7));
 
                 // Export and re-import to ensure the private key is stored properly.
                 var certWithPrivateKey = new X509Certificate2(

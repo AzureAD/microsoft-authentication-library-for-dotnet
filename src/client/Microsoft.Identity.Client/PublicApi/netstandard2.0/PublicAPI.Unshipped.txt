@@ -2,3 +2,8 @@ Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithPro
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.Credential = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 static Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
 Microsoft.Identity.Client.BrokerOptions.OperatingSystems.OSX = 4 -> Microsoft.Identity.Client.BrokerOptions.OperatingSystems
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
+static Microsoft.Identity.Client.ManagedIdentityApplication.BindingCertificateUpdated -> System.Action<System.Security.Cryptography.X509Certificates.X509Certificate2>
+static Microsoft.Identity.Client.ManagedIdentityApplication.ForceUpdateInMemoryCertificate() -> System.Security.Cryptography.X509Certificates.X509Certificate2
+static Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentityBindingCertificate() -> System.Security.Cryptography.X509Certificates.X509Certificate2

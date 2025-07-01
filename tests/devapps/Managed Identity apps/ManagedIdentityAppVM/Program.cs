@@ -5,6 +5,27 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
 
+// Binding certificate event handler
+ManagedIdentityApplication.BindingCertificateUpdated += cert =>
+{
+    Console.WriteLine($"BindingCertificateUpdated - Binding cert thumbprint: {cert.Thumbprint}");
+};
+
+//Get Managed Identity Source
+Console.WriteLine("Managed Identity Source is {0}", 
+    await ManagedIdentityApplication.GetManagedIdentitySourceAsync()
+    .ConfigureAwait(false));
+
+// Get Managed Identity Binding Certificate
+var cert = ManagedIdentityApplication.GetManagedIdentityBindingCertificate();
+Console.WriteLine($"Managed Identity Binding Certificate: {cert.GetExpirationDateString}");
+Console.WriteLine("Get Managed Identity Binding Certificate : {0}", cert);
+
+// Force updated Managed Identity Binding Certificate
+cert = ManagedIdentityApplication.ForceUpdateInMemoryCertificate();
+Console.WriteLine($"Managed Identity Binding Certificate: {cert.GetExpirationDateString}");
+Console.WriteLine("Get New Managed Identity Binding Certificate : {0}", cert);
+
 IIdentityLogger identityLogger = new IdentityLogger();
 
 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
@@ -22,7 +43,7 @@ do
     try
     {
         var result = await mi.AcquireTokenForManagedIdentity(scope)
-            .WithProofOfPossession()
+            //.WithProofOfPossession()
             .ExecuteAsync().ConfigureAwait(false);
 
         Console.WriteLine(result.AccessToken);
