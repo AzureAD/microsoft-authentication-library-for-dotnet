@@ -419,6 +419,7 @@ namespace Microsoft.Identity.Test.Unit
         //Region Discovery Failures
         public const string RegionAutoDetectOkFailureMessage = "Call to local IMDS failed with status code OK or an empty response.";
         public const string RegionAutoDetectNotFoundFailureMessage = "Call to local IMDS failed with status code NotFound or an empty response.";
+        public const string RegionAutoDetectInternalServerErrorFailureMessage = "Service is unavailable to process the request";
         public const string RegionDiscoveryNotSupportedErrorMessage = "Region discovery can only be made if the service resides in Azure function or Azure VM";
         public const string RegionDiscoveryIMDSCallFailedMessage = "IMDS call failed";
 
