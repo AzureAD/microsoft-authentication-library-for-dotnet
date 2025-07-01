@@ -18,7 +18,7 @@ This sample showcases **certificate rotation** and **token acquisition** against
 | Requirement        | Version / Notes                            |
 |--------------------|--------------------------------------------|
 | .NET SDK           | **8.0.100** or later                      |
-| MSAL .NET          | **4.72.3 preview** (included via `Microsoft.Identity.Client`) |
+| MSAL .NET          | **4.72.3 preview** (included via [`Microsoft.Identity.Client`](https://www.nuget.org/packages/Microsoft.Identity.Client/4.72.3-slc-preview)) |
 | Access to SLC host | VM/VMSS image with the prototype **SLC agent** enabled |
 | Managed Identity   | System-assigned (or override in code)      |
 
