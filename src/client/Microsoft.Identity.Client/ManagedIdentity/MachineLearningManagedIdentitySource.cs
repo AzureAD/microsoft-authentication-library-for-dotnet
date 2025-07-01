@@ -46,20 +46,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (FormatException ex)
             {
-                string errorMessage = string.Format(
-                    CultureInfo.InvariantCulture,
-                    MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
-                    "MSI_ENDPOINT", msiEndpoint, "Machine learning");
-
-                // Use the factory to create and throw the exception
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
-                    errorMessage,
+                    UnsupportedIdTypeError,
                     ex, 
                     ManagedIdentitySource.MachineLearning,
                     null); // statusCode is null in this case
-
-                throw exception;
             }
 
             logger.Info($"[Managed Identity] Environment variables validation passed for machine learning managed identity. Endpoint URI: {endpointUri}. Creating machine learning managed identity.");

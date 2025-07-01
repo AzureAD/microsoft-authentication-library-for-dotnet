@@ -388,25 +388,29 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 // For Machine Learning (App Service 2017), the client id param is "clientid"
                 // it will always be a query parameter, no matter the source type
                 // use env var for SAMI, passed-in userAssignedId for UAMI
-                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId2017,
-                    userAssignedId == null ?
-                        EnvironmentVariables.MachineLearningDefaultClientId : userAssignedId);
-            } else if (userAssignedIdentityId == UserAssignedIdentityId.ClientId) {
-                // For App Service 2019, Azure Arc, IMDS, etc., the param is "client_id"
-                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    Constants.ManagedIdentityClientId2017,
+                    userAssignedId ?? EnvironmentVariables.MachineLearningDefaultClientId);
             }
-
-            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            else if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+            {
+                // For App Service 2019, Azure Arc, IMDS, etc., the param is "client_id"
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    Constants.ManagedIdentityClientId, 
+                    userAssignedId);
+            }
+            else if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
             {
                 httpMessageHandler.ExpectedQueryParams.Add(
                     managedIdentitySourceType == ManagedIdentitySource.Imds ? 
                         Constants.ManagedIdentityResourceIdImds : Constants.ManagedIdentityResourceId, 
                     userAssignedId);
             }
-
-            if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
+            else if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    Constants.ManagedIdentityObjectId,
+                    userAssignedId);
             }
 
             httpMessageHandler.ResponseMessage = responseMessage;
