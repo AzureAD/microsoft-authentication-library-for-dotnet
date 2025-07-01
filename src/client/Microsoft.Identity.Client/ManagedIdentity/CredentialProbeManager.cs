@@ -69,8 +69,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (Exception ex)
             {
-                _logger.Error($"[Probe] Exception during probe: {ex.Message}");
-                _logger.Error($"[Probe] Stack Trace: {ex.StackTrace}");
+                _logger.Warning($"[Probe] Exception during probe: {ex.Message}");
+                _logger.Warning($"[Probe] Stack Trace: {ex.StackTrace}");
                 return false;
             }
         }
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             var m = s_serverRegex.Match(serverHeader);
             if (!m.Success || !int.TryParse(m.Groups[1].Value, out int build) || build <= 1324)
             {
-                _logger.Info($"[Probe] Rejected – IMDS build {m.Groups[1].Value} does not support CSR metadata.");
+                _logger.Info($"[Probe] IMDS build {m.Groups[1].Value} does not support Credential source.");
                 return false;
             }
 
