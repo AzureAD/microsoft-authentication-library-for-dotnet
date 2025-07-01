@@ -11,9 +11,8 @@
     <!-- Packages for the main MSAL code -->
     <PackageVersion Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageVersion Include="Microsoft.Identity.Client" Version="4.72.3-slc-preview" />
     <PackageVersion Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />
-    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="8.12.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="6.35.0" />
     <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
     <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <!-- Should match Azure Functions runtime: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4456 -->
