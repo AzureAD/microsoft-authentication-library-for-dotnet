@@ -46,9 +46,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (FormatException ex)
             {
+                string errorMessage = string.Format(
+                    CultureInfo.InvariantCulture,
+                    MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
+                    "MSI_ENDPOINT", msiEndpoint, "Machine learning");
+
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
-                    UnsupportedIdTypeError,
+                    errorMessage,
                     ex, 
                     ManagedIdentitySource.MachineLearning,
                     null); // statusCode is null in this case
@@ -94,20 +99,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
 
                 default:
-                    string errorMessage = string.Format(
-                        CultureInfo.InvariantCulture,
-                        MsalErrorMessage.ManagedIdentityInvalidIdType,
-                        "client id is",
-                        MachineLearning);
-
-                    var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                         MsalError.InvalidManagedIdentityIdType,
-                        errorMessage,
+                        UnsupportedIdTypeError,
                         null, // configuration error
                         ManagedIdentitySource.MachineLearning,
                         null); // statusCode is null in this case
-
-                    throw exception;
             }
                 
             return request;
