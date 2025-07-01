@@ -43,10 +43,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_b2cScopes, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.IsNotNull(authResult);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);

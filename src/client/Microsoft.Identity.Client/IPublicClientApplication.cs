@@ -77,8 +77,9 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>
-        /// This API is no longer recommended and will be deprecated in future versions in favor of 
-        /// similar functionality via <see href="https://aka.ms/msal-net-wam">the Windows broker (WAM)</see>.
+        /// This API is no longer recommended. If your application requires single sign-on (SSO) with the Windows OS's default account, 
+        /// please transition to using WAM, which provides similar functionality 
+        /// via <see href="https://aka.ms/msal-net-wam">the Windows broker (WAM)</see>.
         /// WAM does not require any setup for desktop apps to login with the Windows account.
         /// </para>
         /// <para>
@@ -94,6 +95,9 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// See <see href="https://aka.ms/msal-net-iwa">our documentation</see> for more details.
         /// </remarks>
+
+        [Obsolete("This API is no longer recommended. For scenarios requiring SSO with the Windows OS's default account, please transition to using WAM.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
             IEnumerable<string> scopes);
 
@@ -109,8 +113,8 @@ namespace Microsoft.Identity.Client
         /// Available only for .NET Framework and .NET Core applications. See <see href="https://aka.ms/msal-net-up">our documentation</see> for details.       
         /// .NET no longer recommends using SecureString and MSAL puts the plaintext value of the password on the wire, as required by the OAuth protocol. See <see href="https://docs.microsoft.com/dotnet/api/system.security.securestring?view=net-6.0#remarks">SecureString documentation</see> for details.
         /// </remarks>
-        [Obsolete("Using SecureString is not recommended. Use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
             string username,
@@ -129,6 +133,8 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// Available only for .NET Framework and .NET Core applications. See <see href="https://aka.ms/msal-net-up">our documentation</see> for details.
         /// </remarks>
+        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
             string username,

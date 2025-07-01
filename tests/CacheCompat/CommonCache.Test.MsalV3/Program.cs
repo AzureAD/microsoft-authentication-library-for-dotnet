@@ -67,10 +67,12 @@ namespace CommonCache.Test.MsalV2
                     }
                     catch (MsalUiRequiredException)
                     {
+                        #pragma warning disable CS0618 // Type or memeber is obsolete
                         var result = await app
                             .AcquireTokenByUsernamePassword(scopes, labUserData.Upn, labUserData.Password)
                             .ExecuteAsync(CancellationToken.None)
                             .ConfigureAwait(false);
+                        #pragma warning restore CS0618
 
                         if (string.IsNullOrWhiteSpace(result.AccessToken))
                         {
