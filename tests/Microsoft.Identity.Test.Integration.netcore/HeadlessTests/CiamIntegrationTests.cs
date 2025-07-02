@@ -60,10 +60,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithRedirectUri(_ciamRedirectUri)
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var result = await msalPublicClient
                 .AcquireTokenByUsernamePassword(_ciamScopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
@@ -170,10 +172,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithRedirectUri(labResponse.App.RedirectUri)
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var result = await msalPublicClient
                 .AcquireTokenByUsernamePassword(new[] { labResponse.App.DefaultScopes }, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);

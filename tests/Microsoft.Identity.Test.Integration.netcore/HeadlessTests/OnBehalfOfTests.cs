@@ -69,15 +69,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var user1AuthResult = await pca
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var user2AuthResult = await pca
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user2.Upn, user2.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             Assert.AreEqual(user1AuthResult.TenantId, user2AuthResult.TenantId);
 
@@ -180,10 +184,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                     .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var userResult = await pca
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             // Act and Assert different scenarios
             var cca = BuildCca(userResult.TenantId, true);
@@ -247,10 +253,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                                  .WithTestLogging()
                                                                  .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(
                 new[] { "https://arlmsidlab1.us/IDLABS_APP_Confidential_Client/user_impersonation" }, arligntonUser.Upn, arligntonUser.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             var ccaAuthority = new Uri("https://login.microsoftonline.us/" + authResult.TenantId);
             var confidentialApp = ConfidentialClientApplicationBuilder
@@ -298,9 +306,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                                  .WithHttpClientFactory(factory)
                                                                  .Build();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(OboConfidentialClientID)
@@ -428,12 +438,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             catch (MsalUiRequiredException)
             {
                 Assert.IsFalse(silentCallShouldSucceed, "ATS should have found a token, but it didn't");
-
+#pragma warning disable CS0618 // Type or member is obsolete
                 authResult = await pca
                     .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, user.GetOrFetchPassword())
                     //.AcquireTokenInteractive(s_oboServiceScope)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+                    #pragma warning restore CS0618
                 Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             }
 

@@ -303,12 +303,14 @@ namespace ManualTestApp
                 throw new InvalidOperationException("Please configure a username and password!");
             }
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             return await pca.AcquireTokenByUsernamePassword(
                 Config.Scopes,
                 Config.Username,
                 Config.Password)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
         }
 
         private static void DisplayResult(AuthenticationResult result)
