@@ -1,3 +1,13 @@
+4.73.1
+======
+
+### Features
+Deprecate AcquireTokenByIntegratedWindowsAuth API in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5345
+
+### Bug fixes
+Update native interop to 0.19.2 by @fengga in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5362 to solve broker bugs
+update the deprecated openURL(:) api to openURL(:options:completionHandler) in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5354
+
 4.73.0
 =======
 
