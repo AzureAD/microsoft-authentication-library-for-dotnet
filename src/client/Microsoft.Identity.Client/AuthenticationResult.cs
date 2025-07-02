@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -291,6 +292,11 @@ namespace Microsoft.Identity.Client
         /// AcquireTokenByAuthorizationCode builder. See https://aka.ms/msal-net/spa-auth-code for details.
         /// </summary>
         public string SpaAuthCode { get; }
+
+        /// <summary>
+        /// The X509 certificate bound to the access-token when mTLS-PoP was used.
+        /// </summary>
+        public X509Certificate2 BindingCertificate { get; internal set; }
 
         /// <summary>
         /// Exposes additional response parameters returned by the token issuer (AAD).
