@@ -19,6 +19,9 @@ namespace Microsoft.Identity.Client.Instance.Oidc
     [Preserve(AllMembers = true)]
     internal class OidcMetadata
     {
+        [JsonProperty("issuer")]
+        public string Issuer { get; set; }
+
         [JsonProperty("token_endpoint")]
         public string TokenEndpoint { get; set;  }
 
