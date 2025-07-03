@@ -124,7 +124,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
              "idt",
              new[] { "scope" },
              Guid.NewGuid(),
-             new AuthenticationResultMetadata(TokenSource.Broker));
+             new AuthenticationResultMetadata(TokenSource.Broker),
+             tokenType: "Bearer",
+             bindingCertificate: null);
 
             Assert.AreEqual(TokenSource.Broker, ar3.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual("Bearer", ar1.TokenType);
