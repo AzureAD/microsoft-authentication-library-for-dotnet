@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
 
             if (resource.Equals("api://AzureFMITokenExchange/.default", StringComparison.OrdinalIgnoreCase))
             {
-                Parameters.IsFmiCredential = true;
+                Parameters.isFmiCredentialRequest = true;
                 ValidateUseOfExperimentalFeature();
             }
 

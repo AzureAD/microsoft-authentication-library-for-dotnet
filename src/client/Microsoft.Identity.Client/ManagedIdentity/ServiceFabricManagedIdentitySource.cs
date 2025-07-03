@@ -16,15 +16,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
-        private readonly bool _isFederated;
+        private readonly bool _isFmiCredentialRequest;
         private static string _mitsEndpointFmiPath => "/metadata/identity/oauth2/fmi/credential";
 
-        public static AbstractManagedIdentity Create(RequestContext requestContext, bool isFmiServiceFabric = false)
+        public static AbstractManagedIdentity Create(RequestContext requestContext, bool isFmiCredentialRequest = false)
         {
             Uri endpointUri;
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
 
-            if (isFmiServiceFabric)
+            if (isFmiCredentialRequest)
             {
                 VerifyFederatedEnvVariablesAreAvailable();
                 requestContext.Logger.Info(() => "[Managed Identity] Service fabric federated managed identity is available.");
@@ -62,9 +62,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
             }
 
-            requestContext.Logger.Verbose(() => $"[Managed Identity] Creating Service Fabric {(isFmiServiceFabric ? "federated" : "")} managed identity. Endpoint URI: {identityEndpoint}");
+            requestContext.Logger.Verbose(() => $"[Managed Identity] Creating Service Fabric {(isFmiCredentialRequest ? "federated" : "")} managed identity. Endpoint URI: {identityEndpoint}");
 
-            return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader, isFmiServiceFabric);
+            return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader, isFmiCredentialRequest);
         }
 
         private static void VerifyFederatedEnvVariablesAreAvailable()
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
             _identityHeaderValue = identityHeaderValue;
-            _isFederated = isFmi;
+            _isFmiCredentialRequest = isFmi;
 
             if (requestContext.ServiceBundle.Config.ManagedIdentityId.IsUserAssigned)
             {
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             ManagedIdentityRequest request = new ManagedIdentityRequest(HttpMethod.Get, _endpoint);
             request.Headers["secret"] = _identityHeaderValue;
 
-            if (_isFederated)
+            if (_isFmiCredentialRequest)
             {
                 _requestContext.Logger.Info("[Managed Identity] Request is for FMI, no ids or resource will be added to the request.");
                 request.QueryParameters["api-version"] = EnvironmentVariables.FmiServiceFabricApiVersion;

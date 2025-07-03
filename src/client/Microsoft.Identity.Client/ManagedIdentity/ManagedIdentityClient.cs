@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext, AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
         {
-            if (acquireTokenForManagedIdentityParameters.IsFmiCredential)
+            if (acquireTokenForManagedIdentityParameters.isFmiCredentialRequest)
             {
                 return ServiceFabricManagedIdentitySource.Create(requestContext, true);
             }
