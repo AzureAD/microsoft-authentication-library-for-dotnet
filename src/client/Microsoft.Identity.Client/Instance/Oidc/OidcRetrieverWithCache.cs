@@ -87,8 +87,8 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             string normalizedAuthority = authority.AbsoluteUri.TrimEnd('/');
             string normalizedIssuer = issuer?.TrimEnd('/');
 
-            // Primary validation: check if normalized authority equals normalized issuer (exact string comparison)
-            if (string.Equals(normalizedAuthority, normalizedIssuer, StringComparison.OrdinalIgnoreCase))
+            // Primary validation: check if normalized authority starts with normalized issuer (case-insensitive comparison)
+            if (normalizedAuthority.StartsWith(normalizedIssuer, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -127,8 +127,8 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
             // Validation failed
             throw new MsalServiceException(
-                "authority_validation_failed",
-                $"Issuer validation failed for {authority}. Issuer from OIDC endpoint does not match any expected pattern: {issuer}");
+                MsalError.AuthorityValidationFailed,
+                string.Format(MsalErrorMessage.IssuerValidationFailed, authority, issuer));
         }
 
         // For testing purposes only

@@ -339,6 +339,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             using (var httpManager = new MockHttpManager())
             {
                 string authority = "https://demo.duendesoftware.com";
+                string wrongIssuer = "https://wrong.issuer.com";
+
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(httpManager)
@@ -348,14 +350,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 // Create OIDC document with non-matching issuer
                 string validOidcDocumentWithWrongIssuer = TestConstants.GenericOidcResponse.Replace(
-                        "\"issuer\":\"https://demo.duendesoftware.com\"",
-                        "\"issuer\":\"https://wrong.issuer.com\"");
+                        $"\"issuer\":\"{authority}\"",
+                        $"\"issuer\":\"{wrongIssuer}\"");
 
                 // Mock OIDC endpoint response
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     ExpectedMethod = HttpMethod.Get,
-                    ExpectedUrl = authority + "/.well-known/openid-configuration",
+                    ExpectedUrl = authority + "/" + Constants.WellKnownOpenIdConfigurationPath,
                     ResponseMessage = MockHelpers.CreateSuccessResponseMessage(validOidcDocumentWithWrongIssuer)
                 });
 
@@ -363,11 +365,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()
                 ).ConfigureAwait(false);
 
-                Assert.AreEqual("authority_validation_failed", ex.ErrorCode);
-                Assert.IsTrue(ex.Message.Contains("Issuer validation failed"),
-                    $"Expected error message to contain 'Issuer validation failed', but was: {ex.Message}");
-                Assert.IsTrue(ex.Message.Contains("https://wrong.issuer.com"),
-                    "Error message should include the non-matching issuer value");
+                string expectedErrorMessage = string.Format(MsalErrorMessage.IssuerValidationFailed, app.Authority, wrongIssuer);
+
+                Assert.AreEqual(MsalError.AuthorityValidationFailed, ex.ErrorCode);
+                Assert.AreEqual(expectedErrorMessage, ex.Message, 
+                    "Error message should match the expected error message.");
             }
         }
 
