@@ -178,17 +178,18 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             using (cancellationToken.Register(CloseIfOpen))
             {
                 try
-                {   
-                    // 1. First activate the window
-                    this.Activate();
-                    _logger.Info("Activating authentication window...");
+                {  
                     
-                    // 2. Create a TaskCompletionSource to wait for the WebView2 initialization
+                    // 1. Create a TaskCompletionSource to wait for the WebView2 initialization
                     var tcs = new TaskCompletionSource<bool>();
                     
-                    // 3. Queue the WebView2 initialization on the UI thread
+                    // 2. Queue the WebView2 initialization on the UI thread
                     this.DispatcherQueue.TryEnqueue(() => 
                     {
+                        // First activate the window
+                        this.Activate();
+                        _logger.Info("Activating authentication window...");
+                        
                         // Start the async operation on the UI thread
                         var initTask = _webView2.EnsureCoreWebView2Async().AsTask();
                         
