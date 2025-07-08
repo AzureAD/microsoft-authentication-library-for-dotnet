@@ -83,9 +83,12 @@ namespace Microsoft.Identity.Client.Instance.Oidc
         /// <exception cref="MsalServiceException">Thrown when issuer validation fails.</exception>
         private static void ValidateIssuer(Uri authority, string issuer)
         {
+            // Normalize both URLs to handle trailing slash differences
+            string normalizedAuthority = authority.AbsoluteUri.TrimEnd('/');
+            string normalizedIssuer = issuer?.TrimEnd('/');
 
-            // Primary validation: check if authority begins with the issuer string (exact string comparison)
-            if (authority.AbsoluteUri.StartsWith(issuer, StringComparison.OrdinalIgnoreCase))
+            // Primary validation: check if normalized authority equals normalized issuer (exact string comparison)
+            if (string.Equals(normalizedAuthority, normalizedIssuer, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -114,8 +117,9 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                     $"https://{tenant}{Constants.CiamAuthorityHostSuffix}/{tenant}/v2.0"
                 };
 
-                // Check if the issuer matches any of the valid patterns
-                if (validCiamPatterns.Any(pattern => string.Equals(issuer, pattern, StringComparison.OrdinalIgnoreCase)))
+                // Normalize and check if the issuer matches any of the valid patterns
+                if (validCiamPatterns.Any(pattern =>
+                    string.Equals(normalizedIssuer, pattern.TrimEnd('/'), StringComparison.OrdinalIgnoreCase)))
                 {
                     return;
                 }
