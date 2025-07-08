@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AddAdfsWithTenantIdMockHandler(httpManager);
 
+                #pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app.AcquireTokenByUsernamePassword(
                     TestConstants.s_scope,
                     TestConstants.Username,
@@ -58,6 +59,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTenantIdFromAuthority(authorityUri)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+                #pragma warning restore CS0618
 
                 var account = await app.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
 

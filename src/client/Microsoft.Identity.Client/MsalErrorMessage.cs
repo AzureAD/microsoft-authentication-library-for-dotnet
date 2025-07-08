@@ -417,6 +417,7 @@ namespace Microsoft.Identity.Client
 
         public const string ManagedIdentityNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
         public const string ManagedIdentityInvalidResponse = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
+        public const string ManagedIdentityInvalidIdType = "Only {0} supported for user-assigned managed identity in {1}";
         public const string ManagedIdentityJsonParseFailure = "[Managed Identity] MSI returned 200 OK, but the response could not be parsed.";
         public const string ManagedIdentityUnexpectedResponse = "[Managed Identity] Unexpected exception occurred when parsing the response. See the inner exception for details.";
         public const string ManagedIdentityExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope must be passed.";
@@ -440,5 +441,6 @@ namespace Microsoft.Identity.Client
         public const string MtlsNonTenantedAuthorityNotAllowedMessage = "mTLS authentication requires a tenanted authority. Using 'common', 'organizations', or similar non-tenanted authorities is not allowed. Please provide an authority with a specific tenant ID (e.g., 'https://login.microsoftonline.com/{tenantId}'). See https://aka.ms/msal-net-pop for details.";
         public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. mTLS Proof-of-Possession requires a region to be specified, as there is no global endpoint for mTLS. See https://aka.ms/msal-net-pop for details.";
         public const string ForceRefreshAndTokenHasNotCompatible = "Cannot specify ForceRefresh and AccessTokenSha256ToRefresh in the same request.";
+        public const string RequestTimeOut = "Request to the endpoint timed out.";
     }
 }

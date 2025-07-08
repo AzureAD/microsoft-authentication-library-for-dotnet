@@ -14,5 +14,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static string MsiEndpoint => Environment.GetEnvironmentVariable("MSI_ENDPOINT");
         public static string MsiSecret => Environment.GetEnvironmentVariable("MSI_SECRET");
         public static string IdentityServerThumbprint => Environment.GetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT");
+        public static string MachineLearningDefaultClientId => Environment.GetEnvironmentVariable("DEFAULT_IDENTITY_CLIENT_ID");
     }
 }
