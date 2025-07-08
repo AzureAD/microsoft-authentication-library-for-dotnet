@@ -18,10 +18,13 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
+    <OutputType>Library</OutputType>
+    <Platforms>x86;x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
-    <!--<EnableMsixTooling>true</EnableMsixTooling>-->
+    <!-- <EnableMsixTooling>true</EnableMsixTooling> -->
     <!--<DisableEmbeddedXbf>false</DisableEmbeddedXbf>-->
-    <!--<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>-->
+    <!-- <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained> -->
   </PropertyGroup>
      
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -82,8 +85,11 @@
     <Compile Remove="WebView2WebUi\WinUI3WindowWithWebView2.xaml.cs" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkModernTFM)'">
     <PackageReference Include="Microsoft.Web.WebView2" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
     
