@@ -49,33 +49,46 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             Uri startUri,
             Uri endUri)
         {
-            // XAML InitializeComponent() - this loads the XAML UI
-            this.InitializeComponent();
-            Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", "%UserProfile%/.msal/webview2/data");
+
+            //Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", "%UserProfile%/.msal/webview2/data");
             _embeddedWebViewOptions = embeddedWebViewOptions ?? EmbeddedWebViewOptions.GetDefaultOptions();
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _startUri = startUri ?? throw new ArgumentNullException(nameof(startUri));
             _endUri = endUri ?? throw new ArgumentNullException(nameof(endUri));
 
-            if (ownerWindow is Window window)
+            if (ownerWindow == null)
+            {
+                _ownerWindow = null;
+            }
+            else if (ownerWindow is Window window)
             {
                 _ownerWindow = window;
             }
-            else if (ownerWindow != null)
+            else if (ownerWindow is IntPtr ptr && ptr != IntPtr.Zero)
             {
-                // Handle other window types if needed
-                _logger.Warning("Owner window type not directly supported in WinUI 3");
+                _logger.Verbose(() => "[WebView2Control] ownerWindow is IntPtr ptr && ptr != IntPtr.Zero");
             }
 
-            // Set up WebView2 event handlers
-            _webView2.CoreWebView2Initialized += WebView2_CoreWebView2Initialized;
-            _webView2.NavigationStarting += WebView2_NavigationStarting;
+            // Then initialize component on the UI thread
+            InvokeHandlingOwnerWindow(() =>
+            {
+                // XAML InitializeComponent() - this loads the XAML UI
+                this.InitializeComponent();
 
-            // Configure window properties - CRITICAL FOR PROPER TASK COMPLETION
-            ConfigureWindow();
-            
-            StatusUpdate("Ready");
-            SetTitle();
+                Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", "%UserProfile%/.msal/webview2/data");
+
+                // Set up WebView2 event handlers
+                _webView2.CoreWebView2Initialized += WebView2_CoreWebView2Initialized;
+                _webView2.NavigationStarting += WebView2_NavigationStarting;
+
+                // Configure window properties - CRITICAL FOR PROPER TASK COMPLETION
+                ConfigureWindow();
+
+                StatusUpdate("Ready");
+                SetTitle();
+                // Start navigation to authentication URI
+                _webView2.Source = _startUri;
+            });
         }
 
         private void StatusUpdate(string message)
@@ -169,6 +182,11 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             StatusUpdate("WebView2 Initialized - Ready for authentication");
         }
 
+        /// <summary>
+        /// Displays the authentication dialog and waits for the user to complete the authentication flow.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to cancel the authentication operation.</param>
+        /// <returns>A task that represents the asynchronous authentication operation. The task result contains the authorization result.</returns>
         public async Task<AuthorizationResult> DisplayDialogAndInterceptUriAsync(CancellationToken cancellationToken)
         {
             _cancellationToken = cancellationToken;
@@ -178,59 +196,67 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             using (cancellationToken.Register(CloseIfOpen))
             {
                 try
-                {  
-                    
-                    // 1. Create a TaskCompletionSource to wait for the WebView2 initialization
-                    var tcs = new TaskCompletionSource<bool>();
-                    
-                    // 2. Queue the WebView2 initialization on the UI thread
-                    this.DispatcherQueue.TryEnqueue(() => 
+                {
+                    _logger.Info("Starting DisplayDialogAndInterceptUriAsync...");
+            
+                    // Activate the window first
+                    InvokeHandlingOwnerWindow(() =>
                     {
-                        // First activate the window
-                        this.Activate();
                         _logger.Info("Activating authentication window...");
-                        
-                        // Start the async operation on the UI thread
-                        var initTask = _webView2.EnsureCoreWebView2Async().AsTask();
-                        
-                        // Continue with a callback when it completes
-                        initTask.ContinueWith(t => 
-                        {
-                            if (t.IsFaulted)
-                            {
-                                _logger.Error($"WebView2 initialization failed: {t.Exception?.Message}");
-                                tcs.TrySetException(t.Exception ?? new Exception("Unknown WebView2 initialization error"));
-                            }
-                            else if (t.IsCanceled)
-                            {
-                                _logger.Warning("WebView2 initialization was canceled");
-                                tcs.TrySetCanceled();
-                            }
-                            else
-                            {
-                                _logger.Info("WebView2 CoreWebView2 initialized successfully.");
-                                
-                                // Set the source URI for authentication
-                                _webView2.Source = _startUri;
-                                _logger.Info($"Starting authentication flow with URI: {_startUri}");
-                                StatusUpdate("Starting navigation...");
-                                
-                                tcs.TrySetResult(true);
-                            }
-                        }, TaskScheduler.Current);
+                        this.Activate();
                     });
-                    
-                    // 4. Wait for the initialization to complete
-                    await tcs.Task.ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error($"Authentication failed with exception: {ex.Message}");
-                    return AuthorizationResult.FromStatus(AuthorizationStatus.ErrorHttp);
-                }
+            
+                    // Ensure WebView2 is properly initialized by creating a Core instance if needed
+                    var initTcs = new TaskCompletionSource<bool>();
+            
+                    // Suppress VSTHRD101 warning - we're handling exceptions properly in this case
+#pragma warning disable VSTHRD101 // Avoid using async lambda for a void returning delegate type
+                    InvokeHandlingOwnerWindow(async () =>
+                    {
+                        try
+                        {
+                            // Create explicit environment with proper user data folder
+                            var userDataFolder = Environment.ExpandEnvironmentVariables("%UserProfile%/.msal/webview2/data");
+                            //Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", "<user data folder>");
+                            _logger.Info($"Initializing WebView2 with user data folder: {userDataFolder}");
 
-                try
-                {
+                            // Create directory if it doesn't exist
+                            System.IO.Directory.CreateDirectory(userDataFolder);
+
+                            // Create the environment - use the correct parameter order
+                            // browserExecutableFolder (null to use default), userDataFolder, options
+                            var env = await CoreWebView2Environment.CreateWithOptionsAsync(null, userDataFolder, new CoreWebView2EnvironmentOptions());
+
+                            // If the CoreWebView2 is not initialized yet, initialize it
+                            if (_webView2.CoreWebView2 == null)
+                            {
+                                _logger.Info("WebView2 CoreWebView2 not initialized, initializing now...");
+                        
+                                // This initializes the CoreWebView2
+                                await _webView2.EnsureCoreWebView2Async(env);
+                                _logger.Info("WebView2 CoreWebView2 initialized successfully.");
+                            }
+                    
+                            // Now navigate to the start URI
+                            _logger.Info($"Starting navigation to: {_startUri}");
+                            _webView2.Source = _startUri;
+                            StatusUpdate("Starting navigation...");
+                    
+                            initTcs.TrySetResult(true);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error($"Failed to initialize WebView2 or start navigation: {ex.Message}");
+                            initTcs.TrySetException(ex);
+                        }
+                    });
+#pragma warning restore VSTHRD101
+            
+                    // Wait for initialization and navigation to start
+                    await initTcs.Task.ConfigureAwait(false);
+            
+                    // Wait for the authentication to complete
+                    _logger.Info("Waiting for authentication to complete...");
                     var result = await _dialogCompletionSource.Task.ConfigureAwait(false);
                     _logger.Info($"Authentication completed with status: {result.Status}");
                     return result;
@@ -239,7 +265,58 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 {
                     _logger.Error($"Authentication failed with exception: {ex.Message}");
                     return AuthorizationResult.FromStatus(AuthorizationStatus.ErrorHttp);
-                }               
+                }
+            }
+        }
+
+        /// <summary>
+        /// Some calls need to be made on the UI thread and this is the central place to check if we have an owner
+        /// window and if so, ensure we invoke on that proper thread.
+        /// </summary>
+        /// <param name="action">The action to execute on the UI thread</param>
+        private void InvokeHandlingOwnerWindow(Action action)
+        {
+            // If we have an owner window, use its dispatcher queue
+            if (_ownerWindow != null && _ownerWindow.DispatcherQueue != null)
+            {
+                // If we're already on the UI thread of the owner window, execute directly
+                if (_ownerWindow.DispatcherQueue.HasThreadAccess)
+                {
+                    action();
+                }
+                else
+                {
+                    // Otherwise, queue the action to run on the UI thread
+                    _ownerWindow.DispatcherQueue.TryEnqueue(() => action());
+                }
+            }
+            else
+            {
+                // Use our own dispatcher queue if owner window isn't available
+                if (DispatcherQueue.HasThreadAccess)
+                {
+                    action();
+                }
+                else
+                {
+                    DispatcherQueue.TryEnqueue(() => action());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ensures an action is executed on the UI thread of this window.
+        /// </summary>
+        /// <param name="action">The action to execute on the UI thread</param>
+        private void InvokeOnly(Action action)
+        {
+            if (DispatcherQueue.HasThreadAccess)
+            {
+                action();
+            }
+            else
+            {
+                DispatcherQueue.TryEnqueue(() => action());
             }
         }
 
@@ -376,5 +453,4 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         }
     }
 }
-
 #endif

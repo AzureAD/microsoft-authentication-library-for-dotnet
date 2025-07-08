@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 #if WINRT
             // Use the WinUI 3 implementation
             var window = new WinUI3WindowWithWebView2(
-                _parent.OwnerWindow as Window,
+                _parent.OwnerWindow,
                 _parent?.EmbeddedWebviewOptions,
                 _requestContext.Logger,
                 startUri,
@@ -125,8 +125,9 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             // DisplayDialogAndInterceptUriAsync is async, so we need to block here for the sync signature
             // (This is similar to how the WinForms implementation blocks)
             return window.DisplayDialogAndInterceptUriAsync(cancellationToken)
-                         .GetAwaiter()
-                         .GetResult();
+                            .GetAwaiter()
+                            .GetResult();
+
 #else
             using (var form = new WinFormsPanelWithWebView2(
                 _parent.OwnerWindow,
