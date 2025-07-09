@@ -16,9 +16,6 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
-    <OutputType>Library</OutputType>
-    <Platforms>x86;x64;ARM64</Platforms>
-    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
   </PropertyGroup>
      

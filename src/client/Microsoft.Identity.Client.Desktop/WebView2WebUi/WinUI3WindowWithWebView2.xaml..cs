@@ -49,8 +49,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             Uri startUri,
             Uri endUri)
         {
-
-            //Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", "%UserProfile%/.msal/webview2/data");
             _embeddedWebViewOptions = embeddedWebViewOptions ?? EmbeddedWebViewOptions.GetDefaultOptions();
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _startUri = startUri ?? throw new ArgumentNullException(nameof(startUri));
@@ -86,8 +84,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 
                 StatusUpdate("Ready");
                 SetTitle();
-                // Start navigation to authentication URI
-                _webView2.Source = _startUri;
+
             });
         }
 
@@ -217,14 +214,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                         {
                             // Create explicit environment with proper user data folder
                             var userDataFolder = Environment.ExpandEnvironmentVariables("%UserProfile%/.msal/webview2/data");
-                            //Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", "<user data folder>");
                             _logger.Info($"Initializing WebView2 with user data folder: {userDataFolder}");
 
                             // Create directory if it doesn't exist
                             System.IO.Directory.CreateDirectory(userDataFolder);
 
                             // Create the environment - use the correct parameter order
-                            // browserExecutableFolder (null to use default), userDataFolder, options
                             var env = await CoreWebView2Environment.CreateWithOptionsAsync(null, userDataFolder, new CoreWebView2EnvironmentOptions());
 
                             // If the CoreWebView2 is not initialized yet, initialize it
@@ -240,6 +235,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                             // Now navigate to the start URI
                             _logger.Info($"Starting navigation to: {_startUri}");
                             _webView2.Source = _startUri;
+
                             StatusUpdate("Starting navigation...");
                     
                             initTcs.TrySetResult(true);
