@@ -398,15 +398,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }, TestContext);
         }
 
-        #region Azure AD Kerberos Feature Tests
-        [IgnoreOnOneBranch]
-        public async Task Kerberos_Interactive_AADAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
         private async Task<AuthenticationResult> KerberosRunTestForUserAsync(
             LabResponse labResponse,
             KerberosTicketContainer ticketContainer)
