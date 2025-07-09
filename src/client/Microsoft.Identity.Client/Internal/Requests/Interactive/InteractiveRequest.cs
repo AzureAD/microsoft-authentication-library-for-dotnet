@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 tokenResponse = await GetTokenResponseAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(tokenResponse)
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(tokenResponse, cancellationToken)
                 .ConfigureAwait(false);
         }
         #endregion
