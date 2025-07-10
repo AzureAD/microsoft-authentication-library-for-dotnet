@@ -80,7 +80,6 @@
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="System.Windows.Forms" Version="4.0.0" />
     <PackageVersion Include="CommandLineParser" Version="2.8.0" />
-    <PackageVersion Include="System.Formats.Asn1" Version="9.0.0"/>
-
+    <PackageVersion Include="System.Formats.Asn1" Version="9.0.0" />
   </ItemGroup>
 </Project>

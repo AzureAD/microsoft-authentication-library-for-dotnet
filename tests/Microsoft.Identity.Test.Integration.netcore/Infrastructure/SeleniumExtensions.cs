@@ -22,44 +22,81 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         private static readonly TimeSpan ExplicitTimespan = TimeSpan.FromSeconds(20);
         private static readonly TimeSpan ShortExplicitTimespan = TimeSpan.FromSeconds(5);
 
-        public static IWebDriver CreateDefaultWebDriver()
+        public static IWebDriver CreateDefaultWebDriver(int maxRetries = 3, int timeoutSeconds = 30)
         {
-            // ---------- Chrome launch flags ----------
-            var options = new ChromeOptions();
-            options.AddArguments(
-                "--headless=new",          // modern headless mode (remove this for debugging)
-                "--disable-gpu",
-                "--window-size=1920,1080",
-                "--remote-allow-origins=*",
-                "--disable-dev-shm-usage"); // avoids crashes in low-memory containers
 
-            // ---------- Pick a driver binary ----------
-            // 1) Prefer explicit env-var so devs can override locally
-            var driverDir = Environment.GetEnvironmentVariable("CHROMEWEBDRIVER");
-
-            // 2) Otherwise use the folder where CI drops a matching chromedriver
-            if (string.IsNullOrEmpty(driverDir))
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-                driverDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "drivers");
+                try
+                {
+                    Trace.WriteLine($"[Selenium] Creating Chrome WebDriver (attempt {attempt}/{maxRetries})");
+
+                    // ---------- Chrome launch flags ----------
+                    var options = new ChromeOptions();
+                    options.AddArguments(
+                        "--headless=new",          // modern headless mode (remove this for debugging)
+                        "--disable-gpu",
+                        "--window-size=1920,1080",
+                        "--remote-allow-origins=*",
+                        "--disable-dev-shm-usage"); // avoids crashes in low-memory containers
+
+                    // Additional options to improve stability
+                    options.PageLoadStrategy = PageLoadStrategy.Eager;
+
+                    // ---------- Pick a driver binary ----------
+                    // 1) Prefer explicit env-var so devs can override locally
+                    var driverDir = Environment.GetEnvironmentVariable("CHROMEWEBDRIVER");
+
+                    // 2) Otherwise use the folder where CI drops a matching chromedriver
+                    if (string.IsNullOrEmpty(driverDir))
+                    {
+                        driverDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "drivers");
+                    }
+
+                    // 3) Fallback: let Selenium look on PATH
+                    ChromeDriverService service = string.IsNullOrEmpty(driverDir)
+                        ? ChromeDriverService.CreateDefaultService()
+                        : ChromeDriverService.CreateDefaultService(driverDir);
+
+                    service.HideCommandPromptWindow = true;
+                    service.EnableVerboseLogging = true;
+
+                    var driver = new ChromeDriver(
+                        service,
+                        options,
+                        TimeSpan.FromSeconds(timeoutSeconds));
+
+                    driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
+
+                    try
+                    {
+                        driver.Navigate().GoToUrl("about:blank");
+                        // If this succeeds, the browser is responding
+                    }
+                    catch (Exception)
+                    {
+                        driver.Dispose();
+                        throw;
+                    }
+
+                    TryMaximize(driver);
+                    Trace.WriteLine($"[Selenium] Chrome WebDriver created successfully");
+                    return driver;
+                }
+                catch (Exception ex)
+                {
+                    if (attempt == maxRetries)
+                    {
+                        Trace.WriteLine($"[Selenium] Failed to create Chrome WebDriver after {maxRetries} attempts. Last error: {ex.Message}");
+                        throw;
+                    }
+
+                    Thread.Sleep(1000);
+                }
             }
 
-            // 3) Fallback: let Selenium look on PATH
-            ChromeDriverService service = string.IsNullOrEmpty(driverDir)
-                ? ChromeDriverService.CreateDefaultService()
-                : ChromeDriverService.CreateDefaultService(driverDir);
-
-            service.HideCommandPromptWindow = true;
-            service.EnableVerboseLogging = true;
-
-            var driver = new ChromeDriver(
-                service,
-                options,
-                TimeSpan.FromSeconds(120));       // generous startup timeout
-
-            driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
-
-            TryMaximize(driver);
-            return driver;
+            // This should never be reached due to the throw in the catch block on the last attempt
+            throw new InvalidOperationException("Failed to create Chrome WebDriver");
         }
 
         private static void TryMaximize(IWebDriver driver)
@@ -311,7 +348,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     {
                         Trace.WriteLine("No, workaround failed");
                     }
-                }               
+                }
             }
         }
 
