@@ -17,6 +17,8 @@
   
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
     <UseWinUI>true</UseWinUI>
+    <!--<OutputType>Exe</OutputType>-->
+    <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
      
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -62,7 +64,7 @@
     
     <PackageReference Include="Microsoft.WindowsAppSDK" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
-    <Page Include="WebView2WebUi/WinUI3WindowWithWebView2.xaml" />
+    <!-- <Page Include="WebView2WebUi/WinUI3WindowWithWebView2.xaml" /> -->
   </ItemGroup>
   
   <ItemGroup>
@@ -71,8 +73,7 @@
 
   <!-- Exclude WinUI3 files from non-WinUI targets -->
   <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkModernTFM)'">
-    <Page Remove="WebView2WebUi\WinUI3WindowWithWebView2.xaml" />
-    <Compile Remove="WebView2WebUi\WinUI3WindowWithWebView2.xaml.cs" />
+    <Compile Remove="WebView2WebUi\WinUI3WindowWithWebView2.cs" />
   </ItemGroup>
 
   <!-- Webview2 comes integrated with winappsdk for modern TFMs -->

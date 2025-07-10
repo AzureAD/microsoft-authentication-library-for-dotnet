@@ -11,13 +11,100 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Core;
-
 #if WINRT
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Windowing;
+using Windows.Graphics;
+using Windows.Graphics.Display;
+using Microsoft.UI;
+using Microsoft.UI.Dispatching;
 #endif
 
 namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
+
+#if WINRT
+    internal class BrowserWindow
+    {
+        public void Show()
+        {
+                 var window = new Window();
+                var grid = new Grid();
+            window.DispatcherQueue.TryEnqueue(() =>
+            {
+
+                var webView = new Microsoft.UI.Xaml.Controls.WebView2
+                {
+                    Source = new Uri("https://www.google.com"),
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch
+                };
+
+                grid.Children.Add(webView);
+                window.Content = grid;
+
+                //window.Activated += (s, e) =>
+                //{
+
+                //    var displayInfo = DisplayInformation.GetForCurrentView();
+                //    double scale = displayInfo.RawPixelsPerViewPixel;
+                //    var screenHeight = DisplayArea.GetFromWindowId(GetWindowId(window), DisplayAreaFallback.Primary).WorkArea.Height;
+                //    int uiHeight = (int)(Math.Max(screenHeight, 160) * 0.7 / scale);
+
+                //    var appWindow = AppWindow.GetFromWindowId(GetWindowId(window));
+                //    appWindow.Resize(new SizeInt32(800, uiHeight));
+                //};
+
+                window.Activate();
+            });
+        }
+
+        private WindowId GetWindowId(Window window)
+        {
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+            return Win32Interop.GetWindowIdFromWindow(hwnd);
+        }
+    }
+
+    internal static class UIThreadHelper
+    {
+        private static DispatcherQueue _dispatcherQueue;
+
+        /// 
+
+        /// Call this once from the UI thread during app startup (e.g., in App.xaml.cs or MainWindow).
+        /// 
+
+        internal static void Initialize(DispatcherQueue dispatcherQueue)
+        {
+            _dispatcherQueue = dispatcherQueue ?? throw new ArgumentNullException(nameof(dispatcherQueue));
+        }
+
+        /// 
+
+        /// Executes the given action on the UI thread.
+        /// 
+
+        internal static void RunOnUIThread(Action action)
+        {
+            if (_dispatcherQueue == null)
+            {
+                throw new InvalidOperationException("UIThreadHelper is not initialized. Call Initialize() from the UI thread first.");
+            }
+
+            if (!_dispatcherQueue.HasThreadAccess)
+            {
+                _dispatcherQueue.TryEnqueue(() => action());
+            }
+            else
+            {
+                action();
+            }
+        }
+    }
+#endif
+
     internal class WebView2WebUi : IWebUI
     {
         private CoreUIParent _parent;
@@ -113,22 +200,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 
         private AuthorizationResult InvokeEmbeddedWebview(Uri startUri, Uri endUri, CancellationToken cancellationToken)
         {
-#if WINRT
-            // Use the WinUI 3 implementation
-            var window = new WinUI3WindowWithWebView2(
-                _parent.OwnerWindow,
-                _parent?.EmbeddedWebviewOptions,
-                _requestContext.Logger,
-                startUri,
-                endUri);
-
-            // DisplayDialogAndInterceptUriAsync is async, so we need to block here for the sync signature
-            // (This is similar to how the WinForms implementation blocks)
-            return window.DisplayDialogAndInterceptUriAsync(cancellationToken)
-                            .GetAwaiter()
-                            .GetResult();
-
-#else
+#if !WINRT
             using (var form = new WinFormsPanelWithWebView2(
                 _parent.OwnerWindow,
                 _parent?.EmbeddedWebviewOptions,
@@ -138,6 +210,20 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             {
                 return form.DisplayDialogAndInterceptUri(cancellationToken);
             }
+#else
+                    var browserWindow = new BrowserWindow();
+                    browserWindow.Show();
+            //UIThreadHelper.Initialize(DispatcherQueue.GetForCurrentThread());
+            //Task.Run(() =>
+            //{
+            //    UIThreadHelper.RunOnUIThread(() =>
+            //    {
+            //        var browserWindow = new BrowserWindow();
+            //        browserWindow.Show();
+            //    });
+            ////});
+            return new AuthorizationResult();
+            //throw new NotSupportedException("WebView2WebUi is only supported on Windows with WinRT enabled.");
 #endif
         }
 
