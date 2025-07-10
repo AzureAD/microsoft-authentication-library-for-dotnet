@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Client
         public const string RedirectUriValidationFailed = "redirect_uri_validation_failed";
 
         /// <summary>
-        /// The request could not be preformed because of an unknown failure in the UI flow.*
+        /// The request could not be performed because of an unknown failure in the UI flow.*
         /// <para>Mitigation</para>
         /// Inform the user.
         /// </summary>
@@ -558,7 +558,7 @@ namespace Microsoft.Identity.Client
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
         /// <summary>
-        /// The request could not be preformed because the network is down.
+        /// The request could not be performed because the network is down.
         /// <para>Mitigation [App development]</para> In the application you could either inform the user that there are network issues
         /// or retry later
         /// </summary>

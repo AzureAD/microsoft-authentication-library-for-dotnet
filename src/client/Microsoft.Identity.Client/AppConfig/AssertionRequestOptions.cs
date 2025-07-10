@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
         public IEnumerable<string> ClientCapabilities { get; set; }
 
         /// <summary>
-        /// FMI path to be used for client assertion. Tokens are assocaited with this path in the cache.
+        /// FMI path to be used for client assertion. Tokens are associated with this path in the cache.
         /// </summary>
         public string ClientAssertionFmiPath { get; set; }
     }

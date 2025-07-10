@@ -1,0 +1,20 @@
+﻿# .github/workflows/spellcheck.yml
+name: Spell check
+on: [pull_request]
+
+jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          check_filenames: true           # also scan file names
+          ignore_words_file: .codespellignore
+          skip: >
+            src/client/Microsoft.Identity.Client/json/**,
+            tests/**,
+            devapps/**,
+            build/**,
+            docs/**,
+            prototype/**
