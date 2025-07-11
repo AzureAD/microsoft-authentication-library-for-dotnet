@@ -37,15 +37,21 @@ namespace Microsoft.Identity.Client.AuthScheme.Attribute
             _fmiPath = fmiPath ?? throw new ArgumentNullException(nameof(fmiPath), "Fmi Path cannot be null");
         }
 
+        //No operation needed for formatting the result in this case. Mise will combine this with the authZ token.
         public void FormatResult(AuthenticationResult authenticationResult)
         {
             //No Op
         }
 
+        /// <summary>
+        /// Need to acquire attribute token for the Attribute service.
+        /// Then the attribute token will be provided as a parameter to the AuthN request.
+        /// </summary>
+        /// <returns></returns>
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             //Acquire token for Attribute service using MSAL
-            //Can this be acquired from MISE?
+            //Can this be acquired from MISE since it is already acquiring this token?
             string authToken = GetAttributeAuthTokenAsync().GetAwaiter().GetResult();
 
             //Contact Attribute service to get the attribute token

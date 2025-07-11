@@ -1199,6 +1199,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible";
 
-        public static string AttributeTokenRequestFailed { get; internal set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string AttributeTokenRequestFailed = "attribute_token_request_failed";
     }
 }
