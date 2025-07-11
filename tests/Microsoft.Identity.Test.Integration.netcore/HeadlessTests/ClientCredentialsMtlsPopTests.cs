@@ -67,5 +67,53 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Assert: Verify that the token was fetched from cache on the second request
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
         }
+
+        [DoNotRunOnLinux] // POP is not supported on Linux
+        [TestMethod]
+        public async Task BindingCertificate_Is_Surfaced_In_SniFlow_And_Null_In_BearerFlow_TestAsync()
+        {
+            // ---------- Arrange ----------
+            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            X509Certificate2 cert = settings.GetCertificate();
+
+            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                .Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3")
+                .WithCertificate(cert, sendX5C: true)
+                .WithExperimentalFeatures()
+                .WithTestLogging()
+                .Build();
+
+            // ---------- Act (SNI PoP token) ----------
+            AuthenticationResult sniResult = await cca
+                .AcquireTokenForClient(settings.AppScopes)
+                .WithMtlsProofOfPossession()
+                .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice")
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // ---------- Assert (SNI PoP) ----------
+            Assert.IsNotNull(sniResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint,
+                            sniResult.BindingCertificate.Thumbprint,
+                            "BindingCertificate must match the certificate supplied via WithCertificate().");
+            Assert.AreEqual(Constants.MtlsPoPTokenType,
+                            sniResult.TokenType,
+                            "Token type should be MTLS PoP.");
+
+            // ---------- Act (plain bearer token) ----------
+            AuthenticationResult bearerResult = await cca
+                .AcquireTokenForClient(settings.AppScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // ---------- Assert (bearer) ----------
+            Assert.IsNull(bearerResult.BindingCertificate,
+                          "BindingCertificate should be null for non-SNI / bearer tokens.");
+            Assert.AreEqual("Bearer",
+                            bearerResult.TokenType,
+                            "Token type should be standard Bearer.");
+        }
     }
 }
