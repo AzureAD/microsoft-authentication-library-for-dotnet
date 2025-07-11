@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                 GetAdditionalBodyParameters(userAssertion), cancellationToken)
                                             .ConfigureAwait(false);
 
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
         }
 
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
