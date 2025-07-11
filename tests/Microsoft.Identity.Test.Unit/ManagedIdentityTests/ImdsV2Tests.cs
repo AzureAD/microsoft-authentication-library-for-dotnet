@@ -21,20 +21,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string CsrMetadataEndpoint = "http://169.254.169.254/metadata/identity/getPlatformMetadata";
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
-        [TestInitialize]
-        public override void TestInitialize()
-        {
-            base.TestInitialize();
-            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
-        }
-
-        [TestCleanup]
-        public override void TestCleanup()
-        {
-            base.TestCleanup();
-            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
-        }
-        
         [TestMethod]
         public async Task GetCsrMetadataAsyncSucceeds()
         {

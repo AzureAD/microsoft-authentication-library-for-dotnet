@@ -25,20 +25,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
-        [TestInitialize]
-        public override void TestInitialize()
-        {
-            base.TestInitialize();
-            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
-        }
-
-        [TestCleanup]
-        public override void TestCleanup()
-        {
-            base.TestCleanup();
-            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
-        }
-        
         [DataTestMethod] // see test class header: all sources that allow UAMI
         [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]

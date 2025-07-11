@@ -43,7 +43,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             var handler = new ManagedIdentityAuthRequest(
                 ServiceBundle,
                 requestParams,
-                managedIdentityParameters);
+                managedIdentityParameters,
+                _managedIdentityApplication.ManagedIdentityClient);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
