@@ -20,20 +20,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
-        [TestInitialize]
-        public override void TestInitialize()
+        public ImdsTests()
         {
-            base.TestInitialize();
-            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
+            ManagedIdentityEnabled = true;
         }
 
-        [TestCleanup]
-        public override void TestCleanup()
-        {
-            base.TestCleanup();
-            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
-        }
-        
         [DataTestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI

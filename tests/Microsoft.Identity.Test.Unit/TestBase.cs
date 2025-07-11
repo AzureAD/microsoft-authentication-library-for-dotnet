@@ -3,10 +3,12 @@
 
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -18,6 +20,8 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public partial class TestBase
     {
+        protected bool ManagedIdentityEnabled { get; set; } = false;
+
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext context)
         {
@@ -36,6 +40,14 @@ namespace Microsoft.Identity.Test.Unit
         [TestInitialize]
         public virtual void TestInitialize()
         {
+            if (ManagedIdentityEnabled)
+            {
+                ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
+                typeof(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityClient)
+                    .GetField("s_identitySource", BindingFlags.Static | BindingFlags.NonPublic)
+                    .SetValue(null, null);
+            }
+
 #if NETFRAMEWORK
             Trace.WriteLine("Framework: .NET FX");
 #elif NET
@@ -48,6 +60,15 @@ namespace Microsoft.Identity.Test.Unit
         [TestCleanup]
         public virtual void TestCleanup()
         {
+            if (ManagedIdentityEnabled)
+            {
+                ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
+                // set it null using reflection, since it is a private static field
+                typeof(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityClient)
+                    .GetField("s_identitySource", BindingFlags.Static | BindingFlags.NonPublic)
+                    .SetValue(null, null);
+            }
+
             Trace.WriteLine("Test finished " + TestContext.TestName);
         }
 
