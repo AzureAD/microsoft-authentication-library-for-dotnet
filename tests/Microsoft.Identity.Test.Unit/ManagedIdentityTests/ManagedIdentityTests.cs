@@ -41,6 +41,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            base.TestInitialize();
+            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
+        }
+
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            base.TestCleanup();
+            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
+        }
+
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]

@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         private AbstractManagedIdentity identitySource;
-        internal ManagedIdentitySource sourceName = ManagedIdentitySource.None;
+        internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
             RequestContext requestContext,
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private async Task<AbstractManagedIdentity> SelectManagedIdentitySourceAsync(RequestContext requestContext)
         {
-            var source = (sourceName != ManagedIdentitySource.None) ? sourceName : await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
+            var source = (s_sourceName != ManagedIdentitySource.None) ? s_sourceName : await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
             return source switch
             {
                 ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
@@ -74,40 +74,40 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 if (!string.IsNullOrEmpty(identityServerThumbprint))
                 {
                     logger?.Info("[Managed Identity] Service Fabric detected.");
-                    sourceName = ManagedIdentitySource.ServiceFabric;
+                    s_sourceName = ManagedIdentitySource.ServiceFabric;
                 }
                 else
                 {
                     logger?.Info("[Managed Identity] App Service detected.");
-                    sourceName = ManagedIdentitySource.AppService;
+                    s_sourceName = ManagedIdentitySource.AppService;
                 }
             }
             else if (!string.IsNullOrEmpty(msiSecretMachineLearning) && !string.IsNullOrEmpty(msiEndpoint))
             {
                 logger?.Info("[Managed Identity] Machine Learning detected.");
-                sourceName = ManagedIdentitySource.MachineLearning;
+                s_sourceName = ManagedIdentitySource.MachineLearning;
             }
             else if (!string.IsNullOrEmpty(msiEndpoint))
             {
                 logger?.Info("[Managed Identity] Cloud Shell detected.");
-                sourceName = ManagedIdentitySource.CloudShell;
+                s_sourceName = ManagedIdentitySource.CloudShell;
             }
             else if (ValidateAzureArcEnvironment(identityEndpoint, imdsEndpoint, logger))
             {
                 logger?.Info("[Managed Identity] Azure Arc detected.");
-                sourceName = ManagedIdentitySource.AzureArc;
+                s_sourceName = ManagedIdentitySource.AzureArc;
             }
             else if (await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext).ConfigureAwait(false))
             {
                 logger?.Info("[Managed Identity] ImdsV2 detected.");
-                sourceName = ManagedIdentitySource.ImdsV2;
+                s_sourceName = ManagedIdentitySource.ImdsV2;
             }
             else
             {
-                sourceName = ManagedIdentitySource.DefaultToImds;
+                s_sourceName = ManagedIdentitySource.DefaultToImds;
             }
 
-            return sourceName;
+            return s_sourceName;
         }
 
         // Detect managed identity source based on the availability of environment variables.

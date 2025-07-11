@@ -58,9 +58,9 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         public async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync()
         {
-            if (ManagedIdentityClient.sourceName != ManagedIdentitySource.None)
+            if (ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None)
             {
-                return ManagedIdentityClient.sourceName;
+                return ManagedIdentityClient.s_sourceName;
             }
 
             // Create a temporary RequestContext for the CSR metadata probe request.
