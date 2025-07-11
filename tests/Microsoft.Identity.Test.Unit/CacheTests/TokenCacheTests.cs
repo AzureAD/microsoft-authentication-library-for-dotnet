@@ -1203,7 +1203,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             serializedCache = ((ITokenCacheSerializer)cache).SerializeMsalV3();
             ((ITokenCacheSerializer)cache).DeserializeMsalV3(serializedCache);
             // item count should not change because old cache entries should have
-            // been overriden
+            // been overridden
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
