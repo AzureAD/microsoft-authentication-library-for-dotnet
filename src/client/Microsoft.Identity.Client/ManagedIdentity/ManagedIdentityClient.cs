@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
-        private AbstractManagedIdentity identitySource;
+        private static AbstractManagedIdentity s_identitySource;
         public static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
@@ -27,15 +27,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
-            if (identitySource == null)
+            if (s_identitySource == null)
             {
                 using (requestContext.Logger.LogMethodDuration())
                 {
-                    identitySource = await SelectManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
+                    s_identitySource = await SelectManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
                 }
             }
 
-            return await identitySource.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+            return await s_identitySource.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
