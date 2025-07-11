@@ -153,11 +153,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
             ManagedIdentityClient managedIdentityClient = 
-                new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
+                new ManagedIdentityClient();
 
             ManagedIdentityResponse managedIdentityResponse =
                 await managedIdentityClient
-                .SendTokenRequestForManagedIdentityAsync(_managedIdentityParameters, cancellationToken)
+                .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
                 .ConfigureAwait(false);
 
             var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);

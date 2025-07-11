@@ -55,13 +55,28 @@ namespace Microsoft.Identity.Client
                 resource);
         }
 
+        /// <inheritdoc/>
+        public async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync()
+        {
+            if (ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None)
+            {
+                return ManagedIdentityClient.s_sourceName;
+            }
+
+            // Create a temporary RequestContext for the CSR metadata probe request.
+            var csrMetadataProbeRequestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, CancellationToken.None);
+
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(csrMetadataProbeRequestContext).ConfigureAwait(false);
+        }
+
         /// <summary>
         /// Detects and returns the managed identity source available on the environment.
         /// </summary>
         /// <returns>Managed identity source detected on the environment if any.</returns>
-        public static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync()
+        [Obsolete("Use GetManagedIdentitySourceAsync() instead as an instance method of ManagedIdentityApplication. This method is no longer static.")]
+        public static ManagedIdentitySource GetManagedIdentitySource()
         {
-            return await ManagedIdentityClient.GetManagedIdentitySourceAsync().ConfigureAwait(false);
+            return ManagedIdentityClient.GetManagedIdentitySource();
         }
     }
 }

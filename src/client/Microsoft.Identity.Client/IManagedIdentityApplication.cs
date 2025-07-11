@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client
 {
@@ -27,5 +28,11 @@ namespace Microsoft.Identity.Client
         /// <see cref="AcquireTokenForManagedIdentityParameterBuilder.WithForceRefresh(bool)"/>
         /// </remarks>
         AcquireTokenForManagedIdentityParameterBuilder AcquireTokenForManagedIdentity(string resource);
+
+        /// <summary>
+        /// Detects and returns the managed identity source available on the environment.
+        /// </summary>
+        /// <returns>Managed identity source detected on the environment if any.</returns>
+        Task<ManagedIdentitySource> GetManagedIdentitySourceAsync();
     }
 }

@@ -1,4 +1,5 @@
 const Microsoft.Identity.Client.MsalError.InvalidManagedIdentityIdType = "invalid_managed_identity_id_type" -> string
 const Microsoft.Identity.Client.MsalError.MissingManagedIdentityEnvVar = "missing_managed_identity_env_var" -> string
+Microsoft.Identity.Client.IManagedIdentityApplication.GetManagedIdentitySourceAsync() -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
+Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync() -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ImdsV2 = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
-static Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync() -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>

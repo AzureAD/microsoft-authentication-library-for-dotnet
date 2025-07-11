@@ -41,6 +41,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            base.TestInitialize();
+            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
+        }
+
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            base.TestCleanup();
+            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
+        }
+
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
@@ -50,16 +64,26 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, ManagedIdentitySource.ServiceFabric)]
         [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
+        // TODO: Add test case for IMDSV2
         public async Task GetManagedIdentityTests(
             string endpoint,
             ManagedIdentitySource managedIdentitySource, 
             ManagedIdentitySource expectedManagedIdentitySource)
         {
             using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                Assert.AreEqual(expectedManagedIdentitySource, await ManagedIdentityApplication.GetManagedIdentitySourceAsync().ConfigureAwait(false));
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                Assert.AreEqual(expectedManagedIdentitySource, await mi.GetManagedIdentitySourceAsync().ConfigureAwait(false));
             }
         }
 
