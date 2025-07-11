@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Client
         /// MSAL.NET requires a tenanted authority (i.e., an authority with a tenant ID) for mTLS to be specified when the application is built, but none was provided.
         /// <para>Mitigation</para>
         /// Ensure that a tenanted authority, which includes a specific tenant ID, is specified during the application configuration. 
-        /// For example, use "https://login.microsoftonline.com/{tenantId}" or a similar URL structure.
+        /// For example, use "https://login.microsfoftonline.com/{tenantId}" or a similar URL structure.
         /// </summary>
         public const string MissingTenantedAuthority = "missing_tenanted_authority";
 
