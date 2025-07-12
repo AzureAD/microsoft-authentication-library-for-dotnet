@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class ImdsV2Tests : TestBase
     {
         private const string serverHeaderImdsVersion = "IMDS/150.870.65.1325";
-        private const string CsrMetadataEndpoint = "http://169.254.169.254/metadata/identity/getPlatformMetadata";
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         public ImdsV2Tests()
@@ -38,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
 
                 httpManager.AddManagedIdentityMockHandler(
-                    CsrMetadataEndpoint,
+                    ManagedIdentityTests.CsrMetadataEndpoint,
                     ManagedIdentityTests.Resource,
                     MockHelpers.GetCsrMetadataSuccessfulResponse(),
                     ManagedIdentitySource.ImdsV2,
@@ -62,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // First attempt fails with NOT_FOUND (404)
                 httpManager.AddManagedIdentityMockHandler(
-                    CsrMetadataEndpoint,
+                    ManagedIdentityTests.CsrMetadataEndpoint,
                     ManagedIdentityTests.Resource,
                     MockHelpers.GetMsiImdsErrorResponse(),
                     ManagedIdentitySource.ImdsV2,
@@ -70,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Second attempt succeeds
                 httpManager.AddManagedIdentityMockHandler(
-                    CsrMetadataEndpoint,
+                    ManagedIdentityTests.CsrMetadataEndpoint,
                     ManagedIdentityTests.Resource,
                     MockHelpers.GetCsrMetadataSuccessfulResponse(),
                     ManagedIdentitySource.ImdsV2,
@@ -93,7 +92,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
 
                 httpManager.AddManagedIdentityMockHandler(
-                    CsrMetadataEndpoint,
+                    ManagedIdentityTests.CsrMetadataEndpoint,
                     ManagedIdentityTests.Resource,
                     MockHelpers.GetCsrMetadataSuccessfulResponse(),
                     ManagedIdentitySource.ImdsV2,
@@ -116,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
 
                 httpManager.AddManagedIdentityMockHandler(
-                    CsrMetadataEndpoint,
+                    ManagedIdentityTests.CsrMetadataEndpoint,
                     ManagedIdentityTests.Resource,
                     MockHelpers.GetCsrMetadataSuccessfulResponse(),
                     ManagedIdentitySource.ImdsV2,
@@ -142,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 for (int i = 0; i < Num404Errors; i++)
                 {
                     httpManager.AddManagedIdentityMockHandler(
-                        CsrMetadataEndpoint,
+                        ManagedIdentityTests.CsrMetadataEndpoint,
                         ManagedIdentityTests.Resource,
                         MockHelpers.GetMsiImdsErrorResponse(),
                         ManagedIdentitySource.ImdsV2,
