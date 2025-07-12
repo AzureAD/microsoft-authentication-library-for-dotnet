@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -22,6 +23,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string AppService = "App Service";
         internal const string AppServiceEndpoint = "http://127.0.0.1:41564/msi/token";
         internal const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
+
+        public AppServiceTests()
+        {
+            ManagedIdentityEnabled = true;
+        }
 
         [TestMethod]
         public async Task AppServiceInvalidEndpointAsync()
@@ -55,16 +61,25 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
-        public void TestAppServiceUpgradeScenario(
+        public async Task TestAppServiceUpgradeScenario(
             string endpoint,
             ManagedIdentitySource managedIdentitySource,
             ManagedIdentitySource expectedManagedIdentitySource)
         {
             using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
             {
                 SetUpgradeScenarioEnvironmentVariables(managedIdentitySource, endpoint);
 
-                Assert.AreEqual(expectedManagedIdentitySource, ManagedIdentityApplication.GetManagedIdentitySource());
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                Assert.AreEqual(expectedManagedIdentitySource, await mi.GetManagedIdentitySourceAsync().ConfigureAwait(false));
             }
         }
     }

@@ -23,6 +23,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string AzureArc = "Azure Arc";
 
+        public AzureArcTests()
+        {
+            ManagedIdentityEnabled = true;
+        }
+
         [DataTestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
