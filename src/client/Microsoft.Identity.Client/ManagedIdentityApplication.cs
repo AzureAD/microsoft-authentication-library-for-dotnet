@@ -2,15 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client
@@ -28,6 +24,8 @@ namespace Microsoft.Identity.Client
         : ApplicationBase,
             IManagedIdentityApplication
     {
+        internal ManagedIdentityClient ManagedIdentityClient { get; }
+        
         internal ManagedIdentityApplication(
             ApplicationConfiguration configuration)
             : base(configuration)
@@ -37,6 +35,8 @@ namespace Microsoft.Identity.Client
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
 
             this.ServiceBundle.ApplicationLogger.Verbose(()=>$"ManagedIdentityApplication {configuration.GetHashCode()} created");
+        
+            ManagedIdentityClient = new ManagedIdentityClient();
         }
 
         // Stores all app tokens
