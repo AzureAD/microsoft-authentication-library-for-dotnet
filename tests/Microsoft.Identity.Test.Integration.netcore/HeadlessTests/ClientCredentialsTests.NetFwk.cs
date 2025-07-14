@@ -312,6 +312,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
               GetExpectedCacheKey(settings.ClientId, settings.TenantId),
               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
 
+            Assert.IsNull(authResult.BindingCertificate,
+                          "BindingCertificate should be null for bearer tokens.");
+
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
                .AcquireTokenForClient(settings.AppScopes)
@@ -330,6 +333,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(
                GetExpectedCacheKey(settings.ClientId, settings.TenantId),
                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+
+            Assert.IsNull(authResult.BindingCertificate,
+                          "BindingCertificate should be null for bearer tokens.");
         }
 
         private static IConfidentialClientApplication CreateApp(

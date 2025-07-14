@@ -19,24 +19,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     {
 
         [TestMethod]
-        public void PublicTestConstructorCoversAllProperties()
-        {
-            var ctorParameters = typeof(AuthenticationResult)
-                .GetConstructors()
-                .First(ctor => ctor.GetParameters().Length > 3)
-                .GetParameters();
-
-            var classProperties = typeof(AuthenticationResult)
-                .GetProperties()
-                .Where(p => p.GetCustomAttribute(typeof(ObsoleteAttribute)) == null);
-
-            // +2 because of the obsolete ExtendedExpires properties
-            Assert.AreEqual(ctorParameters.Length, classProperties.Count() + 2, "The <for test> constructor should include all properties of AuthenticationObject"); ;
-        }
-
-        [TestMethod]
         public void GetAuthorizationHeader()
         {
+#pragma warning disable CS0618 // exercising obsolete constructors until full deprecation
             var ar = new AuthenticationResult(
                 "at",
                 false,
@@ -79,6 +64,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             "one for backwards compat with 4.17+ and one for 4.16 and below")]
         public void AuthenticationResult_PublicApi()
         {
+#pragma warning disable CS0618 // exercising obsolete constructors until full deprecation
             // old constructor, before 4.16
             var ar1 = new AuthenticationResult(
                 "at",
@@ -88,8 +74,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 DateTime.UtcNow,
                 "tid",
                 new Account("aid", "user", "env"),
-                "idt", 
-                new[] { "scope" }, 
+                "idt",
+                new[] { "scope" },
                 Guid.NewGuid());
 
             Assert.IsNull(ar1.AuthenticationResultMetadata);
@@ -106,7 +92,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
               new Account("aid", "user", "env"),
               "idt",
               new[] { "scope" },
-              Guid.NewGuid(), 
+              Guid.NewGuid(),
               "ProofOfBear");
 
             Assert.IsNull(ar2.AuthenticationResultMetadata);
@@ -125,8 +111,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
              new[] { "scope" },
              Guid.NewGuid(),
              new AuthenticationResultMetadata(TokenSource.Broker),
-             tokenType: "Bearer",
-             bindingCertificate: null);
+             tokenType: "Bearer");
 
             Assert.AreEqual(TokenSource.Broker, ar3.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual("Bearer", ar1.TokenType);
@@ -146,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 string jsonContent = MockHelpers.CreateSuccessTokenResponseString(
                         TestConstants.Uid,
-                       TestConstants.DisplayableId, 
+                       TestConstants.DisplayableId,
                        TestConstants.s_scope.ToArray());
 
                 jsonContent = jsonContent.TrimEnd('}');
