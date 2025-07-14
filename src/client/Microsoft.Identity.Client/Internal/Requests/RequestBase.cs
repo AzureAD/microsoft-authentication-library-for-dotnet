@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return AssertionType.None;
         }
 
-        protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse)
+        protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse, CancellationToken cancellationToken = default)
         {
             // developer passed in user object.
             AuthenticationRequestParameters.RequestContext.Logger.Info("Checking client info returned from the server..");
@@ -339,7 +339,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var idtItem = tuple.Item2;
             Account account = tuple.Item3;
 
-            return new AuthenticationResult(
+            return await AuthenticationResult.CreateAsync(
                 atItem,
                 idtItem,
                 AuthenticationRequestParameters.AuthenticationScheme,
@@ -348,7 +348,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
                 msalTokenResponse.SpaAuthCode,
-                msalTokenResponse.CreateExtensionDataStringMap());
+                msalTokenResponse.CreateExtensionDataStringMap(),
+                cancellationToken).ConfigureAwait(false);
         }
 
         protected virtual void ValidateAccountIdentifiers(ClientInfo fromServer)
@@ -517,7 +518,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
+        internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(
+            MsalServiceException e, 
+            MsalAccessTokenCacheItem cachedAccessTokenItem, 
+            CancellationToken cancellationToken)
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
@@ -530,7 +534,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var idToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
 
-                return new AuthenticationResult(
+                return await AuthenticationResult.CreateAsync(
                     cachedAccessTokenItem,
                     idToken,
                     AuthenticationRequestParameters.AuthenticationScheme,
@@ -539,7 +543,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.ApiEvent,
                     account,
                     spaAuthCode: null,
-                    additionalResponseParameters: null);
+                    additionalResponseParameters: null, 
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");

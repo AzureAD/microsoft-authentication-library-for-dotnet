@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Extensibility
         public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; set; }
 
         /// <summary>
-        /// Enables the developer to provide a custom authentication extension.
+        /// Important: IAuthenticationOperation2 exists, for asynchronous token formatting.
         /// </summary>
         public IAuthenticationOperation AuthenticationOperation { get; set; }
 

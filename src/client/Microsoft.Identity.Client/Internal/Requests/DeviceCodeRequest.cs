@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await _deviceCodeParameters.DeviceCodeResultCallback(deviceCodeResult).ConfigureAwait(false);
 
             var msalTokenResponse = await WaitForTokenResponseAsync(deviceCodeResult, cancellationToken).ConfigureAwait(false);
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<MsalTokenResponse> WaitForTokenResponseAsync(

@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new MsalServiceException(MsalError.JsonParseError, MsalErrorMessage.JsonParseErrorMessage, ex);
             }
 
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<MsalTokenResponse> GetTokenResponseAsync(CancellationToken cancellationToken)

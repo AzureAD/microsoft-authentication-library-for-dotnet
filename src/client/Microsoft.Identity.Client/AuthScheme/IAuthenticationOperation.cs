@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client.AuthScheme
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// Creates the access token that goes into an Authorization HTTP header. 
         /// </summary>
         void FormatResult(AuthenticationResult authenticationResult);
-
+        
         /// <summary>
         /// Expected to match the token_type parameter returned by ESTS. Used to disambiguate
         /// between ATs of different types (e.g. Bearer and PoP) when loading from cache etc.
