@@ -2,9 +2,9 @@
 
 ## Overview
 
-To support MSI V2 authentication with the `/credential` endpoint, the **Azure SDK** leverages the `IMsalMtlsHttpClientFactory` interface and **certificate management APIs** for secure communication with Azure AD using **mutual TLS (mTLS)**.
+To support MSI V2 authentication with the new `/issuecredential` endpoint, the **Azure SDK** leverages the `IMsalMtlsHttpClientFactory` interface and **certificate management APIs** for secure communication with Azure AD using **mutual TLS (mTLS)**.
 
-This section covers:
+_This section covers:_
 - How Azure SDK uses **`IMsalMtlsHttpClientFactory`** for MTLS authentication.
 - How SDKs interact with the **certificate APIs** to obtain the binding certificate certificates.
 - The **new `CertificateRefreshed` event**, which notifies when a binding certificate is updated.
@@ -13,14 +13,13 @@ This section covers:
 
 ## **Handling Certificate Rotation for Long-Lived Clients**
 
-The Problem: Certificate Expiry and Rotation
-
+**_The Problem: Certificate Expiry and Rotation_**
 - mTLS Proof of Possession (PoP) tokens are signed by a binding certificate.
 - The binding certificate is valid for 90 days.
 - A new certificate is made available 5 days before expiration.
 - The SDKs consuming MSAL (customizing httpclient) must ensure that its HttpClient uses the latest certificate.
 
-Proposed Solution
+**_Proposed Solution_**
 - SDK clients must monitor certificate updates and refresh their HttpClient dynamically.
 - MSAL exposes an event-driven model to notify when the binding certificate is refreshed.
 
