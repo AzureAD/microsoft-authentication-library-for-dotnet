@@ -203,5 +203,52 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("Bearer", ar.TokenType, "Expected default token type to be 'Bearer'");
             Assert.AreEqual("Bearer some-access-token", ar.CreateAuthorizationHeader());
         }
+
+        /// <summary>
+        /// Tests that all public properties of AuthenticationResult have a public setter.
+        /// </summary>
+        [TestMethod]
+        public void AllPublicProperties_HavePublicSetter()
+        {
+            // ---- expected public-settable properties ----
+            string[] expected =
+            [
+                // core primitives
+                nameof(AuthenticationResult.AccessToken),
+                nameof(AuthenticationResult.UniqueId),
+                nameof(AuthenticationResult.ExpiresOn),
+                nameof(AuthenticationResult.TenantId),
+                nameof(AuthenticationResult.Account),
+                nameof(AuthenticationResult.IdToken),
+                nameof(AuthenticationResult.Scopes),
+                nameof(AuthenticationResult.CorrelationId),
+                nameof(AuthenticationResult.TokenType),
+
+                // SPA / mTLS extras
+                nameof(AuthenticationResult.SpaAuthCode),
+                nameof(AuthenticationResult.BindingCertificate),
+
+                // ancillary data
+                nameof(AuthenticationResult.AdditionalResponseParameters),
+                nameof(AuthenticationResult.ClaimsPrincipal),
+                nameof(AuthenticationResult.AuthenticationResultMetadata)
+            ];
+
+            // ---- reflection gather ----
+            var propsWithPublicSetter = typeof(AuthenticationResult)
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(p => p.GetCustomAttribute<ObsoleteAttribute>() == null)     // skip obsolete
+                .Where(p => p.GetSetMethod(/*nonPublic*/ false) != null)           // has public setter
+                .Select(p => p.Name)
+                .OrderBy(n => n)
+                .ToArray();
+
+            // ---- assertion ----
+            CollectionAssert.AreEquivalent(
+                expected.OrderBy(n => n).ToArray(),
+                propsWithPublicSetter,
+                "All non-obsolete public properties should expose a public setter."
+            );
+        }
     }
 }

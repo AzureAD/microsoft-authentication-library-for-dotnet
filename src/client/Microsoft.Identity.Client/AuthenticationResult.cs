@@ -238,14 +238,14 @@ namespace Microsoft.Identity.Client
         /// Guest AAD accounts have different oid claim values in each tenant. Use <see cref="Account.HomeAccountId"/> to uniquely identify users across tenants.
         /// See https://docs.microsoft.com/azure/active-directory/develop/id-tokens#payload-claims
         /// </remarks>
-        public string UniqueId { get; internal set; }
+        public string UniqueId { get; set; }
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the <see cref="AccessToken"/> property ceases to be valid.
         /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the
         /// service.
         /// </summary>
-        public DateTimeOffset ExpiresOn { get; internal set; }
+        public DateTimeOffset ExpiresOn { get; set; }
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in MSAL's extended LifeTime.
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Client
         /// Gets an identifier for the Azure AD tenant from which the token was acquired. This property will be null if tenant information is
         /// not returned by the service.
         /// </summary>
-        public string TenantId { get; internal set; }
+        public string TenantId { get; set; }
 
         /// <summary>
         /// Gets the account information. Some elements in <see cref="IAccount"/> might be null if not returned by the
@@ -267,39 +267,39 @@ namespace Microsoft.Identity.Client
         /// as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> or
         /// <see cref="IClientApplicationBase.RemoveAsync(IAccount)"/> for instance
         /// </summary>
-        public IAccount Account { get; internal set; }
+        public IAccount Account { get; set; }
 
         /// <summary>
         /// Gets the  Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
-        public string IdToken { get; internal set; }
+        public string IdToken { get; set; }
 
         /// <summary>
         /// Gets the granted scope values returned by the service.
         /// </summary>
-        public IEnumerable<string> Scopes { get; internal set; }
+        public IEnumerable<string> Scopes { get; set; }
 
         /// <summary>
         /// Gets the correlation id used for the request.
         /// </summary>
-        public Guid CorrelationId { get; internal set; }
+        public Guid CorrelationId { get; set; }
 
         /// <summary>
         /// Identifies the type of access token. By default tokens returned by Azure Active Directory are Bearer tokens.        
         /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
         /// </summary>
-        public string TokenType { get; internal set; }
+        public string TokenType { get; set; }
 
         /// <summary>
         /// Gets the SPA Authorization Code, if it was requested using WithSpaAuthorizationCode method on the
         /// AcquireTokenByAuthorizationCode builder. See https://aka.ms/msal-net/spa-auth-code for details.
         /// </summary>
-        public string SpaAuthCode { get; internal set; }
+        public string SpaAuthCode { get; set; }
 
         /// <summary>
         /// The X509 certificate bound to the access-token when mTLS-PoP was used.
         /// </summary>
-        public X509Certificate2 BindingCertificate { get; internal set; }
+        public X509Certificate2 BindingCertificate { get; set; }
 
         /// <summary>
         /// Exposes additional response parameters returned by the token issuer (AAD).
@@ -308,19 +308,19 @@ namespace Microsoft.Identity.Client
         /// Not all parameters are added here, only the ones that MSAL doesn't interpret itself and only scalars.
         /// Not supported on mobile frameworks (e.g. net8-android or net8-ios)
         /// </remarks>
-        public IReadOnlyDictionary<string, string> AdditionalResponseParameters { get; internal set; }
+        public IReadOnlyDictionary<string, string> AdditionalResponseParameters { get; set; }
 
         /// <summary>
         /// All the claims present in the ID token.
         /// </summary>
-        public ClaimsPrincipal ClaimsPrincipal { get; internal set; }
+        public ClaimsPrincipal ClaimsPrincipal { get; set; }
 
         internal ApiEvent ApiEvent { get; set; }
 
         /// <summary>
         /// Contains metadata for the Authentication result.
         /// </summary>
-        public AuthenticationResultMetadata AuthenticationResultMetadata { get; internal set; }
+        public AuthenticationResultMetadata AuthenticationResultMetadata { get; set; }
 
         /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so
