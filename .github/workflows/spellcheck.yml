@@ -1,4 +1,4 @@
-﻿# .github/workflows/spellcheck.yml
+# .github/workflows/spellcheck.yml
 name: Spell check
 on: [pull_request]
 
@@ -7,14 +7,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: codespell-project/actions-codespell@v2
+
+      ############################################################
+      # 1️⃣  Built-in codespell action  → PR annotations
+      ############################################################
+      - name: Codespell (built-in dictionary)
+        uses: codespell-project/actions-codespell@v2
         with:
           check_filenames: true           # also scan file names
           ignore_words_file: .codespellignore
           skip: >
-            src/client/Microsoft.Identity.Client/json/**,
-            tests/**,
-            devapps/**,
-            build/**,
-            docs/**,
-            prototype/**
+            src/client/Microsoft.Identity.Client/json,
+            tests,
+            devapps,
+            build,
+            docs,
+            prototype,
+
+      ############################################################
+      # 2️⃣  Raw CLI pass  → enforces your custom typo pairs
+      ############################################################
+      - name: Install codespell
+        run: pip install --quiet codespell
+
+      - name: Codespell (custom pair list)
+        run: |
+          codespell --check-filenames \
+            --dictionary build/codespell_pairs.txt \
+            --ignore-words .codespellignore \
+            --skip "src/client/Microsoft.Identity.Client/json,tests,devapps,build,docs,prototype" \
+            .
