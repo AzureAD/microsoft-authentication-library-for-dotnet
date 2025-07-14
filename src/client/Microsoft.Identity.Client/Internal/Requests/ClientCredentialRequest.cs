@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         /// <summary>
-        /// Gets overriden scopes for client credentials flow
+        /// Gets overridden scopes for client credentials flow
         /// </summary>
         /// <param name="inputScopes"></param>
         /// <returns></returns>
