@@ -26,6 +26,7 @@ update the deprecated openURL(:) api to openURL(:options:completionHandler) in h
  
 ### Bug Fixes
 - Ensure instance of IMsalHttpClientFactory passed by the user is used for managed identity flows that do not require cert validation. See [Issue #5286](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5286)
+- Fix an URL typo in the API comments. See [issue 5277](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5277)
 
 4.72.0
 =======
