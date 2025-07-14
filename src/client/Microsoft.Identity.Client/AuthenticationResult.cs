@@ -247,9 +247,6 @@ namespace Microsoft.Identity.Client
 
                 AccessToken = msalAccessTokenCacheItem.Secret;
             }
-
-            // Note: Token formatting is NOT performed in this constructor.
-            // The caller (AuthenticationResultFactory) is responsible for calling FormatResult/FormatResultAsync
         }
 
         /// <summary>
