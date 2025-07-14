@@ -1017,3 +1017,4 @@ Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.ge
 Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.set -> void
 Microsoft.Identity.Client.AssertionRequestOptions.ClientAssertionFmiPath.get -> string
 Microsoft.Identity.Client.AssertionRequestOptions.ClientAssertionFmiPath.set -> void
+
