@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -42,6 +43,7 @@ namespace Microsoft.Identity.Client
         /// <param name="claimsPrincipal">Claims from the ID token</param>
         /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizationCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code. See https://aka.ms/msal-net/spa-auth-code</param>
         /// <param name="additionalResponseParameters">Other properties from the token response.</param>
+        /// <param name="bindingCertificate">Binding certificate used for mTLS-PoP authentication. This is only set when the authentication scheme is mTLS-PoP.</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -57,7 +59,8 @@ namespace Microsoft.Identity.Client
             AuthenticationResultMetadata authenticationResultMetadata = null,
             ClaimsPrincipal claimsPrincipal = null,
             string spaAuthCode = null,
-            IReadOnlyDictionary<string, string> additionalResponseParameters = null)
+            IReadOnlyDictionary<string, string> additionalResponseParameters = null,
+            X509Certificate2 bindingCertificate = null)
         {
             AccessToken = accessToken;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -76,6 +79,7 @@ namespace Microsoft.Identity.Client
             ClaimsPrincipal = claimsPrincipal;
             SpaAuthCode = spaAuthCode;
             AdditionalResponseParameters = additionalResponseParameters;
+            BindingCertificate = bindingCertificate;
         }
 
         /// <summary>
@@ -94,6 +98,7 @@ namespace Microsoft.Identity.Client
         /// <param name="correlationId">The correlation id of the authentication request</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
+        /// <param name="bindingCertificate">Binding certificate used for mTLS-PoP authentication. This is only set when the authentication scheme is mTLS-PoP.</param>
         /// <remarks>For backwards compatibility with MSAL 4.17-4.20 </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public AuthenticationResult(
@@ -108,7 +113,8 @@ namespace Microsoft.Identity.Client
           IEnumerable<string> scopes,
           Guid correlationId,
           AuthenticationResultMetadata authenticationResultMetadata,
-          string tokenType = "Bearer") :
+          string tokenType,
+          X509Certificate2 bindingCertificate) :
             this(
                 accessToken,
                 isExtendedLifeTimeToken,
@@ -121,7 +127,11 @@ namespace Microsoft.Identity.Client
                 scopes,
                 correlationId,
                 tokenType,
-                authenticationResultMetadata)
+                authenticationResultMetadata,
+                claimsPrincipal: null,
+                spaAuthCode: null,
+                additionalResponseParameters: null,
+                bindingCertificate: bindingCertificate)
         {
 
         }
@@ -291,6 +301,11 @@ namespace Microsoft.Identity.Client
         /// AcquireTokenByAuthorizationCode builder. See https://aka.ms/msal-net/spa-auth-code for details.
         /// </summary>
         public string SpaAuthCode { get; }
+
+        /// <summary>
+        /// The X509 certificate bound to the access-token when mTLS-PoP was used.
+        /// </summary>
+        public X509Certificate2 BindingCertificate { get; internal set; }
 
         /// <summary>
         /// Exposes additional response parameters returned by the token issuer (AAD).
