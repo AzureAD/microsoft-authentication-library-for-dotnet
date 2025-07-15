@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public void FormatResult(AuthenticationResult authenticationResult)
         {
-            //no-op
+            authenticationResult.BindingCertificate = _mtlsCert;
         }
 
         private static string ComputeX5tS256KeyId(X509Certificate2 certificate)

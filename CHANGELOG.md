@@ -1,12 +1,23 @@
+4.74.0
+======
+
+### Features
+* Deprecate ROPC flow in Public Client Applications https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5355.
+* AuthenticationResult exposes a new BindingCertificate property that returns the X.509 certificate bound to the access token in mTLS-PoP scenarios. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5370.
+
+### Bug fixes
+* MSAL now honors the DEFAULT_IDENTITY_CLIENT_ID environment variable when acquiring tokens from Azure Machine Learning managed-identity endpoint. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5350.
+
+
 4.73.1
 ======
 
 ### Features
-Deprecate AcquireTokenByIntegratedWindowsAuth API in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5345
+* Deprecate AcquireTokenByIntegratedWindowsAuth API in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5345
 
 ### Bug fixes
-Update native interop to 0.19.2 by @fengga in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5362 to solve broker bugs
-update the deprecated openURL(:) api to openURL(:options:completionHandler) in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5354
+* Update native interop to 0.19.2 by @fengga in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5362 to solve broker bugs
+* update the deprecated openURL(:) api to openURL(:options:completionHandler) in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5354
 
 4.73.0
 =======
@@ -26,6 +37,7 @@ update the deprecated openURL(:) api to openURL(:options:completionHandler) in h
  
 ### Bug Fixes
 - Ensure instance of IMsalHttpClientFactory passed by the user is used for managed identity flows that do not require cert validation. See [Issue #5286](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5286)
+- Fix a URL typo in the API comments. See [issue 5277](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5277)
 
 4.72.0
 =======
