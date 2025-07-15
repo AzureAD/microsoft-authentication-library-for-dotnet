@@ -93,7 +93,8 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                 return;
             }
 
-            // Extract tenant for CIAM-like scenarios
+            // Extract tenant for CIAM scenarios. In a CIAM scenario the issuer is expected to have "{tenant}.ciamlogin.com"
+            // as the host, even when using a custom domain.
             string tenant = null;
             try
             {

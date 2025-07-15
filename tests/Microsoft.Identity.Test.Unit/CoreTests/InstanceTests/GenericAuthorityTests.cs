@@ -338,26 +338,25 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                string authority = "https://demo.duendesoftware.com";
                 string wrongIssuer = "https://wrong.issuer.com";
 
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(httpManager)
-                    .WithOidcAuthority(authority)
+                    .WithOidcAuthority(TestConstants.GenericAuthority)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
                 // Create OIDC document with non-matching issuer
                 string validOidcDocumentWithWrongIssuer = TestConstants.GenericOidcResponse.Replace(
-                        $"\"issuer\":\"{authority}\"",
+                        $"\"issuer\":\"{TestConstants.GenericAuthority}\"",
                         $"\"issuer\":\"{wrongIssuer}\"");
 
                 // Mock OIDC endpoint response
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     ExpectedMethod = HttpMethod.Get,
-                    ExpectedUrl = authority + "/" + Constants.WellKnownOpenIdConfigurationPath,
+                    ExpectedUrl = $"{TestConstants.GenericAuthority}/{Constants.WellKnownOpenIdConfigurationPath}",
                     ResponseMessage = MockHelpers.CreateSuccessResponseMessage(validOidcDocumentWithWrongIssuer)
                 });
 
