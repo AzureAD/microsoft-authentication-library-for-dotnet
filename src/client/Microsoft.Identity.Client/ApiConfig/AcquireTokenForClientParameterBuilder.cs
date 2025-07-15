@@ -15,6 +15,8 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.OAuth2;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Microsoft.Identity.Client
 {
@@ -44,9 +46,9 @@ namespace Microsoft.Identity.Client
 
             if (!string.IsNullOrEmpty(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken))
             {
-                builder.WithAdditionalCacheKeyComponents(new SortedList<string, string>
+                builder.WithAdditionalCacheKeyComponents(new SortedList<string, Func<string>>
                 {
-                    { Constants.CertSerialNumber, confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken }
+                    { Constants.CertSerialNumber, () => { return confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken; } }
                 });
             }
 
@@ -114,6 +116,29 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Add extra body parameters to the token request. These parameters are added to the cache key to associate these parameters with the acquired token.
+        /// </summary>
+        /// <param name="extrabodyparams">List of additional body parameters</param>
+        /// <returns></returns>
+        public AcquireTokenForClientParameterBuilder WithExtraBodyParameters (Dictionary<string, Func<string>> extrabodyparams)
+        {
+            this.OnBeforeTokenRequest((data) =>
+            {
+               foreach (var param in extrabodyparams)
+                {
+                    if (param.Value == null)
+                    {
+                        data.BodyParameters.Add(param.Key, param.Value.Invoke());
+                    }
+                }
+                return Task.CompletedTask;
+            });
+
+            this.WithAdditionalCacheKeyComponents(extrabodyparams);
+            return this;
+        }
+
+        /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -143,9 +168,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(pathSuffix));
             }
 
-            var cacheKey = new SortedList<string, string>
+            var cacheKey = new SortedList<string, Func<string>>
             { 
-                { OAuth2Parameter.FmiPath, pathSuffix } 
+                { OAuth2Parameter.FmiPath, () => {return pathSuffix;} } 
             };
 
             this.WithAdditionalCacheKeyComponents(cacheKey);

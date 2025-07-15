@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
-        public SortedList<string, string> CacheKeyComponents => _commonParameters.CacheKeyComponents;
+        public SortedList<string, Func<string>> CacheKeyComponents => _commonParameters.CacheKeyComponents;
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <summary>
         /// If set, MSAL should add the key / value pairs from the provider to the token endpoint instead of generating a client assertion
         /// </summary>
-        public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get => _commonParameters.OnBeforeTokenRequestHandler; }
+        public IList<Func<OnBeforeTokenRequestData, Task>> OnBeforeTokenRequestHandler { get => _commonParameters.OnBeforeTokenRequestHandler; }
 
         public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 

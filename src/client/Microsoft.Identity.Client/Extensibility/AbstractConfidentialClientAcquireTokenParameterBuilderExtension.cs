@@ -34,7 +34,14 @@ namespace Microsoft.Identity.Client.Extensibility
                 throw new InvalidOperationException("Cannot set OnBeforeTokenRequest handler twice.");
             }
 
-            builder.CommonParameters.OnBeforeTokenRequestHandler = onBeforeTokenRequestHandler;
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
+            {
+                builder.CommonParameters.OnBeforeTokenRequestHandler = new List<Func<OnBeforeTokenRequestData, Task>> { onBeforeTokenRequestHandler };
+            }
+            else
+            {
+                builder.CommonParameters.OnBeforeTokenRequestHandler.Add(onBeforeTokenRequestHandler);
+            }
 
             return builder;
         }
@@ -80,7 +87,14 @@ namespace Microsoft.Identity.Client.Extensibility
                 throw new InvalidOperationException("Cannot set both an AuthenticaitonOperation and an OnBeforeTokenRequestHandler");
             }
 
-            builder.CommonParameters.OnBeforeTokenRequestHandler = authenticationExtension.OnBeforeTokenRequestHandler;
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
+            {
+                builder.CommonParameters.OnBeforeTokenRequestHandler = new List<Func<OnBeforeTokenRequestData, Task>> { authenticationExtension.OnBeforeTokenRequestHandler };
+            }
+            else
+            {
+                builder.CommonParameters.OnBeforeTokenRequestHandler.Add(authenticationExtension.OnBeforeTokenRequestHandler);
+            }
 
             if (authenticationExtension.AuthenticationOperation != null)
                 builder.WithAuthenticationOperation(authenticationExtension.AuthenticationOperation);
@@ -137,7 +151,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </remarks>
         internal static AbstractAcquireTokenParameterBuilder<T> WithAdditionalCacheKeyComponents<T>(
             this AbstractAcquireTokenParameterBuilder<T> builder,
-            IDictionary<string, string> cacheKeyComponents)
+            IDictionary<string, Func<string>> cacheKeyComponents)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
             if (cacheKeyComponents == null || cacheKeyComponents.Count == 0)
@@ -148,7 +162,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
             if (builder.CommonParameters.CacheKeyComponents == null)
             {
-                builder.CommonParameters.CacheKeyComponents = new SortedList<string, string>(cacheKeyComponents);
+                builder.CommonParameters.CacheKeyComponents = new SortedList<string, Func<string>>(cacheKeyComponents);
             }
             else
             {
@@ -187,9 +201,9 @@ namespace Microsoft.Identity.Client.Extensibility
             builder.CommonParameters.ClientAssertionFmiPath = fmiPath;
 
             // Add the fmi_path to the cache key so that it is used for cache lookups
-            var cacheKey = new SortedList<string, string>
+            var cacheKey = new SortedList<string, Func<string>>
             {
-                { "credential_fmi_path", fmiPath }
+                { "credential_fmi_path", () => { return fmiPath; } }
             };
 
             WithAdditionalCacheKeyComponents(builder, cacheKey);

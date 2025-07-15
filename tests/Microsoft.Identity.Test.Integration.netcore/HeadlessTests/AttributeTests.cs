@@ -11,6 +11,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 {
@@ -23,7 +25,6 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             //Arrange
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            //Fmi app/scenario parameters
             var clientId = "4df2cbbb-8612-49c1-87c8-f334d6d065ad";
             var scope = "api://AzureFMITokenExchange/.default";
 
@@ -32,22 +33,23 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/", "TenantId")
-                        .WithClientAssertion(() => GetFmiCredential())
+                        .WithClientSecret("ClientSecret")
                         .BuildConcrete();
 
             //Acquire AuthN
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
                                                     .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
+                                                    .WithExtraBodyParameters(new Dictionary<string, Func<string>>() {"Attributes", GetPdpAuthorization }) //Sets attributes in client credential request.
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
 
             //Assert
-
+            Assert.IsNotNull(authResult);
         }
 
-        private string GetFmiCredential()
+        private string GetPdpAuthorization()
         {
-            throw new NotImplementedException();
+            return "AttributeToken";
         }
     }
 }

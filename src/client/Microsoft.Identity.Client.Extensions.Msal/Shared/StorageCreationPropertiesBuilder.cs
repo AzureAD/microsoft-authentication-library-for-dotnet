@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// <param name="attribute2">Additional string attribute that will be used to decorate the secret</param>
         /// <returns>The augmented builder</returns>
         /// <remarks>
-        /// Attributes are used like scoping keys - their name and values must match the secrets in the KeyRing.
+        /// ExtraBodyParameters are used like scoping keys - their name and values must match the secrets in the KeyRing.
         /// A suggested pattern is to use a product name (or a group of products) and a version. If you need to increment the version,
         /// the secrets associated with the old version will be ignored.
         /// </remarks>

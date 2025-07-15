@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
@@ -27,10 +28,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IAuthenticationOperation AuthenticationOperation { get; set; } = new BearerAuthenticationOperation();
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
-        public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; internal set; }
+        public IList<Func<OnBeforeTokenRequestData, Task>> OnBeforeTokenRequestHandler { get; internal set; }
         public X509Certificate2 MtlsCertificate { get; internal set; }
         public List<string> AdditionalCacheParameters { get; set; }
-        public SortedList<string, string> CacheKeyComponents { get; internal set; }
+        public SortedList<string, Func<string>> CacheKeyComponents { get; internal set; }
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
     }
