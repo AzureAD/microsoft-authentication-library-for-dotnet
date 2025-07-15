@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Client
         public const string RedirectUriValidationFailed = "redirect_uri_validation_failed";
 
         /// <summary>
-        /// The request could not be preformed because of an unknown failure in the UI flow.*
+        /// The request could not be performed because of an unknown failure in the UI flow.*
         /// <para>Mitigation</para>
         /// Inform the user.
         /// </summary>
@@ -558,7 +558,7 @@ namespace Microsoft.Identity.Client
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
         /// <summary>
-        /// The request could not be preformed because the network is down.
+        /// The request could not be performed because the network is down.
         /// <para>Mitigation [App development]</para> In the application you could either inform the user that there are network issues
         /// or retry later
         /// </summary>
@@ -1104,6 +1104,16 @@ namespace Microsoft.Identity.Client
         /// A required value is missing from the managed identity response.
         /// </summary>
         public const string InvalidManagedIdentityResponse = "invalid_managed_identity_response";
+
+        /// <summary>
+        /// The managed identity's source does not select a specific id type.
+        /// </summary>
+        public const string InvalidManagedIdentityIdType = "invalid_managed_identity_id_type";
+
+        /// <summary>
+        /// The managed identity is missing a required environment variable.
+        /// </summary>
+        public const string MissingManagedIdentityEnvVar = "missing_managed_identity_env_var";
 
         /// <summary>
         /// Managed Identity error response was received.

@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Extensibility
         {
             if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && authenticationExtension.OnBeforeTokenRequestHandler != null)
             {
-                throw new InvalidOperationException("Cannot set both an AuthenticaitonOperation and an OnBeforeTokenRequestHandler");
+                throw new InvalidOperationException("Cannot set both an AuthenticationOperation and an OnBeforeTokenRequestHandler");
             }
 
             builder.CommonParameters.OnBeforeTokenRequestHandler = authenticationExtension.OnBeforeTokenRequestHandler;

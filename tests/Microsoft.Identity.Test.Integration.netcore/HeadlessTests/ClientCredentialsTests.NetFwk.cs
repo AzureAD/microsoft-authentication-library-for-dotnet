@@ -223,10 +223,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(labResponse.Lab.Authority, "organizations")
                 .BuildConcrete();
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            #pragma warning restore CS0618
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(labResponse.App.AppId)

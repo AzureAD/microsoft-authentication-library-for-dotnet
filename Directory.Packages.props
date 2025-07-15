@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
-    <MSALRuntimeNativeInteropVersion>0.18.1</MSALRuntimeNativeInteropVersion>
+    <MSALRuntimeNativeInteropVersion>0.19.2</MSALRuntimeNativeInteropVersion>
     <!-- Version of MSAL if not defined by the CI-->
     <MsalInternalVersion>4.61.0</MsalInternalVersion>
   </PropertyGroup>
@@ -80,7 +80,6 @@
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="System.Windows.Forms" Version="4.0.0" />
     <PackageVersion Include="CommandLineParser" Version="2.8.0" />
-    <PackageVersion Include="System.Formats.Asn1" Version="9.0.0"/>
-
+    <PackageVersion Include="System.Formats.Asn1" Version="9.0.0" />
   </ItemGroup>
 </Project>

@@ -238,8 +238,9 @@ namespace NetFx
                             Console.WriteLine("Enter username:");
                             string username = Console.ReadLine();
                             string password = GetPasswordFromConsole();
+#pragma warning disable CS0618 // Type or member is obsolete
                             var upBuilder = pca.AcquireTokenByUsernamePassword(s_scopes, username, password);
-
+#pragma warning restore CS0618
                             result = await upBuilder.ExecuteAsync().ConfigureAwait(false);
 
                             await CallApiAsync(pca, result).ConfigureAwait(false);

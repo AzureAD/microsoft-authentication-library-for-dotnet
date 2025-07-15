@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
-        public static void AddManagedIdentityMockHandler(
+        public static MockHttpMessageHandler AddManagedIdentityMockHandler(
             this MockHttpManager httpManager,
             string expectedUrl,
             string resource,
@@ -383,37 +383,42 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             MockHttpMessageHandler httpMessageHandler = BuildMockHandlerForManagedIdentitySource(managedIdentitySourceType, resource);
 
-            if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+            if (managedIdentitySourceType == ManagedIdentitySource.MachineLearning)
             {
-                if (managedIdentitySourceType == ManagedIdentitySource.MachineLearning)
-                {
-                    // For Machine Learning (App Service 2017), the param is "clientid"
-                    httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId2017, userAssignedId);
-                }
-                else
-                {
-                    // For App Service 2019, Azure Arc, IMDS, etc., the param is "client_id"
-                    httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
-                }
+                // For Machine Learning (App Service 2017), the client id param is "clientid"
+                // it will always be a query parameter, no matter the source type
+                // use env var for SAMI, passed-in userAssignedId for UAMI
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    Constants.ManagedIdentityClientId2017,
+                    userAssignedId ?? EnvironmentVariables.MachineLearningDefaultClientId);
             }
-
-            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            else if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+            {
+                // For App Service 2019, Azure Arc, IMDS, etc., the param is "client_id"
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    Constants.ManagedIdentityClientId, 
+                    userAssignedId);
+            }
+            else if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
             {
                 httpMessageHandler.ExpectedQueryParams.Add(
                     managedIdentitySourceType == ManagedIdentitySource.Imds ? 
                         Constants.ManagedIdentityResourceIdImds : Constants.ManagedIdentityResourceId, 
                     userAssignedId);
             }
-
-            if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
+            else if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    Constants.ManagedIdentityObjectId,
+                    userAssignedId);
             }
 
             httpMessageHandler.ResponseMessage = responseMessage;
             httpMessageHandler.ExpectedUrl = expectedUrl;
 
             httpManager.AddMockHandler(httpMessageHandler);
+
+            return httpMessageHandler;
         }
             
         private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySource managedIdentitySourceType, string resource)
@@ -493,8 +498,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
-        public static void AddRegionDiscoveryMockHandlerNotFound(
-            this MockHttpManager httpManager)
+        public static void AddRegionDiscoveryMockHandlerWithError(
+            this MockHttpManager httpManager,
+            HttpStatusCode statusCode)
         {
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -505,7 +511,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                          {
                             {"Metadata", "true"}
                          },
-                        ResponseMessage = MockHelpers.CreateFailureMessage(HttpStatusCode.NotFound, "")
+                        ResponseMessage = MockHelpers.CreateFailureMessage(statusCode, "")
                     });
         }
     }
