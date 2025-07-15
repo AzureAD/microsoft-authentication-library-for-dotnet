@@ -1,20 +1,20 @@
 # MSAL.NET Support Policy
 
-_Last updated May 14, 2025_
+_Last updated July 15, 2025_
 
 ## Supported versions
 The following table lists MSAL.NET versions currently supported and receiving security fixes.
 
 | Major Version | Last Release | Patch Release Date  | Support Phase|End of Support |
 | --------------|--------------|--------|------------|--------|
-| 4.x           | [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)   |Monthly| Active | Not planned.<br/>✅Supported versions: from 4.61.2 to [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)<br/>⚠️Unsupported versions `< 4.61.2`.|
+| 4.x           | [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)   |Monthly| Active | Not planned.<br/>✅Supported versions: from 4.72.1 to [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)<br/>⚠️Unsupported versions `< 4.72.1`.|
 
 ## Out of support versions
 The following table lists MSAL.NET versions no longer supported and no longer receiving security fixes.
 
 | Major Version | Latest Patch Version| Patch Release Date | End of Support Date|
 | --------------|--------------|--------|--------|
-| 4.x           |    4.61.1      | August 23, 2024        | May 15, 2025    |
+| 4.x           |    4.72.0      | May 12, 2025        | July 11, 2025    |
 | 3.x           |    3.0.9       | July 31, 2019          | May 15, 2025    |
 | 2.x           |    2.7.1       | February 21, 2019      | May 15, 2025    |
 | 1.x           |    1.1.4-preview0002      | June 1, 2018         | May 15, 2025   |
