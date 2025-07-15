@@ -51,11 +51,14 @@ SDKs customizing the httpclient factory will need a way to get the binding certi
 - Retrieving existing certificates from the OS store or memory.
 - Notifying SDKs when a certificate is updated via the CertificateRefreshed event.
 
-| API Name                         | Purpose                                                                            |
-|----------------------------------|------------------------------------------------------------------------------------|
-| `GetManagedIdentitySourceAsync()`| Will expose the MSI Source including the new `IMDSV2` source                       |
-| `GetBindingCertificate()`        | Helper method to get the binding certificate when source is `IMDSV2`.              |
-| `BindingCertificateRefreshed`    | Event to notify SDKs when the binding certificate is updated.                      |
+| API Name                             | Purpose                                                                            |
+|--------------------------------------|------------------------------------------------------------------------------------|
+| `GetManagedIdentitySourceAsync()`    | Will expose the MSI Source including the new `IMDSV2` source                       |
+| `GetBindingCertificate()`            | Helper method to get the binding certificate when source is `IMDSV2`.              |
+| `BindingCertificateRefreshed`        | Event to notify SDKs when the binding certificate is updated.                      |
+| `IsPopSupported()`                   | Helper method to check if POP is supported.                                        |
+| `IsCaeSupported()`                   | Helper method to check if CAE is supported.                                        |
+| `ResetInternalStaticCachesForTest()` | Helper method to reset internal static caches.                                     |
 
 
 
