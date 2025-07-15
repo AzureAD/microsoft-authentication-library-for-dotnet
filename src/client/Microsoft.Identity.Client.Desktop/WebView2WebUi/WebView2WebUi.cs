@@ -27,10 +27,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 #if WINRT
     internal class BrowserWindow
     {
-        public void Show()
+        public Task ShowAsync()
         {
-                 var window = new Window();
-                var grid = new Grid();
+            var tcs = new TaskCompletionSource<object>();
+
+            var window = new Window();
+            var grid = new Grid();
             window.DispatcherQueue.TryEnqueue(() =>
             {
 
@@ -57,7 +59,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 //};
 
                 window.Activate();
+                window.Closed += (s, e) =>
+                {
+                    tcs.TrySetResult(null);
+                };
             });
+            return tcs.Task;
         }
 
         private WindowId GetWindowId(Window window)
@@ -103,6 +110,36 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             }
         }
     }
+    //internal class BrowserWindow : Window
+    //{
+    //    public BrowserWindow()
+    //    {
+    //        var window = new Window();
+    //        var grid = new Grid();
+    //        window.DispatcherQueue.TryEnqueue(() =>
+    //        {
+
+    //            var webView = new Microsoft.UI.Xaml.Controls.WebView2
+    //            {
+    //                Source = new Uri("https://www.google.com"),
+    //                HorizontalAlignment = HorizontalAlignment.Stretch,
+    //                VerticalAlignment = VerticalAlignment.Stretch
+    //            };
+
+    //            grid.Children.Add(webView);
+    //            window.Content = grid;
+
+    //            window.Activate();
+    //        });
+    //    }
+
+    //    private WindowId GetWindowId(Window window)
+    //    {
+    //        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+    //        return Win32Interop.GetWindowIdFromWindow(hwnd);
+    //    }
+    //}
+
 #endif
 
     internal class WebView2WebUi : IWebUI
@@ -123,20 +160,20 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             CancellationToken cancellationToken)
         {
             AuthorizationResult result = null;
-            var sendAuthorizeRequest = new Action(() =>
+            var sendAuthorizeRequest = new Func<Task>(async () =>
             {
-                result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
+                result = await InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken).ConfigureAwait(false);
             });
 
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
                 if (_parent.SynchronizationContext != null)
                 {
-                    var sendAuthorizeRequestWithTcs = new Action<object>((tcs) =>
+                    var sendAuthorizeRequestWithTcs = new Func<object, Task>(async (tcs) =>
                     {
                         try
                         {
-                            result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
+                            result = await InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken).ConfigureAwait(false);
                             ((TaskCompletionSource<object>)tcs).TrySetResult(null);
                         }
                         catch (Exception e)
@@ -150,8 +187,10 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     var tcs2 = new TaskCompletionSource<object>();
 
                     _parent.SynchronizationContext.Post(
-                        new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
-                    await tcs2.Task.ConfigureAwait(false);
+                        new SendOrPostCallback((state) =>
+                        {
+                            Task.Run(() => sendAuthorizeRequestWithTcs(state));
+                        }), tcs2);
                 }
                 else
                 {
@@ -185,7 +224,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             }
             else
             {
-                sendAuthorizeRequest();
+                await sendAuthorizeRequest().ConfigureAwait(false);
             }
 
             return result;
@@ -198,32 +237,25 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             return redirectUri;
         }
 
-        private AuthorizationResult InvokeEmbeddedWebview(Uri startUri, Uri endUri, CancellationToken cancellationToken)
+        private async Task<AuthorizationResult> InvokeEmbeddedWebviewAsync(Uri startUri, Uri endUri, CancellationToken cancellationToken)
         {
 #if !WINRT
-            using (var form = new WinFormsPanelWithWebView2(
-                _parent.OwnerWindow,
-                _parent?.EmbeddedWebviewOptions,
-                _requestContext.Logger,
-                startUri,
-                endUri))
-            {
-                return form.DisplayDialogAndInterceptUri(cancellationToken);
-            }
-#else
-                    var browserWindow = new BrowserWindow();
-                    browserWindow.Show();
-            //UIThreadHelper.Initialize(DispatcherQueue.GetForCurrentThread());
-            //Task.Run(() =>
+            //using (var form = new WinFormsPanelWithWebView2(
+            //    _parent.OwnerWindow,
+            //    _parent?.EmbeddedWebviewOptions,
+            //    _requestContext.Logger,
+            //    startUri,
+            //    endUri))
             //{
-            //    UIThreadHelper.RunOnUIThread(() =>
-            //    {
-            //        var browserWindow = new BrowserWindow();
-            //        browserWindow.Show();
-            //    });
-            ////});
+            //    return await form.DisplayDialogAndInterceptUriAsync(cancellationToken).ConfigureAwait(false);
+            //}
+            await Task.Yield();
             return new AuthorizationResult();
-            //throw new NotSupportedException("WebView2WebUi is only supported on Windows with WinRT enabled.");
+#else
+            var browserWindow = new BrowserWindow();
+            await browserWindow.ShowAsync().ConfigureAwait(false);
+
+            return new AuthorizationResult();
 #endif
         }
 
