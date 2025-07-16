@@ -3,15 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -19,6 +14,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class ExtraBodyParametersTests : TestBase
     {
+        //TODO: validate cache key components are associated with extra body parameters
+        //TODO: Validate multiple OnBeforeTokenRequest events are executed
         [TestMethod]
         public async Task ValidateExtraBodyParameters()
         {
@@ -55,6 +52,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
                                                         .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
                                                         .WithExtraBodyParameters(extraBodyParams) //Sets attributes in client credential request.
+                                                        
                                                         .ExecuteAsync()
                                                         .ConfigureAwait(false);
 
