@@ -35,7 +35,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
             Authority initialAuthority,
-            string homeAccountId = null)
+            string homeAccountId = null,
+            SortedList<string, string> cacheKeyComponents = null)
         {
             _serviceBundle = serviceBundle;
             _commonParameters = commonParameters;
@@ -73,6 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _serviceBundle.Config.ClientCapabilities);
 
             HomeAccountId = homeAccountId;
+            CacheKeyComponents = cacheKeyComponents;
         }
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
@@ -127,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
-        public SortedList<string, Func<string>> CacheKeyComponents => _commonParameters.CacheKeyComponents;
+        public SortedList<string, string> CacheKeyComponents {get; private set; }
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.

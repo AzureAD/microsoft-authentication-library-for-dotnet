@@ -46,9 +46,9 @@ namespace Microsoft.Identity.Client
 
             if (!string.IsNullOrEmpty(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken))
             {
-                builder.WithAdditionalCacheKeyComponents(new SortedList<string, Func<string>>
+                builder.WithAdditionalCacheKeyComponents(new SortedList<string, Func<CancellationToken, Task<string>>>
                 {
-                    { Constants.CertSerialNumber, () => { return confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken; } }
+                    { Constants.CertSerialNumber, (CancellationToken ct) => { return Task.FromResult(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken); } }
                 });
             }
 
@@ -120,18 +120,17 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="extrabodyparams">List of additional body parameters</param>
         /// <returns></returns>
-        public AcquireTokenForClientParameterBuilder WithExtraBodyParameters (Dictionary<string, Func<string>> extrabodyparams)
+        public AcquireTokenForClientParameterBuilder WithExtraBodyParameters (Dictionary<string, Func<CancellationToken, Task<string>>> extrabodyparams)
         {
-            this.OnBeforeTokenRequest((data) =>
+            this.OnBeforeTokenRequest(async (data) =>
             {
                foreach (var param in extrabodyparams)
                 {
-                    if (param.Value == null)
+                    if (param.Value != null)
                     {
-                        data.BodyParameters.Add(param.Key, param.Value.Invoke());
+                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
                     }
                 }
-                return Task.CompletedTask;
             });
 
             this.WithAdditionalCacheKeyComponents(extrabodyparams);
@@ -168,9 +167,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(pathSuffix));
             }
 
-            var cacheKey = new SortedList<string, Func<string>>
+            var cacheKey = new SortedList<string, Func<CancellationToken, Task<string>>>
             { 
-                { OAuth2Parameter.FmiPath, () => {return pathSuffix;} } 
+                { OAuth2Parameter.FmiPath, (CancellationToken ct) => {return Task.FromResult(pathSuffix);} } 
             };
 
             this.WithAdditionalCacheKeyComponents(cacheKey);

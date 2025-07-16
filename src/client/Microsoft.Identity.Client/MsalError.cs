@@ -1198,10 +1198,5 @@ namespace Microsoft.Identity.Client
         /// - If token hashing is required, allow the cached token to be used instead of forcing a refresh.
         /// </summary>
         public const string ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible";
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public const string AttributeTokenRequestFailed = "attribute_token_request_failed";
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -151,7 +152,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </remarks>
         internal static AbstractAcquireTokenParameterBuilder<T> WithAdditionalCacheKeyComponents<T>(
             this AbstractAcquireTokenParameterBuilder<T> builder,
-            IDictionary<string, Func<string>> cacheKeyComponents)
+            IDictionary<string, Func<CancellationToken, Task<string>>> cacheKeyComponents)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
             if (cacheKeyComponents == null || cacheKeyComponents.Count == 0)
@@ -162,7 +163,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
             if (builder.CommonParameters.CacheKeyComponents == null)
             {
-                builder.CommonParameters.CacheKeyComponents = new SortedList<string, Func<string>>(cacheKeyComponents);
+                builder.CommonParameters.CacheKeyComponents = new SortedList<string, Func<CancellationToken, Task<string>>>(cacheKeyComponents);
             }
             else
             {
@@ -201,9 +202,9 @@ namespace Microsoft.Identity.Client.Extensibility
             builder.CommonParameters.ClientAssertionFmiPath = fmiPath;
 
             // Add the fmi_path to the cache key so that it is used for cache lookups
-            var cacheKey = new SortedList<string, Func<string>>
+            var cacheKey = new SortedList<string, Func<CancellationToken, Task<string>>>
             {
-                { "credential_fmi_path", () => { return fmiPath; } }
+                { "credential_fmi_path", (CancellationToken ct) => Task.FromResult(fmiPath) }
             };
 
             WithAdditionalCacheKeyComponents(builder, cacheKey);

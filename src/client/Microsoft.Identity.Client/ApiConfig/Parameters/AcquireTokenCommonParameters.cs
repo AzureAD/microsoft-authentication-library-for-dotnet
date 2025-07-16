@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IList<Func<OnBeforeTokenRequestData, Task>> OnBeforeTokenRequestHandler { get; internal set; }
         public X509Certificate2 MtlsCertificate { get; internal set; }
         public List<string> AdditionalCacheParameters { get; set; }
-        public SortedList<string, Func<string>> CacheKeyComponents { get; internal set; }
+        public SortedList<string, Func<CancellationToken, Task<string>>> CacheKeyComponents { get; internal set; }
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
     }
