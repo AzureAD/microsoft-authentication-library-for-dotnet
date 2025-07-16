@@ -149,6 +149,8 @@ namespace Microsoft.Identity.Client
 
         public const string AuthorityValidationFailed = "Authority validation failed. ";
 
+        public const string IssuerValidationFailed = "Issuer validation failed for authority: {0} . Issuer from OIDC endpoint does not match any expected pattern: {1} . ";
+
         public const string AuthorityUriInsecure = "The authority must use HTTPS scheme. ";
 
         public const string AuthorityUriInvalidPath =
