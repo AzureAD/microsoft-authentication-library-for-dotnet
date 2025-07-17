@@ -48,7 +48,7 @@ sequenceDiagram
 - MSAL needs to create a CSR (Certificate Signing Request) with a sourced key.
 - Azure RP will add a new `PlatformMetadata` endpoint which will provide the info needed to create the CSR.
 - MSAL will source a key from CredentialGuard (where available) or in-memory to form the CSR
-- For keys from CredentialGuard, MSAL will perform a key attestation with MAA (Microsoft Attestation Service)
+- For keys from CredentialGuard, MSAL will perform a key attestation with MAA (Microsoft Attestation Service) - POP only
 - MSAL will then send the CSR and the attestation token (where applicable) to the MIRP 
 
 ### Certificate Retrieval from `/issuecredential` Endpoint
