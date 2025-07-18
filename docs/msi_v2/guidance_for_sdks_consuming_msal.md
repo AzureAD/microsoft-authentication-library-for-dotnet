@@ -13,7 +13,7 @@ _This section covers:_
 
 ## **Binding Certificate**
 
-SDKs customizing the httpclient factory will continue to use the old `IMtlsHttpClientFactory` interface. MSAL will use the customized httpclient factory to, 
+SDKs customizing the httpclient factory will continue to use the old `IMsalHttpClientFactory` interface. MSAL will use the customized httpclient factory to, 
 
 - call into `platformmetadata` endpoint to form the CSR.
 - Use the CSR and call into `issuecredential` endpoint to get the Certificate.
