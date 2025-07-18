@@ -5,7 +5,7 @@
 To support MSI V2 authentication with the new `/issuecredential` endpoint, the **Azure SDK** will leverage the `IMsalHttpClientFactory` interface and **certificate management APIs** for secure communication with Azure AD using **mutual TLS (mTLS)**.
 
 _This section covers:_
-- How Azure SDK uses **`IMtlsHttpClientFactory`** for MTLS authentication.
+- How Azure SDK uses **`IMsalHttpClientFactory`** for MTLS authentication.
 - How SDKs interact with the **certificate APIs** to obtain information about binding certificate.
 - The **new `CertificateRefreshed` event**, which notifies when a binding certificate is updated.
 
