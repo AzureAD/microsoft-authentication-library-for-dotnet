@@ -24,7 +24,6 @@ SDKs customizing the httpclient factory will continue to use the old `IMtlsHttpC
 | `GetManagedIdentitySourceAsync()`    | Will expose the MSI Source including the new `IMDSV2` source                       |
 | `BindingCertificateRefreshed`        | Event to notify SDKs when the binding certificate is updated.                      |
 | `IsPopSupported()`                   | Helper method to check if POP is supported.                                        |
-| `IsCaeSupported()`                   | Helper method to check if CAE is supported.                                        |
 | `ResetInternalStaticCachesForTest()` | Helper method to reset internal static caches.                                     |
 
 
