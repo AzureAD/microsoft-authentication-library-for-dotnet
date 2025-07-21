@@ -2,19 +2,24 @@
 name: Spell check
 on: [pull_request]
 
+# —— least-privilege token for the whole workflow ——
+permissions:
+  contents: read
+  pull-requests: write   # needed for PR annotations – remove if unused
+
 jobs:
   spellcheck:
     runs-on: ubuntu-latest
+    # OR a fixed runner version: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      # 0️⃣  Safe checkout (pin to commit SHA shown here for example)
+      - uses: actions/checkout@c617bd3e53993a4dd6e4d9bb2e4c597a3065aa68
 
-      ############################################################
-      # 1️⃣  Built-in codespell action  → PR annotations
-      ############################################################
-      - name: Codespell (built-in dictionary)
-        uses: codespell-project/actions-codespell@v2
+      # 1️⃣  Hardened Codespell action → PR annotations
+      - name: Codespell (built-in dictionary, hardened)
+        uses: step-security/actions-codespell@b7401c5f16b3a0725ac2fa9d19252a0aecfba76
         with:
-          check_filenames: true           # also scan file names
+          check_filenames: true
           ignore_words_file: .codespellignore
           skip: >
             src/client/Microsoft.Identity.Client/json,
@@ -22,18 +27,16 @@ jobs:
             devapps,
             build,
             docs,
-            prototype,
+            prototype
 
-      ############################################################
-      # 2️⃣  Raw CLI pass  → enforces your custom typo pairs
-      ############################################################
-      - name: Install codespell
-        run: pip install --quiet codespell
+      # 2️⃣  Raw CLI pass → enforces your custom typo pairs
+      - name: Install pinned Codespell CLI
+        run: pip install --quiet --no-deps "codespell==2.4.1"
 
       - name: Codespell (custom pair list)
         run: |
           codespell --check-filenames \
-            --dictionary build/codespell_pairs.txt \
-            --ignore-words .codespellignore \
-            --skip "src/client/Microsoft.Identity.Client/json,tests,devapps,build,docs,prototype" \
-            .
+                   --dictionary build/codespell_pairs.txt \
+                   --ignore-words .codespellignore \
+                   --skip "src/client/Microsoft.Identity.Client/json,tests,devapps,build,docs,prototype" \
+                   .
