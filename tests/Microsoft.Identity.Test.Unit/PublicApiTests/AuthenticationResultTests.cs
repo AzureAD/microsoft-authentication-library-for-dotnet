@@ -19,9 +19,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     {
 
         [TestMethod]
+        public void PublicTestConstructorCoversAllProperties()
+        {
+            // The first public ctor that is meant only for tests (“for-test”)
+            var ctorParameters = typeof(AuthenticationResult)
+                .GetConstructors()
+                .First(ctor => ctor.GetParameters().Length > 3)
+                .GetParameters();
+
+            var classProperties = typeof(AuthenticationResult)
+                .GetProperties()
+                .Where(p => p.GetCustomAttribute(typeof(ObsoleteAttribute)) == null)
+                .Where(p => p.SetMethod == null || p.SetMethod.IsPublic)
+                .Where(p => p.Name != nameof(AuthenticationResult.BindingCertificate));
+
+            // +2 for the 2 obsolete ExtendedExpires* props that are deliberately
+            // not represented in the ctor.
+            Assert.AreEqual(
+                ctorParameters.Length,
+                classProperties.Count() + 2,
+                "The <for-test> constructor should include all public-settable or read-only properties of AuthenticationResult (except BindingCertificate and the obsolete ExtendedExpires* pair).");
+        }
+
+        [TestMethod]
         public void GetAuthorizationHeader()
         {
-#pragma warning disable CS0618 // exercising obsolete constructors until full deprecation
             var ar = new AuthenticationResult(
                 "at",
                 false,
@@ -64,7 +86,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             "one for backwards compat with 4.17+ and one for 4.16 and below")]
         public void AuthenticationResult_PublicApi()
         {
-#pragma warning disable CS0618 // exercising obsolete constructors until full deprecation
             // old constructor, before 4.16
             var ar1 = new AuthenticationResult(
                 "at",
