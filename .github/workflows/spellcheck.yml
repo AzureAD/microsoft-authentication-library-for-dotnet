@@ -12,7 +12,7 @@ jobs:
       # 1️⃣  Built-in codespell action  → PR annotations
       ############################################################
       - name: Codespell (built-in dictionary)
-        uses: step-security/actions-codespell@b7401c5f16b3a0725ac2fa9d19252a0aecfba76
+        uses: step-security/actions-codespell@8664d8537142419fa42d0a49dcb326d2cac4eeab
         with:
           check_filenames: true           # also scan file names
           ignore_words_file: .codespellignore
