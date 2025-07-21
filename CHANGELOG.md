@@ -1,3 +1,11 @@
+4.74.1
+======
+
+### Bug fixes
+* When you configure MSAL with WithOidcAuthority(), the library now confirms that the issuer returned by the OIDC discovery endpoint matches the expected authority (including CIAM patterns) and throws an exception if it does not. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5358 
+
+* Re-expose public AuthenticationResult constructor. A public, test-friendly constructor of AuthenticationResult was inadvertently hidden behind [Obsolete] and [EditorBrowsable(Never)]. The constructor is now publicly available again. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5392
+
 4.74.0
 ======
 
@@ -7,7 +15,6 @@
 
 ### Bug fixes
 * MSAL now honors the DEFAULT_IDENTITY_CLIENT_ID environment variable when acquiring tokens from Azure Machine Learning managed-identity endpoint. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5350.
-
 
 4.73.1
 ======
