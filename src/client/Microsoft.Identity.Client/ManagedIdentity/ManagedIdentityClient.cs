@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
-        private static async Task<AbstractManagedIdentity> SelectManagedIdentitySourceAsync(RequestContext requestContext)
+        private async Task<AbstractManagedIdentity> SelectManagedIdentitySourceAsync(RequestContext requestContext)
         {
             var source = (s_sourceName != ManagedIdentitySource.None) ? s_sourceName : await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
             return source switch
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         // Detect managed identity source based on the availability of environment variables and csr metadata probe request.
         // This method is perf sensitive any changes should be benchmarked.
-        internal static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(RequestContext requestContext)
+        internal async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(RequestContext requestContext)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
