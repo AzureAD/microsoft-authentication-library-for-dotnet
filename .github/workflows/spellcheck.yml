@@ -12,7 +12,7 @@ jobs:
       # 1️⃣  Built-in codespell action  → PR annotations
       ############################################################
       - name: Codespell (built-in dictionary)
-        uses: codespell-project/actions-codespell@v2
+        uses: step-security/actions-codespell@b7401c5f16b3a0725ac2fa9d19252a0aecfba76
         with:
           check_filenames: true           # also scan file names
           ignore_words_file: .codespellignore
@@ -28,7 +28,7 @@ jobs:
       # 2️⃣  Raw CLI pass  → enforces your custom typo pairs
       ############################################################
       - name: Install codespell
-        run: pip install --quiet codespell
+        run: pip install --quiet --no-deps "codespell==2.4.1"
 
       - name: Codespell (custom pair list)
         run: |
