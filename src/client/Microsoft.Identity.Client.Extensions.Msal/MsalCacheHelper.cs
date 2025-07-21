@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
                     }
                     catch (Exception e)
                     {
-                        logger.LogError("An error occured while reading the token cache: " + e);
+                        logger.LogError("An error occurred while reading the token cache: " + e);
                         logger.LogError("Deleting the token cache as it might be corrupt.");
                         tempCache.Clear(ignoreExceptions: true);
                     }

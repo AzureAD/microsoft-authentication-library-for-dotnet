@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 //IWA is currently not supported in pure adfs environments. See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2771
                 throw new MsalClientException(
                             MsalError.IntegratedWindowsAuthenticationFailed,
-                            "Integrated windows authenticaiton is not supported when using WithAdfsAuthority() to specify the authority in ADFS on premises environments"
+                            "Integrated windows authentication is not supported when using WithAdfsAuthority() to specify the authority in ADFS on premises environments"
                             + " See https://aka.ms/msal-net-iwa for more details.");
             }
 

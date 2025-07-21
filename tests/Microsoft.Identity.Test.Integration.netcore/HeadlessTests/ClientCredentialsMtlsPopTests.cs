@@ -57,6 +57,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
             Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
 
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint,
+                            authResult.BindingCertificate.Thumbprint,
+                            "BindingCertificate must match the certificate supplied via WithCertificate().");
+
             // Simulate cache retrieval to verify MTLS configuration is cached properly
             authResult = await confidentialApp
                .AcquireTokenForClient(settings.AppScopes)
@@ -66,6 +71,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Assert: Verify that the token was fetched from cache on the second request
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint,
+                            authResult.BindingCertificate.Thumbprint,
+                            "BindingCertificate must match the certificate supplied via WithCertificate().");
         }
     }
 }

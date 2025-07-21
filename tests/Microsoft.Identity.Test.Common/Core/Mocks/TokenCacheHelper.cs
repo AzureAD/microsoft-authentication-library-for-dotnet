@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string environment = TestConstants.ProductionPrefCacheEnvironment,
             string displayableId = TestConstants.DisplayableId,
             string rtSecret = TestConstants.RTSecret,
-            string overridenScopes = null,
+            string overriddenScopes = null,
             string userAssertion = null,
             bool expiredAccessTokens = false,
             bool addSecondAt = true)
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                 environment,
                 clientId,
-                overridenScopes ?? TestConstants.s_scope.AsSingleString(),
+                overriddenScopes ?? TestConstants.s_scope.AsSingleString(),
                 utid,
                 "",
                 DateTimeOffset.UtcNow,

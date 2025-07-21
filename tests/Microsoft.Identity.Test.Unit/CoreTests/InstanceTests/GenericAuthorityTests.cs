@@ -333,6 +333,45 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
+        [TestMethod]
+        public async Task OidcIssuerValidation_ThrowsForNonMatchingIssuer_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                string wrongIssuer = "https://wrong.issuer.com";
+
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(TestConstants.GenericAuthority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                // Create OIDC document with non-matching issuer
+                string validOidcDocumentWithWrongIssuer = TestConstants.GenericOidcResponse.Replace(
+                        $"\"issuer\":\"{TestConstants.GenericAuthority}\"",
+                        $"\"issuer\":\"{wrongIssuer}\"");
+
+                // Mock OIDC endpoint response
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = $"{TestConstants.GenericAuthority}/{Constants.WellKnownOpenIdConfigurationPath}",
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(validOidcDocumentWithWrongIssuer)
+                });
+
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()
+                ).ConfigureAwait(false);
+
+                string expectedErrorMessage = string.Format(MsalErrorMessage.IssuerValidationFailed, app.Authority, wrongIssuer);
+
+                Assert.AreEqual(MsalError.AuthorityValidationFailed, ex.ErrorCode);
+                Assert.AreEqual(expectedErrorMessage, ex.Message, 
+                    "Error message should match the expected error message.");
+            }
+        }
+
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(
             string tokenEndpoint,
             string scopesInRequest,
