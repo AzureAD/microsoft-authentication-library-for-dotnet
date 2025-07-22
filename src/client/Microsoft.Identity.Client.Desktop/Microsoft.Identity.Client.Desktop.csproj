@@ -1,12 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
 
     <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
-    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
+    <TargetFrameworkModernTFM>net8.0-windows10.0.17763.0</TargetFrameworkModernTFM>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore);$(TargetFrameworkModernTFM)</TargetFrameworks>
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
-    <UseWindowsForms>true</UseWindowsForms>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
@@ -30,9 +30,36 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
+    <UseWinUI>true</UseWinUI>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
+    <DefineConstants>$(DefineConstants);WINRT</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
+    <Compile Remove="WebView2WebUi/WinFormsPanelWithWebView2.cs" />
+    <Compile Remove="WebView2WebUi/Win32Window.cs" />
+    <Compile Remove="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
+
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <Page Include="WebView2WebUi/WinUI3WindowWithWebView2.xaml" />
+  </ItemGroup>
+
+  <!-- Exclude WinUI3 files from legacy TFM -->
+  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkModernTFM)'">
+    <Compile Remove="WebView2WebUi\WinUI3WindowWithWebView2.cs" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <Reference Include="System.Windows.Forms" />
@@ -47,8 +74,12 @@
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- Webview2 comes integrated with winappsdk for modern TFMs -->
+  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkModernTFM)'">
     <PackageReference Include="Microsoft.Web.WebView2" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
     

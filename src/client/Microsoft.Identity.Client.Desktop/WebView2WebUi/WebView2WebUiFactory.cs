@@ -5,7 +5,9 @@ using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+#if !WINRT
 using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
+#endif
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
@@ -43,6 +45,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 
             AuthorityType authorityType = requestContext.ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType;
 
+#if !WINRT  
             if (authorityType == AuthorityType.Aad)
             {
                 requestContext.Logger.Info($"Using WebView1 embedded browser because the authority is {authorityType}. WebView2 does not provide SSO.");
@@ -54,7 +57,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 requestContext.Logger.Info("Using WebView1 embedded browser because WebView2 is not available.");
                 return new InteractiveWebUI(coreUIParent, requestContext);
             }
-
+#endif
             requestContext.Logger.Info("Using WebView2 embedded browser.");
             return new WebView2WebUi(coreUIParent, requestContext);
         }
@@ -66,10 +69,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString();
                 return !string.IsNullOrEmpty(wv2Version);
             }
+#if !WINRT
             catch (WebView2RuntimeNotFoundException)
             {
                 return false;
             }
+#endif
             catch (Exception ex) when (ex is BadImageFormatException || ex is DllNotFoundException)
             {
                 throw new MsalClientException(MsalError.WebView2LoaderNotFound, MsalErrorMessage.WebView2LoaderNotFound, ex);

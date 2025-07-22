@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Client.Internal
             Uri authorizationUri = authorizationTuple.Item1;
             string state = authorizationTuple.Item2;
             string codeVerifier = authorizationTuple.Item3;
-
+            // FetchAuthCodeAndPkceInternalAsync and VerifyAuthorizationResult is called on one thread and AcquireAuthorizationAsync is called on a different thread
+            // due to this there are synchronization issues and the authorizationResult is null when VerifyAuthorizationResult is called.
             var authorizationResult = await webUi.AcquireAuthorizationAsync(
                                        authorizationUri,
                                        _requestParams.RedirectUri,
