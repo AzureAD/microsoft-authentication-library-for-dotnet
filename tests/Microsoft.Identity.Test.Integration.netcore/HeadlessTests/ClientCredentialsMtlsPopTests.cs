@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3") //test slice region 
                 .WithCertificate(cert, true)  
-                .WithExperimentalFeatures()
                 .WithTestLogging()
                 .Build();
 
