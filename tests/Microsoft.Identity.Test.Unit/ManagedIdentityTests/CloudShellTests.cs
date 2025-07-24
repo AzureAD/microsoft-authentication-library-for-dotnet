@@ -21,6 +21,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string CloudShell = "Cloud Shell";
 
+        public CloudShellTests()
+        {
+            ManagedIdentityEnabled = true;
+        }
+
         [DataTestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]

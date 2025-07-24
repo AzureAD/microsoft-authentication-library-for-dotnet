@@ -22,6 +22,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
         internal const string Resource = "https://management.azure.com";
 
+        public MachineLearningTests()
+        {
+            ManagedIdentityEnabled = true;
+        }
+
         [DataTestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
