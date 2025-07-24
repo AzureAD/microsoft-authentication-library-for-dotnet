@@ -47,7 +47,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .WithMtlsProofOfPossession()
-                .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice 
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
