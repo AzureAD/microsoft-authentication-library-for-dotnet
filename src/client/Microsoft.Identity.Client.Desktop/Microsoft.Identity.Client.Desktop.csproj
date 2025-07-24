@@ -3,8 +3,7 @@
 
     <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
-    <TargetFrameworkModernTFM>net8.0-windows10.0.17763.0</TargetFrameworkModernTFM>
-    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore);$(TargetFrameworkModernTFM)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -25,46 +24,23 @@
     <PackageTags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Authentication Manager</PackageTags>
     <Product>Microsoft Authentication Library Desktop</Product>
   </PropertyGroup>
-  
+
   <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
-    <UseWinUI>true</UseWinUI>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
-    <DefineConstants>$(DefineConstants);WINRT</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkModernTFM)'">
-    <Compile Remove="WebView2WebUi/WinFormsPanelWithWebView2.cs" />
-    <Compile Remove="WebView2WebUi/Win32Window.cs" />
-    <Compile Remove="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
-
-    <PackageReference Include="Microsoft.WindowsAppSDK" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
-    <Page Include="WebView2WebUi/WinUI3WindowWithWebView2.xaml" />
-  </ItemGroup>
-
-  <!-- Exclude WinUI3 files from legacy TFM -->
-  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkModernTFM)'">
-    <Compile Remove="WebView2WebUi\WinUI3WindowWithWebView2.cs" />
-  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\StaTaskScheduler.cs" LinkBase="Features\DesktopOS" />
@@ -74,15 +50,14 @@
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
   </ItemGroup>
 
-  <!-- Webview2 comes integrated with winappsdk for modern TFMs -->
-  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkModernTFM)'">
+  <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-    
+
     <!-- This package is being built against netcore3.1, which causes this analyzer to produce errors in MSAL netcore3.1, even though MSAL isn't built against that-->
     <PackageReference Remove="Microsoft.CodeAnalysis.PublicApiAnalyzers" />
   </ItemGroup>

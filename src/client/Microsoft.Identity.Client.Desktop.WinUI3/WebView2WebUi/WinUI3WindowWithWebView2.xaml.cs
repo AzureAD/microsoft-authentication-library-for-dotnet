@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if WINRT
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Threading;
@@ -392,4 +391,3 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         }
     }
 }
-#endif

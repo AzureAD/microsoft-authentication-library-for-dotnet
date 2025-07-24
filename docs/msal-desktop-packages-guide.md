@@ -11,12 +11,14 @@ MSAL.NET now provides two separate Desktop packages to better support different 
 - **UI Technologies**: Windows Forms, WPF
 - **WebView Implementation**: Windows Forms WebView2
 - **Use Case**: Traditional Windows desktop applications
+- **Structure**: Contains only Windows Forms/WPF-specific WebView2 implementations
 
 ### 2. Microsoft.Identity.Client.Desktop.WinUI3 (Modern)
 - **Target Frameworks**: .NET 8.0 Windows (net8.0-windows10.0.17763.0)
 - **UI Technologies**: WinUI3, Windows App SDK
 - **WebView Implementation**: WinUI3 WebView2
 - **Use Case**: Modern Windows applications built with WinUI3
+- **Structure**: Contains dedicated WinUI3 WebView2 implementations in `WebView2WebUi/` folder
 
 ## How to Choose the Right Package
 

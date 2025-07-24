@@ -30,15 +30,11 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <!-- Include shared source files from Desktop project -->
+  <!-- Include shared source files from Desktop project, excluding only WinUI3-specific files -->
   <ItemGroup>
     <Compile Include="..\Microsoft.Identity.Client.Desktop\**\*.cs" 
              Exclude="..\Microsoft.Identity.Client.Desktop\WebView2WebUi\WinFormsPanelWithWebView2.cs;..\Microsoft.Identity.Client.Desktop\WebView2WebUi\Win32Window.cs;..\Microsoft.Identity.Client.Desktop\obj\**\*;..\Microsoft.Identity.Client.Desktop\bin\**\*" 
              LinkBase="" />
-    
-    <!-- Include WinUI3 XAML files -->
-    <Page Include="..\Microsoft.Identity.Client.Desktop\WebView2WebUi\WinUI3WindowWithWebView2.xaml" 
-          Link="WebView2WebUi\WinUI3WindowWithWebView2.xaml" />
 
     <!-- Include InternalsVisibleTo -->
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
@@ -48,6 +44,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <Page Include="WebView2WebUi/WinUI3WindowWithWebView2.xaml" />
   </ItemGroup>
 
   <!-- Project references -->
@@ -57,6 +54,12 @@
     
     <!-- This package is being built against modern TFM, remove analyzer that causes issues -->
     <PackageReference Remove="Microsoft.CodeAnalysis.PublicApiAnalyzers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="WebView2WebUi\WinUI3WindowWithWebView2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
   </ItemGroup>
 
 </Project>
