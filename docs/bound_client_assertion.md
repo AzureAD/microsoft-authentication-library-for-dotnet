@@ -43,5 +43,5 @@ If Certificate is null,
 
 ## Future Enhancements & mTLS Support
 
-- AssertionResponse is an extensible container; new assertion flavours (e.g., FMI‑bound tokens, custom claim sets) can surface via additional properties—no new builder overloads required.
+- AssertionResponse is an extensible container; new assertion flavors (e.g., FMI‑bound tokens, custom claim sets) can surface via additional properties; no new builder overloads are required.
 - When a certificate is present, MSAL automatically performs the mutual‑TLS handshake and forwards the JWT as a PoP (jwt-pop) client‑assertion.
