@@ -8,25 +8,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// <summary>
     /// Represents metadata required for Certificate Signing Request (CSR) operations.
     /// </summary>
-    internal interface CsrMetadataInterface
+    internal class CsrMetadata
     {
-        string ClientId { get; } // client_id of the Managed Identity
-        string TenantId { get; } // AAD Tenant of the Managed Identity
-        string Cuid { get; } // VM unique Id
-        string AttestationEndpoint { get; } // MAA Regional / Custom Endpoint for attestation purposes. 
-    }
+        public string ClientId { get; }  // client_id of the Managed Identity
+        public string TenantId { get; }  // AAD Tenant of the Managed Identity
+        public string Cuid { get; }  // VM unique Id
+        public string AttestationEndpoint { get; }  // MAA Regional / Custom Endpoint for attestation purposes.
 
-    /// <summary>
-    /// Concrete implementation of the CsrMetadata interface.
-    /// </summary>
-    internal class CsrMetadata : CsrMetadataInterface
-    {
-        public string ClientId { get; }
-        public string TenantId { get; }
-        public string Cuid { get; }
-        public string AttestationEndpoint { get; }
-
-        public CsrMetadata(CsrMetadataResponse response)
+        private CsrMetadata(CsrMetadataResponse response)
         {
             ClientId = response.ClientId;
             TenantId = response.TenantId;
@@ -35,12 +24,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         /// <summary>
-        /// Creates a CsrMetadata instance from a CsrMetadataResponse, logging warnings and returning null if any field is missing.
+        /// Tries to create a CsrMetadata instance from a CsrMetadataResponse, logs warnings and returns null if any field is missing.
         /// </summary>
         /// <param name="response">The CsrMetadataResponse object.</param>
         /// <param name="logger">The ILogger to log warnings.</param>
         /// <returns>CsrMetadata instance or null if any field is null.</returns>
-        public static CsrMetadata CreateOrNull(CsrMetadataResponse response, ILoggerAdapter logger)
+        public static CsrMetadata TryCreate(CsrMetadataResponse response, ILoggerAdapter logger)
         {
             bool hasNull = false;
 

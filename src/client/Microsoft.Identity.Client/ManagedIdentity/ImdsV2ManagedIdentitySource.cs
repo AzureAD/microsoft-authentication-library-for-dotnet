@@ -119,10 +119,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             CsrMetadataResponse csrMetadataResponse = JsonHelper.DeserializeFromJson<CsrMetadataResponse>(response.Body);
-            CsrMetadata csrMetadata = CsrMetadata.CreateOrNull(csrMetadataResponse, requestContext.Logger);
+            CsrMetadata csrMetadata = CsrMetadata.TryCreate(csrMetadataResponse, requestContext.Logger);
             if (csrMetadata == null)
             {
-                requestContext.Logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. CsrMetadata is null.");
+                requestContext.Logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. Invalid CsrMetadata response.");
                 return false;
             }
             

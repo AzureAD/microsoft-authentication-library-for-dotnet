@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
                 var managedIdentityApp = miBuilder.BuildConcrete();
+                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
                 RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -57,6 +59,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
                 var managedIdentityApp = miBuilder.BuildConcrete();
+                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
                 RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
 
                 // First attempt fails with NOT_FOUND (404)
@@ -89,6 +93,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
                 var managedIdentityApp = miBuilder.BuildConcrete();
+                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
                 RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -112,6 +118,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
                 var managedIdentityApp = miBuilder.BuildConcrete();
+                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
                 RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -135,6 +143,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
                 var managedIdentityApp = miBuilder.BuildConcrete();
+                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
                 RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
 
                 const int Num404Errors = 1 + TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries;
