@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <UseWinUI>true</UseWinUI>
+    <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <DefineConstants>$(DefineConstants);NET_CORE;WINRT</DefineConstants>
+
+    <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
+    <!--This should be passed from the VSTS build-->
+    <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">$(MsalInternalVersion)</MicrosoftIdentityClientVersion>
+    <MicrosoftIdentityClientVersion>$(MicrosoftIdentityClientVersion)</MicrosoftIdentityClientVersion>
+    <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
+    <Version>$(MicrosoftIdentityClientVersion)</Version>
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->
+    <Title>MSAL.NET extension for WinUI3 desktop applications</Title>
+    <Description>
+      This package contains WinUI3-specific binaries for using MSAL.NET with modern Windows applications built on WinUI3 and Windows App SDK.
+    </Description>
+    <PackageTags>Microsoft Authentication Library Desktop MSAL WinUI3 Windows App SDK WebView2</PackageTags>
+    <Product>Microsoft Authentication Library Desktop WinUI3</Product>
+  </PropertyGroup>
+  
+  <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- Include shared source files from Desktop project -->
+  <ItemGroup>
+    <Compile Include="..\Microsoft.Identity.Client.Desktop\**\*.cs" 
+             Exclude="..\Microsoft.Identity.Client.Desktop\WebView2WebUi\WinFormsPanelWithWebView2.cs;..\Microsoft.Identity.Client.Desktop\WebView2WebUi\Win32Window.cs;..\Microsoft.Identity.Client.Desktop\obj\**\*;..\Microsoft.Identity.Client.Desktop\bin\**\*" 
+             LinkBase="" />
+    
+    <!-- Include WinUI3 XAML files -->
+    <Page Include="..\Microsoft.Identity.Client.Desktop\WebView2WebUi\WinUI3WindowWithWebView2.xaml" 
+          Link="WebView2WebUi\WinUI3WindowWithWebView2.xaml" />
+
+    <!-- Include InternalsVisibleTo -->
+    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
+  </ItemGroup>
+
+  <!-- WinUI3 and Windows App SDK dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+  </ItemGroup>
+
+  <!-- Project references -->
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
+    <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+    
+    <!-- This package is being built against modern TFM, remove analyzer that causes issues -->
+    <PackageReference Remove="Microsoft.CodeAnalysis.PublicApiAnalyzers" />
+  </ItemGroup>
+
+</Project>
