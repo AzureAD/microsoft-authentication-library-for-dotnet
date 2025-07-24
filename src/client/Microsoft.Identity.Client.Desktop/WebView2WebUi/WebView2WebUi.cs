@@ -34,109 +34,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             _requestContext = requestContext;
         }
 
-        //         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
-        //             Uri authorizationUri,
-        //             Uri redirectUri,
-        //             RequestContext requestContext,
-        //             CancellationToken cancellationToken)
-        //         {
-        //             AuthorizationResult result = null;
-
-        // #if WINRT
-        //             var sendAuthorizeRequest = new Func<Task>(async () =>
-        //             {
-        //                 result = await InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken).ConfigureAwait(false);
-        //             });
-        // #else
-        //             var sendAuthorizeRequest = new Action(() =>
-        //             {
-        //                 result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
-        //             });
-        // #endif
-
-        //             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
-        //             {
-        //                 if (_parent.SynchronizationContext != null)
-        //                 {
-        // #if WINRT
-        //                     var sendAuthorizeRequestWithTcs = new Func<object, Task>(async (tcs) =>
-        //                     {
-        //                         try
-        //                         {
-        //                             result = await InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken).ConfigureAwait(false);
-        // #else
-        //                     var sendAuthorizeRequestWithTcs = new Action<object>((tcs) =>
-        //                     {
-        //                         try
-        //                         {
-        //                             result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
-        // #endif
-        //                             ((TaskCompletionSource<object>)tcs).TrySetResult(null);
-        //                         }
-        //                         catch (Exception e)
-        //                         {
-        //                             // Need to catch the exception here and put on the TCS which is the task we are waiting on so that
-        //                             // the exception coming out of Authenticate is correctly thrown.
-        //                             ((TaskCompletionSource<object>)tcs).TrySetException(e);
-        //                         }
-        //                     });
-
-        //                     var tcs2 = new TaskCompletionSource<object>();
-
-        //                     _parent.SynchronizationContext.Post(
-        // #if WINRT
-        //                         new SendOrPostCallback((state) =>
-        //                         {
-        //                             Task.Run(() => sendAuthorizeRequestWithTcs(state));
-        //                         }), tcs2);
-        // #else
-        //                         new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
-        //                     await tcs2.Task.ConfigureAwait(false);
-        // #endif
-        //                 }
-        //                 else
-        //                 {
-        //                     using (var staTaskScheduler = new StaTaskScheduler(1))
-        //                     {
-        //                         try
-        //                         {
-        //                             Task.Factory.StartNew(
-        //                                 sendAuthorizeRequest,
-        //                                 cancellationToken,
-        //                                 TaskCreationOptions.None,
-        //                                 staTaskScheduler).Wait(cancellationToken);
-        //                         }
-        //                         catch (AggregateException ae)
-        //                         {
-        //                             requestContext.Logger.ErrorPii(ae.InnerException);
-        //                             // Any exception thrown as a result of running task will cause AggregateException to be thrown with
-        //                             // actual exception as inner.
-        //                             Exception innerException = ae.InnerExceptions[0];
-
-        //                             // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
-        //                             if (innerException is AggregateException exception)
-        //                             {
-        //                                 innerException = exception.InnerExceptions[0];
-        //                             }
-
-        //                             throw innerException;
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //             else
-        //             {
-        // #if WINRT
-        //                 await sendAuthorizeRequest().ConfigureAwait(false);
-        // #else
-        //                 sendAuthorizeRequest();
-        // #endif
-        //             }
-
-        //             return result;
-
-        //         }
-
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri,
             Uri redirectUri,
@@ -193,25 +90,29 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     }, tcs);
 
                     return await tcs.Task.ConfigureAwait(false);
-        #else
-                    // For non-WINRT, keep the existing synchronous pattern
+#else
+                    // For non-WINRT, restore the original synchronous pattern
                     var sendAuthorizeRequestWithTcs = new Action<object>((tcs) =>
                     {
                         try
                         {
-                            var authResult = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
-                            ((TaskCompletionSource<AuthorizationResult>)tcs).TrySetResult(authResult);
+                            result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
+                            ((TaskCompletionSource<object>)tcs).TrySetResult(null);
                         }
                         catch (Exception e)
                         {
-                            ((TaskCompletionSource<AuthorizationResult>)tcs).TrySetException(e);
+                            // Need to catch the exception here and put on the TCS which is the task we are waiting on so that
+                            // the exception coming out of Authenticate is correctly thrown.
+                            ((TaskCompletionSource<object>)tcs).TrySetException(e);
                         }
                     });
 
-                    var tcs2 = new TaskCompletionSource<AuthorizationResult>();
-                    _parent.SynchronizationContext.Post(new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
-                    return await tcs2.Task.ConfigureAwait(false);
-        #endif
+                    var tcs2 = new TaskCompletionSource<object>();
+
+                    _parent.SynchronizationContext.Post(
+                        new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
+                    await tcs2.Task.ConfigureAwait(false);
+#endif
                 }
                 else
                 {
@@ -251,183 +152,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 
             return result;
         }
-    
-
-    // public async Task<AuthorizationResult> AcquireAuthorizationAsync(
-        //     Uri authorizationUri,
-        //     Uri redirectUri,
-        //     RequestContext requestContext,
-        //     CancellationToken cancellationToken)
-        // {
-        //     AuthorizationResult result = null;
-
-        // #if WINRT
-        //     // For WinUI3, get the dispatcher queue from the current context
-        //     var currentDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
-
-        //     // Try to get the main window's dispatcher if available
-        //     DispatcherQueue mainDispatcher = null;
-        //     try
-        //     {
-        //         // In WinUI3, we need to get the dispatcher from the main window or current context
-        //         mainDispatcher = currentDispatcher ?? 
-        //                         Microsoft.UI.Xaml.Window.Current?.DispatcherQueue ??
-        //                         (_parent.OwnerWindow as Microsoft.UI.Xaml.Window)?.DispatcherQueue;
-        //     }
-        //     catch
-        //     {
-        //         // Fallback to current thread dispatcher
-        //         mainDispatcher = currentDispatcher;
-        //     }
-
-        //     if (mainDispatcher != null && mainDispatcher.HasThreadAccess)
-        //     {
-        //         // We're already on the correct UI thread - create window directly
-        //         return await InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken).ConfigureAwait(false);
-        //     }
-        //     else if (mainDispatcher != null)
-        //     {
-        //         // We need to marshal to the UI thread
-        //         var tcs = new TaskCompletionSource<AuthorizationResult>();
-
-        //         mainDispatcher.TryEnqueue(() =>
-        //         {
-        //             try
-        //             {
-        //                 var asyncOperation = InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken);
-        //                 asyncOperation.ContinueWith(task =>
-        //                 {
-        //                     if (task.IsFaulted)
-        //                     {
-        //                         var exception = task.Exception?.InnerException ?? task.Exception;
-        //                         tcs.TrySetException(exception);
-        //                     }
-        //                     else if (task.IsCanceled)
-        //                     {
-        //                         tcs.TrySetCanceled();
-        //                     }
-        //                     else
-        //                     {
-        //                         tcs.TrySetResult(task.Result);
-        //                     }
-        //                 }, TaskContinuationOptions.ExecuteSynchronously);
-        //             }
-        //             catch (Exception ex)
-        //             {
-        //                 tcs.TrySetException(ex);
-        //             }
-        //         });
-
-        //         return await tcs.Task.ConfigureAwait(false);
-        //     }
-        //     else
-        //     {
-        //         // Fallback: No UI dispatcher available, use the traditional approach
-        //         var sendAuthorizeRequest = new Func<Task>(async () =>
-        //         {
-        //             result = await InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken).ConfigureAwait(false);
-        //         });
-        // #else
-        //     var sendAuthorizeRequest = new Action(() =>
-        //     {
-        //         result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
-        //     });
-        // #endif
-
-        //         if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
-        //         {
-        //             if (_parent.SynchronizationContext != null)
-        //             {
-        // #if WINRT
-        //                 // This is the fallback case for WinUI3 when no UI dispatcher is available
-        //                 var tcs = new TaskCompletionSource<AuthorizationResult>();
-
-        //                 _parent.SynchronizationContext.Post((state) =>
-        //                 {
-        //                     var taskCompletionSource = (TaskCompletionSource<AuthorizationResult>)state;
-
-        //                     var asyncOperation = InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken);
-        //                     asyncOperation.ContinueWith(task =>
-        //                     {
-        //                         if (task.IsFaulted)
-        //                         {
-        //                             var exception = task.Exception?.InnerException ?? task.Exception;
-        //                             taskCompletionSource.TrySetException(exception);
-        //                         }
-        //                         else if (task.IsCanceled)
-        //                         {
-        //                             taskCompletionSource.TrySetCanceled();
-        //                         }
-        //                         else
-        //                         {
-        //                             taskCompletionSource.TrySetResult(task.Result);
-        //                         }
-        //                     }, TaskContinuationOptions.ExecuteSynchronously);
-
-        //                 }, tcs);
-
-        //                 return await tcs.Task.ConfigureAwait(false);
-        // #else
-        //                 // For non-WINRT, keep the existing synchronous pattern
-        //                 var sendAuthorizeRequestWithTcs = new Action<object>((tcs) =>
-        //                 {
-        //                     try
-        //                     {
-        //                         var authResult = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
-        //                         ((TaskCompletionSource<AuthorizationResult>)tcs).TrySetResult(authResult);
-        //                     }
-        //                     catch (Exception e)
-        //                     {
-        //                         ((TaskCompletionSource<AuthorizationResult>)tcs).TrySetException(e);
-        //                     }
-        //                 });
-
-        //                 var tcs2 = new TaskCompletionSource<AuthorizationResult>();
-        //                 _parent.SynchronizationContext.Post(new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
-        //                 return await tcs2.Task.ConfigureAwait(false);
-        // #endif
-        //             }
-        //             else
-        //             {
-        //                 using (var staTaskScheduler = new StaTaskScheduler(1))
-        //                 {
-        //                     try
-        //                     {
-        //                         Task.Factory.StartNew(
-        //                             sendAuthorizeRequest,
-        //                             cancellationToken,
-        //                             TaskCreationOptions.None,
-        //                             staTaskScheduler).Wait(cancellationToken);
-        //                     }
-        //                     catch (AggregateException ae)
-        //                     {
-        //                         requestContext.Logger.ErrorPii(ae.InnerException);
-        //                         Exception innerException = ae.InnerExceptions[0];
-
-        //                         if (innerException is AggregateException exception)
-        //                         {
-        //                             innerException = exception.InnerExceptions[0];
-        //                         }
-
-        //                         throw innerException;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //         else
-        //         {
-        // #if WINRT
-        //             await sendAuthorizeRequest().ConfigureAwait(false);
-        // #else
-        //             sendAuthorizeRequest();
-        // #endif
-        //         }
-
-        //         return result;
-        // #if WINRT
-        //     }
-        // #endif
-        // }
 
         public Uri UpdateRedirectUri(Uri redirectUri)
         {

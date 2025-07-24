@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             if (CheckForEndUrl(new Uri(e.Uri)))
             {
                 _logger.Verbose(() => "[WebView2Control] Redirect URI reached. Stopping the interactive view");
-                e.Cancel = true;
+                e.Cancel = true;                   
             }
             else
             {
