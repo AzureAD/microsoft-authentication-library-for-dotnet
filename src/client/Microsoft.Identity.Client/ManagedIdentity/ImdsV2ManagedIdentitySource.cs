@@ -62,6 +62,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // CSR metadata GET request
             HttpResponse response;
 
+            // TODO: Remove try/catch once we have a mock for this request, and create a helper method for the SendRequestAsync
             try
             {
                 response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
@@ -90,6 +91,27 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return false;
             }
 
+            if (!ValidateCsrMetadataResponse(response, requestContext.Logger))
+            {
+                return false;
+            }
+
+            var csrMetadata = TryCreateCsrMetadata(response.Body, requestContext.Logger);
+            if (csrMetadata != null)
+            {
+                _csrMetadata = csrMetadata;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private static Boolean ValidateCsrMetadataResponse(
+            HttpResponse response,
+            ILoggerAdapter logger)
+        {
             /*
              * Match "IMDS/" at start of "server" header string (`^IMDS\/`)
              * Match the first three numbers with dots (`\d+.\d+.\d+.`)
@@ -105,30 +127,37 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
             if (serverHeader == null)
             {
-                requestContext.Logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. 'server' header is missing from the CSR metadata response.");
+                logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. 'server' header is missing from the CSR metadata response.");
                 return false;
             }
+
             var match = System.Text.RegularExpressions.Regex.Match(
                 serverHeader,
                 @"^IMDS/\d+\.\d+\.\d+\.(\d+)$"
             );
             if (!match.Success || !int.TryParse(match.Groups[1].Value, out int version) || version <= 1324)
             {
-                requestContext.Logger.Info(() => $"[Managed Identity] IMDSV2 managed identity is not available. 'server' header format/version invalid. Extracted version: {match.Groups[1].Value}");
+                logger.Info(() => $"[Managed Identity] IMDSV2 managed identity is not available. 'server' header format/version invalid. Extracted version: {match.Groups[1].Value}");
                 return false;
             }
 
-            CsrMetadataResponse csrMetadataResponse = JsonHelper.DeserializeFromJson<CsrMetadataResponse>(response.Body);
-            CsrMetadata csrMetadata = CsrMetadata.TryCreate(csrMetadataResponse, requestContext.Logger);
+            return true;
+        }
+
+        private static CsrMetadata TryCreateCsrMetadata(
+            String responseBody,
+            ILoggerAdapter logger)
+        {
+            CsrMetadataResponse csrMetadataResponse = JsonHelper.DeserializeFromJson<CsrMetadataResponse>(responseBody);
+            CsrMetadata csrMetadata = CsrMetadata.TryCreate(csrMetadataResponse, logger);
             if (csrMetadata == null)
             {
-                requestContext.Logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. Invalid CsrMetadata response.");
-                return false;
+                logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. Invalid CsrMetadata response.");
+                return null;
             }
-            
-            requestContext.Logger.Info(() => "[Managed Identity] IMDSV2 managed identity is available.");
-            _csrMetadata = csrMetadata;
-            return true;
+
+            logger.Info(() => "[Managed Identity] IMDSV2 managed identity is available.");
+            return csrMetadata;
         }
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
