@@ -30,11 +30,6 @@ namespace Microsoft.Identity.Client.Extensibility
             Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler) 
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && onBeforeTokenRequestHandler != null)
-            {
-                throw new InvalidOperationException("Cannot set OnBeforeTokenRequest handler twice.");
-            }
-
             if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
             {
                 builder.CommonParameters.OnBeforeTokenRequestHandler = new List<Func<OnBeforeTokenRequestData, Task>> { onBeforeTokenRequestHandler };
@@ -83,18 +78,16 @@ namespace Microsoft.Identity.Client.Extensibility
            MsalAuthenticationExtension authenticationExtension)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && authenticationExtension.OnBeforeTokenRequestHandler != null)
+            if (authenticationExtension.OnBeforeTokenRequestHandler != null)
             {
-                throw new InvalidOperationException("Cannot set both an AuthenticaitonOperation and an OnBeforeTokenRequestHandler");
-            }
-
-            if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
-            {
-                builder.CommonParameters.OnBeforeTokenRequestHandler = new List<Func<OnBeforeTokenRequestData, Task>> { authenticationExtension.OnBeforeTokenRequestHandler };
-            }
-            else
-            {
-                builder.CommonParameters.OnBeforeTokenRequestHandler.Add(authenticationExtension.OnBeforeTokenRequestHandler);
+                if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
+                {
+                    builder.CommonParameters.OnBeforeTokenRequestHandler = new List<Func<OnBeforeTokenRequestData, Task>> { authenticationExtension.OnBeforeTokenRequestHandler };
+                }
+                else
+                {
+                    builder.CommonParameters.OnBeforeTokenRequestHandler.Add(authenticationExtension.OnBeforeTokenRequestHandler);
+                }
             }
 
             if (authenticationExtension.AuthenticationOperation != null)

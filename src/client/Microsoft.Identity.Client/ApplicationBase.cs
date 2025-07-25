@@ -36,17 +36,18 @@ namespace Microsoft.Identity.Client
                requestContext,
                commonParameters.AuthorityOverride).ConfigureAwait(false);
 
-            await InitializeCacheKeyComponentsAsync(cancellationToken, commonParameters.CacheKeyComponents).ConfigureAwait(false);
+            var cacheKeyComponents = await InitializeCacheKeyComponentsAsync(commonParameters.CacheKeyComponents, cancellationToken).ConfigureAwait(false);
 
             return new AuthenticationRequestParameters(
                 ServiceBundle,
                 cache,
                 commonParameters,
                 requestContext,
-                authority);
+                authority,
+                cacheKeyComponents: cacheKeyComponents);
         }
 
-        internal async Task<SortedList<string, string>> InitializeCacheKeyComponentsAsync(CancellationToken cancellationToken, SortedList<string, Func<CancellationToken, Task<string>>> cacheKeyComponents)
+        internal async Task<SortedList<string, string>> InitializeCacheKeyComponentsAsync(SortedList<string, Func<CancellationToken, Task<string>>> cacheKeyComponents, CancellationToken cancellationToken)
         {
             if (cacheKeyComponents != null && cacheKeyComponents.Count > 0)
             {
