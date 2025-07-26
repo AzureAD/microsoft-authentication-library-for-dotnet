@@ -131,12 +131,3 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
     }
 }
-
-//configuration["AzureAd:Instance"] = "https://login.microsoftonline.com/";
-//configuration["AzureAd:TenantId"] = "31a58c3b-ae9c-4448-9e8f-e9e143e800df";
-//configuration["AzureAd:ClientId"] = "d15884b6-a447-4dd5-a5a5-a668c49f6300"; // Agent application.
-//configuration["AzureAd:ClientCredentials:0:SourceType"] = "StoreWithDistinguishedName";
-//configuration["AzureAd:ClientCredentials:0:CertificateStorePath"] = "LocalMachine/My";
-//configuration["AzureAd:ClientCredentials:0:CertificateDistinguishedName"] = "CN=LabAuth.MSIDLab.com";
-//string agentIdentity = "d84da24a-2ea2-42b8-b5ab-8637ec208024"; // Replace with the actual agent identity
-//string userUpn = "aui1@msidlabtoint.onmicrosoft.com";          // Replace with the actual user upn.
