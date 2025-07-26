@@ -91,7 +91,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static async Task<string> GetAppCredential()
         {
-            //Arrange
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             var cca1 = ConfidentialClientApplicationBuilder
