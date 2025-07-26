@@ -125,10 +125,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithFmiPathForClientAssertion(AgentIdentity)
                 .ExecuteAsync().ConfigureAwait(false);
 
-            var result2 = await cca1.AcquireTokenForClient(["api://AzureADTokenExchange/.default"])
-               .WithFmiPathForClientAssertion("other-agent-identity")
-               .ExecuteAsync().ConfigureAwait(false);
-
             Trace.WriteLine($"User FIC credential from : {result.AuthenticationResultMetadata.TokenSource}");
 
             return result.AccessToken;
