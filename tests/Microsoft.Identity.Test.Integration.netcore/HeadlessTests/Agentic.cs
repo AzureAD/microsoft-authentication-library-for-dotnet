@@ -19,13 +19,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         const string TenantId = "31a58c3b-ae9c-4448-9e8f-e9e143e800df";
         const string AgentIdentity = "d84da24a-2ea2-42b8-b5ab-8637ec208024";
         const string UserUpn = "aui1@msidlabtoint.onmicrosoft.com";
+        private const string TokenExchangeUrl = "api://AzureADTokenExchange/.default";
 
         [TestMethod]
         public async Task AgentUserIdentityGetsTokenForGraphTest()
         {
             await AgentUserIdentityGetsTokenForGraphAsync().ConfigureAwait(false);
             await AgentUserIdentityGetsTokenForGraphAsync().ConfigureAwait(false);
-
         }
 
         [TestMethod]
@@ -42,10 +42,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
                         .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                         .WithExperimentalFeatures(true)
-                        .WithClientAssertion((AssertionRequestOptions _) => GetAppCredential())
+                        .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
                         .Build();
 
-            var result = await cca.AcquireTokenForClient(["https://graph.microsoft.com/.default"])                
+            var result = await cca.AcquireTokenForClient(["https://graph.microsoft.com/.default"])
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                         .WithExperimentalFeatures(true)
                         .WithExtraQueryParameters("slice=first")
-                        .WithClientAssertion((AssertionRequestOptions _) => GetAppCredential())
+                        .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
                         .Build();
 
             var result = await (cca as IByUsernameAndPassword).AcquireTokenByUsernamePassword(["https://graph.microsoft.com/.default"], UserUpn, "no_password")
@@ -89,8 +89,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
         }
 
-        private static async Task<string> GetAppCredential()
+        private static async Task<string> GetAppCredentialAsync(string fmiPath)
         {
+            Assert.IsNotNull(fmiPath, "fmiPath cannot be null");
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             var cca1 = ConfidentialClientApplicationBuilder
@@ -101,8 +102,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows                        
                         .Build();
 
-            var result = await cca1.AcquireTokenForClient(["api://AzureADTokenExchange/.default"])
-                .WithFmiPath(AgentIdentity)
+            var result = await cca1.AcquireTokenForClient([TokenExchangeUrl])
+                .WithFmiPath(fmiPath)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -118,10 +119,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                      .WithAuthority("https://login.microsoftonline.com/", TenantId)
                      .WithExperimentalFeatures(true)
                      .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
-                     .WithClientAssertion((AssertionRequestOptions _) => GetAppCredential())                   
+                     .WithClientAssertion(async (AssertionRequestOptions a) =>
+                     {
+                         Assert.AreEqual(AgentIdentity, a.ClientAssertionFmiPath);
+                         var cred = await GetAppCredentialAsync(a.ClientAssertionFmiPath).ConfigureAwait(false);
+                         return cred;
+                     })                   
                      .Build();
 
-            var result = await cca1.AcquireTokenForClient(["api://AzureADTokenExchange/.default"])   
+            var result = await cca1.AcquireTokenForClient([TokenExchangeUrl])   
                 .WithFmiPathForClientAssertion(AgentIdentity)
                 .ExecuteAsync().ConfigureAwait(false);
 
