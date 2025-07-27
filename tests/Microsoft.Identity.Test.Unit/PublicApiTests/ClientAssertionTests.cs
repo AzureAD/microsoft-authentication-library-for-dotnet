@@ -356,7 +356,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures(true)
                     .WithClientSecret("app_level_secret") // Use secret instead of cert for simplicity
-                    .BuildConcrete();
+                    .Build();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithClientAssertion(overrideAssertion)
@@ -390,7 +390,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures(true)
                     .WithClientSecret("app_level_secret")
-                    .BuildConcrete();
+                    .Build();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithClientAssertion(overrideAssertion)
@@ -430,9 +430,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.Fail("App-level assertion delegate should not be called when override is present");
                         return await Task.FromResult(appAssertion).ConfigureAwait(false);
                     })
-                    .BuildConcrete();
+                    .Build();
 
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)                    
                     .WithClientAssertion(overrideAssertion)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
