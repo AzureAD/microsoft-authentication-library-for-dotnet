@@ -129,7 +129,16 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
-            if (_serviceBundle.Config.ClientCredential != null)
+            // Check for client assertion override first - this takes precedence over app-level client credential
+            if (!string.IsNullOrEmpty(_requestParams.ClientAssertionOverride))
+            {
+                _requestParams.RequestContext.Logger.Verbose(
+                    () => "[TokenClient] Using cliet assertion from the request");
+
+                _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+                _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, _requestParams.ClientAssertionOverride);
+            }
+            else if (_serviceBundle.Config.ClientCredential != null)
             {
                 _requestParams.RequestContext.Logger.Verbose(
                     () => "[TokenClient] Before adding the client assertion / secret");

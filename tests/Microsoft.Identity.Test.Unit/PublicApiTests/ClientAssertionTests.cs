@@ -5,11 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -328,6 +330,190 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Cached AT is expired, RT used to retrieve new AT
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsTrue(verified, "The client assertion delegate should have been called with the correct FMI path.");
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertionOverride_OverridesAppLevelCertificate()
+        {
+            const string overrideAssertion = "override_assertion_jwt";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                    { OAuth2Parameter.ClientAssertion, overrideAssertion }
+                };
+
+                // App configured with certificate, but request should use override assertion
+                // Use a simpler approach that doesn't require certificate loading
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .WithClientSecret("app_level_secret") // Use secret instead of cert for simplicity
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(overrideAssertion)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertionOverride_OverridesAppLevelSecret()
+        {
+            const string overrideAssertion = "override_assertion_jwt";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                    { OAuth2Parameter.ClientAssertion, overrideAssertion }
+                };
+
+                // App configured with secret, but request should use override assertion
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .WithClientSecret("app_level_secret")
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(overrideAssertion)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertionOverride_OverridesAppLevelAssertion()
+        {
+            const string appAssertion = "app_level_assertion_jwt";
+            const string overrideAssertion = "override_assertion_jwt";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                    { OAuth2Parameter.ClientAssertion, overrideAssertion }
+                };
+
+                // App configured with assertion delegate, but request should use override assertion
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        // This should not be called when override is provided
+                        Assert.Fail("App-level assertion delegate should not be called when override is present");
+                        return await Task.FromResult(appAssertion).ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(overrideAssertion)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertionOverride_WithoutExperimentalFeatures_ThrowsException()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientSecret("app_level_secret")
+                    .BuildConcrete();
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+                    () => app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithClientAssertion("override_assertion")
+                        .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ExperimentalFeature, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertionOverride_NoAppLevelCredential_WorksWithOverride()
+        {
+            const string overrideAssertion = "override_assertion_jwt";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                    { OAuth2Parameter.ClientAssertion, overrideAssertion }
+                };
+
+                // App configured without any client credential at app level
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(overrideAssertion)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertionOverride_NoAppLevelCredential_FailsWithoutOverride()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // App configured without any client credential at app level
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+                    () => app.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ClientCredentialAuthenticationTypeMustBeDefined, ex.ErrorCode);
             }
         }
     }

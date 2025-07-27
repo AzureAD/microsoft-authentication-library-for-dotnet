@@ -48,7 +48,8 @@ namespace Microsoft.Identity.Client
             // Confidential client must have a credential
             if (ServiceBundle?.Config.ClientCredential == null &&
                 CommonParameters.OnBeforeTokenRequestHandler == null &&
-                ServiceBundle?.Config.AppTokenProvider == null 
+                ServiceBundle?.Config.AppTokenProvider == null &&
+                string.IsNullOrEmpty(CommonParameters.ClientAssertionOverride)
                 )
             {
                 throw new MsalClientException(
@@ -110,6 +111,18 @@ namespace Microsoft.Identity.Client
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
             CommonParameters.AuthenticationOperation = new PopAuthenticationOperation(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+
+            return this as T;
+        }
+
+        /// <summary>
+        /// The client assertion. This overrides any client assertion / certificate / secret set in the application configuration.
+        /// </summary>
+        public T WithClientAssertion(string clientAssertion)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            CommonParameters.ClientAssertionOverride = clientAssertion;
 
             return this as T;
         }

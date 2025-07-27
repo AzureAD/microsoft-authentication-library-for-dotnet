@@ -179,6 +179,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string FmiPathSuffix => _commonParameters.FmiPathSuffix;
 
         public string ClientAssertionFmiPath => _commonParameters.ClientAssertionFmiPath;
+        
+        public string ClientAssertionOverride => _commonParameters.ClientAssertionOverride;
         #endregion
 
         public void LogParameters()
