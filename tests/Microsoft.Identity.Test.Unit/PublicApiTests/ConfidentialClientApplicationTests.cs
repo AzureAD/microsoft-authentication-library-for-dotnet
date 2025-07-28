@@ -901,25 +901,76 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void Constructor_NullDelegate_ThrowsArgumentNullException()
         {
-            // Arrange
-            Func<AssertionRequestOptions, Task<string>> nullDelegate = null;
+            // Arrange 
+            Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>> nullDelegate = null;
 
-            // Act & Assert
+            // Act &  Assert
             Assert.ThrowsException<ArgumentNullException>(() =>
-                new SignedAssertionDelegateClientCredential(nullDelegate));
+                new ClientAssertionDelegateCredential(nullDelegate));
         }
 
         [TestMethod]
-        public void Constructor_ValidDelegate_DoesNotThrow()
+        public void Constructor_ValidDelegate1_DoesNotThrow()
+        {
+            // Arrange – delegate now returns an AssertionResponse and takes CancellationToken
+            Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>> validDelegate =
+                (options, ct) => Task.FromResult(new AssertionResponse
+                {
+                    Assertion = "fake_assertion",      // bearer‑style JWT
+                    TokenBindingCertificate = null     // no cert => jwt-bearer
+                });
+
+            // Act &  Assert – constructor should succeed
+            var credential = new ClientAssertionDelegateCredential(validDelegate);
+            Assert.IsNotNull(credential);
+        }
+
+        [TestMethod]
+        public void Constructor_ValidDelegate2_DoesNotThrow()
         {
             // Arrange
-            Func<AssertionRequestOptions, Task<string>> validDelegate =
-                (options) => Task.FromResult("fake_assertion");
+            X509Certificate2 cert = CertHelper.GetOrCreateTestCert();
 
-            // Act & Assert
-            // Should not throw
-            var credential = new SignedAssertionDelegateClientCredential(validDelegate);
+            Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>> validDelegate =
+                (opts, ct) => Task.FromResult(new AssertionResponse
+                {
+                    Assertion = "fake_assertion",
+                    TokenBindingCertificate = cert
+                });
+
+            // Act – should not throw
+            var credential = new ClientAssertionDelegateCredential(validDelegate);
+
+            // Assert
             Assert.IsNotNull(credential);
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_EmptyAssertion_ThrowsArgumentExceptionAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // Build a CCA whose assertion‑delegate returns NO JWT (error case)
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                          .WithClientSecret(TestConstants.ClientSecret)
+                          .WithHttpManager(httpManager)
+                          .WithClientAssertion(
+                              (opts, ct) => Task.FromResult(new AssertionResponse
+                              {
+                                  Assertion = string.Empty,          // <-- invalid: must be non‑empty
+                                  TokenBindingCertificate = null     // no cert => jwt-bearer
+                              }))
+                          .BuildConcrete();
+
+                // Act & Assert – the first token request will execute the delegate
+                // and should surface ArgumentException from the credential layer.
+                await AssertException.TaskThrowsAsync<ArgumentException>(() =>
+                    cca.AcquireTokenForClient(TestConstants.s_scope)
+                       .ExecuteAsync())
+                       .ConfigureAwait(false);
+            }
         }
 
         [TestMethod]
