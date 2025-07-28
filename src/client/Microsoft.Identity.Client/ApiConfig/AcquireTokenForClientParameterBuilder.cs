@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.OAuth2;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -96,16 +97,33 @@ namespace Microsoft.Identity.Client
         /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
         {
-            if (ServiceBundle.Config.ClientCredential is not CertificateClientCredential certificateCredential)
+            if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certCred)
+            {
+                CommonParameters.AuthenticationOperation =
+                    new MtlsPopAuthenticationOperation(certCred.Certificate);
+                CommonParameters.MtlsCertificate = certCred.Certificate;
+            }
+            else if (ServiceBundle.Config.ClientCredential is ClientAssertionDelegateCredential assertCred)
+            {
+                X509Certificate2 cert = assertCred.PeekCertificate(ServiceBundle.Config.ClientId);
+                
+                if (cert == null)
+                {
+                    // Delegate did not supply a certificate ➜ cannot proceed with mTLS‑PoP
+                    throw new MsalClientException(
+                        MsalError.MtlsCertificateNotProvided,
+                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+                }
+
+                CommonParameters.AuthenticationOperation =
+                    new MtlsPopAuthenticationOperation(cert);
+                CommonParameters.MtlsCertificate = cert;
+            }
+            else
             {
                 throw new MsalClientException(
                     MsalError.MtlsCertificateNotProvided,
                     MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-            }
-            else
-            {
-                CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
-                CommonParameters.MtlsCertificate = certificateCredential.Certificate;
             }
 
             return this;
