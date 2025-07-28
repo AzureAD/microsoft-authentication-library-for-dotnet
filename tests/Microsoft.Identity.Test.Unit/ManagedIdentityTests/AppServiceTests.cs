@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Disabling shared cache options to avoid cross test pollution.
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;
 
                 Assert.AreEqual(expectedManagedIdentitySource, await mi.GetManagedIdentitySourceAsync().ConfigureAwait(false));
             }

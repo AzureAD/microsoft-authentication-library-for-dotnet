@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
         /// Detects and returns the managed identity source available on the environment.
         /// </summary>
         /// <returns>Managed identity source detected on the environment if any.</returns>
-        [Obsolete("Use GetManagedIdentitySourceAsync() instead as an instance method of ManagedIdentityApplication. This method is no longer static.")]
+        [Obsolete("Use GetManagedIdentitySourceAsync() instead. \"ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;\"")]
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
             return ManagedIdentityClient.GetManagedIdentitySource();
