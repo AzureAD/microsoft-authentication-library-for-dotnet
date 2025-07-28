@@ -3,13 +3,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -330,5 +336,281 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsTrue(verified, "The client assertion delegate should have been called with the correct FMI path.");
             }
         }
+
+        [TestMethod]
+        public async Task ClientAssertion_BearerAsync()
+        {
+            using var http = new MockHttpManager();
+            http.AddInstanceDiscoveryMockHandler();
+
+            var handler = http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                       .WithClientSecret(TestConstants.ClientSecret)
+                       .WithHttpManager(http)
+                       .WithClientAssertion(BearerDelegate())
+                       .BuildConcrete();
+
+            var result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                                  .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(
+                "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                handler.ActualRequestPostData["client_assertion_type"]);
+        }
+
+        [TestMethod]
+        public async Task ClientAssertion_PoPAsync()
+        {
+            using var http = new MockHttpManager();
+            http.AddInstanceDiscoveryMockHandler();
+            var handler = http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                       .WithClientSecret(TestConstants.ClientSecret)
+                       .WithHttpManager(http)
+                       .WithClientAssertion(PopDelegate())
+                       .BuildConcrete();
+
+            var result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                                  .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(
+                "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
+                handler.ActualRequestPostData["client_assertion_type"]);
+        }
+        [TestMethod]
+        public async Task ClientAssertion_ReceivesClientCapabilitiesAsync()
+        {
+            using var http = new MockHttpManager();
+            http.AddInstanceDiscoveryMockHandler();
+            http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+            bool checkedCaps = false;
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                      .WithClientSecret(TestConstants.ClientSecret)
+                      .WithClientCapabilities(TestConstants.ClientCapabilities)
+                      .WithHttpManager(http)
+                      .WithClientAssertion((opts, ct) =>
+                      {
+                          checkedCaps = true;
+                          CollectionAssert.AreEqual(
+                              TestConstants.ClientCapabilities,
+                              opts.ClientCapabilities.ToList());
+                          return Task.FromResult(new AssertionResponse
+                          {
+                              Assertion = "jwt"
+                          });
+                      })
+                      .BuildConcrete();
+
+            _ = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            
+            Assert.IsTrue(checkedCaps);
+        }
+
+        [TestMethod]
+        public async Task ClientAssertion_EmptyJwt_ThrowsAsync()
+        {
+            using var http = new MockHttpManager();
+            http.AddInstanceDiscoveryMockHandler();
+
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                      .WithClientSecret(TestConstants.ClientSecret)
+                      .WithHttpManager(http)
+                      .WithClientAssertion((o, c) =>
+                          Task.FromResult(new AssertionResponse { Assertion = string.Empty }))
+                      .BuildConcrete();
+
+            await AssertException.TaskThrowsAsync<ArgumentException>(() =>
+                cca.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
+                .ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ClientAssertion_CancellationTokenPropagatesAsync()
+        {
+            using var http = new MockHttpManager();
+            http.AddInstanceDiscoveryMockHandler();
+
+            using var cts = new CancellationTokenSource();
+
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                      .WithClientSecret(TestConstants.ClientSecret)
+                      .WithHttpManager(http)
+                      .WithClientAssertion((o, ct) =>
+                      {
+                          Assert.AreEqual(cts.Token, ct);
+                          cts.Cancel();
+                          ct.ThrowIfCancellationRequested();
+                          return Task.FromResult(new AssertionResponse { Assertion = "jwt" });
+                      })
+                      .BuildConcrete();
+
+            await AssertException.TaskThrowsAsync<OperationCanceledException>(() =>
+                cca.AcquireTokenForClient(TestConstants.s_scope)
+                   .ExecuteAsync(cts.Token))
+                .ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task WithMtlsPop_AfterPoPDelegate_Works()
+        {
+            const string region = "eastus";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                // Set the expected mTLS endpoint for public cloud
+                string globalEndpoint = "mtlsauth.microsoft.com";
+                string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    // Set up mock handler with expected token endpoint URL
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
+
+                    var cert = CertHelper.GetOrCreateTestCert();
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithClientAssertion(PopDelegate())
+                        .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    // First token acquisition - should hit the identity provider
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+
+                    Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should be present.");
+                    Assert.AreEqual(cert.Thumbprint, result.BindingCertificate.Thumbprint,
+                        "BindingCertificate must match the cert passed to WithCertificate().");
+
+                    // Second token acquisition - should retrieve from cache
+                    AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", secondResult.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, secondResult.TokenType);
+                    Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                    // Cached result must still carry the cert
+                    Assert.IsNotNull(secondResult.BindingCertificate);
+                    Assert.AreEqual(result.BindingCertificate.Thumbprint,
+                        secondResult.BindingCertificate.Thumbprint);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task WithMtlsPop_AfterBearerDelegate_Throws()
+        {
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                      .WithClientSecret(TestConstants.ClientSecret)
+                      .WithClientAssertion(BearerDelegate())
+                      .BuildConcrete();
+
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                cca.AcquireTokenForClient(TestConstants.s_scope)
+                   .WithMtlsProofOfPossession()
+                   .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        public async Task ClientAssertion_NotCalledWhenTokenFromCacheAsync()
+        {
+            using var http = new MockHttpManager();
+            http.AddInstanceDiscoveryMockHandler();
+
+            int callCount = 0;
+            http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(); // first call => network
+
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                      .WithClientSecret(TestConstants.ClientSecret)
+                      .WithHttpManager(http)
+                      .WithClientAssertion((o, c) =>
+                      {
+                          callCount++;
+                          return Task.FromResult(new AssertionResponse { Assertion = "jwt" });
+                      })
+                      .BuildConcrete();
+
+            // 1) first request – delegate runs, token cached
+            _ = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            
+            Assert.AreEqual(1, callCount);
+
+            // 2) second request – should hit cache, delegate NOT called again
+            _ = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(1, callCount);
+        }
+
+        [TestMethod]
+        public async Task WithMtlsPop_AfterPoPDelegate_NoRegion_ThrowsAsync()
+        {
+            using var http = new MockHttpManager();
+            {
+                // Arrange – CCA with PoP delegate (returns JWT + cert) but **no AzureRegion configured**
+                var cert = CertHelper.GetOrCreateTestCert();
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                              .WithClientAssertion(PopDelegate())
+                              .WithHttpManager(http)
+                              .BuildConcrete();
+
+                // Act & Assert – should fail because region is missing
+                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                    await cca.AcquireTokenForClient(TestConstants.s_scope)
+                             .WithMtlsProofOfPossession()
+                             .ExecuteAsync()
+                             .ConfigureAwait(false))
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
+            }
+        }
+
+        #region Helper ---------------------------------------------------------------
+        private static Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>>
+        BearerDelegate(string jwt = "fake_jwt") =>
+            (opts, ct) => Task.FromResult(new AssertionResponse
+            {
+                Assertion = jwt,
+                TokenBindingCertificate = null
+            });
+
+        private static Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>>
+        PopDelegate(string jwt = "fake_jwt") =>
+            (opts, ct) =>
+            {
+                // Obtain (or generate) the test certificate once per call
+                X509Certificate2 cert = CertHelper.GetOrCreateTestCert();
+
+                return Task.FromResult(new AssertionResponse
+                {
+                    Assertion = jwt,
+                    TokenBindingCertificate = cert
+                });
+            };
+#endregion
     }
 }
