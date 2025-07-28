@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext, CsrMetadata csrMetadata) :
-            base(requestContext, ManagedIdentitySource.Imds)
+            base(requestContext, ManagedIdentitySource.ImdsV2)
         {
             _csrMetadata = csrMetadata;
         }
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 "",
                 "ImdsV2ManagedIdentitySource.CreateRequest is not implemented yet.",
                 null,
-                ManagedIdentitySource.Imds,
+                ManagedIdentitySource.ImdsV2,
                 null);
         }
     }

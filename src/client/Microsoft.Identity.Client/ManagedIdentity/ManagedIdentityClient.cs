@@ -66,40 +66,40 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string msiSecretMachineLearning = EnvironmentVariables.MsiSecret;
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
 
-            var logger = requestContext?.ServiceBundle?.ApplicationLogger;
-            logger?.Info("[Managed Identity] Detecting managed identity source...");
+            var logger = requestContext.ServiceBundle.ApplicationLogger;
+            logger.Info("[Managed Identity] Detecting managed identity source...");
 
             if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
             {
                 if (!string.IsNullOrEmpty(identityServerThumbprint))
                 {
-                    logger?.Info("[Managed Identity] Service Fabric detected.");
+                    logger.Info("[Managed Identity] Service Fabric detected.");
                     s_sourceName = ManagedIdentitySource.ServiceFabric;
                 }
                 else
                 {
-                    logger?.Info("[Managed Identity] App Service detected.");
+                    logger.Info("[Managed Identity] App Service detected.");
                     s_sourceName = ManagedIdentitySource.AppService;
                 }
             }
             else if (!string.IsNullOrEmpty(msiSecretMachineLearning) && !string.IsNullOrEmpty(msiEndpoint))
             {
-                logger?.Info("[Managed Identity] Machine Learning detected.");
+                logger.Info("[Managed Identity] Machine Learning detected.");
                 s_sourceName = ManagedIdentitySource.MachineLearning;
             }
             else if (!string.IsNullOrEmpty(msiEndpoint))
             {
-                logger?.Info("[Managed Identity] Cloud Shell detected.");
+                logger.Info("[Managed Identity] Cloud Shell detected.");
                 s_sourceName = ManagedIdentitySource.CloudShell;
             }
             else if (ValidateAzureArcEnvironment(identityEndpoint, imdsEndpoint, logger))
             {
-                logger?.Info("[Managed Identity] Azure Arc detected.");
+                logger.Info("[Managed Identity] Azure Arc detected.");
                 s_sourceName = ManagedIdentitySource.AzureArc;
             }
             else if (await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext).ConfigureAwait(false))
             {
-                logger?.Info("[Managed Identity] ImdsV2 detected.");
+                logger.Info("[Managed Identity] ImdsV2 detected.");
                 s_sourceName = ManagedIdentitySource.ImdsV2;
             }
             else

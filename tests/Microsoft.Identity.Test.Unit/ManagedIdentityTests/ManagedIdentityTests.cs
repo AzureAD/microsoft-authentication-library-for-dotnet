@@ -157,11 +157,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId .ResourceId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
         [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        // TODO: Add test case for IMDSV2
         public async Task ManagedIdentityUserAssignedHappyPathAsync(
             string endpoint,
             ManagedIdentitySource managedIdentitySource,
@@ -178,6 +179,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build();
+
+                if (managedIdentitySource == ManagedIdentitySource.Imds)
+                {
+                    mockCsrMetadataRequest(httpManager);
+                }
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
