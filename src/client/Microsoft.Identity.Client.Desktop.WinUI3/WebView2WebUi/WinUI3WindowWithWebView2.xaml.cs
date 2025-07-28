@@ -33,8 +33,6 @@ namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
         
         // UI controls created programmatically
         private WebView2 _webView2;
-        private Button _cancelButton;
-        private TextBlock _titleText;
         private ProgressRing _progressRing;
 
         /// <summary>
@@ -78,37 +76,16 @@ namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
 
         private void InitializeWindow()
         {
-            // Create the main grid
+            // Create the main grid with just one row for the WebView2
             var mainGrid = new Grid();
-            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(50) });
             mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(50) });
 
-            // Title bar
-            var titlePanel = new StackPanel 
-            { 
-                Orientation = Orientation.Horizontal,
-                Margin = new Thickness(10),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            
-            _titleText = new TextBlock 
-            { 
-                Text = _embeddedWebViewOptions?.Title ?? "Sign in to your account",
-                FontSize = 16,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            titlePanel.Children.Add(_titleText);
-            
-            Grid.SetRow(titlePanel, 0);
-            mainGrid.Children.Add(titlePanel);
-
-            // WebView2
+            // WebView2 - takes up the entire window
             _webView2 = new WebView2();
-            Grid.SetRow(_webView2, 1);
+            Grid.SetRow(_webView2, 0);
             mainGrid.Children.Add(_webView2);
 
-            // Progress ring (initially hidden)
+            // Progress ring (initially hidden) - centered over the WebView2
             _progressRing = new ProgressRing
             {
                 IsActive = true,
@@ -118,28 +95,8 @@ namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };
-            Grid.SetRow(_progressRing, 1);
+            Grid.SetRow(_progressRing, 0);
             mainGrid.Children.Add(_progressRing);
-
-            // Button panel
-            var buttonPanel = new StackPanel 
-            { 
-                Orientation = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(10)
-            };
-            
-            _cancelButton = new Button 
-            { 
-                Content = "Cancel",
-                Width = 100,
-                Height = 32
-            };
-            _cancelButton.Click += CancelButton_Click;
-            buttonPanel.Children.Add(_cancelButton);
-            
-            Grid.SetRow(buttonPanel, 2);
-            mainGrid.Children.Add(buttonPanel);
 
             // Set window content
             Content = mainGrid;
@@ -150,13 +107,6 @@ namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
 
             ConfigureWindow();
             SetTitle();
-        }
-
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
-        {
-            _result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
-            _dialogCompletionSource?.TrySetResult(_result);
-            this.Close();
         }
 
         private void WebView2_NavigationStarting(WebView2 sender, CoreWebView2NavigationStartingEventArgs e)

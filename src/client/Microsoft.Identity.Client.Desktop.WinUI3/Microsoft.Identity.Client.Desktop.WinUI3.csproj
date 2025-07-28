@@ -6,11 +6,9 @@
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <EnableMsixTooling>true</EnableMsixTooling>
     <DefineConstants>$(DefineConstants);NET_CORE;WINRT</DefineConstants>
-    <!--<NoWarn>$(NoWarn);NU5118</NoWarn>-->
 
     <!-- Add this to help with XAML resource resolution in separate assemblies -->
     <EnableDefaultPageItems>false</EnableDefaultPageItems>
-    <!--<XamlCodeGenerationControlFlags>None</XamlCodeGenerationControlFlags>-->
     
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -39,7 +37,7 @@
   <!-- Include shared source files from Desktop project, excluding WinForms-specific and problematic files -->
   <ItemGroup>
     <Compile Include="..\Microsoft.Identity.Client.Desktop\**\*.cs" 
-             Exclude="..\Microsoft.Identity.Client.Desktop\Properties\AssemblyInfo.cs;..\Microsoft.Identity.Client.Desktop\WebView2WebUi\WinFormsPanelWithWebView2.cs;..\Microsoft.Identity.Client.Desktop\WebView2WebUi\Win32Window.cs;..\Microsoft.Identity.Client.Desktop\WebView2WebUi\WebView2WebUi.cs;..\Microsoft.Identity.Client.Desktop\WebView2WebUi\WebView2WebUiFactory.cs;..\Microsoft.Identity.Client.Desktop\obj\**\*;..\Microsoft.Identity.Client.Desktop\bin\**\*" 
+             Exclude="..\Microsoft.Identity.Client.Desktop\WebView2WebUi\**\*.cs;..\Microsoft.Identity.Client.Desktop\obj\**\*;..\Microsoft.Identity.Client.Desktop\bin\**\*" 
              LinkBase="" />
 
     <!-- Include InternalsVisibleTo -->
