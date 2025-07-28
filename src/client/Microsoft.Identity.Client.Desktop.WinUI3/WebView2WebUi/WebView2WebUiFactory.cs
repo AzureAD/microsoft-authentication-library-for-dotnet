@@ -1,0 +1,63 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Web.WebView2.Core;
+//using WebView2WebUiClass = Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi;
+
+namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
+{
+    internal class WebView2WebUiFactory : IWebUIFactory
+    {
+        private readonly Func<bool> _isWebView2AvailableFunc;
+
+        public WebView2WebUiFactory(Func<bool> isWebView2AvailableForTest = null)
+        {
+            _isWebView2AvailableFunc = isWebView2AvailableForTest ?? IsWebView2Available;
+        }
+
+        public bool IsSystemWebViewAvailable => IsUserInteractive;
+
+        public bool IsUserInteractive => DesktopOsHelper.IsUserInteractive();
+
+        public bool IsEmbeddedWebViewAvailable =>
+            IsUserInteractive &&
+            IsWebView2Available(); // Look for the globally available WebView2 runtime
+
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, WebViewPreference useEmbeddedWebView, RequestContext requestContext)
+        {
+            if (useEmbeddedWebView == WebViewPreference.System)
+            {
+                requestContext.Logger.Info("Using system browser.");
+                return new DefaultOsBrowserWebUi(
+                    requestContext.ServiceBundle.PlatformProxy,
+                    requestContext.Logger,
+                    coreUIParent.SystemWebViewOptions);
+            }
+
+            // In WinUI3/WINRT, we always use WebView2 for embedded scenarios
+            // No fallback to WebView1 since it's not available in WinUI3
+            requestContext.Logger.Info("Using WebView2 embedded browser.");
+            return new WebView2WebUi(coreUIParent, requestContext);
+        }
+
+        private static bool IsWebView2Available()
+        {
+            try
+            {
+                string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString();
+                return !string.IsNullOrEmpty(wv2Version);
+            }
+            catch (Exception ex) when (ex is BadImageFormatException || ex is DllNotFoundException)
+            {
+                throw new MsalClientException(MsalError.WebView2LoaderNotFound, MsalErrorMessage.WebView2LoaderNotFound, ex);
+            }
+        }
+    }
+}

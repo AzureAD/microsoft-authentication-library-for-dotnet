@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.Build.NoTargets/3.7.0">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>MSIX</WindowsPackageType>
+    <GenerateAppxPackageOnBuild>false</GenerateAppxPackageOnBuild>
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <Platforms>x86;x64;arm64</Platforms>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <!-- Local testing optimizations -->
+    <AppxBundle>Never</AppxBundle>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
+    <GenerateTestArtifacts>false</GenerateTestArtifacts>
+    <EntryPointProjectUniqueName>..\WinUI3TestApp\WinUI3TestApp.csproj</EntryPointProjectUniqueName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WinUI3TestApp\WinUI3TestApp.csproj">
+      <SetTargetFramework>TargetFramework=net8.0-windows10.0.17763.0</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <!-- Create basic assets if they don't exist -->
+  <ItemGroup>
+    <Content Include="Assets\**" Condition="Exists('Assets')" />
+  </ItemGroup>
+</Project>
