@@ -17,9 +17,9 @@ using Windows.Graphics;
 using Microsoft.UI.Xaml.Input;
 using System.Diagnostics;
 
-namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
+namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
 {
-    internal sealed partial class WinUI3WindowWithWebView2 : Window
+    internal sealed class WinUI3WindowWithWebView2 : Window
     {
         private const int UIWidth = 566;
         private readonly EmbeddedWebViewOptions _embeddedWebViewOptions;
@@ -30,6 +30,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         private TaskCompletionSource<AuthorizationResult> _dialogCompletionSource;
         private CancellationToken _cancellationToken;
         private Window _ownerWindow;
+        
+        // UI controls created programmatically
+        private WebView2 _webView2;
+        private Button _cancelButton;
+        private TextBlock _titleText;
+        private ProgressRing _progressRing;
 
         /// <summary>
         /// Initializes a new instance of the WinUI3WindowWithWebView2 class.
@@ -66,19 +72,91 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
             }
 
-            // Then initialize component on the UI thread
-            // InvokeHandlingOwnerWindow(() =>
-            // {
-                // XAML InitializeComponent() - this loads the XAML UI
-                this.InitializeComponent();
+            // Initialize the UI programmatically instead of using XAML
+            InitializeWindow();
+        }
 
-                // Set up WebView2 event handlers
-                _webView2.CoreWebView2Initialized += WebView2_CoreWebView2Initialized;
-                _webView2.NavigationStarting += WebView2_NavigationStarting;
+        private void InitializeWindow()
+        {
+            // Create the main grid
+            var mainGrid = new Grid();
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(50) });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(50) });
 
-                ConfigureWindow();
-                SetTitle();
-            // });
+            // Title bar
+            var titlePanel = new StackPanel 
+            { 
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(10),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            
+            _titleText = new TextBlock 
+            { 
+                Text = _embeddedWebViewOptions?.Title ?? "Sign in to your account",
+                FontSize = 16,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            titlePanel.Children.Add(_titleText);
+            
+            Grid.SetRow(titlePanel, 0);
+            mainGrid.Children.Add(titlePanel);
+
+            // WebView2
+            _webView2 = new WebView2();
+            Grid.SetRow(_webView2, 1);
+            mainGrid.Children.Add(_webView2);
+
+            // Progress ring (initially hidden)
+            _progressRing = new ProgressRing
+            {
+                IsActive = true,
+                Visibility = Visibility.Collapsed,
+                Width = 50,
+                Height = 50,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetRow(_progressRing, 1);
+            mainGrid.Children.Add(_progressRing);
+
+            // Button panel
+            var buttonPanel = new StackPanel 
+            { 
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(10)
+            };
+            
+            _cancelButton = new Button 
+            { 
+                Content = "Cancel",
+                Width = 100,
+                Height = 32
+            };
+            _cancelButton.Click += CancelButton_Click;
+            buttonPanel.Children.Add(_cancelButton);
+            
+            Grid.SetRow(buttonPanel, 2);
+            mainGrid.Children.Add(buttonPanel);
+
+            // Set window content
+            Content = mainGrid;
+
+            // Set up WebView2 event handlers
+            _webView2.CoreWebView2Initialized += WebView2_CoreWebView2Initialized;
+            _webView2.NavigationStarting += WebView2_NavigationStarting;
+
+            ConfigureWindow();
+            SetTitle();
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            _result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
+            _dialogCompletionSource?.TrySetResult(_result);
+            this.Close();
         }
 
         private void WebView2_NavigationStarting(WebView2 sender, CoreWebView2NavigationStartingEventArgs e)
