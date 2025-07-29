@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             CancellationToken cancellationToken)
         {
             AuthorizationResult result = null;
-
             var sendAuthorizeRequest = new Action(() =>
             {
                 result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
