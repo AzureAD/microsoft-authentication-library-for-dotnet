@@ -1,0 +1,1 @@
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithClientAssertion(string clientAssertion) -> T
