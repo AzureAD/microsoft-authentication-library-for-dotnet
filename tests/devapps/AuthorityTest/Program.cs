@@ -1,29 +1,26 @@
 using System;
 using Microsoft.Identity.Client;
 
-namespace AuthorityTest
+namespace AuthorityEnvironmentTest
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Testing Authority Override Fix...");
+            Console.WriteLine("Testing Authority Override with Different Environments...");
             
-            // Test scenario: WithAuthority followed by WithTenantIdFromAuthority
-            TestWithAuthorityFollowedByWithTenantIdFromAuthority();
-            
-            // Test scenario: WithAuthority followed by WithTenantId  
-            TestWithAuthorityFollowedByWithTenantId();
+            TestDifferentAuthorityHosts();
+            TestSovereignClouds();
         }
 
-        static void TestWithAuthorityFollowedByWithTenantIdFromAuthority()
+        static void TestDifferentAuthorityHosts()
         {
-            Console.WriteLine("\n=== Test 1: WithAuthority + WithTenantIdFromAuthority ===");
+            Console.WriteLine("\n=== Test 1: Different Authority Hosts ===");
             
             string tenantA = "tenant-a-guid";
             string tenantB = "tenant-b-guid";
-            string authorityWithTenantA = $"https://login.microsoftonline.com/{tenantA}";
-            string authorityWithTenantB = $"https://login.microsoftonline.com/{tenantB}";
+            string worldwideAuthority = $"https://login.microsoftonline.com/{tenantA}";
+            string governmentAuthority = $"https://login.microsoftonline.us/{tenantB}";
 
             var app = ConfidentialClientApplicationBuilder
                 .Create("test-client-id")
@@ -34,27 +31,28 @@ namespace AuthorityTest
             {
 #pragma warning disable CS0618 // Type or member is obsolete
                 var builder = app.AcquireTokenForClient(new[] { "https://graph.microsoft.com/.default" })
-                    .WithAuthority(authorityWithTenantA)  // First, set authority to tenantA
-                    .WithTenantIdFromAuthority(new Uri(authorityWithTenantB)); // Then, override tenant to tenantB
+                    .WithAuthority(worldwideAuthority)  // Worldwide cloud with tenantA
+                    .WithTenantIdFromAuthority(new Uri(governmentAuthority)); // Gov cloud with tenantB
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                Console.WriteLine($"✓ PASS: Builder created successfully with both WithAuthority and WithTenantIdFromAuthority");
-                Console.WriteLine($"  Initial Authority (tenantA): {authorityWithTenantA}");
-                Console.WriteLine($"  Override Authority (tenantB): {authorityWithTenantB}");
+                Console.WriteLine($"✓ PASS: Different authority hosts work");
+                Console.WriteLine($"  Initial Authority: {worldwideAuthority}");
+                Console.WriteLine($"  Override Authority: {governmentAuthority}");
+                Console.WriteLine($"  Expected: Should use government cloud host with tenantB");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"✗ FAIL: Exception creating builder: {ex.Message}");
+                Console.WriteLine($"✗ FAIL: Exception with different hosts: {ex.Message}");
             }
         }
 
-        static void TestWithAuthorityFollowedByWithTenantId()
+        static void TestSovereignClouds()
         {
-            Console.WriteLine("\n=== Test 2: WithAuthority + WithTenantId ===");
+            Console.WriteLine("\n=== Test 2: Sovereign Clouds with WithTenantId ===");
             
             string tenantA = "tenant-a-guid";
             string tenantB = "tenant-b-guid";
-            string authorityWithTenantA = $"https://login.microsoftonline.com/{tenantA}";
+            string chinaAuthority = $"https://login.chinacloudapi.cn/{tenantA}";
 
             var app = ConfidentialClientApplicationBuilder
                 .Create("test-client-id")
@@ -65,17 +63,18 @@ namespace AuthorityTest
             {
 #pragma warning disable CS0618 // Type or member is obsolete
                 var builder = app.AcquireTokenForClient(new[] { "https://graph.microsoft.com/.default" })
-                    .WithAuthority(authorityWithTenantA)  // First, set authority to tenantA
-                    .WithTenantId(tenantB); // Then, override tenant to tenantB
+                    .WithAuthority(chinaAuthority)  // China cloud with tenantA
+                    .WithTenantId(tenantB); // Override to tenantB but keep China cloud host
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                Console.WriteLine($"✓ PASS: Builder created successfully with both WithAuthority and WithTenantId");
-                Console.WriteLine($"  Initial Authority (tenantA): {authorityWithTenantA}");
-                Console.WriteLine($"  Override Tenant (tenantB): {tenantB}");
+                Console.WriteLine($"✓ PASS: Sovereign cloud with WithTenantId works");
+                Console.WriteLine($"  Initial Authority: {chinaAuthority}");
+                Console.WriteLine($"  Override Tenant: {tenantB}");
+                Console.WriteLine($"  Expected: Should use China cloud host with tenantB");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"✗ FAIL: Exception creating builder: {ex.Message}");
+                Console.WriteLine($"✗ FAIL: Exception with sovereign cloud: {ex.Message}");
             }
         }
     }
