@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Web.WebView2.Core;
 
-namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
+namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
     internal class WebView2WebUiFactory : IWebUIFactory
     {
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
 
             // In NET6+, webview2 is available by default
             requestContext.Logger.Info("Using WebView2 embedded browser.");
-            return new WebView2WebUi.WebView2WebUi(coreUIParent, requestContext);
+            return new WebView2WebUi(coreUIParent, requestContext);
         }
 
         private static bool IsWebView2Available()
