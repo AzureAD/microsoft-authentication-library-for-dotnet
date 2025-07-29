@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -38,6 +40,36 @@ namespace Microsoft.Identity.Client.Extensibility
             builder.ValidateUseOfExperimentalFeature();
             builder.CommonParameters.AuthenticationOperation = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
 
+            return builder;
+        }
+
+        /// <summary>
+        /// Add extra body parameters to the token request. These parameters are added to the cache key to associate these parameters with the acquired token.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="extrabodyparams">List of additional body parameters</param>
+        /// <returns></returns>
+        public static AcquireTokenForClientParameterBuilder WithExtraBodyParameters(
+            this AcquireTokenForClientParameterBuilder builder, 
+            Dictionary<string, Func<CancellationToken, Task<string>>> extrabodyparams)
+        {
+            builder.ValidateUseOfExperimentalFeature();
+            if (extrabodyparams == null || extrabodyparams.Count == 0)
+            {
+                return builder;
+            }
+            builder.OnBeforeTokenRequest(async (data) =>
+            {
+                foreach (var param in extrabodyparams)
+                {
+                    if (param.Value != null)
+                    {
+                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
+                    }
+                }
+            });
+
+            builder.WithAdditionalCacheKeyComponents(extrabodyparams);
             return builder;
         }
     }

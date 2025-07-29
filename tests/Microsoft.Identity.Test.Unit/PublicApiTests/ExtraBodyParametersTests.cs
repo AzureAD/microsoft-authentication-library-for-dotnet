@@ -9,6 +9,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Client.Extensibility;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -48,6 +49,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             .WithAuthority("https://login.microsoftonline.com/", _tenantId)
                             .WithClientSecret("ClientSecret")
                             .WithHttpManager(httpManager)
+                            .WithExperimentalFeatures(true) // Enable experimental features to use WithExtraBodyParameters
                             .BuildConcrete();
 
                 //Recording test data for Asserts
@@ -139,6 +141,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             .WithAuthority("https://login.microsoftonline.com/", tenantId)
                             .WithClientSecret("ClientSecret")
                             .WithHttpManager(httpManager)
+                            .WithExperimentalFeatures(true) // Enable experimental features to use WithExtraBodyParameters
                             .BuildConcrete();
 
                 //Recording test data for Asserts
@@ -252,6 +255,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             .WithAuthority("https://login.microsoftonline.com/", _tenantId)
                             .WithClientSecret("ClientSecret")
                             .WithHttpManager(httpManager)
+                            .WithExperimentalFeatures(true) // Enable experimental features to use WithExtraBodyParameters
                             .BuildConcrete();
 
                 // Act & Assert

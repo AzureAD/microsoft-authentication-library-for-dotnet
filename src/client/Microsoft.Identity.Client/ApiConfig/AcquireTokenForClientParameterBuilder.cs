@@ -116,32 +116,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Add extra body parameters to the token request. These parameters are added to the cache key to associate these parameters with the acquired token.
-        /// </summary>
-        /// <param name="extrabodyparams">List of additional body parameters</param>
-        /// <returns></returns>
-        public AcquireTokenForClientParameterBuilder WithExtraBodyParameters (Dictionary<string, Func<CancellationToken, Task<string>>> extrabodyparams)
-        {
-            if (extrabodyparams == null || extrabodyparams.Count == 0)
-            {
-                return this;
-            }
-            this.OnBeforeTokenRequest(async (data) =>
-            {
-               foreach (var param in extrabodyparams)
-                {
-                    if (param.Value != null)
-                    {
-                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
-                    }
-                }
-            });
-
-            this.WithAdditionalCacheKeyComponents(extrabodyparams);
-            return this;
-        }
-
-        /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
