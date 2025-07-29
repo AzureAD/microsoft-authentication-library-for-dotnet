@@ -20,7 +20,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
 
-        public static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
+        private static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
+
+        internal static void ResetSourceForTest()
+        {
+            s_sourceName = ManagedIdentitySource.None;            
+        }
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
             RequestContext requestContext,

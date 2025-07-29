@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Common
             OidcRetrieverWithCache.ResetCacheForTest();
             AuthorityManager.ClearValidationCache();
             SingletonThrottlingManager.GetInstance().ResetCache();
-            ManagedIdentityClient.s_sourceName = ManagedIdentitySource.None;
+            ManagedIdentityClient.ResetSourceForTest();
         }
 
         public static object GetPropValue(object src, string propName)
