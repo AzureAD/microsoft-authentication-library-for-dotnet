@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ using Windows.Graphics.Display;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 
-namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
+namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
 {
     internal class WebView2WebUi : IWebUI
     {
@@ -49,14 +50,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             {
                 if (_parent.SynchronizationContext != null)
                 {
-                    // For WINRT/WinUI3, use ContinueWith pattern for async operations
                     var tcs = new TaskCompletionSource<AuthorizationResult>();
 
                     _parent.SynchronizationContext.Post((state) =>
                     {
                         var taskCompletionSource = (TaskCompletionSource<AuthorizationResult>)state;
 
-                        // Start the async operation on the UI thread (this call itself is synchronous)
                         var asyncOperation = InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken);
 
                         // Handle the completion asynchronously
