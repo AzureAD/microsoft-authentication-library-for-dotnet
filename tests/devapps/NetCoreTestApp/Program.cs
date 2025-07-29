@@ -437,9 +437,6 @@ namespace NetCoreTestApp
 
             ccaBuilder = ccaBuilder.WithCertificate(s_confidentialClientCertificate, true);
 
-            //Add Experimental feature for MTLS PoP
-            ccaBuilder = ccaBuilder.WithExperimentalFeatures();
-
             IConfidentialClientApplication ccapp = ccaBuilder.Build();
 
             // Optionally set cache settings or other configurations if needed
