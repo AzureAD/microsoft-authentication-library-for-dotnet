@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
 
     <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
@@ -25,7 +25,7 @@
     <PackageTags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Authentication Manager</PackageTags>
     <Product>Microsoft Authentication Library Desktop</Product>
   </PropertyGroup>
-
+  
   <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
@@ -51,7 +51,7 @@
     <PackageReference Include="Microsoft.Web.WebView2" />
     <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-  
+    
     <!-- This package is being built against netcore3.1, which causes this analyzer to produce errors in MSAL netcore3.1, even though MSAL isn't built against that-->
     <PackageReference Remove="Microsoft.CodeAnalysis.PublicApiAnalyzers" />
   </ItemGroup>
