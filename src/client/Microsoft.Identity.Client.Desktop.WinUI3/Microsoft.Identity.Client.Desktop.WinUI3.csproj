@@ -3,12 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
     <UseWinUI>true</UseWinUI>
-    <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <EnableMsixTooling>true</EnableMsixTooling>
-    <DefineConstants>$(DefineConstants);NET_CORE;WINRT</DefineConstants>
-
-    <!-- Add this to help with XAML resource resolution in separate assemblies -->
-    <EnableDefaultPageItems>false</EnableDefaultPageItems>
+      <!-- Define NET_CORE to ensure the correct platform components are selected.
+         Since modern TFMs (net6.0+, net8.0+) are later versions of .NET Core,
+         the NetCore platform components work correctly for modern TFMs as well. -->
+    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
     
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -34,7 +33,7 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <!-- Include shared source files from Desktop project, excluding WinForms-specific and problematic files -->
+  <!-- Include shared source files from Desktop project, excluding WebView2WebUi files -->
   <ItemGroup>
     <Compile Include="..\Microsoft.Identity.Client.Desktop\**\*.cs" 
              Exclude="..\Microsoft.Identity.Client.Desktop\WebView2WebUi\**\*.cs;..\Microsoft.Identity.Client.Desktop\obj\**\*;..\Microsoft.Identity.Client.Desktop\bin\**\*" 

@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
@@ -53,11 +57,11 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                         }
                     });
 
-                    var tcs = new TaskCompletionSource<object>();
+                    var tcs2 = new TaskCompletionSource<object>();
 
                     _parent.SynchronizationContext.Post(
-                        new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs);
-                    await tcs.Task.ConfigureAwait(false);
+                        new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
+                    await tcs2.Task.ConfigureAwait(false);
                 }
                 else
                 {
@@ -74,8 +78,11 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                         catch (AggregateException ae)
                         {
                             requestContext.Logger.ErrorPii(ae.InnerException);
+                            // Any exception thrown as a result of running task will cause AggregateException to be thrown with
+                            // actual exception as inner.
                             Exception innerException = ae.InnerExceptions[0];
 
+                            // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
                             if (innerException is AggregateException exception)
                             {
                                 innerException = exception.InnerExceptions[0];
@@ -92,6 +99,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             }
 
             return result;
+
         }
 
         public Uri UpdateRedirectUri(Uri redirectUri)
@@ -112,5 +120,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 return form.DisplayDialogAndInterceptUri(cancellationToken);
             }
         }
+
     }
 }
