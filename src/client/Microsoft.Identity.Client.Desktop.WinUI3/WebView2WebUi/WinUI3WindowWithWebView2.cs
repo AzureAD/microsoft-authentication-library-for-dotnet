@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         private CancellationToken _cancellationToken;
         private Window _ownerWindow;
         
-        // UI controls created programmatically
         private WebView2 _webView2;
         private ProgressRing _progressRing;
 
@@ -69,22 +68,18 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
             }
 
-            // Initialize the UI programmatically instead of using XAML
             InitializeWindow();
         }
 
         private void InitializeWindow()
         {
-            // Create the main grid with just one row for the WebView2
             var mainGrid = new Grid();
             mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
-            // WebView2 - takes up the entire window
             _webView2 = new WebView2();
             Grid.SetRow(_webView2, 0);
             mainGrid.Children.Add(_webView2);
 
-            // Progress ring (initially hidden) - centered over the WebView2
             _progressRing = new ProgressRing
             {
                 IsActive = true,
@@ -219,7 +214,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     // Ensure WebView2 is properly initialized by creating a Core instance if needed
                     var initTcs = new TaskCompletionSource<bool>();
 
-#pragma warning disable VSTHRD101 // Avoid using async lambda for a void returning delegate type
+#pragma warning disable VSTHRD101
                     InvokeHandlingOwnerWindow(async () =>
                     {
                         try
@@ -326,7 +321,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         private void ConfigureWindow()
         {
             // Set window properties
-            // this.Title = "Microsoft Authentication Library";
             this.ExtendsContentIntoTitleBar = false;
 
             // Calculate window size based on screen dimensions
