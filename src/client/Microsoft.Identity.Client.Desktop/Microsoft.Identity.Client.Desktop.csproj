@@ -1,4 +1,5 @@
 ﻿﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
   <PropertyGroup>
 
     <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
