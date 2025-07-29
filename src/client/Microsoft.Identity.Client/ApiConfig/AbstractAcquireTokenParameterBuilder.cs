@@ -265,8 +265,13 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(tenantId));
             }
 
+            // Use the current effective authority (either override or config)
+            Authority baseAuthority = CommonParameters.AuthorityOverride != null
+                ? CommonParameters.AuthorityOverride.CreateAuthority()
+                : ServiceBundle.Config.Authority;
+
             Authority newAuthority = AuthorityInfo.AuthorityInfoHelper.CreateAuthorityWithTenant(
-                ServiceBundle.Config.Authority, 
+                baseAuthority, 
                 tenantId, 
                 true);
 
