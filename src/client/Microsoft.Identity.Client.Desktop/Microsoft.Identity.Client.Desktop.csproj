@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+
+    <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
+    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
+
+    <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
+    <UseWindowsForms>true</UseWindowsForms>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
+    <!--This should be passed from the VSTS build-->
+    <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">$(MsalInternalVersion)</MicrosoftIdentityClientVersion>
+    <MicrosoftIdentityClientVersion>$(MicrosoftIdentityClientVersion)</MicrosoftIdentityClientVersion>
+    <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
+    <Version>$(MicrosoftIdentityClientVersion)</Version>
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->
+    <Title>MSAL.NET extension for desktop scenarios for older .NET platforms</Title>
+    <Description>
+      This package contains binaries needed to use the Windows broker and other features with MSAL on older platforms such as .NET Framework and .NET Core 3.x.
+    </Description>
+    <PackageTags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Authentication Manager</PackageTags>
+    <Product>Microsoft Authentication Library Desktop</Product>
+  </PropertyGroup>
+  
+  <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
+    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\StaTaskScheduler.cs" LinkBase="Features\DesktopOS" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" />
+    <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
+    <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+    
+    <!-- This package is being built against netcore3.1, which causes this analyzer to produce errors in MSAL netcore3.1, even though MSAL isn't built against that-->
+    <PackageReference Remove="Microsoft.CodeAnalysis.PublicApiAnalyzers" />
+  </ItemGroup>
+
+</Project>
+
