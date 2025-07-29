@@ -17,7 +17,7 @@ using Windows.Graphics;
 using Microsoft.UI.Xaml.Input;
 using System.Diagnostics;
 
-namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
+namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
     internal sealed class WinUI3WindowWithWebView2 : Window
     {

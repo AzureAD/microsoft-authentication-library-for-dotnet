@@ -19,7 +19,7 @@ using Windows.Graphics.Display;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 
-namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
+namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
     internal class WebView2WebUi : IWebUI
     {
