@@ -122,6 +122,10 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public AcquireTokenForClientParameterBuilder WithExtraBodyParameters (Dictionary<string, Func<CancellationToken, Task<string>>> extrabodyparams)
         {
+            if (extrabodyparams == null || extrabodyparams.Count == 0)
+            {
+                return this;
+            }
             this.OnBeforeTokenRequest(async (data) =>
             {
                foreach (var param in extrabodyparams)
