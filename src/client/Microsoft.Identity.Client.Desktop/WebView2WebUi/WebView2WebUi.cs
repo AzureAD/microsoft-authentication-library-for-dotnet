@@ -1,25 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Core;
-#if WINRT
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Windowing;
-using Windows.Graphics;
-using Windows.Graphics.Display;
-using Microsoft.UI;
-using Microsoft.UI.Dispatching;
-#endif
 
 namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
@@ -42,56 +29,15 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         {
             AuthorizationResult result = null;
 
-        #if WINRT
-            var sendAuthorizeRequest = new Func<Task>(async () =>
-            {
-                result = await InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken).ConfigureAwait(false);
-            });
-        #else
             var sendAuthorizeRequest = new Action(() =>
             {
                 result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
             });
-        #endif
 
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
                 if (_parent.SynchronizationContext != null)
                 {
-        #if WINRT
-                    // For WINRT/WinUI3, use ContinueWith pattern for async operations
-                    var tcs = new TaskCompletionSource<AuthorizationResult>();
-
-                    _parent.SynchronizationContext.Post((state) =>
-                    {
-                        var taskCompletionSource = (TaskCompletionSource<AuthorizationResult>)state;
-
-                        // Start the async operation on the UI thread (this call itself is synchronous)
-                        var asyncOperation = InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken);
-
-                        // Handle the completion asynchronously
-                        asyncOperation.ContinueWith(task =>
-                        {
-                            if (task.IsFaulted)
-                            {
-                                var exception = task.Exception?.InnerException ?? task.Exception;
-                                taskCompletionSource.TrySetException(exception);
-                            }
-                            else if (task.IsCanceled)
-                            {
-                                taskCompletionSource.TrySetCanceled();
-                            }
-                            else
-                            {
-                                taskCompletionSource.TrySetResult(task.Result);
-                            }
-                        }, TaskContinuationOptions.ExecuteSynchronously);
-
-                    }, tcs);
-
-                    return await tcs.Task.ConfigureAwait(false);
-#else
-                    // For non-WINRT, restore the original synchronous pattern
                     var sendAuthorizeRequestWithTcs = new Action<object>((tcs) =>
                     {
                         try
@@ -107,12 +53,11 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                         }
                     });
 
-                    var tcs2 = new TaskCompletionSource<object>();
+                    var tcs = new TaskCompletionSource<object>();
 
                     _parent.SynchronizationContext.Post(
-                        new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
-                    await tcs2.Task.ConfigureAwait(false);
-#endif
+                        new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs);
+                    await tcs.Task.ConfigureAwait(false);
                 }
                 else
                 {
@@ -143,11 +88,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             }
             else
             {
-        #if WINRT
-                await sendAuthorizeRequest().ConfigureAwait(false);
-        #else
                 sendAuthorizeRequest();
-        #endif
             }
 
             return result;
@@ -159,19 +100,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             return redirectUri;
         }
 
-#if WINRT
-        private async Task<AuthorizationResult> InvokeEmbeddedWebviewAsync(Uri startUri, Uri endUri, CancellationToken cancellationToken)
-        {
-            var window = new WinUI3WindowWithWebView2(
-                _parent.OwnerWindow,
-                _parent?.EmbeddedWebviewOptions,
-                _requestContext.Logger,
-                startUri,
-                endUri);
-
-            return await window.DisplayDialogAndInterceptUriAsync(cancellationToken).ConfigureAwait(false);
-        }
-#else
         private AuthorizationResult InvokeEmbeddedWebview(Uri startUri, Uri endUri, CancellationToken cancellationToken)
         {
             using (var form = new WinFormsPanelWithWebView2(
@@ -184,6 +112,5 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 return form.DisplayDialogAndInterceptUri(cancellationToken);
             }
         }
-#endif
     }
 }

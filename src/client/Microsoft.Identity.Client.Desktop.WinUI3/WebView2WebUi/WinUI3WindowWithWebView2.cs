@@ -220,7 +220,6 @@ namespace Microsoft.Identity.Client.Desktop.WinUI3.WebView2WebUi
                     // Ensure WebView2 is properly initialized by creating a Core instance if needed
                     var initTcs = new TaskCompletionSource<bool>();
 
-                    // Suppress VSTHRD101 warning - we're handling exceptions properly in this case
 #pragma warning disable VSTHRD101 // Avoid using async lambda for a void returning delegate type
                     InvokeHandlingOwnerWindow(async () =>
                     {
