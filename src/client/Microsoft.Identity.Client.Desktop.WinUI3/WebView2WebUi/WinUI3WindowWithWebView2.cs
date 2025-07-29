@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             _startUri = startUri ?? throw new ArgumentNullException(nameof(startUri));
             _endUri = endUri ?? throw new ArgumentNullException(nameof(endUri));
 
-            //If the ownerwindow is winforms, then this flow will not work, we need to switch to the winforms WebView2 control.
             if (ownerWindow == null)
             {
                 _ownerWindow = null;
