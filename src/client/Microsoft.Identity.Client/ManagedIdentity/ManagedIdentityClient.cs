@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
-        private static AbstractManagedIdentity s_identitySource;
+
         public static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
@@ -27,94 +27,59 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
-            if (s_identitySource == null)
-            {
-                using (requestContext.Logger.LogMethodDuration())
-                {
-                    s_identitySource = await SelectManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
-                }
-            }
-
-            return await s_identitySource.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+            AbstractManagedIdentity msi = await GetOrSelectManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
+            return await msi.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
-        private async Task<AbstractManagedIdentity> SelectManagedIdentitySourceAsync(RequestContext requestContext)
+        private async Task<AbstractManagedIdentity> GetOrSelectManagedIdentitySourceAsync(RequestContext requestContext)
         {
-            var source = (s_sourceName != ManagedIdentitySource.None) ? s_sourceName : await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
-            return source switch
+            using (requestContext.Logger.LogMethodDuration())
             {
-                ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
-                ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
-                ManagedIdentitySource.MachineLearning => MachineLearningManagedIdentitySource.Create(requestContext),
-                ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
-                ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
-                ManagedIdentitySource.ImdsV2 => ImdsV2ManagedIdentitySource.Create(requestContext),
-                _ => new ImdsManagedIdentitySource(requestContext)
-            };
+                requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source if not cached. Cached value is {s_sourceName} ");
+                var source = (s_sourceName != ManagedIdentitySource.None) ?
+                    s_sourceName :
+                    await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
+
+                return source switch
+                {
+                    ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
+                    ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
+                    ManagedIdentitySource.MachineLearning => MachineLearningManagedIdentitySource.Create(requestContext),
+                    ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
+                    ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
+                    ManagedIdentitySource.ImdsV2 => ImdsV2ManagedIdentitySource.Create(requestContext),
+                    _ => new ImdsManagedIdentitySource(requestContext)
+                };
+            }
         }
 
         // Detect managed identity source based on the availability of environment variables and csr metadata probe request.
         // This method is perf sensitive any changes should be benchmarked.
         internal async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(RequestContext requestContext)
         {
-            string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
-            string identityHeader = EnvironmentVariables.IdentityHeader;
-            string identityServerThumbprint = EnvironmentVariables.IdentityServerThumbprint;
-            string msiSecret = EnvironmentVariables.IdentityHeader;
-            string msiEndpoint = EnvironmentVariables.MsiEndpoint;
-            string msiSecretMachineLearning = EnvironmentVariables.MsiSecret;
-            string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
+            ManagedIdentitySource source = GetManagedIdentitySourceNoImdsV2(requestContext.Logger);
+            if (source != ManagedIdentitySource.DefaultToImds)
+                return source;
 
-            var logger = requestContext.ServiceBundle.ApplicationLogger;
-            logger.Info("[Managed Identity] Detecting managed identity source...");
-
-            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
+            // probe IMDSv2
+            var response = await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext, probeMode: true).ConfigureAwait(false);
+            if (response != null)
             {
-                if (!string.IsNullOrEmpty(identityServerThumbprint))
-                {
-                    logger.Info("[Managed Identity] Service Fabric detected.");
-                    s_sourceName = ManagedIdentitySource.ServiceFabric;
-                }
-                else
-                {
-                    logger.Info("[Managed Identity] App Service detected.");
-                    s_sourceName = ManagedIdentitySource.AppService;
-                }
-            }
-            else if (!string.IsNullOrEmpty(msiSecretMachineLearning) && !string.IsNullOrEmpty(msiEndpoint))
-            {
-                logger.Info("[Managed Identity] Machine Learning detected.");
-                s_sourceName = ManagedIdentitySource.MachineLearning;
-            }
-            else if (!string.IsNullOrEmpty(msiEndpoint))
-            {
-                logger.Info("[Managed Identity] Cloud Shell detected.");
-                s_sourceName = ManagedIdentitySource.CloudShell;
-            }
-            else if (ValidateAzureArcEnvironment(identityEndpoint, imdsEndpoint, logger))
-            {
-                logger.Info("[Managed Identity] Azure Arc detected.");
-                s_sourceName = ManagedIdentitySource.AzureArc;
-            }
-            else if (await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext).ConfigureAwait(false))
-            {
-                logger.Info("[Managed Identity] ImdsV2 detected.");
+                requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
                 s_sourceName = ManagedIdentitySource.ImdsV2;
-            }
-            else
-            {
-                s_sourceName = ManagedIdentitySource.DefaultToImds;
+                return s_sourceName;
             }
 
+            requestContext.Logger.Info("[Managed Identity] Source detection failed. Defaulting to IMDSv1.");
+            s_sourceName = ManagedIdentitySource.DefaultToImds;
             return s_sourceName;
         }
 
         // Detect managed identity source based on the availability of environment variables.
         // The result of this method is not cached because reading environment variables is cheap. 
-        // This method is perf sensitive any changes should be benchmarked.
-        [Obsolete("Use GetManagedIdentitySourceAsync(RequestContext) instead.")]
-        internal static ManagedIdentitySource GetManagedIdentitySource(ILoggerAdapter logger = null)
+        // This method is perf sensitive any changes should be benchmarked.        
+        internal static ManagedIdentitySource GetManagedIdentitySourceNoImdsV2(ILoggerAdapter logger = null)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
@@ -181,8 +146,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through file detection.");
                 return true;
-            } 
-            
+            }
+
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
         }

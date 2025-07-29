@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use GetManagedIdentitySourceAsync() instead. \"ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;\"")]
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
-            return ManagedIdentityClient.GetManagedIdentitySource();
+            return ManagedIdentityClient.GetManagedIdentitySourceNoImdsV2();
         }
     }
 }

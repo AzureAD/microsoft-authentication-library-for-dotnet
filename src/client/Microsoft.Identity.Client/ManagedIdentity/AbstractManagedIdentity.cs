@@ -16,7 +16,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
 using Microsoft.Identity.Client.Http.Retry;
 
-
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -32,7 +31,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected readonly RequestContext _requestContext;
 
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
-        internal readonly ManagedIdentitySource _sourceType;
+        internal readonly ManagedIdentitySource _sourceType; // TODO: move to derived classes
         
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {

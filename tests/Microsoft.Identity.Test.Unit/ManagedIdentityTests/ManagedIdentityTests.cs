@@ -56,11 +56,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 statusCode: statusCode);
         }
 
-        public ManagedIdentityTests()
-        {
-            ManagedIdentityEnabled = true;
-        }
-
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]

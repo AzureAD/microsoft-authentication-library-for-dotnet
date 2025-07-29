@@ -25,11 +25,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
-        public DefaultRetryPolicyTests()
-        {
-            ManagedIdentityEnabled = true;
-        }
-
         [DataTestMethod] // see test class header: all sources that allow UAMI
         [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
