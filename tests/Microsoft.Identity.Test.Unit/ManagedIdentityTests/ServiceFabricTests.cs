@@ -24,11 +24,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string Resource = "https://management.azure.com";
 
-        public ServiceFabricTests()
-        {
-            ManagedIdentityEnabled = true;
-        }
-
         [TestMethod]
         public async Task ServiceFabricInvalidEndpointAsync()
         {

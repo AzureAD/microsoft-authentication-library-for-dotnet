@@ -20,11 +20,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
-        public ImdsTests()
-        {
-            ManagedIdentityEnabled = true;
-        }
-
         [DataTestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI

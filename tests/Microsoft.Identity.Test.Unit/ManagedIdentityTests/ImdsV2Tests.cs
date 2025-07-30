@@ -6,7 +6,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
@@ -17,36 +16,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ImdsV2Tests : TestBase
     {
-        private const string serverHeaderImdsVersion = "IMDS/150.870.65.1325";
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
-
-        public ImdsV2Tests()
-        {
-            ManagedIdentityEnabled = true;
-        }
 
         [TestMethod]
         public async Task GetCsrMetadataAsyncSucceeds()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
-                var managedIdentityApp = miBuilder.BuildConcrete();
-                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .Build();
+
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
-                RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.CsrMetadataEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetCsrMetadataSuccessfulResponse(),
-                    ManagedIdentitySource.ImdsV2,
-                    serverHeaderImdsVersion: serverHeaderImdsVersion);
-
-                bool isValid = await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext).ConfigureAwait(false);
-                Assert.IsTrue(isValid);
             }
         }
 
@@ -55,57 +40,23 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
-                var managedIdentityApp = miBuilder.BuildConcrete();
-                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
-                RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-
                 // First attempt fails with NOT_FOUND (404)
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.CsrMetadataEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySource.ImdsV2,
-                    statusCode: HttpStatusCode.NotFound);
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.NotFound));
 
                 // Second attempt succeeds
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.CsrMetadataEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetCsrMetadataSuccessfulResponse(),
-                    ManagedIdentitySource.ImdsV2,
-                    serverHeaderImdsVersion: serverHeaderImdsVersion);
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
-                bool isValid = await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext).ConfigureAwait(false);
-                Assert.IsTrue(isValid);
-            }
-        }
-
-        [TestMethod]
-        public async Task GetCsrMetadataAsyncFailsWithInvalidVersion()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
-                var managedIdentityApp = miBuilder.BuildConcrete();
-                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .Build();
+
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
-                RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
 
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.CsrMetadataEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetCsrMetadataSuccessfulResponse(),
-                    ManagedIdentitySource.ImdsV2,
-                    serverHeaderImdsVersion: "IMDS/150.870.65.1324");
-
-                bool isValid = await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext).ConfigureAwait(false);
-                Assert.IsFalse(isValid);
+                const int NumRequests = 2; // initial probe request + 1 retry
+                int requestsMade = NumRequests - httpManager.QueueSize;
+                Assert.AreEqual(NumRequests, requestsMade);
             }
         }
 
@@ -114,23 +65,32 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: null));
+
+                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
-                var managedIdentityApp = miBuilder.BuildConcrete();
-                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
-                RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .Build();
 
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.CsrMetadataEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetCsrMetadataSuccessfulResponse(),
-                    ManagedIdentitySource.ImdsV2,
-                    serverHeaderImdsVersion: null); // mock missing server header
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
+            }
+        }
 
-                bool isValid = await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext).ConfigureAwait(false);
-                Assert.IsFalse(isValid);
+        [TestMethod]
+        public async Task GetCsrMetadataAsyncFailsWithInvalidVersion()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "IMDS/150.870.65.1324"));
+
+                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .Build();
+
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
         }
 
@@ -139,27 +99,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
-                var managedIdentityApp = miBuilder.BuildConcrete();
-                var miSource = await managedIdentityApp.GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
-                RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .Build();
 
                 const int Num404Errors = 1 + TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries;
                 for (int i = 0; i < Num404Errors; i++)
                 {
-                    httpManager.AddManagedIdentityMockHandler(
-                        ManagedIdentityTests.CsrMetadataEndpoint,
-                        ManagedIdentityTests.Resource,
-                        MockHelpers.GetMsiImdsErrorResponse(),
-                        ManagedIdentitySource.ImdsV2,
-                        statusCode: HttpStatusCode.NotFound);
+                    httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.NotFound));
                 }
 
-                bool isValid = await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext).ConfigureAwait(false);
-                Assert.IsFalse(isValid);
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
 
                 int requestsMade = Num404Errors - httpManager.QueueSize;
                 Assert.AreEqual(Num404Errors, requestsMade);

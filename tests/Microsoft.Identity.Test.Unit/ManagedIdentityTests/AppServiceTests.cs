@@ -24,11 +24,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string AppServiceEndpoint = "http://127.0.0.1:41564/msi/token";
         internal const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
 
-        public AppServiceTests()
-        {
-            ManagedIdentityEnabled = true;
-        }
-
         [TestMethod]
         public async Task AppServiceInvalidEndpointAsync()
         {

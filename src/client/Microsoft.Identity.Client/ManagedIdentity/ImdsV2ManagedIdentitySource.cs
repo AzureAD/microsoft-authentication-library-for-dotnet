@@ -17,56 +17,46 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private const string CsrMetadataPath = "/metadata/identity/getPlatformMetadata";
 
-        private static CsrMetadata _csrMetadata;
-
-        public static async Task<bool> GetCsrMetadataAsync(RequestContext requestContext)
+        public static async Task<CsrMetadata> GetCsrMetadataAsync(
+            RequestContext requestContext,
+            bool probeMode)
         {
-            string uami = null;
+            string queryParams = $"api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
             switch (requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
                 case AppConfig.ManagedIdentityIdType.ClientId:
-                    uami = requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
-                    requestContext.Logger.Info("[Managed Identity] ImdsV2 supports user-assigned client id.");
+                    queryParams += $"&client_id={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
 
                 case AppConfig.ManagedIdentityIdType.ResourceId:
-                    requestContext.Logger.Info("[Managed Identity] ImdsV2 doesn't support user-assigned resource id. Either provide a client id, or use a system-assigned managed identity.");
-                    return false;
+                    queryParams += $"&msi_res_id={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
+                    break;
 
                 case AppConfig.ManagedIdentityIdType.ObjectId:
-                    requestContext.Logger.Info("[Managed Identity] ImdsV2 doesn't support user-assigned object id. Either provide a client id, or use a system-assigned managed identity.");
-                    return false;
+                    queryParams += $"&object_id={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
+                    break;
 
                 default:
-                    requestContext.Logger.Info("[Managed Identity] ImdsV2 supports system-assigned managed identity.");
                     break;
             }
-
-            string queryParams = $"api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
-            if (!string.IsNullOrEmpty(uami))
-            {
-                queryParams += $"&uaid={uami}";
-            }
-
-            Uri csrMetadataEndpoint = ImdsManagedIdentitySource.GetValidatedEndpoint(requestContext.Logger, CsrMetadataPath, queryParams);
 
             var headers = new Dictionary<string, string>
             {
                 { "Metadata", "true" },
-                { "x-ms-client-request-id", Guid.NewGuid().ToString() }
+                { "x-ms-client-request-id", requestContext.CorrelationId.ToString() }
             };
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.ManagedIdentityDefault);
 
             // CSR metadata GET request
-            HttpResponse response;
+            HttpResponse response = null;
 
             // TODO: Remove try/catch once we have a mock for this request, and create a helper method for the SendRequestAsync
             try
             {
                 response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
-                    csrMetadataEndpoint,
+                    ImdsManagedIdentitySource.GetValidatedEndpoint(requestContext.Logger, CsrMetadataPath, queryParams),
                     headers,
                     body: null,
                     method: System.Net.Http.HttpMethod.Get,
@@ -78,39 +68,62 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     retryPolicy: retryPolicy)
                 .ConfigureAwait(false);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // try/catch is for testing purposes, to avoid adding a mock for this request
-                requestContext.Logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. Exception occurred while sending request to CSR metadata endpoint.");
-                return false;
+                if (probeMode)
+                {
+                    requestContext.Logger.Info(() => $"[Managed Identity] IMDSv2 CSR endpoint failure. Exception occurred while sending request to CSR metadata endpoint: ${ex}");
+                    return null;
+                }
+                else
+                {
+                    throwProbeFailedException(
+                        "ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed.",
+                        ex);
+                }
             }
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                requestContext.Logger.Info(() => $"[Managed Identity] IMDSV2 managed identity is not available. Status code: {response.StatusCode}, Body: {response.Body}");
-                return false;
+                if (probeMode)
+                {
+                    requestContext.Logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. Status code: {response.StatusCode}, Body: {response.Body}");
+                    return null;
+                }
+                else
+                {
+                    throwProbeFailedException(
+                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed due to HTTP error. Status code: {response.StatusCode} Body: {response.Body}",
+                        null,
+                        (int)response.StatusCode);
+                }
             }
 
-            if (!ValidateCsrMetadataResponse(response, requestContext.Logger))
+            if (!ValidateCsrMetadataResponse(response, requestContext.Logger, probeMode))
             {
-                return false;
+                return null;
             }
 
-            var csrMetadata = TryCreateCsrMetadata(response.Body, requestContext.Logger);
-            if (csrMetadata != null)
-            {
-                _csrMetadata = csrMetadata;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return TryCreateCsrMetadata(response, requestContext.Logger, probeMode);
+        }
+
+        private static void throwProbeFailedException(
+            String errorMessage,
+            Exception ex = null,
+            int? statusCode = null)
+        {
+            throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalError.ManagedIdentityRequestFailed,
+                $"[ImdsV2] ${errorMessage}",
+                ex,
+                ManagedIdentitySource.ImdsV2,
+                statusCode);
         }
 
         private static Boolean ValidateCsrMetadataResponse(
             HttpResponse response,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            Boolean probeMode)
         {
             /*
              * Match "IMDS/" at start of "server" header string (`^IMDS\/`)
@@ -127,8 +140,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
             if (serverHeader == null)
             {
-                logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. 'server' header is missing from the CSR metadata response.");
-                return false;
+                if (probeMode)
+                {
+                    logger.Info(() => "[Managed Identity] IMDSv2 managed identity is not available. 'server' header is missing from the CSR metadata response.");
+                    return false;
+                }
+                else
+                {
+                    throwProbeFailedException(
+                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because response doesn't have server header. Status code: {response.StatusCode} Body: {response.Body}",
+                        null,
+                        (int)response.StatusCode);
+                } 
             }
 
             var match = System.Text.RegularExpressions.Regex.Match(
@@ -137,49 +160,63 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             );
             if (!match.Success || !int.TryParse(match.Groups[1].Value, out int version) || version <= 1324)
             {
-                logger.Info(() => $"[Managed Identity] IMDSV2 managed identity is not available. 'server' header format/version invalid. Extracted version: {match.Groups[1].Value}");
-                return false;
+                if (probeMode)
+                {
+                    logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. 'server' header format/version invalid. Extracted version: {match.Groups[1].Value}");
+                    return false;
+                }
+                else
+                {
+                    throwProbeFailedException(
+                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the 'server' header format/version invalid. Extracted version: {match.Groups[1].Value}. Status code: {response.StatusCode} Body: {response.Body}",
+                        null,
+                        (int)response.StatusCode);
+                }
             }
 
             return true;
         }
 
         private static CsrMetadata TryCreateCsrMetadata(
-            String responseBody,
-            ILoggerAdapter logger)
+            HttpResponse response,
+            ILoggerAdapter logger,
+            Boolean probeMode)
         {
-            CsrMetadataResponse csrMetadataResponse = JsonHelper.DeserializeFromJson<CsrMetadataResponse>(responseBody);
+            CsrMetadataResponse csrMetadataResponse = JsonHelper.DeserializeFromJson<CsrMetadataResponse>(response.Body);
             CsrMetadata csrMetadata = CsrMetadata.TryCreate(csrMetadataResponse, logger);
             if (csrMetadata == null)
             {
-                logger.Info(() => "[Managed Identity] IMDSV2 managed identity is not available. Invalid CsrMetadata response.");
-                return null;
+                
+                if (probeMode)
+                {
+                    logger.Info(() => "[Managed Identity] IMDSv2 managed identity is not available. Invalid CsrMetadata response.");
+                    return null;
+                }
+                else
+                {
+                    throwProbeFailedException(
+                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the CsrMetadata response is invalid. Status code: {response.StatusCode} Body: {response.Body}",
+                        null,
+                        (int)response.StatusCode);
+                }
             }
 
-            logger.Info(() => "[Managed Identity] IMDSV2 managed identity is available.");
+            logger.Info(() => "[Managed Identity] IMDSv2 managed identity is available.");
             return csrMetadata;
         }
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
-            return new ImdsV2ManagedIdentitySource(requestContext, _csrMetadata);
+            return new ImdsV2ManagedIdentitySource(requestContext);
         }
 
-        internal ImdsV2ManagedIdentitySource(RequestContext requestContext, CsrMetadata csrMetadata) :
-            base(requestContext, ManagedIdentitySource.ImdsV2)
-        {
-            _csrMetadata = csrMetadata;
-        }
+        internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
+            base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
         // TODO: Implement CreateRequest
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
-            throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                "",
-                "ImdsV2ManagedIdentitySource.CreateRequest is not implemented yet.",
-                null,
-                ManagedIdentitySource.ImdsV2,
-                null);
+            throw new NotImplementedException();
         }
     }
 }
