@@ -2,21 +2,21 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
-    public class TenantIdTests
+    public class TenantIdTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [DataTestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.Common, DisplayName = "Common endpoint")]
@@ -62,6 +62,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var tenantId = AuthorityHelpers.GetTenantId(new Uri(authorityUrl));
 
             Assert.IsNull(tenantId);
+        }
+
+        [TestMethod]
+        public async Task TenantIdOverride()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/tenanta")
+                    .WithHttpManager(httpManager)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithTenantIdFromAuthority(new Uri("https://login.microsoftonline.com/tenantb"))
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/tenantb/oauth2/v2.0/token",
+                    handler.ActualRequestMessage.RequestUri.AbsoluteUri);
+
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+            }
         }
     }
 }
