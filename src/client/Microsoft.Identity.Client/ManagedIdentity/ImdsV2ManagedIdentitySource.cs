@@ -52,7 +52,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // CSR metadata GET request
             HttpResponse response = null;
 
-            // TODO: Remove try/catch once we have a mock for this request, and create a helper method for the SendRequestAsync
             try
             {
                 response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
@@ -120,10 +119,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 statusCode);
         }
 
-        private static Boolean ValidateCsrMetadataResponse(
+        private static bool ValidateCsrMetadataResponse(
             HttpResponse response,
             ILoggerAdapter logger,
-            Boolean probeMode)
+            bool probeMode)
         {
             /*
              * Match "IMDS/" at start of "server" header string (`^IMDS\/`)
@@ -180,7 +179,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private static CsrMetadata TryCreateCsrMetadata(
             HttpResponse response,
             ILoggerAdapter logger,
-            Boolean probeMode)
+            bool probeMode)
         {
             CsrMetadataResponse csrMetadataResponse = JsonHelper.DeserializeFromJson<CsrMetadataResponse>(response.Body);
             CsrMetadata csrMetadata = CsrMetadata.TryCreate(csrMetadataResponse, logger);
@@ -213,7 +212,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
-        // TODO: Implement CreateRequest
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             throw new NotImplementedException();

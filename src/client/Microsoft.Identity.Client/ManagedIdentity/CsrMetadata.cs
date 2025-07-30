@@ -35,31 +35,32 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (response == null)
             {
-                logger?.Warning("[CsrMetadata] CsrMetadataResponse is null.");
+                logger.Warning("[CsrMetadata] CsrMetadataResponse is null.");
                 return null;
             }
 
             if (string.IsNullOrEmpty(response.ClientId))
             {
-                logger?.Warning("[CsrMetadata] ClientId is null or empty in CsrMetadataResponse.");
+                logger.Warning("[CsrMetadata] ClientId is null or empty in CsrMetadataResponse.");
                 hasNull = true;
             }
             if (string.IsNullOrEmpty(response.TenantId))
             {
-                logger?.Warning("[CsrMetadata] TenantId is null or empty in CsrMetadataResponse.");
+                logger.Warning("[CsrMetadata] TenantId is null or empty in CsrMetadataResponse.");
                 hasNull = true;
             }
             if (string.IsNullOrEmpty(response.Cuid))
             {
-                logger?.Warning("[CsrMetadata] Cuid is null or empty in CsrMetadataResponse.");
+                logger.Warning("[CsrMetadata] Cuid is null or empty in CsrMetadataResponse.");
                 hasNull = true;
             }
             if (string.IsNullOrEmpty(response.AttestationEndpoint))
             {
-                logger?.Warning("[CsrMetadata] AttestationEndpoint is null or empty in CsrMetadataResponse.");
+                logger.Warning("[CsrMetadata] AttestationEndpoint is null or empty in CsrMetadataResponse.");
                 hasNull = true;
             }
 
+            // all warnings will be logged before returning null
             if (hasNull)
             {
                 return null;
