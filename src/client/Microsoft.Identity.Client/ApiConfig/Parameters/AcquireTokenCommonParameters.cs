@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension;
 
@@ -33,5 +34,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public SortedList<string, string> CacheKeyComponents { get; internal set; }
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
+        public IClientCredential ClientCredentialOverride { get; internal set; }
     }
 }

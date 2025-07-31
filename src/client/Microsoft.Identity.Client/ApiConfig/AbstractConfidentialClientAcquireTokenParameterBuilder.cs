@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 
 namespace Microsoft.Identity.Client
 {
@@ -45,11 +46,11 @@ namespace Microsoft.Identity.Client
         /// <exception cref="MsalClientException"></exception>
         protected override void Validate()
         {
-            // Confidential client must have a credential
+            // Confidential client must have a credential (either at app level or request level)
             if (ServiceBundle?.Config.ClientCredential == null &&
                 CommonParameters.OnBeforeTokenRequestHandler == null &&
-                ServiceBundle?.Config.AppTokenProvider == null 
-                )
+                ServiceBundle?.Config.AppTokenProvider == null &&
+                CommonParameters.ClientCredentialOverride == null)
             {
                 throw new MsalClientException(
                     MsalError.ClientCredentialAuthenticationTypeMustBeDefined,
@@ -111,6 +112,105 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.AuthenticationOperation = new PopAuthenticationOperation(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
+            return this as T;
+        }
+
+        /// <summary>
+        /// Sets the client assertion for this specific request, overriding any client assertion configured at the application level.
+        /// This method allows you to provide a different client assertion for individual requests when needed.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="signedClientAssertion">The client assertion used to prove the identity of the application to Azure AD. This is a Base-64 encoded JWT.</param>
+        /// <returns>The builder.</returns>
+        /// <remarks>
+        /// This client assertion will override any client assertion configured at the application level for this specific request only.
+        /// Other concurrent requests will continue to use the application-level client assertion.
+        /// </remarks>
+        public T WithClientAssertion(string signedClientAssertion)
+        {
+            if (string.IsNullOrWhiteSpace(signedClientAssertion))
+            {
+                throw new ArgumentNullException(nameof(signedClientAssertion));
+            }
+
+            CommonParameters.ClientCredentialOverride = new SignedAssertionClientCredential(signedClientAssertion);
+            return this as T;
+        }
+
+        /// <summary>
+        /// Sets a client assertion delegate for this specific request, overriding any client assertion configured at the application level.
+        /// This method allows you to provide a different client assertion delegate for individual requests when needed.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientAssertionDelegate">delegate computing the client assertion used to prove the identity of the application to Azure AD.
+        /// This is a delegate that computes a Base-64 encoded JWT for this specific request.</param>
+        /// <returns>The builder.</returns>
+        /// <remarks>
+        /// This client assertion delegate will override any client assertion configured at the application level for this specific request only.
+        /// Other concurrent requests will continue to use the application-level client assertion.
+        /// Callers can use this mechanism to cache their assertions.
+        /// </remarks>
+        public T WithClientAssertion(Func<string> clientAssertionDelegate)
+        {
+            if (clientAssertionDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(clientAssertionDelegate));
+            }
+
+            Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate = (_) =>
+            {
+                return Task.FromResult(clientAssertionDelegate());
+            };
+
+            CommonParameters.ClientCredentialOverride = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
+            return this as T;
+        }
+
+        /// <summary>
+        /// Sets an async client assertion delegate for this specific request, overriding any client assertion configured at the application level.
+        /// This method allows you to provide a different client assertion delegate for individual requests when needed.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientAssertionAsyncDelegate">An async delegate computing the client assertion used to prove the identity of the application to Azure AD.
+        /// This is a delegate that computes a Base-64 encoded JWT for this specific request.</param>
+        /// <returns>The builder.</returns>
+        /// <remarks>
+        /// This client assertion delegate will override any client assertion configured at the application level for this specific request only.
+        /// Other concurrent requests will continue to use the application-level client assertion.
+        /// Callers can use this mechanism to cache their assertions.
+        /// </remarks>
+        public T WithClientAssertion(Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate)
+        {
+            if (clientAssertionAsyncDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
+            }
+
+            CommonParameters.ClientCredentialOverride = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
+            return this as T;
+        }
+
+        /// <summary>
+        /// Sets an async client assertion delegate for this specific request, overriding any client assertion configured at the application level.
+        /// This method allows you to provide a different client assertion delegate for individual requests when needed.
+        /// The delegate is invoked only when a token cannot be retrieved from the cache.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientAssertionAsyncDelegate">An async delegate that returns the client assertion. Assertion lifetime is the responsibility of the caller.</param>
+        /// <returns>The builder.</returns>
+        /// <remarks>
+        /// This client assertion delegate will override any client assertion configured at the application level for this specific request only.
+        /// Other concurrent requests will continue to use the application-level client assertion.
+        /// Callers can use this mechanism to cache their assertions.
+        /// </remarks>
+        public T WithClientAssertion(Func<AssertionRequestOptions, Task<string>> clientAssertionAsyncDelegate)
+        {
+            if (clientAssertionAsyncDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
+            }
+
+            CommonParameters.ClientCredentialOverride = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
             return this as T;
         }
     }
