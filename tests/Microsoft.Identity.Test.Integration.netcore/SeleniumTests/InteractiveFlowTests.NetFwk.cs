@@ -41,9 +41,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        #endregion MSTest Hooks
-
-        [RunOn(TargetFrameworks.NetFx)]
+        [Ignore("Skip while lab is being fixed.")]
+        //[RunOn(TargetFrameworks.NetFx)]
         public async Task Interactive_AADAsync()
         {
             // Arrange
