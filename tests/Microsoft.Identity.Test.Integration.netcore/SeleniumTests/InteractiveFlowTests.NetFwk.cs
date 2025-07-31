@@ -396,7 +396,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 loginBtn?.Click();
             }, TestContext);
         }
-
+        #endregion
         #region Azure AD Kerberos Feature Tests
         [Ignore]
         public async Task Kerberos_Interactive_AADAsync()
@@ -515,4 +515,3 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion
     }
 }
-#endregion
