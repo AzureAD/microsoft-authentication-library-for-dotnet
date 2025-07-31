@@ -63,6 +63,21 @@ namespace Microsoft.Identity.Client.Http.Retry
         }
 
         /// <summary>
+        /// Retry policy specific to Region Discovery.
+        /// Extends Imds retry policy but excludes 404 and 408 status codes.
+        /// </summary>
+        public static bool CsrMetadataProbe(HttpResponse response, Exception exception)
+        {
+            if (!Imds(response, exception))
+            {
+                return false;
+            }
+
+            // If Imds would retry but the status code is 404 or 408, don't retry
+            return (int)response.StatusCode is not 404;
+        }
+
+        /// <summary>
         /// Retry condition for /token and /authorize endpoints
         /// </summary>
         /// <param name="response"></param>

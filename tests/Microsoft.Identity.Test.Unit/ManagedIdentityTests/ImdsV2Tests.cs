@@ -44,8 +44,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                // First attempt fails with NOT_FOUND (404)
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.NotFound));
+                // First attempt fails with INTERNAL_SERVER_ERROR (500)
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.InternalServerError));
 
                 // Second attempt succeeds
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
@@ -108,17 +108,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory)
                     .Build();
 
-                const int Num404Errors = 1 + TestDefaultRetryPolicy.DefaultManagedIdentityMaxRetries;
-                for (int i = 0; i < Num404Errors; i++)
+                const int Num500Errors = 1 + TestCsrMetadataProbeRetryPolicy.ExponentialStrategyNumRetries;
+                for (int i = 0; i < Num500Errors; i++)
                 {
-                    httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.NotFound));
+                    httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.InternalServerError));
                 }
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
 
-                int requestsMade = Num404Errors - httpManager.QueueSize;
-                Assert.AreEqual(Num404Errors, requestsMade);
+                int requestsMade = Num500Errors - httpManager.QueueSize;
+                Assert.AreEqual(Num500Errors, requestsMade);
             }
         }
     }
