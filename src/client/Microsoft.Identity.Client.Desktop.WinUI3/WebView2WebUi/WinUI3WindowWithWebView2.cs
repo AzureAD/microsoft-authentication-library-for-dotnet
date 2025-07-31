@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             else
             {
                 throw new MsalException(MsalError.InvalidOwnerWindowType,
-                    "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
+                    "Invalid owner window type. Expected type is Window (for window handle).");
             }
 
             InitializeWindow();
