@@ -594,10 +594,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             expectedRequestHeaders.Add("Metadata", "true");
 
             string content =
-                "{\"client_id\":\"fake_client_id\"," +
-                 "\"tenant_id\":\"fake_tenant_id\"," +
-                 "\"CUID\":\"fake_CUID\"," +
-                 "\"attestation_endpoint\":\"fake_attestation_endpoint\"}";
+                "{" +
+                "\"cuid\": { \"vmid\": \"fake_vmid\", \"vmssid\": \"fake_vmssid\" }," +
+                "\"clientId\": \"fake_client_id\"," +
+                "\"tenantId\": \"fake_tenant_id\"," +
+                "\"attestationEndpoint\": \"fake_attestation_endpoint\"" +
+                "}";
 
             var handler = new MockHttpMessageHandler()
             {
