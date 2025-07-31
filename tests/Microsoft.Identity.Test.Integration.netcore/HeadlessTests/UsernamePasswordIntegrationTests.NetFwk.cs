@@ -475,7 +475,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         //[IgnoreOnOneBranch]
-        [Ignore("Skip while lab is being fixed.")]
+        [Ignore("Skip while lab is being fixed. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5417")]
         public async Task Kerberos_ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);

@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        [Ignore("Skip while lab is being fixed.")]
+        [Ignore("Skip while lab is being fixed. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5417")]
         //[RunOn(TargetFrameworks.NetFx)]
         public async Task Interactive_AADAsync()
         {
@@ -515,3 +515,4 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion
     }
 }
+#endregion

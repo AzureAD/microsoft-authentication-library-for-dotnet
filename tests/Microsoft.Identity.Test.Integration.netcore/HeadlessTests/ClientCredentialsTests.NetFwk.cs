@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
         }
 
-        [Ignore("Skip while lab is being fixed.")]
+        [Ignore("Skip while lab is being fixed. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5417")]
         //[DataTestMethod]
         //[DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
         //[DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.Cert, useAppIdUri).ConfigureAwait(false);
         }
 
-        [Ignore("Skip while lab is being fixed.")]
+        [Ignore("Skip while lab is being fixed. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5417")]
         //[DataTestMethod]
         //[DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         //[DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Manual).ConfigureAwait(false);
         }
 
-        [Ignore("Skip while lab is being fixed.")]
+        [Ignore("Skip while lab is being fixed. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5417")]
         //[DataTestMethod]
         //[DataRow(Cloud.Public, TargetFrameworks.NetFx)]
         //[DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
