@@ -82,6 +82,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
+        [DoNotRunFederatedTests]
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
@@ -89,6 +90,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        [DoNotRunFederatedTests]
         public async Task ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -96,6 +98,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        [DoNotRunFederatedTests]
         public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -105,6 +108,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
+        [DoNotRunFederatedTests]
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
@@ -182,6 +186,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        [DoNotRunFederatedTests]
         public async Task AcquireTokenWithFederatedUsernameIncorrectPasswordAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -475,6 +480,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [IgnoreOnOneBranch]
+        [DoNotRunFederatedTests]
         public async Task Kerberos_ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);

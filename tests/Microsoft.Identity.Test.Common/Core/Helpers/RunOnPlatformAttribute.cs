@@ -122,4 +122,26 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return base.Execute(testMethod);
         }
     }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
+    public sealed class DoNotRunFederatedTestsAttribute : TestMethodAttribute
+    {
+        public override TestResult[] Execute(ITestMethod testMethod)
+        {
+            // Check if MSAL_SKIP_FEDERATED_TESTS environment variable is set
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSAL_SKIP_FEDERATED_TESTS")))
+            {
+                return new[]
+                {
+                    new TestResult
+                    {
+                        Outcome = UnitTestOutcome.Inconclusive,
+                        TestFailureException = new AssertInconclusiveException("Skipped federated test due to MSAL_SKIP_FEDERATED_TESTS environment variable")
+                    }
+                };
+            }
+
+            return base.Execute(testMethod);
+        }
+    }
 }

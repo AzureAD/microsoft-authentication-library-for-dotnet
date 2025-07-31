@@ -71,6 +71,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        [DoNotRunFederatedTests]
         public async Task Interactive_AdfsV4_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -87,6 +88,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        [DoNotRunFederatedTests]
         public async Task Interactive_AdfsV2019_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
@@ -95,6 +97,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
+        [DoNotRunFederatedTests]
         public async Task Arlington_Interactive_AdfsV2019_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
