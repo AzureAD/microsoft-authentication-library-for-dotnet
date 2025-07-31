@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Core;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+    using Microsoft.Identity.Client.Platforms.net;
+    using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
+    using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -10,63 +15,50 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// </summary>
     internal class CsrMetadata
     {
-        public string ClientId { get; }  // client_id of the Managed Identity
-        public string TenantId { get; }  // AAD Tenant of the Managed Identity
-        public string Cuid { get; }  // VM unique Id
-        public string AttestationEndpoint { get; }  // MAA Regional / Custom Endpoint for attestation purposes.
-
-        private CsrMetadata(CsrMetadataResponse response)
-        {
-            ClientId = response.ClientId;
-            TenantId = response.TenantId;
-            Cuid = response.Cuid;
-            AttestationEndpoint = response.AttestationEndpoint;
-        }
+        /// <summary>
+        /// client_id of the Managed Identity
+        /// </summary>
+        [JsonProperty("client_id")]
+        public string ClientId { get; set; }
 
         /// <summary>
-        /// Tries to create a CsrMetadata instance from a CsrMetadataResponse, logs warnings and returns null if any field is missing.
+        /// AAD Tenant of the Managed Identity
         /// </summary>
-        /// <param name="response">The CsrMetadataResponse object.</param>
-        /// <param name="logger">The ILogger to log warnings.</param>
-        /// <returns>CsrMetadata instance or null if any field is null.</returns>
-        public static CsrMetadata TryCreate(CsrMetadataResponse response, ILoggerAdapter logger)
+        [JsonProperty("tenant_id")] 
+        public string TenantId { get; set; }
+
+        /// <summary>
+        /// VM unique Id
+        /// </summary>
+        [JsonProperty("CUID")] 
+        public string Cuid { get; set; }
+
+        /// <summary>
+        /// MAA Regional / Custom Endpoint for attestation purposes.
+        /// </summary>
+        [JsonProperty("attestation_endpoint")] 
+        public string AttestationEndpoint { get; set; }
+
+        // Parameterless constructor for deserialization
+        public CsrMetadata() { }
+
+        /// <summary>
+        /// Tries to create a CsrMetadata instance from a CsrMetadataResponse.
+        /// </summary>
+        /// <param name="csrMetadata">TheCcsrMetadata object.</param>
+        /// <returns>false if any field is null.</returns>
+        public static bool ValidateCsrMetadata(CsrMetadata csrMetadata)
         {
-            bool hasNull = false;
-
-            if (response == null)
+            if (csrMetadata == null ||
+                string.IsNullOrEmpty(csrMetadata.ClientId) ||
+                string.IsNullOrEmpty(csrMetadata.TenantId) ||
+                string.IsNullOrEmpty(csrMetadata.Cuid) ||
+                string.IsNullOrEmpty(csrMetadata.AttestationEndpoint))
             {
-                logger.Warning("[CsrMetadata] CsrMetadataResponse is null.");
-                return null;
+                return false;
             }
 
-            if (string.IsNullOrEmpty(response.ClientId))
-            {
-                logger.Warning("[CsrMetadata] ClientId is null or empty in CsrMetadataResponse.");
-                hasNull = true;
-            }
-            if (string.IsNullOrEmpty(response.TenantId))
-            {
-                logger.Warning("[CsrMetadata] TenantId is null or empty in CsrMetadataResponse.");
-                hasNull = true;
-            }
-            if (string.IsNullOrEmpty(response.Cuid))
-            {
-                logger.Warning("[CsrMetadata] Cuid is null or empty in CsrMetadataResponse.");
-                hasNull = true;
-            }
-            if (string.IsNullOrEmpty(response.AttestationEndpoint))
-            {
-                logger.Warning("[CsrMetadata] AttestationEndpoint is null or empty in CsrMetadataResponse.");
-                hasNull = true;
-            }
-
-            // all warnings will be logged before returning null
-            if (hasNull)
-            {
-                return null;
-            }
-
-            return new CsrMetadata(response);
+            return true;
         }
     }
 }

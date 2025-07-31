@@ -592,7 +592,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
             expectedQueryParams.Add("api-version", "2018-02-01");
             expectedRequestHeaders.Add("Metadata", "true");
-            expectedRequestHeaders.Add("x-ms-client-request-id", "Some GUID");
 
             string content =
                 "{\"client_id\":\"fake_client_id\"," +

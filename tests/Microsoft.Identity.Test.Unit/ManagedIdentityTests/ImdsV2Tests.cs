@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                var handler = httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
                 var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
@@ -32,6 +32,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
+
+                Assert.IsTrue(handler.ActualRequestHeaders.Contains("Metadata"));
+                Assert.IsTrue(handler.ActualRequestHeaders.Contains("x-ms-client-request-id"));
+                Assert.IsTrue(handler.ActualRequestMessage.RequestUri.Query.Contains("api-version"));
             }
         }
 

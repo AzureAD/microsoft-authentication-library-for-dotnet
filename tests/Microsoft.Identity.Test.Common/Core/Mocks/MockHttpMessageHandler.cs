@@ -147,10 +147,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 foreach (var kvp in ExpectedRequestHeaders)
                 {
-                    // Skip validation for x-ms-client-request-id since it's random
-                    if (kvp.Key.Equals("x-ms-client-request-id", StringComparison.OrdinalIgnoreCase))
-                        continue;
-
                     Assert.IsTrue(request.Headers.Contains(kvp.Key), $"Expected request header not found: {kvp.Key}.");
                     var headerValue = request.Headers.GetValues(kvp.Key).FirstOrDefault();
                     Assert.AreEqual(kvp.Value, headerValue, $"Value mismatch for request header {kvp.Key}.");

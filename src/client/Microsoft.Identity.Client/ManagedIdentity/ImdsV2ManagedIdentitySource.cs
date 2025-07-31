@@ -181,23 +181,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             ILoggerAdapter logger,
             bool probeMode)
         {
-            CsrMetadataResponse csrMetadataResponse = JsonHelper.DeserializeFromJson<CsrMetadataResponse>(response.Body);
-            CsrMetadata csrMetadata = CsrMetadata.TryCreate(csrMetadataResponse, logger);
-            if (csrMetadata == null)
+            CsrMetadata csrMetadata = JsonHelper.DeserializeFromJson<CsrMetadata>(response.Body);
+            if (!CsrMetadata.ValidateCsrMetadata(csrMetadata))
             {
-                
-                if (probeMode)
-                {
-                    logger.Info(() => "[Managed Identity] IMDSv2 managed identity is not available. Invalid CsrMetadata response.");
-                    return null;
-                }
-                else
-                {
-                    throwProbeFailedException(
-                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the CsrMetadata response is invalid. Status code: {response.StatusCode} Body: {response.Body}",
-                        null,
-                        (int)response.StatusCode);
-                }
+                throwProbeFailedException(
+                    $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the CsrMetadata response is invalid. Status code: {response.StatusCode} Body: {response.Body}",
+                    null,
+                    (int)response.StatusCode);
             }
 
             logger.Info(() => "[Managed Identity] IMDSv2 managed identity is available.");
