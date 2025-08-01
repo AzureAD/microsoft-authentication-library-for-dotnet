@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-                    throwProbeFailedException(
+                    ThrowProbeFailedException(
                         "ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed.",
                         ex);
                 }
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-                    throwProbeFailedException(
+                    ThrowProbeFailedException(
                         $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed due to HTTP error. Status code: {response.StatusCode} Body: {response.Body}",
                         null,
                         (int)response.StatusCode);
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return TryCreateCsrMetadata(response, requestContext.Logger, probeMode);
         }
 
-        private static void throwProbeFailedException(
+        private static void ThrowProbeFailedException(
             String errorMessage,
             Exception ex = null,
             int? statusCode = null)
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-                    throwProbeFailedException(
+                    ThrowProbeFailedException(
                         $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because response doesn't have server header. Status code: {response.StatusCode} Body: {response.Body}",
                         null,
                         (int)response.StatusCode);
@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-                    throwProbeFailedException(
+                    ThrowProbeFailedException(
                         $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the 'server' header format/version invalid. Extracted version: {match.Groups[1].Value}. Status code: {response.StatusCode} Body: {response.Body}",
                         null,
                         (int)response.StatusCode);
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             CsrMetadata csrMetadata = JsonHelper.DeserializeFromJson<CsrMetadata>(response.Body);
             if (!CsrMetadata.ValidateCsrMetadata(csrMetadata))
             {
-                throwProbeFailedException(
+                ThrowProbeFailedException(
                     $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the CsrMetadata response is invalid. Status code: {response.StatusCode} Body: {response.Body}",
                     null,
                     (int)response.StatusCode);

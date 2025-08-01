@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
-    using Microsoft.Identity.Client.Platforms.net;
     using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
     using Microsoft.Identity.Json;
@@ -10,6 +9,18 @@
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
+    /// <summary>
+    /// Represents VM unique Ids for CSR metadata.
+    /// </summary>
+    internal class CuidInfo
+    {
+        [JsonProperty("vmid")]
+        public string Vmid { get; set; }
+
+        [JsonProperty("vmssid")]
+        public string Vmssid { get; set; }
+    }
+
     /// <summary>
     /// Represents metadata required for Certificate Signing Request (CSR) operations.
     /// </summary>
@@ -62,17 +73,5 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             return true;
         }
-    }
-
-    /// <summary>
-    /// Represents VM unique Ids for CSR metadata.
-    /// </summary>
-    internal class CuidInfo
-    {
-        [JsonProperty("vmid")]
-        public string Vmid { get; set; }
-
-        [JsonProperty("vmssid")]
-        public string Vmssid { get; set; }
     }
 }
