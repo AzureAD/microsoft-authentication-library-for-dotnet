@@ -1,0 +1,4 @@
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithClientAssertion(System.Func<Microsoft.Identity.Client.AppConfig.AssertionRequestOptions, System.Threading.Tasks.Task<string>> clientAssertionAsyncDelegate) -> T
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithClientAssertion(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string>> clientAssertionAsyncDelegate) -> T
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithClientAssertion(System.Func<string> clientAssertionDelegate) -> T
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithClientAssertion(string signedClientAssertion) -> T

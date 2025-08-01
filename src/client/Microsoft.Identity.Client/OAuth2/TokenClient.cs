@@ -129,14 +129,17 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
-            if (_serviceBundle.Config.ClientCredential != null)
+            // Check for per-request client credential override first, then fall back to app-level credential
+            var clientCredential = _requestParams.ClientCredentialOverride ?? _serviceBundle.Config.ClientCredential;
+            
+            if (clientCredential != null)
             {
                 _requestParams.RequestContext.Logger.Verbose(
                     () => "[TokenClient] Before adding the client assertion / secret");
 
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
-                await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
+                await clientCredential.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
                     _requestParams,
                     _serviceBundle.PlatformProxy.CryptographyManager,
