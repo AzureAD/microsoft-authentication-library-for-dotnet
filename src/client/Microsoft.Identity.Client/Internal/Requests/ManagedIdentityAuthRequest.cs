@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
@@ -8,7 +9,9 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Pop;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.MtlsPop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 
@@ -17,6 +20,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class ManagedIdentityAuthRequest : RequestBase
     {
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
+        private readonly AuthenticationRequestParameters _authenticationRequestParameters;
+        private readonly IServiceBundle _serviceBundle;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
 
         public ManagedIdentityAuthRequest(
@@ -26,6 +31,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
         {
             _managedIdentityParameters = managedIdentityParameters;
+            _authenticationRequestParameters = authenticationRequestParameters;
+            _serviceBundle = serviceBundle;
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -154,6 +161,40 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ManagedIdentityClient managedIdentityClient = 
                 new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
+
+            /* ──────── DEMO POP ATTESTATION BLOCK ──────── */
+            // This block is for demonstration purposes only,
+            // showing how to use POP with managed identities.
+            // This will be plugged into platform proxies.
+            if (_authenticationRequestParameters.IsManagedIdentityPopEnabled)
+            {
+                const string attestationUrl = "";
+                string clientId = "id"; //_serviceBundle.Config.ManagedIdentityId.UserAssignedId; //sami
+
+                // 1. Get the key 
+                var key = PopKeyProvider.Get();
+
+                if (key.IsKeyGuard)
+                {
+                    byte[] jwt = await PopKeyAttestorProvider.Current
+                                        .AttestAsync(key.SafeHandle, attestationUrl, clientId, cancellationToken)
+                                        .ConfigureAwait(false);
+
+                    if (jwt.Length > 0)
+                    {
+                        logger.Verbose(() => "[POP‑DEMO] Attestation JWT obtained - ." + Convert.ToBase64String(jwt));
+                    }
+                    else
+                    {
+                        logger.Verbose(() => "[POP‑DEMO] Attestation failed or empty – continuing with bearer/soft‑POP.");
+                    }
+                }
+                else
+                {
+                    logger.Info("[POP‑DEMO] Software key – enabling POP without attestation.");
+                }
+            }
+            /* ─────── END DEMO BLOCK ─────── */
 
             ManagedIdentityResponse managedIdentityResponse =
                 await managedIdentityClient
