@@ -204,14 +204,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 {
                     _logger.Info("Starting DisplayDialogAndInterceptUriAsync...");
 
-                    // Activate the window first
                     InvokeHandlingOwnerWindow(() =>
                     {
                         _logger.Info("Activating authentication window...");
                         this.Activate();
                     });
 
-                    // Ensure WebView2 is properly initialized by creating a Core instance if needed
                     var initTcs = new TaskCompletionSource<bool>();
 
 #pragma warning disable VSTHRD101
@@ -219,27 +217,21 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     {
                         try
                         {
-                            // Create explicit environment with proper user data folder
                             var userDataFolder = Environment.ExpandEnvironmentVariables("%UserProfile%/.msal/webview2/data");
                             _logger.Info($"Initializing WebView2 with user data folder: {userDataFolder}");
 
-                            // Create directory if it doesn't exist
                             System.IO.Directory.CreateDirectory(userDataFolder);
 
-                            // Create the environment - use the correct parameter order
                             var env = await CoreWebView2Environment.CreateWithOptionsAsync(null, userDataFolder, new CoreWebView2EnvironmentOptions());
 
-                            // If the CoreWebView2 is not initialized yet, initialize it
                             if (_webView2.CoreWebView2 == null)
                             {
                                 _logger.Info("WebView2 CoreWebView2 not initialized, initializing now...");
 
-                                // This initializes the CoreWebView2
                                 await _webView2.EnsureCoreWebView2Async(env);
                                 _logger.Info("WebView2 CoreWebView2 initialized successfully.");
                             }
 
-                            // Now navigate to the start URI
                             _logger.Info($"Starting navigation to: {_startUri}");
                             _webView2.Source = _startUri;
 
@@ -253,10 +245,8 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     });
 #pragma warning restore VSTHRD101
 
-                    // Wait for initialization and navigation to start
                     await initTcs.Task.ConfigureAwait(false);
 
-                    // Wait for the authentication to complete
                     _logger.Info("Waiting for authentication to complete...");
                     var result = await _dialogCompletionSource.Task.ConfigureAwait(false);
                     _logger.Info($"Authentication completed with status: {result.Status}");
