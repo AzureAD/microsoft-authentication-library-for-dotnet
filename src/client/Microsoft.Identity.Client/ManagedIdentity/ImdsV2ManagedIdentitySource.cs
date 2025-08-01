@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             RequestContext requestContext,
             bool probeMode)
         {
-            string queryParams = $"api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
+            string queryParams = $"cred-api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
             switch (requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
                 case AppConfig.ManagedIdentityIdType.ClientId:

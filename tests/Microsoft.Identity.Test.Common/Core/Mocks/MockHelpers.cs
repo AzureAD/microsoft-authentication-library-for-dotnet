@@ -590,7 +590,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
-            expectedQueryParams.Add("api-version", "2018-02-01");
+            expectedQueryParams.Add("cred-api-version", "2018-02-01");
             expectedRequestHeaders.Add("Metadata", "true");
 
             string content =
