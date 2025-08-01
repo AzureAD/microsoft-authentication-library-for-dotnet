@@ -22,22 +22,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             bool probeMode)
         {
             string queryParams = $"cred-api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
-            switch (requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
+            
+            var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
+                requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
+                requestContext.Logger);
+            if (userAssignedIdQueryParam != null)
             {
-                case AppConfig.ManagedIdentityIdType.ClientId:
-                    queryParams += $"&client_id={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
-                    break;
-
-                case AppConfig.ManagedIdentityIdType.ResourceId:
-                    queryParams += $"&msi_res_id={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
-                    break;
-
-                case AppConfig.ManagedIdentityIdType.ObjectId:
-                    queryParams += $"&object_id={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
-                    break;
-
-                default:
-                    break;
+                queryParams += $"{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
             }
 
             var headers = new Dictionary<string, string>

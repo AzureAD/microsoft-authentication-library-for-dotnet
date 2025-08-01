@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -68,9 +69,42 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
             }
 
+            var userAssignedIdQueryParam = GetUserAssignedIdQueryParam(
+                _requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
+                _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
+                _requestContext.Logger);
+            if (userAssignedIdQueryParam != null)
+            {
+                request.QueryParameters[userAssignedIdQueryParam.Value.Key] = userAssignedIdQueryParam.Value.Value;
+            }
+
             request.RequestType = RequestType.Imds;
 
             return request;
+        }
+
+        public static KeyValuePair<string, string>? GetUserAssignedIdQueryParam(
+            AppConfig.ManagedIdentityIdType idType,
+            string userAssignedId,
+            ILoggerAdapter logger)
+        {
+            switch (idType)
+            {
+                case AppConfig.ManagedIdentityIdType.ClientId:
+                    logger?.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    return new KeyValuePair<string, string>(Constants.ManagedIdentityClientId, userAssignedId);
+
+                case AppConfig.ManagedIdentityIdType.ResourceId:
+                    logger?.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    return new KeyValuePair<string, string>(Constants.ManagedIdentityResourceIdImds, userAssignedId);
+
+                case AppConfig.ManagedIdentityIdType.ObjectId:
+                    logger?.Info("[Managed Identity] Adding user assigned object id to the request.");
+                    return new KeyValuePair<string, string>(Constants.ManagedIdentityObjectId, userAssignedId);
+
+                default:
+                    return null;
+            }
         }
 
         protected override async Task<ManagedIdentityResponse> HandleResponseAsync(
