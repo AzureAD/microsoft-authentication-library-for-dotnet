@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -119,6 +120,27 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 int requestsMade = Num500Errors - httpManager.QueueSize;
                 Assert.AreEqual(Num500Errors, requestsMade);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetCsrMetadataAsyncFails404WhichIsNonRetriableAndRetryPolicyIsNotTriggeredAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .Build();
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.NotFound));
+
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
+
+                const int NumRequests = 1; // initial request + 0 retries
+                int requestsMade = NumRequests - httpManager.QueueSize;
+                Assert.AreEqual(NumRequests, requestsMade);
             }
         }
     }
