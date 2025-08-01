@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             };
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
-            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.ManagedIdentityDefault);
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.CsrMetadataProbe);
 
             // CSR metadata GET request
             HttpResponse response = null;
