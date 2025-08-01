@@ -3,12 +3,10 @@
 
 using System;
 using System.Diagnostics;
-using System.Reflection;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -38,7 +36,6 @@ namespace Microsoft.Identity.Test.Unit
         [TestInitialize]
         public virtual void TestInitialize()
         {
-
 #if NETFRAMEWORK
             Trace.WriteLine("Framework: .NET FX");
 #elif NET

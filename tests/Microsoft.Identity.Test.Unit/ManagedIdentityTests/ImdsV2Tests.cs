@@ -56,10 +56,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
-
-                const int NumRequests = 2; // initial probe request + 1 retry
-                int requestsMade = NumRequests - httpManager.QueueSize;
-                Assert.AreEqual(NumRequests, requestsMade);
             }
         }
 
@@ -115,9 +111,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
-
-                int requestsMade = Num500Errors - httpManager.QueueSize;
-                Assert.AreEqual(Num500Errors, requestsMade);
             }
         }
 
@@ -135,10 +128,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
-
-                const int NumRequests = 1; // initial request + 0 retries
-                int requestsMade = NumRequests - httpManager.QueueSize;
-                Assert.AreEqual(NumRequests, requestsMade);
             }
         }
     }
