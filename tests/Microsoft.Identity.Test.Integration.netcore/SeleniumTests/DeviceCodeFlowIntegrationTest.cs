@@ -65,7 +65,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.ADFS)]
-        [DoNotRunFederatedTests]
+#if IGNORE_FEDERATED
+    [Ignore]
+#endif
         public async Task DeviceCodeFlowAdfsTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
@@ -76,7 +78,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.Arlington)]
-        [DoNotRunFederatedTests]
+#if IGNORE_FEDERATED
+    [Ignore]
+#endif
         public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);

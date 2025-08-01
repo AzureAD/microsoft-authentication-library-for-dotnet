@@ -17,8 +17,6 @@ steps:
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
-  env:
-    MSAL_SKIP_FEDERATED_TESTS: '1'
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET FX) On OneBranch'
@@ -33,8 +31,6 @@ steps:
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-  env:
-    MSAL_SKIP_FEDERATED_TESTS: '1'
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET Core)'
@@ -49,5 +45,3 @@ steps:
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     runSettingsFile: 'build\CodeCoverage.runsettings'
-  env:
-    MSAL_SKIP_FEDERATED_TESTS: '1'
