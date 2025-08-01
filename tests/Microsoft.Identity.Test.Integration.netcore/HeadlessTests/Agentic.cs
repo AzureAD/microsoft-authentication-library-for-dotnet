@@ -20,18 +20,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         const string AgentIdentity = "d84da24a-2ea2-42b8-b5ab-8637ec208024";
         const string UserUpn = "aui1@msidlabtoint.onmicrosoft.com";
         private const string TokenExchangeUrl = "api://AzureADTokenExchange/.default";
+        private const string Scope = "https://graph.microsoft.com/.default";
 
         [TestMethod]
         public async Task AgentUserIdentityGetsTokenForGraphTest()
         {
-            await AgentUserIdentityGetsTokenForGraphAsync().ConfigureAwait(false);
             await AgentUserIdentityGetsTokenForGraphAsync().ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task AgentGetsAppTokenForGraphTest()
         {
-            await AgentGetsAppTokenForGraph().ConfigureAwait(false);
             await AgentGetsAppTokenForGraph().ConfigureAwait(false);
         }
 
@@ -45,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
                         .Build();
 
-            var result = await cca.AcquireTokenForClient(["https://graph.microsoft.com/.default"])
+            var result = await cca.AcquireTokenForClient([Scope])
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -63,14 +62,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
                         .Build();
 
-            var result = await (cca as IByUsernameAndPassword).AcquireTokenByUsernamePassword(["https://graph.microsoft.com/.default"], UserUpn, "no_password")
+            var result = await (cca as IByUsernameAndPassword).AcquireTokenByUsernamePassword([Scope], UserUpn, "no_password")
                 .OnBeforeTokenRequest(
                 async (request) =>
                 {
-                    // Already in the request:
-                    // - client_id = agentIdentity;
-                    // - client_assertion is the AA FIC
-
                     string userFicAssertion = await GetUserFic().ConfigureAwait(false);
                     request.BodyParameters["user_federated_identity_credential"] = userFicAssertion;
                     request.BodyParameters["grant_type"] = "user_fic";
@@ -87,6 +82,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 )
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+
+            IAccount account = await cca.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
+            var result2 = await cca.AcquireTokenSilent([Scope], account).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.IsTrue(result2.AuthenticationResultMetadata.TokenSource == TokenSource.Cache, "Token should be from cache");
         }
 
         private static async Task<string> GetAppCredentialAsync(string fmiPath)
