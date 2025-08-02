@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.ADFS)]
 #if IGNORE_FEDERATED
-    [Ignore]
+        [Ignore]
 #endif
         public async Task DeviceCodeFlowAdfsTestAsync()
         {
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.Arlington)]
 #if IGNORE_FEDERATED
-    [Ignore]
+        [Ignore]
 #endif
         public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
         {

@@ -114,8 +114,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
+#if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
-        //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
+#endif
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -146,7 +147,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
+#if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
+#endif
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientClaims_OverrideClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -165,7 +168,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
+#if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
+#endif
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientClaims_SendX5C_OverrideClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {

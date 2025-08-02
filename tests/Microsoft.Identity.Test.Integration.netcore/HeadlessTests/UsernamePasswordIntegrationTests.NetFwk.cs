@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
 #if IGNORE_FEDERATED
-    [Ignore]
+        [Ignore]
 #endif
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [RunOn(TargetFrameworks.NetCore)]
 #if IGNORE_FEDERATED
-    [Ignore]
+        [Ignore]
 #endif
         public async Task ROPC_ADFSv4Federated_Async()
         {
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [RunOn(TargetFrameworks.NetCore)]
 #if IGNORE_FEDERATED
-[Ignore]
+        [Ignore]
 #endif
         public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
         {
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
 #if IGNORE_FEDERATED
-    [Ignore]
+        [Ignore]
 #endif
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
@@ -488,7 +488,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [IgnoreOnOneBranch]
 #if IGNORE_FEDERATED
-    [Ignore]
+        [Ignore]
 #endif
         public async Task Kerberos_ROPC_ADFSv4Federated_Async()
         {
