@@ -226,6 +226,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+#if IGNORE_FEDERATED
+        [Ignore]
+#endif
         public async Task WithMultipleUsers_TestAsync()
         {
             var aadUser1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;

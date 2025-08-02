@@ -6,4 +6,7 @@
   <PropertyGroup Condition="'$(PipelineType)' == 'OneBranch'">
     <DefineConstants>$(DefineConstants);ONEBRANCH_BUILD</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(MSAL_SKIP_FEDERATED_TESTS)' == 'True'">
+    <DefineConstants>$(DefineConstants);IGNORE_FEDERATED</DefineConstants>
+  </PropertyGroup>
 </Project>
