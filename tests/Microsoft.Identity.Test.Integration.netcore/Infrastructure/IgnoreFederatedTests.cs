@@ -10,6 +10,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
+    /// <summary>
+    /// Ignores federated tests.
+    /// </summary>
     internal class IgnoreFederatedTestsAttribute : TestMethodAttribute
     {
         public override TestResult[] Execute(ITestMethod testMethod)
