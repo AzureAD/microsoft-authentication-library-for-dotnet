@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client.AuthScheme
 {
