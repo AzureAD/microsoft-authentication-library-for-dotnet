@@ -16,22 +16,23 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 using NSubstitute;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
-using Microsoft.Identity.Client.Http.Retry;
 
 namespace Microsoft.Identity.Test.Common
 {
@@ -46,6 +47,7 @@ namespace Microsoft.Identity.Test.Common
             OidcRetrieverWithCache.ResetCacheForTest();
             AuthorityManager.ClearValidationCache();
             SingletonThrottlingManager.GetInstance().ResetCache();
+            ManagedIdentityClient.ResetSourceForTest();
         }
 
         public static object GetPropValue(object src, string propName)

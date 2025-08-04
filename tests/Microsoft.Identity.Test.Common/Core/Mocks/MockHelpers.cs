@@ -2,16 +2,17 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -581,6 +582,48 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 WamAccountId = TestConstants.LocalAccountId,
                 TokenSource = TokenSource.Broker
             };
+        }
+
+        public static MockHttpMessageHandler MockCsrResponse(
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            string responseServerHeader = "IMDS/150.870.65.1325")
+        {
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            expectedQueryParams.Add("cred-api-version", "2018-02-01");
+            expectedRequestHeaders.Add("Metadata", "true");
+
+            string content =
+                "{" +
+                "\"cuid\": { \"vmid\": \"fake_vmid\", \"vmssid\": \"fake_vmssid\" }," +
+                "\"clientId\": \"fake_client_id\"," +
+                "\"tenantId\": \"fake_tenant_id\"," +
+                "\"attestationEndpoint\": \"fake_attestation_endpoint\"" +
+                "}";
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = "http://169.254.169.254/metadata/identity/getPlatformMetadata",
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(statusCode)
+                {
+                    Content = new StringContent(content),
+                }
+            };
+
+            if (responseServerHeader != null)
+                handler.ResponseMessage.Headers.TryAddWithoutValidation("server", responseServerHeader);
+
+            return handler;
+        }
+
+        // used for unit tests in ManagedIdentityTests.cs
+        public static MockHttpMessageHandler MockCsrResponseFailure()
+        {
+            // 400 doesn't trigger the retry policy
+            return MockCsrResponse(HttpStatusCode.BadRequest);
         }
     }
 }

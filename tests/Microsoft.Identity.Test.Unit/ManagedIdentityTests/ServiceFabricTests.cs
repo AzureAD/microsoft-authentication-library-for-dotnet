@@ -20,15 +20,9 @@ using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     [TestClass]
-    public class ServiceFabricTests
+    public class ServiceFabricTests : TestBase
     {
         private const string Resource = "https://management.azure.com";
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         public async Task ServiceFabricInvalidEndpointAsync()

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -17,10 +18,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ImdsManagedIdentitySource : AbstractManagedIdentity
     {
         // IMDS constants. Docs for IMDS are available here https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
-        private static readonly Uri s_imdsEndpoint = new("http://169.254.169.254/metadata/identity/oauth2/token");
-
+        private const string DefaultImdsBaseEndpoint= "http://169.254.169.254";
         private const string ImdsTokenPath = "/metadata/identity/oauth2/token";
-        private const string ImdsApiVersion = "2018-02-01";
+        public const string ImdsApiVersion = "2018-02-01";
+
         private const string DefaultMessage = "[Managed Identity] Service request failed.";
 
         internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. " +
@@ -37,20 +38,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             requestContext.Logger.Info(() => "[Managed Identity] Defaulting to IMDS endpoint for managed identity.");
 
-            if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
-			{
-                requestContext.Logger.Verbose(() => "[Managed Identity] Environment variable AZURE_POD_IDENTITY_AUTHORITY_HOST for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);
-                var builder = new UriBuilder(EnvironmentVariables.PodIdentityEndpoint)
-                {
-                    Path = ImdsTokenPath
-                };
-                _imdsEndpoint = builder.Uri;
-			}
-			else
-			{
-                requestContext.Logger.Verbose(() => "[Managed Identity] Unable to find AZURE_POD_IDENTITY_AUTHORITY_HOST environment variable for IMDS, using the default endpoint.");
-            	_imdsEndpoint = s_imdsEndpoint;
-			}
+            _imdsEndpoint = GetValidatedEndpoint(requestContext.Logger, ImdsTokenPath);
 
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating IMDS managed identity source. Endpoint URI: " + _imdsEndpoint);
         }
@@ -81,9 +69,42 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
             }
 
+            var userAssignedIdQueryParam = GetUserAssignedIdQueryParam(
+                _requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
+                _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
+                _requestContext.Logger);
+            if (userAssignedIdQueryParam != null)
+            {
+                request.QueryParameters[userAssignedIdQueryParam.Value.Key] = userAssignedIdQueryParam.Value.Value;
+            }
+
             request.RequestType = RequestType.Imds;
 
             return request;
+        }
+
+        public static KeyValuePair<string, string>? GetUserAssignedIdQueryParam(
+            AppConfig.ManagedIdentityIdType idType,
+            string userAssignedId,
+            ILoggerAdapter logger)
+        {
+            switch (idType)
+            {
+                case AppConfig.ManagedIdentityIdType.ClientId:
+                    logger?.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    return new KeyValuePair<string, string>(Constants.ManagedIdentityClientId, userAssignedId);
+
+                case AppConfig.ManagedIdentityIdType.ResourceId:
+                    logger?.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    return new KeyValuePair<string, string>(Constants.ManagedIdentityResourceIdImds, userAssignedId);
+
+                case AppConfig.ManagedIdentityIdType.ObjectId:
+                    logger?.Info("[Managed Identity] Adding user assigned object id to the request.");
+                    return new KeyValuePair<string, string>(Constants.ManagedIdentityObjectId, userAssignedId);
+
+                default:
+                    return null;
+            }
         }
 
         protected override async Task<ManagedIdentityResponse> HandleResponseAsync(
@@ -151,6 +172,39 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             return messageBuilder.ToString();
+        }
+
+        public static Uri GetValidatedEndpoint(
+            ILoggerAdapter logger,
+            string subPath,
+            string queryParams = null
+            )
+        {
+            UriBuilder builder;
+
+            if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
+            {
+                logger.Verbose(() => "[Managed Identity] Environment variable AZURE_POD_IDENTITY_AUTHORITY_HOST for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);
+                builder = new UriBuilder(EnvironmentVariables.PodIdentityEndpoint)
+                {
+                    Path = subPath
+                };
+            }
+            else
+            {
+                logger.Verbose(() => "[Managed Identity] Unable to find AZURE_POD_IDENTITY_AUTHORITY_HOST environment variable for IMDS, using the default endpoint.");
+                builder = new UriBuilder(DefaultImdsBaseEndpoint)
+                {
+                    Path = subPath
+                };
+            }
+
+            if (!string.IsNullOrEmpty(queryParams))
+            {
+                builder.Query = queryParams;
+            }
+
+            return builder.Uri;
         }
     }
 }
