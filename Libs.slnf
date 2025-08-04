@@ -1,0 +1,18 @@
+{
+  "solution": {
+    "path": "LibsAndSamples.sln",
+    "projects": [
+      "src\\client\\Microsoft.Identity.Client.Broker\\Microsoft.Identity.Client.Broker.csproj",
+      "src\\client\\Microsoft.Identity.Client.Desktop\\Microsoft.Identity.Client.Desktop.csproj",
+      "src\\client\\Microsoft.Identity.Client.Extensions.Msal\\Microsoft.Identity.Client.Extensions.Msal.csproj",
+      "src\\client\\Microsoft.Identity.Client\\Microsoft.Identity.Client.csproj",
+      "tests\\Microsoft.Identity.Test.Common\\Microsoft.Identity.Test.Common.csproj",
+      "tests\\Microsoft.Identity.Test.E2e\\Microsoft.Identity.Test.E2E.MSI.csproj",
+      "tests\\Microsoft.Identity.Test.Integration.netcore\\Microsoft.Identity.Test.Integration.NetCore.csproj",
+      "tests\\Microsoft.Identity.Test.Integration.netfx\\Microsoft.Identity.Test.Integration.NetFx.csproj",
+      "tests\\Microsoft.Identity.Test.LabInfrastructure\\Microsoft.Identity.Test.LabInfrastructure.csproj",
+      "tests\\Microsoft.Identity.Test.Performance\\Microsoft.Identity.Test.Performance.csproj",
+      "tests\\Microsoft.Identity.Test.Unit\\Microsoft.Identity.Test.Unit.csproj"
+    ]
+  }
+}
