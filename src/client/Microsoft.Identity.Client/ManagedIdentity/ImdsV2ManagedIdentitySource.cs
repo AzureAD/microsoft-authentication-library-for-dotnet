@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
             }
 
-            if (!ValidateCsrMetadataResponse(response, requestContext.Logger, probeMode))
+            if (!probeMode && !ValidateCsrMetadataResponse(response, requestContext.Logger, probeMode))
             {
                 return null;
             }
