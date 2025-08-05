@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3") //test slice region 
                 .WithCertificate(cert, true)  
-                .WithExperimentalFeatures()
                 .WithTestLogging()
                 .Build();
 
@@ -48,7 +47,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .WithMtlsProofOfPossession()
-                .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice 
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
