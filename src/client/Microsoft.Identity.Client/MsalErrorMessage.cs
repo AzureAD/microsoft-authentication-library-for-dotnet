@@ -341,7 +341,7 @@ namespace Microsoft.Identity.Client
         public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Deleting invalid ADAL cache. ";
         public static string ExperimentalFeature(string methodName)
         {
-            return $"The API {methodName} is marked as experimental and you should be mindful about using it in production. It may change without incrementing the major version of the library. Call .WithExperimentalFeatures() when creating the public / confidential client to bypass this. See https://aka.ms/msal-net-experimental-features for details. ";
+            return $"The API {methodName} is marked as experimental and should not be used in production scenarios. See https://aka.ms/msal-net-experimental-features for details. ";
         }
 
         public static string NoUserInstanceMetadataEntry(string environment)

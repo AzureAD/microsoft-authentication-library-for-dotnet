@@ -33,5 +33,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public SortedList<string, string> CacheKeyComponents { get; internal set; }
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
+        public string ClientAssertionOverride { get; internal set; }
     }
 }
