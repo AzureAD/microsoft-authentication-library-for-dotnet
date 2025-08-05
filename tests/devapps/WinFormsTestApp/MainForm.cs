@@ -26,8 +26,8 @@ public partial class MainForm : Form
     private void InitializeMsal()
     {
         _pca = PublicClientApplicationBuilder
-            .Create("9c0cb93c-2744-45ee-8399-81688062c058")
-            .WithAuthority("https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47")
+            .Create("e3b9ad76-9763-4827-b088-80c7a7888f79")
+            .WithB2CAuthority("https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/")
             .WithRedirectUri("http://localhost")
             .WithWindowsEmbeddedBrowserSupport()
             .Build();
@@ -140,7 +140,7 @@ public partial class MainForm : Form
         {
             _resultTextBox.Text = $"Authenticating using {authMethod}...";
 
-            var authBuilder = _pca.AcquireTokenInteractive(new[] { "user.read" });
+            var authBuilder = _pca.AcquireTokenInteractive(new[] { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" });
 
             if (useEmbeddedWebView)
             {
