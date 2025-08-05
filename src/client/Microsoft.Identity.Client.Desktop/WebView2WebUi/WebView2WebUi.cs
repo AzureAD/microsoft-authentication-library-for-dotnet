@@ -49,11 +49,18 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             {
                 result = await InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken).ConfigureAwait(false);
             });
+#else
+            var sendAuthorizeRequest = new Action(() =>
+            {
+                result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
+            });
+#endif
 
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
                 if (_parent.SynchronizationContext != null)
                 {
+#if WINUI3
                     var tcs = new TaskCompletionSource<AuthorizationResult>();
 
                     _parent.SynchronizationContext.Post((state) =>
@@ -83,50 +90,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     }, tcs);
 
                     return await tcs.Task.ConfigureAwait(false);
-                }
-                else
-                {
-                    using (var staTaskScheduler = new StaTaskScheduler(1))
-                    {
-                        try
-                        {
-                            Task.Factory.StartNew(
-                                sendAuthorizeRequest,
-                                cancellationToken,
-                                TaskCreationOptions.None,
-                                staTaskScheduler).Wait(cancellationToken);
-                        }
-                        catch (AggregateException ae)
-                        {
-                            requestContext.Logger.ErrorPii(ae.InnerException);
-                            Exception innerException = ae.InnerExceptions[0];
-
-                            if (innerException is AggregateException exception)
-                            {
-                                innerException = exception.InnerExceptions[0];
-                            }
-
-                            throw innerException;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                await sendAuthorizeRequest().ConfigureAwait(false);
-            }
-
-            return result;
 #else
-            var sendAuthorizeRequest = new Action(() =>
-            {
-                result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
-            });
-
-            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
-            {
-                if (_parent.SynchronizationContext != null)
-                {
                     var sendAuthorizeRequestWithTcs = new Action<object>((tcs) =>
                     {
                         try
@@ -147,6 +111,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     _parent.SynchronizationContext.Post(
                         new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
                     await tcs2.Task.ConfigureAwait(false);
+#endif
                 }
                 else
                 {
@@ -154,15 +119,33 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     {
                         try
                         {
+#if WINUI3
+                            await Task.Factory.StartNew(
+                                sendAuthorizeRequest,
+                                cancellationToken,
+                                TaskCreationOptions.None,
+                                staTaskScheduler).Unwrap().ConfigureAwait(false);
+#else
                             Task.Factory.StartNew(
                                 sendAuthorizeRequest,
                                 cancellationToken,
                                 TaskCreationOptions.None,
                                 staTaskScheduler).Wait(cancellationToken);
+#endif
                         }
                         catch (AggregateException ae)
                         {
                             requestContext.Logger.ErrorPii(ae.InnerException);
+#if WINUI3
+                            Exception innerException = ae.InnerExceptions[0];
+
+                            if (innerException is AggregateException exception)
+                            {
+                                innerException = exception.InnerExceptions[0];
+                            }
+
+                            throw innerException;
+#else
                             // Any exception thrown as a result of running task will cause AggregateException to be thrown with
                             // actual exception as inner.
                             Exception innerException = ae.InnerExceptions[0];
@@ -174,17 +157,21 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                             }
 
                             throw innerException;
+#endif
                         }
                     }
                 }
             }
             else
             {
+#if WINUI3
+                await sendAuthorizeRequest().ConfigureAwait(false);
+#else
                 sendAuthorizeRequest();
+#endif
             }
 
             return result;
-#endif
         }
 
         public Uri UpdateRedirectUri(Uri redirectUri)
