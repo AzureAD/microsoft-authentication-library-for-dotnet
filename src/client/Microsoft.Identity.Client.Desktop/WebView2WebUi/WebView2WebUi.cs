@@ -136,16 +136,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                         catch (AggregateException ae)
                         {
                             requestContext.Logger.ErrorPii(ae.InnerException);
-#if WINUI3
-                            Exception innerException = ae.InnerExceptions[0];
-
-                            if (innerException is AggregateException exception)
-                            {
-                                innerException = exception.InnerExceptions[0];
-                            }
-
-                            throw innerException;
-#else
                             // Any exception thrown as a result of running task will cause AggregateException to be thrown with
                             // actual exception as inner.
                             Exception innerException = ae.InnerExceptions[0];
@@ -157,7 +147,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                             }
 
                             throw innerException;
-#endif
                         }
                     }
                 }
