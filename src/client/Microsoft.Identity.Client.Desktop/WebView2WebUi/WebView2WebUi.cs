@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -161,6 +160,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             }
 
             return result;
+
         }
 
         public Uri UpdateRedirectUri(Uri redirectUri)
