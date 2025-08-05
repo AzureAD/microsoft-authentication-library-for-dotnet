@@ -251,24 +251,14 @@ namespace Microsoft.Identity.Client
         }
 
 #if NET_CORE
+        private static readonly Type WinUIWindowType = Type.GetType("Microsoft.UI.Xaml.Window, Microsoft.WinUI");
+
         /// <summary>
         /// Checks if an object is a WinUI3 Window or derives from one
         /// </summary>
         private static bool IsWinUI3Window(object obj)
         {
-            if (obj == null) return false;
-            
-            // Check the object's type hierarchy for Microsoft.UI.Xaml.Window
-            Type currentType = obj.GetType();
-            while (currentType != null)
-            {
-                if (currentType.FullName == "Microsoft.UI.Xaml.Window")
-                {
-                    return true;
-                }
-                currentType = currentType.BaseType;
-            }
-            return false;
+            return obj != null && WinUIWindowType?.IsAssignableFrom(obj.GetType()) == true;
         }
 #endif
 
