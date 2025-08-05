@@ -78,7 +78,7 @@ public sealed partial class MainWindow : Window
             string authMethod = UseEmbeddedWebViewCheckBox.IsChecked == true ? "Embedded WebView" : "System Browser";
             this.DispatcherQueue.TryEnqueue(() =>
             {
-                ResultTextBlock.Text = $"❌ Authentication Failed! (via {authMethod})\n\nError: {ex.Message}\n\nException Type: {ex.GetType().Name}";
+                ResultTextBlock.Text = $"Authentication Failed! (via {authMethod})\n\nError: {ex.Message}\n\nException Type: {ex.GetType().Name}";
             });
         }
     }
