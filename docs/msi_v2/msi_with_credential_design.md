@@ -170,13 +170,6 @@ token_type=mtls_pop   // **Only valid for attested CUs**; omit (default bearer) 
 ```
 Response identical to AAD v2 but may include token_type":"mtls_pop".
 
-#### Certificate Creation Requirements
-- **Subject Name:** CN=devicecert.mtlsauth.local.
-- **Validity Period:** 7 days.
-- **Key Export Policy:** Private key must be exportable to allow use for MTLS authentication.
-- **Key Usage must include:** Digital Signature, Key Encipherment and TLS Client Authentication.
-- **Storage:** The certificate will be stored in the certificate store. 
-
 #### Certificate Rotation Strategy
 - **Track Expiry:** The expiration of the certificate must be monitored at runtime.
 - **Rotation Trigger:** 3 days before expiry
