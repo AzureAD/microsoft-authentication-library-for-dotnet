@@ -138,7 +138,7 @@ MSAL will load a pre-exisitng key, if none available MSAL will try creating one 
 
 - **Subject:** `CN={client_id}, DC={tenant_id}`
 - **Attribute OID 1.2.840.113549.1.9.7:** `PrintableString = {CUID}`
-- **Signed with:** new key (`RSA 2048` / `EC P-256`)
+- **Signed with:** new key `RSA 2048`
 
 #### (Optionally) Attest Key
 
