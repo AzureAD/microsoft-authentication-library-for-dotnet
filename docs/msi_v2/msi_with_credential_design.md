@@ -120,7 +120,7 @@ This section outlines the necessary steps to acquire an access token using the M
 
 ### 1. Retrieve Platform Metadata
 
-`GET /metadata/identity/getPlatformMetadata?api-version=2025-05-01&cid={CUID}&uaid={client_id}`
+`GET /metadata/identity/getPlatformMetadata?api-version=2025-05-01&uaid={client_id}`
 
 Response supplies the UAID/client_id, tenant_id, CUID, and (for attestable VMs) the regional MAA endpoint
 
