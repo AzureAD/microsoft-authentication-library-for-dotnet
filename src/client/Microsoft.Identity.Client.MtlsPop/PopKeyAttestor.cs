@@ -17,37 +17,11 @@ namespace Microsoft.Identity.Client.MtlsPop
     /// Real attestor implemented in the POP plug‑in.  Core discovers it via
     /// the static‑ctor registration below.
     /// </summary>
-    public sealed class PopKeyAttestor : IPopKeyAttestor
+    public sealed class PopKeyAttestor : IManagedIdentityKeyProvider
     {
-        /// <summary>
-        /// Attest the key against the MAA endpoint and return the JWT.
-        /// </summary>
-        /// <param name="keyHandle"></param>
-        /// <param name="attestationUrl"></param>
-        /// <param name="clientId"></param>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        public Task<byte[]> AttestAsync(
-        SafeNCryptKeyHandle keyHandle,
-        string attestationUrl,
-        string clientId,
-        CancellationToken ct)
+        Task<KeyInfo> IManagedIdentityKeyProvider.GetOrCreateKeyAsync(KeyRequest request, CancellationToken cancellationToken)
         {
-            try
-            {
-                ct.ThrowIfCancellationRequested();
-                using var ac = new AttestationClient();
-                var res = ac.Attest(attestationUrl, keyHandle, clientId);
-
-                return Task.FromResult(
-                    res.Status == AttestationStatus.Success && !string.IsNullOrEmpty(res.Jwt)
-                        ? Encoding.UTF8.GetBytes(res.Jwt)
-                        : Array.Empty<byte>());
-            }
-            catch (Exception) when (!ct.IsCancellationRequested)
-            {
-                return Task.FromResult(Array.Empty<byte>());
-            }
+            throw new NotImplementedException();
         }
     }
 }

@@ -167,5 +167,5 @@
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <PackageReference Include="System.Security.Cryptography.Cng" />
   </ItemGroup>
-  
+
 </Project>

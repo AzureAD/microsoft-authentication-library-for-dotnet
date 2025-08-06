@@ -20,7 +20,6 @@ namespace Microsoft.Identity.Client.MtlsPop
         public static AcquireTokenForManagedIdentityParameterBuilder WithMtlsProofOfPossession(
                 this AcquireTokenForManagedIdentityParameterBuilder builder)
         {
-            PopKeyAttestorProvider.Register(static () => new PopKeyAttestor());
             builder.CommonParameters.IsManagedIdentityPopEnabled = true;
             return builder;
         }

@@ -171,24 +171,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 const string attestationUrl = "";
                 string clientId = "id"; //_serviceBundle.Config.ManagedIdentityId.UserAssignedId; //sami
 
-                // 1. Get the key 
-                var key = PopKeyProvider.Get();
+                var keyReq = new KeyRequest(
+                    requireAttestationToken: true,
+                    attestationUrl: new Uri(attestationUrl),
+                    clientId: clientId);
 
-                if (key.IsKeyGuard)
-                {
-                    byte[] jwt = await PopKeyAttestorProvider.Current
-                                        .AttestAsync(key.SafeHandle, attestationUrl, clientId, cancellationToken)
+                KeyInfo keyInfo = await ManagedIdentityKeyProvider.Current
+                                        .GetOrCreateKeyAsync(keyReq, cancellationToken)
                                         .ConfigureAwait(false);
 
-                    if (jwt.Length > 0)
-                    {
-                        logger.Verbose(() => "[POP‑DEMO] Attestation JWT obtained - ." + Convert.ToBase64String(jwt));
-                    }
-                    else
-                    {
-                        logger.Verbose(() => "[POP‑DEMO] Attestation failed or empty – continuing with bearer/soft‑POP.");
-                    }
+                if (keyInfo.Token is { Jwt.Length: > 0 })
+                {
+                    logger.Verbose(() => "[POP‑DEMO] Attestation JWT obtained - .");
                 }
+
                 else
                 {
                     logger.Info("[POP‑DEMO] Software key – enabling POP without attestation.");
