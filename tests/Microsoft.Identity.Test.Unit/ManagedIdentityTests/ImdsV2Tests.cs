@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -131,6 +132,24 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        // TODO: Create CSR generation unit tests
+        [TestMethod]
+        public void TestCsrGeneration()
+        {
+            var cuid = new CuidInfo
+            {
+                Vmid = "test-vm-id-12345",
+                Vmssid = "test-vmss-id-67890"
+            };
+
+            string clientId = "12345678-1234-1234-1234-123456789012";
+            string tenantId = "87654321-4321-4321-4321-210987654321";
+
+            // Generate CSR
+            var csrRequest = CsrRequest.Generate(clientId, tenantId, cuid);
+
+            // Output the generated CSR for analysis
+            System.Console.WriteLine("Generated CSR:");
+            System.Console.WriteLine(csrRequest.Pem);
+        }
     }
 }
