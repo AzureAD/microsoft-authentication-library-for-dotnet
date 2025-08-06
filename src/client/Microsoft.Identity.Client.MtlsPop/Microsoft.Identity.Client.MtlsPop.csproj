@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ─── Target frameworks ─────────────────────────────────────────────── -->
+  <PropertyGroup>
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+
+    <TargetFramework Condition="'$(TargetFrameworkNet)' == ''">
+      $(TargetFrameworkNetStandard)
+    </TargetFramework>
+    <TargetFrameworks Condition="'$(TargetFrameworkNet)' != ''">
+      $(TargetFrameworkNetStandard);$(TargetFrameworkNet)
+    </TargetFrameworks>
+
+    <Configurations>Debug;Release</Configurations>
+  </PropertyGroup>
+
+  <!-- ─── NuGet metadata ────────────────────────────────────────────────── -->
+  <PropertyGroup Label="NuGet">
+    <!-- Passed in by pipeline -->
+    <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">
+      $(MsalInternalVersion)
+    </MicrosoftIdentityClientVersion>
+
+    <Version>$(MicrosoftIdentityClientVersion)</Version>
+    <Title>MSAL.NET extension for Mutual‑TLS Proof‑of‑Possession</Title>
+    <Description>
+      Adds `WithMtlsProofOfPossession()` to MSAL Managed‑Identity flows.
+      Requires MSAL.NET (Microsoft.Identity.Client).
+    </Description>
+    <PackageTags>Microsoft Authentication Library MSAL POP MTLS Managed Identity</PackageTags>
+    <Product>Microsoft Authentication Library – POP plug‑in</Product>
+    <Authors>Microsoft</Authors>
+    <RepositoryUrl>https://github.com/AzureAD/microsoft-authentication-library-for-dotnet</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://aka.ms/msal</PackageProjectUrl>
+    <Copyright>© Microsoft Corporation</Copyright>
+  </PropertyGroup>
+
+  <!-- ─── Continuous Integration flag (same pattern as other packages) ─── -->
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- ─── File inclusions ───────────────────────────────────────────────── -->
+  <ItemGroup>
+    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
+  </ItemGroup>
+
+  <!-- ─── References ────────────────────────────────────────────────────── -->
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Analyse + pack like core ──────────────────────────────────────── -->
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+    <PackageReference Include="System.Security.Cryptography.Cng" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="PublicAPI/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI/PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+</Project>
