@@ -310,35 +310,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         /// <summary>
-        /// Sets the claims and capabilities in the request.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="parameters"></param>
-        protected virtual void ApplyClaimsAndCapabilities(
-            ManagedIdentityRequest request,
-            AcquireTokenForManagedIdentityParameters parameters)
-        {
-            IEnumerable<string> clientCapabilities = _requestContext.ServiceBundle.Config.ClientCapabilities;
-
-            // Set xms_cc only if clientCapabilities exist
-            if (clientCapabilities != null && clientCapabilities.Any())
-            {
-                SetRequestParameter(request, "xms_cc", string.Join(",", clientCapabilities));
-                _requestContext.Logger.Info("[Managed Identity] Adding client capabilities (xms_cc) to Managed Identity request.");
-            }
-
-            // Only include 'token_sha256_to_refresh' if we have both Claims and the old token's hash
-            if (!string.IsNullOrEmpty(parameters.Claims) &&
-                !string.IsNullOrEmpty(parameters.RevokedTokenHash))
-            {
-                SetRequestParameter(request, "token_sha256_to_refresh", parameters.RevokedTokenHash);
-                _requestContext.Logger.Info(
-                    "[Managed Identity] Passing SHA-256 of the 'bad' token to Managed Identity endpoint."
-                );
-            }
-        }
-
-        /// <summary>
         /// Sets the request parameter in either the query or body based on the request method.
         /// </summary>
         /// <param name="request"></param>

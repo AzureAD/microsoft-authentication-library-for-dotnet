@@ -84,7 +84,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             request.QueryParameters["api-version"] = ServiceFabricMsiApiVersion;
             request.QueryParameters["resource"] = resource;
-            ApplyClaimsAndCapabilities(request, parameters);
+
+            request.AddClaimsAndCapabilities(
+                _requestContext.ServiceBundle.Config.ClientCapabilities, 
+                parameters, _requestContext.Logger);
 
             switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
