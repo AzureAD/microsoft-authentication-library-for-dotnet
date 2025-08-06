@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -16,6 +17,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
         private const string CsrMetadataPath = "/metadata/identity/getPlatformMetadata";
+        private const string CsrRequestPath = "/metadata/identity/issuecredential";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
@@ -29,7 +31,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 requestContext.Logger);
             if (userAssignedIdQueryParam != null)
             {
-                queryParams += $"{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
+                queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
             }
 
             var headers = new Dictionary<string, string>
@@ -41,7 +43,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.CsrMetadataProbe);
 
-            // CSR metadata GET request
             HttpResponse response = null;
 
             try
@@ -50,7 +51,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     ImdsManagedIdentitySource.GetValidatedEndpoint(requestContext.Logger, CsrMetadataPath, queryParams),
                     headers,
                     body: null,
-                    method: System.Net.Http.HttpMethod.Get,
+                    method: HttpMethod.Get,
                     logger: requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
@@ -194,8 +195,75 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
+        private async Task<CsrRequestResponse> ExecuteCsrRequestAsync(
+            RequestContext requestContext,
+            string queryParams,
+            string pem)
+        {
+            var headers = new Dictionary<string, string>
+            {
+                { "Metadata", "true" },
+                { "x-ms-client-request-id", requestContext.CorrelationId.ToString() }
+            };
+
+            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
+
+            HttpResponse response = null;
+
+            try
+            {
+                response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                    ImdsManagedIdentitySource.GetValidatedEndpoint(requestContext.Logger, CsrRequestPath, queryParams),
+                    headers,
+                    body: new StringContent($"{{\"pem\":\"{pem}\"}}", System.Text.Encoding.UTF8, "application/json"),
+                    method: HttpMethod.Post,
+                    logger: requestContext.Logger,
+                    doNotThrow: false,
+                    mtlsCertificate: null,
+                    validateServerCertificate: null,
+                    cancellationToken: requestContext.UserCancellationToken,
+                    retryPolicy: retryPolicy)
+                .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCsrRequest failed.",
+                    ex,
+                    ManagedIdentitySource.ImdsV2,
+                    (int)response.StatusCode);
+            }
+
+            var csrRequestResponse = JsonHelper.DeserializeFromJson<CsrRequestResponse>(response.Body);
+            if (!CsrRequestResponse.ValidateCsrRequestResponse(csrRequestResponse))
+            {
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the CsrMetadata response is invalid. Status code: {response.StatusCode} Body: {response.Body}",
+                    null,
+                    ManagedIdentitySource.ImdsV2,
+                    (int)response.StatusCode);
+            }
+
+            return csrRequestResponse;
+        }
+
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
+            var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
+            var csrRequest = CsrRequest.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.Cuid);
+
+            var queryParams = $"cid={csrMetadata.Cuid}";
+            if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
+            {
+                queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
+            }
+            queryParams += $"&api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
+
+            var csrRequestResponse = ExecuteCsrRequestAsync(_requestContext, queryParams, csrRequest.Pem);
+
             throw new NotImplementedException();
         }
     }

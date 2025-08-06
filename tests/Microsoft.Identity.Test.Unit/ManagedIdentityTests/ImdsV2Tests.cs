@@ -130,5 +130,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
         }
+
+        // TODO: Create CSR generation unit tests
     }
 }
