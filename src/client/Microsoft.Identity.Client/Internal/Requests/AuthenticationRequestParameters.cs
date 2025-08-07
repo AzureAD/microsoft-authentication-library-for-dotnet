@@ -111,6 +111,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public X509Certificate2 MtlsCertificate => _commonParameters.MtlsCertificate;
 
+        public bool IsPopEnabled => _commonParameters.IsPopEnabled;
+
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>

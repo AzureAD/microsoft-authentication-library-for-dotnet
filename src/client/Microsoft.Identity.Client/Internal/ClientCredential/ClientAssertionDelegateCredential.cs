@@ -5,6 +5,9 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -13,94 +16,78 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     /// <summary>
-    /// Handles client assertions supplied via a delegate that returns
-    /// <see cref="AssertionResponse"/> (JWT + optional certificate).
+    /// Handles client assertions supplied via a delegate that returns an
+    /// <see cref="AssertionResponse"/> (JWT + optional certificate bound for mTLS‑PoP).
     /// </summary>
     internal sealed class ClientAssertionDelegateCredential : IClientCredential
     {
-        private readonly Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>> _assertionDelegate;
+        private readonly Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>> _provider;
+
+        internal Task<AssertionResponse> GetAssertionAsync(
+                AssertionRequestOptions options,
+                CancellationToken cancellationToken) =>
+            _provider(options, cancellationToken);
 
         public ClientAssertionDelegateCredential(
-            Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>> assertionDelegate)
+            Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>> provider)
         {
-            _assertionDelegate = assertionDelegate ?? throw new ArgumentNullException(nameof(assertionDelegate));
+            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
-        private X509Certificate2 _cachedCertificate;
+        // ──────────────────────────────────
+        //  Expose the certificate we used in the *last* call
+        // ──────────────────────────────────
+        private X509Certificate2 _lastCertificate;
+        internal X509Certificate2 LastCertificate => _lastCertificate;
 
-        internal X509Certificate2 PeekCertificate(string clientId)
-        {
-            // Return the cached value if we already probed once
-            if (_cachedCertificate != null)
-            {
-                return _cachedCertificate;
-            }
-
-            try
-            {
-                var probeOpts = new AssertionRequestOptions
-                {
-                    ClientID = clientId,
-                };
-
-                var resp = _assertionDelegate(probeOpts, CancellationToken.None)
-                                 .ConfigureAwait(false)
-                                 .GetAwaiter()
-                                 .GetResult();
-
-                _cachedCertificate = resp?.TokenBindingCertificate;
-            }
-            catch
-            {
-            }
-
-            return _cachedCertificate;
-        }
-
+        // ──────────────────────────────────
+        //  Main hook for token requests
+        // ──────────────────────────────────
         public async Task AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters requestParameters,
-            ICryptographyManager cryptographyManager,
+            AuthenticationRequestParameters p,
+            ICryptographyManager _,
             string tokenEndpoint,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
-            // Build the same AssertionRequestOptions old code produced
             var opts = new AssertionRequestOptions
             {
-                CancellationToken = cancellationToken,
-                ClientID = requestParameters.AppConfig.ClientId,
+                CancellationToken = ct,
+                ClientID = p.AppConfig.ClientId,
                 TokenEndpoint = tokenEndpoint,
-                ClientCapabilities = requestParameters.RequestContext.ServiceBundle.Config.ClientCapabilities,
-                Claims = requestParameters.Claims,
-                ClientAssertionFmiPath = requestParameters.ClientAssertionFmiPath
+                ClientCapabilities = p.RequestContext.ServiceBundle.Config.ClientCapabilities,
+                Claims = p.Claims,
+                ClientAssertionFmiPath = p.ClientAssertionFmiPath
             };
 
-            // Execute delegate
-            AssertionResponse resp = await _assertionDelegate(opts, cancellationToken)
-                                            .ConfigureAwait(false);
+            AssertionResponse resp = await _provider(opts, ct).ConfigureAwait(false);
 
-            // Empty JWT is not allowed
-            if (string.IsNullOrWhiteSpace(resp.Assertion))
+            if (string.IsNullOrWhiteSpace(resp?.Assertion))
             {
-                throw new ArgumentException(
-                    "The assertion delegate returned an empty JWT.",
-                    nameof(_assertionDelegate));
+                throw new MsalClientException(MsalError.InvalidClientAssertion,
+                    MsalErrorMessage.InvalidClientAssertionEmpty);
             }
 
-            // Set assertion type
-            if (resp.TokenBindingCertificate != null)
+            // Decide bearer vs PoP
+            bool popEnabled = p.IsPopEnabled;
+
+            if (popEnabled && resp.TokenBindingCertificate != null)
             {
                 oAuth2Client.AddBodyParameter(
                     OAuth2Parameter.ClientAssertionType,
-                    OAuth2AssertionType.JwtPop);
+                    OAuth2AssertionType.JwtPop /* constant added in OAuth2AssertionType */);
+
+                _lastCertificate = resp.TokenBindingCertificate;
             }
             else
             {
                 oAuth2Client.AddBodyParameter(
                     OAuth2Parameter.ClientAssertionType,
                     OAuth2AssertionType.JwtBearer);
+
+                _lastCertificate = null;
             }
 
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, resp.Assertion);

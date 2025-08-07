@@ -1,3 +1,4 @@
+const Microsoft.Identity.Client.MsalError.InvalidClientAssertion = "invalid_client_assertion" -> string
 Microsoft.Identity.Client.AssertionResponse
 Microsoft.Identity.Client.AssertionResponse.Assertion.get -> string
 Microsoft.Identity.Client.AssertionResponse.Assertion.init -> void
