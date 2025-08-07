@@ -137,33 +137,28 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             var cuid = new CuidInfo
             {
-                Vmid = "test-vm-id-12345",
-                Vmssid = "test-vmss-id-67890"
+                Vmid = TestConstants.Vmid,
+                Vmssid = TestConstants.Vmssid
             };
 
-            string clientId = "12345678-1234-1234-1234-123456789012";
-            string tenantId = "87654321-4321-4321-4321-210987654321";
-
             // Generate CSR
-            var csrRequest = CsrRequest.Generate(clientId, tenantId, cuid);
+            var csrRequest = CsrRequest.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
 
             // Validate the CSR contents using the helper
-            CsrValidator.ValidateCsrContent(csrRequest.Pem, clientId, tenantId, cuid);
+            CsrValidator.ValidateCsrContent(csrRequest.Pem, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
         [DataTestMethod]
-        [DataRow(null, "87654321-4321-4321-4321-210987654321", DisplayName = "Null ClientId")]
-        [DataRow("", "87654321-4321-4321-4321-210987654321", DisplayName = "Empty ClientId")]
-        [DataRow("   ", "87654321-4321-4321-4321-210987654321", DisplayName = "Whitespace ClientId")]
-        [DataRow("12345678-1234-1234-1234-123456789012", null, DisplayName = "Null TenantId")]
-        [DataRow("12345678-1234-1234-1234-123456789012", "", DisplayName = "Empty TenantId")]
-        [DataRow("12345678-1234-1234-1234-123456789012", "   ", DisplayName = "Whitespace TenantId")]
+        [DataRow(null, TestConstants.TenantId)]
+        [DataRow("", TestConstants.TenantId)]
+        [DataRow(TestConstants.ClientId, null)]
+        [DataRow(TestConstants.ClientId, "")]
         public void TestCsrGeneration_InvalidParameters(string clientId, string tenantId)
         {
             var cuid = new CuidInfo
             {
-                Vmid = "test-vm-id-12345",
-                Vmssid = "test-vmss-id-67890"
+                Vmid = TestConstants.Vmid,
+                Vmssid = TestConstants.Vmssid
             };
 
             Assert.ThrowsException<ArgumentException>(() => 
@@ -173,22 +168,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void TestCsrGeneration_NullCuid()
         {
-            string clientId = "12345678-1234-1234-1234-123456789012";
-            string tenantId = "87654321-4321-4321-4321-210987654321";
-
             // Test with null CUID
             Assert.ThrowsException<ArgumentNullException>(() => 
-                CsrRequest.Generate(clientId, tenantId, null));
+                CsrRequest.Generate(TestConstants.ClientId, TestConstants.TenantId, null));
         }
 
         [DataTestMethod]
-        [DataRow(null, "test-vmss-id-67890", DisplayName = "Null VMID")]
-        [DataRow("", "test-vmss-id-67890", DisplayName = "Empty VMID")]
+        [DataRow(null, TestConstants.Vmssid)]
+        [DataRow("", TestConstants.Vmssid)]
         public void TestCsrGeneration_InvalidVmid(string vmid, string vmssid)
         {
-            string clientId = "12345678-1234-1234-1234-123456789012";
-            string tenantId = "87654321-4321-4321-4321-210987654321";
-
             var cuid = new CuidInfo
             {
                 Vmid = vmid,
@@ -197,17 +186,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Should throw ArgumentException since Vmid is required
             Assert.ThrowsException<ArgumentException>(() => 
-                CsrRequest.Generate(clientId, tenantId, cuid));
+                CsrRequest.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid));
         }
 
         [DataTestMethod]
-        [DataRow("test-vm-id-12345", null, DisplayName = "Null VMSSID")]
-        [DataRow("test-vm-id-12345", "", DisplayName = "Empty VMSSID")]
+        [DataRow(TestConstants.Vmid, null)]
+        [DataRow(TestConstants.Vmid, "")]
         public void TestCsrGeneration_OptionalVmssid(string vmid, string vmssid)
         {
-            string clientId = "12345678-1234-1234-1234-123456789012";
-            string tenantId = "87654321-4321-4321-4321-210987654321";
-
             var cuid = new CuidInfo
             {
                 Vmid = vmid,
@@ -215,12 +201,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             };
 
             // Should succeed since Vmssid is optional (Vmid is provided and valid)
-            var csrRequest = CsrRequest.Generate(clientId, tenantId, cuid);
+            var csrRequest = CsrRequest.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
             Assert.IsNotNull(csrRequest);
             Assert.IsFalse(string.IsNullOrWhiteSpace(csrRequest.Pem));
 
             // Validate the CSR contents - this should handle null/empty VMSSID gracefully
-            CsrValidator.ValidateCsrContent(csrRequest.Pem, clientId, tenantId, cuid);
+            CsrValidator.ValidateCsrContent(csrRequest.Pem, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
         [TestMethod]
@@ -232,9 +218,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow("-----BEGIN CERTIFICATE-----\nTUlJQzNqQ0NBY1lDQVFBd1pURT0K\n-----END CERTIFICATE REQUEST-----", DisplayName = "Wrong Headers")]
-        [DataRow("", DisplayName = "Empty PEM")]
-        [DataRow(null, DisplayName = "Null PEM")]
+        [DataRow("-----BEGIN CERTIFICATE-----\nTUlJQzNqQ0NBY1lDQVFBd1pURT0K\n-----END CERTIFICATE REQUEST-----")]
+        [DataRow("")]
+        [DataRow(null)]
         public void TestCsrGeneration_MalformedPem_ArgumentException(string malformedPem)
         {
             Assert.ThrowsException<ArgumentException>(() => 
