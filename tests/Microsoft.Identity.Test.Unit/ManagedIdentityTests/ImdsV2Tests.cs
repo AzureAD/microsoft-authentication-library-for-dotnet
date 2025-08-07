@@ -142,10 +142,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             };
 
             // Generate CSR
-            var csrRequest = CsrRequest.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            var csr = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
 
             // Validate the CSR contents using the helper
-            CsrValidator.ValidateCsrContent(csrRequest.Pem, TestConstants.ClientId, TestConstants.TenantId, cuid);
+            CsrValidator.ValidateCsrContent(csr.Pem, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
         [DataTestMethod]
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             };
 
             Assert.ThrowsException<ArgumentException>(() => 
-                CsrRequest.Generate(clientId, tenantId, cuid));
+                Csr.Generate(clientId, tenantId, cuid));
         }
 
         [TestMethod]
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             // Test with null CUID
             Assert.ThrowsException<ArgumentNullException>(() => 
-                CsrRequest.Generate(TestConstants.ClientId, TestConstants.TenantId, null));
+                Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, null));
         }
 
         [DataTestMethod]
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Should throw ArgumentException since Vmid is required
             Assert.ThrowsException<ArgumentException>(() => 
-                CsrRequest.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid));
+                Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid));
         }
 
         [DataTestMethod]
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             };
 
             // Should succeed since Vmssid is optional (Vmid is provided and valid)
-            var csrRequest = CsrRequest.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            var csrRequest = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
             Assert.IsNotNull(csrRequest);
             Assert.IsFalse(string.IsNullOrWhiteSpace(csrRequest.Pem));
 

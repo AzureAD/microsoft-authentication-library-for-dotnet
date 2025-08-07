@@ -8,11 +8,11 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal class CsrRequest
+    internal class Csr
     {
         public string Pem { get; }
 
-        public CsrRequest(string pem)
+        public Csr(string pem)
         {
             Pem = pem ?? throw new ArgumentNullException(nameof(pem));
         }
@@ -24,19 +24,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <param name="tenantId">AAD tenant_id.</param>
         /// <param name="cuid">CuidInfo object containing required VMID and optional VMSSID.</param>
         /// <returns>CsrRequest containing the PEM CSR.</returns>
-        public static CsrRequest Generate(string clientId, string tenantId, CuidInfo cuid)
+        public static Csr Generate(string clientId, string tenantId, CuidInfo cuid)
         {
-            if (string.IsNullOrWhiteSpace(clientId))
+            if (string.IsNullOrEmpty(clientId))
                 throw new ArgumentException("clientId must not be null or empty.", nameof(clientId));
-            if (string.IsNullOrWhiteSpace(tenantId))
+            if (string.IsNullOrEmpty(tenantId))
                 throw new ArgumentException("tenantId must not be null or empty.", nameof(tenantId));
             if (cuid == null)
                 throw new ArgumentNullException(nameof(cuid));
-            if (string.IsNullOrWhiteSpace(cuid.Vmid))
+            if (string.IsNullOrEmpty(cuid.Vmid))
                 throw new ArgumentException("cuid.Vmid must not be null or empty.", nameof(cuid.Vmid));
 
             string pemCsr = GeneratePkcs10Csr(clientId, tenantId, cuid);
-            return new CsrRequest(pemCsr);
+            return new Csr(pemCsr);
         }
 
         /// <summary>

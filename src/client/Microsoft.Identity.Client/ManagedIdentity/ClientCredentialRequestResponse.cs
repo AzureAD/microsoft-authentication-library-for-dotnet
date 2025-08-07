@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// <summary>
     /// Represents the response for a Managed Identity CSR request.
     /// </summary>
-    internal class CsrRequestResponse
+    internal class ClientCredentialRequestResponse
     {
         [JsonProperty("client_id")]
         public string ClientId { get; }
@@ -33,16 +33,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         [JsonProperty("refresh_in")]
         public int RefreshIn { get; }
 
-        public CsrRequestResponse() { }
+        public ClientCredentialRequestResponse() { }
 
-        public static bool ValidateCsrRequestResponse(CsrRequestResponse csrRequestResponse)
+        public static bool ValidateCsrRequestResponse(ClientCredentialRequestResponse clientCredentialRequestResponse)
         {
-            if (string.IsNullOrEmpty(csrRequestResponse.ClientId) ||
-                string.IsNullOrEmpty(csrRequestResponse.TenantId) ||
-                string.IsNullOrEmpty(csrRequestResponse.ClientCredential) ||
-                string.IsNullOrEmpty(csrRequestResponse.RegionalTokenUrl) ||
-                csrRequestResponse.ExpiresIn <= 0 ||
-                csrRequestResponse.RefreshIn <= 0)
+            if (string.IsNullOrEmpty(clientCredentialRequestResponse.ClientId) ||
+                string.IsNullOrEmpty(clientCredentialRequestResponse.TenantId) ||
+                string.IsNullOrEmpty(clientCredentialRequestResponse.ClientCredential) ||
+                string.IsNullOrEmpty(clientCredentialRequestResponse.RegionalTokenUrl) ||
+                clientCredentialRequestResponse.ExpiresIn <= 0 ||
+                clientCredentialRequestResponse.RefreshIn <= 0)
             {
                 return false;
             }
