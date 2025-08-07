@@ -4,6 +4,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -21,7 +22,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         /// <param name="clientId">Managed Identity client_id.</param>
         /// <param name="tenantId">AAD tenant_id.</param>
-        /// <param name="cuid">CuidInfo object containing VMID and VMSSID.</param>
+        /// <param name="cuid">CuidInfo object containing required VMID and optional VMSSID.</param>
         /// <returns>CsrRequest containing the PEM CSR.</returns>
         public static CsrRequest Generate(string clientId, string tenantId, CuidInfo cuid)
         {
@@ -33,8 +34,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw new ArgumentNullException(nameof(cuid));
             if (string.IsNullOrWhiteSpace(cuid.Vmid))
                 throw new ArgumentException("cuid.Vmid must not be null or empty.", nameof(cuid.Vmid));
-            if (string.IsNullOrWhiteSpace(cuid.Vmssid))
-                throw new ArgumentException("cuid.Vmssid must not be null or empty.", nameof(cuid.Vmssid));
 
             string pemCsr = GeneratePkcs10Csr(clientId, tenantId, cuid);
             return new CsrRequest(pemCsr);
@@ -156,8 +155,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             var attributes = new System.Collections.Generic.List<byte[]>();
 
             // CUID attribute (OID 1.2.840.113549.1.9.7)
+            // Serialize CuidInfo as JSON object string using existing JSON serialization
             byte[] cuidOid = EncodeAsn1ObjectIdentifier(new int[] { 1, 2, 840, 113549, 1, 9, 7 });
-            string cuidValue = $"{cuid.Vmid}:{cuid.Vmssid}";
+            string cuidValue = JsonHelper.SerializeToJson(cuid);
             byte[] cuidData = EncodeAsn1PrintableString(cuidValue);
             byte[] cuidAttributeValue = EncodeAsn1Set(new[] { cuidData });
             byte[] cuidAttribute = EncodeAsn1Sequence(new[] { cuidOid, cuidAttributeValue });

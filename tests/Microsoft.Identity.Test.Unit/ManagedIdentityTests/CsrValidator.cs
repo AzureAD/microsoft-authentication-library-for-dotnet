@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -300,7 +301,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
-        /// Validates the CUID attribute contains the expected VM and VMSS IDs.
+        /// Validates the CUID attribute contains the expected VM and VMSS IDs as JSON.
+        /// Note: Vmid is required, Vmssid is optional and will be omitted if null/empty.
         /// </summary>
         private static void ValidateCuidAttribute(byte[] attributesBytes, CuidInfo expectedCuid)
         {
@@ -327,15 +329,25 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     var value = ParseAsn1Tag(valueSet, ref valueOffset, 255); // Any string type
                     
                     string cuidValue = System.Text.Encoding.ASCII.GetString(value);
-                    string expectedCuidValue = $"{expectedCuid.Vmid}:{expectedCuid.Vmssid}";
                     
-                    Assert.AreEqual(expectedCuidValue, cuidValue, "CUID attribute value does not match expected");
+                    // Build expected CUID value as JSON
+                    string expectedCuidValue = BuildExpectedCuidJson(expectedCuid);
+                    
+                    Assert.AreEqual(expectedCuidValue, cuidValue, "CUID attribute JSON value does not match expected");
                     foundCuid = true;
                     break;
                 }
             }
             
             Assert.IsTrue(foundCuid, "CUID (challengePassword) attribute not found");
+        }
+
+        /// <summary>
+        /// Builds the expected CUID JSON string for validation using JsonHelper.
+        /// </summary>
+        private static string BuildExpectedCuidJson(CuidInfo expectedCuid)
+        {
+            return JsonHelper.SerializeToJson(expectedCuid);
         }
 
         /// <summary>

@@ -57,13 +57,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// Validates a JSON decoded CsrMetadata instance.
         /// </summary>
         /// <param name="csrMetadata">The CsrMetadata object.</param>
-        /// <returns>false if any field is null.</returns>
+        /// <returns>false if any required field is null. Note: Vmid is required, Vmssid is optional.</returns>
         public static bool ValidateCsrMetadata(CsrMetadata csrMetadata)
         {
             if (csrMetadata == null ||
                 csrMetadata.Cuid == null ||
                 string.IsNullOrEmpty(csrMetadata.Cuid.Vmid) ||
-                string.IsNullOrEmpty(csrMetadata.Cuid.Vmssid) ||
                 string.IsNullOrEmpty(csrMetadata.ClientId) ||
                 string.IsNullOrEmpty(csrMetadata.TenantId) ||
                 string.IsNullOrEmpty(csrMetadata.AttestationEndpoint))

@@ -147,10 +147,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // Generate CSR
             var csrRequest = CsrRequest.Generate(clientId, tenantId, cuid);
 
-            // Output the generated CSR for analysis
-            System.Console.WriteLine("Generated CSR:");
-            System.Console.WriteLine(csrRequest.Pem);
-
             // Validate the CSR contents using the helper
             CsrValidator.ValidateCsrContent(csrRequest.Pem, clientId, tenantId, cuid);
         }
@@ -188,9 +184,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow(null, "test-vmss-id-67890", DisplayName = "Null VMID")]
         [DataRow("", "test-vmss-id-67890", DisplayName = "Empty VMID")]
-        [DataRow("test-vm-id-12345", null, DisplayName = "Null VMSSID")]
-        [DataRow("test-vm-id-12345", "", DisplayName = "Empty VMSSID")]
-        public void TestCsrGeneration_InvalidCuidProperties(string vmid, string vmssid)
+        public void TestCsrGeneration_InvalidVmid(string vmid, string vmssid)
         {
             string clientId = "12345678-1234-1234-1234-123456789012";
             string tenantId = "87654321-4321-4321-4321-210987654321";
@@ -201,8 +195,32 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Vmssid = vmssid
             };
 
+            // Should throw ArgumentException since Vmid is required
             Assert.ThrowsException<ArgumentException>(() => 
                 CsrRequest.Generate(clientId, tenantId, cuid));
+        }
+
+        [DataTestMethod]
+        [DataRow("test-vm-id-12345", null, DisplayName = "Null VMSSID")]
+        [DataRow("test-vm-id-12345", "", DisplayName = "Empty VMSSID")]
+        public void TestCsrGeneration_OptionalVmssid(string vmid, string vmssid)
+        {
+            string clientId = "12345678-1234-1234-1234-123456789012";
+            string tenantId = "87654321-4321-4321-4321-210987654321";
+
+            var cuid = new CuidInfo
+            {
+                Vmid = vmid,
+                Vmssid = vmssid
+            };
+
+            // Should succeed since Vmssid is optional (Vmid is provided and valid)
+            var csrRequest = CsrRequest.Generate(clientId, tenantId, cuid);
+            Assert.IsNotNull(csrRequest);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(csrRequest.Pem));
+
+            // Validate the CSR contents - this should handle null/empty VMSSID gracefully
+            CsrValidator.ValidateCsrContent(csrRequest.Pem, clientId, tenantId, cuid);
         }
 
         [TestMethod]
