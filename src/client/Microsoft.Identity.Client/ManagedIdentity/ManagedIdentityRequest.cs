@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 !string.IsNullOrEmpty(parameters.RevokedTokenHash))
             {
                 QueryParameters["token_sha256_to_refresh"] = parameters.RevokedTokenHash;
-                logger.Info("[Managed Identity] Passing SHA-256 of the 'bad' token to Managed Identity endpoint.");
+                logger.Info("[Managed Identity] Passing SHA-256 of the 'revoked' token to Managed Identity endpoint.");
             }
         }
     }

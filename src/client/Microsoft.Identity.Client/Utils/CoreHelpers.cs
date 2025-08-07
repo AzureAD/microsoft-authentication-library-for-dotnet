@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Utils
                     // The value is everything after the first '=' (including any trailing '=')
                     string value = queryPair.Substring(idx + 1);
 
-                    // If urlDecode == true, decode both key and value
+                    // Url decoding is needed for parsing OAuth response, but not for parsing WWW-Authenticate header in 401 challenge
                     if (urlDecode)
                     {
                         key = UrlDecode(key);

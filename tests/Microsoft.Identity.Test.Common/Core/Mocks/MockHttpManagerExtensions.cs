@@ -486,30 +486,53 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             var manager = new CommonCryptographyManager();
 
-            // If capabilityEnabled, add "xms_cc": "cp1"
-            if (capabilityEnabled)
+            // ---------------------------------------------------------------------------
+            // Client-capabilities (xms_cc) and revoked-token hash
+            // ---------------------------------------------------------------------------
+
+            bool sourceSupportsExtras = managedIdentitySourceType.SupportsClaimsAndCapabilities();
+
+            // ----- xms_cc --------------------------------------------------------------
+            if (sourceSupportsExtras)
             {
-                if (managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
+                if (capabilityEnabled)
                 {
+                    // This source should send xms_cc
                     expectedQueryParams.Add("xms_cc", "cp1,cp2");
+                }
+                else
+                {
+                    // Capability flag disabled → xms_cc must NOT be present
+                    notExpectedQueryParams.Add("xms_cc", "cp1,cp2");
                 }
             }
             else
             {
+                // Source does not support capabilities → never expect xms_cc
                 notExpectedQueryParams.Add("xms_cc", "cp1,cp2");
             }
 
-            if (claimsEnabled)
+            // ----- token_sha256_to_refresh --------------------------------------------
+            if (sourceSupportsExtras)
             {
-                if (managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
+                string hash = manager.CreateSha256HashHex(TestConstants.ATSecret);
+
+                if (claimsEnabled)
                 {
-                    expectedQueryParams.Add("token_sha256_to_refresh", 
-                        manager.CreateSha256HashHex(TestConstants.ATSecret));
+                    // Claims path active → expect the hash
+                    expectedQueryParams.Add("token_sha256_to_refresh", hash);
+                }
+                else
+                {
+                    // No claims → hash must be absent
+                    notExpectedQueryParams.Add("token_sha256_to_refresh", hash);
                 }
             }
             else
             {
-                notExpectedQueryParams.Add("token_sha256_to_refresh", 
+                // Source does not support hash param → ensure it's absent
+                notExpectedQueryParams.Add(
+                    "token_sha256_to_refresh",
                     manager.CreateSha256HashHex(TestConstants.ATSecret));
             }
 

@@ -57,6 +57,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             ManagedIdentityRequest request = CreateRequest(resource, parameters);
 
+            // Automatically add claims / capabilities if this MI source supports them
+            if (_sourceType.SupportsClaimsAndCapabilities())
+            {
+                request.AddClaimsAndCapabilities(
+                    _requestContext.ServiceBundle.Config.ClientCapabilities,
+                    parameters,
+                    _requestContext.Logger);
+            }
+
             _requestContext.Logger.Info("[Managed Identity] Sending request to managed identity endpoints.");
 
             IRetryPolicy retryPolicy = _requestContext.ServiceBundle.Config.RetryPolicyFactory.GetRetryPolicy(request.RequestType);
@@ -307,24 +316,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 null);
 
             throw exception;
-        }
-
-        /// <summary>
-        /// Sets the request parameter in either the query or body based on the request method.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        protected void SetRequestParameter(ManagedIdentityRequest request, string key, string value)
-        {
-            if (request.Method == HttpMethod.Post)
-            {
-                request.BodyParameters[key] = value;
-            }
-            else
-            {
-                request.QueryParameters[key] = value;
-            }
         }
     }
 }

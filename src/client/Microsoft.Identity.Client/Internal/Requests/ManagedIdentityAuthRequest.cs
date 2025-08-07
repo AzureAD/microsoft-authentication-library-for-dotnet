@@ -39,11 +39,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // 1. FIRST, handle ForceRefresh
             if (_managedIdentityParameters.ForceRefresh)
             {
+                //log a warning if Claims are also set
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+                {
+                    logger.Warning("[ManagedIdentityRequest] Both ForceRefresh and Claims are set. Using ForceRefresh to skip cache.");
+                }
+
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("[ManagedIdentityRequest] Skipped using the cache because ForceRefresh was set.");
-
-                // We still respect claims if present
-                _managedIdentityParameters.Claims = AuthenticationRequestParameters.Claims;
 
                 // Straight to the MI endpoint
                 authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
@@ -60,19 +63,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _managedIdentityParameters.Claims = AuthenticationRequestParameters.Claims;
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
 
-                // If there is a cached token, compute its hash for the “bad token” scenario
+                // If there is a cached token, compute its hash for the “revoked token” scenario
                 if (cachedAccessTokenItem != null)
                 {
                     string cachedTokenHash = _cryptoManager.CreateSha256HashHex(cachedAccessTokenItem.Secret);
                     _managedIdentityParameters.RevokedTokenHash = cachedTokenHash;
 
-                    logger.Info("[ManagedIdentityRequest] Claims are present. Computed hash of the cached (bad) token. " +
+                    logger.Info("[ManagedIdentityRequest] Claims are present. Computed hash of the cached (revoked) token. " +
                                 "Will now request a fresh token from the MI endpoint.");
                 }
                 else
                 {
                     logger.Info("[ManagedIdentityRequest] Claims are present, but no cached token was found. " +
-                                "Requesting a fresh token from the MI endpoint without a bad-token hash.");
+                                "Requesting a fresh token from the MI endpoint without a revoked-token hash.");
                 }
 
                 // In both cases, we skip using the cached token and get a new one
