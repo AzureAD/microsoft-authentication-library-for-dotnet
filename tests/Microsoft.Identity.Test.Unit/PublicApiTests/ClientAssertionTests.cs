@@ -353,9 +353,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var result = await cca.AcquireTokenForClient(TestConstants.s_scope)
                                   .ExecuteAsync().ConfigureAwait(false);
 
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
             Assert.AreEqual(
                 "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 handler.ActualRequestPostData["client_assertion_type"]);
+
+            result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                                  .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
         }
 
         [TestMethod]
@@ -398,7 +405,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                           CollectionAssert.AreEqual(
                               TestConstants.ClientCapabilities,
                               opts.ClientCapabilities.ToList());
-                          return Task.FromResult(new AssertionResponse
+                          return Task.FromResult(new ClientAssertion
                           {
                               Assertion = "jwt"
                           });
@@ -418,7 +425,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                       .WithClientSecret(TestConstants.ClientSecret)
                       .WithClientAssertion((o, c) =>
-                          Task.FromResult(new AssertionResponse { Assertion = string.Empty }))
+                          Task.FromResult(new ClientAssertion { Assertion = string.Empty }))
                       .BuildConcrete();
 
             await AssertException.TaskThrowsAsync<MsalClientException>(() =>
@@ -438,7 +445,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                           Assert.AreEqual(cts.Token, ct);
                           cts.Cancel();
                           ct.ThrowIfCancellationRequested();
-                          return Task.FromResult(new AssertionResponse { Assertion = "jwt" });
+                          return Task.FromResult(new ClientAssertion { Assertion = "jwt" });
                       })
                       .BuildConcrete();
 
@@ -510,6 +517,73 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task PoP_CachedTokenWithDifferentCertificate_IsBypassedAsync()
+        {
+            const string region = "eastus";
+
+            // ─────────── Set up HTTP mocks ───────────
+            using var httpManager = new MockHttpManager();
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                // 1st network call returns token‑A
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                            tokenType: "mtls_pop");
+
+                // 2nd network call returns token‑B
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                            tokenType: "mtls_pop");
+
+                // ─────────── Two distinct certificates ───────────
+                var certA = CertHelper.GetOrCreateTestCert();
+                var certB = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+
+                // Delegate returns certA on first call, certB on second call
+                int callCount = 0;
+                Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>> popDelegate =
+                    (opts, ct) =>
+                    {
+                        callCount++;
+                        var cert = (callCount == 1) ? certA : certB;
+                        return Task.FromResult(new ClientAssertion
+                        {
+                            Assertion = $"jwt_{callCount}",      // payload not important for this test
+                            TokenBindingCertificate = cert
+                        });
+                    };
+
+                // ─────────── Build the app ───────────
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                           .WithClientSecret(TestConstants.ClientSecret)
+                           .WithClientAssertion(popDelegate)
+                           .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                           .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                           .WithHttpManager(httpManager)
+                           .BuildConcrete();
+
+                // ─────────── First acquire – network call, caches token‑A bound to certA ───────────
+                AuthenticationResult first = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(certA.Thumbprint, first.BindingCertificate.Thumbprint);
+
+                // ─────────── Second acquire – delegate now returns certB ───────────
+                AuthenticationResult second = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // The serial number mismatch should have forced a network call, not a cache hit
+                Assert.AreEqual(TokenSource.IdentityProvider, second.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(certB.Thumbprint, second.BindingCertificate.Thumbprint);
+            }
+        }
+
+        [TestMethod]
         public async Task WithMtlsPop_AfterBearerDelegate_Throws()
         {
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -541,7 +615,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                       .WithClientAssertion((o, c) =>
                       {
                           callCount++;
-                          return Task.FromResult(new AssertionResponse { Assertion = "jwt" });
+                          return Task.FromResult(new ClientAssertion { Assertion = "jwt" });
                       })
                       .BuildConcrete();
 
@@ -583,22 +657,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         #region Helper ---------------------------------------------------------------
-        private static Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>>
+        private static Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>>
         BearerDelegate(string jwt = "fake_jwt") =>
-            (opts, ct) => Task.FromResult(new AssertionResponse
+            (opts, ct) => Task.FromResult(new ClientAssertion
             {
                 Assertion = jwt,
                 TokenBindingCertificate = null
             });
 
-        private static Func<AssertionRequestOptions, CancellationToken, Task<AssertionResponse>>
+        private static Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>>
         PopDelegate(string jwt = "fake_jwt") =>
             (opts, ct) =>
             {
                 // Obtain (or generate) the test certificate once per call
                 X509Certificate2 cert = CertHelper.GetOrCreateTestCert();
 
-                return Task.FromResult(new AssertionResponse
+                return Task.FromResult(new ClientAssertion
                 {
                     Assertion = jwt,
                     TokenBindingCertificate = cert

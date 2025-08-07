@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                     CancellationToken = ct
                 };
 
-                AssertionResponse ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
+                ClientAssertion ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
 
                 if (ar.TokenBindingCertificate == null)
                 {

@@ -1,8 +1,8 @@
 const Microsoft.Identity.Client.MsalError.InvalidClientAssertion = "invalid_client_assertion" -> string
-Microsoft.Identity.Client.AssertionResponse
-Microsoft.Identity.Client.AssertionResponse.Assertion.get -> string
-Microsoft.Identity.Client.AssertionResponse.Assertion.init -> void
-Microsoft.Identity.Client.AssertionResponse.AssertionResponse() -> void
-Microsoft.Identity.Client.AssertionResponse.TokenBindingCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
-Microsoft.Identity.Client.AssertionResponse.TokenBindingCertificate.init -> void
-Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAssertion(System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.CancellationToken, System.Threading.Tasks.Task<Microsoft.Identity.Client.AssertionResponse>> boundAssertionAsync) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ClientAssertion
+Microsoft.Identity.Client.ClientAssertion.Assertion.get -> string
+Microsoft.Identity.Client.ClientAssertion.Assertion.set -> void
+Microsoft.Identity.Client.ClientAssertion.ClientAssertion() -> void
+Microsoft.Identity.Client.ClientAssertion.TokenBindingCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.ClientAssertion.TokenBindingCertificate.set -> void
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAssertion(System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.CancellationToken, System.Threading.Tasks.Task<Microsoft.Identity.Client.ClientAssertion>> clientAssertionProvider) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
