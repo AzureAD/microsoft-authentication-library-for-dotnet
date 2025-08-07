@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task ClientAssertion_PoPAsync()
+        public async Task ClientAssertion_WithPoPApi_SendsBearer_Async()
         {
             using var http = new MockHttpManager();
             http.AddInstanceDiscoveryMockHandler();
@@ -373,10 +373,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var result = await cca.AcquireTokenForClient(TestConstants.s_scope)
                                   .ExecuteAsync().ConfigureAwait(false);
 
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
             Assert.AreEqual(
-                "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
+                "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 handler.ActualRequestPostData["client_assertion_type"]);
         }
+
         [TestMethod]
         public async Task ClientAssertion_ReceivesClientCapabilitiesAsync()
         {
@@ -412,17 +415,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task ClientAssertion_EmptyJwt_ThrowsAsync()
         {
-            using var http = new MockHttpManager();
-            http.AddInstanceDiscoveryMockHandler();
-
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                       .WithClientSecret(TestConstants.ClientSecret)
-                      .WithHttpManager(http)
                       .WithClientAssertion((o, c) =>
                           Task.FromResult(new AssertionResponse { Assertion = string.Empty }))
                       .BuildConcrete();
 
-            await AssertException.TaskThrowsAsync<ArgumentException>(() =>
+            await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 cca.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                 .ConfigureAwait(false);
         }
@@ -430,14 +429,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task ClientAssertion_CancellationTokenPropagatesAsync()
         {
-            using var http = new MockHttpManager();
-            http.AddInstanceDiscoveryMockHandler();
-
             using var cts = new CancellationTokenSource();
 
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                       .WithClientSecret(TestConstants.ClientSecret)
-                      .WithHttpManager(http)
                       .WithClientAssertion((o, ct) =>
                       {
                           Assert.AreEqual(cts.Token, ct);
@@ -550,14 +545,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                       })
                       .BuildConcrete();
 
-            // 1) first request – delegate runs, token cached
             _ = await cca.AcquireTokenForClient(TestConstants.s_scope)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             
             Assert.AreEqual(1, callCount);
 
-            // 2) second request – should hit cache, delegate NOT called again
             _ = await cca.AcquireTokenForClient(TestConstants.s_scope)
                 .ExecuteAsync()
                 .ConfigureAwait(false);

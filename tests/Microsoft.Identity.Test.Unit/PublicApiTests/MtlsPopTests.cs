@@ -63,8 +63,8 @@ namespace Microsoft.Identity.Test.Unit
                    .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.MtlsCertificateNotProvidedMessage, ex.Message);
+            Assert.AreEqual(MsalError.ClientCredentialAuthenticationTypeMustBeDefined, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.ClientCredentialAuthenticationTypeMustBeDefined, ex.Message);
         }
 
         [TestMethod]

@@ -62,6 +62,14 @@ namespace Microsoft.Identity.Client
         public const string UserAssertionNullError = "user_assertion_null";
 
         /// <summary>
+        /// Returned when a <c>WithClientAssertion</c> delegate provides
+        /// a <see langword="null"/> or empty JWT string.
+        /// <para><b>Mitigation</b></para>
+        /// Ensure the delegate returns a non‑empty, base‑64‑encoded JWT.
+        /// </summary>
+        public const string InvalidClientAssertion = "invalid_client_assertion";
+
+        /// <summary>
         /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when the 
         /// <see cref="PublicClientApplication.OperatingSystemAccount"/> user is passed as the <c>account</c> parameter. Only some brokers (WAM) can login the current user.
         /// <para>Mitigation</para>

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -13,6 +14,8 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
@@ -24,7 +27,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenForClientParameters _clientParameters;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly ICryptographyManager _cryptoManager;
-
+        
         public ClientCredentialRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -236,7 +239,36 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return false;
             }
 
-            // 2) If the token’s hash matches AccessTokenHashToRefresh, ignore it
+            // 2) Certificate mismatch → bypass cache
+            // Serial of the certificate supplied *with this request* (null if none)
+            string requestSerial = AuthenticationRequestParameters.MtlsCertificate?.SerialNumber;
+            string storedSerial = string.Empty;
+ 
+            if (!string.IsNullOrEmpty(requestSerial))
+            {
+                // Try to read the serial that was stored with the cached token.
+                // If it exists, compare it with the request's serial.
+                bool exists = cacheItem.AdditionalCacheKeyComponents?
+                                    .TryGetValue(Constants.CertSerialNumber, out storedSerial) == true;
+
+                // If the serial number exists in the cache, compare it with the request's serial.
+                if (exists &&
+                    !string.Equals(storedSerial, requestSerial, StringComparison.OrdinalIgnoreCase))
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
+                        "[ClientCredentialRequest] Cached token is unbound, or bound to a different " +
+                        "certificate. Bypassing cache.");
+                    return false;   // MISMATCH → skip cache
+                }
+
+                // Serial numbers match – safe to use cached token
+                // Or caller did not provide a new certificate,
+                // but the cached token is bound to the same old certificate.
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
+                    "[ClientCredentialRequest] Cached token is bound to the same certificate. Using cached token.");
+            }
+
+            // 3) If the token’s hash matches AccessTokenHashToRefresh, ignore it
             if (!string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh) &&
                 IsMatchingTokenHash(cacheItem.Secret, _clientParameters.AccessTokenHashToRefresh))
             {

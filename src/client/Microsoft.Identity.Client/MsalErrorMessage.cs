@@ -89,6 +89,8 @@ namespace Microsoft.Identity.Client
         public const string UserMismatch = "User '{0}' returned by service does not match user '{1}' in the request. ";
         public const string UserCredentialAssertionTypeEmpty = "credential.AssertionType cannot be empty. ";
 
+        public const string InvalidClientAssertionEmpty = "Client‑assertion JWT cannot be null or empty. Verify the delegate supplied to WithClientAssertion returns a valid signed JWT.";
+
         public const string NoPromptFailedErrorMessage =
             "One of two conditions was encountered: "
             +

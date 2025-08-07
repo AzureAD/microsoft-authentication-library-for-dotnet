@@ -287,21 +287,16 @@ namespace Microsoft.Identity.Client
         /// <remarks>This method allows the client application to authenticate using a custom client
         /// assertion, which can be useful in scenarios where the assertion needs to be dynamically generated or
         /// retrieved.</remarks>
-        /// <param name="boundAssertionAsync">A delegate that asynchronously provides an <see cref="AssertionResponse"/> based on the given <see
+        /// <param name="clientAssertionProvider">A delegate that asynchronously provides an <see cref="AssertionResponse"/> based on the given <see
         /// cref="AssertionRequestOptions"/> and <see cref="CancellationToken"/>. This delegate must not be <see
         /// langword="null"/>.</param>
         /// <returns>The <see cref="ConfidentialClientApplicationBuilder"/> instance configured with the specified client
         /// assertion.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="boundAssertionAsync"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="clientAssertionProvider"/> is <see langword="null"/>.</exception>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions,
-            CancellationToken, Task<AssertionResponse>> boundAssertionAsync)
+            CancellationToken, Task<AssertionResponse>> clientAssertionProvider)
         {
-            if (boundAssertionAsync == null)
-            {
-                throw new ArgumentNullException(nameof(boundAssertionAsync));
-            }
-
-            Config.ClientCredential = new ClientAssertionDelegateCredential(boundAssertionAsync);
+            Config.ClientCredential = new ClientAssertionDelegateCredential(clientAssertionProvider);
             return this;
         }
 

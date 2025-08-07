@@ -97,35 +97,19 @@ namespace Microsoft.Identity.Client
         /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
         {
-            if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certCred)
+            if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certificateCredential)
             {
-                CommonParameters.AuthenticationOperation =
-                    new MtlsPopAuthenticationOperation(certCred.Certificate);
-                CommonParameters.MtlsCertificate = certCred.Certificate;
-            }
-            else if (ServiceBundle.Config.ClientCredential is ClientAssertionDelegateCredential assertCred)
-            {
-                X509Certificate2 cert = assertCred.PeekCertificate(ServiceBundle.Config.ClientId);
-                
-                if (cert == null)
+                if (certificateCredential.Certificate == null)
                 {
-                    // Delegate did not supply a certificate ➜ cannot proceed with mTLS‑PoP
                     throw new MsalClientException(
-                        MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-                }
-
-                CommonParameters.AuthenticationOperation =
-                    new MtlsPopAuthenticationOperation(cert);
-                CommonParameters.MtlsCertificate = cert;
-            }
-            else
-            {
-                throw new MsalClientException(
                     MsalError.MtlsCertificateNotProvided,
                     MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-            }
+                }
 
+                CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
+                CommonParameters.MtlsCertificate = certificateCredential.Certificate;               
+            }
+            CommonParameters.IsPopEnabled = true;
             return this;
         }
 

@@ -832,32 +832,26 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task ConfidentialClientUsingSignedClientAssertion_AsyncDelegate_CancellationTestAsync()
         {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithClientAssertion(
+                        async ct =>
+                        {
+                            // make sure that the cancellation token given to AcquireToken method
+                            // is propagated to here
+                            cancellationTokenSource.Cancel();
+                            ct.ThrowIfCancellationRequested();
+                            return await Task.FromResult(TestConstants.DefaultClientAssertion)
+                            .ConfigureAwait(false);
+                        });
 
-                var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithHttpManager(httpManager)
-                            .WithClientAssertion(
-                            async ct =>
-                            {
-                                // make sure that the cancellation token given to AcquireToken method
-                                // is propagated to here
-                                cancellationTokenSource.Cancel();
-                                ct.ThrowIfCancellationRequested();
-                                return await Task.FromResult(TestConstants.DefaultClientAssertion)
-                                .ConfigureAwait(false);
-                            });
+            var app = builder.BuildConcrete();
+            Assert.IsNull(app.Certificate);
 
-                var app = builder.BuildConcrete();
-                Assert.IsNull(app.Certificate);
-
-                await AssertException.TaskThrowsAsync<OperationCanceledException>(
-                    () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .ExecuteAsync(cancellationTokenSource.Token)).ConfigureAwait(false);
-            }
+            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                .ExecuteAsync(cancellationTokenSource.Token)).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -948,29 +942,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task AcquireTokenForClient_EmptyAssertion_ThrowsArgumentExceptionAsync()
         {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
+            // Build a CCA whose assertion‑delegate returns NO JWT (error case)
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithClientSecret(TestConstants.ClientSecret)
+                        .WithClientAssertion(
+                            (opts, ct) => Task.FromResult(new AssertionResponse
+                            {
+                                Assertion = string.Empty,          // <-- invalid: must be non‑empty
+                                TokenBindingCertificate = null     // no cert => jwt-bearer
+                            }))
+                        .BuildConcrete();
 
-                // Build a CCA whose assertion‑delegate returns NO JWT (error case)
-                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                          .WithClientSecret(TestConstants.ClientSecret)
-                          .WithHttpManager(httpManager)
-                          .WithClientAssertion(
-                              (opts, ct) => Task.FromResult(new AssertionResponse
-                              {
-                                  Assertion = string.Empty,          // <-- invalid: must be non‑empty
-                                  TokenBindingCertificate = null     // no cert => jwt-bearer
-                              }))
-                          .BuildConcrete();
-
-                // Act & Assert – the first token request will execute the delegate
-                // and should surface ArgumentException from the credential layer.
-                await AssertException.TaskThrowsAsync<ArgumentException>(() =>
-                    cca.AcquireTokenForClient(TestConstants.s_scope)
-                       .ExecuteAsync())
-                       .ConfigureAwait(false);
-            }
+            // Act & Assert – the first token request will execute the delegate
+            // and should surface ArgumentException from the credential layer.
+            await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync())
+                    .ConfigureAwait(false);            
         }
 
         [TestMethod]
