@@ -105,15 +105,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         cachedAccessTokenItem,
                             () =>
                             {
-                                // Use a linked token source, in case the original cts is disposed
+                                // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
                                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                                 return GetAccessTokenAsync(tokenSource.Token, logger);
-                            },
-                            logger,
-                            ServiceBundle,
-                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                            AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
-                            AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
+                            }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
                     }
                 }
                 catch (MsalServiceException e)
@@ -154,9 +151,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                // Bypass cache and send request to token endpoint, when
-                // 1. Force refresh is requested, or
-                // 2. If the access token needs to be refreshed proactively.
+                // While holding the semaphore, decide whether to bypass the cache.
+                // Re-check because another thread may have filled the cache while we waited.
+                // Bypass when:
+                // 1) ForceRefresh is requested
+                // 2) Proactive refresh is in effect
+                // 3) Claims are present (revocation flow)
                 if (_managedIdentityParameters.ForceRefresh || 
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
                     !string.IsNullOrEmpty(_managedIdentityParameters.Claims))

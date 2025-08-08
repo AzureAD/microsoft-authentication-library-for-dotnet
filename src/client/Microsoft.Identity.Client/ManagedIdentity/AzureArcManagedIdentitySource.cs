@@ -79,8 +79,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource, 
-            AcquireTokenForManagedIdentityParameters parameters)
+        protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             ManagedIdentityRequest request = new ManagedIdentityRequest(System.Net.Http.HttpMethod.Get, _endpoint);
 
@@ -120,7 +119,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 var authHeaderValue = "Basic " + File.ReadAllText(splitChallenge[1]);
 
-                ManagedIdentityRequest request = CreateRequest(parameters.Resource, parameters);
+                ManagedIdentityRequest request = CreateRequest(parameters.Resource);
 
                 _requestContext.Logger.Verbose(() => "[Managed Identity] Adding authorization header to the request.");
                 request.Headers.Add("Authorization", authHeaderValue);

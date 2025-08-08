@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
 
-            ManagedIdentityRequest request = CreateRequest(resource, parameters);
+            ManagedIdentityRequest request = CreateRequest(resource);
 
             // Automatically add claims / capabilities if this MI source supports them
             if (_sourceType.SupportsClaimsAndCapabilities())
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             throw exception;
         }
 
-        protected abstract ManagedIdentityRequest CreateRequest(string resource, AcquireTokenForManagedIdentityParameters parameters);
+        protected abstract ManagedIdentityRequest CreateRequest(string resource);
 
         protected ManagedIdentityResponse GetSuccessfulResponse(HttpResponse response)
         {

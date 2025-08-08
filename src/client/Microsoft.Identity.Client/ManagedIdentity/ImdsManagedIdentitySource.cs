@@ -55,8 +55,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating IMDS managed identity source. Endpoint URI: " + _imdsEndpoint);
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource, 
-            AcquireTokenForManagedIdentityParameters parameters)
+        protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             ManagedIdentityRequest request = new(HttpMethod.Get, _imdsEndpoint);
 

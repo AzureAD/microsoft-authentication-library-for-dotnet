@@ -8,10 +8,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal static class ManagedIdentitySourceExtensions
     {
         private static readonly HashSet<ManagedIdentitySource> s_supportsClaimsAndCaps =
-            [
-            // add other sources here as they light up
-            ManagedIdentitySource.ServiceFabric,
-            ];
+        [
+        // add other sources here as they light up
+        ManagedIdentitySource.ServiceFabric,
+        ];
 
         internal static bool SupportsClaimsAndCapabilities(
             this ManagedIdentitySource source) => s_supportsClaimsAndCaps.Contains(source);

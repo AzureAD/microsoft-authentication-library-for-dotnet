@@ -66,8 +66,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return true;
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource, 
-            AcquireTokenForManagedIdentityParameters parameters)
+        protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
             
