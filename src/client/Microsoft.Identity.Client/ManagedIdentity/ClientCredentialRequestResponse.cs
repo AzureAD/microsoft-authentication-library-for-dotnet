@@ -16,22 +16,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ClientCredentialRequestResponse
     {
         [JsonProperty("client_id")]
-        public string ClientId { get; }
+        public string ClientId { get; set; }
 
         [JsonProperty("tenant_id")]
-        public string TenantId { get; }
+        public string TenantId { get; set; }
 
         [JsonProperty("client_credential")]
-        public string ClientCredential { get; }
+        public string ClientCredential { get; set; }
 
         [JsonProperty("regional_token_url")]
-        public string RegionalTokenUrl { get; }
+        public string RegionalTokenUrl { get; set; }
 
         [JsonProperty("expires_in")]
-        public int ExpiresIn { get; }
+        public int ExpiresIn { get; set; }
 
         [JsonProperty("refresh_in")]
-        public int RefreshIn { get; }
+        public int RefreshIn { get; set; }
 
         public ClientCredentialRequestResponse() { }
 
