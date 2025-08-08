@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Client
         {
             Parameters.Resource = ScopeHelper.RemoveDefaultSuffixIfPresent(resource);
             CommonParameters.Scopes = new string[] { Parameters.Resource };
-
             return this;
         }
 
