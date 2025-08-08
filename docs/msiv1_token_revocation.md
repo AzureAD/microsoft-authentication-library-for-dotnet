@@ -125,6 +125,82 @@ The `xms_cc` parameter can hold **multiple** client capabilities, formatted as:
 > [!NOTE]  
 > RPs or MITS should not bypass cache if a bad token is not passed by MSAL. 
 
+#### Cluster-wide cache-bypass optimization (hash-based)
+
+```mermaid
+sequenceDiagram
+    %% cluster-wide cache-bypass (hash-based)
+    autonumber
+    participant NodeA as "Node A (stale token T0)"
+    participant NodeB as "Node B (fresh token T1)"
+    participant MI   as "Managed-Identity endpoint / cache"
+    participant AAD  as "Azure AD"
+
+    Note over NodeA,AAD: Conditional-Access change → claims="{…}"
+
+    NodeA->>MI: GET /token? claims + hash(T0)
+    MI->>MI: cache lookup hash(T0)  (hit - stale)
+    MI->>AAD: request fresh token T1
+    AAD-->>MI: token T1
+    MI->>MI: store hash(T1)\ninvalidate hash(T0)
+    MI-->>NodeA: token T1 (fresh)
+
+    Note over NodeA,NodeB: shortly after …
+
+    NodeB->>MI: GET /token? claims + hash(T1)
+    MI->>MI: cache lookup hash(T1)  (hit - fresh)
+    MI-->>NodeB: token T1 (from cache)
+
+    Note over NodeA,NodeB: **Only one** AAD call for this revoked token
+```
+
+#### Step-by-step flow
+
+1. **Claims challenge arrives** (e.g., CAE / Conditional Access).  
+   `AcquireToken*` receives `claims="{...}"`.
+
+---
+
+##### **Node A** (first node that still holds the stale token)
+
+| Step | Action |
+|------|--------|
+| A-1 | Finds **`access_token_A`** in its local MSAL cache. |
+| A-2 | Computes **`hash_A = sha256(access_token_A)`**. |
+| A-3 | Calls the Managed-Identity (MI) endpoint with<br/>`token_sha256_to_refresh = hash_A`. |
+| A-4 | MI detects `hash_A` in its cache ⇒ marks token revoked, requests a new token **`access_token_B`** from AAD. |
+| A-5 | MI cache now stores `hash_B = sha256(access_token_B) → access_token_B`. |
+
+---
+
+##### **Node B** (arrives moments later)
+
+| Step | Action |
+|------|--------|
+| B-1 | Already has **`access_token_B`** via cache propagation/read-through. |
+| B-2 | Computes **`hash_B = sha256(access_token_B)`**. |
+| B-3 | Sends `token_sha256_to_refresh = hash_B`. |
+| B-4 | MI cache looks up `hash_B` → **hit** (token already fresh). |
+| B-5 | MI returns **HTTP 200** + **`access_token_B`** — _no extra AAD round-trip_. |
+
+---
+
+##### Cluster settles
+
+* **Only one** outbound call to AAD per unique revoked token, no matter how many nodes receive the claims challenge.  
+* Dramatically reduces pressure on the MI proxy and on ESTS in large Service Fabric (or AKS) deployments.
+
+---
+
+##### Why a simple `bypass_cache=true` flag isn’t enough
+
+* `bypass_cache=true` forces **every** node to refresh → scales **O(N)** with cluster size.  
+  Large clusters could issue thousands of token requests within seconds, triggering throttling (`429`) or high latency.
+
+* The **hash check** turns the problem into **O(1)**:  
+  The first node refreshes; the hash acts as an idempotency key so all other nodes immediately reuse the fresh token already in the MI cache.
+
+
 #### Motivation
 
 The *internal protocol* between the client and the RP (i.e. calling the MITS endpoint in case of Service Fabric), is a simplified version of CAE. This is because CAE is claims driven and involves JSON operations such as JSON doc merges. The RP doesn't need the actual claims to perform revocation, it just needs a signal to bypass the cache. As such, it was decided to not use the full claims value internally.
