@@ -15,8 +15,8 @@ using System.Text;
 using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
 using Microsoft.Identity.Client.Http.Retry;
-
-
+using System.Collections.Generic;
+using System.Linq;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -56,6 +56,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string resource = parameters.Resource;
 
             ManagedIdentityRequest request = CreateRequest(resource);
+
+            // Automatically add claims / capabilities if this MI source supports them
+            if (_sourceType.SupportsClaimsAndCapabilities())
+            {
+                request.AddClaimsAndCapabilities(
+                    _requestContext.ServiceBundle.Config.ClientCapabilities,
+                    parameters,
+                    _requestContext.Logger);
+            }
 
             _requestContext.Logger.Info("[Managed Identity] Sending request to managed identity endpoints.");
 
