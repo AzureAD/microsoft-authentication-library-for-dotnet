@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             CuidInfo Cuid,
             string pem)
         {
-            var queryParams = $"cid={Cuid}";
+            var queryParams = $"cid={JsonHelper.SerializeToJson(Cuid)}";
             if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
             {
                 queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
@@ -213,6 +213,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
 
+            var payload = new
+            {
+                pem = pem
+            };
+            var body = JsonHelper.SerializeToJson(payload);
+
             IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
 
@@ -223,7 +229,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
                     ImdsManagedIdentitySource.GetValidatedEndpoint(_requestContext.Logger, ClientCredentialRequestPath, queryParams),
                     headers,
-                    body: new StringContent($"{{\"pem\":\"{pem}\"}}", System.Text.Encoding.UTF8, "application/json"),
+                    body: new StringContent(body, System.Text.Encoding.UTF8, "application/json"),
                     method: HttpMethod.Post,
                     logger: _requestContext.Logger,
                     doNotThrow: false,
