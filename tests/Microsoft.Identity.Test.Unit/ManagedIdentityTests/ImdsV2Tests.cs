@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
@@ -17,6 +18,56 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class ImdsV2Tests : TestBase
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
+
+        [TestMethod]
+        public async Task ImdsV2HappyPathAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                /*ManagedIdentityId managedIdentityId = userAssignedId == null
+                    ? ManagedIdentityId.SystemAssigned
+                    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
+                    .WithHttpManager(httpManager);*/
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockClientCredentialResponse());
+
+                // TODO: finish this. everything has been tested to this point.
+                /*MockHttpMessageHandler mockHandler = httpManager.AddManagedIdentityMockHandler(
+                    "MachineLearningEndpoint",
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.ImdsV2//,
+                    // userAssignedId: userAssignedId,
+                    // userAssignedIdentityId);*/
+
+                // this will fail, see TODO above
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // this will fail, see TODO above
+                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
 
         [TestMethod]
         public async Task GetCsrMetadataAsyncSucceeds()

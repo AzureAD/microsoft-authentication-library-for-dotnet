@@ -625,5 +625,39 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             // 400 doesn't trigger the retry policy
             return MockCsrResponse(HttpStatusCode.BadRequest);
         }
+
+        public static MockHttpMessageHandler MockClientCredentialResponse()
+        {
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            expectedQueryParams.Add("cid", "%7B%22vmid%22:%22fake_vmid%22,%22vmssid%22:%22fake_vmssid%22%7D");
+            //expectedQueryParams.Add("uaid", "fake_client_id");
+            expectedQueryParams.Add("api-version", "2018-02-01");
+            expectedRequestHeaders.Add("Metadata", "true");
+
+            string content =
+                "{" +
+                "\"client_id\": \"fake_client_id\"," +
+                "\"tenant_id\": \"fake_tenant_id\"," +
+                "\"client_credential\": \"fake_client_credential\"," +
+                "\"regional_token_url\": \"fake_regional_token_url\"," +
+                "\"expires_in\": 3600," +
+                "\"refresh_in\": 1800" +
+                "}";
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = "http://169.254.169.254/metadata/identity/issuecredential",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(content),
+                }
+            };
+
+            return handler;
+        }
     }
 }
