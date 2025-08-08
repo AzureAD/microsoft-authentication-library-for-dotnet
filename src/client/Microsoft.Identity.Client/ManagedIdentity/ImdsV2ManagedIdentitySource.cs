@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
             var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.Cuid);
 
-            var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(csrMetadata.Cuid, csr.Pem);
+            var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(csrMetadata.Cuid, csr.Pem).GetAwaiter().GetResult();
 
             throw new NotImplementedException();
         }
