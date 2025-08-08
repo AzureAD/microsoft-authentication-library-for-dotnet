@@ -270,7 +270,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(csrMetadata.Cuid, csr.Pem).GetAwaiter().GetResult();
 
-            throw new NotImplementedException();
+            ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{clientCredentialRequestResponse.RegionalTokenUrl}/{clientCredentialRequestResponse.TenantId}{AcquireEntraTokenPath}"));
+
+            request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
+
+            request.BodyParameters.Add("grant_type", clientCredentialRequestResponse.ClientCredential);
+            request.BodyParameters.Add("scope", "https://management.azure.com/.default");
+            if (clientCredentialRequestResponse.ClientId != null)
+            {
+                request.BodyParameters.Add("client_id", clientCredentialRequestResponse.ClientId);
+            }
+
+            request.RequestType = RequestType.Imds;
+
+            return request;
         }
     }
 }
