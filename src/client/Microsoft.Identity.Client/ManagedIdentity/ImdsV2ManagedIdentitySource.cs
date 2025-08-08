@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -16,6 +17,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
         private const string CsrMetadataPath = "/metadata/identity/getPlatformMetadata";
+        private const string ClientCredentialRequestPath = "/metadata/identity/issuecredential";
+        private const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
@@ -29,7 +32,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 requestContext.Logger);
             if (userAssignedIdQueryParam != null)
             {
-                queryParams += $"{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
+                queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
             }
 
             var headers = new Dictionary<string, string>
@@ -41,7 +44,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.CsrMetadataProbe);
 
-            // CSR metadata GET request
             HttpResponse response = null;
 
             try
@@ -50,7 +52,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     ImdsManagedIdentitySource.GetValidatedEndpoint(requestContext.Logger, CsrMetadataPath, queryParams),
                     headers,
                     body: null,
-                    method: System.Net.Http.HttpMethod.Get,
+                    method: HttpMethod.Get,
                     logger: requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
@@ -90,7 +92,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
             }
 
-            if (!probeMode && !ValidateCsrMetadataResponse(response, requestContext.Logger, probeMode))
+            if (!ValidateCsrMetadataResponse(response, requestContext.Logger, probeMode))
             {
                 return null;
             }
@@ -194,8 +196,80 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
+        private async Task<ClientCredentialRequestResponse> ExecuteClientCredentialRequestAsync(
+            CuidInfo Cuid,
+            string pem)
+        {
+            var queryParams = $"cid={JsonHelper.SerializeToJson(Cuid)}";
+            if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
+            {
+                queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
+            }
+            queryParams += $"&api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
+
+            var headers = new Dictionary<string, string>
+            {
+                { "Metadata", "true" },
+                { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
+            };
+
+            var payload = new
+            {
+                pem = pem
+            };
+            var body = JsonHelper.SerializeToJson(payload);
+
+            IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
+
+            HttpResponse response = null;
+
+            try
+            {
+                response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                    ImdsManagedIdentitySource.GetValidatedEndpoint(_requestContext.Logger, ClientCredentialRequestPath, queryParams),
+                    headers,
+                    body: new StringContent(body, System.Text.Encoding.UTF8, "application/json"),
+                    method: HttpMethod.Post,
+                    logger: _requestContext.Logger,
+                    doNotThrow: false,
+                    mtlsCertificate: null,
+                    validateServerCertificate: null,
+                    cancellationToken: _requestContext.UserCancellationToken,
+                    retryPolicy: retryPolicy)
+                .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCsrRequest failed.",
+                    ex,
+                    ManagedIdentitySource.ImdsV2,
+                    (int)response.StatusCode);
+            }
+
+            var clientCredentialRequestResponse = JsonHelper.DeserializeFromJson<ClientCredentialRequestResponse>(response.Body);
+            if (!ClientCredentialRequestResponse.ValidateCsrRequestResponse(clientCredentialRequestResponse))
+            {
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the CsrMetadata response is invalid. Status code: {response.StatusCode} Body: {response.Body}",
+                    null,
+                    ManagedIdentitySource.ImdsV2,
+                    (int)response.StatusCode);
+            }
+
+            return clientCredentialRequestResponse;
+        }
+
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
+            var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
+            var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.Cuid);
+
+            var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(csrMetadata.Cuid, csr.Pem).GetAwaiter().GetResult();
+
             throw new NotImplementedException();
         }
     }
