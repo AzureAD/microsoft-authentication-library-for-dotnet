@@ -196,33 +196,39 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
         private async Task<ClientCredentialRequestResponse> ExecuteClientCredentialRequestAsync(
-            RequestContext requestContext,
-            string queryParams,
+            CuidInfo Cuid,
             string pem)
         {
+            var queryParams = $"cid={Cuid}";
+            if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
+            {
+                queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
+            }
+            queryParams += $"&api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
+
             var headers = new Dictionary<string, string>
             {
                 { "Metadata", "true" },
-                { "x-ms-client-request-id", requestContext.CorrelationId.ToString() }
+                { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
 
-            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
 
             HttpResponse response = null;
 
             try
             {
-                response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
-                    ImdsManagedIdentitySource.GetValidatedEndpoint(requestContext.Logger, ClientCredentialRequestPath, queryParams),
+                response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                    ImdsManagedIdentitySource.GetValidatedEndpoint(_requestContext.Logger, ClientCredentialRequestPath, queryParams),
                     headers,
                     body: new StringContent($"{{\"pem\":\"{pem}\"}}", System.Text.Encoding.UTF8, "application/json"),
                     method: HttpMethod.Post,
-                    logger: requestContext.Logger,
+                    logger: _requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
                     validateServerCertificate: null,
-                    cancellationToken: requestContext.UserCancellationToken,
+                    cancellationToken: _requestContext.UserCancellationToken,
                     retryPolicy: retryPolicy)
                 .ConfigureAwait(false);
             }
@@ -255,14 +261,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
             var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.Cuid);
 
-            var queryParams = $"cid={csrMetadata.Cuid}";
-            if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
-            {
-                queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
-            }
-            queryParams += $"&api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
-
-            var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(_requestContext, queryParams, csr.Pem);
+            var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(csrMetadata.Cuid, csr.Pem);
 
             throw new NotImplementedException();
         }
