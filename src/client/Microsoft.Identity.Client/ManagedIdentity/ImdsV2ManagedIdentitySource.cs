@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private const string CsrMetadataPath = "/metadata/identity/getPlatformMetadata";
         private const string ClientCredentialRequestPath = "/metadata/identity/issuecredential";
+        private const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
@@ -261,9 +262,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
             var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.Cuid);
 
-            var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(csrMetadata.Cuid, csr.Pem);
+            var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(csrMetadata.Cuid, csr.Pem).GetAwaiter().GetResult();
 
-            throw new NotImplementedException();
+            ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{clientCredentialRequestResponse.RegionalTokenUrl}/{clientCredentialRequestResponse.TenantId}{AcquireEntraTokenPath}"));
+
+            request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
+
+            request.BodyParameters.Add("grant_type", clientCredentialRequestResponse.ClientCredential);
+            request.BodyParameters.Add("scope", "https://management.azure.com/.default");
+            if (clientCredentialRequestResponse.ClientId != null)
+            {
+                request.BodyParameters.Add("client_id", clientCredentialRequestResponse.ClientId);
+            }
+
+            request.RequestType = RequestType.Imds;
+
+            return request;
         }
     }
 }
