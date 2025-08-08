@@ -43,12 +43,6 @@ namespace Microsoft.Identity.Client
             Parameters.Resource = ScopeHelper.RemoveDefaultSuffixIfPresent(resource);
             CommonParameters.Scopes = new string[] { Parameters.Resource };
 
-            if (resource.Equals("api://AzureFMITokenExchange/.default", StringComparison.OrdinalIgnoreCase))
-            {
-                Parameters.isFmiCredentialRequest = true;
-                ValidateUseOfExperimentalFeature();
-            }
-
             return this;
         }
 

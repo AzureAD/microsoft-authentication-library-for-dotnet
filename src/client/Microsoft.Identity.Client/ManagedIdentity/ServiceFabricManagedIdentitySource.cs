@@ -19,10 +19,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly bool _isFmiCredentialRequest;
         private static string _mitsEndpointFmiPath => "/metadata/identity/oauth2/fmi/credential";
 
-        public static AbstractManagedIdentity Create(RequestContext requestContext, bool isFmiCredentialRequest = false)
+        public static AbstractManagedIdentity Create(RequestContext requestContext, string resource)
         {
             Uri endpointUri;
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
+            bool isFmiCredentialRequest = false;
+
+            if(resource is not null && resource.Equals("api://AzureFMITokenExchange/.default", StringComparison.OrdinalIgnoreCase))
+            {
+                isFmiCredentialRequest = true;
+                requestContext.Logger.Info(() => "[Managed Identity] Request is for FMI, using federated managed identity.");
+            }
 
             if (isFmiCredentialRequest)
             {
@@ -151,6 +158,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
                         request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                         break;
+                    default:
+                        throw new MsalServiceException(
+                            MsalError.InvalidManagedIdentityIdType,
+                            MsalErrorMessage.ManagedIdentityInvalidIdTypeError);
                 }
             }
 

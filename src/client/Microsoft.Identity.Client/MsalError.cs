@@ -1188,5 +1188,11 @@ namespace Microsoft.Identity.Client
         /// - If token hashing is required, allow the cached token to be used instead of forcing a refresh.
         /// </summary>
         public const string ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible";
+
+        /// <summary>
+        /// <para>What happened?</para> The specified managed identity IdType is invalid
+        /// <para>Mitigation:</para> Ensure a valid IdType is specified for the managed identity.
+        /// </summary>
+        public const string InvalidManagedIdentityIdType = "invalid_managed_identity_id_type";
     }
 }

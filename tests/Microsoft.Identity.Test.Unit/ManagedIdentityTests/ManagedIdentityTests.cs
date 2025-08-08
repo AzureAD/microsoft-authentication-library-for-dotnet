@@ -1398,7 +1398,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             switch (sourceType)
             {
                 case ManagedIdentitySource.ServiceFabric:
-                    managedIdentity = ServiceFabricManagedIdentitySource.Create(requestContext);
+                    managedIdentity = ServiceFabricManagedIdentitySource.Create(requestContext, "");
                     break;
                 case ManagedIdentitySource.AppService:
                     managedIdentity = AppServiceManagedIdentitySource.Create(requestContext);

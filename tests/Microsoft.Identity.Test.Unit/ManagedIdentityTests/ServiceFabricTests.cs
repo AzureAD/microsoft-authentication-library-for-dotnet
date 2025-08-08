@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 RequestContext requestContext = new RequestContext(mi.ServiceBundle, Guid.NewGuid(), null);
 
-                var sf = ServiceFabricManagedIdentitySource.Create(requestContext);
+                var sf = ServiceFabricManagedIdentitySource.Create(requestContext, "");
 
                 Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
                 var callback = sf.GetValidationCallback();
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 RequestContext requestContext = new RequestContext(mi.ServiceBundle, Guid.NewGuid(), null);
 
-                ServiceFabricManagedIdentitySource sf = ServiceFabricManagedIdentitySource.Create(requestContext, true) as ServiceFabricManagedIdentitySource;
+                ServiceFabricManagedIdentitySource sf = ServiceFabricManagedIdentitySource.Create(requestContext, "api://AzureFMITokenExchange/.default") as ServiceFabricManagedIdentitySource;
 
                 Assert.IsInstanceOfType(sf, typeof(ServiceFabricManagedIdentitySource));
                 Assert.AreEqual("http://localhost:40342/metadata/identity/oauth2/fmi/credential", sf.GetEndpointForTesting());
