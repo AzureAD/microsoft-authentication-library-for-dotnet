@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.OAuth2;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -96,18 +97,19 @@ namespace Microsoft.Identity.Client
         /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
         {
-            if (ServiceBundle.Config.ClientCredential is not CertificateClientCredential certificateCredential)
+            if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certificateCredential)
             {
-                throw new MsalClientException(
+                if (certificateCredential.Certificate == null)
+                {
+                    throw new MsalClientException(
                     MsalError.MtlsCertificateNotProvided,
                     MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-            }
-            else
-            {
-                CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
-                CommonParameters.MtlsCertificate = certificateCredential.Certificate;
-            }
+                }
 
+                CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
+                CommonParameters.MtlsCertificate = certificateCredential.Certificate;               
+            }
+            CommonParameters.IsPopEnabled = true;
             return this;
         }
 
