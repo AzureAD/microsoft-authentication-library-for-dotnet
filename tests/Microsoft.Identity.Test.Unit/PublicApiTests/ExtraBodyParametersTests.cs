@@ -31,15 +31,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Arrange
                 var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
                     {
-                        { "attributetoken", (CancellationToken ct) => GetPdpAuthorization() },
-                        { "attributetoken2", (CancellationToken ct) => GetPdpAuthorization() }
+                        { "attributetoken", (CancellationToken ct) => GetComputedValue() },
+                        { "attributetoken2", (CancellationToken ct) => GetComputedValue() }
                     };
 
                 var extraBodyParams2 = new Dictionary<string, Func<CancellationToken, Task<string>>>
                     {
-                        { "attributetoken", (CancellationToken ct) => GetPdpAuthorization() },
-                        { "attributetoken2", (CancellationToken ct) => GetPdpAuthorization() },
-                        { "attributetoken3", (CancellationToken ct) => GetPdpAuthorization() }
+                        { "attributetoken", (CancellationToken ct) => GetComputedValue() },
+                        { "attributetoken2", (CancellationToken ct) => GetComputedValue() },
+                        { "attributetoken3", (CancellationToken ct) => GetComputedValue() }
                     };
 
                 //Act
@@ -167,15 +167,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
                     {
-                        { "attributetoken1", (CancellationToken ct) => GetPdpAuthorization() },
-                        { "attributetoken2", (CancellationToken ct) => GetPdpAuthorization() }
+                        { "attributetoken1", (CancellationToken ct) => GetComputedValue() },
+                        { "attributetoken2", (CancellationToken ct) => GetComputedValue() }
                     };
 
                 var extraBodyParams2 = new Dictionary<string, Func<CancellationToken, Task<string>>>
                     {
-                        { "attributetoken3", (CancellationToken ct) => GetPdpAuthorization() },
-                        { "attributetoken4", (CancellationToken ct) => GetPdpAuthorization() },
-                        { "attributetoken5", (CancellationToken ct) => GetPdpAuthorization() }
+                        { "attributetoken3", (CancellationToken ct) => GetComputedValue() },
+                        { "attributetoken4", (CancellationToken ct) => GetComputedValue() },
+                        { "attributetoken5", (CancellationToken ct) => GetComputedValue() }
                     };
 
                 var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private Task<string> GetPdpAuthorization()
+        private Task<string> GetComputedValue()
         {
             return Task.FromResult("AttributeToken");
         }
