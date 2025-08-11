@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private const string CsrMetadataPath = "/metadata/identity/getPlatformMetadata";
         private const string ClientCredentialRequestPath = "/metadata/identity/issuecredential";
+        private const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
