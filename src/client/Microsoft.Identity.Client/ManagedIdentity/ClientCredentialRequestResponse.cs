@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public ClientCredentialRequestResponse() { }
 
-        public static bool ValidateCsrRequestResponse(ClientCredentialRequestResponse clientCredentialRequestResponse)
+        public static bool IsValid(ClientCredentialRequestResponse clientCredentialRequestResponse)
         {
             if (string.IsNullOrEmpty(clientCredentialRequestResponse.ClientId) ||
                 string.IsNullOrEmpty(clientCredentialRequestResponse.TenantId) ||
