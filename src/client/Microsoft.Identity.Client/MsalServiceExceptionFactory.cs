@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
                 }
                 else  
                 {  
-                    errorMessageToUse  = errorMessage;  
+                    errorMessageToUse = errorMessage;  
                 }
 
                 if (oAuth2Response.Claims == null)
@@ -62,6 +62,11 @@ namespace Microsoft.Identity.Client
                     MsalError.InvalidClient,
                     MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription,
                     innerException);
+            }
+
+            if (IsOidcAuthorityError(context, oAuth2Response))
+            {
+                errorMessage += $" {MsalErrorMessage.MalformedOidcAuthority}";
             }
 
             ex ??= new MsalServiceException(errorCode, GetErrorMessage(errorMessage, httpResponse, context), innerException);
@@ -106,6 +111,18 @@ namespace Microsoft.Identity.Client
         {
             return oAuth2Response.ErrorDescription != null &&
                oAuth2Response.ErrorDescription.StartsWith(Constants.AadThrottledErrorCode);
+        }
+
+        private static bool IsOidcAuthorityError(RequestContext context, OAuth2ResponseBase oAuth2Response)
+        {
+            var authortyInfo = context.ServiceBundle.Config.Authority.AuthorityInfo;
+
+            return context is not null &&
+                authortyInfo.AuthorityType == AuthorityType.Generic && // Generic Oidc authority
+                !authortyInfo.CanonicalAuthority.AbsoluteUri.EndsWith("/v2.0") && // Does not end with /v2.0
+                oAuth2Response.ErrorDescription != null &&
+                (oAuth2Response.ErrorDescription.StartsWith(Constants.AadAccountTypeAndResourceIncompatibleErrorCode) || // Certain error codes are returned
+                oAuth2Response.ErrorDescription.StartsWith(Constants.AadMissingScopeErrorCode));
         }
 
         internal static MsalServiceException FromBrokerResponse(

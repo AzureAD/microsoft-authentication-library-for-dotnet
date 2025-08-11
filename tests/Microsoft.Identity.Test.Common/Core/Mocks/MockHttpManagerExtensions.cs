@@ -86,15 +86,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
            this MockHttpManager httpManager,
            string error,
            string authority = TestConstants.AuthorityCommonTenant, 
-           string correlationId = null)
+           string correlationId = null,
+           string AadErrorCode = "AADSTS00000",
+           string expectedUrl = null)
         {
             var handler = new MockHttpMessageHandler()
             {
-                ExpectedUrl = authority + "oauth2/v2.0/token",
+                ExpectedUrl = expectedUrl != null? expectedUrl : authority + "oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateFailureTokenResponseMessage(
-                    error, 
-                    correlationId: correlationId)
+                    error,
+                    correlationId: correlationId,
+                    errorCode: AadErrorCode)
             };
             httpManager.AddMockHandler(handler);
             return handler;
