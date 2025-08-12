@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -34,9 +35,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    null, 
+                    null,
                     ManagedIdentitySource.ServiceFabric,
-                    null); 
+                    null);
 
                 throw exception;
             }
