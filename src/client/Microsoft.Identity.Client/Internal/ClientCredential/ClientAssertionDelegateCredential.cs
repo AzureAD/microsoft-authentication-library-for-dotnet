@@ -64,10 +64,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     MsalErrorMessage.InvalidClientAssertionEmpty);
             }
 
-            // Decide bearer vs PoP
-            bool popEnabled = p.IsPopEnabled;
+            // Decide bearer vs mTLS PoP
+            bool isMtlsPopEnabled = p.IsMtlsPopEnabled;
 
-            if (popEnabled && resp.TokenBindingCertificate != null)
+            if (isMtlsPopEnabled && resp.TokenBindingCertificate != null)
             {
                 oAuth2Client.AddBodyParameter(
                     OAuth2Parameter.ClientAssertionType,

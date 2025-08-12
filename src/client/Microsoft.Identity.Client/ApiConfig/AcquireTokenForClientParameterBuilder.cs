@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client
                 CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
                 CommonParameters.MtlsCertificate = certificateCredential.Certificate;               
             }
-            CommonParameters.IsPopEnabled = true;
+            CommonParameters.IsMtlsPopEnabled = true;
             return this;
         }
 

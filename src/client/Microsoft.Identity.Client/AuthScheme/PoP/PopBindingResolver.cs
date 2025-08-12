@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             AcquireTokenCommonParameters commonParameters,
             CancellationToken ct)
         {
-            if (!commonParameters.IsPopEnabled)
+            if (!commonParameters.IsMtlsPopEnabled)
             {
                 return; // PoP not requested
             }
