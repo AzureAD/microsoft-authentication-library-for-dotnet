@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             
             // Get the resource and endpoints from the scenario helper
             string resource = scenario.Resource;
-            string serviceUri = scenario.CreateIdentityProviderUri();
+            string serviceUri = scenario.CreateIdentityProviderUri_SuccessfulToken();
             string revocationEndpoint = scenario.CreateRevocationEndpointUri();
             
             // Build managed identity application with client capabilities for token revocation support

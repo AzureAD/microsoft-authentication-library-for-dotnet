@@ -279,7 +279,8 @@ namespace Microsoft.Identity.Test.Unit.TestUtils
             }
 
             /// <summary>
-            /// Create an OIDC authority URI with encoded issuer
+            /// Create an authority URI for OIDC scenarios, with an encoded issuer URL that will be
+            /// passed to the service to help configure the response.
             /// </summary>
             /// <returns>The full OIDC authority URI</returns>
             public string CreateOidcAuthorityUri()
@@ -293,11 +294,10 @@ namespace Microsoft.Identity.Test.Unit.TestUtils
             /// Create an identity provider URI for token revocation scenarios
             /// </summary>
             /// <returns>The identity provider URI</returns>
-            public string CreateIdentityProviderUri()
+            public string CreateIdentityProviderUri_SuccessfulToken()
             {
-                string servicePath = GetValue("servicePath");
                 string tokenResponsePath = GetResponseTypeUri("token_successful");
-                return GetServiceUri($"{servicePath}{tokenResponsePath}");
+                return GetServiceUri($"{tokenResponsePath}");
             }
 
             /// <summary>
