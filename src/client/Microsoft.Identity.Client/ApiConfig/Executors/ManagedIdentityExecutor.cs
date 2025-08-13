@@ -40,12 +40,30 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _managedIdentityApplication.AppTokenCacheInternal).ConfigureAwait(false);
 
-            var handler = new ManagedIdentityAuthRequest(
-                ServiceBundle,
-                requestParams,
-                managedIdentityParameters);
+            // Determine the Managed Identity Source
+            ManagedIdentitySource managedIdentitySource =
+                await ManagedIdentityClient.GetManagedIdentitySourceAsync(ServiceBundle, cancellationToken)
+                .ConfigureAwait(false);
 
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+            ManagedIdentityAuthRequestBase authRequest;
+
+            if (managedIdentitySource == ManagedIdentitySource.Credential)
+            {
+                authRequest = new CredentialManagedIdentityAuthRequest(
+                    ServiceBundle,
+                    requestParams,
+                    managedIdentityParameters);
+            }
+            else
+            {
+                authRequest = new LegacyManagedIdentityAuthRequest(
+                    ServiceBundle,
+                    requestParams,
+                    managedIdentityParameters);
+            }
+
+            // Execute the request
+            return await authRequest.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
      

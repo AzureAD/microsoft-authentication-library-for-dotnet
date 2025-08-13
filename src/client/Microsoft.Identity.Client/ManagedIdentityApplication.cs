@@ -8,7 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
@@ -62,6 +64,18 @@ namespace Microsoft.Identity.Client
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
             return ManagedIdentityClient.GetManagedIdentitySource();
+        }
+
+        /// <summary>
+        /// Detects and returns the managed identity source available on the environment asynchronously.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation. The task result contains the managed identity source detected on the environment if any.</returns>
+        public static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(CancellationToken cancellationToken = default)
+        {
+            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
+            config.RetryPolicyFactory = new RetryPolicyFactory();
+            var serviceBundle = new ServiceBundle(config);
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(serviceBundle, cancellationToken).ConfigureAwait(false);
         }
     }
 }
