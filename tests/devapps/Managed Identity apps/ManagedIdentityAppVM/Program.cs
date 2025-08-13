@@ -7,6 +7,11 @@ using Microsoft.IdentityModel.Abstractions;
 
 IIdentityLogger identityLogger = new IdentityLogger();
 
+//Get Managed Identity Source
+Console.WriteLine("Managed Identity Source is {0}",
+    await ManagedIdentityApplication.GetManagedIdentitySourceAsync()
+    .ConfigureAwait(false));
+
 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                 .WithLogging(identityLogger, true)
                 .Build();
