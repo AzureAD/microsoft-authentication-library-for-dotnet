@@ -1,64 +1,78 @@
-# MSAL MSI V2 /credential Endpoint Design Document
+# MSAL MSI V2 /issuecredential Endpoint high level design document
 
 ## Overview
 
-This document provides detailed guidance for SDK developers to implement MSI V2 `/credential` endpoint support. It focuses on the **token acquisition process**, ensuring seamless interactions with Managed Identity Resource Providers (MIRPs) on **Azure Virtual Machines (VMs) and Virtual Machine Scale Sets (VMSS)**.
+This document provides high level guidance for SDK developers to implement MSI V2 `/issuecredential` endpoint support. It focuses on the **token acquisition process**, ensuring seamless interactions with Managed Identity Resource Providers (MIRPs) on **Azure Virtual Machines (VMs) and Virtual Machine Scale Sets (VMSS)**.
 
 ## Goals
 
-The primary objective is to enable seamless token acquisition in MSI V2 for VM/VMSS, utilizing the `/credential` endpoint.
+The primary objective is to enable seamless token acquisition in MSI V2 for VM/VMSS, utilizing the new `/issuecredential` endpoint.
 
 - Define the **MSI V2 token acquisition process**.
-- Describe how MSAL interacts with the `/credential` and the ESTS regional token endpoint.
+- Describe how MSAL interacts with the `/issuecredential` and the ESTS regional token endpoint.
 - Ensure compatibility with **Windows and Linux** VMs and VMSS.
 
 ## Token Acquisition Process
 
-In **MSI V1**, IMDS or any other Managed Identity Resource Provider (MIRP) directly returns an **access token**. However, in **MSI V2**, the process involves two steps:
+In **MSI V1**, IMDS or any other Managed Identity Resource Provider (MIRP) directly returns an **access token**. However, in **MSI V2**, the process involves few more steps:
 
 ```mermaid
 sequenceDiagram
-    participant Application
+    participant App as Application
     participant MSAL
     participant IMDS
-    participant ESTS
+    participant MAA as Azure MAA
+    participant ESTS as Entra STS (mTLS)
 
-    Application ->> MSAL: 1. Request token using Managed Identity
-    MSAL ->> IMDS: 2. Probe for `/credential` endpoint availability
-    IMDS -->> MSAL: 3. Response (200 OK / 404 Not Found)
+    App  ->> MSAL: AcquireTokenForManagedIdentity()
+    MSAL ->> IMDS: GET /metadata/identity/getPlatformMetadata
+    IMDS -->> MSAL: client_id, tenant_id, cuid, maa_endpoint
 
-    alt `/credential` endpoint available
-        MSAL ->> IMDS: 4. Request Short-Lived Credential (SLC) via `/credential`
-        IMDS -->> MSAL: 5. Return SLC
-        MSAL ->> ESTS: 6. Exchange SLC for Access Token via MTLS
-        ESTS -->> MSAL: 7. Return Access Token
-        MSAL ->> Application: 8. Return Access Token
-    else `/credential` endpoint not available
-        MSAL ->> IMDS: 4a. Fallback to legacy `/token` endpoint
-        IMDS -->> MSAL: 5a. Return Access Token
-        MSAL ->> Application: 6a. Return Access Token
+    alt Attestable CU
+        MSAL ->> MAA: POST /attest/keyguard (attestation info)
+        MAA  -->> MSAL: attestation_token
+    else Unattestable CU
+        Note over MSAL: Skip attestation
     end
+
+    MSAL ->> IMDS: POST /metadata/identity/issuecredential (CSR + attestation_token?)
+    IMDS -->> MSAL: client_credential (x509), regional_token_url
+
+    MSAL ->> ESTS: POST /oauth2/v2.0/token (mTLS)
+    ESTS -->> MSAL: access_token (bearer|mtls_pop **for attested CUs**, bearer **only** for unattested CUs)
+    MSAL -->> App : AuthenticationResult (access_token + mtls_certificate)
 ```
 
-### Short-Lived Credential Retrieval from `/credential` Endpoint
+### The new CSR + Attested flow 
 
-- Azure Managed Identity Resource Providers host the `/credential` endpoint.
-- The client (MSAL) calls the `/credential` endpoint to retrieve a **short-lived credential (SLC)**.
-- This credential is valid for a short duration and must be used promptly in the next step.
+- MSAL needs to create a CSR (Certificate Signing Request) with a sourced key.
+- Azure RP will add a new `PlatformMetadata` endpoint which will provide the info needed to create the CSR.
+- MSAL will source a key from CredentialGuard (where available) or in-memory to form the CSR
+- For keys from CredentialGuard, MSAL will perform a key attestation with MAA (Microsoft Attestation Service) - POP only
+- MSAL will then send the CSR and the attestation token (where applicable) to the MIRP 
 
+### Certificate Retrieval from `/issuecredential` Endpoint
+
+- Azure Managed Identity Resource Providers host the `/issuecredential` endpoint.
+- The client (MSAL) calls the `/issuecredential` endpoint to retrieve a **Certificate** by providing a CSR.
+- This certificate is valid only for 7 days.
+- Azure RP will also provide a `getPlatformMetadata` which will provide the info needed to create the CSR.
+ 
 ### Access Token Acquisition via ESTS
 
-- The client presents the **short-lived credential** to **ESTS** over **MTLS** as an assertion.
-- ESTS validates the credential and issues an **access token**.
+- The client (MSAL) presents the **certificate** to **ESTS** over **MTLS**.
+- ESTS validates the certificate and issues an **access token**.
 - The access token is then used to authenticate with Azure services.
+- The access token can be bearer / pop depending upon the key that was sourced.
+- MSAL will then return the access token and the certificate obtained from MIRP back to the caller.
+- The caller will need to use the access token to call the target resource over mTLS using the cert. 
 
 ## Certificate Handling
 
 To start the flow, MSAL requires a certificate. MSAL follows these steps:
 
-1. **Check for an existing certificate (Windows only)**: MSAL looks for a platform certificate (`devicecert.mtlsauth.local`) in the given Azure resource (In both local machine and local user store). 
-2. **Create a new certificate, if none is found**: If a platform certificate is not available, MSAL generates one (self signed) for authentication.
-3. **Linux Only**: MSAL will always generate a self signed certificate on Linux.
+1. **Check for an existing certificate (Windows only)**: MSAL looks for a certificate (`devicecert.mtlsauth.local`) in the given Azure resource (In the local user store). 
+2. **Create a new certificate, if none is found**: If a certificate is not available, MSAL generates one (self signed) for authentication.
 
 ## Source Detection Logic
 
@@ -80,183 +94,241 @@ If identified, MSAL will use the appropriate legacy MSI endpoint for that resour
 
 - If no specific Azure resource is identified from the environment variables, MSAL will fall back to IMDS (VMs and VMSS).
 - This fallback is the MSI v1 design or the legacy fallback mechanism.
-- In this new MSI v2 design, Before fully falling back to IMDS, MSAL will now **probe for the Credential Endpoint**.
-- MSAL probes to see if the `/credential` endpoint exists.
-- If the `/credential` endpoint is unavailable, it falls back to the legacy `/token` endpoint.
-- If probe is succesful then we can assume the current Azure Resource is a VM/VMSS 
+- In this new MSI v2 design, Before fully falling back to IMDS, MSAL will now **probe for the IssueCredential Endpoint**.
+- MSAL probes to see if the `/issuecredential` endpoint exists.
+- If the `/issuecredential` endpoint is unavailable, it falls back to the legacy `/token` endpoint.
+- If probe is succesful then we can assume the current Azure Resource is a VM/VMSS or supports the new MSI V2 flow.
+
+> Note - for the probe, either the `issuecredential` or the `platformmetadata` endpoint can be used.
 
 ## MSI V2 /credential Endpoint Details
 
-### Short-Lived Credential Retrieval
+### Certificate Retrieval
 
-- The `/credential` endpoint provides a **temporary credential** instead of an access token.
-- This credential is only valid for a short duration (1 hour) and must be used **immediately** to acquire an access token from ESTS.
+- The `/issuecredential` endpoint provides a **certificate** instead of an access token.
+- This certificate is only valid for 7 days and must be used **over MTLS** to acquire an access token from ESTS.
+- ESTS uses the MTLS cert as the credential and exchanges the certificate for an access token.
 - This mechanism improves security by reducing the lifetime of sensitive authentication materials.
 
 ### Retry Logic
 
-MSAL uses the **default Managed Identity [retry](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/651b71c7d1dcaf3261e598e01e017dfd3672bb25/src/client/Microsoft.Identity.Client/Http/HttpManagerFactory.cs#L28) policy** for MSI V2 credential/token requests, whether calling the ESTS endpoint or the new `/credential` endpoint. i.e. MSAL performs 3 retries with a 1 second pause between each retry. Retries are performed on certain error [codes](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/651b71c7d1dcaf3261e598e01e017dfd3672bb25/src/client/Microsoft.Identity.Client/Http/HttpRetryCondition.cs#L12) only.
+MSAL uses the **default Managed Identity [retry](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/651b71c7d1dcaf3261e598e01e017dfd3672bb25/src/client/Microsoft.Identity.Client/Http/HttpManagerFactory.cs#L28) policy** for MSI V2 credential/token requests, whether calling the ESTS endpoint or the new `/issuecredential` endpoint. i.e. MSAL performs 3 retries with a 1 second pause between each retry. Retries are performed on certain error [codes](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/651b71c7d1dcaf3261e598e01e017dfd3672bb25/src/client/Microsoft.Identity.Client/Http/HttpRetryCondition.cs#L12) only.
 
 ## Steps for MSI V2 Authentication
 
-This section outlines the necessary steps to acquire an access token using the MSI V2 `/credential` endpoint. 
+This section outlines the necessary steps to acquire an access token using the MSI V2 `/issuecredential` endpoint. 
 
-### 1. Check for an Existing (Platform) Certificate (Windows only)
-- Search for a specific certificate (`devicecert.mtlsauth.local`) in `(Cert:\LocalMachine\My)`.
-- If the certificate is not found in Local Machine, check Current User's certificate store `(Cert:\CurrentUser\My)`.
+### 1. Retrieve Platform Metadata
 
-### 2. Generate a New Certificate (if platform certificate is not found)
-- If no valid platform certificate is found in Cert:\LocalMachine\My or Cert:\CurrentUser\My, create a new in-memory self-signed certificate.
-- This applies especially to Linux VMs, where platform certificates are not pre-configured, and MSAL must always generate an in-memory certificate for MTLS authentication.
+`GET /metadata/identity/getPlatformMetadata?api-version=2025-05-01&uaid={client_id}`
 
-#### Certificate Creation Requirements
-- **Subject Name:** CN=mtls-auth (subject name not final).
-- **Validity Period:** 90 days.
-- **Key Export Policy:** Private key must be exportable to allow use for MTLS authentication.
-- **Key Usage must include:** Digital Signature, Key Encipherment and TLS Client Authentication.
-- **Storage:** The certificate should exist only in memory. It is not stored in the certificate store. It is discarded when the process exits.
+Response supplies the UAID/client_id, tenant_id, CUID, and (for attestable VMs) the regional MAA endpoint
+
+### 2. Generate / Load Key & CSR
+
+MSAL will load a pre-exisitng key, if none available MSAL will try creating one in KSP (Key Storage Provider) 
+
+| OS                     | Key Store        | Persistence       |
+|------------------------|------------------|-------------------|
+| Windows (attested)     | KeyGuard KSP     | Durable           |
+| Windows (unattested)   | Software KSP     | Durable           |
+| Linux                  | In-memory → KMPP (future) | Process-lifetime |
+
+#### CSR requirements
+
+- **Subject:** `CN={client_id}, DC={tenant_id}`
+- **Attribute OID 1.2.840.113549.1.9.7:** `PrintableString = {CUID}`
+- **Signed with:** new key `RSA 2048`
+
+#### (Optionally) Attest Key
+
+If they Key is from KeyGuard, MSAL will then get an attestation token for this key. 
+
+#### Request Certificate
+
+```http
+POST /metadata/identity/issuecredential?cid={CUID}&uaid={client_id}&api-version=2025-05-01 HTTP/1.1
+Content-Type: application/json
+
+{
+  "csr": "<Base64 CSR>",
+  "attestation_token": "<jwt>" // Optional on unattested compute units
+}
+```
+
+#### Acquire Entra Token
+
+MSAL will then call ESTS-R to get an access token
+
+`POST {regional_token_url}/{tenant_id}/oauth2/v2.0/token (mTLS)`
+
+```
+grant_type=client_credentials
+client_id=<UAID>
+scope=https://management.azure.com/.default
+token_type=mtls_pop   // **Only valid for attested CUs**; omit (default bearer) for unattested
+```
+Response identical to AAD v2 but may include token_type":"mtls_pop".
 
 #### Certificate Rotation Strategy
 - **Track Expiry:** The expiration of the certificate must be monitored at runtime.
-- **Rotation Trigger:** 5 days before expiry, generate a new in-memory certificate.
-
-### 3. Extract Certificate Data
-- Convert the certificate to a Base64-encoded string (`x5c`).
-- Format the JSON payload containing the certificate details for request authentication.
-
-### 4. Request MSI Credential
-- Send a POST request to the IMDS `/credential` endpoint with the certificate details.
-- The request must include:
-  - `Metadata: true` header.
-  - `X-ms-Client-Request-id` header with a GUID.
-  - JSON body containing the certificate's public key in `jwk` format. [RFC](https://datatracker.ietf.org/doc/html/rfc7517#appendix-B) 
-- Parse the response to extract:
-  - `regional_token_url`
-  - `tenant_id`
-  - `client_id`
-  - `credential` (short-lived credential).
-
-### 5. Request Access Token from ESTS
-- Construct the OAuth2 request body, including:
-  - `grant_type=client_credentials`
-  - `scope=https://management.azure.com/.default`
-  - `client_id` from the MSI response.
-  - `client_assertion` containing the short-lived credential.
-  - `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer`.
-- Send a POST request to the `regional_token_url` with the certificate for mutual TLS (mTLS) authentication.
-
-### 6. Retrieve and Use Access Token
-- Parse the response to extract the `access_token`.
-- Use the access token to authenticate requests to Azure services.
-- Handle any errors that may occur during the token request.
+- **Rotation Trigger:** 3 days before expiry
 
 ## End-to-End Script
 
 ```powershell
-# Define certificate subject names
-$searchSubject = "CN=devicecert.mtlsauth.local"  # Existing cert to look for
-$newCertSubject = "CN=mtls-auth"  # Subject for new self-signed cert
+<#
+.SYNOPSIS
+    Offline-friendly PowerShell proof‑of‑concept for the **Managed Identity v2 /issuecredential** flow.
 
-# Step 1: Search for an existing certificate in LocalMachine\My
-$cert = Get-ChildItem -Path "Cert:\LocalMachine\My" | Where-Object { $_.Subject -eq $searchSubject -and $_.NotAfter -gt (Get-Date) }
+.DESCRIPTION
+    • When **-Mock** is supplied (or when IMDS is unreachable) the script fabricates realistic
+      JSON responses so you can validate the end‑to‑end logic with *no Azure resources*.
+    • Otherwise the script calls live IMDS/MAA/ESTS endpoints on a VM/VMSS that supports MI v2.
 
-# Step 2: If not found, search in CurrentUser\My
-if (-not $cert) {
-    Write-Output "🔍 No valid certificate found in LocalMachine\My. Checking CurrentUser\My..."
-    $cert = Get-ChildItem -Path "Cert:\CurrentUser\My" | Where-Object { $_.Subject -eq $searchSubject -and $_.NotAfter -gt (Get-Date) }
-}
+.PARAMETERS
+    -Scope        Resource scope (default: ARM).
+    -Unattested   Skip attestation token; forces bearer token.
+    -Mock         Use mocked responses (auto‑fallback if IMDS is not reachable).
 
-# Step 3: If found, use it
-if ($cert) {
-    Write-Output "✅ Found valid certificate: $($cert.Subject)"
-} else {
-    Write-Output "❌ No valid certificate found in both stores. Creating a new self-signed certificate in `CurrentUser\My`..."
+.NOTES
+    Tested on Windows PowerShell 5.1 & PowerShell 7.x
+#>
 
-    # Step 4: Generate a new self-signed certificate in `CurrentUser\My`
-    # For POC we are creating the cert in the user store. But in Product this will be a in-memory cert
-    $cert = New-SelfSignedCertificate `
-        -Subject $newCertSubject `
-        -CertStoreLocation "Cert:\CurrentUser\My" `
-        -KeyExportPolicy Exportable `
-        -KeySpec Signature `
-        -KeyUsage DigitalSignature, KeyEncipherment `
-        -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.2") `
-        -NotAfter (Get-Date).AddDays(90)
+param(
+    [string]$Scope = "https://management.azure.com/.default",
+    [switch]$Unattested,
+    [switch]$Mock
+)
 
-    Write-Output "✅ Created certificate in CurrentUser\My: $($cert.Thumbprint)"
-}
-
-# Ensure `$cert` is valid
-if (-not $cert) {
-    Write-Error "❌ No certificate found or created. Exiting."
-    exit
-}
-
-# Step 5: Compute SHA-256 of the Public Key for `kid`
-$publicKeyBytes = $cert.GetPublicKey()
-$sha256 = New-Object System.Security.Cryptography.SHA256Managed
-$certSha256 = [BitConverter]::ToString($sha256.ComputeHash($publicKeyBytes)) -replace "-", ""
-
-Write-Output "🔐 Using SHA-256 Certificate Identifier (kid): $certSha256"
-
-# Step 6: Convert certificate to Base64 for JWT (x5c field)
-$x5c = [System.Convert]::ToBase64String($cert.RawData)
-Write-Output "📜 x5c: $x5c"
-
-# Step 7: Construct the JSON body properly
-$bodyObject = @{
-    cnf = @{
-        jwk = @{
-            kty = "RSA"
-            use = "sig"
-            alg = "RS256"
-            kid = $certSha256  # Use SHA-256 instead of Thumbprint
-            x5c = @($x5c)  # Ensures correct array formatting
-        }
+# Helper: console coloring (use ASCII hyphens)
+function Info($msg) { Write-Host "[INFO] $msg" -ForegroundColor Cyan }
+function Warn($msg) { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
+function Err ($msg) { Write-Host "[ERR ] $msg" -ForegroundColor Red }
+function Throw-IfError($resp, [string]$step) {
+    if ($null -ne $resp -and $resp.StatusCode -ge 400) {
+        Err "[$step] HTTP $($resp.StatusCode) – $($resp.StatusDescription)"; exit 2
     }
-    latch_key = $false  # Final version of the product should not have this. IMDS team is working on removing this. 
 }
 
-# Convert JSON object to a string
-$body = $bodyObject | ConvertTo-Json -Depth 10 -Compress
-Write-Output "🔹 JSON Payload: $body"
+$ErrorActionPreference = 'Stop'
 
-# Step 8: Request MSI credential
-$headers = @{
-    "Metadata" = "true"
-    "X-ms-Client-Request-id" = [guid]::NewGuid().ToString()
-}
-
-$imdsResponse = Invoke-WebRequest -Uri "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0" `
-    -Method POST `
-    -Headers $headers `
-    -Body $body
-
-$jsonContent = $imdsResponse.Content | ConvertFrom-Json
-
-$regionalEndpoint = $jsonContent.regional_token_url + "/" + $jsonContent.tenant_id + "/oauth2/v2.0/token"
-Write-Output "✅ Using Regional Endpoint: $regionalEndpoint"
-
-# Step 9: Authenticate with Azure
-$tokenHeaders = @{
-    "Content-Type" = "application/x-www-form-urlencoded"
-    "Accept" = "application/json"
-}
-
-$tokenRequestBody = "grant_type=client_credentials&scope=https://management.azure.com/.default&client_id=$($jsonContent.client_id)&client_assertion=$($jsonContent.credential)&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
-
+# ------------------------------------------------------------
+# 1. Platform metadata (auto‑mock if unreachable)
+# ------------------------------------------------------------
 try {
-    $tokenResponse = Invoke-WebRequest -Uri $regionalEndpoint `
-        -Method POST `
-        -Headers $tokenHeaders `
-        -Body $tokenRequestBody `
-        -Certificate $cert  # Use the full certificate object
-
-    $tokenJson = $tokenResponse.Content | ConvertFrom-Json
-    Write-Output "🔑 Access Token: $($tokenJson.access_token)"
+    if (-not $Mock) {
+        $metaUri  = "http://169.254.169.254/metadata/identity/getPlatformMetadata?api-version=2025-05-01"
+        $metaResp = Invoke-WebRequest -Uri $metaUri -Headers @{ Metadata = 'true' } -UseBasicParsing -TimeoutSec 3
+        Throw-IfError $metaResp 'getPlatformMetadata'
+        $metaObj  = $metaResp.Content | ConvertFrom-Json
+    }
 } catch {
-    Write-Error "❌ Failed to retrieve access token. Error: $_"
+    Warn "IMDS unreachable – switching to mock mode."; $Mock = $true
 }
+
+if ($Mock) {
+    $metaObj = [pscustomobject]@{
+        client_id            = [guid]::NewGuid().Guid
+        tenant_id            = [guid]::NewGuid().Guid
+        CUID                 = [guid]::NewGuid().Guid
+        attestation_endpoint = if ($Unattested) { $null } else { "https://mock.maa.contoso.com" }
+    }
+    Info "Generated mock platform metadata."
+}
+
+$clientId = $metaObj.client_id
+$tenantId = $metaObj.tenant_id
+$cuid     = $metaObj.CUID
+$maaEp    = $metaObj.attestation_endpoint
+
+Info "client_id = $clientId"
+Info "tenant_id = $tenantId"
+Info "CUID      = $cuid"
+
+# ------------------------------------------------------------
+# 2. Key / certificate for CSR
+# ------------------------------------------------------------
+$subject  = "CN=$clientId, DC=$tenantId"
+$certPath = "Cert:\\CurrentUser\\My"
+$existing = Get-ChildItem $certPath | Where-Object Subject -eq $subject
+if ($existing) {
+    Info "Reusing existing key for $subject"; $keyCert = $existing
+} else {
+    Info "Creating new RSA-2048 key for $subject"
+    $keyCert = New-SelfSignedCertificate -Subject $subject -KeyExportPolicy Exportable -KeySpec Signature -KeyAlgorithm RSA -KeyLength 2048 -KeyUsage DigitalSignature,KeyEncipherment -CertStoreLocation $certPath
+}
+
+# ------------------------------------------------------------
+# 3. Build CSR with CUID attribute
+# ------------------------------------------------------------
+# Compatible across PS versions / older .NET
+$rsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($keyCert)
+$csrReq   = [System.Security.Cryptography.X509Certificates.CertificateRequest]::new($subject, $rsa, [System.Security.Cryptography.HashAlgorithmName]::SHA256, [System.Security.Cryptography.RSASignaturePadding]::Pkcs1)
+$oid      = [System.Security.Cryptography.Oid]::new("1.2.840.113549.1.9.7")
+$attrExt = [System.Security.Cryptography.X509Certificates.X509Extension]::new($oid, [System.Text.Encoding]::ASCII.GetBytes($cuid), $false)
+$csrReq.CertificateExtensions.Add($attrExt)
+$csrBytes  = $csrReq.CreateSigningRequest()
+$csrBase64 = [Convert]::ToBase64String($csrBytes)
+Info "CSR ready (len=$($csrBytes.Length))"
+
+# ------------------------------------------------------------
+# 4. Attestation token (mock or real)
+# ------------------------------------------------------------
+$attToken = $null
+if (-not $Unattested) {
+    if ($Mock) {
+        $attToken = "eyMock.Token"; Info "Mock attestation token generated."
+    } elseif ($maaEp) {
+        Info "Requesting attestation token from $maaEp …"
+        $maaResp = Invoke-WebRequest -Uri "$maaEp/attest/keyguard?api-version=2023-04-01-preview" -Method POST -Body (@{ AttestationInfo = '<bin>' } | ConvertTo-Json -Compress) -ContentType 'application/json'
+        Throw-IfError $maaResp 'attest/keyguard'
+        $attToken = ($maaResp.Content | ConvertFrom-Json).token
+    }
+}
+
+# ------------------------------------------------------------
+# 5. /issuecredential (mock or real)
+# ------------------------------------------------------------
+if ($Mock) {
+    Info "Generating mock MI credential locally."
+    $clientCredential = [Convert]::ToBase64String($keyCert.RawData)
+    $regionalTokenUrl = "https://eastus2.mock.mtlsauth.microsoft.com"
+} else {
+    $issueUri  = "http://169.254.169.254/metadata/identity/issuecredential?api-version=2025-05-01&cid=$cuid&uaid=$clientId"
+    $issueHdr  = @{ Metadata = 'true'; 'X-ms-Client-Request-id' = [guid]::NewGuid() }
+    $bodyObj   = @{ csr = $csrBase64 }; if ($attToken) { $bodyObj.attestation_token = $attToken }
+    $issueResp = Invoke-WebRequest -Uri $issueUri -Method POST -Headers $issueHdr -Body ($bodyObj | ConvertTo-Json -Compress) -ContentType 'application/json'
+    Throw-IfError $issueResp 'issuecredential'
+    $cred      = $issueResp.Content | ConvertFrom-Json
+    $clientCredential = $cred.client_credential
+    $regionalTokenUrl = $cred.regional_token_url
+}
+
+# Import credential certificate for mTLS (mock → reuse keyCert)
+if ($Mock) { $miCert = $keyCert }
+else {
+    $miCert = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new([Convert]::FromBase64String($clientCredential), $null, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::MachineKeySet)
+}
+Info "MI credential thumbprint = $($miCert.Thumbprint)"
+
+# ------------------------------------------------------------
+# 6. Token request (mock or real)
+# ------------------------------------------------------------
+if ($Mock) {
+    $tokenJson = [pscustomobject]@{ access_token = "mock_access_token"; expires_in = 3600 }
+    Info "Mock access token generated."
+} else {
+    $regional = "$regionalTokenUrl/$tenantId/oauth2/v2.0/token"
+    $bodyStr  = "grant_type=client_credentials&scope=$([Uri]::EscapeDataString($Scope))&client_id=$clientId"
+    if (-not $Unattested) { $bodyStr += "&token_type=mtls_pop" }
+    $tokResp  = Invoke-WebRequest -Uri $regional -Method POST -Body $bodyStr -Headers @{ 'Accept'='application/json'; 'Content-Type'='application/x-www-form-urlencoded' } -Certificate $miCert
+    Throw-IfError $tokResp 'token'
+    $tokenJson = $tokResp.Content | ConvertFrom-Json
+}
+
+$kind = if ($Unattested) { 'Bearer' } else { 'mTLS-PoP' }
+Info "$kind token acquired – expires_in = $($tokenJson.expires_in)s"
 ```
 
 ## Summary of New APIs on Managed Identity Builder

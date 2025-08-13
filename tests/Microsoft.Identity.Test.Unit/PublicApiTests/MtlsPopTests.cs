@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Test.Unit
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
                             .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
-                            .WithExperimentalFeatures()
                             .Build();
 
             MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
@@ -74,7 +73,6 @@ namespace Microsoft.Identity.Test.Unit
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
                             .WithClientSecret(TestConstants.ClientSecret)
-                            .WithExperimentalFeatures()
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request without a certificate
@@ -98,7 +96,6 @@ namespace Microsoft.Identity.Test.Unit
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
                             .WithClientClaims(s_testCertificate, ipAddress)
-                            .WithExperimentalFeatures()
                             .Build();
 
             // Expecting an exception because MTLS PoP requires a certificate to sign the claims
@@ -117,7 +114,6 @@ namespace Microsoft.Identity.Test.Unit
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
                             .WithClientAssertion(() => { return TestConstants.DefaultClientAssertion; })
-                            .WithExperimentalFeatures()
                             .Build();
 
             // Expecting an exception because MTLS PoP requires a certificate to sign the claims
@@ -146,7 +142,6 @@ namespace Microsoft.Identity.Test.Unit
                                     .WithCertificate(s_testCertificate)
                                     // Setting Azure region to ConfidentialClientApplicationBuilder.DisableForceRegion overrides the AzureRegion to null.
                                     .WithAzureRegion(ConfidentialClientApplicationBuilder.DisableForceRegion)
-                                    .WithExperimentalFeatures()
                                     .Build();
                 }
                 else
@@ -155,7 +150,6 @@ namespace Microsoft.Identity.Test.Unit
                                     .Create(TestConstants.ClientId)
                                     .WithAuthority(TestConstants.AuthorityTenant)
                                     .WithCertificate(s_testCertificate)
-                                    .WithExperimentalFeatures()
                                     .Build();
                 }
 
@@ -177,7 +171,6 @@ namespace Microsoft.Identity.Test.Unit
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
                             .WithCertificate(s_testCertificate)
-                            .WithExperimentalFeatures()
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request without specifying an authority
@@ -220,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit
         public void GetTokenRequestParams_ExpectedValues()
         {
             var scheme = new MtlsPopAuthenticationOperation(s_testCertificate);
-            System.Collections.Generic.IReadOnlyDictionary<string, string> parameters = scheme.GetTokenRequestParams();
+            IReadOnlyDictionary<string, string> parameters = scheme.GetTokenRequestParams();
 
             Assert.AreEqual(Constants.MtlsPoPTokenType, parameters[OAuth2Parameter.TokenType]);
         }
@@ -248,7 +241,6 @@ namespace Microsoft.Identity.Test.Unit
                         .WithCertificate(s_testCertificate)
                         .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                        .WithExperimentalFeatures()
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
@@ -263,6 +255,10 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                     Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
 
+                    Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should be present.");
+                    Assert.AreEqual(s_testCertificate.Thumbprint, result.BindingCertificate.Thumbprint, 
+                        "BindingCertificate must match the cert passed to WithCertificate().");
+
                     // Second token acquisition - should retrieve from cache
                     AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
                         .WithMtlsProofOfPossession()
@@ -273,6 +269,10 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, secondResult.TokenType);
                     Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
                     Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                    // Cached result must still carry the cert
+                    Assert.IsNotNull(secondResult.BindingCertificate);
+                    Assert.AreEqual(result.BindingCertificate.Thumbprint,
+                        secondResult.BindingCertificate.Thumbprint);
                 }
             }
         }
@@ -300,7 +300,6 @@ namespace Microsoft.Identity.Test.Unit
                         .WithCertificate(s_testCertificate)
                         .WithTenantId("123456-1234-2345-1234561234")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                        .WithExperimentalFeatures()
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
@@ -347,7 +346,6 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthority(authorityUrl)
                     .WithAzureRegion(region)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .BuildConcrete();
 
                 AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -380,7 +378,6 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAzureRegion(region)
                     .WithAuthority(authority)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .BuildConcrete();
 
                 IConfidentialClientApplication regionalApp2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -388,7 +385,6 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAzureRegion(region)
                     .WithAuthority(authority)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .BuildConcrete();
 
                 var memoryTokenCache = new InMemoryTokenCache();
@@ -435,7 +431,6 @@ namespace Microsoft.Identity.Test.Unit
                         .WithCertificate(s_testCertificate)
                         .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                        .WithExperimentalFeatures()
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
@@ -463,7 +458,6 @@ namespace Microsoft.Identity.Test.Unit
                             .Create(TestConstants.ClientId)
                             .WithCertificate(s_testCertificate)
                             .WithAuthority(authorityUrl)
-                            .WithExperimentalFeatures()
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request with a non-AAD authority
@@ -502,7 +496,6 @@ namespace Microsoft.Identity.Test.Unit
                         .WithCertificate(s_testCertificate)
                         .WithAuthority($"{authorityUrl}/{nonTenantValue}")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                        .WithExperimentalFeatures()
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
@@ -559,7 +552,6 @@ namespace Microsoft.Identity.Test.Unit
                                  .WithHttpManager(harness.HttpManager)
                                  .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                                  .WithCertificate(s_testCertificate)
-                                 .WithExperimentalFeatures(true)
                                  .Build();
 
                     // Act
@@ -607,7 +599,6 @@ namespace Microsoft.Identity.Test.Unit
                                         .WithHttpManager(harness.HttpManager)
                                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                                         .WithCertificate(s_testCertificate)
-                                        .WithExperimentalFeatures(true)
                                         .Build();
 
                     AuthenticationResult result = await app
@@ -670,7 +661,6 @@ namespace Microsoft.Identity.Test.Unit
                                     .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                                     .WithCertificate(s_testCertificate)
                                     .WithInstanceDiscovery(false)
-                                    .WithExperimentalFeatures(true)
                                     .Build();
 
                     AuthenticationResult result = await app
@@ -719,7 +709,6 @@ namespace Microsoft.Identity.Test.Unit
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithCertificate(s_testCertificate)
                     .WithAuthority(authorityUrl)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -755,7 +744,6 @@ namespace Microsoft.Identity.Test.Unit
                             .Create(TestConstants.ClientId)
                             .WithAuthority(authorityUrl)
                             .WithCertificate(s_testCertificate)
-                            .WithExperimentalFeatures()
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request specifying an authority
@@ -764,6 +752,50 @@ namespace Microsoft.Identity.Test.Unit
                    .WithMtlsProofOfPossession()
                    .ExecuteAsync())
                 .ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task BindingCertificate_PopulatedForMtlsPop_AndNullForBearerAsync()
+        {
+            const string region = "eastus";
+            using var env = new EnvVariableContext();
+            Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+            using var httpManager = new MockHttpManager();
+            {
+                // Token call for MTLS-PoP
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                            tokenType: "mtls_pop");
+                // Token call for bearer  – second AcquireToken uses this
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(); // defaults to Bearer
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithCertificate(s_testCertificate)
+                    .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                    .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // -------- 1st call: MTLS-PoP --------
+                AuthenticationResult popResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                                          .WithMtlsProofOfPossession()
+                                                          .ExecuteAsync()
+                                                          .ConfigureAwait(false);
+
+                Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, popResult.TokenType);
+                Assert.IsNotNull(popResult.BindingCertificate, "BindingCertificate should be set for MTLS-PoP.");
+                Assert.AreEqual(s_testCertificate.Thumbprint,
+                                popResult.BindingCertificate.Thumbprint,
+                                "BindingCertificate thumbprint should match the cert supplied via WithCertificate().");
+
+                // -------- 2nd call: Bearer --------
+                AuthenticationResult bearerResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                                             .ExecuteAsync()
+                                                             .ConfigureAwait(false);
+
+                Assert.AreEqual("Bearer", bearerResult.TokenType);
+                Assert.IsNull(bearerResult.BindingCertificate, "BindingCertificate must be null for Bearer tokens.");
+            }
         }
     }
 }

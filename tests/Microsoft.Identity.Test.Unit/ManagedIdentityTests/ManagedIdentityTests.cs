@@ -319,7 +319,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
+                    managedIdentitySource,
+                    claimsEnabled: false,
+                    capabilityEnabled: true);
 
                 var result = await mi.AcquireTokenForManagedIdentity(scope).ExecuteAsync().ConfigureAwait(false);
 
@@ -339,9 +341,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     scope,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
+                    managedIdentitySource,
+                    claimsEnabled: true,
+                    capabilityEnabled: true);
 
-                // Acquire token with force refresh
+                // Acquire token with claims
                 result = await mi.AcquireTokenForManagedIdentity(scope).WithClaims(TestConstants.Claims)
                     .ExecuteAsync().ConfigureAwait(false);
 
@@ -369,7 +373,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures(true)
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -401,11 +404,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     scope,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
+                    managedIdentitySource,
+                    claimsEnabled: true,
+                    capabilityEnabled: false);
 
-                // Acquire token with force refresh
-                result = await mi.AcquireTokenForManagedIdentity(scope).WithClaims(TestConstants.Claims)
-                    .ExecuteAsync().ConfigureAwait(false);
+                // Acquire token with claims
+                result = await mi.AcquireTokenForManagedIdentity(scope)
+                    .WithClaims(TestConstants.Claims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
@@ -811,7 +818,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -1333,6 +1339,56 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // 3 retries (requestsMade would be 9 if retry policy was NOT per request)
                 requestsMade = Num504Errors - httpManager.QueueSize;
                 Assert.AreEqual(Num504Errors, requestsMade);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
+        [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
+        [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
+        [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
+        public async Task ManagedIdentityWithCapabilitiesTestAsync(
+            string endpoint,
+            string scope,
+            ManagedIdentitySource managedIdentitySource)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithClientCapabilities(TestConstants.ClientCapabilities)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource,
+                    claimsEnabled: false,
+                    capabilityEnabled: true);
+
+                var result = await mi.AcquireTokenForManagedIdentity(scope).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Acquire token from cache
+                result = await mi.AcquireTokenForManagedIdentity(scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 

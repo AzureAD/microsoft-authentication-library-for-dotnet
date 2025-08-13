@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
                     string.Equals(accessToken.TokenType ?? "", tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(accessToken.TenantId, tenantId, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(accessToken.TenantId ?? "", tenantId ?? "", StringComparison.OrdinalIgnoreCase) &&
                     accessToken.ScopeSet.Overlaps(scopeSet))
                 {
                     requestParams.RequestContext.Logger.Verbose(() => $"Intersecting scopes found: {scopeSet}");

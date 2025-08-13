@@ -98,8 +98,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
         {
-            ValidateUseOfExperimentalFeature();
-
             if (ServiceBundle.Config.ClientCredential is not CertificateClientCredential certificateCredential)
             {
                 throw new MsalClientException(

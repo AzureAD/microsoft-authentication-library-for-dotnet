@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3") //test slice region 
                 .WithCertificate(cert, true)  
-                .WithExperimentalFeatures()
                 .WithTestLogging()
                 .Build();
 
@@ -48,7 +47,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .WithMtlsProofOfPossession()
-                .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice 
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -56,6 +54,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult, "The authentication result should not be null.");
             Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
             Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
+
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint,
+                            authResult.BindingCertificate.Thumbprint,
+                            "BindingCertificate must match the certificate supplied via WithCertificate().");
 
             // Simulate cache retrieval to verify MTLS configuration is cached properly
             authResult = await confidentialApp
@@ -66,6 +69,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Assert: Verify that the token was fetched from cache on the second request
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint,
+                            authResult.BindingCertificate.Thumbprint,
+                            "BindingCertificate must match the certificate supplied via WithCertificate().");
         }
     }
 }

@@ -111,10 +111,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Ciam CUD
             authority = "https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/";
             string ciamClient = "b244c86f-ed88-45bf-abda-6b37aa482c79";
-            await RunCiamCCATest(authority, ciamClient).ConfigureAwait(false);
+            await RunCiamCCATest(authority, ciamClient, true).ConfigureAwait(false);
         }
 
-        private async Task RunCiamCCATest(string authority, string appId)
+        private async Task RunCiamCCATest(string authority, string appId, bool useOidcAuthority = false)
         {
             //Acquire tokens
             var msalConfidentialClientBuilder = ConfidentialClientApplicationBuilder
@@ -122,15 +122,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithCertificate(CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName))
                 .WithExperimentalFeatures();
 
-            if (authority.Contains(Constants.CiamAuthorityHostSuffix))
-            {
-                msalConfidentialClientBuilder.WithAuthority(authority, false);
-            }
-            else
+            if (useOidcAuthority)
             {
                 msalConfidentialClientBuilder.WithOidcAuthority(authority);
             }
-
+            else
+            {
+                msalConfidentialClientBuilder.WithAuthority(authority);
+            }
 
             var msalConfidentialClient = msalConfidentialClientBuilder.Build();
 
@@ -215,6 +214,29 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.Cache, resultObo.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
+        public async Task WithOidcAuthority_ValidatesIssuerSuccessfully()
+        {
+            //Get lab details
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
+            {
+                FederationProvider = FederationProvider.CIAMCUD,
+                SignInAudience = SignInAudience.AzureAdMyOrg
+            }).ConfigureAwait(false);
+
+            //Test with standard and CUD CIAM authorities
+            string[] authorities =
+            {
+                string.Format("https://{0}.ciamlogin.com/{1}/v2.0/", labResponse.Lab.TenantId, labResponse.Lab.TenantId),
+                string.Format("https://login.msidlabsciam.com/{0}/v2.0/", labResponse.Lab.TenantId)
+            };
+
+            foreach (var authority in authorities)
+            {
+                await RunCiamCCATest(authority, labResponse.App.AppId, true).ConfigureAwait(false);
+            }
         }
 
         private string GetCiamSecret()
