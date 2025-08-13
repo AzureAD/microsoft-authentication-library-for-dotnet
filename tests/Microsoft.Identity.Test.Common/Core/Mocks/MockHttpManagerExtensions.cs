@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             var handler = new MockHttpMessageHandler()
             {
-                ExpectedUrl = expectedUrl != null? expectedUrl : authority + "oauth2/v2.0/token",
+                ExpectedUrl = expectedUrl != null? expectedUrl : $"{authority}oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateFailureTokenResponseMessage(
                     error,

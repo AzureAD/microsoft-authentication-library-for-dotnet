@@ -339,7 +339,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                string authority = "https://demo.duendesoftware.com";
+                string authority = TestConstants.CiamCUDAuthorityMalformed;
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(httpManager)
@@ -348,14 +348,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .Build();
 
                 httpManager.AddMockHandler(
-                    CreateOidcHttpHandler(authority + @"/" + Constants.WellKnownOpenIdConfigurationPath));
+                    CreateOidcHttpHandler(authority + "/" + Constants.WellKnownOpenIdConfigurationPath));
 
                 httpManager.AddFailureTokenEndpointResponse(
                                 error: "error",
-                                AadErrorCode: "AADSTS500207",
-                                expectedUrl: "https://demo.duendesoftware.com/connect/token");
+                                AadErrorCode: TestConstants.AadAccountTypeAndResourceIncompatibleErrorCode,
+                                expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
 
-                Assert.AreEqual(authority + "/", app.Authority);
+                Assert.AreEqual(authority, app.Authority);
                 var confidentailClientApp = (ConfidentialClientApplication)app;
                 Assert.AreEqual(AuthorityType.Generic, confidentailClientApp.AuthorityInfo.AuthorityType);
 
@@ -364,19 +364,27 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                              .ExecuteAsync())
                              .ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains("Did you forget to append \"/v2.0\" to your OIDC authority?"));
+                Assert.IsTrue(ex.Message.Contains(
+                                string.Format(
+                                    CultureInfo.InvariantCulture, 
+                                    MsalErrorMessage.MalformedOidcAuthorityFormat, 
+                                    TestConstants.CiamCUDAuthorityMalformed)));
 
                 httpManager.AddFailureTokenEndpointResponse(
                 error: "error",
-                AadErrorCode: "AADSTS900144",
-                expectedUrl: "https://demo.duendesoftware.com/connect/token");
+                AadErrorCode: TestConstants.AadMissingScopeErrorCode,
+                expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
 
                 ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
                          app.AcquireTokenForClient(new[] { "api" })
                              .ExecuteAsync())
                              .ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains("Did you forget to append \"/v2.0\" to your OIDC authority?"));
+                Assert.IsTrue(ex.Message.Contains(
+                                string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    MsalErrorMessage.MalformedOidcAuthorityFormat,
+                                    TestConstants.CiamCUDAuthorityMalformed)));
             }
         }
 
