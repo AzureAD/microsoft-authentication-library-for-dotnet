@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Client
         /// Guidance on constructing the client assertion (required claims, audience, and lifetime) is available at
         /// <see href="https://aka.ms/msal-net-client-assertion">aka.ms/msal-net-client-assertion</see>.
         /// The assertion is created by your callback; MSAL does not modify or re‑sign it.
+        /// **Note:** It is up to the caller to cache the assertion and certificate if reuse is desired.
         /// </remarks>
         public string Assertion { get; set; }
 

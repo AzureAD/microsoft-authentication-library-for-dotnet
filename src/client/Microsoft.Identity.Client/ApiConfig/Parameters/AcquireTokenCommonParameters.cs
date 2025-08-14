@@ -4,12 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
@@ -33,6 +38,75 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public SortedList<string, string> CacheKeyComponents { get; internal set; }
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
-        public bool IsMtlsPopEnabled { get; set; }
+        public bool IsMtlsPopRequested { get; set; }
+
+        internal async Task ValidateAndWireMtlsPopAsync(IServiceBundle serviceBundle, CancellationToken ct)
+        {
+            if (!IsMtlsPopRequested)
+            {
+                return; // PoP not requested
+            }
+
+            // ────────────────────────────────────
+            // Case 1 – Certificate credential
+            // ────────────────────────────────────
+            if (serviceBundle.Config.ClientCredential is CertificateClientCredential certCred)
+            {
+                if (certCred.Certificate == null)
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsCertificateNotProvided,
+                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+                }
+
+                return;
+            }
+
+            // ────────────────────────────────────
+            // Case 2 – Client‑assertion delegate
+            // ────────────────────────────────────
+            if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc)
+            {
+                var opts = new AssertionRequestOptions
+                {
+                    ClientID = serviceBundle.Config.ClientId,
+                    ClientCapabilities = serviceBundle.Config.ClientCapabilities,
+                    Claims = Claims,
+                    CancellationToken = ct
+                };
+
+                ClientAssertion ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
+
+                if (ar.TokenBindingCertificate == null)
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsCertificateNotProvided,
+                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+                }
+
+                Wire(ar.TokenBindingCertificate, serviceBundle);
+                return;
+            }
+
+            // ────────────────────────────────────
+            // Case 3 – Any other credential (client‑secret etc.)
+            // ────────────────────────────────────
+            throw new MsalClientException(
+                MsalError.MtlsCertificateNotProvided,
+                MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+        }
+
+        private void Wire(X509Certificate2 cert, IServiceBundle serviceBundle)
+        {
+            // region check (AAD only)
+            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
+                serviceBundle.Config.AzureRegion == null)
+            {
+                throw new MsalClientException(MsalError.MtlsPopWithoutRegion, MsalErrorMessage.MtlsPopWithoutRegion);
+            }
+
+            AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
+            MtlsCertificate = cert;
+        }
     }
 }

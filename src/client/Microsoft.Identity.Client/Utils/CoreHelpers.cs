@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -214,6 +215,21 @@ namespace Microsoft.Identity.Client.Utils
             {
                 var hashBytes = hash.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
                 return Base64UrlHelpers.Encode(hashBytes);
+            }
+        }
+
+        internal static string ComputeX5tS256KeyId(X509Certificate2 certificate)
+        {
+            // Extract the raw bytes of the certificate’s public key.
+            var publicKey = certificate.GetPublicKey();
+
+            // Compute the SHA-256 hash of the public key.
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hash = sha256.ComputeHash(publicKey);
+
+                // Return the hash encoded in Base64 URL format.
+                return Base64UrlHelpers.Encode(hash);
             }
         }
     }

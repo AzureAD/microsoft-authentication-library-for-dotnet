@@ -366,57 +366,61 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task ClientAssertion_WithPoPApi_SendsBearer_Async()
+        public async Task ClientAssertion_WithPoPDelegate_No_Mtls_Api_SendsBearer_Async()
         {
             using var http = new MockHttpManager();
-            http.AddInstanceDiscoveryMockHandler();
-            var handler = http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                       .WithClientSecret(TestConstants.ClientSecret)
-                       .WithHttpManager(http)
-                       .WithClientAssertion(PopDelegate())
-                       .BuildConcrete();
+            {
+                http.AddInstanceDiscoveryMockHandler();
+                var handler = http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                           .WithClientSecret(TestConstants.ClientSecret)
+                           .WithHttpManager(http)
+                           .WithClientAssertion(PopDelegate())
+                           .BuildConcrete();
 
-            var result = await cca.AcquireTokenForClient(TestConstants.s_scope)
-                                  .ExecuteAsync().ConfigureAwait(false);
+                var result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                                      .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-            Assert.AreEqual(
-                "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-                handler.ActualRequestPostData["client_assertion_type"]);
+                Assert.AreEqual(
+                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                    handler.ActualRequestPostData["client_assertion_type"]);
+            }
         }
 
         [TestMethod]
         public async Task ClientAssertion_ReceivesClientCapabilitiesAsync()
         {
             using var http = new MockHttpManager();
-            http.AddInstanceDiscoveryMockHandler();
-            http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+            {
+                http.AddInstanceDiscoveryMockHandler();
+                http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-            bool checkedCaps = false;
-            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                      .WithClientSecret(TestConstants.ClientSecret)
-                      .WithClientCapabilities(TestConstants.ClientCapabilities)
-                      .WithHttpManager(http)
-                      .WithClientAssertion((opts, ct) =>
-                      {
-                          checkedCaps = true;
-                          CollectionAssert.AreEqual(
-                              TestConstants.ClientCapabilities,
-                              opts.ClientCapabilities.ToList());
-                          return Task.FromResult(new ClientAssertion
+                bool checkedCaps = false;
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                          .WithClientSecret(TestConstants.ClientSecret)
+                          .WithClientCapabilities(TestConstants.ClientCapabilities)
+                          .WithHttpManager(http)
+                          .WithClientAssertion((opts, ct) =>
                           {
-                              Assertion = "jwt"
-                          });
-                      })
-                      .BuildConcrete();
+                              checkedCaps = true;
+                              CollectionAssert.AreEqual(
+                                  TestConstants.ClientCapabilities,
+                                  opts.ClientCapabilities.ToList());
+                              return Task.FromResult(new ClientAssertion
+                              {
+                                  Assertion = "jwt"
+                              });
+                          })
+                          .BuildConcrete();
 
-            _ = await cca.AcquireTokenForClient(TestConstants.s_scope)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-            
-            Assert.IsTrue(checkedCaps);
+                _ = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(checkedCaps);
+            }
         }
 
         [TestMethod]

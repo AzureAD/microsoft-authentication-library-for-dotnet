@@ -65,9 +65,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             // Decide bearer vs mTLS PoP
-            bool isMtlsPopEnabled = p.IsMtlsPopEnabled;
+            bool IsMtlsPopRequested = p.IsMtlsPopRequested;
 
-            if (isMtlsPopEnabled && resp.TokenBindingCertificate != null)
+            if (IsMtlsPopRequested && resp.TokenBindingCertificate != null)
             {
                 oAuth2Client.AddBodyParameter(
                     OAuth2Parameter.ClientAssertionType,

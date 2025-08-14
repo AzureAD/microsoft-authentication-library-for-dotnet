@@ -239,33 +239,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return false;
             }
 
-            // 2) Certificate mismatch → bypass cache
-            // Serial of the certificate supplied *with this request* (null if none)
-            string requestSerial = AuthenticationRequestParameters.MtlsCertificate?.SerialNumber;
-            string storedSerial = string.Empty;
- 
-            if (!string.IsNullOrEmpty(requestSerial))
+            // 2) If an mTLS cert is supplied for THIS request, reuse cache only if
+            //    the cached token's KeyId matches the one provided in the request.
+            X509Certificate2 requestCert = AuthenticationRequestParameters.MtlsCertificate;
+            
+            if (requestCert != null)
             {
-                // Try to read the serial that was stored with the cached token.
-                // If it exists, compare it with the request's serial.
-                bool exists = cacheItem.AdditionalCacheKeyComponents?
-                                    .TryGetValue(Constants.CertSerialNumber, out storedSerial) == true;
+                string expectedKid = CoreHelpers.ComputeX5tS256KeyId(requestCert);
 
-                // If the serial number exists in the cache, compare it with the request's serial.
-                if (exists &&
-                    !string.Equals(storedSerial, requestSerial, StringComparison.OrdinalIgnoreCase))
+                // If the certificate cannot produce a valid KeyId (SPKI-SHA256), expectedKid will be null or empty.
+                // In this case, the cache will be bypassed, as we cannot safely match the cached token to the certificate.
+                if (!string.Equals(cacheItem.KeyId, expectedKid, StringComparison.Ordinal))
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
-                        "[ClientCredentialRequest] Cached token is unbound, or bound to a different " +
-                        "certificate. Bypassing cache.");
-                    return false;   // MISMATCH → skip cache
+                    "[ClientCredentialRequest] Cached token KeyId does not match request certificate (SPKI-SHA256 mismatch). Bypassing cache.");
+                    return false;
                 }
-
-                // Serial numbers match – safe to use cached token
-                // Or caller did not provide a new certificate,
-                // but the cached token is bound to the same old certificate.
+                
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
-                    "[ClientCredentialRequest] Cached token is bound to the same certificate. Using cached token.");
+                "[ClientCredentialRequest] Cached token KeyId matches request certificate (SPKI-SHA256). Using cached token.");
             }
 
             // 3) If the token’s hash matches AccessTokenHashToRefresh, ignore it
