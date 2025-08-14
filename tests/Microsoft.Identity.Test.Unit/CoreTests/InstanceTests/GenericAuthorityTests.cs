@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -330,6 +331,60 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     default:
                         throw new NotImplementedException();
                 }
+            }
+        }
+
+        [TestMethod]
+        public async Task Oidc_Malformed_Failure_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                string authority = TestConstants.CiamCUDAuthorityMalformed;
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                httpManager.AddMockHandler(
+                    CreateOidcHttpHandler(authority + "/" + Constants.WellKnownOpenIdConfigurationPath));
+
+                httpManager.AddFailureTokenEndpointResponse(
+                                error: "error",
+                                AadErrorCode: TestConstants.AadAccountTypeAndResourceIncompatibleErrorCode,
+                                expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
+
+                Assert.AreEqual(authority, app.Authority);
+                var confidentailClientApp = (ConfidentialClientApplication)app;
+                Assert.AreEqual(AuthorityType.Generic, confidentailClientApp.AuthorityInfo.AuthorityType);
+
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                         app.AcquireTokenForClient(new[] { "api" })
+                             .ExecuteAsync())
+                             .ConfigureAwait(false);
+
+                Assert.IsTrue(ex.Message.Contains(
+                                string.Format(
+                                    CultureInfo.InvariantCulture, 
+                                    MsalErrorMessage.MalformedOidcAuthorityFormat, 
+                                    TestConstants.CiamCUDAuthorityMalformed)));
+
+                httpManager.AddFailureTokenEndpointResponse(
+                error: "error",
+                AadErrorCode: TestConstants.AadMissingScopeErrorCode,
+                expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
+
+                ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                         app.AcquireTokenForClient(new[] { "api" })
+                             .ExecuteAsync())
+                             .ConfigureAwait(false);
+
+                Assert.IsTrue(ex.Message.Contains(
+                                string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    MsalErrorMessage.MalformedOidcAuthorityFormat,
+                                    TestConstants.CiamCUDAuthorityMalformed)));
             }
         }
 
