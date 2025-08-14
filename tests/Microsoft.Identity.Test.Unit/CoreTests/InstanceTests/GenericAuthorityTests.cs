@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
@@ -21,6 +22,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class GenericAuthorityTests : TestBase
     {
+        [ClassInitialize]
+        public static async Task ClassInit(TestContext context)
+        {
+            // Use the new method to initialize with just the oidc scenario
+            await ConfigService.InitializeAsync("oidc", true).ConfigureAwait(false);
+        }
+
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
@@ -334,42 +342,37 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        [Description("Tests that OIDC issuer validation properly fails when issuers don't match")]
         public async Task OidcIssuerValidation_ThrowsForNonMatchingIssuer_Async()
         {
-            using (var httpManager = new MockHttpManager())
-            {
-                string wrongIssuer = "https://wrong.issuer.com";
+            // Get the test scenario configuration
+            var scenario = ConfigService.GetScenario("nonMatchingIssuer");
 
-                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithHttpManager(httpManager)
-                    .WithOidcAuthority(TestConstants.GenericAuthority)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .Build();
+            // Get the wrong issuer URL and test service authority from the config
+            string wrongIssuer = ConfigService.GetIssuer(scenario.AuthorityKey);
+            string testServiceAuthority = scenario.CreateOidcAuthorityUri();
+            
+            // Get the expected error from the configuration
+            string expectedErrorCode = scenario.GetValue("expectedError");
 
-                // Create OIDC document with non-matching issuer
-                string validOidcDocumentWithWrongIssuer = TestConstants.GenericOidcResponse.Replace(
-                        $"\"issuer\":\"{TestConstants.GenericAuthority}\"",
-                        $"\"issuer\":\"{wrongIssuer}\"");
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                .Create(ConfigService.GetClientId())
+                .WithOidcAuthority(testServiceAuthority)
+                .WithClientSecret(ConfigService.GetClientSecret())
+                .WithHttpClientFactory(ConfigService.HttpClientFactory)
+                .Build();
 
-                // Mock OIDC endpoint response
-                httpManager.AddMockHandler(new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Get,
-                    ExpectedUrl = $"{TestConstants.GenericAuthority}/{Constants.WellKnownOpenIdConfigurationPath}",
-                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(validOidcDocumentWithWrongIssuer)
-                });
+            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()
+            ).ConfigureAwait(false);
+            
+            string expectedErrorMessage = string.Format(MsalErrorMessage.IssuerValidationFailed, app.Authority, wrongIssuer);
 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
-                    app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()
-                ).ConfigureAwait(false);
-
-                string expectedErrorMessage = string.Format(MsalErrorMessage.IssuerValidationFailed, app.Authority, wrongIssuer);
-
-                Assert.AreEqual(MsalError.AuthorityValidationFailed, ex.ErrorCode);
-                Assert.AreEqual(expectedErrorMessage, ex.Message, 
-                    "Error message should match the expected error message.");
-            }
+            // Assert using the error code from the configuration
+            Assert.AreEqual(expectedErrorCode, ex.ErrorCode, 
+                $"Error code should match the expected error code '{expectedErrorCode}'");
+            Assert.AreEqual(expectedErrorMessage, ex.Message, 
+                "Error message should match the expected error message.");
         }
 
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(
