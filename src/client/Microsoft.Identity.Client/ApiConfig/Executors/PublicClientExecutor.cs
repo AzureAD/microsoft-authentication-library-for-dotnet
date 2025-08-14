@@ -31,7 +31,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AuthenticationRequestParameters requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+                _publicClientApplication.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
 
             requestParams.LoginHint = interactiveParameters.LoginHint;
             requestParams.Account = interactiveParameters.Account;
@@ -52,7 +53,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+                _publicClientApplication.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
 
             var handler = new DeviceCodeRequest(
                 ServiceBundle,
@@ -72,7 +74,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+                _publicClientApplication.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
 
             var handler = new IntegratedWindowsAuthRequest(
                 ServiceBundle,
@@ -92,7 +95,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+                _publicClientApplication.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
 
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,

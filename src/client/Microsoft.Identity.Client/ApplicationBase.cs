@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
@@ -27,18 +29,41 @@ namespace Microsoft.Identity.Client
         internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
-            ITokenCacheInternal cache)
+            ITokenCacheInternal cache,
+            CancellationToken cancellationToken)
         {
             Instance.Authority authority = await Instance.Authority.CreateAuthorityForRequestAsync(
                requestContext,
                commonParameters.AuthorityOverride).ConfigureAwait(false);
+
+            var cacheKeyComponents = await InitializeCacheKeyComponentsAsync(commonParameters.CacheKeyComponents, cancellationToken).ConfigureAwait(false);
 
             return new AuthenticationRequestParameters(
                 ServiceBundle,
                 cache,
                 commonParameters,
                 requestContext,
-                authority);
+                authority,
+                cacheKeyComponents: cacheKeyComponents);
+        }
+
+        internal async Task<SortedList<string, string>> InitializeCacheKeyComponentsAsync(SortedList<string, Func<CancellationToken, Task<string>>> cacheKeyComponents, CancellationToken cancellationToken)
+        {
+            if (cacheKeyComponents != null && cacheKeyComponents.Count > 0)
+            {
+                var initializedCacheKeyComponents = new SortedList<string, string>();
+
+                foreach (var kvp in cacheKeyComponents)
+                {
+                    if (kvp.Value != null)
+                    {
+                        initializedCacheKeyComponents.Add(kvp.Key, await kvp.Value.Invoke(cancellationToken).ConfigureAwait(false));
+                    }
+                }
+                return initializedCacheKeyComponents;
+            }
+
+            return null;
         }
 
         internal static void GuardMobileFrameworks()

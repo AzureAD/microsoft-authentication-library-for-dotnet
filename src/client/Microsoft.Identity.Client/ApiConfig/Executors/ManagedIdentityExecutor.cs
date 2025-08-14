@@ -38,7 +38,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             var requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _managedIdentityApplication.AppTokenCacheInternal).ConfigureAwait(false);
+                _managedIdentityApplication.AppTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
 
             var handler = new ManagedIdentityAuthRequest(
                 ServiceBundle,

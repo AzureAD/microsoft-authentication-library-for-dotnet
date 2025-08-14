@@ -33,7 +33,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _clientApplicationBase.UserTokenCacheInternal).ConfigureAwait(false);
+                _clientApplicationBase.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
 
             requestParameters.SendX5C = silentParameters.SendX5C ?? false;
 
@@ -59,7 +60,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _clientApplicationBase.UserTokenCacheInternal).ConfigureAwait(false);
+                _clientApplicationBase.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
 
             requestContext.Logger.Info(() => LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 

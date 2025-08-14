@@ -24,6 +24,30 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class CacheKeyExtensionTests : TestBase
     {
         private byte[] _serializedCache;
+        private Dictionary<string, Func<CancellationToken, Task<string>>> _additionalCacheKeysAsync1 = new Dictionary<string, Func<CancellationToken, Task<string>>>
+                                                                            {
+                                                                                { "key1", (CancellationToken ct) => { return Task.FromResult("value1"); } },
+                                                                                { "key2", (CancellationToken ct) => { return Task.FromResult("value2"); } }
+                                                                            };
+        private Dictionary<string, Func<CancellationToken, Task<string>>> _additionalCacheKeysAsync2 = new Dictionary<string, Func<CancellationToken, Task<string>>>
+                                                                            {
+                                                                                { "key3", (CancellationToken ct) => { return Task.FromResult("value3"); } },
+                                                                                { "key4", (CancellationToken ct) => { return Task.FromResult("value4"); } }
+                                                                            };
+        private Dictionary<string, Func<CancellationToken, Task<string>>> _additionalCacheKeysAsync3 = new Dictionary<string, Func<CancellationToken, Task<string>>>
+                                                                            {
+                                                                                { "key2", (CancellationToken ct) => { return Task.FromResult("value2"); } },
+                                                                                { "key1", (CancellationToken ct) => { return Task.FromResult("value1"); } }
+                                                                            };
+
+        private Dictionary<string, Func<CancellationToken, Task<string>>> _additionalCacheKeysCombinedAsync = new Dictionary<string, Func<CancellationToken, Task<string>>>
+                                                                            {
+                                                                                { "key1", (CancellationToken ct) => { return Task.FromResult("value1"); } },
+                                                                                { "key2", (CancellationToken ct) => { return Task.FromResult("value2"); } },
+                                                                                { "key3", (CancellationToken ct) => { return Task.FromResult("value3"); } },
+                                                                                { "key4", (CancellationToken ct) => { return Task.FromResult("value4"); } }
+                                                                            };
+
         private Dictionary<string, string> _additionalCacheKeys1 = new Dictionary<string, string>
                                                                             {
                                                                                 { "key1", "value1" },
@@ -47,7 +71,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                                 { "key3", "value3" },
                                                                                 { "key4", "value4" }
                                                                             };
-
         [TestMethod]
         public async Task CacheExtWithInMemoryTestAsync()
         {
@@ -101,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             expectedCacheKeyHash = CoreHelpers.ComputeAccessTokenExtCacheKey(new(_additionalCacheKeys1));
             var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
+                                    .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
                                     .ExecuteAsync(CancellationToken.None)
                                     .ConfigureAwait(false);
 
@@ -113,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             //Ensure that the order of the keys does not matter
             expectedCacheKeyHash = CoreHelpers.ComputeAccessTokenExtCacheKey(new(_additionalCacheKeys3));
             result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                .WithAdditionalCacheKeyComponents(_additionalCacheKeys3)
+                                .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync3)
                                 .ExecuteAsync(CancellationToken.None)
                                 .ConfigureAwait(false);
 
@@ -127,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
             expectedCacheKeyHash = null;
             result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                .WithAdditionalCacheKeyComponents(_additionalCacheKeys2)
+                                .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync2)
                                 .ExecuteAsync(CancellationToken.None)
                                 .ConfigureAwait(false);
 
@@ -185,7 +208,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
+                                    .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
                                     .ExecuteAsync(CancellationToken.None)
                                     .ConfigureAwait(false);
 
@@ -203,7 +226,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Ensure that extended tokens are retrivable
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
+                    .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -230,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                        .WithAdditionalCacheKeyComponents(new SortedList<string, string>())
+                                        .WithAdditionalCacheKeyComponents(new SortedList<string, Func<CancellationToken, Task<string>>>())
                                         .ExecuteAsync(CancellationToken.None)
                                         .ConfigureAwait(false);
 
@@ -280,7 +303,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
                     .WithSignedHttpRequestProofOfPossession(popConfig)
-                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
+                    .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -293,7 +316,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
                     .WithSignedHttpRequestProofOfPossession(popConfig)
-                    .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
+                    .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -324,8 +347,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Ensure cache key components are added correctly
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                                         .WithForceRefresh(true)
-                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
-                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeys2)
+                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
+                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync2)
                                         .ExecuteAsync(CancellationToken.None)
                                         .ConfigureAwait(false);
 
@@ -335,8 +358,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First(), _additionalCacheKeysCombined, expectedPopCacheKey);
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeys1)
-                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeys2)
+                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
+                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync2)
                                         .ExecuteAsync(CancellationToken.None)
                                         .ConfigureAwait(false);
 
