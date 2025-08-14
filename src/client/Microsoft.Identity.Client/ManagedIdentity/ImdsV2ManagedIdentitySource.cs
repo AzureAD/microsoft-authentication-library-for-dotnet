@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
         private const string CsrMetadataPath = "/metadata/identity/getPlatformMetadata";
-        private const string ClientCredentialRequestPath = "/metadata/identity/issuecredential";
+        private const string CertificateRequestPath = "/metadata/identity/issuecredential";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
-        private async Task<ClientCredentialRequestResponse> ExecuteClientCredentialRequestAsync(
+        private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
             CuidInfo Cuid,
             string pem)
         {
@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             try
             {
                 response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
-                    ImdsManagedIdentitySource.GetValidatedEndpoint(_requestContext.Logger, ClientCredentialRequestPath, queryParams),
+                    ImdsManagedIdentitySource.GetValidatedEndpoint(_requestContext.Logger, CertificateRequestPath, queryParams),
                     headers,
                     body: new StringContent(body, System.Text.Encoding.UTF8, "application/json"),
                     method: HttpMethod.Post,
@@ -248,8 +248,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     (int)response.StatusCode);
             }
 
-            var clientCredentialRequestResponse = JsonHelper.DeserializeFromJson<ClientCredentialRequestResponse>(response.Body);
-            if (!ClientCredentialRequestResponse.IsValid(clientCredentialRequestResponse))
+            var certificateRequestResponse = JsonHelper.DeserializeFromJson<CertificateRequestResponse>(response.Body);
+            if (!CertificateRequestResponse.IsValid(certificateRequestResponse))
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     (int)response.StatusCode);
             }
 
-            return clientCredentialRequestResponse;
+            return certificateRequestResponse;
         }
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
@@ -267,7 +267,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
             var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.Cuid);
 
-            var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(csrMetadata.Cuid, csr.Pem).GetAwaiter().GetResult();
+            var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.Cuid, csr.Pem).GetAwaiter().GetResult();
 
             throw new NotImplementedException();
         }
