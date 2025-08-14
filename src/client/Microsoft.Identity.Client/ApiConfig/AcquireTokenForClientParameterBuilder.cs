@@ -16,6 +16,8 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.OAuth2;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Microsoft.Identity.Client
 {
@@ -45,9 +47,9 @@ namespace Microsoft.Identity.Client
 
             if (!string.IsNullOrEmpty(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken))
             {
-                builder.WithAdditionalCacheKeyComponents(new SortedList<string, string>
+                builder.WithAdditionalCacheKeyComponents(new SortedList<string, Func<CancellationToken, Task<string>>>
                 {
-                    { Constants.CertSerialNumber, confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken }
+                    { Constants.CertSerialNumber, (CancellationToken ct) => { return Task.FromResult(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken); } }
                 });
             }
 
@@ -144,9 +146,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(pathSuffix));
             }
 
-            var cacheKey = new SortedList<string, string>
+            var cacheKey = new SortedList<string, Func<CancellationToken, Task<string>>>
             { 
-                { OAuth2Parameter.FmiPath, pathSuffix } 
+                { OAuth2Parameter.FmiPath, (CancellationToken ct) => {return Task.FromResult(pathSuffix);} } 
             };
 
             this.WithAdditionalCacheKeyComponents(cacheKey);
