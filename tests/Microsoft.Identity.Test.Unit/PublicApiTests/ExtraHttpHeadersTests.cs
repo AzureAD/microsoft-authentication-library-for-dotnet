@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -139,6 +140,117 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_WithExtraHttpHeaders_Null_DoesNotChangeHeaders_Async()
+        {
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            HashSet<string> baseline = new(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> afterNull = new(StringComparer.OrdinalIgnoreCase);
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(),
+                AdditionalRequestValidation = req => { foreach (var h in EnumerateAllHeaders(req)) baseline.Add(h.Key); }
+            });
+
+            var app1 = ConfidentialClientApplicationBuilder.Create(_clientId)
+                .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                .WithClientSecret("ClientSecret")
+                .WithHttpManager(httpManager)
+                .BuildConcrete();
+
+            await app1.AcquireTokenForClient(new[] { _scope }).ExecuteAsync().ConfigureAwait(false);
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(),
+                AdditionalRequestValidation = req => { foreach (var h in EnumerateAllHeaders(req)) afterNull.Add(h.Key); }
+            });
+
+            var app2 = ConfidentialClientApplicationBuilder.Create(_clientId)
+                .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                .WithClientSecret("ClientSecret")
+                .WithHttpManager(httpManager)
+                .BuildConcrete();
+
+            Dictionary<string, string> headers = null;
+            await app2.AcquireTokenForClient(new[] { _scope })
+                .WithExtraHttpHeaders(headers)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            CollectionAssert.AreEquivalent(baseline.ToList(), afterNull.ToList(),
+                "Null headers should not change the header set.");
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_ExtraHeaders_OverridesDefault_Async()
+        {
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(),
+                AdditionalRequestValidation = (HttpRequestMessage req) =>
+                {
+                    Assert.IsTrue(TryGetHeader(req, "Accept", out var v), "Accept not present");
+                    Assert.AreEqual("text/plain", v); // user value should win
+                }
+            });
+
+            var app = ConfidentialClientApplicationBuilder.Create(_clientId)
+                .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                .WithClientSecret("ClientSecret")
+                .WithHttpManager(httpManager)
+                .BuildConcrete();
+
+            var headers = new Dictionary<string, string> { ["Accept"] = "text/plain" };
+            var result = await app.AcquireTokenForClient(new[] { _scope })
+                .WithExtraHttpHeaders(headers)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_MultipleWithExtraHttpHeaders_Calls_LastWins_Async()
+        {
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(),
+                AdditionalRequestValidation = (HttpRequestMessage req) =>
+                {
+                    // Only the last set of headers should be present
+                    Assert.IsTrue(TryGetHeader(req, "x-ms-test", out var v1), "x-ms-test not present.");
+                    Assert.AreEqual("final", v1);
+                    Assert.IsFalse(TryGetHeader(req, "x-ms-old", out _), "x-ms-old should not be present.");
+                }
+            });
+
+            var app = ConfidentialClientApplicationBuilder
+                .Create(_clientId)
+                .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                .WithClientSecret("ClientSecret")
+                .WithHttpManager(httpManager)
+                .BuildConcrete();
+
+            var result = await app.AcquireTokenForClient(new[] { _scope })
+                .WithExtraHttpHeaders(new Dictionary<string, string> { ["x-ms-test"] = "initial", ["x-ms-old"] = "old" })
+                .WithExtraHttpHeaders(new Dictionary<string, string> { ["x-ms-test"] = "final" }) // last call should win
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
         }
 
         private static IEnumerable<KeyValuePair<string, IEnumerable<string>>> EnumerateAllHeaders(HttpRequestMessage req)
