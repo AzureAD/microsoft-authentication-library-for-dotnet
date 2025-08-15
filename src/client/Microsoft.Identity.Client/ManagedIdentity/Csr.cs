@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Identity.Client.Utils;
@@ -83,7 +84,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
 #if NET462 || NET472
             // .NET Framework runs only on Windows, so RSACng (Windows-only) is always available
-            rsa = new System.Security.Cryptography.RSACng();
+            rsa = new RSACng();
 #else
             // Cross-platform .NET - RSA.Create() returns appropriate PSS-capable implementation
             rsa = RSA.Create();
@@ -97,7 +98,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         private static byte[] BuildCertificationRequestInfo(string clientId, string tenantId, CuidInfo cuid, RSA rsa)
         {
-            var components = new System.Collections.Generic.List<byte[]>();
+            var components = new List<byte[]>();
 
             // Version (INTEGER 0)
             components.Add(EncodeAsn1Integer(new byte[] { 0x00 }));
@@ -119,7 +120,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         private static byte[] BuildSubjectName(string clientId, string tenantId)
         {
-            var rdnSequence = new System.Collections.Generic.List<byte[]>();
+            var rdnSequence = new List<byte[]>();
 
             // CN=<clientId>
             byte[] cnOid = EncodeAsn1ObjectIdentifier(new int[] { 2, 5, 4, 3 }); // commonName OID
@@ -163,7 +164,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         private static byte[] BuildAttributes(CuidInfo cuid)
         {
-            var attributes = new System.Collections.Generic.List<byte[]>();
+            var attributes = new List<byte[]>();
 
             // CUID attribute (OID 1.2.840.113549.1.9.7)
             // Serialize CuidInfo as JSON object string using existing JSON serialization
@@ -192,7 +193,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         private static byte[] BuildPssParameters()
         {
-            var parameters = new System.Collections.Generic.List<byte[]>();
+            var parameters = new List<byte[]>();
 
             // hashAlgorithm [0] AlgorithmIdentifier DEFAULT sha1
             // We explicitly specify SHA256 since default is SHA1
@@ -309,7 +310,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (value == 0)
                 return EncodeAsn1Tag(0x02, new byte[] { 0x00 });
 
-            var bytes = new System.Collections.Generic.List<byte>();
+            var bytes = new List<byte>();
             int temp = value;
             while (temp > 0)
             {
@@ -365,7 +366,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (oid == null || oid.Length < 2)
                 throw new ArgumentException("OID must have at least 2 components");
 
-            var bytes = new System.Collections.Generic.List<byte>();
+            var bytes = new List<byte>();
 
             // First two components are encoded as (first * 40 + second)
             bytes.AddRange(EncodeOidComponent(oid[0] * 40 + oid[1]));
@@ -411,7 +412,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return new byte[] { (byte)length };
             }
 
-            var lengthBytes = new System.Collections.Generic.List<byte>();
+            var lengthBytes = new List<byte>();
             int temp = length;
             while (temp > 0)
             {
@@ -433,7 +434,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (value == 0)
                 return new byte[] { 0x00 };
 
-            var bytes = new System.Collections.Generic.List<byte>();
+            var bytes = new List<byte>();
             int temp = value;
 
             bytes.Insert(0, (byte)(temp & 0x7F));
