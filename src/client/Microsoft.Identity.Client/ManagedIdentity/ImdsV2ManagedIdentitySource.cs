@@ -242,8 +242,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
-                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCsrRequest failed.",
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed.",
                     ex,
+                    ManagedIdentitySource.ImdsV2,
+                    (int)response.StatusCode);
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed due to HTTP error. Status code: {response.StatusCode} Body: {response.Body}",
+                    null,
                     ManagedIdentitySource.ImdsV2,
                     (int)response.StatusCode);
             }
@@ -253,7 +263,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
-                    $"[ImdsV2] ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the CsrMetadata response is invalid. Status code: {response.StatusCode} Body: {response.Body}",
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed because the certificate request response is malformed. Status code: {response.StatusCode}",
                     null,
                     ManagedIdentitySource.ImdsV2,
                     (int)response.StatusCode);

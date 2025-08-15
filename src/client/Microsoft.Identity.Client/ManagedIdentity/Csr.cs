@@ -80,6 +80,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <returns>An RSA instance configured for 2048-bit keys with PSS padding capability.</returns>
         private static RSA CreateRsaKeyPair()
         {
+            // TODO: use the strongest key on the machine i.e. a TPM key
             RSA rsa = null;
 
 #if NET462 || NET472
