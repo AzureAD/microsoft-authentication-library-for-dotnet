@@ -2,12 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.Utils;
@@ -56,6 +59,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
+            await commonParameters.InitMtlsPopParametersAsync(ServiceBundle, cancellationToken)
+                .ConfigureAwait(false);
+
             RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(

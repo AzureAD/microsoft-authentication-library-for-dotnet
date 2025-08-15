@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public MtlsPopAuthenticationOperation(X509Certificate2 mtlsCert)
         {
             _mtlsCert = mtlsCert;
-            KeyId = ComputeX5tS256KeyId(_mtlsCert);
+            KeyId = CoreHelpers.ComputeX5tS256KeyId(_mtlsCert);
         }
 
         public int TelemetryTokenType => TelemetryTokenTypeConstants.MtlsPop;
@@ -39,21 +39,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public void FormatResult(AuthenticationResult authenticationResult)
         {
             authenticationResult.BindingCertificate = _mtlsCert;
-        }
-
-        private static string ComputeX5tS256KeyId(X509Certificate2 certificate)
-        {
-            // Extract the raw bytes of the certificate’s public key.
-            var publicKey = certificate.GetPublicKey();
-
-            // Compute the SHA-256 hash of the public key.
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] hash = sha256.ComputeHash(publicKey);
-
-                // Return the hash encoded in Base64 URL format.
-                return Base64UrlHelpers.Encode(hash);
-            }
         }
     }
 }
