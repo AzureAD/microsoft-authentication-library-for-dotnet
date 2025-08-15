@@ -5,11 +5,14 @@ using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Web.WebView2.Core;
+
+#if !WINUI3
+using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
+#endif
 
 namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
@@ -41,6 +44,11 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     coreUIParent.SystemWebViewOptions);
             }
 
+#if WINUI3
+            // In MAUI/packaged winapps, webview2 is available by default
+            requestContext.Logger.Info("Using WebView2 embedded browser.");
+            return new WebView2WebUi(coreUIParent, requestContext);
+#else
             AuthorityType authorityType = requestContext.ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType;
 
             if (authorityType == AuthorityType.Aad)
@@ -57,6 +65,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 
             requestContext.Logger.Info("Using WebView2 embedded browser.");
             return new WebView2WebUi(coreUIParent, requestContext);
+#endif
         }
 
         private static bool IsWebView2Available()
@@ -66,10 +75,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 string wv2Version = CoreWebView2Environment.GetAvailableBrowserVersionString();
                 return !string.IsNullOrEmpty(wv2Version);
             }
+#if !WINUI3
             catch (WebView2RuntimeNotFoundException)
             {
                 return false;
             }
+#endif
             catch (Exception ex) when (ex is BadImageFormatException || ex is DllNotFoundException)
             {
                 throw new MsalClientException(MsalError.WebView2LoaderNotFound, MsalErrorMessage.WebView2LoaderNotFound, ex);
