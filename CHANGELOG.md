@@ -1,3 +1,16 @@
+4.76.0
+======
+
+### New Features
+* Removal of `ExperimentalFeatures` flag on `WithMtlsProofOfPossession` API
+* Add Service Fabric token revocation support
+* Adding WithExtraBodyParameters api
+* Enable mTLS Proof‑of‑Possession for Client‑Assertion Delegates
+
+### Bug Fixes
+* #5400 Fixing issue that leads to multiple active access tokens in the cache for non-tenanted oidc authority 
+* Update NativeInterop package version to 0.19.4 
+
 4.74.1
 ======
 
