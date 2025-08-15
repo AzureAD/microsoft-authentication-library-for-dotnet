@@ -1,3 +1,16 @@
+4.75.0
+======
+
+### New Features
+* Removal of `ExperimentalFeatures` flag on `WithMtlsProofOfPossession` API: by @gladjohn in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5402
+* Add Service Fabric token revocation support by @gladjohn in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5421
+* Adding WithExtraBodyParameters api by @trwalke in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5389
+* Enable mTLS Proof‑of‑Possession for Client‑Assertion Delegates by @gladjohn in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5409
+
+### Bug Fixes
+* #5400 Fixing issue that leads to multiple active access tokens in the cache for non-tenanted oidc authority by @andkorsh in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5401
+* Update NativeInterop package version to 0.19.4 by @ashok672 in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5434
+
 4.74.1
 ======
 
