@@ -2,10 +2,10 @@
 ======
 
 ### New Features
-* Removal of `ExperimentalFeatures` flag on `WithMtlsProofOfPossession` API: by @gladjohn in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5402
-* Add Service Fabric token revocation support by @gladjohn in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5421
-* Adding WithExtraBodyParameters api by @trwalke in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5389
-* Enable mTLS Proof‑of‑Possession for Client‑Assertion Delegates by @gladjohn in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5409
+* Removal of `ExperimentalFeatures` flag on `WithMtlsProofOfPossession` API
+* Add Service Fabric token revocation support
+* Adding WithExtraBodyParameters api
+* Enable mTLS Proof‑of‑Possession for Client‑Assertion Delegates
 
 ### Bug Fixes
 * #5400 Fixing issue that leads to multiple active access tokens in the cache for non-tenanted oidc authority by @andkorsh in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5401
