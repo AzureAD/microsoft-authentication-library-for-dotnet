@@ -8,8 +8,8 @@
 * Enable mTLS Proof‑of‑Possession for Client‑Assertion Delegates
 
 ### Bug Fixes
-* #5400 Fixing issue that leads to multiple active access tokens in the cache for non-tenanted oidc authority by @andkorsh in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5401
-* Update NativeInterop package version to 0.19.4 by @ashok672 in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5434
+* #5400 Fixing issue that leads to multiple active access tokens in the cache for non-tenanted oidc authority 
+* Update NativeInterop package version to 0.19.4 
 
 4.74.1
 ======
