@@ -15,6 +15,7 @@ namespace FociTestApp
 {
     /// <summary>
     /// Family of Apps (FOCI) test app. changes the authority to AzureAdMultipleOrgs, and uses 3 different client IDs:
+    /// 1. Family member 1
     /// </summary>
     public class Program
     {
