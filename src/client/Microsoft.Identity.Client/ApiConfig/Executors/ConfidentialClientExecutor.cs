@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
-            await commonParameters.ValidateAndWireMtlsPopAsync(ServiceBundle, cancellationToken)
+            await commonParameters.InitMtlsPopParametersAsync(ServiceBundle, cancellationToken)
                 .ConfigureAwait(false);
 
             RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);

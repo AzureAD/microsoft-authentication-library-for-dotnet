@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
 
-        internal async Task ValidateAndWireMtlsPopAsync(IServiceBundle serviceBundle, CancellationToken ct)
+        internal async Task InitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {
             if (!IsMtlsPopRequested)
             {
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalErrorMessage.MtlsCertificateNotProvidedMessage);
                 }
 
-                Wire(ar.TokenBindingCertificate, serviceBundle);
+                InitMtlsPopParameters(ar.TokenBindingCertificate, serviceBundle);
                 return;
             }
 
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 MsalErrorMessage.MtlsCertificateNotProvidedMessage);
         }
 
-        private void Wire(X509Certificate2 cert, IServiceBundle serviceBundle)
+        private void InitMtlsPopParameters(X509Certificate2 cert, IServiceBundle serviceBundle)
         {
             // region check (AAD only)
             if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
