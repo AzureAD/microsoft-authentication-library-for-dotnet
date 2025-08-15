@@ -16,7 +16,7 @@ namespace ManualTestApp
 {
     /// <summary>
     /// This advanced console app uses MSAL with the token cache based on Config.cs to show how various MSAL flows work.
-    /// If you are new to this sample, please look at Config and ExampleUsage 
+    /// If you are new to this sample, please look at Config and ExampleUsage - 
     /// </summary>
     class Program
     {
