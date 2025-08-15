@@ -8,12 +8,12 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Container returned from <c>WithClientAssertion</c>.
     /// </summary>
-    public class ClientAssertion
+    public class ClientSignedAssertion
     {
         /// <summary>
         /// Represents the client assertion (JWT) and optional mutual‑TLS binding certificate returned
         /// by the <c>clientAssertionProvider</c> callback supplied to
-        /// <see cref="ConfidentialClientApplicationBuilder.WithClientAssertion(System.Func{AssertionRequestOptions, System.Threading.CancellationToken, System.Threading.Tasks.Task{ClientAssertion}})"/>.
+        /// <see cref="ConfidentialClientApplicationBuilder.WithClientAssertion(System.Func{AssertionRequestOptions, System.Threading.CancellationToken, System.Threading.Tasks.Task{ClientSignedAssertion}})"/>.
         /// </summary>
         /// <remarks>
         /// MSAL forwards <see cref="Assertion"/> to the token endpoint as the <c>client_assertion</c> parameter.
