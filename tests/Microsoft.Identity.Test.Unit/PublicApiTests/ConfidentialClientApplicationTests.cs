@@ -896,7 +896,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void Constructor_NullDelegate_ThrowsArgumentNullException()
         {
             // Arrange 
-            Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>> nullDelegate = null;
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> nullDelegate = null;
 
             // Act &  Assert
             Assert.ThrowsException<ArgumentNullException>(() =>
@@ -911,8 +911,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             X509Certificate2 cert = withCert ? CertHelper.GetOrCreateTestCert() : null;
 
-            Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>> validDelegate =
-                (options, ct) => Task.FromResult(new ClientAssertion
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> validDelegate =
+                (options, ct) => Task.FromResult(new ClientSignedAssertion
                 {
                     Assertion = "fake_assertion",
                     TokenBindingCertificate = cert
@@ -932,7 +932,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithClientSecret(TestConstants.ClientSecret)
                         .WithClientAssertion(
-                            (opts, ct) => Task.FromResult(new ClientAssertion
+                            (opts, ct) => Task.FromResult(new ClientSignedAssertion
                             {
                                 Assertion = string.Empty,          // <-- invalid: must be non‑empty
                                 TokenBindingCertificate = null     // no cert => jwt-bearer
