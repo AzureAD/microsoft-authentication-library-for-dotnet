@@ -408,7 +408,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                               CollectionAssert.AreEqual(
                                   TestConstants.ClientCapabilities,
                                   opts.ClientCapabilities.ToList());
-                              return Task.FromResult(new ClientAssertion
+                              return Task.FromResult(new ClientSignedAssertion
                               {
                                   Assertion = "jwt"
                               });
@@ -429,7 +429,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                       .WithClientSecret(TestConstants.ClientSecret)
                       .WithClientAssertion((o, c) =>
-                          Task.FromResult(new ClientAssertion { Assertion = string.Empty }))
+                          Task.FromResult(new ClientSignedAssertion { Assertion = string.Empty }))
                       .BuildConcrete();
 
             await AssertException.TaskThrowsAsync<MsalClientException>(() =>
@@ -449,7 +449,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                           Assert.AreEqual(cts.Token, ct);
                           cts.Cancel();
                           ct.ThrowIfCancellationRequested();
-                          return Task.FromResult(new ClientAssertion { Assertion = "jwt" });
+                          return Task.FromResult(new ClientSignedAssertion { Assertion = "jwt" });
                       })
                       .BuildConcrete();
 
@@ -545,12 +545,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Delegate returns certA on first call, certB on second call
                 int callCount = 0;
-                Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>> popDelegate =
+                Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> popDelegate =
                     (opts, ct) =>
                     {
                         callCount++;
                         var cert = (callCount == 1) ? certA : certB;
-                        return Task.FromResult(new ClientAssertion
+                        return Task.FromResult(new ClientSignedAssertion
                         {
                             Assertion = $"jwt_{callCount}",      // payload not important for this test
                             TokenBindingCertificate = cert
@@ -619,7 +619,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                       .WithClientAssertion((o, c) =>
                       {
                           callCount++;
-                          return Task.FromResult(new ClientAssertion { Assertion = "jwt" });
+                          return Task.FromResult(new ClientSignedAssertion { Assertion = "jwt" });
                       })
                       .BuildConcrete();
 
@@ -661,22 +661,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         #region Helper ---------------------------------------------------------------
-        private static Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>>
+        private static Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>>
         BearerDelegate(string jwt = "fake_jwt") =>
-            (opts, ct) => Task.FromResult(new ClientAssertion
+            (opts, ct) => Task.FromResult(new ClientSignedAssertion
             {
                 Assertion = jwt,
                 TokenBindingCertificate = null
             });
 
-        private static Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>>
+        private static Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>>
         PopDelegate(string jwt = "fake_jwt") =>
             (opts, ct) =>
             {
                 // Obtain (or generate) the test certificate once per call
                 X509Certificate2 cert = CertHelper.GetOrCreateTestCert();
 
-                return Task.FromResult(new ClientAssertion
+                return Task.FromResult(new ClientSignedAssertion
                 {
                     Assertion = jwt,
                     TokenBindingCertificate = cert
