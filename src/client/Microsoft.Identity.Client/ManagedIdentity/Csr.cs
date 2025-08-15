@@ -67,18 +67,29 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         /// <summary>
-        /// Creates a 2048-bit RSA key pair compatible with all target frameworks.
+        /// Creates a 2048-bit RSA key pair that supports PSS padding across all target frameworks.
         /// </summary>
+        /// <remarks>
+        /// On .NET Framework 4.6.2/4.7.2 (Windows-only), explicitly uses RSACng (also Windows-only)
+        /// to ensure PSS padding support, as RSA.Create() may return RSACryptoServiceProvider 
+        /// which doesn't support PSS.
+        /// On .NET Standard 2.0 and .NET 8.0+ (cross-platform), uses RSA.Create() which returns 
+        /// modern implementations that support PSS: RSACng on Windows, OpenSSL-based on Linux/macOS.
+        /// </remarks>
+        /// <returns>An RSA instance configured for 2048-bit keys with PSS padding capability.</returns>
         private static RSA CreateRsaKeyPair()
         {
+            RSA rsa = null;
+
 #if NET462 || NET472
-            var rsa = new RSACryptoServiceProvider(2048);
-            return rsa;
+            // .NET Framework runs only on Windows, so RSACng (Windows-only) is always available
+            rsa = new System.Security.Cryptography.RSACng();
 #else
-            var rsa = RSA.Create();
+            // Cross-platform .NET - RSA.Create() returns appropriate PSS-capable implementation
+            rsa = RSA.Create();
+#endif
             rsa.KeySize = 2048;
             return rsa;
-#endif
         }
 
         /// <summary>
@@ -167,31 +178,56 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         /// <summary>
-        /// Builds the signature algorithm identifier for SHA256withRSA.
+        /// Builds the signature algorithm identifier for RSASSA-PSS with SHA256.
         /// </summary>
         private static byte[] BuildSignatureAlgorithmIdentifier()
         {
-            byte[] sha256WithRsaOid = EncodeAsn1ObjectIdentifier(new int[] { 1, 2, 840, 113549, 1, 1, 11 }); // SHA256withRSA OID
-            byte[] nullParam = EncodeAsn1Null();
-            return EncodeAsn1Sequence(new[] { sha256WithRsaOid, nullParam });
+            byte[] rsassaPssOid = EncodeAsn1ObjectIdentifier(new int[] { 1, 2, 840, 113549, 1, 1, 10 }); // RSASSA-PSS OID
+            byte[] pssParams = BuildPssParameters();
+            return EncodeAsn1Sequence(new[] { rsassaPssOid, pssParams });
         }
 
         /// <summary>
-        /// Signs the CertificationRequestInfo with SHA256withRSA.
+        /// Builds the RSASSA-PSS parameters for SHA256 with MGF1.
+        /// </summary>
+        private static byte[] BuildPssParameters()
+        {
+            var parameters = new System.Collections.Generic.List<byte[]>();
+
+            // hashAlgorithm [0] AlgorithmIdentifier DEFAULT sha1
+            // We explicitly specify SHA256 since default is SHA1
+            byte[] sha256Oid = EncodeAsn1ObjectIdentifier(new int[] { 2, 16, 840, 1, 101, 3, 4, 2, 1 }); // SHA256 OID
+            byte[] sha256Null = EncodeAsn1Null();
+            byte[] hashAlgorithm = EncodeAsn1Sequence(new[] { sha256Oid, sha256Null });
+            byte[] hashAlgorithmParam = EncodeAsn1ContextSpecific(0, hashAlgorithm);
+            parameters.Add(hashAlgorithmParam);
+
+            // maskGenAlgorithm [1] AlgorithmIdentifier DEFAULT mgf1SHA1
+            // We explicitly specify MGF1 with SHA256
+            byte[] mgf1Oid = EncodeAsn1ObjectIdentifier(new int[] { 1, 2, 840, 113549, 1, 1, 8 }); // MGF1 OID
+            byte[] mgf1HashAlgorithm = EncodeAsn1Sequence(new[] { sha256Oid, sha256Null }); // MGF1 uses SHA256
+            byte[] maskGenAlgorithm = EncodeAsn1Sequence(new[] { mgf1Oid, mgf1HashAlgorithm });
+            byte[] maskGenAlgorithmParam = EncodeAsn1ContextSpecific(1, maskGenAlgorithm);
+            parameters.Add(maskGenAlgorithmParam);
+
+            // saltLength [2] INTEGER DEFAULT 20
+            // We explicitly specify 32 for SHA256 (hash length)
+            byte[] saltLength = EncodeAsn1Integer(32);
+            byte[] saltLengthParam = EncodeAsn1ContextSpecific(2, saltLength);
+            parameters.Add(saltLengthParam);
+
+            // trailerField [3] INTEGER DEFAULT 1
+            // Default value is 1 (0xBC), so we omit this parameter
+
+            return EncodeAsn1Sequence(parameters.ToArray());
+        }
+
+        /// <summary>
+        /// Signs the CertificationRequestInfo with SHA256withRSA-PSS.
         /// </summary>
         private static byte[] SignCertificationRequestInfo(byte[] certificationRequestInfo, RSA rsa)
         {
-#if NET462 || NET472
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] hash = sha256.ComputeHash(certificationRequestInfo);
-                var formatter = new RSAPKCS1SignatureFormatter(rsa);
-                formatter.SetHashAlgorithm("SHA256");
-                return formatter.CreateSignature(hash);
-            }
-#else
-            return rsa.SignData(certificationRequestInfo, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-#endif
+            return rsa.SignData(certificationRequestInfo, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
         }
 
         /// <summary>
