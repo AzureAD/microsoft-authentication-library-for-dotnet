@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                     CancellationToken = ct
                 };
 
-                ClientAssertion ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
+                ClientSignedAssertion ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
 
                 if (ar.TokenBindingCertificate == null)
                 {

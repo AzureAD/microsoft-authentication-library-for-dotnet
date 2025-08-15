@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Client
 
             return WithClientAssertion(
                 (opts, ct) =>
-                    Task.FromResult(new ClientAssertion
+                    Task.FromResult(new ClientSignedAssertion
                     {
                         Assertion = clientAssertionDelegate()   // bearer
                     }));
@@ -255,7 +255,7 @@ namespace Microsoft.Identity.Client
                 async (opts, ct) =>
                 {
                     string jwt = await clientAssertionAsyncDelegate(ct).ConfigureAwait(false);
-                    return new ClientAssertion { Assertion = jwt };    // bearer
+                    return new ClientSignedAssertion { Assertion = jwt };    // bearer
                 });
         }
 
@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Client
                 async (opts, _) =>
                 {
                     string jwt = await clientAssertionAsyncDelegate(opts).ConfigureAwait(false);
-                    return new ClientAssertion { Assertion = jwt };    // bearer
+                    return new ClientSignedAssertion { Assertion = jwt };    // bearer
                 });
         }
 
@@ -287,16 +287,16 @@ namespace Microsoft.Identity.Client
         /// <remarks>This method allows the client application to authenticate using a custom client
         /// assertion, which can be useful in scenarios where the assertion needs to be dynamically generated or
         /// retrieved.</remarks>
-        /// <param name="clientAssertionProvider">A delegate that asynchronously provides an <see cref="ClientAssertion"/> based on the given <see
+        /// <param name="clientSignedAssertionProvider">A delegate that asynchronously provides an <see cref="ClientSignedAssertion"/> based on the given <see
         /// cref="AssertionRequestOptions"/> and <see cref="CancellationToken"/>. This delegate must not be <see
         /// langword="null"/>.</param>
         /// <returns>The <see cref="ConfidentialClientApplicationBuilder"/> instance configured with the specified client
         /// assertion.</returns>
-        /// <exception cref="MsalClientException">Thrown if <paramref name="clientAssertionProvider"/> is <see langword="null"/>.</exception>
+        /// <exception cref="MsalClientException">Thrown if <paramref name="clientSignedAssertionProvider"/> is <see langword="null"/>.</exception>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions,
-            CancellationToken, Task<ClientAssertion>> clientAssertionProvider)
+            CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
-            Config.ClientCredential = new ClientAssertionDelegateCredential(clientAssertionProvider);
+            Config.ClientCredential = new ClientAssertionDelegateCredential(clientSignedAssertionProvider);
             return this;
         }
 

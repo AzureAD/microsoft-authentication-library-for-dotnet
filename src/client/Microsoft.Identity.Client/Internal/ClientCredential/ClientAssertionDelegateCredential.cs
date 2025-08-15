@@ -17,19 +17,19 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     /// <summary>
     /// Handles client assertions supplied via a delegate that returns an
-    /// <see cref="ClientAssertion"/> (JWT + optional certificate bound for mTLS‑PoP).
+    /// <see cref="ClientSignedAssertion"/> (JWT + optional certificate bound for mTLS‑PoP).
     /// </summary>
     internal sealed class ClientAssertionDelegateCredential : IClientCredential
     {
-        private readonly Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>> _provider;
+        private readonly Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> _provider;
 
-        internal Task<ClientAssertion> GetAssertionAsync(
+        internal Task<ClientSignedAssertion> GetAssertionAsync(
                 AssertionRequestOptions options,
                 CancellationToken cancellationToken) =>
             _provider(options, cancellationToken);
 
         public ClientAssertionDelegateCredential(
-            Func<AssertionRequestOptions, CancellationToken, Task<ClientAssertion>> provider)
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider)
         {
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 ClientAssertionFmiPath = p.ClientAssertionFmiPath
             };
 
-            ClientAssertion resp = await _provider(opts, ct).ConfigureAwait(false);
+            ClientSignedAssertion resp = await _provider(opts, ct).ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(resp?.Assertion))
             {
