@@ -14,7 +14,7 @@ using Microsoft.Identity.Client;
 namespace FociTestApp
 {
     /// <summary>
-    /// Family of Apps (FOCI) test app.
+    /// Family of Apps (FOCI) test app. changes the authority to AzureAdMultipleOrgs, and uses 3 different client IDs:
     /// </summary>
     public class Program
     {
