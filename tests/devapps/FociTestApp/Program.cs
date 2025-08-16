@@ -18,7 +18,7 @@ namespace FociTestApp
         private const string FAMILY_MEMBER_1 = "7660e4d6-d3f3-4385-9851-bc9027ef4a03";
         private const string FAMILY_MEMBER_2 = "9668f2bd-6103-4292-9024-84fa2d1b6fb2";
         private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        private static bool s_useIWA = false;
+        private static bool s_useIWA = false; //false means false
 
         private static readonly string[] s_scopes = new[] { "user.read" };
 
