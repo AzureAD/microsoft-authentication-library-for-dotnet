@@ -397,7 +397,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     builder.WithClientClaims(settings.GetCertificate(), GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
                     break;
                 default:
-                    throw new NotImplementedException();
+                    throw new NotImplementedException(); // this is to ensure that all cases are handled
             }
 
             var confidentialApp = builder.Build();
