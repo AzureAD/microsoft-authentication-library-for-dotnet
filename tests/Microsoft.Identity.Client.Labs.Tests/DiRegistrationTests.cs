@@ -22,10 +22,9 @@ namespace Microsoft.Identity.Client.Labs.Tests.Unit
             services.AddLabsIdentity(o =>
             {
                 o.KeyVaultUri = new Uri("https://example.vault.azure.net/");
-                o.GlobalPasswordSecret = "global_pwd";
+                o.GlobalPasswordSecret = "global_pwd"; // secret name, not a secret value
             });
 
-            // Minimal maps so resolvers have something to resolve
             services.AddSingleton<IAccountMapProvider>(sp =>
                 new FakeAccountMapProvider(new Dictionary<(AuthType, CloudType, Scenario), string>
                 {
@@ -39,12 +38,14 @@ namespace Microsoft.Identity.Client.Labs.Tests.Unit
                       new AppSecretKeys("cid_secret") }
                 }));
 
-            // Override the secret store with a fake (last registration wins)
+            // Use a non-sensitive generated placeholder for secret values
+            var fakeValue = $"UT_{Guid.NewGuid():N}";
+
             services.AddSingleton<ISecretStore>(sp =>
                 new FakeSecretStore(new Dictionary<string, string>
                 {
                     ["uname_secret"] = "user@example.com",
-                    ["global_pwd"] = "pwd",
+                    ["global_pwd"] = fakeValue,
                     ["cid_secret"] = "33333333-3333-3333-3333-333333333333"
                 }));
 
@@ -58,4 +59,3 @@ namespace Microsoft.Identity.Client.Labs.Tests.Unit
         }
     }
 }
-

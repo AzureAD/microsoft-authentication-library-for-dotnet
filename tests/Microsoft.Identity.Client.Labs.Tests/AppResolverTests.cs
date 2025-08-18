@@ -23,19 +23,23 @@ namespace Microsoft.Identity.Client.Labs.Tests.Unit
                   new AppSecretKeys("cid", "csec") }
             });
 
+            // Generate a non-sensitive test value
+            var expectedClientSecret = $"UT_{Guid.NewGuid():N}";
+
             var store = new FakeSecretStore(new Dictionary<string, string>
             {
                 ["cid"] = "11111111-1111-1111-1111-111111111111",
-                ["csec"] = "super-secret"
+                ["csec"] = expectedClientSecret
             });
 
             var agg = new AppMapAggregator(new[] { appMap });
             var resolver = new AppResolver(agg, store);
 
-            var app = await resolver.ResolveAppAsync(CloudType.Public, Scenario.Obo, AppKind.ConfidentialClient).ConfigureAwait(false);
+            var app = await resolver.ResolveAppAsync(CloudType.Public, Scenario.Obo, AppKind.ConfidentialClient)
+                .ConfigureAwait(false);
 
             Assert.AreEqual("11111111-1111-1111-1111-111111111111", app.ClientId);
-            Assert.AreEqual("super-secret", app.ClientSecret);
+            Assert.AreEqual(expectedClientSecret, app.ClientSecret);
             CollectionAssert.AreEqual(Array.Empty<byte>(), app.PfxBytes);
             Assert.AreEqual(string.Empty, app.PfxPassword);
         }
@@ -52,21 +56,24 @@ namespace Microsoft.Identity.Client.Labs.Tests.Unit
                   new AppSecretKeys("api_cid", "", "api_pfx", "api_pfxpwd") }
             });
 
+            var expectedPfxPassword = $"UTPFX_{Guid.NewGuid():N}";
+
             var store = new FakeSecretStore(new Dictionary<string, string>
             {
                 ["api_cid"] = "22222222-2222-2222-2222-222222222222",
                 ["api_pfx"] = b64,
-                ["api_pfxpwd"] = "pfx-pass"
+                ["api_pfxpwd"] = expectedPfxPassword
             });
 
             var agg = new AppMapAggregator(new[] { appMap });
             var resolver = new AppResolver(agg, store);
 
-            var app = await resolver.ResolveAppAsync(CloudType.Public, Scenario.Obo, AppKind.WebApi).ConfigureAwait(false);
+            var app = await resolver.ResolveAppAsync(CloudType.Public, Scenario.Obo, AppKind.WebApi)
+                .ConfigureAwait(false);
 
             Assert.AreEqual("22222222-2222-2222-2222-222222222222", app.ClientId);
             CollectionAssert.AreEqual(pfxBytes, app.PfxBytes);
-            Assert.AreEqual("pfx-pass", app.PfxPassword);
+            Assert.AreEqual(expectedPfxPassword, app.PfxPassword);
         }
 
         [TestMethod]
@@ -82,14 +89,15 @@ namespace Microsoft.Identity.Client.Labs.Tests.Unit
             {
                 ["api_cid"] = "cid",
                 ["api_pfx"] = "NOT-BASE64",
-                ["api_pfxpwd"] = "pwd"
+                ["api_pfxpwd"] = "UT_IGNORE_THIS_VALUE" // benign literal
             });
 
             var agg = new AppMapAggregator(new[] { appMap });
             var resolver = new AppResolver(agg, store);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () =>
-                await resolver.ResolveAppAsync(CloudType.Public, Scenario.Obo, AppKind.WebApi).ConfigureAwait(false)).ConfigureAwait(false);
+                await resolver.ResolveAppAsync(CloudType.Public, Scenario.Obo, AppKind.WebApi).ConfigureAwait(false))
+                .ConfigureAwait(false);
         }
     }
 }
