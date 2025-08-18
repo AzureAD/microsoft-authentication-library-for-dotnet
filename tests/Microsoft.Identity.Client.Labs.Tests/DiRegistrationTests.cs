@@ -19,12 +19,16 @@ namespace Microsoft.Identity.Client.Labs.Tests.Unit
         {
             var services = new ServiceCollection();
 
+            // Use a neutral, non-sensitive placeholder for the *secret name*
+            const string TestPasswordSecretName = "UT_PLACEHOLDER_SECRET_NAME";
+
             services.AddLabsIdentity(o =>
             {
                 o.KeyVaultUri = new Uri("https://example.vault.azure.net/");
-                o.GlobalPasswordSecret = "global_pwd"; // secret name, not a secret value
+                o.GlobalPasswordSecret = TestPasswordSecretName; // secret *name*, not value
             });
 
+            // Minimal maps so resolvers have something to resolve
             services.AddSingleton<IAccountMapProvider>(sp =>
                 new FakeAccountMapProvider(new Dictionary<(AuthType, CloudType, Scenario), string>
                 {
@@ -38,14 +42,15 @@ namespace Microsoft.Identity.Client.Labs.Tests.Unit
                       new AppSecretKeys("cid_secret") }
                 }));
 
-            // Use a non-sensitive generated placeholder for secret values
+            // Generate a benign placeholder for secret *values*
             var fakeValue = $"UT_{Guid.NewGuid():N}";
 
+            // Register a fake store whose keys are secret names and values are placeholder values
             services.AddSingleton<ISecretStore>(sp =>
                 new FakeSecretStore(new Dictionary<string, string>
                 {
                     ["uname_secret"] = "user@example.com",
-                    ["global_pwd"] = fakeValue,
+                    [TestPasswordSecretName] = fakeValue,
                     ["cid_secret"] = "33333333-3333-3333-3333-333333333333"
                 }));
 
