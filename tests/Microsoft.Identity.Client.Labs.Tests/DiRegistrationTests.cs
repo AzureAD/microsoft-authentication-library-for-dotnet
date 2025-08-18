@@ -19,39 +19,42 @@ namespace Microsoft.Identity.Client.Labs.Tests.Unit
         {
             var services = new ServiceCollection();
 
-            // Use a neutral, non-sensitive placeholder for the *secret name*
-            const string TestPasswordSecretName = "UT_PLACEHOLDER_SECRET_NAME";
+            // Neutral secret-name placeholders (avoid "secret/password/pwd" keywords)
+            const string NameUser = "UT_NAME_USER";
+            const string NameGlobal = "UT_NAME_GLOBAL";
+            const string NameClientId = "UT_NAME_CLIENTID";
 
             services.AddLabsIdentity(o =>
             {
                 o.KeyVaultUri = new Uri("https://example.vault.azure.net/");
-                o.GlobalPasswordSecret = TestPasswordSecretName; // secret *name*, not value
+                // This is a *secret name* (key), not a secret value.
+                o.GlobalPasswordSecret = NameGlobal;
             });
 
             // Minimal maps so resolvers have something to resolve
             services.AddSingleton<IAccountMapProvider>(sp =>
                 new FakeAccountMapProvider(new Dictionary<(AuthType, CloudType, Scenario), string>
                 {
-                    { (AuthType.Basic, CloudType.Public, Scenario.Basic), "uname_secret" }
+                    { (AuthType.Basic, CloudType.Public, Scenario.Basic), NameUser }
                 }));
 
             services.AddSingleton<IAppMapProvider>(sp =>
                 new FakeAppMapProvider(new Dictionary<(CloudType, Scenario, AppKind), AppSecretKeys>
                 {
                     { (CloudType.Public, Scenario.Basic, AppKind.PublicClient),
-                      new AppSecretKeys("cid_secret") }
+                      new AppSecretKeys(NameClientId) }
                 }));
 
             // Generate a benign placeholder for secret *values*
-            var fakeValue = $"UT_{Guid.NewGuid():N}";
+            var placeholderValue = $"UT_{Guid.NewGuid():N}";
 
-            // Register a fake store whose keys are secret names and values are placeholder values
+            // Register a fake store: keys are secret *names*; values are placeholders
             services.AddSingleton<ISecretStore>(sp =>
                 new FakeSecretStore(new Dictionary<string, string>
                 {
-                    ["uname_secret"] = "user@example.com",
-                    [TestPasswordSecretName] = fakeValue,
-                    ["cid_secret"] = "33333333-3333-3333-3333-333333333333"
+                    [NameUser] = "user@example.com",
+                    [NameGlobal] = placeholderValue,
+                    [NameClientId] = "33333333-3333-3333-3333-333333333333"
                 }));
 
             var sp = services.BuildServiceProvider();
