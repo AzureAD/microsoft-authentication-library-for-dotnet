@@ -21,29 +21,50 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         private readonly AbstractManagedIdentity _identitySource;
 
-        public ManagedIdentityClient(RequestContext requestContext)
+        // Cache for the managed identity source
+        private static ManagedIdentitySource? s_cachedManagedIdentitySource;
+        private static readonly SemaphoreSlim s_credentialSemaphore = new(1, 1);
+
+        internal static async Task<ManagedIdentityClient> CreateAsync(RequestContext requestContext, CancellationToken cancellationToken = default)
         {
-            using (requestContext.Logger.LogMethodDuration())
+            if (requestContext == null)
             {
-                _identitySource = SelectManagedIdentitySource(requestContext);
+                throw new ArgumentNullException(nameof(requestContext), "RequestContext cannot be null.");
             }
+
+            requestContext.Logger?.Info("[ManagedIdentityClient] Creating ManagedIdentityClient.");
+
+            AbstractManagedIdentity identitySource = await SelectManagedIdentitySourceAsync(requestContext, cancellationToken).ConfigureAwait(false);
+
+            requestContext.Logger?.Info($"[ManagedIdentityClient] Managed identity source selected: {identitySource.GetType().Name}.");
+
+            return new ManagedIdentityClient(identitySource);
         }
 
-        internal Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(AcquireTokenForManagedIdentityParameters parameters, CancellationToken cancellationToken)
+        private ManagedIdentityClient(AbstractManagedIdentity identitySource)
         {
-            return _identitySource.AuthenticateAsync(parameters, cancellationToken);
+            _identitySource = identitySource ?? throw new ArgumentNullException(nameof(identitySource), "Identity source cannot be null.");
         }
 
-        // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
-        private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
+        /// <summary>
+        /// This method tries to create managed identity source for different sources. 
+        /// If none is created then defaults to IMDS.
+        /// </summary>
+        /// <param name="requestContext"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private static async Task<AbstractManagedIdentity> SelectManagedIdentitySourceAsync(RequestContext requestContext, CancellationToken cancellationToken = default)
         {
-            return GetManagedIdentitySource(requestContext.Logger) switch
+            ManagedIdentitySource source = await GetManagedIdentitySourceAsync(requestContext.ServiceBundle, cancellationToken).ConfigureAwait(false);
+
+            return source switch
             {
                 ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.MachineLearning => MachineLearningManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.Credential => CredentialManagedIdentitySource.Create(requestContext),
                 _ => new ImdsManagedIdentitySource(requestContext)
             };
         }
@@ -97,6 +118,134 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
+        /// <summary>
+        /// Compute the managed identity source based on the environment variables and the probe.
+        /// </summary>
+        /// <param name="serviceBundle"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(
+            IServiceBundle serviceBundle,
+            CancellationToken cancellationToken = default)
+        {
+            if (serviceBundle == null)
+            {
+                throw new ArgumentNullException(nameof(serviceBundle), "ServiceBundle is required to initialize the probe manager.");
+            }
+
+            ILoggerAdapter logger = serviceBundle.ApplicationLogger;
+
+            logger.Verbose(() => s_cachedManagedIdentitySource.HasValue
+                ? "[Managed Identity] Using cached managed identity source."
+                : "[Managed Identity] Computing managed identity source asynchronously.");
+
+            if (s_cachedManagedIdentitySource.HasValue)
+            {
+                return s_cachedManagedIdentitySource.Value;
+            }
+
+            // Use SemaphoreSlim to prevent multiple threads from computing at the same time
+            logger.Verbose(() => "[Managed Identity] Entering managed identity source semaphore.");
+            await s_credentialSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            logger.Verbose(() => "[Managed Identity] Entered managed identity source semaphore.");
+
+            try
+            {
+                // Ensure another thread didn't set this while waiting on semaphore
+                if (s_cachedManagedIdentitySource.HasValue)
+                {
+                    return s_cachedManagedIdentitySource.Value;
+                }
+
+                // Initialize probe manager
+                var probeManager = new ImdsCredentialProbeManager(serviceBundle);
+
+                // Compute the managed identity source
+                s_cachedManagedIdentitySource = await ComputeManagedIdentitySourceAsync(
+                    probeManager,
+                    serviceBundle.ApplicationLogger,
+                    cancellationToken).ConfigureAwait(false);
+
+                logger.Info($"[Managed Identity] Managed identity source determined: {s_cachedManagedIdentitySource.Value}.");
+
+                return s_cachedManagedIdentitySource.Value;
+            }
+            finally
+            {
+                s_credentialSemaphore.Release();
+                logger.Verbose(() => "[Managed Identity] Released managed identity source semaphore.");
+            }
+        }
+
+        /// <summary>
+        /// Compute the managed identity source based on the environment variables and the probe.
+        /// </summary>
+        /// <param name="imdsCredentialProbeManager"></param>
+        /// <param name="logger"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private static async Task<ManagedIdentitySource> ComputeManagedIdentitySourceAsync(
+            ImdsCredentialProbeManager imdsCredentialProbeManager,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken)
+        {
+            string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
+            string identityHeader = EnvironmentVariables.IdentityHeader;
+            string identityServerThumbprint = EnvironmentVariables.IdentityServerThumbprint;
+            string msiEndpoint = EnvironmentVariables.MsiEndpoint;
+            string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
+            string msiSecretMachineLearning = EnvironmentVariables.MsiSecret;
+
+            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
+            {
+                if (!string.IsNullOrEmpty(identityServerThumbprint))
+                {
+                    return ManagedIdentitySource.ServiceFabric;
+                }
+                else
+                {
+                    return ManagedIdentitySource.AppService;
+                }
+            }
+            else if (!string.IsNullOrEmpty(msiSecretMachineLearning) && !string.IsNullOrEmpty(msiEndpoint))
+            {
+                return ManagedIdentitySource.MachineLearning;
+            }
+            else if (!string.IsNullOrEmpty(msiEndpoint))
+            {
+                return ManagedIdentitySource.CloudShell;
+            }
+            else if (ValidateAzureArcEnvironment(identityEndpoint, imdsEndpoint, logger))
+            {
+                return ManagedIdentitySource.AzureArc;
+            }
+            else
+            {
+                logger?.Info("[Managed Identity] Probing for credential endpoint.");
+                bool isSuccess = await imdsCredentialProbeManager.ExecuteProbeAsync(cancellationToken).ConfigureAwait(false);
+
+                if (isSuccess)
+                {
+                    logger?.Info("[Managed Identity] Credential endpoint detected.");
+                    return ManagedIdentitySource.Credential;
+                }
+                else
+                {
+                    logger?.Verbose(() => "[Managed Identity] Defaulting to IMDS as credential endpoint not detected.");
+                    return ManagedIdentitySource.DefaultToImds;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Resets the cached managed identity source. Used only for testing purposes.
+        /// </summary>
+        internal static void ResetManagedIdentitySourceCache()
+        {
+            s_cachedManagedIdentitySource = null;
+        }
+
         // Method to return true if a file exists and is not empty to validate the Azure arc environment.
         private static bool ValidateAzureArcEnvironment(string identityEndpoint, string imdsEndpoint, ILoggerAdapter logger)
         {
@@ -122,6 +271,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
+        }
+
+        internal Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(AcquireTokenForManagedIdentityParameters parameters, CancellationToken cancellationToken)
+        {
+            return _identitySource.AuthenticateAsync(parameters, cancellationToken);
         }
     }
 }

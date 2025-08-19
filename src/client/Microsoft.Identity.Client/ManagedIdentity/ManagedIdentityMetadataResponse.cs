@@ -1,0 +1,30 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using Microsoft.Identity.Client.Platforms.net;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
+using Microsoft.Identity.Json;
+#endif
+
+namespace Microsoft.Identity.Client.ManagedIdentity
+{
+    [JsonObject]
+    [Preserve(AllMembers = true)]
+    internal class ManagedIdentityMetadataResponse
+    {
+        [JsonProperty("client_id")]
+        public string ClientId { get; set; }
+
+        [JsonProperty("client_credential")]
+        public byte[] CertificateForMtls { get; set; }
+
+        [JsonProperty("regional_token_url")]
+        public string RegionalTokenUrl { get; set; }
+
+        [JsonProperty("tenant_id")]
+        public string TenantId { get; set; }
+    }
+}

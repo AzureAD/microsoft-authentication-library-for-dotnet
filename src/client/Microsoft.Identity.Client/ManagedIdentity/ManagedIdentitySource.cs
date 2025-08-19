@@ -53,6 +53,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <summary>
         /// The source to acquire token for managed identity is Machine Learning Service.
         /// </summary>
-        MachineLearning
+        MachineLearning,
+
+        /// <summary>
+        /// Indicates that the source is credential endpoint based on the probe.
+        /// This is used to detect the new managed identity credential source.
+        /// </summary>
+        Credential
     }
 }
