@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Advanced
     }
 }
 
-// Extensibility (new surface)
+// Extensibility (new surface for WithExtraHttpHeaders)
 namespace Microsoft.Identity.Client.Extensibility
 {
     /// <summary>
