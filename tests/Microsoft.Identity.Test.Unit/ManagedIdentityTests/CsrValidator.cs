@@ -302,7 +302,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         /// <summary>
         /// Validates the CUID attribute contains the expected VM and VMSS IDs as JSON.
-        /// Note: Vmid is required, Vmssid is optional and will be omitted if null/empty.
+        /// Note: VmId is required, VmssId is optional and will be omitted if null/empty.
         /// </summary>
         private static void ValidateCuidAttribute(byte[] attributesBytes, CuidInfo expectedCuid)
         {

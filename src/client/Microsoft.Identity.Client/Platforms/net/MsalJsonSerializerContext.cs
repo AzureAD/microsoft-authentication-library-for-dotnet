@@ -40,6 +40,10 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(ManagedIdentityResponse))]
     [JsonSerializable(typeof(ManagedIdentityErrorResponse))]
     [JsonSerializable(typeof(OidcMetadata))]
+    [JsonSerializable(typeof(CsrMetadata))]
+    [JsonSerializable(typeof(CuidInfo))]
+    [JsonSerializable(typeof(CertificateRequestResponse))]
+    [JsonSerializable(typeof(PemPayload))]
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {
@@ -54,6 +58,7 @@ namespace Microsoft.Identity.Client.Platforms.net
                     {
                         NumberHandling = JsonNumberHandling.AllowReadingFromString,
                         AllowTrailingCommas = true,
+                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                         Converters =
                         {
                             new JsonStringConverter(),

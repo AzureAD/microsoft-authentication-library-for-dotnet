@@ -16,15 +16,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
-        private const string CsrMetadataPath = "/metadata/identity/getPlatformMetadata";
+        public const string ImdsV2ApiVersion = "2.0";
+        private const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
         private const string CertificateRequestPath = "/metadata/identity/issuecredential";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
             bool probeMode)
         {
-            string queryParams = $"cred-api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
-            
+            string queryParams = $"cred-api-version={ImdsV2ApiVersion}";
+
             var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
                 requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
                 requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
@@ -129,12 +130,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
              * "1556"                   // index 1: captured group (\d+)
              * ]
              */
-            string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
+            // Imds bug: headers are missing
+            // TODO: uncomment this when the bug is fixed
+            /*string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
             if (serverHeader == null)
             {
                 if (probeMode)
                 {
-                    logger.Info(() => "[Managed Identity] IMDSv2 managed identity is not available. 'server' header is missing from the CSR metadata response.");
+                    logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. 'server' header is missing from the CSR metadata response. Body: {response.Body}");
                     return false;
                 }
                 else
@@ -164,7 +167,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         null,
                         (int)response.StatusCode);
                 }
-            }
+            }*/
 
             return true;
         }
@@ -196,26 +199,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
-            CuidInfo Cuid,
+            CuidInfo cuid,
             string pem)
         {
-            var queryParams = $"cid={JsonHelper.SerializeToJson(Cuid)}";
+            var queryParams = $"cuid={JsonHelper.SerializeToJson(cuid)}&cred-api-version={ImdsV2ApiVersion}";
             if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
             {
                 queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
             }
-            queryParams += $"&api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
 
             var headers = new Dictionary<string, string>
             {
                 { "Metadata", "true" },
                 { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
-
-            var payload = new
-            {
-                pem = pem
-            };
+            
+            var payload = new PemPayload { pem = pem };
             var body = JsonHelper.SerializeToJson(payload);
 
             IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
@@ -275,9 +274,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
-            var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.Cuid);
+            var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
-            var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.Cuid, csr.Pem).GetAwaiter().GetResult();
+            var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.CuId, csr.Pem).GetAwaiter().GetResult();
 
             throw new NotImplementedException();
         }

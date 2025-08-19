@@ -9,6 +9,11 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
+    internal class PemPayload
+    {
+        public string pem { get; set; }
+    }
+
     internal class Csr
     {
         public string Pem { get; }
@@ -23,7 +28,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         /// <param name="clientId">Managed Identity client_id.</param>
         /// <param name="tenantId">AAD tenant_id.</param>
-        /// <param name="cuid">CuidInfo object containing required VMID and optional VMSSID.</param>
+        /// <param name="cuid">CuidInfo object containing required vmId and optional vmssId.</param>
         /// <returns>CsrRequest containing the PEM CSR.</returns>
         public static Csr Generate(string clientId, string tenantId, CuidInfo cuid)
         {
@@ -33,8 +38,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw new ArgumentException("tenantId must not be null or empty.", nameof(tenantId));
             if (cuid == null)
                 throw new ArgumentNullException(nameof(cuid));
-            if (string.IsNullOrEmpty(cuid.Vmid))
-                throw new ArgumentException("cuid.Vmid must not be null or empty.", nameof(cuid.Vmid));
+            if (string.IsNullOrEmpty(cuid.VmId))
+                throw new ArgumentException("cuid.VmId must not be null or empty.", nameof(cuid.VmId));
 
             string pemCsr = GeneratePkcs10Csr(clientId, tenantId, cuid);
             return new Csr(pemCsr);
