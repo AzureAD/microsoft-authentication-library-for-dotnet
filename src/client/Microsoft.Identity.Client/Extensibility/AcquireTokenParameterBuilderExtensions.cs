@@ -26,3 +26,26 @@ namespace Microsoft.Identity.Client.Advanced
         }
     }
 }
+
+// Extensibility (new surface for WithExtraHttpHeaders)
+namespace Microsoft.Identity.Client.Extensibility
+{
+    /// <summary>
+    /// Extensibility helpers for acquire token parameter builders.
+    /// </summary>
+    public static class AcquireTokenParameterBuilderExtensions
+    {
+        /// <summary>Adds additional HTTP headers to the token request.</summary>
+        /// <param name="builder">Parameter builder for acquiring tokens.</param>
+        /// <param name="extraHttpHeaders">Additional HTTP headers to add to the token request.</param>
+        public static T WithExtraHttpHeaders<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            IDictionary<string, string> extraHttpHeaders)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            // Delegate to the Advanced implementation to keep a single source of truth.
+            return Advanced.AcquireTokenParameterBuilderExtensions
+                   .WithExtraHttpHeaders(builder, extraHttpHeaders);
+        }
+    }
+}
