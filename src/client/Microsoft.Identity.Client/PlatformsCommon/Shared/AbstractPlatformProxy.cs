@@ -8,6 +8,8 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.ManagedIdentity;
+
 #if SUPPORTS_OTEL
 using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 #endif
@@ -34,6 +36,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private readonly Lazy<string> _productName;
         private readonly Lazy<string> _runtimeVersion;
         private readonly Lazy<IOtelInstrumentation> _otelInstrumentation;
+        private readonly Lazy<IManagedIdentityKeyProvider> _miKeyProvider;
 
         protected AbstractPlatformProxy(ILoggerAdapter logger)
         {
@@ -49,6 +52,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _platformLogger = new Lazy<IPlatformLogger>(InternalGetPlatformLogger);
             _runtimeVersion = new Lazy<string>(InternalGetRuntimeVersion);
             _otelInstrumentation = new Lazy<IOtelInstrumentation>(InternalGetOtelInstrumentation);
+            _miKeyProvider = new Lazy<IManagedIdentityKeyProvider>(GetManagedIdentityKeyProvider);
         }
 
         private IOtelInstrumentation InternalGetOtelInstrumentation()
@@ -229,10 +233,17 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return new SimpleHttpClientFactory();
         }
 
+        internal virtual IManagedIdentityKeyProvider GetManagedIdentityKeyProvider()
+        {
+            return ManagedIdentityKeyProviderFactory.GetOrCreateProvider();
+        }
+
         /// <summary>
         /// On Android and iOS, MSAL will save the legacy ADAL cache in a known location.
         /// On other platforms, the app developer must use the serialization callbacks
         /// </summary>
         public virtual bool LegacyCacheRequiresSerialization => true;
+
+        public IManagedIdentityKeyProvider ManagedIdentityKeyProvider => _miKeyProvider.Value;
     }
 }
