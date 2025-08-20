@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             string malformedPem = "-----BEGIN CERTIFICATE REQUEST-----\nInvalid@#$%Base64Content!\n-----END CERTIFICATE REQUEST-----";
             Assert.ThrowsException<FormatException>(() => 
-                TestCsrValidator.ParseCsrFromPem(malformedPem));
+                CsrValidator.ParseCsrFromPem(malformedPem));
         }
 
         [DataTestMethod]
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void TestCsrGeneration_MalformedPem_ArgumentException(string malformedPem)
         {
             Assert.ThrowsException<ArgumentException>(() => 
-                TestCsrValidator.ParseCsrFromPem(malformedPem));
+                CsrValidator.ParseCsrFromPem(malformedPem));
         }
     }
 }

@@ -19,14 +19,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         [JsonProperty("vmssId")]
         public string VmssId { get; set; }
-
-        /*internal string VmId { get; set; }
-        internal string VmssId { get; set; }
-
-        internal string ToJsonString()
-        {
-            return $"{{ \"vmId\": \"{VmId}\", \"vmssId\": \"{VmssId}\" }}";
-        }*/
     }
 
     /// <summary>
