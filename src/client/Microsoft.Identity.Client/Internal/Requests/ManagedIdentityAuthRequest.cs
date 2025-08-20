@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Net;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -196,6 +197,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             logger.Info("[ManagedIdentityRequest] Acquiring a token from the managed identity endpoint.");
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
+
+            ManagedIdentityClient managedIdentityClient = 
+                new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
+
+            var keyProvider = ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
+
+            var mi = await keyProvider.GetOrCreateKeyAsync(cancellationToken).ConfigureAwait(false);
+            var rsa = mi.KeyInfo;
+
+            byte[] data = System.Text.Encoding.UTF8.GetBytes("ping");
+            byte[] sig = rsa.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            bool ok = rsa.VerifyData(data, sig, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            // ok should be true
 
             ManagedIdentityResponse managedIdentityResponse =
                 await _managedIdentityClient
