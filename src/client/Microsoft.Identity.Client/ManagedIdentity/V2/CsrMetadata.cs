@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
-    using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
-    using Microsoft.Identity.Json;
+using Microsoft.Identity.Json;
 #endif
 
-namespace Microsoft.Identity.Client.ManagedIdentity
+namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     /// <summary>
     /// Represents VM unique Ids for CSR metadata.
@@ -19,6 +19,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         [JsonProperty("vmssId")]
         public string VmssId { get; set; }
+
+        /*internal string VmId { get; set; }
+        internal string VmssId { get; set; }
+
+        internal string ToJsonString()
+        {
+            return $"{{ \"vmId\": \"{VmId}\", \"vmssId\": \"{VmssId}\" }}";
+        }*/
     }
 
     /// <summary>

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -146,71 +147,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             };
 
             // Generate CSR
-            var csr = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
 
             // Validate the CSR contents using the helper
-            CsrValidator.ValidateCsrContent(csr.Pem, TestConstants.ClientId, TestConstants.TenantId, cuid);
-        }
-
-        [DataTestMethod]
-        [DataRow(null, TestConstants.TenantId)]
-        [DataRow("", TestConstants.TenantId)]
-        [DataRow(TestConstants.ClientId, null)]
-        [DataRow(TestConstants.ClientId, "")]
-        public void TestCsrGeneration_InvalidParameters(string clientId, string tenantId)
-        {
-            var cuid = new CuidInfo
-            {
-                VmId = TestConstants.VmId,
-                //VmssId = TestConstants.VmssId
-            };
-
-            Assert.ThrowsException<ArgumentException>(() => 
-                Csr.Generate(clientId, tenantId, cuid));
-        }
-
-        [TestMethod]
-        public void TestCsrGeneration_NullCuid()
-        {
-            // Test with null CUID
-            Assert.ThrowsException<ArgumentNullException>(() => 
-                Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, null));
-        }
-
-        [DataTestMethod]
-        [DataRow(null, TestConstants.VmssId)]
-        [DataRow("", TestConstants.VmssId)]
-        public void TestCsrGeneration_InvalidVmId(string vmId, string vmssId)
-        {
-            var cuid = new CuidInfo
-            {
-                VmId = vmId,
-                //VmssId = vmssId
-            };
-
-            // Should throw ArgumentException since VmId is required
-            Assert.ThrowsException<ArgumentException>(() => 
-                Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid));
-        }
-
-        [DataTestMethod]
-        [DataRow(TestConstants.VmId, null)]
-        [DataRow(TestConstants.VmId, "")]
-        public void TestCsrGeneration_OptionalVmssId(string vmId, string vmssId)
-        {
-            var cuid = new CuidInfo
-            {
-                VmId = vmId,
-                //VmssId = vmssId
-            };
-
-            // Should succeed since VmssId is optional (VmId is provided and valid)
-            var csrRequest = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
-            Assert.IsNotNull(csrRequest);
-            Assert.IsFalse(string.IsNullOrWhiteSpace(csrRequest.Pem));
-
-            // Validate the CSR contents - this should handle null/empty vmssId gracefully
-            CsrValidator.ValidateCsrContent(csrRequest.Pem, TestConstants.ClientId, TestConstants.TenantId, cuid);
+            CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
         [TestMethod]

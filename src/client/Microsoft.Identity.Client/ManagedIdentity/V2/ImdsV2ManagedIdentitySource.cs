@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.ManagedIdentity
+namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
             CuidInfo cuid,
-            string pem)
+            string csrPem)
         {
             var queryParams = $"cuid={JsonHelper.SerializeToJson(cuid)}&cred-api-version={ImdsV2ApiVersion}";
             if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
             
-            var payload = new PemPayload { pem = pem };
+            var payload = new PemPayload { pem = csrPem };
             var body = JsonHelper.SerializeToJson(payload);
 
             IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
@@ -274,9 +274,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
-            var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
+            var csrPem = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
-            var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.CuId, csr.Pem).GetAwaiter().GetResult();
+            var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.CuId, csrPem).GetAwaiter().GetResult();
 
             throw new NotImplementedException();
         }
