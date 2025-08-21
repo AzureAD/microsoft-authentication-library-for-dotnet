@@ -19,7 +19,7 @@ using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
-    internal sealed class WinUI3WindowWithWebView2 : Window
+    internal sealed class WinUI3WindowWithWebView2 : Window, IDisposable
     {
         private const int UIWidth = 566;
         private readonly EmbeddedWebViewOptions _embeddedWebViewOptions;
@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         private TaskCompletionSource<AuthorizationResult> _dialogCompletionSource;
         private CancellationToken _cancellationToken;
         private Window _ownerWindow;
+        private bool _disposed = false;
         
         private WebView2 _webView2;
         private ProgressRing _progressRing;
@@ -123,7 +124,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             bool readyToClose = false;
 
             if (url.Authority.Equals(_endUri.Authority, StringComparison.OrdinalIgnoreCase) &&
-                url.AbsolutePath.Equals(_endUri.AbsolutePath))
+                url.AbsolutePath.Equals(_endUri.AbsolutePath, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Info("Redirect Uri was reached. Stopping WebView navigation...");
                 _result = AuthorizationResult.FromUri(url.OriginalString);
@@ -195,7 +196,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
         public async Task<AuthorizationResult> DisplayDialogAndInterceptUriAsync(CancellationToken cancellationToken)
         {
             _cancellationToken = cancellationToken;
-            _dialogCompletionSource = new TaskCompletionSource<AuthorizationResult>();
+            _dialogCompletionSource = new TaskCompletionSource<AuthorizationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Register cancellation callback
             using (cancellationToken.Register(CloseIfOpen))
@@ -210,14 +211,14 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                         this.Activate();
                     });
 
-                    var initTcs = new TaskCompletionSource<bool>();
+                    var initTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
 #pragma warning disable VSTHRD101
                     InvokeHandlingOwnerWindow(async () =>
                     {
                         try
                         {
-                            var userDataFolder = Environment.ExpandEnvironmentVariables("%UserProfile%/.msal/webview2/data");
+                            var userDataFolder = Environment.ExpandEnvironmentVariables("%UserProfile%\\.msal\\webview2\\data");
                             _logger.Info($"Initializing WebView2 with user data folder: {userDataFolder}");
 
                             System.IO.Directory.CreateDirectory(userDataFolder);
@@ -302,7 +303,15 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             {
                 if (_dialogCompletionSource != null && !_dialogCompletionSource.Task.IsCompleted)
                 {
-                    _dialogCompletionSource.TrySetResult(AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel));
+                    // When cancellation token is triggered, set the task as canceled rather than completed with UserCancel
+                    if (_cancellationToken.IsCancellationRequested)
+                    {
+                        _dialogCompletionSource.TrySetCanceled(_cancellationToken);
+                    }
+                    else
+                    {
+                        _dialogCompletionSource.TrySetResult(AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel));
+                    }
                 }
                 this.Close();
             });
@@ -349,6 +358,9 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 {
                     _dialogCompletionSource.TrySetResult(_result);
                 }
+
+                // Dispose of resources when window closes
+                Dispose();
             };
 
             this.Activated += (s, e) =>
@@ -398,6 +410,47 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             {
                 this.Title = _webView2.CoreWebView2.DocumentTitle ?? "";
             });
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed && disposing)
+            {
+                try
+                {
+                    // Dispose WebView2 and its resources
+                    if (_webView2 != null)
+                    {
+                        // Unsubscribe from events to prevent memory leaks
+                        _webView2.CoreWebView2Initialized -= WebView2_CoreWebView2Initialized;
+                        _webView2.NavigationStarting -= WebView2_NavigationStarting;
+
+                        if (_webView2.CoreWebView2 != null)
+                        {
+                            _webView2.CoreWebView2.DocumentTitleChanged -= CoreWebView2_DocumentTitleChanged;
+                        }
+
+                        // Dispose the WebView2 control
+                        _webView2?.Close();
+                    }
+
+                    _logger?.Info("WinUI3WindowWithWebView2 disposed successfully");
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Warning($"Exception during dispose: {ex.Message}");
+                }
+                finally
+                {
+                    _disposed = true;
+                }
+            }
         }
     }
 }

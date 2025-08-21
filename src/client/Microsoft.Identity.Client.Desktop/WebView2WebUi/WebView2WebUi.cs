@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 if (_parent.SynchronizationContext != null)
                 {
 #if WINUI3
-                    var tcs = new TaskCompletionSource<AuthorizationResult>();
+                    var tcs = new TaskCompletionSource<AuthorizationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                     _parent.SynchronizationContext.Post((state) =>
                     {
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                         }
                     });
 
-                    var tcs2 = new TaskCompletionSource<object>();
+                    var tcs2 = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                     _parent.SynchronizationContext.Post(
                         new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
