@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Net.Http;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 

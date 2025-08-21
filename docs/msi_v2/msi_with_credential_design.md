@@ -120,7 +120,7 @@ This section outlines the necessary steps to acquire an access token using the M
 
 ### 1. Retrieve Platform Metadata
 
-`GET /metadata/identity/getPlatformMetadata?api-version=2025-05-01&cid={CUID}&uaid={client_id}`
+`GET /metadata/identity/getPlatformMetadata?api-version=2025-05-01&uaid={client_id}`
 
 Response supplies the UAID/client_id, tenant_id, CUID, and (for attestable VMs) the regional MAA endpoint
 
@@ -138,7 +138,7 @@ MSAL will load a pre-exisitng key, if none available MSAL will try creating one 
 
 - **Subject:** `CN={client_id}, DC={tenant_id}`
 - **Attribute OID 1.2.840.113549.1.9.7:** `PrintableString = {CUID}`
-- **Signed with:** new key (`RSA 2048` / `EC P-256`)
+- **Signed with:** new key `RSA 2048`
 
 #### (Optionally) Attest Key
 
