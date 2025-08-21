@@ -236,10 +236,31 @@ namespace Microsoft.Identity.Client
             if (parent is IntPtr intPtrWindow)
             {
                 Parameters.UiParent.OwnerWindow = intPtrWindow;
+                return this;
+            }
+#endif
+
+#if NET_CORE
+            // Handle WinUI3 Window objects (including derived types)
+            if (parent != null && IsWinUI3Window(parent))
+            {
+                Parameters.UiParent.OwnerWindow = parent;
             }
 #endif
             return this;
         }
+
+#if NET_CORE
+        private static readonly Type WinUIWindowType = Type.GetType("Microsoft.UI.Xaml.Window, Microsoft.WinUI");
+
+        /// <summary>
+        /// Checks if an object is a WinUI3 Window or derives from one
+        /// </summary>
+        private static bool IsWinUI3Window(object obj)
+        {
+            return obj != null && WinUIWindowType?.IsAssignableFrom(obj.GetType()) == true;
+        }
+#endif
 
 #if ANDROID
         /// <summary>

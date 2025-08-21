@@ -12,6 +12,16 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Core;
 
+#if WINUI3
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Windowing;
+using Windows.Graphics;
+using Windows.Graphics.Display;
+using Microsoft.UI;
+using Microsoft.UI.Dispatching;
+#endif
+
 namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
     internal class WebView2WebUi : IWebUI
@@ -32,15 +42,54 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             CancellationToken cancellationToken)
         {
             AuthorizationResult result = null;
+
+#if WINUI3
+            var sendAuthorizeRequest = new Func<Task>(async () =>
+            {
+                result = await InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken).ConfigureAwait(false);
+            });
+#else
             var sendAuthorizeRequest = new Action(() =>
             {
                 result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
             });
+#endif
 
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
                 if (_parent.SynchronizationContext != null)
                 {
+#if WINUI3
+                    var tcs = new TaskCompletionSource<AuthorizationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                    _parent.SynchronizationContext.Post((state) =>
+                    {
+                        var taskCompletionSource = (TaskCompletionSource<AuthorizationResult>)state;
+
+                        var asyncOperation = InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken);
+
+                        // Handle the completion asynchronously
+                        asyncOperation.ContinueWith(task =>
+                        {
+                            if (task.IsFaulted)
+                            {
+                                var exception = task.Exception?.InnerException ?? task.Exception;
+                                taskCompletionSource.TrySetException(exception);
+                            }
+                            else if (task.IsCanceled)
+                            {
+                                taskCompletionSource.TrySetCanceled();
+                            }
+                            else
+                            {
+                                taskCompletionSource.TrySetResult(task.Result);
+                            }
+                        }, TaskContinuationOptions.ExecuteSynchronously);
+
+                    }, tcs);
+
+                    return await tcs.Task.ConfigureAwait(false);
+#else
                     var sendAuthorizeRequestWithTcs = new Action<object>((tcs) =>
                     {
                         try
@@ -56,11 +105,12 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                         }
                     });
 
-                    var tcs2 = new TaskCompletionSource<object>();
+                    var tcs2 = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                     _parent.SynchronizationContext.Post(
                         new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
                     await tcs2.Task.ConfigureAwait(false);
+#endif
                 }
                 else
                 {
@@ -68,11 +118,19 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                     {
                         try
                         {
+#if WINUI3
+                            await Task.Factory.StartNew(
+                                sendAuthorizeRequest,
+                                cancellationToken,
+                                TaskCreationOptions.None,
+                                staTaskScheduler).Unwrap().ConfigureAwait(false);
+#else
                             Task.Factory.StartNew(
                                 sendAuthorizeRequest,
                                 cancellationToken,
                                 TaskCreationOptions.None,
                                 staTaskScheduler).Wait(cancellationToken);
+#endif
                         }
                         catch (AggregateException ae)
                         {
@@ -94,7 +152,11 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             }
             else
             {
+#if WINUI3
+                await sendAuthorizeRequest().ConfigureAwait(false);
+#else
                 sendAuthorizeRequest();
+#endif
             }
 
             return result;
@@ -107,6 +169,19 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
             return redirectUri;
         }
 
+#if WINUI3
+        private async Task<AuthorizationResult> InvokeEmbeddedWebviewAsync(Uri startUri, Uri endUri, CancellationToken cancellationToken)
+        {
+            var window = new WinUI3WindowWithWebView2(
+                _parent.OwnerWindow,
+                _parent?.EmbeddedWebviewOptions,
+                _requestContext.Logger,
+                startUri,
+                endUri);
+
+            return await window.DisplayDialogAndInterceptUriAsync(cancellationToken).ConfigureAwait(false);
+        }
+#else
         private AuthorizationResult InvokeEmbeddedWebview(Uri startUri, Uri endUri, CancellationToken cancellationToken)
         {
             using (var form = new WinFormsPanelWithWebView2(
@@ -119,6 +194,6 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
                 return form.DisplayDialogAndInterceptUri(cancellationToken);
             }
         }
-
+#endif
     }
 }
