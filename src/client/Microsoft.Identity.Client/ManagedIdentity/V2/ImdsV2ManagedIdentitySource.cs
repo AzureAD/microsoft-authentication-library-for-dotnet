@@ -214,8 +214,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
             
-            var payload = new PemPayload { pem = csrPem };
-            var body = JsonHelper.SerializeToJson(payload);
+            var body = $"{{\"pem\":\"{csrPem}\"}}";
 
             IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);

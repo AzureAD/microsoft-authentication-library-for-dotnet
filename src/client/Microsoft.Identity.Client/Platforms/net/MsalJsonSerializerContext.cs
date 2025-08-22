@@ -44,7 +44,6 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(CsrMetadata))]
     [JsonSerializable(typeof(CuidInfo))]
     [JsonSerializable(typeof(CertificateRequestResponse))]
-    [JsonSerializable(typeof(PemPayload))]
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {
