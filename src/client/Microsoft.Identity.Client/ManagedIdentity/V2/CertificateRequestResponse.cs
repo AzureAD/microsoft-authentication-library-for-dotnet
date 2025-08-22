@@ -7,7 +7,7 @@
     using Microsoft.Identity.Json;
 #endif
 
-namespace Microsoft.Identity.Client.ManagedIdentity
+namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     /// <summary>
     /// Represents the response for a Managed Identity CSR request.

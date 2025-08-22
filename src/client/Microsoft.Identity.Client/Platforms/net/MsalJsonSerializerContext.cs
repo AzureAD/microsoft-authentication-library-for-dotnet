@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
@@ -43,7 +44,6 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(CsrMetadata))]
     [JsonSerializable(typeof(CuidInfo))]
     [JsonSerializable(typeof(CertificateRequestResponse))]
-    [JsonSerializable(typeof(PemPayload))]
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {
