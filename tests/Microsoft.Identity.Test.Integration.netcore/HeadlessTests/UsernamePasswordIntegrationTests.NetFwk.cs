@@ -81,14 +81,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        [TestCategory(TestCategories.Arlington)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
-        public async Task ARLINGTON_ROPC_ADFS_Async()
+        public async Task Public_ROPC_Cloud_Async()
         {
-            var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            var aadUser = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await RunHappyPathTestAsync(aadUser).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]

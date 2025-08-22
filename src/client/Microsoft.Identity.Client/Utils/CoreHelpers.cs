@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -75,22 +76,33 @@ namespace Microsoft.Identity.Client.Utils
             return builder.ToString();
         }
 
-        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode,
+        public static Dictionary<string, string> ParseKeyValueList(
+            string input,
+            char delimiter,
+            bool urlDecode,
             bool lowercaseKeys,
             RequestContext requestContext)
         {
             var response = new Dictionary<string, string>();
 
+            // Split the full query string on & (or any provided delimiter) to get individual k=v pairs.
             var queryPairs = SplitWithQuotes(input, delimiter);
 
             foreach (string queryPair in queryPairs)
             {
-                var pair = SplitWithQuotes(queryPair, '=');
+                // Instead of splitting on *all* '=' characters, find only the first one.
+                // This ensures that if the value itself contains '=', such as a trailing '=' in Base64,
+                // we do not accidentally split the base64 value into extra parts and lose the padding.
+                int idx = queryPair.IndexOf('=');
 
-                if (pair.Count == 2 && !string.IsNullOrWhiteSpace(pair[0]) && !string.IsNullOrWhiteSpace(pair[1]))
+                // idx > 0 means we found an '=' and have a valid key substring before it
+                if (idx > 0)
                 {
-                    string key = pair[0];
-                    string value = pair[1];
+                    // The key is everything before the first '='
+                    string key = queryPair.Substring(0, idx);
+
+                    // The value is everything after the first '=' (including any trailing '=')
+                    string value = queryPair.Substring(idx + 1);
 
                     // Url decoding is needed for parsing OAuth response, but not for parsing WWW-Authenticate header in 401 challenge
                     if (urlDecode)
@@ -99,16 +111,19 @@ namespace Microsoft.Identity.Client.Utils
                         value = UrlDecode(value);
                     }
 
+                    // Optionally convert key to lowercase
                     if (lowercaseKeys)
                     {
                         key = key.Trim().ToLowerInvariant();
                     }
 
+                    // Trim quotes and whitespace around the value
                     value = value.Trim().Trim('\"').Trim();
 
                     if (response.ContainsKey(key))
                     {
-                        requestContext?.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
+                        requestContext?.Logger.Warning(
+                            string.Format(CultureInfo.InvariantCulture,
                             "Key/value pair list contains redundant key '{0}'.", key));
                     }
 
@@ -200,6 +215,21 @@ namespace Microsoft.Identity.Client.Utils
             {
                 var hashBytes = hash.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
                 return Base64UrlHelpers.Encode(hashBytes);
+            }
+        }
+
+        internal static string ComputeX5tS256KeyId(X509Certificate2 certificate)
+        {
+            // Extract the raw bytes of the certificate’s public key.
+            var publicKey = certificate.GetPublicKey();
+
+            // Compute the SHA-256 hash of the public key.
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hash = sha256.ComputeHash(publicKey);
+
+                // Return the hash encoded in Base64 URL format.
+                return Base64UrlHelpers.Encode(hash);
             }
         }
     }

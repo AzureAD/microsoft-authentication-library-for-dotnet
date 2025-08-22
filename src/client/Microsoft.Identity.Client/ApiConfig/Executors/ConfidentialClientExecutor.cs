@@ -2,12 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.Utils;
@@ -39,7 +42,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+                _confidentialClientApplication.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
             requestParams.SendX5C = authorizationCodeParameters.SendX5C ?? false;
 
             var handler = new ConfidentialAuthCodeRequest(
@@ -55,12 +59,16 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
+            await commonParameters.InitMtlsPopParametersAsync(ServiceBundle, cancellationToken)
+                .ConfigureAwait(false);
+
             RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _confidentialClientApplication.AppTokenCacheInternal).ConfigureAwait(false);
+                _confidentialClientApplication.AppTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
        
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
 
@@ -82,7 +90,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+                _confidentialClientApplication.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
 
             requestParams.SendX5C = onBehalfOfParameters.SendX5C ?? false;
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
@@ -106,7 +115,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AuthenticationRequestParameters requestParameters = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+                _confidentialClientApplication.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
 
             requestParameters.Account = authorizationRequestUrlParameters.Account;
             requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;
@@ -142,7 +152,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
-                _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+                _confidentialClientApplication.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
             
             requestParams.SendX5C = usernamePasswordParameters.SendX5C ?? false;
 
