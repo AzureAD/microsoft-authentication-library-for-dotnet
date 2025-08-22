@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
@@ -40,6 +41,9 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(ManagedIdentityResponse))]
     [JsonSerializable(typeof(ManagedIdentityErrorResponse))]
     [JsonSerializable(typeof(OidcMetadata))]
+    [JsonSerializable(typeof(CsrMetadata))]
+    [JsonSerializable(typeof(CuidInfo))]
+    [JsonSerializable(typeof(CertificateRequestResponse))]
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {
@@ -54,6 +58,7 @@ namespace Microsoft.Identity.Client.Platforms.net
                     {
                         NumberHandling = JsonNumberHandling.AllowReadingFromString,
                         AllowTrailingCommas = true,
+                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                         Converters =
                         {
                             new JsonStringConverter(),

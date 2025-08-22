@@ -4,16 +4,15 @@
 #if SUPPORTS_SYSTEM_TEXT_JSON
     using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
+    using Microsoft.Identity.Json;
 #endif
 
-namespace Microsoft.Identity.Client.ManagedIdentity
+namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     /// <summary>
     /// Represents the response for a Managed Identity CSR request.
     /// </summary>
-    internal class ClientCredentialRequestResponse
+    internal class CertificateRequestResponse
     {
         [JsonProperty("client_id")]
         public string ClientId { get; set; }
@@ -33,16 +32,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         [JsonProperty("refresh_in")]
         public int RefreshIn { get; set; }
 
-        public ClientCredentialRequestResponse() { }
+        public CertificateRequestResponse() { }
 
-        public static bool IsValid(ClientCredentialRequestResponse clientCredentialRequestResponse)
+        public static bool IsValid(CertificateRequestResponse certificateRequestResponse)
         {
-            if (string.IsNullOrEmpty(clientCredentialRequestResponse.ClientId) ||
-                string.IsNullOrEmpty(clientCredentialRequestResponse.TenantId) ||
-                string.IsNullOrEmpty(clientCredentialRequestResponse.ClientCredential) ||
-                string.IsNullOrEmpty(clientCredentialRequestResponse.RegionalTokenUrl) ||
-                clientCredentialRequestResponse.ExpiresIn <= 0 ||
-                clientCredentialRequestResponse.RefreshIn <= 0)
+            if (string.IsNullOrEmpty(certificateRequestResponse.ClientId) ||
+                string.IsNullOrEmpty(certificateRequestResponse.TenantId) ||
+                string.IsNullOrEmpty(certificateRequestResponse.ClientCredential) ||
+                string.IsNullOrEmpty(certificateRequestResponse.RegionalTokenUrl) ||
+                certificateRequestResponse.ExpiresIn <= 0 ||
+                certificateRequestResponse.RefreshIn <= 0)
             {
                 return false;
             }

@@ -12,20 +12,21 @@ using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.ManagedIdentity
+namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
-        private const string CsrMetadataPath = "/metadata/identity/getPlatformMetadata";
-        private const string ClientCredentialRequestPath = "/metadata/identity/issuecredential";
+        public const string ImdsV2ApiVersion = "2.0";
+        private const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
+        private const string CertificateRequestPath = "/metadata/identity/issuecredential";
         private const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
             bool probeMode)
         {
-            string queryParams = $"cred-api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
-            
+            string queryParams = $"cred-api-version={ImdsV2ApiVersion}";
+
             var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
                 requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
                 requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
@@ -130,12 +131,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
              * "1556"                   // index 1: captured group (\d+)
              * ]
              */
-            string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
+            // Imds bug: headers are missing
+            // TODO: uncomment this when the bug is fixed
+            /*string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
             if (serverHeader == null)
             {
                 if (probeMode)
                 {
-                    logger.Info(() => "[Managed Identity] IMDSv2 managed identity is not available. 'server' header is missing from the CSR metadata response.");
+                    logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. 'server' header is missing from the CSR metadata response. Body: {response.Body}");
                     return false;
                 }
                 else
@@ -165,7 +168,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         null,
                         (int)response.StatusCode);
                 }
-            }
+            }*/
 
             return true;
         }
@@ -196,28 +199,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
-        private async Task<ClientCredentialRequestResponse> ExecuteClientCredentialRequestAsync(
-            CuidInfo Cuid,
-            string pem)
+        private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
+            CuidInfo cuid,
+            string csrPem)
         {
-            var queryParams = $"cid={JsonHelper.SerializeToJson(Cuid)}";
+            var queryParams = $"cuid={JsonHelper.SerializeToJson(cuid)}&cred-api-version={ImdsV2ApiVersion}";
             if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
             {
                 queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
             }
-            queryParams += $"&api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
 
             var headers = new Dictionary<string, string>
             {
                 { "Metadata", "true" },
                 { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
-
-            var payload = new
-            {
-                pem = pem
-            };
-            var body = JsonHelper.SerializeToJson(payload);
+            
+            var body = $"{{\"pem\":\"{csrPem}\"}}";
 
             IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
@@ -227,7 +225,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             try
             {
                 response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
-                    ImdsManagedIdentitySource.GetValidatedEndpoint(_requestContext.Logger, ClientCredentialRequestPath, queryParams),
+                    ImdsManagedIdentitySource.GetValidatedEndpoint(_requestContext.Logger, CertificateRequestPath, queryParams),
                     headers,
                     body: new StringContent(body, System.Text.Encoding.UTF8, "application/json"),
                     method: HttpMethod.Post,
@@ -243,32 +241,42 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
-                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCsrRequest failed.",
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed.",
                     ex,
                     ManagedIdentitySource.ImdsV2,
                     (int)response.StatusCode);
             }
 
-            var clientCredentialRequestResponse = JsonHelper.DeserializeFromJson<ClientCredentialRequestResponse>(response.Body);
-            if (!ClientCredentialRequestResponse.IsValid(clientCredentialRequestResponse))
+            if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
-                    $"[ImdsV2] ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the CsrMetadata response is invalid. Status code: {response.StatusCode} Body: {response.Body}",
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed due to HTTP error. Status code: {response.StatusCode} Body: {response.Body}",
                     null,
                     ManagedIdentitySource.ImdsV2,
                     (int)response.StatusCode);
             }
 
-            return clientCredentialRequestResponse;
+            var certificateRequestResponse = JsonHelper.DeserializeFromJson<CertificateRequestResponse>(response.Body);
+            if (!CertificateRequestResponse.IsValid(certificateRequestResponse))
+            {
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed because the certificate request response is malformed. Status code: {response.StatusCode}",
+                    null,
+                    ManagedIdentitySource.ImdsV2,
+                    (int)response.StatusCode);
+            }
+
+            return certificateRequestResponse;
         }
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
-            var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.Cuid);
+            var csrPem = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
-            var clientCredentialRequestResponse = ExecuteClientCredentialRequestAsync(csrMetadata.Cuid, csr.Pem).GetAwaiter().GetResult();
+            var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.CuId, csrPem).GetAwaiter().GetResult();
 
             ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{clientCredentialRequestResponse.RegionalTokenUrl}/{clientCredentialRequestResponse.TenantId}{AcquireEntraTokenPath}"));
 

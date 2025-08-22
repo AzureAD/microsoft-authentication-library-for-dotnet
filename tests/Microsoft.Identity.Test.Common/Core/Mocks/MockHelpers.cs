@@ -371,7 +371,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string[] scope,
             bool foci = false,
             string utid = TestConstants.Utid,
-            string accessToken = "some-access-token",
+            string accessToken = TestConstants.ATSecret,
             string refreshToken = "OAAsomethingencrypedQwgAA")
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
@@ -386,7 +386,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string[] scope,
             bool foci = false,
             string utid = TestConstants.Utid,
-            string accessToken = "some-access-token",
+            string accessToken = TestConstants.ATSecret,
             string refreshToken = "OAAsomethingencrypedQwgAA")
         {
             string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
@@ -590,12 +590,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
-            expectedQueryParams.Add("cred-api-version", "2018-02-01");
+            expectedQueryParams.Add("cred-api-version", "2.0");
             expectedRequestHeaders.Add("Metadata", "true");
 
             string content =
                 "{" +
-                "\"cuid\": { \"vmid\": \"fake_vmid\", \"vmssid\": \"fake_vmssid\" }," +
+                "\"cuid\": { \"vmId\": \"fake_vmId\", \"vmssId\": \"fake_vmssId\" }," +
                 "\"clientId\": \"fake_client_id\"," +
                 "\"tenantId\": \"fake_tenant_id\"," +
                 "\"attestationEndpoint\": \"fake_attestation_endpoint\"" +
@@ -603,7 +603,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             var handler = new MockHttpMessageHandler()
             {
-                ExpectedUrl = "http://169.254.169.254/metadata/identity/getPlatformMetadata",
+                ExpectedUrl = "http://169.254.169.254/metadata/identity/getplatformmetadata",
                 ExpectedMethod = HttpMethod.Get,
                 ExpectedQueryParams = expectedQueryParams,
                 ExpectedRequestHeaders = expectedRequestHeaders,

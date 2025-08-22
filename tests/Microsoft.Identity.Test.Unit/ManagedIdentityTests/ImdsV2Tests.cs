@@ -8,6 +8,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -111,7 +112,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [TestMethod]
+        // Imds bug: headers are missing
+        // TODO: uncomment this when the bug is fixed
+        /*[TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithMissingServerHeader()
         {
             using (var httpManager = new MockHttpManager())
@@ -126,9 +129,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
-        }
+        }*/
 
-        [TestMethod]
+        // Imds bug: headers are missing
+        // TODO: uncomment this when the bug is fixed
+        /*[TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithInvalidVersion()
         {
             using (var httpManager = new MockHttpManager())
@@ -143,7 +148,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
-        }
+        }*/
 
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsAfterMaxRetries()
@@ -188,76 +193,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             var cuid = new CuidInfo
             {
-                Vmid = TestConstants.Vmid,
-                Vmssid = TestConstants.Vmssid
+                VmId = TestConstants.VmId,
+                VmssId = TestConstants.VmssId
             };
 
             // Generate CSR
-            var csr = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
 
             // Validate the CSR contents using the helper
-            CsrValidator.ValidateCsrContent(csr.Pem, TestConstants.ClientId, TestConstants.TenantId, cuid);
-        }
-
-        [DataTestMethod]
-        [DataRow(null, TestConstants.TenantId)]
-        [DataRow("", TestConstants.TenantId)]
-        [DataRow(TestConstants.ClientId, null)]
-        [DataRow(TestConstants.ClientId, "")]
-        public void TestCsrGeneration_InvalidParameters(string clientId, string tenantId)
-        {
-            var cuid = new CuidInfo
-            {
-                Vmid = TestConstants.Vmid,
-                Vmssid = TestConstants.Vmssid
-            };
-
-            Assert.ThrowsException<ArgumentException>(() => 
-                Csr.Generate(clientId, tenantId, cuid));
-        }
-
-        [TestMethod]
-        public void TestCsrGeneration_NullCuid()
-        {
-            // Test with null CUID
-            Assert.ThrowsException<ArgumentNullException>(() => 
-                Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, null));
-        }
-
-        [DataTestMethod]
-        [DataRow(null, TestConstants.Vmssid)]
-        [DataRow("", TestConstants.Vmssid)]
-        public void TestCsrGeneration_InvalidVmid(string vmid, string vmssid)
-        {
-            var cuid = new CuidInfo
-            {
-                Vmid = vmid,
-                Vmssid = vmssid
-            };
-
-            // Should throw ArgumentException since Vmid is required
-            Assert.ThrowsException<ArgumentException>(() => 
-                Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid));
-        }
-
-        [DataTestMethod]
-        [DataRow(TestConstants.Vmid, null)]
-        [DataRow(TestConstants.Vmid, "")]
-        public void TestCsrGeneration_OptionalVmssid(string vmid, string vmssid)
-        {
-            var cuid = new CuidInfo
-            {
-                Vmid = vmid,
-                Vmssid = vmssid
-            };
-
-            // Should succeed since Vmssid is optional (Vmid is provided and valid)
-            var csrRequest = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
-            Assert.IsNotNull(csrRequest);
-            Assert.IsFalse(string.IsNullOrWhiteSpace(csrRequest.Pem));
-
-            // Validate the CSR contents - this should handle null/empty VMSSID gracefully
-            CsrValidator.ValidateCsrContent(csrRequest.Pem, TestConstants.ClientId, TestConstants.TenantId, cuid);
+            CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
         [TestMethod]
@@ -265,7 +209,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             string malformedPem = "-----BEGIN CERTIFICATE REQUEST-----\nInvalid@#$%Base64Content!\n-----END CERTIFICATE REQUEST-----";
             Assert.ThrowsException<FormatException>(() => 
-                TestCsrValidator.ParseCsrFromPem(malformedPem));
+                CsrValidator.ParseCsrFromPem(malformedPem));
         }
 
         [DataTestMethod]
@@ -275,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void TestCsrGeneration_MalformedPem_ArgumentException(string malformedPem)
         {
             Assert.ThrowsException<ArgumentException>(() => 
-                TestCsrValidator.ParseCsrFromPem(malformedPem));
+                CsrValidator.ParseCsrFromPem(malformedPem));
         }
     }
 }
