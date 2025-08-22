@@ -8,8 +8,10 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Web;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
@@ -626,13 +628,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return MockCsrResponse(HttpStatusCode.BadRequest);
         }
 
-        public static MockHttpMessageHandler MockClientCredentialResponse()
+        public static MockHttpMessageHandler MockCertificateRequestResponse()
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
-            expectedQueryParams.Add("cid", "%7B%22vmid%22:%22fake_vmid%22,%22vmssid%22:%22fake_vmssid%22%7D");
+            expectedQueryParams.Add("cuid", "%7B%22vmId%22:%22fake_vmId%22,%22vmssId%22:%22fake_vmssId%22%7D");
             //expectedQueryParams.Add("uaid", "fake_client_id");
-            expectedQueryParams.Add("api-version", "2018-02-01");
+            expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
             expectedRequestHeaders.Add("Metadata", "true");
 
             string content =
@@ -647,7 +649,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             var handler = new MockHttpMessageHandler()
             {
-                ExpectedUrl = "http://169.254.169.254/metadata/identity/issuecredential",
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CertificateRequestPath}",
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedQueryParams = expectedQueryParams,
                 ExpectedRequestHeaders = expectedRequestHeaders,

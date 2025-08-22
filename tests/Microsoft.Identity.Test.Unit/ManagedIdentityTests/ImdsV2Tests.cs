@@ -41,7 +41,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
-                httpManager.AddMockHandler(MockHelpers.MockClientCredentialResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+                // TODO: add a mock handler for acquiring the entra token over an mTLS channel
+                //httpManager.AddMockHandler();
 
                 // TODO: finish this. everything has been tested to this point.
                 /*MockHttpMessageHandler mockHandler = httpManager.AddManagedIdentityMockHandler(
