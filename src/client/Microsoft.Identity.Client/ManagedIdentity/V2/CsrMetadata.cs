@@ -7,18 +7,18 @@
     using Microsoft.Identity.Json;
 #endif
 
-namespace Microsoft.Identity.Client.ManagedIdentity
+namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     /// <summary>
     /// Represents VM unique Ids for CSR metadata.
     /// </summary>
     internal class CuidInfo
     {
-        [JsonProperty("vmid")]
-        public string Vmid { get; set; }
+        [JsonProperty("vmId")]
+        public string VmId { get; set; }
 
-        [JsonProperty("vmssid")]
-        public string Vmssid { get; set; }
+        [JsonProperty("vmssId")]
+        public string VmssId { get; set; }
     }
 
     /// <summary>
@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <summary>
         /// VM unique Id
         /// </summary>
-        [JsonProperty("cuid")]
-        public CuidInfo Cuid { get; set; }
+        [JsonProperty("cuId")]
+        public CuidInfo CuId { get; set; }
 
         /// <summary>
         /// client_id of the Managed Identity
@@ -57,13 +57,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// Validates a JSON decoded CsrMetadata instance.
         /// </summary>
         /// <param name="csrMetadata">The CsrMetadata object.</param>
-        /// <returns>false if any field is null.</returns>
+        /// <returns>false if any required field is null. Note: VmId is required, VmssId is optional.</returns>
         public static bool ValidateCsrMetadata(CsrMetadata csrMetadata)
         {
             if (csrMetadata == null ||
-                csrMetadata.Cuid == null ||
-                string.IsNullOrEmpty(csrMetadata.Cuid.Vmid) ||
-                string.IsNullOrEmpty(csrMetadata.Cuid.Vmssid) ||
+                csrMetadata.CuId == null ||
+                string.IsNullOrEmpty(csrMetadata.CuId.VmId) ||
                 string.IsNullOrEmpty(csrMetadata.ClientId) ||
                 string.IsNullOrEmpty(csrMetadata.TenantId) ||
                 string.IsNullOrEmpty(csrMetadata.AttestationEndpoint))

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -11,25 +12,27 @@ using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.ManagedIdentity
+namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
-        private const string CsrMetadataPath = "/metadata/identity/getPlatformMetadata";
+        public const string ImdsV2ApiVersion = "2.0";
+        private const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
+        private const string CertificateRequestPath = "/metadata/identity/issuecredential";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
             bool probeMode)
         {
-            string queryParams = $"cred-api-version={ImdsManagedIdentitySource.ImdsApiVersion}";
-            
+            string queryParams = $"cred-api-version={ImdsV2ApiVersion}";
+
             var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
                 requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
                 requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
                 requestContext.Logger);
             if (userAssignedIdQueryParam != null)
             {
-                queryParams += $"{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
+                queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
             }
 
             var headers = new Dictionary<string, string>
@@ -41,7 +44,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.CsrMetadataProbe);
 
-            // CSR metadata GET request
             HttpResponse response = null;
 
             try
@@ -50,7 +52,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     ImdsManagedIdentitySource.GetValidatedEndpoint(requestContext.Logger, CsrMetadataPath, queryParams),
                     headers,
                     body: null,
-                    method: System.Net.Http.HttpMethod.Get,
+                    method: HttpMethod.Get,
                     logger: requestContext.Logger,
                     doNotThrow: false,
                     mtlsCertificate: null,
@@ -90,7 +92,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
             }
 
-            if (!probeMode && !ValidateCsrMetadataResponse(response, requestContext.Logger, probeMode))
+            if (!ValidateCsrMetadataResponse(response, requestContext.Logger, probeMode))
             {
                 return null;
             }
@@ -128,12 +130,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
              * "1556"                   // index 1: captured group (\d+)
              * ]
              */
-            string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
+            // Imds bug: headers are missing
+            // TODO: uncomment this when the bug is fixed
+            /*string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
             if (serverHeader == null)
             {
                 if (probeMode)
                 {
-                    logger.Info(() => "[Managed Identity] IMDSv2 managed identity is not available. 'server' header is missing from the CSR metadata response.");
+                    logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. 'server' header is missing from the CSR metadata response. Body: {response.Body}");
                     return false;
                 }
                 else
@@ -163,7 +167,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         null,
                         (int)response.StatusCode);
                 }
-            }
+            }*/
 
             return true;
         }
@@ -194,8 +198,77 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
+        private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
+            CuidInfo cuid,
+            string csrPem)
+        {
+            var queryParams = $"cuid={JsonHelper.SerializeToJson(cuid)}&cred-api-version={ImdsV2ApiVersion}";
+            if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
+            {
+                queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
+            }
+
+            var headers = new Dictionary<string, string>
+            {
+                { "Metadata", "true" },
+                { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
+            };
+            
+            var body = $"{{\"pem\":\"{csrPem}\"}}";
+
+            IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
+
+            HttpResponse response = null;
+
+            try
+            {
+                response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                    ImdsManagedIdentitySource.GetValidatedEndpoint(_requestContext.Logger, CertificateRequestPath, queryParams),
+                    headers,
+                    body: new StringContent(body, System.Text.Encoding.UTF8, "application/json"),
+                    method: HttpMethod.Post,
+                    logger: _requestContext.Logger,
+                    doNotThrow: false,
+                    mtlsCertificate: null,
+                    validateServerCertificate: null,
+                    cancellationToken: _requestContext.UserCancellationToken,
+                    retryPolicy: retryPolicy)
+                .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed.",
+                    ex,
+                    ManagedIdentitySource.ImdsV2,
+                    (int)response.StatusCode);
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed due to HTTP error. Status code: {response.StatusCode} Body: {response.Body}",
+                    null,
+                    ManagedIdentitySource.ImdsV2,
+                    (int)response.StatusCode);
+            }
+
+            var certificateRequestResponse = JsonHelper.DeserializeFromJson<CertificateRequestResponse>(response.Body);
+            CertificateRequestResponse.Validate(certificateRequestResponse);
+
+            return certificateRequestResponse;
+        }
+
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
+            var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
+            var csrPem = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
+
+            var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.CuId, csrPem).GetAwaiter().GetResult();
+
             throw new NotImplementedException();
         }
     }

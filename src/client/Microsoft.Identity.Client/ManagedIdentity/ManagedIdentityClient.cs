@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.IO;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
