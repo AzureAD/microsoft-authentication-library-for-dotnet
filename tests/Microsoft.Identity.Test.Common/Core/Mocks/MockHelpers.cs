@@ -8,8 +8,10 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Web;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
@@ -624,6 +626,40 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             // 400 doesn't trigger the retry policy
             return MockCsrResponse(HttpStatusCode.BadRequest);
+        }
+
+        public static MockHttpMessageHandler MockCertificateRequestResponse()
+        {
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            expectedQueryParams.Add("cuid", "%7B%22vmId%22:%22fake_vmId%22,%22vmssId%22:%22fake_vmssId%22%7D");
+            //expectedQueryParams.Add("uaid", "fake_client_id");
+            expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
+            expectedRequestHeaders.Add("Metadata", "true");
+
+            string content =
+                "{" +
+                "\"client_id\": \"fake_client_id\"," +
+                "\"tenant_id\": \"fake_tenant_id\"," +
+                "\"client_credential\": \"fake_client_credential\"," +
+                "\"regional_token_url\": \"fake_regional_token_url\"," +
+                "\"expires_in\": 3600," +
+                "\"refresh_in\": 1800" +
+                "}";
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CertificateRequestPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(content),
+                }
+            };
+
+            return handler;
         }
     }
 }

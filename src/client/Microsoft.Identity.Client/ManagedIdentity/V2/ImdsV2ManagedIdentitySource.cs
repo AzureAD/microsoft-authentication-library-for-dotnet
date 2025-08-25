@@ -16,9 +16,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
+        // used in unit tests
         public const string ImdsV2ApiVersion = "2.0";
         private const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
-        private const string CertificateRequestPath = "/metadata/identity/issuecredential";
+        public const string CertificateRequestPath = "/metadata/identity/issuecredential";
+        public const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
@@ -269,7 +271,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.CuId, csrPem).GetAwaiter().GetResult();
 
-            throw new NotImplementedException();
+            ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.RegionalTokenUrl}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
+            request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
+            request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
+            request.BodyParameters.Add("grant_type", certificateRequestResponse.ClientCredential);
+            request.BodyParameters.Add("scope", "https://management.azure.com/.default");
+            request.RequestType = RequestType.Imds;
+
+            return request;
         }
     }
 }
