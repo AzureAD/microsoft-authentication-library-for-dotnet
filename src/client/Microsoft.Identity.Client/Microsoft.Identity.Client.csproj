@@ -80,15 +80,10 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <Compile Remove="C:\msi_vs_keys\src\client\Microsoft.Identity.Client\ManagedIdentity\IManagedIdentityPlatformKeyProvider.cs" />
-    <None Remove="C:\msi_vs_keys\src\client\Microsoft.Identity.Client\ManagedIdentity\IManagedIdentityPlatformKeyProvider.cs" />
-    <None Remove="ManagedIdentity\KeyProviders\InMemoryManagedIdentityKeyProvider.cs" />
-    <None Remove="ManagedIdentity\KeyProviders\KeyGuardKey.cs" />
-    <None Remove="ManagedIdentity\KeyProviders\WindowsManagedIdentityKeyProvider.cs" />
-    <None Remove="ManagedIdentity\ManagedIdentityKeyProviderFactory.cs" />
-    <None Remove="ManagedIdentity\MiKeyTypes.cs" />
+    <Compile Remove="$(PathToMsalSources)\ManagedIdentity\KeyProviders\WindowsCngKeyOperations.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
     <None Include="$(PathToMsalSources)\..\..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="ManagedIdentity\KeyProviders\KeyGuardHelper.cs" />
     <None Include="Platforms\net\JsonObjectAttribute.cs" />
     <None Include="Platforms\net\JsonStringConverter.cs" />
     <None Include="Platforms\net\MsalJsonSerializerContext.cs" />
@@ -99,7 +94,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
-
+    
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
@@ -109,7 +104,8 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
-
+    <Compile Include="$(PathToMsalSources)\ManagedIdentity\KeyProviders\WindowsCngKeyOperations.cs" />
+    
     <!--System.Text.Json replaces internal NewtonSoft for NET -->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
 
@@ -132,6 +128,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\ManagedIdentity\KeyProviders\WindowsCngKeyOperations.cs" />
 
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -172,10 +169,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="ManagedIdentity\KeyProviders\InMemoryManagedIdentityKeyProvider.cs" />
-    <Compile Include="ManagedIdentity\KeyProviders\KeyGuardKey.cs" />
-    <Compile Include="ManagedIdentity\KeyProviders\WindowsManagedIdentityKeyProvider.cs" />
-    <Compile Include="ManagedIdentity\ManagedIdentityKeyProviderFactory.cs" />
-    <Compile Include="ManagedIdentity\MiKeyTypes.cs" />
+    <Compile Include="ManagedIdentity\KeyProviders\KeyGuardHelper.cs" />
   </ItemGroup>
+
 </Project>

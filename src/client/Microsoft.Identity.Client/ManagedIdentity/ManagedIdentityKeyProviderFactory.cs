@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading;
-using Microsoft.Identity.Client.ManagedIdentity.Providers;
+using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Client.PlatformsCommon.Shared; 
 
 namespace Microsoft.Identity.Client.ManagedIdentity
@@ -20,12 +20,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             IManagedIdentityKeyProvider created = CreateProviderCore();
             Interlocked.CompareExchange(ref s_provider, created, null);
-            return s_provider!;
+            return s_provider;
         }
 
         private static IManagedIdentityKeyProvider CreateProviderCore()
         {
-#if NETSTANDARD2_0
+#if !SUPPORTS_CNG
             return new InMemoryManagedIdentityKeyProvider();
 #else
             if (DesktopOsHelper.IsWindows())

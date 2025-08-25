@@ -8,6 +8,9 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_MTLS;</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)'">
+    <DefineConstants>$(DefineConstants);SUPPORTS_CNG;</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">
     <DefineConstants>$(DefineConstants);ANDROID;SUPPORTS_BROKER</DefineConstants>
   </PropertyGroup>
