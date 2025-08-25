@@ -19,6 +19,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         [JsonProperty("vmssId")]
         public string VmssId { get; set; }
+
+        public static bool IsNullOrEmpty(CuidInfo cuidInfo)
+        {
+            return cuidInfo == null ||
+                   (string.IsNullOrEmpty(cuidInfo.VmId) && string.IsNullOrEmpty(cuidInfo.VmssId));
+        }
     }
 
     /// <summary>
@@ -61,8 +67,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public static bool ValidateCsrMetadata(CsrMetadata csrMetadata)
         {
             if (csrMetadata == null ||
-                csrMetadata.CuId == null ||
-                string.IsNullOrEmpty(csrMetadata.CuId.VmId) ||
+                CuidInfo.IsNullOrEmpty(csrMetadata.CuId) ||
                 string.IsNullOrEmpty(csrMetadata.ClientId) ||
                 string.IsNullOrEmpty(csrMetadata.TenantId) ||
                 string.IsNullOrEmpty(csrMetadata.AttestationEndpoint))

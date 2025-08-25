@@ -595,7 +595,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             string content =
                 "{" +
-                "\"cuid\": { \"vmId\": \"fake_vmId\", \"vmssId\": \"fake_vmssId\" }," +
+                "\"cuId\": { \"vmId\": \"fake_vmId\" }," +
                 "\"clientId\": \"fake_client_id\"," +
                 "\"tenantId\": \"fake_tenant_id\"," +
                 "\"attestationEndpoint\": \"fake_attestation_endpoint\"" +
