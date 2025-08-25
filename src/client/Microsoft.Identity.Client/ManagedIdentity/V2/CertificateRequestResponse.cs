@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Net;
 #if SUPPORTS_SYSTEM_TEXT_JSON
     using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
-    using Microsoft.Identity.Json;
+using Microsoft.Identity.Json;
 #endif
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
@@ -34,7 +35,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         public CertificateRequestResponse() { }
 
-        public static bool IsValid(CertificateRequestResponse certificateRequestResponse)
+        public static void Validate(CertificateRequestResponse certificateRequestResponse)
         {
             if (string.IsNullOrEmpty(certificateRequestResponse.ClientId) ||
                 string.IsNullOrEmpty(certificateRequestResponse.TenantId) ||
@@ -43,10 +44,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 certificateRequestResponse.ExpiresIn <= 0 ||
                 certificateRequestResponse.RefreshIn <= 0)
             {
-                return false;
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed because the certificate request response is malformed. Status code: 200",
+                    null,
+                    ManagedIdentitySource.ImdsV2,
+                    (int)HttpStatusCode.OK);
             }
-
-            return true;
         }
     }
 }

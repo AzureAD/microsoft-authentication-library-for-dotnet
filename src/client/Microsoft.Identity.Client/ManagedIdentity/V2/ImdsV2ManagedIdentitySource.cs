@@ -257,15 +257,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             var certificateRequestResponse = JsonHelper.DeserializeFromJson<CertificateRequestResponse>(response.Body);
-            if (!CertificateRequestResponse.IsValid(certificateRequestResponse))
-            {
-                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.ManagedIdentityRequestFailed,
-                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed because the certificate request response is malformed. Status code: {response.StatusCode}",
-                    null,
-                    ManagedIdentitySource.ImdsV2,
-                    (int)response.StatusCode);
-            }
+            CertificateRequestResponse.Validate(certificateRequestResponse);
 
             return certificateRequestResponse;
         }
