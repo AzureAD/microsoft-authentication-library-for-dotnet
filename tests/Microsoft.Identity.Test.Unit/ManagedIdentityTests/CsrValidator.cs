@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     {
                         var attrSeq = attrSetReader.ReadSequence();
                         string oid = attrSeq.ReadObjectIdentifier();
-                        if (oid == "1.2.840.113549.1.9.7") // challengePassword
+                        if (oid == "1.3.6.1.4.1.311.90.2.10") // challengePassword
                         {
                             var valueSet = attrSeq.ReadSetOf();
                             while (valueSet.HasData)

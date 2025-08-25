@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                 req.OtherRequestAttributes.Add(
                     new AsnEncodedData(
-                        "1.2.840.113549.1.9.7",
+                        "1.3.6.1.4.1.311.90.2.10",
                         writer.Encode()));
 
                 return req.CreateSigningRequestPem();

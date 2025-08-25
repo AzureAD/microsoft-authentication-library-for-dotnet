@@ -138,7 +138,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TestCsrGeneration()
+        public void TestCsrGeneration_OnlyVmId()
+        {
+            var cuid = new CuidInfo
+            {
+                VmId = TestConstants.VmId
+            };
+
+            var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
+        }
+
+        [TestMethod]
+        public void TestCsrGeneration_VmIdAndVmssId()
         {
             var cuid = new CuidInfo
             {
@@ -146,10 +158,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 VmssId = TestConstants.VmssId
             };
 
-            // Generate CSR
             var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
-
-            // Validate the CSR contents using the helper
             CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
