@@ -24,16 +24,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             RequestContext requestContext,
             bool probeMode)
         {
-            string queryParams = $"cred-api-version={ImdsV2ApiVersion}";
-
-            var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
-                requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
-                requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
-                requestContext.Logger);
-            if (userAssignedIdQueryParam != null)
-            {
-                queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
-            }
+            var queryParams = ImdsV2QueryParamsHelper(requestContext);
 
             var headers = new Dictionary<string, string>
             {
@@ -200,11 +191,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(string csr)
         {
-            var queryParams = $"cred-api-version={ImdsV2ApiVersion}";
-            if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
-            {
-                queryParams += $"&client_id{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
-            }
+            var queryParams = ImdsV2QueryParamsHelper(_requestContext);
+
+            // TODO: add bypass_cache query param in case of token revocation. Boolean: true/false
 
             var headers = new Dictionary<string, string>
             {
@@ -268,6 +257,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var certificateRequestResponse = ExecuteCertificateRequestAsync(csr).GetAwaiter().GetResult();
 
             throw new NotImplementedException();
+        }
+
+        private static string ImdsV2QueryParamsHelper(RequestContext requestContext)
+        {
+            var queryParams = $"cred-api-version={ImdsV2ApiVersion}";
+
+            var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
+                requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
+                requestContext.Logger);
+            if (userAssignedIdQueryParam != null)
+            {
+                queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
+            }
+
+            return queryParams;
         }
     }
 }
