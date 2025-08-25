@@ -198,14 +198,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
-        private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
-            CuidInfo cuid,
-            string csrPem)
+        private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(string csr)
         {
-            var queryParams = $"cuid={JsonHelper.SerializeToJson(cuid)}&cred-api-version={ImdsV2ApiVersion}";
+            var queryParams = $"cred-api-version={ImdsV2ApiVersion}";
             if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
             {
-                queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
+                queryParams += $"&client_id{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
             }
 
             var headers = new Dictionary<string, string>
@@ -214,7 +212,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
             
-            var body = $"{{\"pem\":\"{csrPem}\"}}";
+            var body = $"{{\"csr\":\"{csr}\"}}";
 
             IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
@@ -265,9 +263,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
-            var csrPem = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
+            var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
-            var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.CuId, csrPem).GetAwaiter().GetResult();
+            var certificateRequestResponse = ExecuteCertificateRequestAsync(csr).GetAwaiter().GetResult();
 
             throw new NotImplementedException();
         }
