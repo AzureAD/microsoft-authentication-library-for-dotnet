@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         internal virtual IManagedIdentityKeyProvider GetManagedIdentityKeyProvider()
         {
-            return ManagedIdentityKeyProviderFactory.GetOrCreateProvider();
+            return ManagedIdentityKeyProviderFactory.GetOrCreateProvider(Logger);
         }
 
         /// <summary>

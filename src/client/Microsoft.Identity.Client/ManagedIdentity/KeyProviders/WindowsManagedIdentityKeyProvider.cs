@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 {
@@ -17,69 +18,106 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
     /// </summary>
     internal sealed class WindowsManagedIdentityKeyProvider : IManagedIdentityKeyProvider
     {
-        private static readonly SemaphoreSlim s_once = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim s_once = new (1, 1);
         private volatile ManagedIdentityKeyInfo _cached;
 
-        public async Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(CancellationToken ct)
+        public async Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(
+            ILoggerAdapter logger,
+            CancellationToken ct)
         {
+            // Return cached if available
             if (_cached != null)
+            {
+                logger?.Info("[MI][WinKeyProvider] Returning cached key.");
                 return _cached;
+            }
 
+            // Ensure only one creation at a time
+            logger?.Verbose(() => "[MI][WinKeyProvider] Waiting on creation semaphore.");
             await s_once.WaitAsync(ct).ConfigureAwait(false);
+
             try
             {
                 if (_cached != null)
+                {
+                    logger?.Verbose(() => "[MI][WinKeyProvider] Cached key created while waiting; returning it.");
                     return _cached;
+                }
 
-                // Respect cancellation after entering critical section (optional).
-                ct.ThrowIfCancellationRequested();
+                if (ct.IsCancellationRequested)
+                {
+                    logger?.Verbose(() => "[MI][WinKeyProvider] Cancellation requested after entering critical section.");
+                    ct.ThrowIfCancellationRequested();
+                }
 
                 var messageBuilder = new StringBuilder();
-
 #if SUPPORTS_CNG
                 // 1) KeyGuard (RSA-2048 under VBS isolation)
                 try
                 {
+                    logger.Info("[MI][WinKeyProvider] Trying KeyGuard key.");
                     if (WindowsCngKeyOperations.TryGetOrCreateKeyGuard(out RSA kgRsa))
                     {
-                        messageBuilder.AppendLine("KeyGuard RSA key created successfully. ");
+                        messageBuilder.AppendLine("KeyGuard RSA key created successfully.");
                         _cached = new ManagedIdentityKeyInfo(kgRsa, ManagedIdentityKeyType.KeyGuard, messageBuilder.ToString());
+                        logger?.Info("[MI][WinKeyProvider] Using KeyGuard key (RSA).");
                         return _cached;
                     }
                     else
                     {
-                        messageBuilder.AppendLine("KeyGuard RSA key creation not available or failed. ");
+                        messageBuilder.AppendLine("KeyGuard RSA key creation not available or failed.");
+                        logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard key not available.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    messageBuilder.AppendLine($"KeyGuard RSA key creation threw exception: {ex.Message} ");
+                    messageBuilder.AppendLine($"KeyGuard RSA key creation threw exception: {ex.GetType().Name}: {ex.Message}");
+                    logger?.WarningPii(
+                        $"[MI][WinKeyProvider] Exception creating KeyGuard key: {ex}",
+                        $"[MI][WinKeyProvider] Exception creating KeyGuard key: {ex.GetType().Name}");
                 }
 
                 // 2) Hardware TPM/KSP (RSA-2048, non-exportable)
                 try
                 {
+                    logger?.Verbose(() => "[MI][WinKeyProvider] Trying Hardware (TPM/KSP) key.");
                     if (WindowsCngKeyOperations.TryGetOrCreateHardwareRsa(out RSA hwRsa))
                     {
-                        messageBuilder.AppendLine("Hardware RSA key created successfully. ");
+                        messageBuilder.AppendLine("Hardware RSA key created successfully.");
                         _cached = new ManagedIdentityKeyInfo(hwRsa, ManagedIdentityKeyType.Hardware, messageBuilder.ToString());
+                        logger?.Info("[MI][WinKeyProvider] Using Hardware key (RSA).");
                         return _cached;
                     }
                     else
                     {
                         messageBuilder.AppendLine("Hardware RSA key creation not available or failed.");
+                        logger?.Verbose(() => "[MI][WinKeyProvider] Hardware key not available.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    messageBuilder.AppendLine($"Hardware RSA key creation threw exception: {ex.Message} ");
+                    messageBuilder.AppendLine($"Hardware RSA key creation threw exception: {ex.GetType().Name}: {ex.Message}");
+                    logger?.WarningPii(
+                        $"[MI][WinKeyProvider] Exception creating Hardware key: {ex}",
+                        $"[MI][WinKeyProvider] Exception creating Hardware key: {ex.GetType().Name}");
                 }
 #endif
                 // 3) Fallback to portable in-memory provider
-                messageBuilder.AppendLine("Falling back to in-memory RSA key provider. ");
+                logger?.Verbose(() => "[MI][WinKeyProvider] Falling back to InMemory key provider.");
+                messageBuilder.AppendLine("Falling back to in-memory RSA key provider.");
+
                 var memProvider = new InMemoryManagedIdentityKeyProvider();
-                ManagedIdentityKeyInfo memKeyInfo = await memProvider.GetOrCreateKeyAsync(ct).ConfigureAwait(false);
+                ManagedIdentityKeyInfo memKeyInfo = await memProvider.GetOrCreateKeyAsync(logger, ct).ConfigureAwait(false);
+
+                if (!string.IsNullOrEmpty(memKeyInfo.ProviderMessage))
+                {
+                    messageBuilder.AppendLine(memKeyInfo.ProviderMessage.TrimEnd());
+                }
+
                 _cached = new ManagedIdentityKeyInfo(memKeyInfo.Key, ManagedIdentityKeyType.InMemory, messageBuilder.ToString());
+
+                logger?.Info($"[MI][WinKeyProvider] Using InMemory key. Success={(memKeyInfo.Key != null)}.");
+
                 return _cached;
             }
             finally

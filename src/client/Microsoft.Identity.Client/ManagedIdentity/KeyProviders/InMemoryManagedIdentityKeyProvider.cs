@@ -5,6 +5,7 @@ using System;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 {
@@ -16,26 +17,36 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         private static readonly SemaphoreSlim s_once = new(1, 1);
         private volatile ManagedIdentityKeyInfo _cached;
 
-        public async Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(CancellationToken ct)
+        public async Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(
+            ILoggerAdapter logger,
+            CancellationToken ct)
         {
+            // Return cached if available
             if (_cached is not null)
             {
+                logger?.Info("[MI][InMemoryKeyProvider] Returning cached key.");
                 return _cached;
             }
 
-            // Ensure only one thread can create the key at a time.
+            // Ensure only one creation at a time
+            logger?.Verbose(() => "[MI][InMemoryKeyProvider] Waiting on creation semaphore.");
             await s_once.WaitAsync(ct).ConfigureAwait(false);
 
             try
             {
                 if (_cached is not null)
                 {
+                    logger?.Verbose(() => "[MI][InMemoryKeyProvider] Cached key created while waiting; returning it.");
                     return _cached;
                 }
 
-                // Respect cancellation after entering critical section.
-                ct.ThrowIfCancellationRequested();
+                if (ct.IsCancellationRequested)
+                {
+                    logger?.Verbose(() => "[MI][InMemoryKeyProvider] Cancellation requested after entering critical section.");
+                    ct.ThrowIfCancellationRequested();
+                }
 
+                logger?.Verbose(() => "[MI][InMemoryKeyProvider] Starting RSA key creation.");
                 RSA rsa = null;
                 string message;
 
@@ -43,13 +54,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 {
                     rsa = CreateRsaKeyPair();
                     message = "In-memory RSA key created for Managed Identity authentication.";
+                    logger?.Info("[MI][InMemoryKeyProvider] RSA key created (2048).");
                 }
                 catch (Exception ex)
                 {
                     message = $"Failed to create in-memory RSA key: {ex.GetType().Name} - {ex.Message}";
+                    logger?.WarningPii(
+                        $"[MI][InMemoryKeyProvider] Exception during RSA creation: {ex}",
+                        $"[MI][InMemoryKeyProvider] Exception during RSA creation: {ex.GetType().Name}");
                 }
 
                 _cached = new ManagedIdentityKeyInfo(rsa, ManagedIdentityKeyType.InMemory, message);
+
+                logger?.Verbose(() =>
+                    $"[MI][InMemoryKeyProvider] Caching key. Success={(rsa != null)}. HasMessage={!string.IsNullOrEmpty(message)}.");
+
                 return _cached;
             }
             finally

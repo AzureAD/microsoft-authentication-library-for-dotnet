@@ -4,11 +4,12 @@
 // src/client/Microsoft.Identity.Client/ManagedIdentity/MiKeyAbstractions.cs
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal interface IManagedIdentityKeyProvider
     {
-        Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(CancellationToken ct);
+        Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(ILoggerAdapter logger, CancellationToken ct);
     }
 }
