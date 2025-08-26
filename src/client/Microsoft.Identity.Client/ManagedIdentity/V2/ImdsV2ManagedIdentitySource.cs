@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 serverHeader,
                 @"^IMDS/\d+\.\d+\.\d+\.(\d+)$"
             );
-            if (!match.Success || !int.TryParse(match.Groups[1].Value, out int version) || version <= 1324)
+            if (!match.Success || !int.TryParse(match.Groups[1].Value, out int version) || version < 1854)
             {
                 if (probeMode)
                 {
