@@ -61,9 +61,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        // Imds bug: headers are missing
-        // TODO: uncomment this when the bug is fixed
-        /*[TestMethod]
+        [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithMissingServerHeader()
         {
             using (var httpManager = new MockHttpManager())
@@ -78,11 +76,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
-        }*/
-
-        // Imds bug: headers are missing
-        // TODO: uncomment this when the bug is fixed
-        /*[TestMethod]
+        }
+        
+        [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithInvalidVersion()
         {
             using (var httpManager = new MockHttpManager())
@@ -97,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
-        }*/
+        }
 
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsAfterMaxRetries()

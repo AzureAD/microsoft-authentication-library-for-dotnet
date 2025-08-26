@@ -121,9 +121,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
              * "1556"                   // index 1: captured group (\d+)
              * ]
              */
-            // Imds bug: headers are missing
-            // TODO: uncomment this when the bug is fixed
-            /*string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
+            string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
             if (serverHeader == null)
             {
                 if (probeMode)
@@ -158,7 +156,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         null,
                         (int)response.StatusCode);
                 }
-            }*/
+            }
 
             return true;
         }
@@ -249,12 +247,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return certificateRequestResponse;
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
+            var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
             var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
-            var certificateRequestResponse = ExecuteCertificateRequestAsync(csr).GetAwaiter().GetResult();
+            var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
 
             throw new NotImplementedException();
         }
