@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -29,12 +30,14 @@ namespace Microsoft.Identity.Client.Extensibility
             Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler) 
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && onBeforeTokenRequestHandler != null)
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
             {
-                throw new InvalidOperationException("Cannot set OnBeforeTokenRequest handler twice.");
+                builder.CommonParameters.OnBeforeTokenRequestHandler = new List<Func<OnBeforeTokenRequestData, Task>> { onBeforeTokenRequestHandler };
             }
-
-            builder.CommonParameters.OnBeforeTokenRequestHandler = onBeforeTokenRequestHandler;
+            else
+            {
+                builder.CommonParameters.OnBeforeTokenRequestHandler.Add(onBeforeTokenRequestHandler);
+            }
 
             return builder;
         }
@@ -75,12 +78,17 @@ namespace Microsoft.Identity.Client.Extensibility
            MsalAuthenticationExtension authenticationExtension)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && authenticationExtension.OnBeforeTokenRequestHandler != null)
+            if (authenticationExtension.OnBeforeTokenRequestHandler != null)
             {
-                throw new InvalidOperationException("Cannot set both an AuthenticationOperation and an OnBeforeTokenRequestHandler");
+                if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
+                {
+                    builder.CommonParameters.OnBeforeTokenRequestHandler = new List<Func<OnBeforeTokenRequestData, Task>> { authenticationExtension.OnBeforeTokenRequestHandler };
+                }
+                else
+                {
+                    builder.CommonParameters.OnBeforeTokenRequestHandler.Add(authenticationExtension.OnBeforeTokenRequestHandler);
+                }
             }
-
-            builder.CommonParameters.OnBeforeTokenRequestHandler = authenticationExtension.OnBeforeTokenRequestHandler;
 
             if (authenticationExtension.AuthenticationOperation != null)
                 builder.WithAuthenticationOperation(authenticationExtension.AuthenticationOperation);
@@ -137,7 +145,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </remarks>
         internal static AbstractAcquireTokenParameterBuilder<T> WithAdditionalCacheKeyComponents<T>(
             this AbstractAcquireTokenParameterBuilder<T> builder,
-            IDictionary<string, string> cacheKeyComponents)
+            IDictionary<string, Func<CancellationToken, Task<string>>> cacheKeyComponents)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
             if (cacheKeyComponents == null || cacheKeyComponents.Count == 0)
@@ -148,7 +156,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
             if (builder.CommonParameters.CacheKeyComponents == null)
             {
-                builder.CommonParameters.CacheKeyComponents = new SortedList<string, string>(cacheKeyComponents);
+                builder.CommonParameters.CacheKeyComponents = new SortedList<string, Func<CancellationToken, Task<string>>>(cacheKeyComponents);
             }
             else
             {
@@ -187,9 +195,9 @@ namespace Microsoft.Identity.Client.Extensibility
             builder.CommonParameters.ClientAssertionFmiPath = fmiPath;
 
             // Add the fmi_path to the cache key so that it is used for cache lookups
-            var cacheKey = new SortedList<string, string>
+            var cacheKey = new SortedList<string, Func<CancellationToken, Task<string>>>
             {
-                { "credential_fmi_path", fmiPath }
+                { "credential_fmi_path", (CancellationToken ct) => Task.FromResult(fmiPath) }
             };
 
             WithAdditionalCacheKeyComponents(builder, cacheKey);

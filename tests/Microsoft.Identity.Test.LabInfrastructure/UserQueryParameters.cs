@@ -35,6 +35,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             Upn = "idlab@msidlab4.onmicrosoft.com"
         };
 
+        public static UserQuery PublicAadUser3Query => new UserQuery()
+        {
+            Upn = "idlabxcg@msidlab4.onmicrosoft.com"
+        };
+
         public static UserQuery MsaUserQuery => new UserQuery
         {
             UserType = LabInfrastructure.UserType.MSA

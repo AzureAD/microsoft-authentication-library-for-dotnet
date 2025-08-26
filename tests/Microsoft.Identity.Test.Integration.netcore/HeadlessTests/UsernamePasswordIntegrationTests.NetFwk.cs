@@ -81,14 +81,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        [TestCategory(TestCategories.Arlington)]
-        public async Task ARLINGTON_ROPC_ADFS_Async()
+        public async Task Public_ROPC_Cloud_Async()
         {
-            var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            var aadUser = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await RunHappyPathTestAsync(aadUser).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+#if IGNORE_FEDERATED
+        [Ignore]
+#endif
         public async Task ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -96,6 +98,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+#if IGNORE_FEDERATED
+        [Ignore]
+#endif
         public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -105,6 +110,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
+#if IGNORE_FEDERATED
+        [Ignore]
+#endif
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
@@ -182,7 +190,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireTokenWithFederatedUsernameIncorrectPasswordAsync()
+        public async Task AcquireTokenDefaultUserIncorrectPasswordAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             var user = labResponse.User;
@@ -475,6 +483,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [IgnoreOnOneBranch]
+#if IGNORE_FEDERATED
+        [Ignore]
+#endif
         public async Task Kerberos_ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
