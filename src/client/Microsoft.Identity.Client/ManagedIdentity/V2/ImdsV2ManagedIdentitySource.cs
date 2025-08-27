@@ -257,9 +257,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
             
             // transform certificateRequestResponse.ClientCredential to x509
-            var mtlsCertificate = CreateCertificateWithPrivateKey( // TODO: implement this method
+            /*var mtlsCertificate = CreateCertificateWithPrivateKey( // TODO: implement this method
                 certificateRequestResponse.Certificate,
-                privateKey);
+                privateKey);*/
 
             ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.MtlsAuthenticationEndpoint}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
             request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
@@ -267,7 +267,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             request.BodyParameters.Add("grant_type", certificateRequestResponse.Certificate);
             request.BodyParameters.Add("scope", "https://management.azure.com/.default");
             request.RequestType = RequestType.Imds;
-            request.MtlsCertificate = mtlsCertificate;
+            //request.MtlsCertificate = mtlsCertificate;
 
             return request;
         }

@@ -194,8 +194,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 VmId = TestConstants.VmId
             };
 
-            var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
-            CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
+            var (csr, _) = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            CsrValidator.ValidateCsrContent(csr, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
         [TestMethod]
@@ -207,8 +207,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 VmssId = TestConstants.VmssId
             };
 
-            var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
-            CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
+            var (csr, _) = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            CsrValidator.ValidateCsrContent(csr, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
         [TestMethod]
