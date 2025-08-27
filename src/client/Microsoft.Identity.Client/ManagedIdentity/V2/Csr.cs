@@ -14,11 +14,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             using (RSA rsa = CreateRsaKeyPair())
             {
-                CertificateRequest req = new CertificateRequest(
+#if NET8_0_OR_GREATER
+                // Use built-in .NET 8.0+ CertificateRequest with OtherRequestAttributes support
+                var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
                     new X500DistinguishedName($"CN={clientId}, DC={tenantId}"),
                     rsa,
                     HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pss);
+#else
+                // Use custom polyfill for downlevel frameworks (net462, net472, netstandard2.0)
+                var req = new CertificateRequest(
+                    new X500DistinguishedName($"CN={clientId}, DC={tenantId}"),
+                    rsa,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pss);
+#endif
 
                 AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
                 writer.WriteCharacterString(UniversalTagNumber.UTF8String, JsonHelper.SerializeToJson(cuid));

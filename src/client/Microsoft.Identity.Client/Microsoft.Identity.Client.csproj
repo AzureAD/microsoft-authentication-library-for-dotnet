@@ -80,11 +80,18 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
+    <!-- Remove custom CertificateRequest from all targets, then conditionally include for downlevel frameworks only -->
+    <Compile Remove="$(PathToMsalSources)\ManagedIdentity\V2\CertificateRequest.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
     <None Include="$(PathToMsalSources)\..\..\..\README.md" Pack="true" PackagePath="\" />
     <None Include="Platforms\net\JsonObjectAttribute.cs" />
     <None Include="Platforms\net\JsonStringConverter.cs" />
     <None Include="Platforms\net\MsalJsonSerializerContext.cs" />
+  </ItemGroup>
+
+  <!-- Include custom CertificateRequest polyfill only for downlevel frameworks that don't have OtherRequestAttributes -->
+  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkNet)'">
+    <Compile Include="$(PathToMsalSources)\ManagedIdentity\V2\CertificateRequest.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
