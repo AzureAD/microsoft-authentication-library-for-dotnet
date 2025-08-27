@@ -256,10 +256,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
 
-            ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.RegionalTokenUrl}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
+            ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.MtlsAuthenticationEndpoint}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
             request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
             request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
-            request.BodyParameters.Add("grant_type", certificateRequestResponse.ClientCredential);
+            request.BodyParameters.Add("grant_type", certificateRequestResponse.Certificate);
             request.BodyParameters.Add("scope", "https://management.azure.com/.default");
             request.RequestType = RequestType.Imds;
 
