@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client
     /// Contains the results of one token acquisition operation in <see cref="PublicClientApplication"/>
     /// or ConfidentialClientApplication. For details see https://aka.ms/msal-net-authenticationresult
     /// </summary>
-    public partial class AuthenticationResult
+    public partial class AuthenticationResult : Microsoft.Identity.Abstractions.AcquireTokenResult
     {
         private readonly IAuthenticationOperation _authenticationScheme;
 
@@ -36,13 +36,14 @@ namespace Microsoft.Identity.Client
         /// <param name="isExtendedLifeTimeToken">See <see cref="IsExtendedLifeTimeToken"/></param>
         /// <param name="scopes">Granted scope values as returned by the service</param>
         /// <param name="tenantId">Identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
-        /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
+        /// <param name="uniqueId">Unique Id of the account. It can be null. When the IdToken is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
         /// <param name="correlationId">The correlation id of the authentication request</param>
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="claimsPrincipal">Claims from the ID token</param>
         /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizationCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code. See https://aka.ms/msal-net/spa-auth-code</param>
         /// <param name="additionalResponseParameters">Other properties from the token response.</param>
+        [EditorBrowsable(EditorBrowsableState.Never)] // for testing purposes only
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -59,6 +60,14 @@ namespace Microsoft.Identity.Client
             ClaimsPrincipal claimsPrincipal = null,
             string spaAuthCode = null,
             IReadOnlyDictionary<string, string> additionalResponseParameters = null)
+            : base(
+                accessToken,
+                expiresOn,
+                tenantId,
+                idToken,
+                scopes,
+                correlationId,
+                tokenType)
         {
             AccessToken = accessToken;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -91,7 +100,7 @@ namespace Microsoft.Identity.Client
         /// <param name="isExtendedLifeTimeToken">See <see cref="IsExtendedLifeTimeToken"/></param>
         /// <param name="scopes">Granted scope values as returned by the service</param>
         /// <param name="tenantId">Identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
-        /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
+        /// <param name="uniqueId">Unique Id of the account. It can be null. When the IdToken is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
         /// <param name="correlationId">The correlation id of the authentication request</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
@@ -136,6 +145,14 @@ namespace Microsoft.Identity.Client
             Account account,
             string spaAuthCode,
             IReadOnlyDictionary<string, string> additionalResponseParameters)
+            : base(
+                msalAccessTokenCacheItem?.Secret,
+                msalAccessTokenCacheItem?.ExpiresOn ?? default,
+                msalIdTokenCacheItem?.IdToken?.TenantId,
+                msalIdTokenCacheItem?.Secret,
+                msalAccessTokenCacheItem?.ScopeSet,
+                correlationID,
+                msalAccessTokenCacheItem?.TokenType)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
 
@@ -168,8 +185,8 @@ namespace Microsoft.Identity.Client
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
             AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
-                                                                    (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
-                                                                    additionalResponseParameters;
+                                                                        (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
+                                                                        additionalResponseParameters;
             if (msalAccessTokenCacheItem != null)
             {
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
@@ -201,13 +218,15 @@ namespace Microsoft.Identity.Client
         }
 
         //Default constructor for testing
-        internal AuthenticationResult() { }
-
-        /// <summary>
-        /// Access Token that can be used as a bearer token to access protected web APIs
-        /// </summary>
-        public string AccessToken { get; set; }
-
+        internal AuthenticationResult() : base(
+            accessToken: null,
+            expiresOn: default,
+            tenantId: null,
+            idToken: null,
+            scopes: null,
+            correlationId: default,
+            tokenType: null)
+        { }
         /// <summary>
         /// In case when Azure AD has an outage, to be more resilient, it can return tokens with
         /// an expiration time, and also with an extended expiration time.
@@ -224,7 +243,7 @@ namespace Microsoft.Identity.Client
         public bool IsExtendedLifeTimeToken { get; }
 
         /// <summary>
-        /// Gets the Unique Id of the account in this <see cref="TenantId" />
+        /// Gets the Unique Id of the account in this TenantId />
         /// It is set as the oid (ObjectId) claim, or if that claim is <c>null</c>, as the sub (Subject) claim which is guaranteed not-null.
         /// </summary>
         /// <remarks>
@@ -237,13 +256,6 @@ namespace Microsoft.Identity.Client
         public string UniqueId { get; set; }
 
         /// <summary>
-        /// Gets the point in time in which the Access Token returned in the <see cref="AccessToken"/> property ceases to be valid.
-        /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the
-        /// service.
-        /// </summary>
-        public DateTimeOffset ExpiresOn { get; set; }
-
-        /// <summary>
         /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in MSAL's extended LifeTime.
         /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
         /// </summary>
@@ -252,39 +264,12 @@ namespace Microsoft.Identity.Client
         public DateTimeOffset ExtendedExpiresOn { get; }
 
         /// <summary>
-        /// Gets an identifier for the Azure AD tenant from which the token was acquired. This property will be null if tenant information is
-        /// not returned by the service.
-        /// </summary>
-        public string TenantId { get; set; }
-
-        /// <summary>
         /// Gets the account information. Some elements in <see cref="IAccount"/> might be null if not returned by the
         /// service. The account can be passed back in some API overloads to identify which account should be used such
         /// as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> or
         /// <see cref="IClientApplicationBase.RemoveAsync(IAccount)"/> for instance
         /// </summary>
         public IAccount Account { get; set; }
-
-        /// <summary>
-        /// Gets the  Id Token if returned by the service or null if no Id Token is returned.
-        /// </summary>
-        public string IdToken { get; set; }
-
-        /// <summary>
-        /// Gets the granted scope values returned by the service.
-        /// </summary>
-        public IEnumerable<string> Scopes { get; set; }
-
-        /// <summary>
-        /// Gets the correlation id used for the request.
-        /// </summary>
-        public Guid CorrelationId { get; set; }
-
-        /// <summary>
-        /// Identifies the type of access token. By default tokens returned by Azure Active Directory are Bearer tokens.        
-        /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
-        /// </summary>
-        public string TokenType { get; set; }
 
         /// <summary>
         /// Gets the SPA Authorization Code, if it was requested using WithSpaAuthorizationCode method on the
