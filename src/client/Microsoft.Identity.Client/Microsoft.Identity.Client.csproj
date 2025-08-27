@@ -80,13 +80,6 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <Compile Remove="C:\msi_vs_keys\src\client\Microsoft.Identity.Client\ManagedIdentity\IManagedIdentityPlatformKeyProvider.cs" />
-    <None Remove="C:\msi_vs_keys\src\client\Microsoft.Identity.Client\ManagedIdentity\IManagedIdentityPlatformKeyProvider.cs" />
-    <None Remove="ManagedIdentity\KeyProviders\InMemoryManagedIdentityKeyProvider.cs" />
-    <None Remove="ManagedIdentity\KeyProviders\KeyGuardKey.cs" />
-    <None Remove="ManagedIdentity\KeyProviders\WindowsManagedIdentityKeyProvider.cs" />
-    <None Remove="ManagedIdentity\ManagedIdentityKeyProviderFactory.cs" />
-    <None Remove="ManagedIdentity\MiKeyTypes.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
     <None Include="$(PathToMsalSources)\..\..\..\README.md" Pack="true" PackagePath="\" />
     <None Include="Platforms\net\JsonObjectAttribute.cs" />
@@ -99,8 +92,9 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
-
+    
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+    <PackageReference Include="System.Security.Cryptography.Cng" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
@@ -109,7 +103,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
-
+    
     <!--System.Text.Json replaces internal NewtonSoft for NET -->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
 
@@ -171,11 +165,4 @@
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Unshipped.txt" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="ManagedIdentity\KeyProviders\InMemoryManagedIdentityKeyProvider.cs" />
-    <Compile Include="ManagedIdentity\KeyProviders\KeyGuardKey.cs" />
-    <Compile Include="ManagedIdentity\KeyProviders\WindowsManagedIdentityKeyProvider.cs" />
-    <Compile Include="ManagedIdentity\ManagedIdentityKeyProviderFactory.cs" />
-    <Compile Include="ManagedIdentity\MiKeyTypes.cs" />
-  </ItemGroup>
 </Project>
