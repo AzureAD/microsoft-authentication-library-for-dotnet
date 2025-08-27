@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     {
         // used in unit tests
         public const string ImdsV2ApiVersion = "2.0";
-        private const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
+        public const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
         public const string CertificateRequestPath = "/metadata/identity/issuecredential";
         public const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
@@ -26,16 +26,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             RequestContext requestContext,
             bool probeMode)
         {
-            string queryParams = $"cred-api-version={ImdsV2ApiVersion}";
-
-            var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
-                requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
-                requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
-                requestContext.Logger);
-            if (userAssignedIdQueryParam != null)
-            {
-                queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
-            }
+            var queryParams = ImdsV2QueryParamsHelper(requestContext);
 
             var headers = new Dictionary<string, string>
             {
@@ -155,7 +146,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 serverHeader,
                 @"^IMDS/\d+\.\d+\.\d+\.(\d+)$"
             );
-            if (!match.Success || !int.TryParse(match.Groups[1].Value, out int version) || version <= 1324)
+            if (!match.Success || !int.TryParse(match.Groups[1].Value, out int version) || version < 1854)
             {
                 if (probeMode)
                 {
@@ -200,15 +191,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.ImdsV2) { }
 
-        private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
-            CuidInfo cuid,
-            string csrPem)
+        private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(string csr)
         {
-            var queryParams = $"cuid={JsonHelper.SerializeToJson(cuid)}&cred-api-version={ImdsV2ApiVersion}";
-            if (_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId != null)
-            {
-                queryParams += $"&uaid{_requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
-            }
+            var queryParams = ImdsV2QueryParamsHelper(_requestContext);
+
+            // TODO: add bypass_cache query param in case of token revocation. Boolean: true/false
 
             var headers = new Dictionary<string, string>
             {
@@ -216,7 +203,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
             
-            var body = $"{{\"pem\":\"{csrPem}\"}}";
+            var body = $"{{\"csr\":\"{csr}\"}}";
 
             IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
@@ -259,25 +246,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             var certificateRequestResponse = JsonHelper.DeserializeFromJson<CertificateRequestResponse>(response.Body);
-            if (!CertificateRequestResponse.IsValid(certificateRequestResponse))
-            {
-                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.ManagedIdentityRequestFailed,
-                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed because the certificate request response is malformed. Status code: {response.StatusCode}",
-                    null,
-                    ManagedIdentitySource.ImdsV2,
-                    (int)response.StatusCode);
-            }
+            CertificateRequestResponse.Validate(certificateRequestResponse);
 
             return certificateRequestResponse;
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            var csrMetadata = GetCsrMetadataAsync(_requestContext, false).GetAwaiter().GetResult();
-            var csrPem = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
+            var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
+            var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
-            var certificateRequestResponse = ExecuteCertificateRequestAsync(csrMetadata.CuId, csrPem).GetAwaiter().GetResult();
+            var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
 
             ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.RegionalTokenUrl}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
             request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
@@ -287,6 +266,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             request.RequestType = RequestType.Imds;
 
             return request;
+        }
+
+        private static string ImdsV2QueryParamsHelper(RequestContext requestContext)
+        {
+            var queryParams = $"cred-api-version={ImdsV2ApiVersion}";
+
+            var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
+                requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
+                requestContext.Logger);
+            if (userAssignedIdQueryParam != null)
+            {
+                queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
+            }
+
+            return queryParams;
         }
     }
 }

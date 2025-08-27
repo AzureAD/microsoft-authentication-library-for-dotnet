@@ -2,12 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -66,7 +64,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return true;
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
             
@@ -92,7 +90,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
             }
                 
-            return request;
+            return Task.FromResult(request);
         }
     }
 }

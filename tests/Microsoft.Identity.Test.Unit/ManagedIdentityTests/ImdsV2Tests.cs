@@ -131,16 +131,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
-        }*/
-
-        // Imds bug: headers are missing
-        // TODO: uncomment this when the bug is fixed
-        /*[TestMethod]
+        }
+        
+        [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithInvalidVersion()
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "IMDS/150.870.65.1324"));
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "IMDS/150.870.65.1853")); // min version is 1854
 
                 var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
@@ -191,7 +189,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TestCsrGeneration()
+        public void TestCsrGeneration_OnlyVmId()
+        {
+            var cuid = new CuidInfo
+            {
+                VmId = TestConstants.VmId
+            };
+
+            var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
+        }
+
+        [TestMethod]
+        public void TestCsrGeneration_VmIdAndVmssId()
         {
             var cuid = new CuidInfo
             {
@@ -199,10 +209,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 VmssId = TestConstants.VmssId
             };
 
-            // Generate CSR
             var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
-
-            // Validate the CSR contents using the helper
             CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 

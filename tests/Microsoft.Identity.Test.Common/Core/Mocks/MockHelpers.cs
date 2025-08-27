@@ -588,7 +588,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static MockHttpMessageHandler MockCsrResponse(
             HttpStatusCode statusCode = HttpStatusCode.OK,
-            string responseServerHeader = "IMDS/150.870.65.1325")
+            string responseServerHeader = "IMDS/150.870.65.1854")
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
@@ -597,7 +597,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             string content =
                 "{" +
-                "\"cuid\": { \"vmId\": \"fake_vmId\", \"vmssId\": \"fake_vmssId\" }," +
+                "\"cuId\": { \"vmId\": \"fake_vmId\" }," +
                 "\"clientId\": \"fake_client_id\"," +
                 "\"tenantId\": \"fake_tenant_id\"," +
                 "\"attestationEndpoint\": \"fake_attestation_endpoint\"" +
@@ -605,7 +605,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             var handler = new MockHttpMessageHandler()
             {
-                ExpectedUrl = "http://169.254.169.254/metadata/identity/getplatformmetadata",
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CsrMetadataPath}",
                 ExpectedMethod = HttpMethod.Get,
                 ExpectedQueryParams = expectedQueryParams,
                 ExpectedRequestHeaders = expectedRequestHeaders,

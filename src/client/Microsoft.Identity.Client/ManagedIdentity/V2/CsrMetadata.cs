@@ -19,6 +19,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         [JsonProperty("vmssId")]
         public string VmssId { get; set; }
+
+        public static bool IsNullOrEmpty(CuidInfo cuidInfo)
+        {
+            return cuidInfo == null ||
+                   (string.IsNullOrEmpty(cuidInfo.VmId) && string.IsNullOrEmpty(cuidInfo.VmssId));
+        }
     }
 
     /// <summary>
@@ -57,12 +63,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// Validates a JSON decoded CsrMetadata instance.
         /// </summary>
         /// <param name="csrMetadata">The CsrMetadata object.</param>
-        /// <returns>false if any required field is null. Note: VmId is required, VmssId is optional.</returns>
+        /// <returns>false if any field is null or empty</returns>
         public static bool ValidateCsrMetadata(CsrMetadata csrMetadata)
         {
             if (csrMetadata == null ||
-                csrMetadata.CuId == null ||
-                string.IsNullOrEmpty(csrMetadata.CuId.VmId) ||
+                CuidInfo.IsNullOrEmpty(csrMetadata.CuId) ||
                 string.IsNullOrEmpty(csrMetadata.ClientId) ||
                 string.IsNullOrEmpty(csrMetadata.TenantId) ||
                 string.IsNullOrEmpty(csrMetadata.AttestationEndpoint))
