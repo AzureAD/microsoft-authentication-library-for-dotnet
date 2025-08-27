@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ImdsManagedIdentitySource : AbstractManagedIdentity
     {
         // IMDS constants. Docs for IMDS are available here https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
-        // used in unit tests too
+        // used in unit tests as well
         public const string DefaultImdsBaseEndpoint= "http://169.254.169.254";
         private const string ImdsTokenPath = "/metadata/identity/oauth2/token";
         public const string ImdsApiVersion = "2018-02-01";

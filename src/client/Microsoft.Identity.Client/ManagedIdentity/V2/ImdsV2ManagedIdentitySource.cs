@@ -123,9 +123,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
              * "1556"                   // index 1: captured group (\d+)
              * ]
              */
-            // Imds bug: headers are missing
-            // TODO: uncomment this when the bug is fixed
-            /*string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
+            string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
             if (serverHeader == null)
             {
                 if (probeMode)
@@ -160,7 +158,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         null,
                         (int)response.StatusCode);
                 }
-            }*/
+            }
 
             return true;
         }
