@@ -1,0 +1,61 @@
+Microsoft.Identity.Client.Labs.AppCredentials
+Microsoft.Identity.Client.Labs.AppCredentials.AppCredentials(string! clientId, string! clientSecret = "", byte[]? pfxBytes = null, string! pfxPassword = "") -> void
+Microsoft.Identity.Client.Labs.AppCredentials.ClientId.get -> string!
+Microsoft.Identity.Client.Labs.AppCredentials.ClientSecret.get -> string!
+Microsoft.Identity.Client.Labs.AppCredentials.PfxBytes.get -> byte[]!
+Microsoft.Identity.Client.Labs.AppCredentials.PfxPassword.get -> string!
+Microsoft.Identity.Client.Labs.AppKind
+Microsoft.Identity.Client.Labs.AppKind.ConfidentialClient = 1 -> Microsoft.Identity.Client.Labs.AppKind
+Microsoft.Identity.Client.Labs.AppKind.Daemon = 2 -> Microsoft.Identity.Client.Labs.AppKind
+Microsoft.Identity.Client.Labs.AppKind.PublicClient = 0 -> Microsoft.Identity.Client.Labs.AppKind
+Microsoft.Identity.Client.Labs.AppKind.WebApi = 3 -> Microsoft.Identity.Client.Labs.AppKind
+Microsoft.Identity.Client.Labs.AppKind.WebApp = 4 -> Microsoft.Identity.Client.Labs.AppKind
+Microsoft.Identity.Client.Labs.AppSecretKeys
+Microsoft.Identity.Client.Labs.AppSecretKeys.AppSecretKeys(string! clientIdSecret, string! clientSecretSecret = "", string! pfxSecret = "", string! pfxPasswordSecret = "") -> void
+Microsoft.Identity.Client.Labs.AppSecretKeys.ClientIdSecret.get -> string!
+Microsoft.Identity.Client.Labs.AppSecretKeys.ClientSecretSecret.get -> string!
+Microsoft.Identity.Client.Labs.AppSecretKeys.PfxPasswordSecret.get -> string!
+Microsoft.Identity.Client.Labs.AppSecretKeys.PfxSecret.get -> string!
+Microsoft.Identity.Client.Labs.AuthType
+Microsoft.Identity.Client.Labs.AuthType.Basic = 0 -> Microsoft.Identity.Client.Labs.AuthType
+Microsoft.Identity.Client.Labs.AuthType.Federated = 1 -> Microsoft.Identity.Client.Labs.AuthType
+Microsoft.Identity.Client.Labs.AuthType.Guest = 3 -> Microsoft.Identity.Client.Labs.AuthType
+Microsoft.Identity.Client.Labs.AuthType.Mfa = 2 -> Microsoft.Identity.Client.Labs.AuthType
+Microsoft.Identity.Client.Labs.CloudType
+Microsoft.Identity.Client.Labs.CloudType.Canary = 5 -> Microsoft.Identity.Client.Labs.CloudType
+Microsoft.Identity.Client.Labs.CloudType.China = 3 -> Microsoft.Identity.Client.Labs.CloudType
+Microsoft.Identity.Client.Labs.CloudType.Dod = 2 -> Microsoft.Identity.Client.Labs.CloudType
+Microsoft.Identity.Client.Labs.CloudType.Gcc = 1 -> Microsoft.Identity.Client.Labs.CloudType
+Microsoft.Identity.Client.Labs.CloudType.Germany = 4 -> Microsoft.Identity.Client.Labs.CloudType
+Microsoft.Identity.Client.Labs.CloudType.Public = 0 -> Microsoft.Identity.Client.Labs.CloudType
+Microsoft.Identity.Client.Labs.IAccountMapProvider
+Microsoft.Identity.Client.Labs.IAccountMapProvider.GetUsernameMap() -> System.Collections.Generic.IReadOnlyDictionary<(Microsoft.Identity.Client.Labs.AuthType auth, Microsoft.Identity.Client.Labs.CloudType cloud, Microsoft.Identity.Client.Labs.Scenario scenario), string!>!
+Microsoft.Identity.Client.Labs.IAccountResolver
+Microsoft.Identity.Client.Labs.IAccountResolver.ResolveUserAsync(Microsoft.Identity.Client.Labs.AuthType auth, Microsoft.Identity.Client.Labs.CloudType cloud, Microsoft.Identity.Client.Labs.Scenario scenario, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(string! Username, string! Password)>!
+Microsoft.Identity.Client.Labs.IAppMapProvider
+Microsoft.Identity.Client.Labs.IAppMapProvider.GetAppMap() -> System.Collections.Generic.IReadOnlyDictionary<(Microsoft.Identity.Client.Labs.CloudType cloud, Microsoft.Identity.Client.Labs.Scenario scenario, Microsoft.Identity.Client.Labs.AppKind kind), Microsoft.Identity.Client.Labs.AppSecretKeys!>!
+Microsoft.Identity.Client.Labs.IAppResolver
+Microsoft.Identity.Client.Labs.IAppResolver.ResolveAppAsync(Microsoft.Identity.Client.Labs.CloudType cloud, Microsoft.Identity.Client.Labs.Scenario scenario, Microsoft.Identity.Client.Labs.AppKind kind, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.Labs.AppCredentials!>!
+Microsoft.Identity.Client.Labs.LabsOptions
+Microsoft.Identity.Client.Labs.LabsOptions.EnableConventionFallback.get -> bool
+Microsoft.Identity.Client.Labs.LabsOptions.EnableConventionFallback.set -> void
+Microsoft.Identity.Client.Labs.LabsOptions.GlobalPasswordSecret.get -> string!
+Microsoft.Identity.Client.Labs.LabsOptions.GlobalPasswordSecret.set -> void
+Microsoft.Identity.Client.Labs.LabsOptions.KeyVaultUri.get -> System.Uri!
+Microsoft.Identity.Client.Labs.LabsOptions.KeyVaultUri.set -> void
+Microsoft.Identity.Client.Labs.LabsOptions.LabsOptions() -> void
+Microsoft.Identity.Client.Labs.LabsOptions.PasswordSecretByCloud.get -> System.Collections.Generic.Dictionary<Microsoft.Identity.Client.Labs.CloudType, string!>!
+Microsoft.Identity.Client.Labs.LabsOptions.PasswordSecretByCloud.set -> void
+Microsoft.Identity.Client.Labs.LabsOptions.PasswordSecretByTuple.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Microsoft.Identity.Client.Labs.LabsOptions.PasswordSecretByTuple.set -> void
+Microsoft.Identity.Client.Labs.LabsServiceCollectionExtensions
+Microsoft.Identity.Client.Labs.Scenario
+Microsoft.Identity.Client.Labs.Scenario.Basic = 0 -> Microsoft.Identity.Client.Labs.Scenario
+Microsoft.Identity.Client.Labs.Scenario.Cca = 2 -> Microsoft.Identity.Client.Labs.Scenario
+Microsoft.Identity.Client.Labs.Scenario.Daemon = 5 -> Microsoft.Identity.Client.Labs.Scenario
+Microsoft.Identity.Client.Labs.Scenario.DeviceCode = 3 -> Microsoft.Identity.Client.Labs.Scenario
+Microsoft.Identity.Client.Labs.Scenario.Obo = 1 -> Microsoft.Identity.Client.Labs.Scenario
+Microsoft.Identity.Client.Labs.Scenario.Ropc = 4 -> Microsoft.Identity.Client.Labs.Scenario
+static Microsoft.Identity.Client.Labs.LabsServiceCollectionExtensions.AddAccountMapProvider<T>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Microsoft.Identity.Client.Labs.LabsServiceCollectionExtensions.AddAppMapProvider<T>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Microsoft.Identity.Client.Labs.LabsServiceCollectionExtensions.AddLabsIdentity(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<Microsoft.Identity.Client.Labs.LabsOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
