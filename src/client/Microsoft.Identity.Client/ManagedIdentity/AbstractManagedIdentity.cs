@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             method: HttpMethod.Get,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
-                            mtlsCertificate: null,
+                            mtlsCertificate: request.MtlsCertificate,
                             validateServerCertificate: GetValidationCallback(), 
                             cancellationToken: cancellationToken,
                             retryPolicy: retryPolicy).ConfigureAwait(false);
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             method: HttpMethod.Post,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
-                            mtlsCertificate: null,
+                            mtlsCertificate: request.MtlsCertificate,
                             validateServerCertificate: GetValidationCallback(), 
                             cancellationToken: cancellationToken,
                             retryPolicy: retryPolicy)
