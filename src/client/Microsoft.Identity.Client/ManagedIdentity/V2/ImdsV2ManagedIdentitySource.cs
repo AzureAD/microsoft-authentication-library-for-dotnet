@@ -16,8 +16,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
+        // used in unit tests
         public const string ImdsV2ApiVersion = "2.0";
-        private const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
+        public const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
         private const string CertificateRequestPath = "/metadata/identity/issuecredential";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
