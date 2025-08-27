@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating IMDS managed identity source. Endpoint URI: " + _imdsEndpoint);
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             ManagedIdentityRequest request = new(HttpMethod.Get, _imdsEndpoint);
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             request.RequestType = RequestType.Imds;
 
-            return request;
+            return Task.FromResult(request);
         }
 
         public static KeyValuePair<string, string>? GetUserAssignedIdQueryParam(

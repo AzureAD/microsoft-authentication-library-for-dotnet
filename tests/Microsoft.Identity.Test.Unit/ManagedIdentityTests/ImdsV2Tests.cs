@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -75,13 +77,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
         }
-
+        
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithInvalidVersion()
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "IMDS/150.870.65.1324"));
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "IMDS/150.870.65.1853")); // min version is 1854
 
                 var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
@@ -129,6 +131,49 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
+        }
+
+        [TestMethod]
+        public void TestCsrGeneration_OnlyVmId()
+        {
+            var cuid = new CuidInfo
+            {
+                VmId = TestConstants.VmId
+            };
+
+            var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
+        }
+
+        [TestMethod]
+        public void TestCsrGeneration_VmIdAndVmssId()
+        {
+            var cuid = new CuidInfo
+            {
+                VmId = TestConstants.VmId,
+                VmssId = TestConstants.VmssId
+            };
+
+            var csrPem = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            CsrValidator.ValidateCsrContent(csrPem, TestConstants.ClientId, TestConstants.TenantId, cuid);
+        }
+
+        [TestMethod]
+        public void TestCsrGeneration_MalformedPem_FormatException()
+        {
+            string malformedPem = "-----BEGIN CERTIFICATE REQUEST-----\nInvalid@#$%Base64Content!\n-----END CERTIFICATE REQUEST-----";
+            Assert.ThrowsException<FormatException>(() => 
+                CsrValidator.ParseCsrFromPem(malformedPem));
+        }
+
+        [DataTestMethod]
+        [DataRow("-----BEGIN CERTIFICATE-----\nTUlJQzNqQ0NBY1lDQVFBd1pURT0K\n-----END CERTIFICATE REQUEST-----")]
+        [DataRow("")]
+        [DataRow(null)]
+        public void TestCsrGeneration_MalformedPem_ArgumentException(string malformedPem)
+        {
+            Assert.ThrowsException<ArgumentException>(() => 
+                CsrValidator.ParseCsrFromPem(malformedPem));
         }
     }
 }
