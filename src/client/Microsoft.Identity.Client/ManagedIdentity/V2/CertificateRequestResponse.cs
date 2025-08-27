@@ -48,8 +48,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     ManagedIdentitySource.ImdsV2,
                     (int)HttpStatusCode.OK);
             }
-
-            return true;
         }
     }
 }
