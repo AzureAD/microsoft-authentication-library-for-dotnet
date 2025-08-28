@@ -127,6 +127,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
+        public bool IsManagedIdentityPopEnabled => _commonParameters.IsManagedIdentityPopEnabled;
+
         public IAuthenticationOperation AuthenticationScheme => _commonParameters.AuthenticationOperation;
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
