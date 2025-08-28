@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Drawing;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
