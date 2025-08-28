@@ -991,6 +991,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 AssertCcsHint(uri, "oid:oid@tid");
+                Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+                ValidateCommonQueryParams(qp);
             }
         }
 
@@ -1025,6 +1027,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 AssertCcsHint(uri, $"upn:{TestConstants.DisplayableId}");
+                Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+                ValidateCommonQueryParams(qp);
             }
         }
 
@@ -1347,7 +1351,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp["prompt"]);
             Assert.AreEqual(TestCommon.CreateDefaultServiceBundle().PlatformProxy.GetProductName(), qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
-            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+            Assert.IsFalse(qp.ContainsKey("x-client-os"));
         }
 
         [TestMethod]
