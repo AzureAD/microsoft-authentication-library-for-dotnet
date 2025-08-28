@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenTelemetry.Resources;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -20,52 +21,37 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class ImdsV2Tests : TestBase
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
+        private readonly TestCsrFactory _testCsrFactory = new TestCsrFactory();
 
-        // Test constants for certificate testing - using a real self-signed certificate
-        private const string ValidPemCertificate = @"-----BEGIN CERTIFICATE-----
-MIIDUTCCAjmgAwIBAgIUPS20Ik/lV4SSwHHHJGPSlG7j5SgwDQYJKoZIhvcNAQEL
-BQAwNzEWMBQGA1UEAwwNVW5pdFRlc3REdW1teTEQMA4GA1UECgwHVGVzdE9yZzEL
-MAkGA1UEBhMCVVMwIBcNMjUwODI4MTcxMTA3WhgPMjI5OTA2MTIxNzExMDdaMDcx
-FjAUBgNVBAMMDVVuaXRUZXN0RHVtbXkxEDAOBgNVBAoMB1Rlc3RPcmcxCzAJBgNV
-BAYTAlVTMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwFX8Gqz2g4Hf
-dRhrNiP8oNiZ4IwO4bra9wdCR03PEKgYv1GL1Uj0OfhKSt+8WLng43da1p3jBh2P
-79IRdRLLJFX4LEJaPWW2/qUCRBpA4eMmSEBRSt1hYGtMNaKdBtxDpOxCBRpofV7Z
-PPTrg682ZHAlZ5K5PK9mWfRzV1C/NmSg8FtnD24VWrdkh1waqt40OzrE16JzmPpu
-2YDfXilM3G5Zq4uxHXQVCrmchBSVf7frsz+LSnMU1kn45AqDjsqufxH5+CDOtFvM
-R7794+HKOdzl20U+npfbtVGKIfcWh+kRcZyrLj6DER09ehVz8VWLYgntY+8riDcl
-UAfGh0RNswIDAQABo1MwUTAdBgNVHQ4EFgQUbR0id2PPztRSAoggeu0eqNFwtTAw
-HwYDVR0jBBgwFoAUbR0id2PPztRSAoggeu0eqNFwtTAwDwYDVR0TAQH/BAUwAwEB
-/zANBgkqhkiG9w0BAQsFAAOCAQEAje7eY+MtaBo0TmeF6fM14H5MtD7cYqdFVyIa
-KeVWOxwNDtwbwRyfcDlkgcXK8gLeIZA1MNBY/juTx6qy8RsHPdNSTImDVw3t7guq
-2CqrA+tqU5E+wah+XzltIvbjqTvRV/20FccfcXAkyM/aWl3WHNkFYNSziT+Ug3QQ
-qPABEWvXOjo4BEgrCmQJSIprLgjtfjFSK/LS/VDpRqsSa+3mmx/Dw4FY3rfEqKzv
-4RPSFxE8uF/05ByoIaAJZ2JcffDZW8PI5+qwsNatCsypyRADJE1jXLzqZnFFBLW7
-dj80Qbs0xLeK0U/Aq1kFf0stgdwbDoHaJj9Q4TlSHZuI0TnjSg==
------END CERTIFICATE-----";
-
-        public async Task ImdsV2HappyPathAsync()
+        //TODO: Clean up this method. Use constants, etc.
+        [TestMethod]
+        public async Task ImdsV2SAMIHappyPathAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
+                // TODO: Implement DataTestMethod. SAMI + UAMI
                 //ManagedIdentityId managedIdentityId = userAssignedId == null
                 //    ? ManagedIdentityId.SystemAssigned
                 //    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .WithCsrFactory(_testCsrFactory);
 
                 // Disabling shared cache options to avoid cross test pollution.
                 miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
 
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // initial probe
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // do it again, since CsrMetadata from initial probe is not cached
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
-                // TODO: add a mock handler for acquiring the entra token over an mTLS channel
-                //httpManager.AddMockHandler()
+                httpManager.AddManagedIdentityMockHandler(
+                    "http://fake_mtls_authentication_endpoint/fake_tenant_id/oauth2/v2.0/token",
+                    "https://management.azure.com",
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.ImdsV2);
 
-                // this will fail, see TODO above
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
@@ -73,7 +59,6 @@ dj80Qbs0xLeK0U/Aq1kFf0stgdwbDoHaJj9Q4TlSHZuI0TnjSg==
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                // this will fail, see TODO above
                 result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
@@ -259,7 +244,7 @@ dj80Qbs0xLeK0U/Aq1kFf0stgdwbDoHaJj9Q4TlSHZuI0TnjSg==
                 // For this test, we just want to verify that the method doesn't crash
                 // The actual certificate/private key matching isn't critical for the unit test
                 var exception = Assert.ThrowsException<NotSupportedException>(() => 
-                    imdsV2Source.AttachPrivateKeyToCert(ValidPemCertificate, rsa));
+                    imdsV2Source.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, rsa));
 
                 // The test should fail with a NotSupportedException because the RSA key doesn't match
                 // the certificate, but this validates that the method is working correctly
@@ -320,7 +305,7 @@ dj80Qbs0xLeK0U/Aq1kFf0stgdwbDoHaJj9Q4TlSHZuI0TnjSg==
             var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
 
             Assert.ThrowsException<ArgumentNullException>(() => 
-                imdsV2Source.AttachPrivateKeyToCert(ValidPemCertificate, null));
+                imdsV2Source.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, null));
         }
 
         [TestMethod]

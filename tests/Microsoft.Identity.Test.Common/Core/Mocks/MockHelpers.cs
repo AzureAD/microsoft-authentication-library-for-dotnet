@@ -631,7 +631,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
-            expectedQueryParams.Add("cuid", "%7B%22vmId%22:%22fake_vmId%22");
             //expectedQueryParams.Add("uaid", "fake_client_id");
             expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
             expectedRequestHeaders.Add("Metadata", "true");
@@ -640,9 +639,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "{" +
                 "\"client_id\": \"fake_client_id\"," +
                 "\"tenant_id\": \"fake_tenant_id\"," +
-                "\"certificate\": \"fake_certificate\"," +
+                "\"certificate\": \"" + TestConstants.ValidPemCertificate + "\"," +
                 "\"identity_type\": \"fake_identity_type\"," +
-                "\"mtls_authentication_endpoint\": \"fake_mtls_authentication_endpoint\"," +
+                "\"mtls_authentication_endpoint\": \"http://fake_mtls_authentication_endpoint\"," +
                 "}";
 
             var handler = new MockHttpMessageHandler()
