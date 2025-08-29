@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if !NET7_0_OR_GREATER
 using System;
 using System.Collections.ObjectModel;
 using System.Formats.Asn1;
@@ -10,6 +11,12 @@ using System.Text;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
+    /// <summary>
+    /// Downlevel polyfill for System.Security.Cryptography.X509Certificates.CertificateRequest
+    /// that provides OtherRequestAttributes support for frameworks prior to .NET 7.0.
+    /// This file is conditionally included only for net462, net472, and netstandard2.0.
+    /// For .NET 8.0+, the built-in CertificateRequest class is used instead.
+    /// </summary>
     internal class CertificateRequest
     {
         private X500DistinguishedName _subjectName;
@@ -233,3 +240,4 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
     }
 }
+#endif
