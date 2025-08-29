@@ -31,11 +31,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             var client = new OAuth2Client(ServiceBundle.ApplicationLogger, ServiceBundle.HttpManager, null);
 
-            var deviceCodeScopes = new HashSet<string>();
-            deviceCodeScopes.UnionWith(AuthenticationRequestParameters.Scope);
-            deviceCodeScopes.Add(OAuth2Value.ScopeOfflineAccess);
-            deviceCodeScopes.Add(OAuth2Value.ScopeProfile);
-            deviceCodeScopes.Add(OAuth2Value.ScopeOpenId);
+            var deviceCodeScopes = new HashSet<string>(AuthenticationRequestParameters.Scope);
+            deviceCodeScopes.UnionWith(OAuth2Value.ReservedScopes);
 
             client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.AppConfig.ClientId);
             client.AddBodyParameter(OAuth2Parameter.Scope, deviceCodeScopes.AsSingleString());
