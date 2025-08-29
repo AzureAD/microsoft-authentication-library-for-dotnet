@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if !NET7_0_OR_GREATER
 using System;
 using System.Collections.ObjectModel;
 using System.Formats.Asn1;
@@ -239,3 +240,4 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
     }
 }
+#endif
