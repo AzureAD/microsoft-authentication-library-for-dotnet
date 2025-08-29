@@ -14,7 +14,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             using (RSA rsa = CreateRsaKeyPair())
             {
-                CertificateRequest req = new CertificateRequest(
+                // Use custom polyfill for downlevel frameworks (net462, net472, netstandard2.0)
+                // See CertificateRequest.cs
+                var req = new CertificateRequest(
                     new X500DistinguishedName($"CN={clientId}, DC={tenantId}"),
                     rsa,
                     HashAlgorithmName.SHA256,
