@@ -10,10 +10,10 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenTelemetry.Resources;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -243,14 +243,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 // For this test, we just want to verify that the method doesn't crash
                 // The actual certificate/private key matching isn't critical for the unit test
-                var exception = Assert.ThrowsException<NotSupportedException>(() => 
-                    imdsV2Source.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, rsa));
+                var exception = Assert.ThrowsException<CryptographicUnexpectedOperationException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, rsa));
 
-                // The test should fail with a NotSupportedException because the RSA key doesn't match
+                // The test should fail with a CryptographicUnexpectedOperationException because the RSA key doesn't match
                 // the certificate, but this validates that the method is working correctly
-                Assert.AreEqual(
-                    "Failed to attach private key to certificate on this .NET Framework version.",
-                    exception.Message);
+                Assert.IsNotNull(exception.Message);
             }
         }
 
@@ -268,8 +266,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<ArgumentNullException>(() => 
-                    imdsV2Source.AttachPrivateKeyToCert(null, rsa));
+                Assert.ThrowsException<ArgumentNullException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(null, rsa));
             }
         }
 
@@ -287,8 +285,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<ArgumentNullException>(() => 
-                    imdsV2Source.AttachPrivateKeyToCert("", rsa));
+                Assert.ThrowsException<ArgumentNullException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert("", rsa));
             }
         }
 
@@ -304,8 +302,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
             var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
 
-            Assert.ThrowsException<ArgumentNullException>(() => 
-                imdsV2Source.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, null));
+            Assert.ThrowsException<ArgumentNullException>(() =>
+                CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, null));
         }
 
         [TestMethod]
@@ -324,8 +322,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<ArgumentException>(() => 
-                    imdsV2Source.AttachPrivateKeyToCert(InvalidPemNoCertMarker, rsa));
+                Assert.ThrowsException<ArgumentException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemNoCertMarker, rsa));
             }
         }
 
@@ -346,8 +344,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<ArgumentException>(() => 
-                    imdsV2Source.AttachPrivateKeyToCert(InvalidPemMissingBeginMarker, rsa));
+                Assert.ThrowsException<ArgumentException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemMissingBeginMarker, rsa));
             }
         }
 
@@ -367,8 +365,8 @@ MIICXTCCAUWgAwIBAgIJAKPiQh26MIuPMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV";
 
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<ArgumentException>(() => 
-                    imdsV2Source.AttachPrivateKeyToCert(InvalidPemMissingEndMarker, rsa));
+                Assert.ThrowsException<ArgumentException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemMissingEndMarker, rsa));
             }
         }
 
@@ -390,8 +388,8 @@ Invalid@#$%Base64Content!
 
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<FormatException>(() => 
-                    imdsV2Source.AttachPrivateKeyToCert(InvalidPemBadBase64, rsa));
+                Assert.ThrowsException<FormatException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemBadBase64, rsa));
             }
         }
 

@@ -5,13 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
@@ -28,6 +27,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             RequestContext requestContext,
             bool probeMode)
         {
+#if NET462
+            requestContext.Logger.Info(() => "[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
+            return await Task.FromResult<CsrMetadata>(null).ConfigureAwait(false);
+#else
             var queryParams = ImdsV2QueryParamsHelper(requestContext);
 
             var headers = new Dictionary<string, string>
@@ -93,6 +96,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             return TryCreateCsrMetadata(response, requestContext.Logger, probeMode);
+#endif
         }
 
         private static void ThrowProbeFailedException(
@@ -259,7 +263,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
             
             // transform certificateRequestResponse.Certificate to x509 with private key
-            var mtlsCertificate = AttachPrivateKeyToCert(
+            var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
                 certificateRequestResponse.Certificate,
                 privateKey);
 
@@ -273,131 +277,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             return request;
         }
-
-        /// <summary>
-        /// Attaches a private key to a certificate for use in mTLS authentication.
-        /// </summary>
-        /// <param name="certificatePem">The certificate in PEM format</param>
-        /// <param name="privateKey">The RSA private key to attach</param>
-        /// <returns>An X509Certificate2 with the private key attached</returns>
-        /// <exception cref="ArgumentNullException">Thrown when certificatePem or privateKey is null</exception>
-        /// <exception cref="ArgumentException">Thrown when certificatePem is not a valid PEM certificate</exception>
-        /// <exception cref="FormatException">Thrown when the certificate cannot be parsed</exception>
-        internal X509Certificate2 AttachPrivateKeyToCert(string certificatePem, RSA privateKey)
-        {
-            if (string.IsNullOrEmpty(certificatePem))
-                throw new ArgumentNullException(nameof(certificatePem));
-            if (privateKey == null)
-                throw new ArgumentNullException(nameof(privateKey));
-
-            X509Certificate2 certificate;
-
-#if NET8_0_OR_GREATER
-            // .NET 8.0+ has direct PEM parsing support
-            certificate = X509Certificate2.CreateFromPem(certificatePem);
-            // Attach the private key and return a new certificate instance
-            return certificate.CopyWithPrivateKey(privateKey);
-#else
-            // .NET Framework 4.7.2 and .NET Standard 2.0 - manual PEM parsing and private key attachment
-            certificate = ParseCertificateFromPem(certificatePem);
-            return AttachPrivateKeyToOlderFrameworks(certificate, privateKey);
-#endif
-        }
-
-#if !NET8_0_OR_GREATER
-        /// <summary>
-        /// Parses a certificate from PEM format for older .NET versions.
-        /// </summary>
-        /// <param name="certificatePem">The certificate in PEM format</param>
-        /// <returns>An X509Certificate2 instance</returns>
-        /// <exception cref="ArgumentException">Thrown when the PEM format is invalid</exception>
-        /// <exception cref="FormatException">Thrown when the Base64 content cannot be decoded</exception>
-        internal static X509Certificate2 ParseCertificateFromPem(string certificatePem)
-        {
-            const string CertBeginMarker = "-----BEGIN CERTIFICATE-----";
-            const string CertEndMarker = "-----END CERTIFICATE-----";
-
-            int startIndex = certificatePem.IndexOf(CertBeginMarker, StringComparison.Ordinal);
-            if (startIndex == -1)
-            {
-                throw new ArgumentException("Invalid PEM format: missing BEGIN CERTIFICATE marker", nameof(certificatePem));
-            }
-
-            startIndex += CertBeginMarker.Length;
-            int endIndex = certificatePem.IndexOf(CertEndMarker, startIndex, StringComparison.Ordinal);
-            if (endIndex == -1)
-            {
-                throw new ArgumentException("Invalid PEM format: missing END CERTIFICATE marker", nameof(certificatePem));
-            }
-
-            string base64Content = certificatePem.Substring(startIndex, endIndex - startIndex)
-                .Replace("\r", "")
-                .Replace("\n", "")
-                .Replace(" ", "");
-
-            if (string.IsNullOrEmpty(base64Content))
-            {
-                throw new ArgumentException("Invalid PEM format: no certificate content found", nameof(certificatePem));
-            }
-
-            try
-            {
-                byte[] certBytes = Convert.FromBase64String(base64Content);
-                return new X509Certificate2(certBytes);
-            }
-            catch (FormatException ex)
-            {
-                throw new FormatException("Invalid PEM format: certificate content is not valid Base64", ex);
-            }
-        }
-
-        /// <summary>
-        /// Attaches a private key to a certificate for older .NET Framework versions.
-        /// This method uses the older RSACng approach for .NET Framework 4.7.2 and .NET Standard 2.0.
-        /// </summary>
-        /// <param name="certificate">The certificate without private key</param>
-        /// <param name="privateKey">The RSA private key to attach</param>
-        /// <returns>An X509Certificate2 with the private key attached</returns>
-        /// <exception cref="NotSupportedException">Thrown when private key attachment fails</exception>
-        internal X509Certificate2 AttachPrivateKeyToOlderFrameworks(X509Certificate2 certificate, RSA privateKey)
-        {
-            try
-            {
-                // For older frameworks, we need to use the legacy approach with RSACryptoServiceProvider
-                // First, export the RSA parameters from the provided private key
-                var parameters = privateKey.ExportParameters(includePrivateParameters: true);
-                
-                // Create a new RSACryptoServiceProvider with the correct key size
-                int keySize = parameters.Modulus.Length * 8;
-                var rsaProvider = new RSACryptoServiceProvider(keySize);
-                
-                try
-                {
-                    // Import the parameters into the new provider
-                    rsaProvider.ImportParameters(parameters);
-                    
-                    // Create a new certificate instance from the raw data
-                    var certWithPrivateKey = new X509Certificate2(certificate.RawData);
-                    
-                    // Assign the private key using the legacy property
-                    certWithPrivateKey.PrivateKey = rsaProvider;
-                    
-                    return certWithPrivateKey;
-                }
-                catch
-                {
-                    // Clean up the RSA provider if something goes wrong
-                    rsaProvider?.Dispose();
-                    throw;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new NotSupportedException(
-                    "Failed to attach private key to certificate on this .NET Framework version.", ex);
-            }
-        }
-#endif
 
         private static string ImdsV2QueryParamsHelper(RequestContext requestContext)
         {
