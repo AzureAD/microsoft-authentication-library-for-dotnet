@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -23,16 +24,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
         private readonly TestCsrFactory _testCsrFactory = new TestCsrFactory();
 
-        //TODO: Clean up this method. Use constants, etc.
         [TestMethod]
         public async Task ImdsV2SAMIHappyPathAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                // TODO: Implement DataTestMethod. SAMI + UAMI
-                //ManagedIdentityId managedIdentityId = userAssignedId == null
-                //    ? ManagedIdentityId.SystemAssigned
-                //    : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory)
@@ -47,8 +43,54 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // do it again, since CsrMetadata from initial probe is not cached
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
                 httpManager.AddManagedIdentityMockHandler(
-                    "http://fake_mtls_authentication_endpoint/fake_tenant_id/oauth2/v2.0/token",
-                    "https://management.azure.com",
+                    $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.ImdsV2);
+
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]
+        public async Task ImdsV2UAMIHappyPathAsync(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
+                miBuilder
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .WithCsrFactory(_testCsrFactory);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(idType: userAssignedIdentityId, userAssignedId: userAssignedId)); // initial probe
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(idType: userAssignedIdentityId, userAssignedId: userAssignedId)); // do it again, since CsrMetadata from initial probe is not cached
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(userAssignedIdentityId, userAssignedId));
+                httpManager.AddManagedIdentityMockHandler(
+                    $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                    ManagedIdentityTests.Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
                     ManagedIdentitySource.ImdsV2);
 

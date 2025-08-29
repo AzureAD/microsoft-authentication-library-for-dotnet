@@ -156,6 +156,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string MiResourceId = "/subscriptions/ffa4aaa2-4444-4444-5555-e3ccedd3d046/resourcegroups/UAMI_group/providers/Microsoft.ManagedIdentityClient/userAssignedIdentities/UAMI";
         public const string VmId = "test-vm-id";
         public const string VmssId = "test-vmss-id";
+        public const string MtlsAuthenticationEndpoint = "http://fake_mtls_authentication_endpoint";
 
         public const string Claims = @"{""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
         public static readonly string[] ClientCapabilities = new[] { "cp1", "cp2" };

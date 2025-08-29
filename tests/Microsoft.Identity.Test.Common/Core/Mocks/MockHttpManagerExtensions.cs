@@ -464,7 +464,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     httpMessageHandler.ExpectedMethod = HttpMethod.Post;
                     expectedPostData = new Dictionary<string, string>
                     {
-                        { "client_id", "fake_client_id" },
+                        { "client_id", TestConstants.ClientId },
                         { "grant_type", TestConstants.ValidPemCertificate },
                         { "scope", resource }
                     };
