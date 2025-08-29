@@ -8,12 +8,16 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Castle.Core.Logging;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
+using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -587,18 +591,25 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static MockHttpMessageHandler MockCsrResponse(
             HttpStatusCode statusCode = HttpStatusCode.OK,
-            string responseServerHeader = "IMDS/150.870.65.1854")
+            string responseServerHeader = "IMDS/150.870.65.1854",
+            UserAssignedIdentityId idType = UserAssignedIdentityId.None,
+            string userAssignedId = null)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            if (idType != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)idType, userAssignedId, null);
+                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
+            }
             expectedQueryParams.Add("cred-api-version", "2.0");
             expectedRequestHeaders.Add("Metadata", "true");
 
             string content =
                 "{" +
                 "\"cuId\": { \"vmId\": \"fake_vmId\" }," +
-                "\"clientId\": \"fake_client_id\"," +
-                "\"tenantId\": \"fake_tenant_id\"," +
+                "\"clientId\": \"" + TestConstants.ClientId + "\"," +
+                "\"tenantId\": \"" + TestConstants.TenantId + "\"," +
                 "\"attestationEndpoint\": \"fake_attestation_endpoint\"" +
                 "}";
 
@@ -625,6 +636,44 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             // 400 doesn't trigger the retry policy
             return MockCsrResponse(HttpStatusCode.BadRequest);
+        }
+
+        public static MockHttpMessageHandler MockCertificateRequestResponse(
+            UserAssignedIdentityId idType = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            if (idType != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)idType, userAssignedId, null);
+                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
+            }
+            expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
+            expectedRequestHeaders.Add("Metadata", "true");
+
+            string content =
+                "{" +
+                "\"client_id\": \"" + TestConstants.ClientId + "\"," +
+                "\"tenant_id\": \"" + TestConstants.TenantId + "\"," +
+                "\"certificate\": \"" + TestConstants.ValidPemCertificate + "\"," +
+                "\"identity_type\": \"fake_identity_type\"," + // "SystemAssigned" or "UserAssigned", it doesn't matter for these tests
+                "\"mtls_authentication_endpoint\": \"" + TestConstants.MtlsAuthenticationEndpoint + "\"," +
+                "}";
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CertificateRequestPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(content),
+                }
+            };
+
+            return handler;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal class Csr
     {
-        internal static string Generate(string clientId, string tenantId, CuidInfo cuid)
+        internal static (string csrPem, RSA privateKey) Generate(string clientId, string tenantId, CuidInfo cuid)
         {
             using (RSA rsa = CreateRsaKeyPair())
             {
@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         "1.3.6.1.4.1.311.90.2.10",
                         writer.Encode()));
 
-                return req.CreateSigningRequestPem();
+                return (req.CreateSigningRequestPem(), rsa);
             }
         }
 

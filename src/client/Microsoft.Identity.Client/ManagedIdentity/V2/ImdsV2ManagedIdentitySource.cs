@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
@@ -20,11 +21,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public const string ImdsV2ApiVersion = "2.0";
         public const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
         public const string CertificateRequestPath = "/metadata/identity/issuecredential";
+        public const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
             bool probeMode)
         {
+#if NET462
+            requestContext.Logger.Info(() => "[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
+            return await Task.FromResult<CsrMetadata>(null).ConfigureAwait(false);
+#else
             var queryParams = ImdsV2QueryParamsHelper(requestContext);
 
             var headers = new Dictionary<string, string>
@@ -90,6 +96,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             return TryCreateCsrMetadata(response, requestContext.Logger, probeMode);
+#endif
         }
 
         private static void ThrowProbeFailedException(
@@ -251,11 +258,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
-            var csr = Csr.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
+            var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
+            
+            // transform certificateRequestResponse.Certificate to x509 with private key
+            var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
+                certificateRequestResponse.Certificate,
+                privateKey);
 
-            throw new NotImplementedException();
+            ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.MtlsAuthenticationEndpoint}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
+            request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
+            request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
+            request.BodyParameters.Add("grant_type", certificateRequestResponse.Certificate);
+            request.BodyParameters.Add("scope", "https://management.azure.com/.default");
+            request.RequestType = RequestType.Imds;
+            request.MtlsCertificate = mtlsCertificate;
+
+            return request;
         }
 
         private static string ImdsV2QueryParamsHelper(RequestContext requestContext)
