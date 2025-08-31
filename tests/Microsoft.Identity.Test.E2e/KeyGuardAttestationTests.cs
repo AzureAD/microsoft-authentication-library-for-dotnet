@@ -13,6 +13,27 @@ namespace Microsoft.Identity.Test.E2E
     [TestClass]
     public class KeyGuardAttestationTests
     {
+        public TestContext TestContext { get; set; }
+
+        private void Skip(string reason)
+        {
+            // show up in TRX and console
+            TestContext?.WriteLine("[KeyGuardAttestation] SKIP: " + reason);
+            Console.WriteLine("[KeyGuardAttestation] SKIP: " + reason);
+            Assert.Inconclusive(reason);
+        }
+
+        private static string FirstNonEmptyEnv(params string[] names)
+        {
+            foreach (var n in names)
+            {
+                var v = Environment.GetEnvironmentVariable(n);
+                if (!string.IsNullOrWhiteSpace(v))
+                    return v!;
+            }
+            return null;
+        }
+
         private static CngKey CreateKeyGuardKey(string keyName)
         {
             const string ProviderName = "Microsoft Software Key Storage Provider";
@@ -60,6 +81,11 @@ namespace Microsoft.Identity.Test.E2E
         [TestMethod]
         public void Attest_KeyGuardKey_OnAzureArc_Succeeds()
         {
+            // Emit diagnostics that land in the TRX
+            TestContext.WriteLine($"Is64BitProcess={Environment.Is64BitProcess}");
+            TestContext.WriteLine($"MSAL_MTLSPOP_NATIVE_PATH={Environment.GetEnvironmentVariable("MSAL_MTLSPOP_NATIVE_PATH") ?? "<unset>"}");
+            TestContext.WriteLine($"PATH={Environment.GetEnvironmentVariable("PATH")}");
+
             var endpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
             if (string.IsNullOrWhiteSpace(endpoint))
             {
