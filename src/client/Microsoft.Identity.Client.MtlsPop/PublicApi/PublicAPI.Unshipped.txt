@@ -20,5 +20,5 @@ Microsoft.Identity.Client.MtlsPop.Attestation.AttestationStatus.Success = 0 -> M
 Microsoft.Identity.Client.MtlsPop.Attestation.AttestationStatus.TokenEmpty = 2 -> Microsoft.Identity.Client.MtlsPop.Attestation.AttestationStatus
 Microsoft.Identity.Client.MtlsPop.ManagedIdentityApplicationPopExtension
 Microsoft.Identity.Client.MtlsPop.PopKeyAttestor
-Microsoft.Identity.Client.MtlsPop.PopKeyAttestor.PopKeyAttestor() -> void
 static Microsoft.Identity.Client.MtlsPop.ManagedIdentityApplicationPopExtension.WithMtlsProofOfPossession(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+static Microsoft.Identity.Client.MtlsPop.PopKeyAttestor.AttestKeyGuardAsync(Microsoft.Win32.SafeHandles.SafeNCryptKeyHandle keyHandle, string endpoint, string authToken, string clientPayload, string clientId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.MtlsPop.Attestation.AttestationResult>

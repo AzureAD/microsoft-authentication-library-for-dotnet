@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
@@ -9,9 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Pop;
 using Microsoft.Identity.Client.ManagedIdentity;
-using Microsoft.Identity.Client.MtlsPop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
@@ -21,8 +18,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class ManagedIdentityAuthRequest : RequestBase
     {
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
-        private readonly AuthenticationRequestParameters _authenticationRequestParameters;
-        private readonly IServiceBundle _serviceBundle;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly ICryptographyManager _cryptoManager;
 
@@ -33,8 +28,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
         {
             _managedIdentityParameters = managedIdentityParameters;
-            _authenticationRequestParameters = authenticationRequestParameters;
-            _serviceBundle = serviceBundle;
             _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
         }
 
@@ -98,7 +91,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Info("[ManagedIdentityRequest] Access token retrieved from cache.");
 
                 try
-                {  
+                {
                     var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
                     // If needed, refreshes token in the background
@@ -144,7 +137,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            CancellationToken cancellationToken, 
+            CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
             AuthenticationResult authResult;
@@ -164,7 +157,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // 1) ForceRefresh is requested
                 // 2) Proactive refresh is in effect
                 // 3) Claims are present (revocation flow)
-                if (_managedIdentityParameters.ForceRefresh || 
+                if (_managedIdentityParameters.ForceRefresh ||
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
                     !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
                 {
@@ -201,38 +194,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            ManagedIdentityClient managedIdentityClient = 
+            ManagedIdentityClient managedIdentityClient =
                 new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
-
-            /* ──────── DEMO POP ATTESTATION BLOCK ──────── */
-            // This block is for demonstration purposes only,
-            // showing how to use POP with managed identities.
-            // This will be plugged into platform proxies.
-            if (_authenticationRequestParameters.IsManagedIdentityPopEnabled)
-            {
-                const string attestationUrl = "";
-                string clientId = "id"; //_serviceBundle.Config.ManagedIdentityId.UserAssignedId; //sami
-
-                var keyReq = new KeyRequest(
-                    requireAttestationToken: true,
-                    attestationUrl: new Uri(attestationUrl),
-                    clientId: clientId);
-
-                KeyInfo keyInfo = await ManagedIdentityKeyProvider.Current
-                                        .GetOrCreateKeyAsync(keyReq, cancellationToken)
-                                        .ConfigureAwait(false);
-
-                if (keyInfo.Token is { Jwt.Length: > 0 })
-                {
-                    logger.Verbose(() => "[POP‑DEMO] Attestation JWT obtained - .");
-                }
-
-                else
-                {
-                    logger.Info("[POP‑DEMO] Software key – enabling POP without attestation.");
-                }
-            }
-            /* ─────── END DEMO BLOCK ─────── */
 
             ManagedIdentityResponse managedIdentityResponse =
                 await managedIdentityClient
