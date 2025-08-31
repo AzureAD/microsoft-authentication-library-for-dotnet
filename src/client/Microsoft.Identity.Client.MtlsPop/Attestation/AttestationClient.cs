@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.MtlsPop.Attestation
@@ -18,22 +16,25 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
         private bool _initialized;
 
         /// <summary>
-        /// AttestationClient constructor.  Pro-actively verifies the native DLL,
+        /// AttestationClient constructor. Pro-actively verifies the native DLL.
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         public AttestationClient()
         {
-            /* step 0 ── pro-actively verify the native DLL */
-            string dllError = NativeDiagnostics.ProbeNativeDll();
-            if (dllError is not null)
-                throw new InvalidOperationException(dllError);
-
-            /* step 1 ── load & initialize */
+            /* step 0 ── ensure the resolver probes all valid locations
+               (env override → app base → System32/SysWOW64 → PATH) */
             NativeDllResolver.EnsureLoaded();
 
+            /* step 1 ── optional proactive verification (non-fatal)
+               Keep the probe for diagnostics, but do NOT throw here; if the DLL
+               is truly unavailable/mismatched, InitAttestationLib will fail. */
+            string dllError = NativeDiagnostics.ProbeNativeDll();
+            // intentionally not throwing on dllError to avoid path-specific false negatives
+
+            /* step 2 ── load & initialize (logger is required by native lib) */
             var info = new AttestationClientLib.AttestationLogInfo
             {
-                Log = AttestationLogger.ConsoleLogger,
+                Log = AttestationLogger.ConsoleLogger, // minimal rooted delegate; works on netstandard2.0 & net8.0
                 Ctx = IntPtr.Zero
             };
 
