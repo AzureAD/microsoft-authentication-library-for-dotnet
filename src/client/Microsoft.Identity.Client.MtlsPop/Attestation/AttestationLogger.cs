@@ -2,14 +2,50 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.MtlsPop.Attestation
 {
     internal static class AttestationLogger
     {
-        /// <summary>Default logger that pipes native messages to <c>Console.WriteLine</c>.</summary>
-        internal static readonly AttestationClientLib.LogFunc ConsoleLogger = (_,
-            tag, lvl, func, line, msg) =>
-            Console.WriteLine($"[{lvl}] {tag} {func}:{line}  {msg}");
+        /// <summary>
+        /// Attestation Logger
+        /// </summary>
+        internal static readonly AttestationClientLib.LogFunc ConsoleLogger = (ctx, tag, lvl, func, line, msg) =>
+        {
+            try
+            {
+                string sTag = ToText(tag);
+                string sFunc = ToText(func);
+                string sMsg = ToText(msg);
+
+                var lineText = $"[MtlsPop][{lvl}] {sTag} {sFunc}:{line}  {sMsg}";
+
+                // Default: Trace (respects listeners; safe for all app types)
+                Trace.WriteLine(lineText);
+
+                // Opt-in console mirroring for local debugging
+                if (Environment.GetEnvironmentVariable("MSAL_MTLSPOP_LOG_TO_CONSOLE") == "1")
+                {
+                    Console.WriteLine(lineText);
+                }
+            }
+            catch
+            {
+            }
+        };
+
+        // Converts either string or IntPtr (char*) to text. Works with any LogFunc variant.
+        private static string ToText(object value)
+        {
+            if (value is IntPtr p && p != IntPtr.Zero)
+            {
+                try
+                { return Marshal.PtrToStringAnsi(p) ?? string.Empty; }
+                catch { return string.Empty; }
+            }
+            return value?.ToString() ?? string.Empty;
+        }
     }
 }

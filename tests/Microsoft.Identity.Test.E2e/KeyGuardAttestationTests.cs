@@ -60,12 +60,6 @@ namespace Microsoft.Identity.Test.E2E
         [TestMethod]
         public void Attest_KeyGuardKey_OnAzureArc_Succeeds()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Assert.Inconclusive("KeyGuard attestation test runs only on Windows.");
-            }
-
-            // Attestation endpoint must be injected via pipeline variables on the Arc agent.
             var endpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
             if (string.IsNullOrWhiteSpace(endpoint))
             {
@@ -73,7 +67,6 @@ namespace Microsoft.Identity.Test.E2E
             }
 
             var clientId = "MSI_CLIENT_ID";
-
             string keyName = "MsalE2E_Keyguard";
 
             CngKey key = null;
