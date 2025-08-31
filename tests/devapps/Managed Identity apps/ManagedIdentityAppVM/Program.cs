@@ -4,6 +4,7 @@
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
+using Microsoft.Identity.Client.MtlsPop;
 
 IIdentityLogger identityLogger = new IdentityLogger();
 
@@ -20,6 +21,7 @@ do
     try
     {
         var result = await mi.AcquireTokenForManagedIdentity(scope)
+            .WithMtlsProofOfPossession()
             .ExecuteAsync().ConfigureAwait(false);
 
         Console.WriteLine("Success");
