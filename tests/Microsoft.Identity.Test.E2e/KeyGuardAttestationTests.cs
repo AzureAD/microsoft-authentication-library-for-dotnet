@@ -13,11 +13,6 @@ namespace Microsoft.Identity.Test.E2E
     [TestClass]
     public class KeyGuardAttestationTests
     {
-        // Create a KeyGuard-protected RSA key, using the same provider + flags we use elsewhere.
-        // Provider name + flags mirror the KeyGuard helper in #5448:
-        //  - Provider: "Microsoft Software Key Storage Provider"
-        //  - Flags: Virtual Isolation (0x00020000) + Per-Boot Key (0x00040000)
-        // See PR #5448 KeyGuardHelper.cs. :contentReference[oaicite:0]{index=0}
         private static CngKey CreateKeyGuardKey(string keyName)
         {
             const string ProviderName = "Microsoft Software Key Storage Provider";
@@ -77,10 +72,10 @@ namespace Microsoft.Identity.Test.E2E
                 Assert.Inconclusive($"Set {"TOKEN_ATTESTATION_ENDPOINT"} on the Azure Arc agent to run this test.");
             }
 
-            // UAMI client id (optional). For SAMI it's typically unset.
-            var clientId = Environment.GetEnvironmentVariable("MSI_CLIENT_ID") ?? string.Empty;
+            var clientId = "MSI_CLIENT_ID";
 
-            string keyName = "MsalE2E_Keyguard_" + Guid.NewGuid().ToString("N");
+            string keyName = "MsalE2E_Keyguard";
+
             CngKey key = null;
             try
             {
