@@ -102,7 +102,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                         $"[MI][WinKeyProvider] Exception creating Hardware key: {ex.GetType().Name}");
                 }
 
+                // 3) In-memory fallback (software RSA)
+                logger?.Info("[MI][WinKeyProvider] Falling back to in-memory RSA key (software).");
+                if (ct.IsCancellationRequested)
+                {
+                    logger?.Verbose(() => "[MI][WinKeyProvider] Cancellation requested before in-memory fallback.");
+                    ct.ThrowIfCancellationRequested();
+                }
+
+                var fallback = new InMemoryManagedIdentityKeyProvider();
+                _cached = await fallback.GetOrCreateKeyAsync(logger, ct).ConfigureAwait(false);
+
+                if (messageBuilder.Length > 0)
+                {
+                    logger?.Verbose(() => "[MI][WinKeyProvider] Fallback reasons:\n" + messageBuilder.ToString().Trim());
+                }
+
                 return _cached;
+
             }
             finally
             {

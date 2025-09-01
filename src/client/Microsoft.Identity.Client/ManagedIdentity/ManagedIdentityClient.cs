@@ -20,14 +20,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         private readonly AbstractManagedIdentity _identitySource;
-        private readonly IManagedIdentityKeyProvider _provider;
 
         public ManagedIdentityClient(RequestContext requestContext)
         {
             using (requestContext.Logger.LogMethodDuration())
             {
-
-                _provider = requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
                 _identitySource = SelectManagedIdentitySource(requestContext);
             }
         }
