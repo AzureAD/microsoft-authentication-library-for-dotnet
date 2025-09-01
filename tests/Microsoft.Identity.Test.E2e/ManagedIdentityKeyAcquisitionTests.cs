@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Test.E2E
     [TestClass]
     public class ManagedIdentityKeyAcquisitionTests
     {
-        private const string SoftwareKspName = "Microsoft Software Key Storage Provider";
+        private const string HardwareKspName = "Microsoft Platform Crypto Provider";
 
         // Runs on the AzureArc agent: must obtain a VBS/KeyGuard key.
         [TestMethod]
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.E2E
                 Assert.IsNotNull(rsacng, "Expected RSACng for hardware key.");
 
                 Assert.AreEqual(
-                    SoftwareKspName,
+                    HardwareKspName,
                     rsacng.Key.Provider.Provider,
                     "Expected TPM-backed key via Microsoft Software Key Storage Provider.");
 
