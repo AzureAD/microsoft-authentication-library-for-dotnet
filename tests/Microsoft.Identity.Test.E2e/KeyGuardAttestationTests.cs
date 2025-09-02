@@ -7,33 +7,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Microsoft.Identity.Client.MtlsPop;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Microsoft.Identity.Test.E2E
 {
     [TestClass]
     public class KeyGuardAttestationTests
     {
-        public TestContext TestContext { get; set; }
-
-        private void Skip(string reason)
-        {
-            // show up in TRX and console
-            TestContext?.WriteLine("[KeyGuardAttestation] SKIP: " + reason);
-            Console.WriteLine("[KeyGuardAttestation] SKIP: " + reason);
-            Assert.Inconclusive(reason);
-        }
-
-        private static string FirstNonEmptyEnv(params string[] names)
-        {
-            foreach (var n in names)
-            {
-                var v = Environment.GetEnvironmentVariable(n);
-                if (!string.IsNullOrWhiteSpace(v))
-                    return v!;
-            }
-            return null;
-        }
-
         private static CngKey CreateKeyGuardKey(string keyName)
         {
             const string ProviderName = "Microsoft Software Key Storage Provider";
@@ -81,11 +63,6 @@ namespace Microsoft.Identity.Test.E2E
         [TestMethod]
         public void Attest_KeyGuardKey_OnAzureArc_Succeeds()
         {
-            // Emit diagnostics that land in the TRX
-            TestContext.WriteLine($"Is64BitProcess={Environment.Is64BitProcess}");
-            TestContext.WriteLine($"MSAL_MTLSPOP_NATIVE_PATH={Environment.GetEnvironmentVariable("MSAL_MTLSPOP_NATIVE_PATH") ?? "<unset>"}");
-            TestContext.WriteLine($"PATH={Environment.GetEnvironmentVariable("PATH")}");
-
             var endpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
             if (string.IsNullOrWhiteSpace(endpoint))
             {
@@ -125,6 +102,65 @@ namespace Microsoft.Identity.Test.E2E
             {
                 // Thrown by AttestationClient when the native DLL cannot be found/initialized.
                 Assert.Inconclusive("Attestation native lib not available on this runner: " + ex.Message);
+            }
+            finally
+            {
+                try { key?.Delete(); } catch { /* best-effort cleanup */ }
+            }
+        }
+
+        [TestCategory("MI_E2E_AzureArc")]
+        [RunOnAzureDevOps]
+        [TestMethod]
+        public async Task Attest_KeyGuardKey_OnAzureArc_Async_Succeeds()
+        {
+            var endpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
+            if (string.IsNullOrWhiteSpace(endpoint))
+            {
+                Assert.Inconclusive($"Set {"TOKEN_ATTESTATION_ENDPOINT"} on the Azure Arc agent to run this test.");
+            }
+
+            var clientId = "MSI_CLIENT_ID";
+            string keyName = "MsalE2E_Keyguard_Async";
+
+            CngKey key = null;
+            try
+            {
+                key = CreateKeyGuardKey(keyName);
+
+                if (!IsKeyGuardProtected(key))
+                {
+                    Assert.Inconclusive("Key was created but not KeyGuard-protected. Is KeyGuard/VBS enabled on this machine?");
+                }
+
+                // Exercise the async facade (PopKeyAttestor) which wraps the synchronous native call in Task.Run.
+                var result = await PopKeyAttestor.AttestKeyGuardAsync(
+                    key.Handle,
+                    endpoint,
+                    authToken: null,
+                    clientPayload: null,
+                    clientId: clientId,
+                    cancellationToken: CancellationToken.None).ConfigureAwait(false);
+
+                Assert.AreEqual(AttestationStatus.Success, result.Status,
+                    $"Async attestation failed: status={result.Status}, nativeRc={result.NativeErrorCode}, msg={result.ErrorMessage}");
+                Assert.IsFalse(string.IsNullOrEmpty(result.Jwt), "Expected a non-empty attestation JWT from async path.");
+
+                var parts = result.Jwt.Split('.');
+                Assert.AreEqual(3, parts.Length, "Expected a JWT (3 parts) from async path.");
+            }
+            catch (CryptographicException ex)
+            {
+                Assert.Inconclusive("CNG/KeyGuard is not available or access is denied on this machine: " + ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Could originate from native initialization inside PopKeyAttestor (AttestationClient constructor).
+                Assert.Inconclusive("Attestation native lib not available on this runner (async path): " + ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                Assert.Inconclusive("Handle or parameters invalid for async attestation path: " + ex.Message);
             }
             finally
             {

@@ -12,14 +12,21 @@ namespace Microsoft.Identity.Client.MtlsPop
 {
     /// <summary>
     /// Static facade for attesting a KeyGuard/CNG key and getting a JWT back.
-    /// All key management (KeyGuard discovery/creation/rotation) lives outside this package.
+    /// Key discovery / rotation is the caller's responsibility.
     /// </summary>
     public static class PopKeyAttestor
     {
         /// <summary>
-        /// Attests a KeyGuard/CNG key with the remote attestation service and returns a JWT.
-        /// The <paramref name="keyHandle"/> must be a valid SafeNCryptKeyHandle (e.g., from KeyGuard).
+        /// Asynchronously attests a KeyGuard/CNG key with the remote attestation service and returns a JWT.
+        /// This is a synchronous native call executed on the thread pool; cancellation only applies
+        /// before the operation starts (the native call cannot be cancelled mid-flight).
         /// </summary>
+        /// <param name="keyHandle">Valid SafeNCryptKeyHandle (must remain valid for duration of call).</param>
+        /// <param name="endpoint">Attestation service endpoint (required).</param>
+        /// <param name="authToken">Optional authorization token.</param>
+        /// <param name="clientPayload">Optional opaque client payload sent to the service.</param>
+        /// <param name="clientId">Optional client identifier.</param>
+        /// <param name="cancellationToken">Cancellation token (cooperative before native call starts).</param>
         public static Task<AttestationResult> AttestKeyGuardAsync(
             SafeNCryptKeyHandle keyHandle,
             string endpoint,
@@ -33,13 +40,22 @@ namespace Microsoft.Identity.Client.MtlsPop
             if (string.IsNullOrWhiteSpace(endpoint))
                 throw new ArgumentException("endpoint must be provided", nameof(endpoint));
 
+            // Fast path cancellation before scheduling.
+            cancellationToken.ThrowIfCancellationRequested();
+
             return Task.Run(() =>
             {
-                using var client = new AttestationClient(); // ensures native lib is loaded/initialized
+                cancellationToken.ThrowIfCancellationRequested();
+
+                using var client = new AttestationClient(); // ensures native lib is loaded / initialized
                 IntPtr tokenPtr = IntPtr.Zero;
+                bool addRef = false;
+
                 try
                 {
-                    // Native call (returns 0 on success; non-zero error codes mapped to AttestationResultErrorCode)
+                    // Protect handle from being closed while native code runs.
+                    keyHandle.DangerousAddRef(ref addRef);
+
                     int rc = AttestationClientLib.AttestKeyGuardImportKey(
                         endpoint,
                         authToken ?? string.Empty,
@@ -48,21 +64,47 @@ namespace Microsoft.Identity.Client.MtlsPop
                         out tokenPtr,
                         clientId ?? string.Empty);
 
-                    if (rc == 0)
+                    if (rc != 0)
                     {
-                        // ANSI string from native; FreeAttestationToken must be called
-                        string jwt = Marshal.PtrToStringAnsi(tokenPtr) ?? string.Empty;
-                        return new AttestationResult(AttestationStatus.Success, jwt, rc, string.Empty);
+                        var error = AttestationErrors.Describe((AttestationResultErrorCode)rc);
+                        return new AttestationResult(AttestationStatus.NativeError, string.Empty, rc, error);
                     }
 
-                    var error = AttestationErrors.Describe((AttestationResultErrorCode)rc);
-                    return new AttestationResult(AttestationStatus.Exception, string.Empty, rc, error);
+                    if (tokenPtr == IntPtr.Zero)
+                    {
+                        return new AttestationResult(
+                            AttestationStatus.TokenEmpty,
+                            string.Empty,
+                            rc,
+                            "Native call succeeded (rc==0) but token pointer was null.");
+                    }
+
+                    string jwt = Marshal.PtrToStringAnsi(tokenPtr) ?? string.Empty;
+                    if (jwt.Length == 0)
+                    {
+                        return new AttestationResult(
+                            AttestationStatus.TokenEmpty,
+                            string.Empty,
+                            rc,
+                            "JWT string was empty.");
+                    }
+
+                    return new AttestationResult(AttestationStatus.Success, jwt, rc, string.Empty);
+                }
+                catch (Exception ex)
+                {
+                    return new AttestationResult(AttestationStatus.Exception, string.Empty, -1, ex.Message);
                 }
                 finally
                 {
                     if (tokenPtr != IntPtr.Zero)
                     {
                         AttestationClientLib.FreeAttestationToken(tokenPtr);
+                    }
+
+                    if (addRef)
+                    {
+                        keyHandle.DangerousRelease();
                     }
                 }
             }, cancellationToken);
