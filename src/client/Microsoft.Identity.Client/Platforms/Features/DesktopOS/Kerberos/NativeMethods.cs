@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
         );
 
         [DllImport(SECUR32)]
-        public static unsafe extern int LsaCallAuthenticationPackage(
+        public static extern unsafe int LsaCallAuthenticationPackage(
             LsaSafeHandle LsaHandle,
             int AuthenticationPackage,
             void* ProtocolSubmitBuffer,
@@ -403,19 +403,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
                 }
             }
 
+            // Replace the usage of Marshal.PtrToStructure(IntPtr, Type) with the generic version Marshal.PtrToStructure<T>(IntPtr)
+            // in the ForEachBuffer method inside SecBufferDesc struct.
+
             private void ForEachBuffer(Action<SecBuffer> onBuffer)
             {
                 for (int Index = 0; Index < cBuffers; Index++)
                 {
-                    int CurrentOffset = Index * Marshal.SizeOf(typeof(SecBuffer));
+                    int CurrentOffset = Index * Marshal.SizeOf<SecBuffer>();
 
-                    SecBuffer thisSecBuffer = (SecBuffer)Marshal.PtrToStructure(
+                    SecBuffer thisSecBuffer = (SecBuffer)Marshal.PtrToStructure<SecBuffer>(
                         IntPtr.Add(
                             pBuffers,
                             CurrentOffset
-                        ),
-                        typeof(SecBuffer)
-                    );
+                        ));
 
                     onBuffer(thisSecBuffer);
                 }
