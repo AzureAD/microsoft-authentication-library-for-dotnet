@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             {
                 try
                 {
-                    GError err = (GError)Marshal.PtrToStructure(error, typeof(GError));
+                    GError err = Marshal.PtrToStructure<GError>(error);
                     throw new InteropException(
                         $"An error was encountered while clearing secret from keyring in the {nameof(Storage)} domain:'{err.Domain}' code:'{err.Code}' message:'{err.Message}'", 
                         err.Code);
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             {
                 try
                 {
-                    GError err = (GError)Marshal.PtrToStructure(error, typeof(GError));
+                    GError err = Marshal.PtrToStructure<GError>(error);
                     throw new InteropException(
                         $"An error was encountered while reading secret from keyring in the {nameof(Storage)} domain:'{err.Domain}' code:'{err.Code}' message:'{err.Message}'", err.Code);
                 }
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             {
                 try
                 {
-                    GError err = (GError)Marshal.PtrToStructure(error, typeof(GError));
+                    GError err = Marshal.PtrToStructure<GError>(error);
                     string message = $"An error was encountered while saving secret to keyring in the {nameof(Storage)} domain:'{err.Domain}' code:'{err.Code}' message:'{err.Message}'";
                     throw new InteropException(message, err.Code);
                 }
