@@ -16,26 +16,18 @@
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
-  <!-- ─── NuGet metadata ────────────────────────────────────────────────── -->
-  <PropertyGroup Label="NuGet">
-    <!-- Passed in by pipeline -->
-    <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">
-      $(MsalInternalVersion)
-    </MicrosoftIdentityClientVersion>
-
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
+    <!--This should be passed from the VSTS build-->
+    <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">$(MsalInternalVersion)</MicrosoftIdentityClientVersion>
+    <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MicrosoftIdentityClientVersion)</Version>
-    <Title>MSAL.NET extension for Mutual‑TLS Proof‑of‑Possession</Title>
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->
+    <Title>MSAL.NET extension for managed identity proof-of-possession flows</Title>
     <Description>
-      Adds `WithMtlsProofOfPossession()` to MSAL Managed‑Identity flows.
-      Requires MSAL.NET (Microsoft.Identity.Client).
+      This package contains binaries needed to use managed identity proof-of-possession (MTLS PoP) flows in applications using MSAL.NET.
     </Description>
-    <PackageTags>Microsoft Authentication Library MSAL POP MTLS Managed Identity</PackageTags>
-    <Product>Microsoft Authentication Library – POP plug‑in</Product>
-    <Authors>Microsoft</Authors>
-    <RepositoryUrl>https://github.com/AzureAD/microsoft-authentication-library-for-dotnet</RepositoryUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://aka.ms/msal</PackageProjectUrl>
-    <Copyright>© Microsoft Corporation</Copyright>
+    <PackageTags>Microsoft Authentication Library Managed Identity MSAL Proof-of-Possession</PackageTags>
+    <Product>Microsoft Authentication Library Broker</Product>
   </PropertyGroup>
 
   <!-- ─── Continuous Integration flag (same pattern as other packages) ─── -->
