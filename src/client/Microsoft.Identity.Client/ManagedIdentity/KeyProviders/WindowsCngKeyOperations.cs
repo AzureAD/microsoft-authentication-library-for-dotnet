@@ -17,8 +17,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
     /// </summary>
     internal static class WindowsCngKeyOperations
     {
-        private const string ProviderName = "Microsoft Software Key Storage Provider";
-        private const string KeyName = "KeyGuardRSAKey";
+        private const string SoftwareKspName = "Microsoft Software Key Storage Provider";
+        private const string KeyGuardKeyName = "KeyGuardRSAKey";
+        private const string HardwareKeyName = "HardwareRSAKey";
 
         // --- KeyGuard path (RSA) ---
         public static bool TryGetOrCreateKeyGuard(ILoggerAdapter logger, out RSA rsa)
@@ -27,17 +28,27 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
             try
             {
-                // Try open by the known name first
+                // Try open by the known name first (Software KSP, user scope, silent)
                 CngKey key;
                 try
                 {
-                    key = CngKey.Open(KeyName, new CngProvider(ProviderName));
+                    key = CngKey.Open(
+                        KeyGuardKeyName,
+                        new CngProvider(SoftwareKspName),
+                        CngKeyOpenOptions.UserKey | CngKeyOpenOptions.Silent);
                 }
                 catch (CryptographicException)
                 {
-                    // Not found -> create fresh
+                    // Not found -> create fresh (helper may return null if VBS unavailable)
                     logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard key not found; creating fresh.");
                     key = KeyGuardHelper.CreateFresh(logger);
+                }
+
+                // If VBS is unavailable, CreateFresh() returns null. Bail out cleanly.
+                if (key == null)
+                {
+                    logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard unavailable (VBS off or not supported).");
+                    return false;
                 }
 
                 // Ensure actually KeyGuard-protected; recreate if not
@@ -46,6 +57,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                     logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard key found but not protected; recreating.");
                     key.Dispose();
                     key = KeyGuardHelper.CreateFresh(logger);
+
+                    // Check again after recreate; still null or not protected -> give up KeyGuard path
+                    if (key == null || !KeyGuardHelper.IsKeyGuardProtected(key))
+                    {
+                        key?.Dispose();
+                        logger?.Verbose(() => "[MI][WinKeyProvider] Unable to obtain a KeyGuard-protected key.");
+                        return false;
+                    }
                 }
 
                 rsa = new RSACng(key);
@@ -53,7 +72,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 {
                     try
                     { rsa.KeySize = 2048; }
-                    catch { }
+                    catch { /* some providers don't allow */ }
                 }
                 return true;
             }
@@ -76,21 +95,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
             try
             {
-                CngProvider provider = new CngProvider(ProviderName);
-                CngKeyOpenOptions openOpts = CngKeyOpenOptions.UserKey;
+                // PCP (TPM) in USER scope
+                CngProvider provider = new CngProvider(SoftwareKspName);
+                CngKeyOpenOptions openOpts = CngKeyOpenOptions.UserKey | CngKeyOpenOptions.Silent;
 
-                CngKey key = CngKey.Exists(KeyName, provider, openOpts)
-                    ? CngKey.Open(KeyName, provider, openOpts)
-                    : CngKey.Create(
-                        CngAlgorithm.Rsa,
-                        KeyName,
-                        new CngKeyCreationParameters
-                        {
-                            Provider = provider,
-                            KeyUsage = CngKeyUsages.Signing,
-                            ExportPolicy = CngExportPolicies.None,   // non-exportable
-                            KeyCreationOptions = CngKeyCreationOptions.MachineKey
-                        });
+                CngKey key = CngKey.Exists(HardwareKeyName, provider, openOpts)
+                    ? CngKey.Open(HardwareKeyName, provider, openOpts)
+                    : CreateUserPcpRsa(provider, HardwareKeyName);
 
                 rsa = new RSACng(key);
 
@@ -98,16 +109,33 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 {
                     try
                     { rsa.KeySize = 2048; }
-                    catch { }
+                    catch { /* PCP typically ignores post-create change */ }
                 }
-                
-                logger?.Info("[MI][WinKeyProvider] Using Hardware key (RSA).");
+
+                logger?.Info("[MI][WinKeyProvider] Using Hardware key (RSA, PCP user).");
                 return true;
             }
-            catch (CryptographicException)
+            catch (CryptographicException e)
             {
-                logger?.Verbose(() => "[MI][WinKeyProvider] Exception creating Hardware key.");
+                // Add HResult to make CI diagnostics actionable
+                logger?.Verbose(() => "[MI][WinKeyProvider] Hardware key creation/open failed. " +
+                                       $"HR=0x{e.HResult:X8}. {e.GetType().Name}: {e.Message}");
                 return false;
+            }
+
+            static CngKey CreateUserPcpRsa(CngProvider provider, string name)
+            {
+                var p = new CngKeyCreationParameters
+                {
+                    Provider = provider,
+                    KeyUsage = CngKeyUsages.Signing,
+                    ExportPolicy = CngExportPolicies.None,          // non-exportable (expected for TPM)
+                    KeyCreationOptions = CngKeyCreationOptions.None // USER scope
+                };
+
+                p.Parameters.Add(new CngProperty("Length", BitConverter.GetBytes(2048), CngPropertyOptions.None));
+
+                return CngKey.Create(CngAlgorithm.Rsa, name, p);
             }
         }
     }
