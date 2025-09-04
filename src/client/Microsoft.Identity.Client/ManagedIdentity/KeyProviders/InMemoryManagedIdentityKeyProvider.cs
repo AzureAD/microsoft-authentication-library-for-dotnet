@@ -80,11 +80,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         private static RSA CreateRsaKeyPair()
         {
             RSA rsa;
-#if NET462 || NET472
+#if NETFRAMEWORK
             // .NET Framework (Windows): use RSACng 
             rsa = new RSACng();
 #else
-            // Cross-platform (.NET Core/8+/Standard)
+            // Cross‑platform: RSA.Create() -> CNG (Windows) / OpenSSL (Linux).
             rsa = RSA.Create();
 #endif
             rsa.KeySize = 2048;
