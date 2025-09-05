@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
+using Microsoft.Identity.Test.Unit.PublicApiTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
@@ -23,6 +25,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
         private readonly TestCsrFactory _testCsrFactory = new TestCsrFactory();
+        private readonly IdentityLoggerAdapter _identityLoggerAdapter = new IdentityLoggerAdapter(
+            new TestIdentityLogger(),
+            Guid.Empty,
+            "TestClient",
+            "1.0.0",
+            enablePiiLogging: false
+        );
 
         [TestMethod]
         public async Task ImdsV2SAMIHappyPathAsync()
@@ -42,12 +51,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // initial probe
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // do it again, since CsrMetadata from initial probe is not cached
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
-                httpManager.AddManagedIdentityMockHandler(
-                    $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.ImdsV2);
-
+                httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter));
+                
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
@@ -88,11 +93,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(idType: userAssignedIdentityId, userAssignedId: userAssignedId)); // initial probe
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(idType: userAssignedIdentityId, userAssignedId: userAssignedId)); // do it again, since CsrMetadata from initial probe is not cached
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(userAssignedIdentityId, userAssignedId));
-                httpManager.AddManagedIdentityMockHandler(
-                    $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.ImdsV2);
+                httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter));
 
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);

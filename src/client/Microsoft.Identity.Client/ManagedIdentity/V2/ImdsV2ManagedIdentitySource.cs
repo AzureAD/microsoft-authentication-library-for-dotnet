@@ -194,7 +194,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
-            base(requestContext, ManagedIdentitySource.ImdsV2) { }
+            base(requestContext, ManagedIdentitySource.ImdsV2)
+        { }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(string csr)
         {

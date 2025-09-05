@@ -11,9 +11,12 @@ using System.Net.Http.Headers;
 using Castle.Core.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
@@ -670,6 +673,33 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(content),
+                }
+            };
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponse(
+            IdentityLoggerAdapter identityLoggerAdapter)
+        {
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>
+                {
+                    { ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue }
+                };
+            var idParams = MsalIdHelper.GetMsalIdParameters(identityLoggerAdapter);
+            foreach (var idParam in idParams)
+            {
+                expectedRequestHeaders[idParam.Key] = idParam.Value;
+            }
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(GetMsiSuccessfulResponse()),
                 }
             };
 
