@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
@@ -143,7 +144,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because response doesn't have server header. Status code: {response.StatusCode} Body: {response.Body}",
                         null,
                         (int)response.StatusCode);
-                } 
+                }
             }
 
             var match = System.Text.RegularExpressions.Regex.Match(
@@ -206,7 +207,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { "Metadata", "true" },
                 { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
-            
+
             var body = $"{{\"csr\":\"{csr}\"}}";
 
             IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
@@ -261,18 +262,29 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
-            
+
             // transform certificateRequestResponse.Certificate to x509 with private key
             var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
                 certificateRequestResponse.Certificate,
                 privateKey);
 
             ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.MtlsAuthenticationEndpoint}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
+
+            var idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
+            foreach (var idParam in idParams)
+            {
+                request.Headers[idParam.Key] = idParam.Value;
+            }
             request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
+            request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
+
             request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
-            request.BodyParameters.Add("grant_type", certificateRequestResponse.Certificate);
+            request.BodyParameters.Add("grant_type", "client_credentials");
             request.BodyParameters.Add("scope", "https://management.azure.com/.default");
-            request.RequestType = RequestType.Imds;
+            request.BodyParameters.Add("token_type", "bearer");
+
+            request.RequestType = RequestType.STS;
+
             request.MtlsCertificate = mtlsCertificate;
 
             return request;
