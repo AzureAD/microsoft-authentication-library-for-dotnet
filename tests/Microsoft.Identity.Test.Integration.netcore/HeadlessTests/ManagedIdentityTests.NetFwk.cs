@@ -118,10 +118,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        //[DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
-        //[DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
-        //[DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Web_App")]
         public async Task AcquireMSITokenPopAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
             //Arrange
