@@ -590,8 +590,8 @@ namespace Microsoft.Identity.Test.Unit
         /// Test (expired and valid) PEM-encoded X.509 certificate and their matching RSA private key.
         /// These are used together in unit tests that require both a certificate and its private key.
         /// The <see cref="ExpiredPemCertificate"/>/<see cref="ValidPemCertificate"/> and <see cref="XmlPrivateKey"/> are a matched pair:
-        /// - <see cref="ExpiredPemCertificate"/> is an expired PEM-encoded certificate. The certificate is valid for 100 years, ensuring it will not expire during the lifetime of the tests.
-        /// - <see cref="ValidPemCertificate"/> is a valid PEM-encoded certificate. The certificate is valid for 1 day and was created on September 8 2025, ensuring it will always be expired.
+        /// - <see cref="ExpiredPemCertificate"/> is an expired PEM-encoded certificate. The certificate is valid for 1 day and was created on September 8 2025, ensuring it will always be expired.
+        /// - <see cref="ValidPemCertificate"/> is a valid PEM-encoded certificate. The certificate is valid for 100 years and expires on August 4, 2125, ensuring it will not expire during the lifetime of the tests.
         /// - <see cref="XmlPrivateKey"/> is their corresponding RSA private key in XML format.
         /// </summary>
         internal const string ExpiredPemCertificate = @"-----BEGIN CERTIFICATE-----
