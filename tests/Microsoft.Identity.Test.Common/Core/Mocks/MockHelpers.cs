@@ -643,7 +643,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static MockHttpMessageHandler MockCertificateRequestResponse(
             UserAssignedIdentityId idType = UserAssignedIdentityId.None,
-            string userAssignedId = null)
+            string userAssignedId = null,
+            string certificate = TestConstants.ValidPemCertificate)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
@@ -659,7 +660,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "{" +
                 "\"client_id\": \"" + TestConstants.ClientId + "\"," +
                 "\"tenant_id\": \"" + TestConstants.TenantId + "\"," +
-                "\"certificate\": \"" + TestConstants.ValidPemCertificate + "\"," +
+                "\"certificate\": \"" + certificate + "\"," +
                 "\"identity_type\": \"fake_identity_type\"," + // "SystemAssigned" or "UserAssigned", it doesn't matter for these tests
                 "\"mtls_authentication_endpoint\": \"" + TestConstants.MtlsAuthenticationEndpoint + "\"," +
                 "}";
