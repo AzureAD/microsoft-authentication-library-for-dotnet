@@ -1,2 +1,3 @@
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithMtlsPop() -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
 Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithExtraHttpHeaders<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IDictionary<string, string> extraHttpHeaders) -> T

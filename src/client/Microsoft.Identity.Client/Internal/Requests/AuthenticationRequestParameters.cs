@@ -127,6 +127,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
+        internal void OverrideAuthenticationScheme(IAuthenticationOperation authenticationOperation)
+        {
+            if (IsMtlsPopRequested)
+            {
+                // Replace the scheme for this request only.
+                _commonParameters.AuthenticationOperation = authenticationOperation;
+            }
+        }
+
         public IAuthenticationOperation AuthenticationScheme => _commonParameters.AuthenticationOperation;
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;

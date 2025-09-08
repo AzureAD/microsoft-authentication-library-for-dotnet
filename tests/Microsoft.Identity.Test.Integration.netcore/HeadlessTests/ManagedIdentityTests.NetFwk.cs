@@ -117,6 +117,75 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
+        [DataTestMethod]
+        //[DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
+        //[DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        //[DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Web_App")]
+        public async Task AcquireMSITokenPopAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
+        {
+            //Arrange
+            using (new EnvVariableContext())
+            {
+                // Fetch the env variables from the resource and set them locally
+                Dictionary<string, string> envVariables =
+                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+
+                //Set the Environment Variables
+                SetEnvironmentVariables(envVariables);
+
+                //form the http proxy URI 
+                string uri = s_baseURL + $"MSIToken?" +
+                    $"azureresource={azureResource}&uri=";
+
+                //Create CCA with Proxy
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
+
+                AuthenticationResult result;
+                //Act
+                result = await mia
+                            .AcquireTokenForManagedIdentity(s_msi_scopes).WithMtlsPop()
+                            .ExecuteAsync().ConfigureAwait(false);
+
+                //Assert
+                //1. Token Type
+                //Assert.AreEqual("mtls_pop", result.TokenType); /Uncomment when service supports PoP
+
+                Assert.AreEqual("Bearer", result.TokenType);
+
+                //2. First token response is from the MSI Endpoint
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                //3. Validate the ExpiresOn falls within a 24 hour range from now
+                CoreAssert.IsWithinRange(
+                                DateTimeOffset.UtcNow + TimeSpan.FromHours(0),
+                                result.ExpiresOn,
+                                TimeSpan.FromHours(24));
+
+                //4.1 We should have a binding certificate
+
+                Assert.IsNotNull(result.BindingCertificate);
+
+                result = await mia
+                    .AcquireTokenForManagedIdentity(s_msi_scopes)
+                    .WithMtlsPop()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                //4. Validate the scope
+                Assert.IsTrue(result.Scopes.All(s_msi_scopes.Contains));
+
+                //5. Validate the second call to token endpoint gets returned from the cache
+                Assert.AreEqual(TokenSource.Cache,
+                    result.AuthenticationResultMetadata.TokenSource);
+
+                //5.1 We should have a binding certificate
+
+                Assert.IsNotNull(result.BindingCertificate);
+
+            }
+        }
+
         [TestMethod]
         public async Task AcquireMsiToken_ForTokenExchangeResource_Successfully()
         {

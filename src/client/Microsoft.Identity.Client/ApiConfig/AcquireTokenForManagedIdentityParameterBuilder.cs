@@ -4,10 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -74,6 +76,16 @@ namespace Microsoft.Identity.Client
         public AcquireTokenForManagedIdentityParameterBuilder WithClaims(string claims)
         {
             CommonParameters.Claims = claims;
+            return this;
+        }
+
+        /// <summary>
+        /// Enables acquisition of an mTLS-PoP access token for Managed Identity. 
+        /// Experimental – subject to change.
+        /// </summary>
+        public AcquireTokenForManagedIdentityParameterBuilder WithMtlsPop()
+        {
+            CommonParameters.IsMtlsPopRequested = true;
             return this;
         }
 
