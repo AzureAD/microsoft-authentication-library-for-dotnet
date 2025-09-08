@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 //1. Token Type
-                //Assert.AreEqual("mtls_pop", result.TokenType); /Uncomment when service supports PoP
+                //Assert.AreEqual("mtls_pop", result.TokenType); //Uncomment when service supports PoP
 
                 Assert.AreEqual("Bearer", result.TokenType);
 

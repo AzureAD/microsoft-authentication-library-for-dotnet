@@ -38,13 +38,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
+            bool isMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
+
             X509Certificate2 cert = ManagedIdentityCertificateHelper.TryGetLabAuthCertificate(logger);
 
-            if (cert == null)
-            {
-                logger.Info("[ManagedIdentityRequest] No binding certificate available. Continuing with existing auth scheme.");
-            }
-            else
+            if(isMtlsPopRequested)
             {
                 var op = new MsiMtlsPopAuthenticationOperation(cert);
                 AuthenticationRequestParameters.OverrideAuthenticationScheme(op);

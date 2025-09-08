@@ -28,6 +28,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly IServiceBundle _serviceBundle;
         private readonly AcquireTokenCommonParameters _commonParameters;
         private string _loginHint;
+        private IAuthenticationOperation _effectiveAuthenticationOperation;
+        private readonly IAuthenticationOperation _defaultAuthenticationOperation;
 
         public AuthenticationRequestParameters(
             IServiceBundle serviceBundle,
@@ -75,6 +77,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             HomeAccountId = homeAccountId;
             CacheKeyComponents = cacheKeyComponents;
+
+            _defaultAuthenticationOperation = _commonParameters.AuthenticationOperation;
+            _effectiveAuthenticationOperation = _defaultAuthenticationOperation;
         }
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
@@ -129,14 +134,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal void OverrideAuthenticationScheme(IAuthenticationOperation authenticationOperation)
         {
-            if (IsMtlsPopRequested)
-            {
-                // Replace the scheme for this request only.
-                _commonParameters.AuthenticationOperation = authenticationOperation;
-            }
+            _effectiveAuthenticationOperation = authenticationOperation ?? _defaultAuthenticationOperation;
         }
 
-        public IAuthenticationOperation AuthenticationScheme => _commonParameters.AuthenticationOperation;
+        public IAuthenticationOperation AuthenticationScheme => _effectiveAuthenticationOperation;
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
