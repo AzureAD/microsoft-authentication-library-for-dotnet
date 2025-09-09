@@ -338,8 +338,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                string authority = "https://demo.duendesoftware.com/tenant1/2.0/";
-                string issuerWithDifferentPath = "https://demo.duendesoftware.com/oidc/2.0/";
+                string authority = "https://demo.duendesoftware.com/someTenant/2.0/";
+                string issuerWithDifferentPath = "https://demo.duendesoftware.com/organizations/2.0/";
 
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
