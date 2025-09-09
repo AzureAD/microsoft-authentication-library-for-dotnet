@@ -35,18 +35,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         private void AddMocksToGetEntraToken(
             MockHttpManager httpManager,
-            string certificateRequestCertificate = TestConstants.ValidPemCertificate)
+            string certificateRequestCertificate = TestConstants.ValidPemCertificate,
+            bool mTLSPop = false)
         {
             httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // initial probe
             httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // do it again, since CsrMetadata from initial probe is not cached
             httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certificateRequestCertificate));
-            httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter));
+            httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop));
         }
 
         #region Acceptance Tests
-        #region Bearer Token Tests
-        [TestMethod]
-        public async Task BearerTokenSAMIHappyPath()
+        [DataTestMethod]
+        [DataRow(true)]  // mtls-PoP token
+        [DataRow(false)] // bearer token
+        public async Task SAMIHappyPath(bool mTLSPop)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -60,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                AddMocksToGetEntraToken(httpManager);
+                AddMocksToGetEntraToken(httpManager, mTLSPop: mTLSPop);
 
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
@@ -79,12 +81,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
-        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)]
-        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]
-        public async Task BearerTokenUAMIHappyPath(
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, true)]        // mtls-PoP token
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, true)]  // mtls-PoP token
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, true)]        // mtls-PoP token
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, false)]       // bearer token
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, false)] // bearer token
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, false)]       // bearer token
+        public async Task UAMIHappyPath(
             UserAssignedIdentityId userAssignedIdentityId,
-            string userAssignedId)
+            string userAssignedId,
+            bool mTLSPop)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -99,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                AddMocksToGetEntraToken(httpManager);
+                AddMocksToGetEntraToken(httpManager, mTLSPop: mTLSPop);
 
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
@@ -117,14 +123,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [TestMethod]
-        public async Task BearerTokenIsPerIdentity()
+        [DataTestMethod]
+        [DataRow(true)]  // mtls-PoP token
+        [DataRow(false)] // bearer token
+        public async Task TokenIsPerIdentity(bool mTLSPop)
         {
             using (var httpManager = new MockHttpManager())
             {
                 for (int i = 0; i < 2; i++) // two token requests
                 {
-                    AddMocksToGetEntraToken(httpManager);
+                    AddMocksToGetEntraToken(httpManager, mTLSPop: mTLSPop);
                 }
 
                 #region Identity 1
@@ -186,8 +194,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [TestMethod]
-        public async Task BearerTokenIsReAcquiredWhenCertificatIsExpired()
+        [DataTestMethod]
+        [DataRow(true)]  // mtls-PoP token
+        [DataRow(false)] // bearer token
+        public async Task TokenIsReAcquiredWhenCertificatIsExpired(bool mTLSPop)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -203,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miSource = await (mi as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
 
-                AddMocksToGetEntraToken(httpManager, TestConstants.ExpiredPemCertificate);
+                AddMocksToGetEntraToken(httpManager, TestConstants.ExpiredPemCertificate, mTLSPop);
 
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
@@ -212,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                AddMocksToGetEntraToken(httpManager);
+                AddMocksToGetEntraToken(httpManager, mTLSPop: mTLSPop);
 
                 result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
@@ -225,12 +235,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreNotEqual(ImdsV2ManagedIdentitySource.CertificateCache.Count, 1); // expired cert was removed from the cache
             }
         }
-        #endregion Bearer Token Tests
-
-        #region Pop Token Tests
-        // TODO: Add Pop Token Tests
-        #endregion Pop Token Tests
-        #endregion Acceptance Tests
+        #endregion
 
         [TestMethod]
         public async Task GetCsrMetadataAsyncSucceeds()

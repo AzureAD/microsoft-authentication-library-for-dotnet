@@ -600,6 +600,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+
             if (idType != UserAssignedIdentityId.None && userAssignedId != null)
             {
                 var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)idType, userAssignedId, null);
@@ -648,6 +649,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+
             if (idType != UserAssignedIdentityId.None && userAssignedId != null)
             {
                 var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)idType, userAssignedId, null);
@@ -681,22 +683,29 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponse(
-            IdentityLoggerAdapter identityLoggerAdapter)
+            IdentityLoggerAdapter identityLoggerAdapter,
+            bool mTLSPop = false)
         {
+            IDictionary<string, string> expectedPostData = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>
                 {
                     { ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue }
                 };
+
             var idParams = MsalIdHelper.GetMsalIdParameters(identityLoggerAdapter);
             foreach (var idParam in idParams)
             {
                 expectedRequestHeaders[idParam.Key] = idParam.Value;
             }
 
+            var tokenType = mTLSPop ? "mtls_pop" : "bearer";
+            expectedPostData.Add("token_type", tokenType);
+
             var handler = new MockHttpMessageHandler()
             {
                 ExpectedUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
                 ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = expectedPostData,
                 ExpectedRequestHeaders = expectedRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
