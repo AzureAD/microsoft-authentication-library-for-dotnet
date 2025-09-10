@@ -66,12 +66,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public string GetProtocolKeyFromHandShakeResult(Bundle bundleResult)
         {
-            var negotiatedBrokerProtocalKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
+            var negotiatedBrokerProtocolKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
 
-            if (!string.IsNullOrEmpty(negotiatedBrokerProtocalKey))
+            if (!string.IsNullOrEmpty(negotiatedBrokerProtocolKey))
             {
-                _logger.Info(() => "[Android broker] Using broker protocol version: " + negotiatedBrokerProtocalKey);
-                return negotiatedBrokerProtocalKey;
+                _logger.Info(() => "[Android broker] Using broker protocol version: " + negotiatedBrokerProtocolKey);
+                return negotiatedBrokerProtocolKey;
             }
 
             JObject errorResultObj = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2) ?? "{}");
