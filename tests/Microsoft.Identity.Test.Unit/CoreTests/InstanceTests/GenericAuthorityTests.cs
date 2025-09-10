@@ -338,8 +338,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                string authority = "https://demo.duendesoftware.com/organizations/2.0/";
-                string issuerWithDifferentPath = "https://demo.duendesoftware.com/someTenant/2.0/";
+                // This test was made to cover an issue that realistically would only happen with Microsoft authorities in multi-tenant scenarios,
+                // so it uses a Microsoft host instead of the custom domain used in other tests.
+                string microsoftHost = "login.microsoftonline.com";
+                string authority = $"https://{microsoftHost}/organizations/2.0/";
+                string issuerWithDifferentPath = $"https://{microsoftHost}/someTenant/2.0/";
 
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -348,10 +351,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
-                // Create OIDC document with matching host but different path
+                // Create OIDC document with a Microsoft host and an issuer that has matching host but different path
                 string oidcDocumentWithDifferentPath = TestConstants.GenericOidcResponse.Replace(
                         $"\"issuer\":\"{TestConstants.GenericAuthority}\"",
                         $"\"issuer\":\"{issuerWithDifferentPath}\"");
+                oidcDocumentWithDifferentPath = oidcDocumentWithDifferentPath.Replace(
+                        "demo.duendesoftware.com",
+                        microsoftHost);
 
                 // Mock OIDC endpoint response
                 httpManager.AddMockHandler(new MockHttpMessageHandler
@@ -364,7 +370,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 // Mock token endpoint response
                 httpManager.AddMockHandler(
                     CreateTokenResponseHttpHandler(
-                        "https://demo.duendesoftware.com/connect/token",
+                        $"https://{microsoftHost}/connect/token",
                         scopesInRequest: "api",
                         scopesInResponse: "api", 
                         grant: "client_credentials"));
