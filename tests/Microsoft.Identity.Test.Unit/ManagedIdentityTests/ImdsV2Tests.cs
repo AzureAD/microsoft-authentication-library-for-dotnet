@@ -262,6 +262,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -270,6 +271,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
@@ -296,6 +298,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -304,6 +307,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 1
 
@@ -318,6 +322,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
                 // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
 
                 result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -326,6 +331,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
                 // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 2
 
@@ -354,6 +360,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 // TODO: Add functionality to check cert expiration in the cache
@@ -366,6 +373,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 Assert.AreNotEqual(CertificateCache.Count, 1); // expired cert was removed from the cache
