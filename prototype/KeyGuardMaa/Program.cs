@@ -86,7 +86,7 @@ class Program
             byte[] sig = rsa.SignData(
                 System.Text.Encoding.UTF8.GetBytes("Hello KeyGuard"),
                 HashAlgorithmName.SHA256,
-                RSASignaturePadding.PSS);
+                RSASignaturePadding.Pss);
 
             Console.WriteLine($"\nSignature length: {sig.Length} bytes");
         }
