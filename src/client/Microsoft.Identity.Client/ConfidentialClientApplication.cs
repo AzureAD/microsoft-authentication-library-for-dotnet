@@ -207,9 +207,10 @@ namespace Microsoft.Identity.Client
         internal override async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
-            ITokenCacheInternal cache)
+            ITokenCacheInternal cache,
+            CancellationToken cancellationToken)
         {
-            AuthenticationRequestParameters requestParams = await base.CreateRequestParametersAsync(commonParameters, requestContext, cache).ConfigureAwait(false);
+            AuthenticationRequestParameters requestParams = await base.CreateRequestParametersAsync(commonParameters, requestContext, cache, cancellationToken).ConfigureAwait(false);
             return requestParams;
         }
     }

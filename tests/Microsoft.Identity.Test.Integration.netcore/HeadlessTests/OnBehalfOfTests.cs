@@ -226,20 +226,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
         public async Task WithMultipleUsers_TestAsync()
         {
             var aadUser1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
             var aadUser2 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
-            var adfsUser = (await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019).ConfigureAwait(false)).User;
+            var aadUser3 = (await LabUserHelper.GetDefaultUser3Async().ConfigureAwait(false)).User;
 
-            await RunOnBehalfOfTestAsync(adfsUser, false).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(aadUser3, false).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(aadUser1, false).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(aadUser1, true).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(aadUser2, false).ConfigureAwait(false);
-            await RunOnBehalfOfTestAsync(adfsUser, true).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(aadUser3, true).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(aadUser2, true).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(aadUser2, false, true).ConfigureAwait(false);
         }

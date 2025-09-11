@@ -90,10 +90,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         $" Error Code: {errorCode} \n" +
                         $" Error Message: {authResult.Error.Status} \n" +
                         $" WAM Error Message: {authResult.Error.Context} \n" +
-                        $" Internal Error Code: {internalErrorCode} \n" +
-                        $" Possible causes: \n" +
-                        $"- Invalid redirect uri - ensure you have configured the following url in the application registration in Azure Portal: " +
-                        $"{GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n";
+                        $" Internal Error Code: {internalErrorCode} \n" + 
+                        $" See troubleshooting: https://aka.ms/msal-net-wam \n";
                     logger.Error($"[RuntimeBroker] WAM_provider_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException($"WAM_provider_error_{errorCode}", errorMessage);
                     serviceException.IsRetryable = false;
