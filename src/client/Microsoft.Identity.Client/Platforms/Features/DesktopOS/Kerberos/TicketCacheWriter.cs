@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
             {
                 MessageType = NativeMethods.KERB_PROTOCOL_MESSAGE_TYPE.KerbSubmitTicketMessage,
                 KerbCredSize = ticketBytes.Length,
-                KerbCredOffset = Marshal.SizeOf(typeof(NativeMethods.KERB_SUBMIT_TKT_REQUEST)),
+                KerbCredOffset = Marshal.SizeOf<NativeMethods.KERB_SUBMIT_TKT_REQUEST>(),
                 LogonId = luid
             };
 
