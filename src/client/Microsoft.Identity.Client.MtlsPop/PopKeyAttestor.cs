@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.MtlsPop.Attestation;
@@ -26,26 +27,30 @@ namespace Microsoft.Identity.Client.MtlsPop
         /// <param name="cancellationToken">Cancellation token (cooperative before scheduling / start).</param>
         public static Task<AttestationResult> AttestKeyGuardAsync(
             string endpoint,
-            SafeNCryptKeyHandle keyHandle,
+            SafeHandle keyHandle,
             string clientId,
             CancellationToken cancellationToken = default)
         {
-            if (keyHandle is null || keyHandle.IsInvalid)
-                throw new ArgumentException("keyHandle must be a valid SafeNCryptKeyHandle", nameof(keyHandle));
+            if (keyHandle is null)
+                throw new ArgumentNullException(nameof(keyHandle));
 
             if (string.IsNullOrWhiteSpace(endpoint))
-                throw new ArgumentException("endpoint must be provided", nameof(endpoint));
+                throw new ArgumentNullException(nameof(endpoint));
+
+            if (keyHandle.IsInvalid)
+                throw new ArgumentException("keyHandle is invalid", nameof(keyHandle));
+
+            var safeNCryptKeyHandle = keyHandle as SafeNCryptKeyHandle
+                ?? throw new ArgumentException("keyHandle must be a SafeNCryptKeyHandle. Only Windows CNG keys are supported.", nameof(keyHandle));
 
             cancellationToken.ThrowIfCancellationRequested();
 
             return Task.Run(() =>
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
                 try
                 {
                     using var client = new AttestationClient();
-                    return client.Attest(endpoint, keyHandle, clientId ?? string.Empty);
+                    return client.Attest(endpoint, safeNCryptKeyHandle, clientId ?? string.Empty);
                 }
                 catch (Exception ex)
                 {

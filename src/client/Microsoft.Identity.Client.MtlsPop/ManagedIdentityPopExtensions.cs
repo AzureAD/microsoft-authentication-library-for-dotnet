@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.MtlsPop
             AcquireTokenForManagedIdentityParameterBuilder builder)
         {
             // Register the "runtime" function that PoP operation will invoke.
-            builder.CommonParameters.MtlsPopProvider =
+            builder.CommonParameters.AttestationTokenProvider =
                 async (req, ct) =>
                 {
                     // 1) Get the caller-provided KeyGuard/CNG handle
@@ -49,11 +49,12 @@ namespace Microsoft.Identity.Client.MtlsPop
                         att.Status == Attestation.AttestationStatus.Success &&
                         !string.IsNullOrWhiteSpace(att.Jwt))
                     {
-                        return new MtlsPopResponse { AttestationToken = att.Jwt };
+                        return new ManagedIdentity.AttestationTokenResponse { AttestationToken = att.Jwt };
                     }
 
-                    throw new InvalidOperationException(
-                        $"Attestation failed (status={att?.Status}, code={att?.NativeErrorCode}). {att?.ErrorMessage}");
+                    throw new MsalClientException(
+                        "attestation_failure",
+                        $"Key Attestation failed (status={att?.Status}, code={att?.NativeErrorCode}). {att?.ErrorMessage}");
                 };
         }
     }
