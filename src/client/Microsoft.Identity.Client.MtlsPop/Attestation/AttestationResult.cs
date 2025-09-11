@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
     /// <param name="Jwt"></param>
     /// <param name="NativeErrorCode"></param>
     /// <param name="ErrorMessage"></param>
-    public sealed record AttestationResult(
+    internal sealed record AttestationResult(
         AttestationStatus Status,
         string Jwt,
         int NativeErrorCode,

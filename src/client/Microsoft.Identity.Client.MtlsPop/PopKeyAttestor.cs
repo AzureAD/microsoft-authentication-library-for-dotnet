@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.MtlsPop
     /// Static facade for attesting a KeyGuard/CNG key and getting a JWT back.
     /// Key discovery / rotation is the caller's responsibility.
     /// </summary>
-    public static class PopKeyAttestor
+    internal static class PopKeyAttestor
     {
         /// <summary>
         /// Asynchronously attests a KeyGuard/CNG key with the remote attestation service and returns a JWT.

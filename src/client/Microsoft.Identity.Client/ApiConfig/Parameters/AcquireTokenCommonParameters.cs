@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Win32.SafeHandles;
 using static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
@@ -40,6 +41,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsManagedIdentityPopEnabled { get; set; }
         public bool IsMtlsPopRequested { get; set; }
+        internal SafeNCryptKeyHandle MtlsPopKeyHandle { get; set; }
+        internal Func<MtlsPopRequest, CancellationToken, Task<MtlsPopResponse>> MtlsPopProvider { get; set; }
 
         internal async Task InitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {

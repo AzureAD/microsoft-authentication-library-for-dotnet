@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
     /// <summary>
     /// High-level outcome categories returned by <see cref="AttestationClient.Attest"/>.
     /// </summary>
-    public enum AttestationStatus
+    internal enum AttestationStatus
     {
         /// <summary>Everything succeeded; <see cref="AttestationResult.Jwt"/> is populated.</summary>
         Success = 0,
