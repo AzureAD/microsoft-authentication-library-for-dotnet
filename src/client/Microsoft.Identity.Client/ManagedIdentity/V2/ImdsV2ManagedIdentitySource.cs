@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -22,6 +24,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
         public const string CertificateRequestPath = "/metadata/identity/issuecredential";
         public const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
+        private static readonly TimeSpan s_certRefreshSkew = TimeSpan.FromMinutes(5);
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
@@ -257,23 +260,43 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
-            var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
+            // 1) CSR metadata gives the authoritative client_id (works for SAMI and UAMI)
+            CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
+            string key = _requestContext.ServiceBundle.Config.ClientId;
 
-            var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
-            
-            // transform certificateRequestResponse.Certificate to x509 with private key
-            var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
-                certificateRequestResponse.Certificate,
-                privateKey);
+            // 2) Try cached binding; refresh if cert expires within 5 minutes
+            var nowUtc = ManagedIdentityClient.s_timeService.GetUtcNow();
 
-            ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.MtlsAuthenticationEndpoint}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
+            if (!ManagedIdentityClient.s_miCerts.TryGetValue(key, out var binding) ||
+                IsExpiringSoon(binding.Cert, nowUtc, s_certRefreshSkew))
+            {
+                // Runs under the global MI semaphore in ManagedIdentityAuthRequest
+                var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory
+                    .Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
+
+                CertificateRequestResponse resp = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
+                var cert = CommonCryptographyManager.AttachPrivateKeyToCert(resp.Certificate, privateKey);
+
+                binding = (cert, resp.ClientId, resp.TenantId, resp.MtlsAuthenticationEndpoint);
+                ManagedIdentityClient.s_miCerts[key] = binding;
+
+                _requestContext.Logger.Info($"[Managed Identity] mTLS cert minted/rotated; expires={cert.NotAfter:u}");
+            }
+
+            // 3) Build the token request from the binding
+            var (mTLSCertificate, clientId, tenantId, endpoint) = binding;
+
+            var tokenEndpoint = new Uri($"{endpoint}/{tenantId}{AcquireEntraTokenPath}");
+
+            var request = new ManagedIdentityRequest(HttpMethod.Post, tokenEndpoint);
             request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
-            request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
-            request.BodyParameters.Add("grant_type", certificateRequestResponse.Certificate);
-            request.BodyParameters.Add("scope", "https://management.azure.com/.default");
+
+            request.BodyParameters.Add("client_id", clientId);
+            request.BodyParameters.Add("grant_type", "client_credentials");
+            request.BodyParameters.Add("scope", $"{resource}/.default");
+
             request.RequestType = RequestType.Imds;
-            request.MtlsCertificate = mtlsCertificate;
+            request.MtlsCertificate = mTLSCertificate;
 
             return request;
         }
@@ -292,6 +315,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             return queryParams;
+        }
+
+        private static bool IsExpiringSoon(X509Certificate2 cert, DateTime nowUtc, TimeSpan skew)
+        {
+            if (cert == null)
+                return true;
+
+            // X509Certificate2.NotAfter is a local DateTime; normalize to UTC before comparing.
+            DateTime notAfterUtc = cert.NotAfter.ToUniversalTime();
+            return nowUtc >= (notAfterUtc - skew);
         }
     }
 }
