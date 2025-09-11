@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
 using Castle.Core.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -605,10 +606,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             expectedQueryParams.Add("cred-api-version", "2.0");
             expectedRequestHeaders.Add("Metadata", "true");
 
+            var clientId = userAssignedId !=null ? userAssignedId : TestConstants.ClientId;
+
             string content =
                 "{" +
                 "\"cuId\": { \"vmId\": \"fake_vmId\" }," +
-                "\"clientId\": \"" + TestConstants.ClientId + "\"," +
+                "\"clientId\": \"" + clientId + "\"," +
                 "\"tenantId\": \"" + TestConstants.TenantId + "\"," +
                 "\"attestationEndpoint\": \"fake_attestation_endpoint\"" +
                 "}";
@@ -674,6 +677,24 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
 
             return handler;
+        }
+
+        public static DateTime GetPemNotAfterUtc(string pem)
+        {
+            const string begin = "-----BEGIN CERTIFICATE-----";
+            const string end = "-----END CERTIFICATE-----";
+            int i = pem.IndexOf(begin, StringComparison.Ordinal);
+            int j = pem.IndexOf(end, StringComparison.Ordinal);
+            if (i < 0 || j < 0)
+                throw new ArgumentException("Invalid PEM");
+
+            string base64 = pem.Substring(i + begin.Length, j - (i + begin.Length))
+                              .Replace("\r", string.Empty)
+                              .Replace("\n", string.Empty)
+                              .Trim();
+            var raw = Convert.FromBase64String(base64);
+            using var cert = new X509Certificate2(raw);
+            return cert.NotAfter.ToUniversalTime();
         }
     }
 }

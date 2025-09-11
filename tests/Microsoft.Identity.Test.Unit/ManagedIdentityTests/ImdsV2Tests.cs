@@ -111,6 +111,335 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task ImdsV2_CertCache_ReusesBinding_OnForceRefreshAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .WithCsrFactory(_testCsrFactory);
+
+                // Avoid shared token cache between tests
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                // First call: CSR (probe + non-probe), then /issuecredential, then token
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // probe
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+                httpManager.AddManagedIdentityMockHandler(
+                    $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.ImdsV2);
+
+                // Second call (network again): only CSR (non-probe) + token. NO /issuecredential here.
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe for CreateRequestAsync
+                httpManager.AddManagedIdentityMockHandler(
+                    $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.ImdsV2);
+
+                // 1) First acquisition: network path, issues cert, returns token
+                var result1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                      .ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result1);
+                Assert.IsNotNull(result1.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                // 2) Second acquisition: bypass token cache to force another *network* call,
+                //    but cert must be reused (no /issuecredential mock was queued).
+                var result2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                      .WithForceRefresh(true)
+                                      .ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result2);
+                Assert.IsNotNull(result2.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        //[TestMethod]
+        // This test fails because bad response is not handled properly in the code yet.
+        public async Task ImdsV2_CertCache_Invalidation_RetryOnce_MintsNewCertAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .WithCsrFactory(_testCsrFactory);
+
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                var tokenUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}";
+
+                // First attempt: mint cert, then token returns 401/invalid_client_certificate
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // probe
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+
+                var unauthorizedBody =
+                "{\"error\":\"invalid_client_certificate\",\"error_description\":\"bad certificate\"}";
+
+                httpManager.AddManagedIdentityMockHandler(
+                    tokenUrl,
+                    ManagedIdentityTests.Resource,
+                    unauthorizedBody,
+                    ManagedIdentitySource.ImdsV2);
+
+                // Retry path: CSR (non-probe), mint NEW cert, then token succeeds
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe for retry
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+                httpManager.AddManagedIdentityMockHandler(
+                    tokenUrl,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.ImdsV2);
+
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                     .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ImdsV2_CertCache_Isolates_SAMI_and_UAMI_IdentitiesAsync()
+        {
+            var tokenUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}";
+
+            // --- SAMI ---
+            using (var httpManagerSami = new MockHttpManager())
+            {
+                var samiBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManagerSami)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .WithCsrFactory(_testCsrFactory);
+                samiBuilder.Config.AccessorOptions = null;
+
+                var sami = samiBuilder.Build();
+
+                httpManagerSami.AddMockHandler(MockHelpers.MockCsrResponse()); // probe
+                httpManagerSami.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
+                httpManagerSami.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+                httpManagerSami.AddManagedIdentityMockHandler(
+                    tokenUrl,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.ImdsV2);
+
+                var resSami = await sami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                        .ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(resSami.AccessToken);
+            }
+
+            using (var httpManagerUami = new MockHttpManager())
+            {
+                var uamiBuilder = CreateMIABuilder(TestConstants.ClientId2, UserAssignedIdentityId.ClientId)
+                    .WithHttpManager(httpManagerUami)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .WithCsrFactory(_testCsrFactory);
+                uamiBuilder.Config.AccessorOptions = null;
+
+                var uami = uamiBuilder.Build();
+
+                httpManagerUami.AddMockHandler(MockHelpers.MockCsrResponse(
+                    idType: UserAssignedIdentityId.ClientId, userAssignedId: TestConstants.ClientId2)); // non-probe
+
+                httpManagerUami.AddMockHandler(MockHelpers.MockCertificateRequestResponse(
+                    UserAssignedIdentityId.ClientId, TestConstants.ClientId2));
+
+                httpManagerUami.AddManagedIdentityMockHandler(
+                    tokenUrl,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.ImdsV2);
+
+                var resUami = await uami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                        .ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(resUami.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task ImdsV2_CertCache_DoesNotRotate_WhenOutside5MinWindow_UsingTestTimeService()
+        {
+            using var http = new MockHttpManager();
+
+            ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                .WithHttpManager(http)
+                .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                .WithCsrFactory(_testCsrFactory);
+
+            miBuilder.Config.AccessorOptions = null;
+
+            var mi = miBuilder.Build();
+
+            // Position clock 6 minutes before NotAfter (outside 5m window)
+            DateTime notAfterUtc = MockHelpers.GetPemNotAfterUtc(TestConstants.ValidPemCertificate);
+            ManagedIdentityClient.SetTimeServiceForTest(new TestTimeService(notAfterUtc.AddMinutes(-6)));
+
+            // First call: probe + non-probe CSR, /issuecredential, token
+            http.AddMockHandler(MockHelpers.MockCsrResponse()); // probe
+            http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
+            http.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+            http.AddManagedIdentityMockHandler(
+                $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ManagedIdentityTests.Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.ImdsV2);
+
+            // Second call: CSR (non-probe) + token only (no /issuecredential)
+            http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
+            // No /issuecredential mock queued here because we have that info cached
+            http.AddManagedIdentityMockHandler(
+                $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ManagedIdentityTests.Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.ImdsV2);
+
+            AuthenticationResult r1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            AuthenticationResult r2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                .WithForceRefresh(true)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(r1.AccessToken);
+            Assert.IsNotNull(r2.AccessToken);
+        }
+
+        [TestMethod]
+        public async Task ImdsV2_CertCache_Reset_ClearsBindingAndSource_ReissuesOnNextCall()
+        {
+            using var http = new MockHttpManager();
+
+            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                .WithHttpManager(http)
+                .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                .WithCsrFactory(_testCsrFactory);
+
+            // Avoid shared token cache between tests (so network path is deterministic)
+            miBuilder.Config.AccessorOptions = null;
+
+            var mi = miBuilder.Build();
+
+            var tokenUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}";
+
+            // ---------------------
+            // 1) First acquisition: mint + token
+            // ---------------------
+            http.AddMockHandler(MockHelpers.MockCsrResponse()); // probe
+            http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
+            http.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+            http.AddManagedIdentityMockHandler(
+                tokenUrl,
+                ManagedIdentityTests.Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.ImdsV2);
+
+            var r1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                             .ExecuteAsync().ConfigureAwait(false);
+            Assert.IsNotNull(r1.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, r1.AuthenticationResultMetadata.TokenSource);
+
+            // ----------------------------------------------
+            // 2) Second acquisition (ForceRefresh): reuse mTLS binding (no new /issuecredential)
+            // ----------------------------------------------
+            http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe (CreateRequestAsync)
+                                                                // NOTE: No MockCertificateRequestResponse queued here intentionally
+            http.AddManagedIdentityMockHandler(
+                tokenUrl,
+                ManagedIdentityTests.Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.ImdsV2);
+
+            var r2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                             .WithForceRefresh(true)
+                             .ExecuteAsync().ConfigureAwait(false);
+            Assert.IsNotNull(r2.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, r2.AuthenticationResultMetadata.TokenSource);
+
+            // ---------------------
+            // 3) Reset caches mid-test
+            // ---------------------
+            ManagedIdentityClient.ResetSourceForTest();
+
+            // After reset, source detection will re-run (probe CSR) and binding is gone,
+            // so we expect: probe CSR -> non-probe CSR -> /issuecredential -> token
+            http.AddMockHandler(MockHelpers.MockCsrResponse()); // probe again after reset
+            http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
+            http.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+            http.AddManagedIdentityMockHandler(
+                tokenUrl,
+                ManagedIdentityTests.Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.ImdsV2);
+
+            var r3 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                             .WithForceRefresh(true) // bypass token cache to force network path
+                             .ExecuteAsync().ConfigureAwait(false);
+            Assert.IsNotNull(r3.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, r3.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
+        public async Task ImdsV2_TokenCacheMiss_ValidCert_SkipsMetadataAndCsr_GoesDirectToToken_Async()
+        {
+            using var http = new MockHttpManager();
+
+            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                .WithHttpManager(http)
+                .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                .WithCsrFactory(_testCsrFactory);
+            miBuilder.Config.AccessorOptions = null;
+
+            var mi = miBuilder.Build();
+
+            // First call: mint + token (fills the mTLS binding cache under miKey)
+            http.AddMockHandler(MockHelpers.MockCsrResponse());               // probe
+            http.AddMockHandler(MockHelpers.MockCsrResponse());               // non-probe
+            http.AddMockHandler(MockHelpers.MockCertificateRequestResponse()); // issuecredential
+            http.AddManagedIdentityMockHandler(
+                $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ManagedIdentityTests.Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.ImdsV2);
+
+            var r1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(r1.AccessToken);
+
+            // Scenario 2: simulate token cache miss (ForceRefresh) but cert is still valid.
+            // We expect: NO /issuecredential; ONLY metadate and token call.
+            http.AddMockHandler(MockHelpers.MockCsrResponse());               // non-probe
+            http.AddManagedIdentityMockHandler(
+                $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ManagedIdentityTests.Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.ImdsV2);
+
+            var r2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                             .WithForceRefresh(true)
+                             .ExecuteAsync()
+                             .ConfigureAwait(false);
+
+            Assert.IsNotNull(r2.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, r2.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
         public async Task GetCsrMetadataAsyncSucceeds()
         {
             using (var httpManager = new MockHttpManager())

@@ -2,14 +2,17 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -21,12 +24,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
-        internal static ICertCache s_certCache = new ManagedIdentityCertificateCache();
+        internal static ITimeService s_timeService = new TimeService();
+
+        internal static readonly ConcurrentDictionary<string, 
+            (X509Certificate2 Cert, string ClientId, string TenantId, string Endpoint)> s_miCerts = new ();
 
         internal static void ResetSourceForTest()
         {
             s_sourceName = ManagedIdentitySource.None;
-            (s_certCache as ManagedIdentityCertificateCache)?.ClearForTest();
+            s_miCerts.Clear();
+            s_timeService = new TimeService();
         }
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
@@ -158,6 +165,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
+        }
+
+        // Test-only helpers
+        internal static void SetTimeServiceForTest(ITimeService timeService) /* internal - test only usage */
+        {
+            s_timeService = timeService ?? new TimeService();
         }
     }
 }
