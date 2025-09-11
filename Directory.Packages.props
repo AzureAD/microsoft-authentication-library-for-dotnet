@@ -16,6 +16,11 @@
     <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
     <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
     <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
+    <!-- OneAuth package and dependencies -->
+    <PackageVersion Include="Microsoft.OneAuth" Version="7.2.0" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.1" />
+    <PackageVersion Include="System.Drawing.Common" Version="9.0.1" />
+    <PackageVersion Include="System.Threading.Channels" Version="9.0.1" />
     <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <!-- Should match Azure Functions runtime: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4456 -->
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" />
