@@ -595,15 +595,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static MockHttpMessageHandler MockCsrResponse(
             HttpStatusCode statusCode = HttpStatusCode.OK,
             string responseServerHeader = "IMDS/150.870.65.1854",
-            UserAssignedIdentityId idType = UserAssignedIdentityId.None,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
 
-            if (idType != UserAssignedIdentityId.None && userAssignedId != null)
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
-                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)idType, userAssignedId, null);
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
                 expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
             }
             expectedQueryParams.Add("cred-api-version", "2.0");
@@ -643,16 +643,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static MockHttpMessageHandler MockCertificateRequestResponse(
-            UserAssignedIdentityId idType = UserAssignedIdentityId.None,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
             string certificate = TestConstants.ValidPemCertificate)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
 
-            if (idType != UserAssignedIdentityId.None && userAssignedId != null)
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
-                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)idType, userAssignedId, null);
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
                 expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
             }
             expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);

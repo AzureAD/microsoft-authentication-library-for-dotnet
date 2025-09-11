@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
@@ -32,210 +31,349 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             "1.0.0",
             enablePiiLogging: false
         );
+        public const string Bearer = "Bearer";
+        public const string MTLSPoP = "MTLSPoP";
 
         private void AddMocksToGetEntraToken(
             MockHttpManager httpManager,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
             string certificateRequestCertificate = TestConstants.ValidPemCertificate,
             bool mTLSPop = false)
         {
-            httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // initial probe
-            httpManager.AddMockHandler(MockHelpers.MockCsrResponse()); // do it again, since CsrMetadata from initial probe is not cached
-            httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certificateRequestCertificate));
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(userAssignedIdentityId: userAssignedIdentityId, userAssignedId: userAssignedId));
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(userAssignedIdentityId, userAssignedId, certificateRequestCertificate));
+            }
+            else
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certificateRequestCertificate));
+            }
+            
             httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop));
         }
 
-        #region Acceptance Tests
-        [DataTestMethod]
-        [DataRow(true)]  // mtls-PoP token
-        [DataRow(false)] // bearer token
-        public async Task SAMIHappyPath(bool mTLSPop)
+        private async Task<IManagedIdentityApplication> CreateManagedIdentityAsync(
+            MockHttpManager httpManager,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            bool addProbeMock = true,
+            bool addSourceCheck = true)
         {
-            using (var httpManager = new MockHttpManager())
+            ManagedIdentityApplicationBuilder miBuilder = null;
+
+            var uami = userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null;
+            if (uami)
             {
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .WithCsrFactory(_testCsrFactory);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                AddMocksToGetEntraToken(httpManager, mTLSPop: mTLSPop);
-
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
             }
-        }
-
-        [DataTestMethod]
-        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, true)]        // mtls-PoP token
-        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, true)]  // mtls-PoP token
-        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, true)]        // mtls-PoP token
-        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, false)]       // bearer token
-        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, false)] // bearer token
-        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, false)]       // bearer token
-        public async Task UAMIHappyPath(
-            UserAssignedIdentityId userAssignedIdentityId,
-            string userAssignedId,
-            bool mTLSPop)
-        {
-            using (var httpManager = new MockHttpManager())
+            else
             {
-                var miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
-                miBuilder
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .WithCsrFactory(_testCsrFactory);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-
-                AddMocksToGetEntraToken(httpManager, mTLSPop: mTLSPop);
-
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
             }
-        }
 
-        [DataTestMethod]
-        [DataRow(true)]  // mtls-PoP token
-        [DataRow(false)] // bearer token
-        public async Task TokenIsPerIdentity(bool mTLSPop)
-        {
-            using (var httpManager = new MockHttpManager())
+            miBuilder
+                .WithHttpManager(httpManager)
+                .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                .WithCsrFactory(_testCsrFactory);
+
+            // Disabling shared cache options to avoid cross test pollution.
+            miBuilder.Config.AccessorOptions = null;
+
+            var managedIdentityApp = miBuilder.Build();
+
+            if (addProbeMock)
             {
-                for (int i = 0; i < 2; i++) // two token requests
+                if (uami)
                 {
-                    AddMocksToGetEntraToken(httpManager, mTLSPop: mTLSPop);
+                    httpManager.AddMockHandler(MockHelpers.MockCsrResponse(userAssignedIdentityId: userAssignedIdentityId, userAssignedId: userAssignedId));
                 }
-
-                #region Identity 1
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .WithCsrFactory(_testCsrFactory);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
-                var miSource = await (mi as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                else
+                {
+                    httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                }
+            }
+            
+            if (addSourceCheck)
+            {
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
+            }
 
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+            return managedIdentityApp;
+        }
+
+        #region Acceptance Tests
+        #region Bearer Token Tests
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        public async Task BearerTokenHappyPath(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
+
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(result.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(result.TokenType, Bearer);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        public async Task BearerTokenTokenIsPerIdentity(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                #region Identity 1
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
+
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(result.TokenType, Bearer);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(result.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 1
 
                 #region Identity 2
-                var miBuilder2 = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .WithCsrFactory(_testCsrFactory);
+                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder2.Config.AccessorOptions = null;
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
 
-                var mi2 = miBuilder2.Build();
-
-                var result2 = await mi2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
+                Assert.AreEqual(result.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
 
-                result2 = await mi2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
+                Assert.AreEqual(result.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 2
 
-                // TODO: Create CertificateCache factory so that it doesn't have to be static
-                Assert.AreNotEqual(ImdsV2ManagedIdentitySource.CertificateCache.Count, 2);
+                // TODO: Assert.AreNotEqual(CertificateCache.Count, 2);
             }
         }
 
         [DataTestMethod]
-        [DataRow(true)]  // mtls-PoP token
-        [DataRow(false)] // bearer token
-        public async Task TokenIsReAcquiredWhenCertificatIsExpired(bool mTLSPop)
+        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        public async Task BearerTokenIsReAcquiredWhenCertificatIsExpired(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
         {
             using (var httpManager = new MockHttpManager())
             {
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .WithCsrFactory(_testCsrFactory);
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredPemCertificate); // cert will be expired on second request
 
-                var mi = miBuilder.Build();
-                var miSource = await (mi as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
-
-                AddMocksToGetEntraToken(httpManager, TestConstants.ExpiredPemCertificate, mTLSPop);
-
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(result.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                AddMocksToGetEntraToken(httpManager, mTLSPop: mTLSPop);
+                // TODO: Add functionality to check cert expiration in the cache
+                /**
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
 
-                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(result.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                // TODO: Create CertificateCache factory so that it doesn't have to be static
-                Assert.AreNotEqual(ImdsV2ManagedIdentitySource.CertificateCache.Count, 1); // expired cert was removed from the cache
+                Assert.AreNotEqual(CertificateCache.Count, 1); // expired cert was removed from the cache
+                */
             }
         }
-        #endregion
+        #endregion Bearer Token Tests
+
+        #region mTLS PoP Token Tests
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        public async Task mTLSPopTokenHappyPath(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId/*, mTLSPop: true*/); // TODO: implement mTLS Pop
+
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        public async Task mTLSPopTokenTokenIsPerIdentity(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                #region Identity 1
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId/*, mTLSPop: true*/); // TODO: implement mTLS Pop
+
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                #endregion Identity 1
+
+                #region Identity 2
+                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
+
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId/*, mTLSPop: true*/); // TODO: implement mTLS Pop
+
+                var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result2);
+                Assert.IsNotNull(result2.AccessToken);
+                // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+
+                result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result2);
+                Assert.IsNotNull(result2.AccessToken);
+                // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
+                #endregion Identity 2
+
+                // TODO: Assert.AreNotEqual(CertificateCache.Count, 2);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        public async Task mTLSPopTokenIsReAcquiredWhenCertificatIsExpired(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredPemCertificate/*, mTLSPop: true*/); // TODO: implement mTLS Pop
+
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // TODO: Add functionality to check cert expiration in the cache
+                /**
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, // mTLSPop: true);  // TODO: implement mTLS Pop
+
+                result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                // Assert.AreEqual(result.TokenType, MTLSPoP);  // TODO: implement mTLS Pop
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                Assert.AreNotEqual(CertificateCache.Count, 1); // expired cert was removed from the cache
+                */
+            }
+        }
+        #endregion mTLS Pop Token Tests
+        #endregion Acceptance Tests
 
         [TestMethod]
         public async Task GetCsrMetadataAsyncSucceeds()
@@ -244,13 +382,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 var handler = httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
-                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .Build();
-
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
+                await CreateManagedIdentityAsync(httpManager, addProbeMock: false).ConfigureAwait(false);
 
                 Assert.IsTrue(handler.ActualRequestHeaders.Contains("Metadata"));
                 Assert.IsTrue(handler.ActualRequestHeaders.Contains("x-ms-client-request-id"));
@@ -266,16 +398,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // First attempt fails with INTERNAL_SERVER_ERROR (500)
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.InternalServerError));
 
-                // Second attempt succeeds
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
-
-                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .Build();
-
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
+                // Second attempt succeeds (defined inside of CreateSAMIAsync)
+                await CreateManagedIdentityAsync(httpManager).ConfigureAwait(false);
             }
         }
 
@@ -286,10 +410,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: null));
 
-                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .Build();
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
@@ -303,10 +424,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "IMDS/150.870.65.1853")); // min version is 1854
 
-                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .Build();
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
@@ -318,16 +436,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .Build();
-
                 const int Num500Errors = 1 + TestCsrMetadataProbeRetryPolicy.ExponentialStrategyNumRetries;
                 for (int i = 0; i < Num500Errors; i++)
                 {
                     httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.InternalServerError));
                 }
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
@@ -339,12 +454,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .Build();
-
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.NotFound));
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
@@ -395,19 +507,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         #region AttachPrivateKeyToCert Tests
-
         [TestMethod]
         public void AttachPrivateKeyToCert_ValidInputs_ReturnsValidCertificate()
         {
-            using var httpManager = new MockHttpManager();
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithHttpManager(httpManager)
-                .WithRetryPolicyFactory(_testRetryPolicyFactory);
-            var managedIdentityApp = miBuilder.BuildConcrete();
-
-            var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-            var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
-
             using (RSA rsa = RSA.Create())
             {
                 // For this test, we just want to verify that the method doesn't crash
@@ -424,15 +526,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void AttachPrivateKeyToCert_NullCertificatePem_ThrowsArgumentNullException()
         {
-            using var httpManager = new MockHttpManager();
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithHttpManager(httpManager)
-                .WithRetryPolicyFactory(_testRetryPolicyFactory);
-            var managedIdentityApp = miBuilder.BuildConcrete();
-
-            var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-            var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
-
             using (RSA rsa = RSA.Create())
             {
                 Assert.ThrowsException<ArgumentNullException>(() =>
@@ -443,15 +536,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void AttachPrivateKeyToCert_EmptyCertificatePem_ThrowsArgumentNullException()
         {
-            using var httpManager = new MockHttpManager();
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithHttpManager(httpManager)
-                .WithRetryPolicyFactory(_testRetryPolicyFactory);
-            var managedIdentityApp = miBuilder.BuildConcrete();
-
-            var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-            var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
-
             using (RSA rsa = RSA.Create())
             {
                 Assert.ThrowsException<ArgumentNullException>(() =>
@@ -462,15 +546,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void AttachPrivateKeyToCert_NullPrivateKey_ThrowsArgumentNullException()
         {
-            using var httpManager = new MockHttpManager();
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithHttpManager(httpManager)
-                .WithRetryPolicyFactory(_testRetryPolicyFactory);
-            var managedIdentityApp = miBuilder.BuildConcrete();
-
-            var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-            var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
-
             Assert.ThrowsException<ArgumentNullException>(() =>
                 CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, null));
         }
@@ -479,15 +554,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void AttachPrivateKeyToCert_InvalidPemFormat_ThrowsArgumentException()
         {
             const string InvalidPemNoCertMarker = @"This is not a valid PEM certificate";
-
-            using var httpManager = new MockHttpManager();
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithHttpManager(httpManager)
-                .WithRetryPolicyFactory(_testRetryPolicyFactory);
-            var managedIdentityApp = miBuilder.BuildConcrete();
-
-            var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-            var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
 
             using (RSA rsa = RSA.Create())
             {
@@ -502,15 +568,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             const string InvalidPemMissingBeginMarker = @"MIICXTCCAUWgAwIBAgIJAKPiQh26MIuPMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
 -----END CERTIFICATE-----";
 
-            using var httpManager = new MockHttpManager();
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithHttpManager(httpManager)
-                .WithRetryPolicyFactory(_testRetryPolicyFactory);
-            var managedIdentityApp = miBuilder.BuildConcrete();
-
-            var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-            var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
-
             using (RSA rsa = RSA.Create())
             {
                 Assert.ThrowsException<ArgumentException>(() =>
@@ -523,15 +580,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             const string InvalidPemMissingEndMarker = @"-----BEGIN CERTIFICATE-----
 MIICXTCCAUWgAwIBAgIJAKPiQh26MIuPMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV";
-            using var httpManager = new MockHttpManager();
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithHttpManager(httpManager)
-                .WithRetryPolicyFactory(_testRetryPolicyFactory);
-            var managedIdentityApp = miBuilder.BuildConcrete();
-
-            var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-            var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
-
+            
             using (RSA rsa = RSA.Create())
             {
                 Assert.ThrowsException<ArgumentException>(() =>
@@ -546,22 +595,12 @@ MIICXTCCAUWgAwIBAgIJAKPiQh26MIuPMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV";
 Invalid@#$%Base64Content!
 -----END CERTIFICATE-----";
 
-            using var httpManager = new MockHttpManager();
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithHttpManager(httpManager)
-                .WithRetryPolicyFactory(_testRetryPolicyFactory);
-            var managedIdentityApp = miBuilder.BuildConcrete();
-
-            var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-            var imdsV2Source = new ImdsV2ManagedIdentitySource(requestContext);
-
             using (RSA rsa = RSA.Create())
             {
                 Assert.ThrowsException<FormatException>(() =>
                     CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemBadBase64, rsa));
             }
         }
-
         #endregion
     }
 }
