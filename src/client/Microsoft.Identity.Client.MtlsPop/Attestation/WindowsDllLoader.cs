@@ -38,7 +38,12 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
             {
                 // Preserve Win32 error code for diagnosis
                 int err = Marshal.GetLastWin32Error();
-                throw new Win32Exception(err, $"Unable to load {path}");
+
+                throw new MsalClientException(
+                        "attestationmodule_load_failure",
+                        $"Key Attestation Module load failed " +
+                        $"(error={err}, " +
+                        $"Unable to load {path}");
             }
 
             return h;

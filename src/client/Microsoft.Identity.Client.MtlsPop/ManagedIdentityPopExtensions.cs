@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.MtlsPop.Attestation;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.MtlsPop
@@ -27,6 +29,11 @@ namespace Microsoft.Identity.Client.MtlsPop
             return builder;
         }
 
+        /// <summary>
+        /// Adds the runtime support by registering the attestation function.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <exception cref="MsalClientException"></exception>
         private static void AddRuntimeSupport(
             AcquireTokenForManagedIdentityParameterBuilder builder)
         {
@@ -35,26 +42,28 @@ namespace Microsoft.Identity.Client.MtlsPop
                 async (req, ct) =>
                 {
                     // 1) Get the caller-provided KeyGuard/CNG handle
-                    var keyHandle = req.KeyHandle;
+                    SafeHandle keyHandle = req.KeyHandle;
 
                     // 2) Call the native interop via PopKeyAttestor
-                    var att = await PopKeyAttestor.AttestKeyGuardAsync(
+                    AttestationResult attestationResult = await PopKeyAttestor.AttestKeyGuardAsync(
                                   req.AttestationEndpoint.AbsoluteUri, // expects string
                                   keyHandle,
                                   req.ClientId ?? string.Empty,
                                   ct).ConfigureAwait(false);
 
                     // 3) Map to MSAL's internal response
-                    if (att != null &&
-                        att.Status == Attestation.AttestationStatus.Success &&
-                        !string.IsNullOrWhiteSpace(att.Jwt))
+                    if (attestationResult != null &&
+                        attestationResult.Status == AttestationStatus.Success &&
+                        !string.IsNullOrWhiteSpace(attestationResult.Jwt))
                     {
-                        return new ManagedIdentity.AttestationTokenResponse { AttestationToken = att.Jwt };
+                        return new ManagedIdentity.AttestationTokenResponse { AttestationToken = attestationResult.Jwt };
                     }
 
                     throw new MsalClientException(
                         "attestation_failure",
-                        $"Key Attestation failed (status={att?.Status}, code={att?.NativeErrorCode}). {att?.ErrorMessage}");
+                        $"Key Attestation failed " +
+                        $"(status={attestationResult?.Status}, " +
+                        $"code={attestationResult?.NativeErrorCode}). {attestationResult?.ErrorMessage}");
                 };
         }
     }
