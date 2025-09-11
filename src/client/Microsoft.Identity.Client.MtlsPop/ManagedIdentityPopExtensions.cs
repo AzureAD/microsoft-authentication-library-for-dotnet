@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.MtlsPop
         public static AcquireTokenForManagedIdentityParameterBuilder WithMtlsProofOfPossession(
             this AcquireTokenForManagedIdentityParameterBuilder builder)
         {
-            builder.CommonParameters.IsManagedIdentityPopEnabled = true;
+            builder.CommonParameters.IsMtlsPopRequested = true;
             AddRuntimeSupport(builder);
             return builder;
         }
