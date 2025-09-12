@@ -118,18 +118,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             ILoggerAdapter logger,
             bool probeMode)
         {
-            /*
-             * Match "IMDS/" at start of "server" header string (`^IMDS\/`)
-             * Match the first three numbers with dots (`\d+.\d+.\d+.`)
-             * Capture the last number in a group (`(\d+)`)
-             * Ensure end of string (`$`)
-             *
-             * Example:
-             * [
-             * "IMDS/150.870.65.1556",  // index 0: full match
-             * "1556"                   // index 1: captured group (\d+)
-             * ]
-             */
             string serverHeader = response.HeadersAsDictionary
                 .FirstOrDefault((kvp) => {
                     return string.Equals(kvp.Key, "server", StringComparison.OrdinalIgnoreCase);
