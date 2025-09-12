@@ -51,8 +51,7 @@ namespace Microsoft.Identity.Client
         {
             var config = new ApplicationConfiguration(MsalClientType.PublicClient);
             return new PublicClientApplicationBuilder(config)
-                .WithOptions(options)
-                .WithKerberosTicketClaim(options.KerberosServicePrincipalName, options.TicketContainer);
+                .WithOptions(options);
         }
 
         /// <summary>
@@ -324,6 +323,7 @@ namespace Microsoft.Identity.Client
         /// The expiry of the Kerberos ticket is tied to the expiry of the token that contains it.
         /// MSAL provides several helper APIs to read and write Kerberos tickets from the Windows Ticket Cache - see <see cref="KerberosSupplementalTicketManager"/>.
         /// </remarks>
+        [Obsolete]
         public PublicClientApplicationBuilder WithKerberosTicketClaim(string servicePrincipalName, KerberosTicketContainer ticketContainer)
         {
             Config.KerberosServicePrincipalName = servicePrincipalName;
