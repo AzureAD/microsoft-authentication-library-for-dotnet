@@ -334,6 +334,56 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public async Task OidcIssuerValidation_AcceptsDifferentPath_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // This test was made to cover an issue that realistically would only happen with Microsoft authorities in multi-tenant scenarios,
+                // so it uses a Microsoft host instead of the custom domain used in other tests.
+                string microsoftHost = "login.microsoftonline.com";
+                string authority = $"https://{microsoftHost}/organizations/2.0/";
+                string issuerWithDifferentPath = $"https://{microsoftHost}/someTenant/2.0/";
+
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                // Create OIDC document with a Microsoft host and an issuer that has matching host but different path
+                string oidcDocumentWithDifferentPath = TestConstants.GenericOidcResponse.Replace(
+                        $"\"issuer\":\"{TestConstants.GenericAuthority}\"",
+                        $"\"issuer\":\"{issuerWithDifferentPath}\"");
+                oidcDocumentWithDifferentPath = oidcDocumentWithDifferentPath.Replace(
+                        "demo.duendesoftware.com",
+                        microsoftHost);
+
+                // Mock OIDC endpoint response
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = $"{authority}{Constants.WellKnownOpenIdConfigurationPath}",
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(oidcDocumentWithDifferentPath)
+                });
+
+                // Mock token endpoint response
+                httpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandler(
+                        $"https://{microsoftHost}/connect/token",
+                        scopesInRequest: "api",
+                        scopesInResponse: "api", 
+                        grant: "client_credentials"));
+
+                // Should not throw an exception with our updated validation
+                var result = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
+                
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+            }
+        }
+
+        [TestMethod]
         public async Task OidcIssuerValidation_ThrowsForNonMatchingIssuer_Async()
         {
             using (var httpManager = new MockHttpManager())
