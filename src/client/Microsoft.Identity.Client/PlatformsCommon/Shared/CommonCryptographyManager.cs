@@ -102,10 +102,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
 
             byte[] SignDataAndCacheProvider(string message)
-            {                
+            {
                 // CodeQL [SM03799] PKCS1 padding is for Identity Providers not supporting PSS (older ADFS, dSTS)
                 var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, signaturePadding);
-                
+
                 // Cache only valid RSA crypto providers, which are able to sign data successfully
                 s_certificateToRsaMap[certificate.Thumbprint] = rsa;
                 return signedData;
@@ -132,7 +132,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
 #if NET8_0_OR_GREATER
             // .NET 8.0+ has direct PEM parsing support
-            certificate = X509Certificate2.CreateFromPem(certificatePem);
+            var base64 = Convert.FromBase64String(certificatePem);
+            certificate = new X509Certificate2(base64);
+
             // Attach the private key and return a new certificate instance
             return certificate.CopyWithPrivateKey(privateKey);
 #else
