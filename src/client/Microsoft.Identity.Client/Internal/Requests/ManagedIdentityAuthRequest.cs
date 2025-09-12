@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
@@ -42,10 +43,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             X509Certificate2 cert = ManagedIdentityCertificateHelper.TryGetLabAuthCertificate(logger);
 
-            if(isMtlsPopRequested)
+            if (isMtlsPopRequested && cert != null)
             {
-                var op = new MsiMtlsPopAuthenticationOperation(cert);
-                AuthenticationRequestParameters.OverrideAuthenticationScheme(op);
+                // Use the factory-based approach so the scheme is resolved once and cached.
+                AuthenticationRequestParameters.SetAuthOperationFactory(
+                    new StaticAuthenticationOperationFactory(
+                        new MsiMtlsPopAuthenticationOperation(cert)));
+
+                logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Applied MsiMtlsPopAuthenticationOperation.");
+            }
+            else if (isMtlsPopRequested)
+            {
+                logger.Warning("[ManagedIdentityRequest] mTLS PoP requested but no LabAuth certificate was found. Falling back to default scheme.");
             }
 
             // 1. FIRST, handle ForceRefresh
