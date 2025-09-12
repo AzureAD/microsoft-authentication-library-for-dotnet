@@ -91,8 +91,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            _logger?.Info("[OneAuth] AcquireTokenInteractiveAsync called");
-            return await SignInInteractivelyAsync(authenticationRequestParameters, acquireTokenInteractiveParameters).ConfigureAwait(false);
+            _logger?.Info("[OneAuth] AcquireTokenInteractiveAsync called - not yet implemented");
+            // TODO: Implement OneAuth silent token acquisition
+            return await Task.FromResult<MsalTokenResponse>(null).ConfigureAwait(false);
         }
 
         public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
@@ -126,8 +127,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
 
         public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
         {
-            _logger?.Info("[OneAuth] GetSsoPolicyHeaders called");
-            // OneAuth doesn't require SSO policy headers
+            _logger?.Info("[OneAuth] GetSsoPolicyHeaders called - not yet implemented");
+            // TODO: Implement OneAuth GetSsoPolicyHeaders
             return CollectionHelpers.GetEmptyDictionary<string, string>();
         }
 
@@ -150,7 +151,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             await Task.CompletedTask.ConfigureAwait(false);
         }
 
-        private Task<MsalTokenResponse> SignInInteractivelyAsync(
+        private async Task<MsalTokenResponse> SignInInteractivelyAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters = null)
         {
@@ -161,57 +162,201 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
                     throw new InvalidOperationException("OneAuth adapter is not initialized");
                 }
 
-                _logger?.Info("[OneAuth] Calling SignInInteractively using IDCR C# Interop API");
+                _logger?.Info("[OneAuth] Calling SignInInteractively using OneAuth C# API");
 
-                // Create UxContext (replaces IntPtr parentHwnd)
+                // Create UxContext for OneAuth UI handling
                 var uxContext = new UxContext(IntPtr.Zero, IntPtr.Zero, "OneAuth");
 
-                // Create account hint (replaces loginHint)
+                // Create account hint
                 string accountHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
 
-                // Create AuthenticationParameters (replaces single AuthParameters)
-                var authenticationParameters = OneAuthParameterMappers.CreateAuthParameters(authenticationRequestParameters);
+                // Convert MSAL parameters to OneAuth AuthParameters (actual OneAuth package type)
+                var authenticationParameters = OneAuthParameterMappers.ToOneAuthAuthParameters(
+                    authenticationRequestParameters, 
+                    acquireTokenInteractiveParameters);
 
-                // Create SignInBehaviorParameters (new in IDCR)
-                var signInBehaviorParameters = OneAuthParameterMappers.CreateSignInBehaviorParameters(acquireTokenInteractiveParameters);
+                // Convert MSAL parameters to OneAuth SignInBehaviorParameters
+                var signInBehaviorParameters = OneAuthParameterMappers.ToOneAuthSignInBehaviorParameters(acquireTokenInteractiveParameters);
 
-                // Create TelemetryParameters (replaces explicit correlationId)
+                // Create TelemetryParameters for OneAuth
                 var telemetryParameters = new TelemetryParameters(
                     "OneAuth", 
                     "SignInInteractively", 
                     authenticationRequestParameters.CorrelationId.ToString("D"));
 
-                // TODO: Call OneAuth SignInInteractively with proper parameters
-                // For now, simulate OneAuth call with placeholder implementation
-                // var authResult = await _oneAuth.SignInInteractively(
-                //     uxContext,
-                //     authenticationRequestParameters.LoginHint,
-                //     CreateAuthParameters(authenticationParameters),
-                //     CreateSignInBehaviorParameters(signInBehaviorParameters),
-                //     telemetryParameters).ConfigureAwait(false);
+                // Log what we're about to send to OneAuth (using internal representation for logging)
+                var internalAuthParams = OneAuthParameterMappers.ToOneAuthInternalAuthParameters(
+                    authenticationRequestParameters, 
+                    acquireTokenInteractiveParameters);
 
-                // Placeholder implementation - convert parameter dictionaries to actual OneAuth types
-                // This needs to be implemented when real OneAuth packages are available
-                _logger?.Info("[OneAuth] SignInInteractively called with placeholder implementation");
+                _logger?.Info($"[OneAuth] Calling OneAuth SignInInteractively with:");
+                _logger?.Info($"[OneAuth] - Authority: {internalAuthParams.Authority}");
+                _logger?.Info($"[OneAuth] - Target: {internalAuthParams.Target}");
+                _logger?.Info($"[OneAuth] - AuthenticationScheme: {internalAuthParams.AuthenticationScheme}");
+                _logger?.Info($"[OneAuth] - Claims: {internalAuthParams.Claims}");
+                _logger?.Info($"[OneAuth] - AccountHint: {accountHint ?? "N/A"}");
+                _logger?.Info($"[OneAuth] - AdditionalParameters count: {internalAuthParams.AdditionalParameters?.Count ?? 0}");
+                _logger?.Info($"[OneAuth] - Capabilities count: {internalAuthParams.Capabilities?.Count ?? 0}");
 
-                // Convert OneAuth result to MSAL token response (basic implementation)
-                return Task.FromResult(new MsalTokenResponse
-                {
-                    // TODO: Map authResult properties to MSAL token response
-                    // This is a placeholder - needs proper result mapping
-                    CorrelationId = authenticationRequestParameters.CorrelationId.ToString()
-                });
+                // Call OneAuth SignInInteractively with the correct signature
+                var authResult = await _oneAuth.SignInInteractively(
+                    uxContext,
+                    accountHint,
+                    authenticationParameters,  // Now using proper OneAuth AuthParameters type
+                    signInBehaviorParameters,
+                    telemetryParameters).ConfigureAwait(false);
+
+                // Convert OneAuth result to MSAL token response
+                return ConvertOneAuthResultToMsalTokenResponse(authResult, authenticationRequestParameters);
             }
             catch (Exception ex)
             {
                 _logger?.Error($"[OneAuth] Interactive authentication failed: {ex}");
-                return Task.FromResult(new MsalTokenResponse
+                return new MsalTokenResponse
                 {
                     Error = MsalError.UnknownBrokerError,
                     ErrorDescription = ex.Message,
                     CorrelationId = authenticationRequestParameters.CorrelationId.ToString()
-                });
+                };
             }
+        }
+
+        /// <summary>
+        /// Converts OneAuth authentication result to MSAL token response
+        /// </summary>
+        private MsalTokenResponse ConvertOneAuthResultToMsalTokenResponse(
+            AuthResult authResult,
+            AuthenticationRequestParameters authenticationRequestParameters)
+        {
+            if (authResult == null)
+            {
+                return new MsalTokenResponse
+                {
+                    Error = MsalError.UnknownBrokerError,
+                    ErrorDescription = "OneAuth returned null result",
+                    CorrelationId = authenticationRequestParameters.CorrelationId.ToString()
+                };
+            }
+
+            try
+            {
+                // Check if OneAuth returned an error
+                if (authResult.Error != null)
+                {
+                    _logger?.Error($"[OneAuth] Authentication failed with error: {authResult.Error}");
+                    return new MsalTokenResponse
+                    {
+                        Error = MapOneAuthErrorToMsalError(authResult.Error.ToString()),
+                        ErrorDescription = authResult.Error.ToString(),
+                        CorrelationId = authenticationRequestParameters.CorrelationId.ToString()
+                    };
+                }
+
+                // Convert successful OneAuth result to MSAL token response
+                // Note: Property names will need to be adjusted based on actual OneAuth AuthResult structure
+                var tokenResponse = new MsalTokenResponse
+                {
+                    // Map OneAuth result properties to MSAL token response
+                    // These property names are assumptions and will need to be corrected based on actual OneAuth AuthResult
+                    AccessToken = GetAuthResultProperty(authResult, "AccessToken"),
+                    RefreshToken = GetAuthResultProperty(authResult, "RefreshToken"),
+                    IdToken = GetAuthResultProperty(authResult, "IdToken"),
+                    TokenType = GetAuthResultProperty(authResult, "TokenType") ?? "Bearer",
+                    ExpiresIn = GetAuthResultPropertyAsLong(authResult, "ExpiresIn"),
+                    Scope = GetAuthResultProperty(authResult, "Scope"),
+                    ClientInfo = GetAuthResultProperty(authResult, "ClientInfo"),
+                    CorrelationId = authenticationRequestParameters.CorrelationId.ToString(),
+                    WamAccountId = GetAuthResultProperty(authResult, "AccountId"),
+                    TokenSource = TokenSource.Broker
+                };
+
+                _logger?.Info("[OneAuth] Successfully converted OneAuth result to MSAL token response");
+                return tokenResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"[OneAuth] Failed to convert OneAuth result to MSAL token response: {ex}");
+                return new MsalTokenResponse
+                {
+                    Error = MsalError.UnknownBrokerError,
+                    ErrorDescription = $"Failed to convert OneAuth result: {ex.Message}",
+                    CorrelationId = authenticationRequestParameters.CorrelationId.ToString()
+                };
+            }
+        }
+
+        /// <summary>
+        /// Helper method to safely get properties from OneAuth AuthResult
+        /// This will be updated based on actual OneAuth AuthResult structure
+        /// </summary>
+        private string GetAuthResultProperty(AuthResult authResult, string propertyName)
+        {
+            try
+            {
+                // Use reflection to get property value until we know the exact AuthResult structure
+                var property = authResult.GetType().GetProperty(propertyName);
+                return property?.GetValue(authResult)?.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Helper method to safely get long properties from OneAuth AuthResult
+        /// </summary>
+        private long GetAuthResultPropertyAsLong(AuthResult authResult, string propertyName)
+        {
+            try
+            {
+                var property = authResult.GetType().GetProperty(propertyName);
+                var value = property?.GetValue(authResult);
+                if (value != null && long.TryParse(value.ToString(), out long result))
+                {
+                    return result;
+                }
+                return 3600; // Default 1 hour
+            }
+            catch
+            {
+                return 3600; // Default 1 hour
+            }
+        }
+
+        /// <summary>
+        /// Maps OneAuth errors to MSAL error codes
+        /// </summary>
+        private string MapOneAuthErrorToMsalError(string oneAuthError)
+        {
+            if (string.IsNullOrEmpty(oneAuthError))
+                return MsalError.UnknownBrokerError;
+
+            // Map common OneAuth errors to MSAL errors
+            var errorLower = oneAuthError.ToLowerInvariant();
+            
+            if (errorLower.Contains("user_cancel") || errorLower.Contains("authentication_canceled"))
+                return MsalError.AuthenticationCanceledError;
+            
+            if (errorLower.Contains("invalid_request"))
+                return MsalError.InvalidRequest;
+            
+            if (errorLower.Contains("invalid_client"))
+                return MsalError.InvalidClient;
+            
+            if (errorLower.Contains("invalid_grant"))
+                return MsalError.InvalidGrantError;
+            
+            if (errorLower.Contains("unauthorized_client"))
+                return MsalError.UnauthorizedClient;
+            
+            if (errorLower.Contains("unsupported_grant_type"))
+                return MsalError.InvalidGrantError; // Use available error
+            
+            if (errorLower.Contains("invalid_scope"))
+                return MsalError.InvalidRequest; // Use available error
+            
+            return MsalError.UnknownBrokerError;
         }
 
         public void HandleInstallUrl(string appLink)
