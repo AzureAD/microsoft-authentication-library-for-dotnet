@@ -1,3 +1,16 @@
+4.77.0
+======
+### Features
+* Added WinUI 3 support for Desktop Broker flows. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5411
+* Introduced extensibility API to allow users to add custom HTTP headers to token acquisition requests (under extensibility). https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5440
+
+### Changes
+* Remove passing `x-client-os` as a query parameter in the authorization URI. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5456
+* Bump `Microsoft.IdentityModel.Abstractions` to a supported version. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5452
+
+### Bug fixes
+* Remove confusing error text as it only applies to one of many possible causes. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5467
+
 4.76.0
 ======
 
