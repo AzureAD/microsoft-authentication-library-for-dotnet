@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "I_MDS/150.870.65.1854")); // min version is 1854
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "I_MDS/150.870.65.1854"));
 
                 var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
