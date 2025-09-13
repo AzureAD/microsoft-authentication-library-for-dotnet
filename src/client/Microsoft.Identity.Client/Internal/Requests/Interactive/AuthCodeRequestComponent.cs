@@ -214,10 +214,10 @@ namespace Microsoft.Identity.Client.Internal
                     _requestParams.RequestContext.CorrelationId.ToString();
             }
 
-            foreach (KeyValuePair<string, string> kvp in MsalIdHelper.GetMsalIdParameters(_requestParams.RequestContext.Logger))
-            {
-                authorizationRequestParameters[kvp.Key] = kvp.Value;
-            }
+            MsalIdHelper.GetMsalIdParameters(_requestParams.RequestContext.Logger)
+                .Where(kvp => kvp.Key != MsalIdParameter.OS)
+                .ToList()
+                .ForEach(kvp => authorizationRequestParameters[kvp.Key] = kvp.Value);
 
             if (_interactiveParameters.Prompt == Prompt.NotSpecified)
             {
