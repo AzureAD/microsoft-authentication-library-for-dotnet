@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -117,19 +118,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             ILoggerAdapter logger,
             bool probeMode)
         {
-            /*
-             * Match "IMDS/" at start of "server" header string (`^IMDS\/`)
-             * Match the first three numbers with dots (`\d+.\d+.\d+.`)
-             * Capture the last number in a group (`(\d+)`)
-             * Ensure end of string (`$`)
-             *
-             * Example:
-             * [
-             * "IMDS/150.870.65.1556",  // index 0: full match
-             * "1556"                   // index 1: captured group (\d+)
-             * ]
-             */
-            string serverHeader = response.HeadersAsDictionary.TryGetValue("server", out var value) ? value : null;
+            string serverHeader = response.HeadersAsDictionary
+                .FirstOrDefault((kvp) => {
+                    return string.Equals(kvp.Key, "server", StringComparison.OrdinalIgnoreCase);
+                }).Value;
+
             if (serverHeader == null)
             {
                 if (probeMode)
@@ -143,24 +136,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because response doesn't have server header. Status code: {response.StatusCode} Body: {response.Body}",
                         null,
                         (int)response.StatusCode);
-                } 
+                }
             }
 
-            var match = System.Text.RegularExpressions.Regex.Match(
-                serverHeader,
-                @"^IMDS/\d+\.\d+\.\d+\.(\d+)$"
-            );
-            if (!match.Success || !int.TryParse(match.Groups[1].Value, out int version) || version < 1854)
+            if (!serverHeader.Contains("IMDS", StringComparison.OrdinalIgnoreCase))
             {
                 if (probeMode)
                 {
-                    logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. 'server' header format/version invalid. Extracted version: {match.Groups[1].Value}");
+                    logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. The 'server' header format is invalid. Extracted server header: {serverHeader}");
                     return false;
                 }
                 else
                 {
                     ThrowProbeFailedException(
-                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the 'server' header format/version invalid. Extracted version: {match.Groups[1].Value}. Status code: {response.StatusCode} Body: {response.Body}",
+                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the 'server' header format is invalid. Extracted server header: {serverHeader}. Status code: {response.StatusCode} Body: {response.Body}",
                         null,
                         (int)response.StatusCode);
                 }
@@ -193,7 +182,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
-            base(requestContext, ManagedIdentitySource.ImdsV2) { }
+            base(requestContext, ManagedIdentitySource.ImdsV2)
+        { }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(string csr)
         {
@@ -206,8 +196,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { "Metadata", "true" },
                 { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
             };
-            
-            var body = $"{{\"csr\":\"{csr}\"}}";
+
+            var certificateRequestBody = new CertificateRequestBody()
+            {
+                Csr = csr,
+                // AttestationToken = "fake_attestation_token" TODO: implement attestation token
+            };
+
+            string body = JsonHelper.SerializeToJson(certificateRequestBody);
 
             IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
@@ -261,7 +257,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
-            
+
             // transform certificateRequestResponse.Certificate to x509 with private key
             var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
                 certificateRequestResponse.Certificate,

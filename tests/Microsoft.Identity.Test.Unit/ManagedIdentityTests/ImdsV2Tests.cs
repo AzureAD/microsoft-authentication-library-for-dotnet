@@ -170,11 +170,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
         
         [TestMethod]
-        public async Task GetCsrMetadataAsyncFailsWithInvalidVersion()
+        public async Task GetCsrMetadataAsyncFailsWithInvalidFormat()
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "IMDS/150.870.65.1853")); // min version is 1854
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "I_MDS/150.870.65.1854"));
 
                 var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
