@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -13,8 +13,10 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Win32.SafeHandles;
 using static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
@@ -38,7 +40,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public SortedList<string, Func<CancellationToken, Task<string>>> CacheKeyComponents { get; internal set; }
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
-        public bool IsMtlsPopRequested { get; set; }
+        public bool IsMtlsPopRequested { get; set; }        
+        internal Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> AttestationTokenProvider { get; set; }
 
         internal async Task InitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {

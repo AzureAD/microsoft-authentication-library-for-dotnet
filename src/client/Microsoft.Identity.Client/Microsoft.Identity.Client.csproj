@@ -94,6 +94,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
 
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+    <PackageReference Include="System.Security.Cryptography.Cng" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
@@ -157,4 +158,6 @@
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Shipped.txt" />
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Unshipped.txt" />
   </ItemGroup>
+
+
 </Project>
