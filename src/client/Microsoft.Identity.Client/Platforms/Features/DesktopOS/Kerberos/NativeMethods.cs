@@ -405,7 +405,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 
             // Replace the usage of Marshal.PtrToStructure(IntPtr, Type) with the generic version Marshal.PtrToStructure<T>(IntPtr)
             // in the ForEachBuffer method inside SecBufferDesc struct.
-
             private void ForEachBuffer(Action<SecBuffer> onBuffer)
             {
                 for (int Index = 0; Index < cBuffers; Index++)
