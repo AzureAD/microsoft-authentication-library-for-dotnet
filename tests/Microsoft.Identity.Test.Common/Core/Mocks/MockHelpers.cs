@@ -600,6 +600,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
 
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
@@ -623,6 +627,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ExpectedMethod = HttpMethod.Get,
                 ExpectedQueryParams = expectedQueryParams,
                 ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(statusCode)
                 {
                     Content = new StringContent(content),
@@ -649,6 +654,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
 
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
@@ -673,6 +682,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedQueryParams = expectedQueryParams,
                 ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(content),
@@ -691,6 +701,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 {
                     { ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue }
                 };
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
 
             var idParams = MsalIdHelper.GetMsalIdParameters(identityLoggerAdapter);
             foreach (var idParam in idParams)
@@ -707,6 +721,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = expectedPostData,
                 ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(GetMsiSuccessfulResponse()),

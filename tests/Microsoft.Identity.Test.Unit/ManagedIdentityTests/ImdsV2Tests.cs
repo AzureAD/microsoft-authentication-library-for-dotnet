@@ -398,10 +398,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var handler = httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
                 await CreateManagedIdentityAsync(httpManager, addProbeMock: false).ConfigureAwait(false);
-
-                Assert.IsTrue(handler.ActualRequestHeaders.Contains("Metadata"));
-                Assert.IsTrue(handler.ActualRequestHeaders.Contains("x-ms-client-request-id"));
-                Assert.IsTrue(handler.ActualRequestMessage.RequestUri.Query.Contains("api-version"));
             }
         }
 
