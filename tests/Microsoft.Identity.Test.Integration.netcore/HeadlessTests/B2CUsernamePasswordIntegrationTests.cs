@@ -2,13 +2,9 @@
 // Licensed under the MIT License.
 
 using System.Linq;
-using System.Net;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -54,7 +50,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
 
             var acc = (await msalPublicClient.GetAccountsAsync().ConfigureAwait(false)).Single();
             var claimsPrincipal = acc.GetTenantProfiles().Single().ClaimsPrincipal;

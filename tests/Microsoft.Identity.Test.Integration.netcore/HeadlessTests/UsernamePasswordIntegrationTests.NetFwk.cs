@@ -6,15 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -137,7 +133,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
         }
 
         #endregion
@@ -330,7 +325,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.IsNull(authResult.Account.GetTenantProfiles());
             }
 
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password, and put a breakpoint there.

@@ -324,6 +324,7 @@ namespace Microsoft.Identity.Client
         /// MSAL provides several helper APIs to read and write Kerberos tickets from the Windows Ticket Cache - see <see cref="KerberosSupplementalTicketManager"/>.
         /// </remarks>
         [Obsolete]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public PublicClientApplicationBuilder WithKerberosTicketClaim(string servicePrincipalName, KerberosTicketContainer ticketContainer)
         {
             Config.KerberosServicePrincipalName = servicePrincipalName;

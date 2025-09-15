@@ -5,14 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Kerberos;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -266,7 +262,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs > 0);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
             userCacheAccess.AssertAccessCounts(0, 1);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
@@ -296,7 +291,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(2, 3);
             AssertCcsRoutingInformationIsSent(factory, labResponse);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
             account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(3, 3);
@@ -313,8 +307,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
             
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
-
             Trace.WriteLine("Part 5 - Acquire a token silently with force refresh");
             result = await pca
                 .AcquireTokenSilent(s_scopes, account)
@@ -325,7 +317,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
             AssertCcsRoutingInformationIsSent(factory, labResponse);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
             return result;
         }
@@ -384,7 +375,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                .ConfigureAwait(false);
 
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
         }
 
         private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)

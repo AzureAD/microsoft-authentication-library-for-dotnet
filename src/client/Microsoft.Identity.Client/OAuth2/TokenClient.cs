@@ -188,9 +188,11 @@ namespace Microsoft.Identity.Client.OAuth2
         /// </summary>
         private void AddClaims()
         {
+#pragma warning disable CS0612 // Type or member is obsolete
             string kerberosClaim = KerberosSupplementalTicketManager.GetKerberosTicketClaim(
                 _requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName,
                 _requestParams.RequestContext.ServiceBundle.Config.TicketContainer);
+#pragma warning restore CS0612 // Type or member is obsolete
             string resolvedClaims;
             if (string.IsNullOrEmpty(kerberosClaim))
             {

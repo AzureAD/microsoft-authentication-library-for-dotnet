@@ -23,6 +23,8 @@ namespace Microsoft.Identity.Client.Kerberos
     /// <summary>
     /// Helper class to manage Kerberos Ticket Claims.
     /// </summary>
+    [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class KerberosSupplementalTicketManager
     {
         private const int DefaultLogonId = 0;
