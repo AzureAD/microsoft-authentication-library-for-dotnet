@@ -231,9 +231,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string Pop = "PoP";
         public const string FmiNodeClientId = "urn:microsoft:identity:fmi";
 
-        public const string AadAccountTypeAndResourceIncompatibleErrorCode = "AADSTS500207";
-        public const string AadMissingScopeErrorCode = "AADSTS900144";
-
         public static IDictionary<string, string> ExtraQueryParameters
         {
             get

@@ -348,11 +348,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .Build();
 
                 httpManager.AddMockHandler(
-                    CreateOidcHttpHandler(authority + "/" + Constants.WellKnownOpenIdConfigurationPath));
+                    CreateOidcHttpHandler($"{authority}/{Constants.WellKnownOpenIdConfigurationPath}"));
 
                 httpManager.AddFailureTokenEndpointResponse(
                                 error: "error",
-                                AadErrorCode: TestConstants.AadAccountTypeAndResourceIncompatibleErrorCode,
+                                AadErrorCode: Constants.AadAccountTypeAndResourceIncompatibleErrorCode,
                                 expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
 
                 Assert.AreEqual(authority, app.Authority);
@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 httpManager.AddFailureTokenEndpointResponse(
                 error: "error",
-                AadErrorCode: TestConstants.AadMissingScopeErrorCode,
+                AadErrorCode: Constants.AadMissingScopeErrorCode,
                 expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
 
                 ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
