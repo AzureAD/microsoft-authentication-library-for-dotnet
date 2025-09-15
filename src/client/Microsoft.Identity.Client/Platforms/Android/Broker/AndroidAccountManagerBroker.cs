@@ -350,14 +350,17 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             return;
                         }
 
-                        dynamic errorResult = JObject.Parse(helloRequestResult.GetString(BrokerConstants.BrokerResultV2));
+                        JObject errorResultObj = JObject.Parse(helloRequestResult.GetString(BrokerConstants.BrokerResultV2) ?? "{}");
                         string errorCode = null;
                         string errorDescription = null;
 
-                        if (!string.IsNullOrEmpty(errorResult))
+                        if (errorResultObj != null && errorResultObj.Count > 0)
                         {
-                            errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-                            string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                            JToken errorCodeToken = errorResultObj[BrokerResponseConst.BrokerErrorCode];
+                            errorCode = errorCodeToken?.ToString();
+                            
+                            JToken errorMsgToken = errorResultObj[BrokerResponseConst.BrokerErrorMessage];
+                            string errorMessage = errorMsgToken?.ToString();
                             errorDescription = $"[Android broker] An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
                         }
                         else

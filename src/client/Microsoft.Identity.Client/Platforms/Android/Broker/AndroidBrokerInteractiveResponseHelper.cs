@@ -58,14 +58,18 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     case (int)BrokerResponseCode.BrowserCodeError:
                         unreliableLogger?.Info("[Android broker] Response received - error. ");
 
-                        dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                        JObject errorResultObj = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2) ?? "{}");
 
                         string error;
                         string errorDescription;
-                        if (errorResult != null)
+                        
+                        if (errorResultObj != null && errorResultObj.Count > 0)
                         {
-                            error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-                            errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                            JToken errorToken = errorResultObj[BrokerResponseConst.BrokerErrorCode];
+                            error = errorToken?.ToString();
+                            
+                            JToken errorDescToken = errorResultObj[BrokerResponseConst.BrokerErrorMessage];
+                            errorDescription = errorDescToken?.ToString();
 
                             unreliableLogger?.Error($"[Android broker] error: {error} errorDescription {errorDescription}. ");
                         }
@@ -77,20 +81,27 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         }
 
                         var httpResponse = new HttpResponse();
-                        //TODO: figure out how to get status code properly deserialized from JObject
-                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody]?.ToString();
+                        //Get HTTP body from the JSON
+                        JToken bodyToken = errorResultObj[BrokerResponseConst.BrokerHttpBody];
+                        httpResponse.Body = bodyToken?.ToString();
+
+                        JToken subErrorToken = errorResultObj[BrokerResponseConst.BrokerSubError];
+                        JToken tenantIdToken = errorResultObj[BrokerResponseConst.TenantId];
+                        JToken upnToken = errorResultObj[BrokerResponseConst.UserName];
+                        JToken accountUserIdToken = errorResultObj[BrokerResponseConst.LocalAccountId];
+                        JToken authorityUrlToken = errorResultObj[BrokerResponseConst.Authority];
 
                         InteractiveBrokerTokenResponse = new MsalTokenResponse
                         {
                             Error = error,
                             ErrorDescription = errorDescription,
-                            SubError = errorResult[BrokerResponseConst.BrokerSubError],
+                            SubError = subErrorToken?.ToString(),
                             HttpResponse = httpResponse,
                             CorrelationId = InteractiveRequestCorrelationId,
-                            TenantId = errorResult[BrokerResponseConst.TenantId]?.ToString(),
-                            Upn = errorResult[BrokerResponseConst.UserName]?.ToString(),
-                            AccountUserId = errorResult[BrokerResponseConst.LocalAccountId]?.ToString(),
-                            AuthorityUrl = errorResult[BrokerResponseConst.Authority]?.ToString(),
+                            TenantId = tenantIdToken?.ToString(),
+                            Upn = upnToken?.ToString(),
+                            AccountUserId = accountUserIdToken?.ToString(),
+                            AuthorityUrl = authorityUrlToken?.ToString(),
                         };
                         break;
                     default:
