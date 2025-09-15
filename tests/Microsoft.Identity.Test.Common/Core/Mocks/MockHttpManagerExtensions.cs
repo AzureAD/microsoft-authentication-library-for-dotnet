@@ -460,15 +460,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("Metadata", "true");
                     break;
-                case ManagedIdentitySource.ImdsV2:
-                    httpMessageHandler.ExpectedMethod = HttpMethod.Post;
-                    expectedPostData = new Dictionary<string, string>
-                    {
-                        { "client_id", TestConstants.ClientId },
-                        { "grant_type", TestConstants.ValidPemCertificate },
-                        { "scope", resource }
-                    };
-                    break;
                 case ManagedIdentitySource.CloudShell:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Post;
                     expectedRequestHeaders.Add("Metadata", "true");

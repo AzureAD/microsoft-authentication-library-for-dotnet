@@ -11,6 +11,8 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
@@ -37,7 +39,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var headers = new Dictionary<string, string>
             {
                 { "Metadata", "true" },
-                { "x-ms-client-request-id", requestContext.CorrelationId.ToString() }
+                { OAuth2Header.XMsCorrelationId, requestContext.CorrelationId.ToString() }
             };
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
@@ -194,7 +196,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var headers = new Dictionary<string, string>
             {
                 { "Metadata", "true" },
-                { "x-ms-client-request-id", _requestContext.CorrelationId.ToString() }
+                { OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString() }
             };
 
             var certificateRequestBody = new CertificateRequestBody()
@@ -264,11 +266,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 privateKey);
 
             ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.MtlsAuthenticationEndpoint}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
-            request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString());
+
+            var idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
+            foreach (var idParam in idParams)
+            {
+                request.Headers[idParam.Key] = idParam.Value;
+            }
+            request.Headers.Add(OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString());
+            request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
+            request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
+
             request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
-            request.BodyParameters.Add("grant_type", certificateRequestResponse.Certificate);
+            request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
             request.BodyParameters.Add("scope", "https://management.azure.com/.default");
-            request.RequestType = RequestType.Imds;
+            request.BodyParameters.Add("token_type", "bearer");
+
+            request.RequestType = RequestType.STS;
+
             request.MtlsCertificate = mtlsCertificate;
 
             return request;

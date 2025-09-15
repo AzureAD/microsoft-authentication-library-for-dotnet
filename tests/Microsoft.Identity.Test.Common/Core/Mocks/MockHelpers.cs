@@ -11,9 +11,12 @@ using System.Net.Http.Headers;
 using Castle.Core.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
@@ -592,14 +595,19 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static MockHttpMessageHandler MockCsrResponse(
             HttpStatusCode statusCode = HttpStatusCode.OK,
             string responseServerHeader = "IMDS/150.870.65.1854",
-            UserAssignedIdentityId idType = UserAssignedIdentityId.None,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
-            if (idType != UserAssignedIdentityId.None && userAssignedId != null)
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
+
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
-                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)idType, userAssignedId, null);
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
                 expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
             }
             expectedQueryParams.Add("cred-api-version", "2.0");
@@ -619,6 +627,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ExpectedMethod = HttpMethod.Get,
                 ExpectedQueryParams = expectedQueryParams,
                 ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(statusCode)
                 {
                     Content = new StringContent(content),
@@ -639,14 +648,20 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static MockHttpMessageHandler MockCertificateRequestResponse(
-            UserAssignedIdentityId idType = UserAssignedIdentityId.None,
-            string userAssignedId = null)
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            string certificate = TestConstants.ValidPemCertificate)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
-            if (idType != UserAssignedIdentityId.None && userAssignedId != null)
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
+
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
-                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)idType, userAssignedId, null);
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam((ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
                 expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
             }
             expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
@@ -656,7 +671,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "{" +
                 "\"client_id\": \"" + TestConstants.ClientId + "\"," +
                 "\"tenant_id\": \"" + TestConstants.TenantId + "\"," +
-                "\"certificate\": \"" + TestConstants.ValidPemCertificate + "\"," +
+                "\"certificate\": \"" + certificate + "\"," +
                 "\"identity_type\": \"fake_identity_type\"," + // "SystemAssigned" or "UserAssigned", it doesn't matter for these tests
                 "\"mtls_authentication_endpoint\": \"" + TestConstants.MtlsAuthenticationEndpoint + "\"," +
                 "}";
@@ -667,9 +682,49 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedQueryParams = expectedQueryParams,
                 ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(content),
+                }
+            };
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponse(
+            IdentityLoggerAdapter identityLoggerAdapter,
+            bool mTLSPop = false)
+        {
+            IDictionary<string, string> expectedPostData = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>
+                {
+                    { ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue }
+                };
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
+
+            var idParams = MsalIdHelper.GetMsalIdParameters(identityLoggerAdapter);
+            foreach (var idParam in idParams)
+            {
+                expectedRequestHeaders[idParam.Key] = idParam.Value;
+            }
+
+            var tokenType = mTLSPop ? "mtls_pop" : "bearer";
+            expectedPostData.Add("token_type", tokenType);
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = expectedPostData,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(GetMsiSuccessfulResponse()),
                 }
             };
 
