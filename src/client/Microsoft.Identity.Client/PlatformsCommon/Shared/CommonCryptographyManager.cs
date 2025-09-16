@@ -115,21 +115,29 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <summary>
         /// Attaches a private key to a certificate for use in mTLS authentication.
         /// </summary>
-        /// <param name="certificatePem">The certificate in PEM format</param>
+        /// <param name="rawCertificate">The certificate received from the Imds server</param>
         /// <param name="privateKey">The RSA private key to attach</param>
         /// <returns>An X509Certificate2 with the private key attached</returns>
-        /// <exception cref="ArgumentNullException">Thrown when certificatePem or privateKey is null</exception>
-        /// <exception cref="ArgumentException">Thrown when certificatePem is not a valid PEM certificate</exception>
-        /// <exception cref="FormatException">Thrown when the certificate cannot be parsed</exception>
-        internal static X509Certificate2 AttachPrivateKeyToCert(string certificatePem, RSA privateKey)
+        /// <exception cref="ArgumentNullException">Thrown when rawCertificate or privateKey is null</exception>
+        /// <exception cref="FormatException">Thrown when rawCertificate is empty, invalid, and cannot be parsed</exception>
+        internal static X509Certificate2 AttachPrivateKeyToCert(string rawCertificate, RSA privateKey)
         {
-            if (string.IsNullOrEmpty(certificatePem))
-                throw new ArgumentNullException(nameof(certificatePem));
+            if (string.IsNullOrEmpty(rawCertificate))
+                throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate);
             if (privateKey == null)
                 throw new ArgumentNullException(nameof(privateKey));
 
-            // .NET 8.0+ has direct PEM parsing support, but we still need to parse the PEM format properly
-            X509Certificate2 certificate = ParseCertificateFromPem(certificatePem);
+            X509Certificate2 certificate = null;
+
+            try
+            {
+                byte[] certBytes = Convert.FromBase64String(rawCertificate);
+                certificate = new X509Certificate2(certBytes);
+            }
+            catch (FormatException ex)
+            {
+                throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate, ex);
+            }
 
             try
             {
@@ -141,58 +149,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 return AttachPrivateKeyToOlderFrameworks(certificate, privateKey);
 #endif
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new MsalServiceException(MsalError.InvalidPemCertificate, MsalErrorMessage.InvalidPemCertificate, e);
-            }
-        }
-
-        /// <summary>
-        /// Parses a certificate from PEM format.
-        /// </summary>
-        /// <param name="certificatePem">The certificate in PEM format</param>
-        /// <returns>An X509Certificate2 instance</returns>
-        /// <exception cref="ArgumentException">Thrown when the PEM format is invalid</exception>
-        /// <exception cref="FormatException">Thrown when the Base64 content cannot be decoded</exception>
-        private static X509Certificate2 ParseCertificateFromPem(string certificatePem)
-        {
-            // Handle JSON-escaped newlines by converting them to actual newlines
-            string normalizedPem = certificatePem.Replace("\\n", "\n").Replace("\\r", "\r");
-
-            const string CertBeginMarker = "-----BEGIN CERTIFICATE-----";
-            const string CertEndMarker = "-----END CERTIFICATE-----";
-
-            int startIndex = normalizedPem.IndexOf(CertBeginMarker, StringComparison.Ordinal);
-            if (startIndex == -1)
-            {
-                throw new ArgumentException("Invalid PEM format: missing BEGIN CERTIFICATE marker", nameof(certificatePem));
-            }
-
-            startIndex += CertBeginMarker.Length;
-            int endIndex = normalizedPem.IndexOf(CertEndMarker, startIndex, StringComparison.Ordinal);
-            if (endIndex == -1)
-            {
-                throw new ArgumentException("Invalid PEM format: missing END CERTIFICATE marker", nameof(certificatePem));
-            }
-
-            string base64Content = normalizedPem.Substring(startIndex, endIndex - startIndex)
-                .Replace("\r", "")
-                .Replace("\n", "")
-                .Replace(" ", "");
-
-            if (string.IsNullOrEmpty(base64Content))
-            {
-                throw new ArgumentException("Invalid PEM format: no certificate content found", nameof(certificatePem));
-            }
-
-            try
-            {
-                byte[] certBytes = Convert.FromBase64String(base64Content);
-                return new X509Certificate2(certBytes);
-            }
-            catch (FormatException ex)
-            {
-                throw new FormatException("Invalid PEM format: certificate content is not valid Base64", ex);
+                throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate, ex);
             }
         }
 

@@ -445,6 +445,6 @@ namespace Microsoft.Identity.Client
         public const string ForceRefreshAndTokenHasNotCompatible = "Cannot specify ForceRefresh and AccessTokenSha256ToRefresh in the same request.";
         public const string RequestTimeOut = "Request to the endpoint timed out.";
 
-        public const string InvalidPemCertificate = "The PEM certificate from the Imds server is invalid.";
+        public const string InvalidCertificate = "The certificate received from the Imds server is invalid.";
     }
 }

@@ -30,7 +30,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         "1.3.6.1.4.1.311.90.2.10",
                         writer.Encode()));
 
-                return (req.CreateSigningRequestPem(), rsa);
+                string pemCsr = req.CreateSigningRequestPem();
+                
+                // Remove PEM headers and format as single line
+                string rawCsr = pemCsr
+                    .Replace("-----BEGIN CERTIFICATE REQUEST-----", "")
+                    .Replace("-----END CERTIFICATE REQUEST-----", "")
+                    .Replace("\r", "")
+                    .Replace("\n", "")
+                    .Trim();
+
+                return (rawCsr, rsa);
             }
         }
 

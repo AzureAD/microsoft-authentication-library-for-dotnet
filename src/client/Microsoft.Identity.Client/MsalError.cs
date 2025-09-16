@@ -1208,8 +1208,8 @@ namespace Microsoft.Identity.Client
         public const string ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible";
 
         /// <summary>
-        /// The PEM certificate from the Imds server is invalid.
+        /// The certificate received from the Imds server is invalid.
         /// </summary>
-        public const string InvalidPemCertificate = "invalid_pem_certificate";
+        public const string InvalidCertificate = "invalid_certificate";
     }
 }
