@@ -667,11 +667,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
             expectedRequestHeaders.Add("Metadata", "true");
 
+            // Properly escape the certificate for JSON by replacing newlines with \n
+            string escapedCertificate = certificate.Replace("\r\n", "\\n").Replace("\r", "\\n").Replace("\n", "\\n");
+
             string content =
                 "{" +
                 "\"client_id\": \"" + TestConstants.ClientId + "\"," +
                 "\"tenant_id\": \"" + TestConstants.TenantId + "\"," +
-                "\"certificate\": \"" + certificate + "\"," +
+                "\"certificate\": \"" + escapedCertificate + "\"," +
                 "\"identity_type\": \"fake_identity_type\"," + // "SystemAssigned" or "UserAssigned", it doesn't matter for these tests
                 "\"mtls_authentication_endpoint\": \"" + TestConstants.MtlsAuthenticationEndpoint + "\"" +
                 "}";

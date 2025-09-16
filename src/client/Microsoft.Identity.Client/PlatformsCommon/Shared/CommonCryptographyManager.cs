@@ -128,20 +128,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (privateKey == null)
                 throw new ArgumentNullException(nameof(privateKey));
 
-            X509Certificate2 certificate;
+            // .NET 8.0+ has direct PEM parsing support, but we still need to parse the PEM format properly
+            X509Certificate2 certificate = ParseCertificateFromPem(certificatePem);
 
             try
             {
 #if NET8_0_OR_GREATER
-                // .NET 8.0+ has direct PEM parsing support
-                var base64 = Convert.FromBase64String(certificatePem);
-                certificate = new X509Certificate2(base64);
-
-                // Attach the private key and return a new certificate instance
                 return certificate.CopyWithPrivateKey(privateKey);
 #else
-                // .NET Framework 4.7.2 and .NET Standard 2.0 - manual PEM parsing and private key attachment
-                certificate = ParseCertificateFromPem(certificatePem);
+                // .NET Framework 4.7.2 and .NET Standard 2.0 - manual private key attachment
                 return AttachPrivateKeyToOlderFrameworks(certificate, privateKey);
 #endif
             }
@@ -151,9 +146,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
-#if !NET8_0_OR_GREATER
         /// <summary>
-        /// Parses a certificate from PEM format for older .NET versions.
+        /// Parses a certificate from PEM format.
         /// </summary>
         /// <param name="certificatePem">The certificate in PEM format</param>
         /// <returns>An X509Certificate2 instance</returns>
@@ -161,23 +155,26 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <exception cref="FormatException">Thrown when the Base64 content cannot be decoded</exception>
         private static X509Certificate2 ParseCertificateFromPem(string certificatePem)
         {
+            // Handle JSON-escaped newlines by converting them to actual newlines
+            string normalizedPem = certificatePem.Replace("\\n", "\n").Replace("\\r", "\r");
+
             const string CertBeginMarker = "-----BEGIN CERTIFICATE-----";
             const string CertEndMarker = "-----END CERTIFICATE-----";
 
-            int startIndex = certificatePem.IndexOf(CertBeginMarker, StringComparison.Ordinal);
+            int startIndex = normalizedPem.IndexOf(CertBeginMarker, StringComparison.Ordinal);
             if (startIndex == -1)
             {
                 throw new ArgumentException("Invalid PEM format: missing BEGIN CERTIFICATE marker", nameof(certificatePem));
             }
 
             startIndex += CertBeginMarker.Length;
-            int endIndex = certificatePem.IndexOf(CertEndMarker, startIndex, StringComparison.Ordinal);
+            int endIndex = normalizedPem.IndexOf(CertEndMarker, startIndex, StringComparison.Ordinal);
             if (endIndex == -1)
             {
                 throw new ArgumentException("Invalid PEM format: missing END CERTIFICATE marker", nameof(certificatePem));
             }
 
-            string base64Content = certificatePem.Substring(startIndex, endIndex - startIndex)
+            string base64Content = normalizedPem.Substring(startIndex, endIndex - startIndex)
                 .Replace("\r", "")
                 .Replace("\n", "")
                 .Replace(" ", "");
@@ -198,6 +195,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
+#if !NET8_0_OR_GREATER
         /// <summary>
         /// Attaches a private key to a certificate for older .NET Framework versions.
         /// This method uses the older RSACng approach for .NET Framework 4.7.2 and .NET Standard 2.0.
