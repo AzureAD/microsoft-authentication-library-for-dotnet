@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Client.OAuth2
             MsalServiceException exceptionToThrow;
             try
             {
-                exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError);
+                exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError, requestContext);
             }
             catch (JsonException) // in the rare case we get an error response we cannot deserialize
             {
@@ -309,7 +309,7 @@ namespace Microsoft.Identity.Client.OAuth2
             throw exceptionToThrow;
         }
 
-        private static MsalServiceException ExtractErrorsFromTheResponse(HttpResponse response, ref bool shouldLogAsError)
+        private static MsalServiceException ExtractErrorsFromTheResponse(HttpResponse response, ref bool shouldLogAsError, RequestContext context = null)
         {
             // In cases where the end-point is not found (404) response.body will be empty.
             if (string.IsNullOrWhiteSpace(response.Body))
@@ -352,7 +352,8 @@ namespace Microsoft.Identity.Client.OAuth2
             return MsalServiceExceptionFactory.FromHttpResponse(
                 msalTokenResponse.Error,
                 msalTokenResponse.ErrorDescription,
-                response);
+                response,
+                context: context);
         }
 
         private Uri AddExtraQueryParams(Uri endPoint)
