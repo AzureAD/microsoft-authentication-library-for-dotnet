@@ -24,7 +24,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
         public const string CertificateRequestPath = "/metadata/identity/issuecredential";
         public const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
-        private static readonly TimeSpan s_certRefreshSkew = TimeSpan.FromMinutes(5);
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
@@ -265,10 +264,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             string key = _requestContext.ServiceBundle.Config.ClientId;
 
             // 2) Try cached binding; refresh if cert expires within 5 minutes
-            var nowUtc = ManagedIdentityClient.s_timeService.GetUtcNow();
-
             if (!ManagedIdentityClient.s_miCerts.TryGetValue(key, out var binding) ||
-                IsExpiringSoon(binding.Cert, nowUtc, s_certRefreshSkew))
+                ManagedIdentityClient.IsMtlsCertExpiringSoon(key))
             {
                 // Runs under the global MI semaphore in ManagedIdentityAuthRequest
                 var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory
@@ -315,16 +312,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             return queryParams;
-        }
-
-        private static bool IsExpiringSoon(X509Certificate2 cert, DateTime nowUtc, TimeSpan skew)
-        {
-            if (cert == null)
-                return true;
-
-            // X509Certificate2.NotAfter is a local DateTime; normalize to UTC before comparing.
-            DateTime notAfterUtc = cert.NotAfter.ToUniversalTime();
-            return nowUtc >= (notAfterUtc - skew);
         }
     }
 }

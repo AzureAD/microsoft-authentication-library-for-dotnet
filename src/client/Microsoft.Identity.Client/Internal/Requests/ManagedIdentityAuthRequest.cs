@@ -60,6 +60,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync()
                 .ConfigureAwait(false);
 
+            // If using IMDSv2 (mTLS) and the mTLS cert is near expiry, skip the AT cache
+            if (cachedAccessTokenItem != null && ManagedIdentityClient.s_sourceName == ManagedIdentitySource.ImdsV2)
+            {
+                string identityKey = ServiceBundle.Config.ClientId;
+
+                if (ManagedIdentityClient.IsMtlsCertExpiringSoon(identityKey))
+                {
+                    logger.Info("[Managed Identity] mTLS cert expiring soon; bypassing cached access token to rotate cert.");
+                    cachedAccessTokenItem = null; // Force provider path (cert rotation + fresh token)
+                }
+            }
+
             // If we have claims, we do NOT use the cached token (but we still need it to compute the hash).
             if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
@@ -170,6 +182,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     logger.Info("[ManagedIdentityRequest] Checking for a cached access token.");
                     cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+
+                    // If using IMDSv2 (mTLS) and the mTLS cert is near expiry, skip the AT cache
+                    if (cachedAccessTokenItem != null && ManagedIdentityClient.s_sourceName == ManagedIdentitySource.ImdsV2)
+                    {
+                        string identityKey = ServiceBundle.Config.ClientId;
+
+                        if (ManagedIdentityClient.IsMtlsCertExpiringSoon(identityKey))
+                        {
+                            logger.Info("[Managed Identity] mTLS cert expiring soon; bypassing cached access token to rotate cert.");
+                            cachedAccessTokenItem = null; // Force provider path (cert rotation + fresh token)
+                        }
+                    }
 
                     // Check the cache again after acquiring the semaphore in case the previous request cached a new token.
                     if (cachedAccessTokenItem != null)

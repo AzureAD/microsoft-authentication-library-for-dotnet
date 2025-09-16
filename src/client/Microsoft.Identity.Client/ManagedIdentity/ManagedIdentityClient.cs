@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,9 +26,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
         internal static ITimeService s_timeService = new TimeService();
+        internal static readonly TimeSpan MtlsCertRefreshSkew = TimeSpan.FromMinutes(5);
 
-        internal static readonly ConcurrentDictionary<string, 
-            (X509Certificate2 Cert, string ClientId, string TenantId, string Endpoint)> s_miCerts = new ();
+        internal static readonly ConcurrentDictionary<string,
+            (X509Certificate2 Cert, string ClientId, string TenantId, string Endpoint)> s_miCerts = new();
 
         internal static void ResetSourceForTest()
         {
@@ -161,13 +163,35 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through file detection.");
                 return true;
-            } 
-            
+            }
+
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
         }
 
+        // Identity-aware check over the mTLS cert cache
+        internal static bool IsMtlsCertExpiringSoon(string identityKey)
+        {
+            if (!s_miCerts.TryGetValue(identityKey, out var binding))
+            {
+                // No cert minted yet -> nothing to refresh proactively
+                return false;
+            }
+
+            return IsCertExpiringSoon(binding.Cert, s_timeService.GetUtcNow(), MtlsCertRefreshSkew);
+        }
+
         // Test-only helpers
+        internal static bool IsCertExpiringSoon(X509Certificate2 cert, DateTime nowUtc, TimeSpan skew)
+        {
+            if (cert == null)
+            {
+                return true;
+            }
+            DateTime notAfterUtc = cert.NotAfter.ToUniversalTime();
+            return nowUtc >= (notAfterUtc - skew);
+        }
+
         internal static void SetTimeServiceForTest(ITimeService timeService) /* internal - test only usage */
         {
             s_timeService = timeService ?? new TimeService();

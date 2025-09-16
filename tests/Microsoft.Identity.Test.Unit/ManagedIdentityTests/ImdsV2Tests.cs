@@ -440,6 +440,77 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task ImdsV2_BypassesTokenCache_WhenCertNearExpiry_Async()
+        {
+            using var http = new MockHttpManager();
+
+            // Make sure source / mTLS cache / time are clean for this test
+            ManagedIdentityClient.ResetSourceForTest();
+
+            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                .WithHttpManager(http)
+                .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                .WithCsrFactory(_testCsrFactory);
+
+            // Avoid shared token cache between tests
+            miBuilder.Config.AccessorOptions = null;
+
+            var mi = miBuilder.Build();
+
+            string tokenUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}";
+
+            // ------------------------
+            // 1) First acquisition: mint cert + get token (fills s_miCerts and token cache)
+            // ------------------------
+            http.AddMockHandler(MockHelpers.MockCsrResponse());                // probe
+            http.AddMockHandler(MockHelpers.MockCsrResponse());                // non-probe
+            http.AddMockHandler(MockHelpers.MockCertificateRequestResponse()); // /issuecredential
+            http.AddManagedIdentityMockHandler(
+                tokenUrl,
+                ManagedIdentityTests.Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.ImdsV2);
+
+            var r1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                             .ExecuteAsync()
+                             .ConfigureAwait(false);
+
+            Assert.IsNotNull(r1);
+            Assert.IsNotNull(r1.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, r1.AuthenticationResultMetadata.TokenSource, "First call should be network.");
+
+            // ------------------------
+            // 2) Move time to within the 5-minute window before cert expiry
+            //    => cache must be bypassed and cert rotated
+            // ------------------------
+            DateTime notAfterUtc = MockHelpers.GetPemNotAfterUtc(TestConstants.ValidPemCertificate);
+            ManagedIdentityClient.SetTimeServiceForTest(new TestTimeService(notAfterUtc.AddMinutes(-1)));
+
+            // Expect: CSR (non-probe) + /issuecredential (rotate) + token
+            http.AddMockHandler(MockHelpers.MockCsrResponse());                // non-probe
+            http.AddMockHandler(MockHelpers.MockCertificateRequestResponse()); // /issuecredential (rotation)
+            http.AddManagedIdentityMockHandler(
+                tokenUrl,
+                ManagedIdentityTests.Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.ImdsV2);
+
+            var r2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                             .ExecuteAsync()
+                             .ConfigureAwait(false);
+
+            Assert.IsNotNull(r2);
+            Assert.IsNotNull(r2.AccessToken);
+            Assert.AreEqual(
+                TokenSource.IdentityProvider,
+                r2.AuthenticationResultMetadata.TokenSource,
+                "When mTLS cert is near expiry, token cache must be bypassed and network path taken.");
+
+            // clean up the test time service to avoid bleeding into other tests
+            ManagedIdentityClient.SetTimeServiceForTest(null);
+        }
+
+        [TestMethod]
         public async Task GetCsrMetadataAsyncSucceeds()
         {
             using (var httpManager = new MockHttpManager())
