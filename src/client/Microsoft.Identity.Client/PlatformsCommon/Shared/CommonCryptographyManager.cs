@@ -134,6 +134,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             try
             {
 #if NET8_0_OR_GREATER
+                // Attach the private key and return a new certificate instance
                 return certificate.CopyWithPrivateKey(privateKey);
 #else
                 // .NET Framework 4.7.2 and .NET Standard 2.0 - manual private key attachment
