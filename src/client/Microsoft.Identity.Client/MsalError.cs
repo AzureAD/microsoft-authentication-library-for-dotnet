@@ -1206,5 +1206,10 @@ namespace Microsoft.Identity.Client
         /// - If token hashing is required, allow the cached token to be used instead of forcing a refresh.
         /// </summary>
         public const string ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible";
+
+        /// <summary>
+        /// The PEM certificate from the Imds server is invalid.
+        /// </summary>
+        public const string InvalidPemCertificate = "invalid_pem_certificate";
     }
 }

@@ -130,18 +130,25 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             X509Certificate2 certificate;
 
+            try
+            {
 #if NET8_0_OR_GREATER
-            // .NET 8.0+ has direct PEM parsing support
-            var base64 = Convert.FromBase64String(certificatePem);
-            certificate = new X509Certificate2(base64);
+                // .NET 8.0+ has direct PEM parsing support
+                var base64 = Convert.FromBase64String(certificatePem);
+                certificate = new X509Certificate2(base64);
 
-            // Attach the private key and return a new certificate instance
-            return certificate.CopyWithPrivateKey(privateKey);
+                // Attach the private key and return a new certificate instance
+                return certificate.CopyWithPrivateKey(privateKey);
 #else
-            // .NET Framework 4.7.2 and .NET Standard 2.0 - manual PEM parsing and private key attachment
-            certificate = ParseCertificateFromPem(certificatePem);
-            return AttachPrivateKeyToOlderFrameworks(certificate, privateKey);
+                // .NET Framework 4.7.2 and .NET Standard 2.0 - manual PEM parsing and private key attachment
+                certificate = ParseCertificateFromPem(certificatePem);
+                return AttachPrivateKeyToOlderFrameworks(certificate, privateKey);
 #endif
+            }
+            catch (Exception e)
+            {
+                throw new MsalServiceException(MsalError.InvalidPemCertificate, MsalErrorMessage.InvalidPemCertificate, e);
+            }
         }
 
 #if !NET8_0_OR_GREATER

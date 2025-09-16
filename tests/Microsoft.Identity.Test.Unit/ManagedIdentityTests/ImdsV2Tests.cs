@@ -525,10 +525,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 // For this test, we just want to verify that the method doesn't crash
                 // The actual certificate/private key matching isn't critical for the unit test
-                var exception = Assert.ThrowsException<CryptographicUnexpectedOperationException>(() =>
+                var exception = Assert.ThrowsException<MsalServiceException>(() =>
                     CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, rsa));
 
-                // The test should fail with a CryptographicUnexpectedOperationException because the RSA key doesn't match
+                // The test should fail with a MsalServiceException because the RSA key doesn't match
                 // the certificate, but this validates that the method is working correctly
                 Assert.IsNotNull(exception.Message);
             }
@@ -562,45 +562,45 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void AttachPrivateKeyToCert_InvalidPemFormat_ThrowsArgumentException()
+        public void AttachPrivateKeyToCert_InvalidPemFormat_ThrowsMsalServiceException()
         {
             const string InvalidPemNoCertMarker = @"This is not a valid PEM certificate";
 
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<ArgumentException>(() =>
+                Assert.ThrowsException<MsalServiceException>(() =>
                     CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemNoCertMarker, rsa));
             }
         }
 
         [TestMethod]
-        public void AttachPrivateKeyToCert_MissingBeginMarker_ThrowsArgumentException()
+        public void AttachPrivateKeyToCert_MissingBeginMarker_ThrowsMsalServiceException()
         {
             const string InvalidPemMissingBeginMarker = @"MIICXTCCAUWgAwIBAgIJAKPiQh26MIuPMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
 -----END CERTIFICATE-----";
 
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<ArgumentException>(() =>
+                Assert.ThrowsException<MsalServiceException>(() =>
                     CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemMissingBeginMarker, rsa));
             }
         }
 
         [TestMethod]
-        public void AttachPrivateKeyToCert_MissingEndMarker_ThrowsArgumentException()
+        public void AttachPrivateKeyToCert_MissingEndMarker_ThrowsMsalServiceException()
         {
             const string InvalidPemMissingEndMarker = @"-----BEGIN CERTIFICATE-----
 MIICXTCCAUWgAwIBAgIJAKPiQh26MIuPMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV";
             
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<ArgumentException>(() =>
+                Assert.ThrowsException<MsalServiceException>(() =>
                     CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemMissingEndMarker, rsa));
             }
         }
 
         [TestMethod]
-        public void AttachPrivateKeyToCert_BadBase64Content_ThrowsFormatException()
+        public void AttachPrivateKeyToCert_BadBase64Content_ThrowsMsalServiceException()
         {
             const string InvalidPemBadBase64 = @"-----BEGIN CERTIFICATE-----
 Invalid@#$%Base64Content!
@@ -608,7 +608,7 @@ Invalid@#$%Base64Content!
 
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<FormatException>(() =>
+                Assert.ThrowsException<MsalServiceException>(() =>
                     CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemBadBase64, rsa));
             }
         }

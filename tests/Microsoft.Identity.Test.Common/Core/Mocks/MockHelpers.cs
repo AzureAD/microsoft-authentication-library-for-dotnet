@@ -673,7 +673,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"tenant_id\": \"" + TestConstants.TenantId + "\"," +
                 "\"certificate\": \"" + certificate + "\"," +
                 "\"identity_type\": \"fake_identity_type\"," + // "SystemAssigned" or "UserAssigned", it doesn't matter for these tests
-                "\"mtls_authentication_endpoint\": \"" + TestConstants.MtlsAuthenticationEndpoint + "\"," +
+                "\"mtls_authentication_endpoint\": \"" + TestConstants.MtlsAuthenticationEndpoint + "\"" +
                 "}";
 
             var handler = new MockHttpMessageHandler()

@@ -444,5 +444,7 @@ namespace Microsoft.Identity.Client
         public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. mTLS Proof-of-Possession requires a region to be specified, as there is no global endpoint for mTLS. See https://aka.ms/msal-net-pop for details.";
         public const string ForceRefreshAndTokenHasNotCompatible = "Cannot specify ForceRefresh and AccessTokenSha256ToRefresh in the same request.";
         public const string RequestTimeOut = "Request to the endpoint timed out.";
+
+        public const string InvalidPemCertificate = "The PEM certificate from the Imds server is invalid.";
     }
 }
