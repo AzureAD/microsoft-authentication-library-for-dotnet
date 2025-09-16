@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .Build();
 
                 httpManager.AddMockHandler(
-                    CreateOidcHttpHandler($"{authority}/{Constants.WellKnownOpenIdConfigurationPath}"));
+                    CreateOidcHttpHandler($"{authority}/{Constants.WellKnownOpenIdConfigurationPath}", authority));
 
                 httpManager.AddFailureTokenEndpointResponse(
                                 error: "error",
@@ -534,13 +534,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
 
-        private static MockHttpMessageHandler CreateOidcHttpHandler(string oidcEndpoint)
+        private static MockHttpMessageHandler CreateOidcHttpHandler(string oidcEndpoint, string authority = null)
         {
             return new MockHttpMessageHandler()
             {
                 ExpectedMethod = HttpMethod.Get,
                 ExpectedUrl = oidcEndpoint,
-                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GenericOidcResponse)
+                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GetOidcResponse(authority))
             };
         }
     }

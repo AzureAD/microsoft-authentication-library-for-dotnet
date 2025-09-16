@@ -65,11 +65,11 @@ namespace Microsoft.Identity.Client
                     innerException);
             }
 
-            var authorityInfo = context.ServiceBundle.Config.Authority.AuthorityInfo;
+            var authorityInfo = context?.ServiceBundle.Config.Authority.AuthorityInfo;
 
-            if (IsOidcAuthorityError(authorityInfo, oAuth2Response.ErrorDescription))
+            if (IsOidcAuthorityError(authorityInfo, oAuth2Response?.ErrorDescription))
             {
-                errorMessage +=  string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, $" {authorityInfo.CanonicalAuthority}");
+                errorMessage += " " +  string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, $"{authorityInfo.CanonicalAuthority}");
             }
 
             ex ??= new MsalServiceException(errorCode, GetErrorMessage(errorMessage, httpResponse, context), innerException);

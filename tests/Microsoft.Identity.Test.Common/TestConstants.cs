@@ -542,6 +542,14 @@ namespace Microsoft.Identity.Test.Unit
    ],
    ""backchannel_user_code_parameter_supported"":true
 }";
+        public static string GetOidcResponse(string authority = null)
+        {
+            if (string.IsNullOrEmpty(authority))
+            {
+                return GenericOidcResponse;
+            }
+            return GenericOidcResponse.Replace("https://demo.duendesoftware.com", authority.TrimEnd('/'));
+        }
 
         public static MsalTokenResponse CreateAadTestTokenResponse()
         {
