@@ -4,6 +4,7 @@
 using System;
 using System.Net;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -38,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             MockHttpManager httpManager,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
-            string certificateRequestCertificate = TestConstants.ValidPemCertificate,
+            string certificateRequestCertificate = TestConstants.ValidRawCertificate,
             bool mTLSPop = false)
         {
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
@@ -51,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certificateRequestCertificate));
             }
-            
+
             httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop));
         }
 
@@ -95,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
                 }
             }
-            
+
             if (addSourceCheck)
             {
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
@@ -212,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
 
-                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredPemCertificate); // cert will be expired on second request
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredRawCertificate); // cert will be expired on second request
 
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
@@ -357,7 +358,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
 
-                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredPemCertificate/*, mTLSPop: true*/); // TODO: implement mTLS Pop
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredRawCertificate/*, mTLSPop: true*/); // TODO: implement mTLS Pop
 
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     // .WithMtlsProofOfPossession() // TODO: implement mTLS Pop
@@ -427,7 +428,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
             }
         }
-        
+
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithInvalidFormat()
         {
@@ -474,6 +475,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        #region Cuid Tests
         [TestMethod]
         public void TestCsrGeneration_OnlyVmId()
         {
@@ -498,23 +500,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var (csr, _) = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
             CsrValidator.ValidateCsrContent(csr, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
-
-        [TestMethod]
-        public void TestCsrGeneration_MalformedPem_FormatException()
-        {
-            string malformedPem = "-----BEGIN CERTIFICATE REQUEST-----\nInvalid@#$%Base64Content!\n-----END CERTIFICATE REQUEST-----";
-            Assert.ThrowsException<FormatException>(() => 
-                CsrValidator.ParseCsrFromPem(malformedPem));
-        }
+        #endregion
 
         [DataTestMethod]
-        [DataRow("-----BEGIN CERTIFICATE-----\nTUlJQzNqQ0NBY1lDQVFBd1pURT0K\n-----END CERTIFICATE REQUEST-----")]
+        [DataRow("Invalid@#$%Certificate!")]
         [DataRow("")]
         [DataRow(null)]
-        public void TestCsrGeneration_MalformedPem_ArgumentException(string malformedPem)
+        public void TestCsrGeneration_BadCert_ThrowsMsalServiceException(string badCert)
         {
-            Assert.ThrowsException<ArgumentException>(() => 
-                CsrValidator.ParseCsrFromPem(malformedPem));
+            Assert.ThrowsException<MsalServiceException>(() =>
+                CsrValidator.ParseRawCsr(badCert));
         }
 
         #region AttachPrivateKeyToCert Tests
@@ -523,34 +518,21 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (RSA rsa = RSA.Create())
             {
-                // For this test, we just want to verify that the method doesn't crash
-                // The actual certificate/private key matching isn't critical for the unit test
-                var exception = Assert.ThrowsException<CryptographicUnexpectedOperationException>(() =>
-                    CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, rsa));
-
-                // The test should fail with a CryptographicUnexpectedOperationException because the RSA key doesn't match
-                // the certificate, but this validates that the method is working correctly
-                Assert.IsNotNull(exception.Message);
+                X509Certificate2 certificate = CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidRawCertificate, TestCsrFactory.CreateMockRsa());
+                Assert.IsNotNull(certificate);
             }
         }
 
-        [TestMethod]
-        public void AttachPrivateKeyToCert_NullCertificatePem_ThrowsArgumentNullException()
+        [DataTestMethod]
+        [DataRow("Invalid@#$%Certificate!")]
+        [DataRow("")]
+        [DataRow(null)]
+        public void AttachPrivateKeyToCert_BadContent_ThrowsMsalServiceException(string badCert)
         {
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<ArgumentNullException>(() =>
-                    CommonCryptographyManager.AttachPrivateKeyToCert(null, rsa));
-            }
-        }
-
-        [TestMethod]
-        public void AttachPrivateKeyToCert_EmptyCertificatePem_ThrowsArgumentNullException()
-        {
-            using (RSA rsa = RSA.Create())
-            {
-                Assert.ThrowsException<ArgumentNullException>(() =>
-                    CommonCryptographyManager.AttachPrivateKeyToCert("", rsa));
+                Assert.ThrowsException<MsalServiceException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(badCert, rsa));
             }
         }
 
@@ -558,59 +540,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void AttachPrivateKeyToCert_NullPrivateKey_ThrowsArgumentNullException()
         {
             Assert.ThrowsException<ArgumentNullException>(() =>
-                CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidPemCertificate, null));
-        }
-
-        [TestMethod]
-        public void AttachPrivateKeyToCert_InvalidPemFormat_ThrowsArgumentException()
-        {
-            const string InvalidPemNoCertMarker = @"This is not a valid PEM certificate";
-
-            using (RSA rsa = RSA.Create())
-            {
-                Assert.ThrowsException<ArgumentException>(() =>
-                    CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemNoCertMarker, rsa));
-            }
-        }
-
-        [TestMethod]
-        public void AttachPrivateKeyToCert_MissingBeginMarker_ThrowsArgumentException()
-        {
-            const string InvalidPemMissingBeginMarker = @"MIICXTCCAUWgAwIBAgIJAKPiQh26MIuPMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
------END CERTIFICATE-----";
-
-            using (RSA rsa = RSA.Create())
-            {
-                Assert.ThrowsException<ArgumentException>(() =>
-                    CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemMissingBeginMarker, rsa));
-            }
-        }
-
-        [TestMethod]
-        public void AttachPrivateKeyToCert_MissingEndMarker_ThrowsArgumentException()
-        {
-            const string InvalidPemMissingEndMarker = @"-----BEGIN CERTIFICATE-----
-MIICXTCCAUWgAwIBAgIJAKPiQh26MIuPMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV";
-            
-            using (RSA rsa = RSA.Create())
-            {
-                Assert.ThrowsException<ArgumentException>(() =>
-                    CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemMissingEndMarker, rsa));
-            }
-        }
-
-        [TestMethod]
-        public void AttachPrivateKeyToCert_BadBase64Content_ThrowsFormatException()
-        {
-            const string InvalidPemBadBase64 = @"-----BEGIN CERTIFICATE-----
-Invalid@#$%Base64Content!
------END CERTIFICATE-----";
-
-            using (RSA rsa = RSA.Create())
-            {
-                Assert.ThrowsException<FormatException>(() =>
-                    CommonCryptographyManager.AttachPrivateKeyToCert(InvalidPemBadBase64, rsa));
-            }
+                CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidRawCertificate, null));
         }
         #endregion
     }

@@ -79,12 +79,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
-              return
-            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
-            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
-            ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
-            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
+            return
+          "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
+          "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
+          ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
+          ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+          ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
         }
 
         public static string GetPopTokenResponse()
@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                   idToken +
                                   (foci ? "\",\"foci\":\"1" : "") +
                                   "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo(uniqueId, utid) + "\"}";
-            
+
             return stringContent;
         }
 
@@ -650,7 +650,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static MockHttpMessageHandler MockCertificateRequestResponse(
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
-            string certificate = TestConstants.ValidPemCertificate)
+            string certificate = TestConstants.ValidRawCertificate)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
@@ -673,7 +673,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"tenant_id\": \"" + TestConstants.TenantId + "\"," +
                 "\"certificate\": \"" + certificate + "\"," +
                 "\"identity_type\": \"fake_identity_type\"," + // "SystemAssigned" or "UserAssigned", it doesn't matter for these tests
-                "\"mtls_authentication_endpoint\": \"" + TestConstants.MtlsAuthenticationEndpoint + "\"," +
+                "\"mtls_authentication_endpoint\": \"" + TestConstants.MtlsAuthenticationEndpoint + "\"" +
                 "}";
 
             var handler = new MockHttpMessageHandler()

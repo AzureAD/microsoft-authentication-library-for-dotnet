@@ -1,3 +1,4 @@
+const Microsoft.Identity.Client.MsalError.InvalidCertificate = "invalid_certificate" -> string
 Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithExtraHttpHeaders<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IDictionary<string, string> extraHttpHeaders) -> T
 Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync() -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>

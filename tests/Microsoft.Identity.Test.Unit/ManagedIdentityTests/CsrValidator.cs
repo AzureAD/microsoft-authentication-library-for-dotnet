@@ -4,6 +4,7 @@
 using System;
 using System.Formats.Asn1;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,42 +17,29 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     internal static class CsrValidator
     {
         /// <summary>
-        /// Parses a PEM-encoded CSR and returns the DER bytes.
+        /// Parses a raw CSR and returns the DER bytes.
         /// </summary>
-        public static byte[] ParseCsrFromPem(string pemCsr)
+        public static byte[] ParseRawCsr(string rawCsr)
         {
-            if (string.IsNullOrWhiteSpace(pemCsr))
-                throw new ArgumentException("PEM CSR cannot be null or empty");
-
-            const string beginMarker = "-----BEGIN CERTIFICATE REQUEST-----";
-            const string endMarker = "-----END CERTIFICATE REQUEST-----";
-
-            int beginIndex = pemCsr.IndexOf(beginMarker, StringComparison.Ordinal);
-            int endIndex = pemCsr.IndexOf(endMarker, StringComparison.Ordinal);
-
-            if (beginIndex < 0 || endIndex < 0)
-                throw new ArgumentException("Invalid PEM format - missing CSR headers");
-
-            beginIndex += beginMarker.Length;
-            string base64Content = pemCsr.Substring(beginIndex, endIndex - beginIndex)
-                .Replace("\r", "").Replace("\n", "").Replace(" ", "");
+            if (string.IsNullOrWhiteSpace(rawCsr))
+                throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate);
 
             try
             {
-                return Convert.FromBase64String(base64Content);
+                return Convert.FromBase64String(rawCsr);
             }
-            catch (FormatException)
+            catch (Exception ex)
             {
-                throw new FormatException("Invalid Base64 content in PEM CSR");
+                throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate, ex);
             }
         }
 
         /// <summary>
-        /// Validates the content of a CSR PEM string against expected values.
+        /// Validates the content of a CSR string against expected values.
         /// </summary>
-        public static void ValidateCsrContent(string pemCsr, string expectedClientId, string expectedTenantId, CuidInfo expectedCuid)
+        public static void ValidateCsrContent(string rawCsr, string expectedClientId, string expectedTenantId, CuidInfo expectedCuid)
         {
-            byte[] csrBytes = ParseCsrFromPem(pemCsr);
+            byte[] csrBytes = ParseRawCsr(rawCsr);
 
             // Parse the CSR using AsnReader
             var reader = new AsnReader(csrBytes, AsnEncodingRules.DER);
