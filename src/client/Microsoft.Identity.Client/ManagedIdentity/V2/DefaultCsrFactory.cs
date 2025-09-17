@@ -7,9 +7,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal class DefaultCsrFactory : ICsrFactory
     {
-        public (string csrPem, RSA privateKey) Generate(string clientId, string tenantId, CuidInfo cuid)
+        public (string csrPem, RSA privateKey) Generate(RSA rsa, string clientId, string tenantId, CuidInfo cuid)
         {
-            return Csr.Generate(clientId, tenantId, cuid);
+            return Csr.Generate(rsa, clientId, tenantId, cuid);
         }
     }
 }

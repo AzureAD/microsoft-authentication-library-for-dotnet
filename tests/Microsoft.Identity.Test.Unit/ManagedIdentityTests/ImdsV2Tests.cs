@@ -10,6 +10,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -483,8 +484,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 VmId = TestConstants.VmId
             };
-
-            var (csr, _) = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            
+            var rsa = InMemoryManagedIdentityKeyProvider.CreateRsaKeyPair();
+            var (csr, _) = Csr.Generate(rsa, TestConstants.ClientId, TestConstants.TenantId, cuid);
             CsrValidator.ValidateCsrContent(csr, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
@@ -497,7 +499,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 VmssId = TestConstants.VmssId
             };
 
-            var (csr, _) = Csr.Generate(TestConstants.ClientId, TestConstants.TenantId, cuid);
+            var rsa = InMemoryManagedIdentityKeyProvider.CreateRsaKeyPair();
+            var (csr, _) = Csr.Generate(rsa, TestConstants.ClientId, TestConstants.TenantId, cuid);
             CsrValidator.ValidateCsrContent(csr, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
         #endregion

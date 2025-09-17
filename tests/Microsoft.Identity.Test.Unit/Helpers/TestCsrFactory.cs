@@ -8,8 +8,9 @@ namespace Microsoft.Identity.Test.Unit.Helpers
 {
     internal class TestCsrFactory : ICsrFactory
     {
-        public (string csrPem, RSA privateKey) Generate(string clientId, string tenantId, CuidInfo cuId)
+        public (string csrPem, RSA privateKey) Generate(RSA rsa, string clientId, string tenantId, CuidInfo cuId)
         {
+            // we don't care about the RSA that's passed in, we will always return the same mock private key
             return ("mock-csr", CreateMockRsa());
         }
 

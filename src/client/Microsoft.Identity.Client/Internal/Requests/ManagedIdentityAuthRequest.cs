@@ -40,9 +40,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            ManagedIdentityKeyInfo keyInfo = await _managedIdentityKeyProvider.GetOrCreateKeyAsync(
-                logger, cancellationToken).ConfigureAwait(false);
-
             // 1. FIRST, handle ForceRefresh
             if (_managedIdentityParameters.ForceRefresh)
             {

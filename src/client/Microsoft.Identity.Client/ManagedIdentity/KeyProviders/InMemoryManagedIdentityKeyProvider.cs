@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 {
@@ -96,18 +97,60 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         /// An <see cref="RSA"/> instance configured with a 2048-bit key size.
         /// On .NET Framework, returns <see cref="RSACng"/>; on other platforms, returns the default RSA implementation.
         /// </returns>
-        private static RSA CreateRsaKeyPair()
+        public static RSA CreateRsaKeyPair()
         {
-            RSA rsa;
-#if NETFRAMEWORK
-            // .NET Framework (Windows): use RSACng 
-            rsa = new RSACng();
+#if NET462 || NET472 || NET8_0
+            // Windows-only TFMs (Framework or -windows TFMs): compile CNG path
+            return CreateWindowsPersistedRsa();
+
 #else
-            // Cross‑platform: RSA.Create() -> CNG (Windows) / OpenSSL (Linux).
-            rsa = RSA.Create();
+            // netstandard2.0 can run anywhere; pick at runtime
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return CreateWindowsPersistedRsa(); // requires CNG package in csproj
+            }
+            return CreatePortableRsa();
+
 #endif
-            rsa.KeySize = Constants.KeySize2048;
+        }
+
+        private static RSA CreatePortableRsa()
+        {
+            var rsa = RSA.Create();
+            if (rsa.KeySize < Constants.KeySize2048)
+                rsa.KeySize = Constants.KeySize2048;
             return rsa;
+        }
+
+        private static RSA CreateWindowsPersistedRsa()
+        {
+            // Persisted CNG key (non-ephemeral) so Schannel can use it for TLS client auth
+            var creation = new CngKeyCreationParameters
+            {
+                ExportPolicy = CngExportPolicies.AllowExport,
+                KeyCreationOptions = CngKeyCreationOptions.MachineKey, // try machine store first
+                Provider = CngProvider.MicrosoftSoftwareKeyStorageProvider
+            };
+
+            // Persist key length with the key
+            creation.Parameters.Add(
+                new CngProperty("Length", BitConverter.GetBytes(Constants.KeySize2048), CngPropertyOptions.Persist));
+
+            // Non-null name => persisted; null would be ephemeral (bad for Schannel)
+            string keyName = "MSAL-MTLS-" + Guid.NewGuid().ToString("N");
+
+            try
+            {
+                var k = CngKey.Create(CngAlgorithm.Rsa, keyName, creation);
+                return new RSACng(k);
+            }
+            catch (CryptographicException)
+            {
+                // Some environments disallow MachineKey. Fall back to user profile.
+                creation.KeyCreationOptions = CngKeyCreationOptions.None;
+                var k = CngKey.Create(CngAlgorithm.Rsa, keyName, creation);
+                return new RSACng(k);
+            }
         }
     }
 }
