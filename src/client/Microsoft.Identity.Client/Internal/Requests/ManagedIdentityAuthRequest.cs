@@ -201,9 +201,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            ManagedIdentityClient managedIdentityClient = 
-                new ManagedIdentityClient();
-
             ManagedIdentityResponse managedIdentityResponse =
                 await _managedIdentityClient
                 .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
