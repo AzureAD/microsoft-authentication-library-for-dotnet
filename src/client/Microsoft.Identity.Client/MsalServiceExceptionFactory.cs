@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Text;
 using Microsoft.Identity.Client.Http;
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Client
                 }
                 else  
                 {  
-                    errorMessageToUse  = errorMessage;  
+                    errorMessageToUse = errorMessage;  
                 }
 
                 if (oAuth2Response.Claims == null)
@@ -62,6 +63,13 @@ namespace Microsoft.Identity.Client
                     MsalError.InvalidClient,
                     MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription,
                     innerException);
+            }
+
+            var authorityInfo = context?.ServiceBundle.Config.Authority.AuthorityInfo;
+
+            if (IsOidcAuthorityError(authorityInfo, oAuth2Response?.ErrorDescription))
+            {
+                errorMessage += " " +  string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, $"{authorityInfo.CanonicalAuthority}");
             }
 
             ex ??= new MsalServiceException(errorCode, GetErrorMessage(errorMessage, httpResponse, context), innerException);
@@ -106,6 +114,16 @@ namespace Microsoft.Identity.Client
         {
             return oAuth2Response.ErrorDescription != null &&
                oAuth2Response.ErrorDescription.StartsWith(Constants.AadThrottledErrorCode);
+        }
+
+        private static bool IsOidcAuthorityError(AuthorityInfo authortyInfo, string ErrorDescription)
+        {
+            return authortyInfo is not null &&
+                authortyInfo.AuthorityType == AuthorityType.Generic && // Generic Oidc authority
+                !authortyInfo.CanonicalAuthority!.AbsoluteUri.EndsWith("/v2.0") && // Does not end with /v2.0
+                ErrorDescription != null &&
+                (ErrorDescription.StartsWith(Constants.AadAccountTypeAndResourceIncompatibleErrorCode) || // Certain error codes are returned
+                ErrorDescription.StartsWith(Constants.AadMissingScopeErrorCode));
         }
 
         internal static MsalServiceException FromBrokerResponse(
