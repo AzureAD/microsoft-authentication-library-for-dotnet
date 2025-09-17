@@ -144,15 +144,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
             try
             {
-                var k = CngKey.Create(CngAlgorithm.Rsa, keyName, creation);
-                return new RSACng(k);
+                var key = CngKey.Create(CngAlgorithm.Rsa, keyName, creation);
+                return new RSACng(key);
             }
             catch (CryptographicException)
             {
                 // Some environments disallow MachineKey. Fall back to user profile.
                 creation.KeyCreationOptions = CngKeyCreationOptions.None;
-                var k = CngKey.Create(CngAlgorithm.Rsa, keyName, creation);
-                return new RSACng(k);
+                var key = CngKey.Create(CngAlgorithm.Rsa, keyName, creation);
+                return new RSACng(key);
             }
         }
     }
