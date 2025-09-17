@@ -76,5 +76,9 @@ namespace Microsoft.Identity.Client.Internal
         {
             return $"https://{host}/.well-known/webfinger?rel={DefaultRealm}&resource={resource}";
         }
+
+        public const int KeySize2048 = 2048;
+        public const string SoftwareKspName = "Microsoft Software Key Storage Provider";
+        public const string KeyGuardKeyName = "KeyGuardRSAKey";
     }
 }

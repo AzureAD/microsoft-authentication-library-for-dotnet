@@ -6,26 +6,37 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 {
     /// <summary>
-    /// In-memory managed identity key provider.
+    /// In-memory RSA key provider for managed identity authentication.
     /// </summary>
     internal sealed class InMemoryManagedIdentityKeyProvider : IManagedIdentityKeyProvider
     {
         private static readonly SemaphoreSlim s_once = new(1, 1);
-        private volatile ManagedIdentityKeyInfo _cached;
+        private volatile ManagedIdentityKeyInfo _cachedKey;
 
+        /// <summary>
+        /// Asynchronously retrieves or creates an RSA key pair for managed identity authentication.
+        /// Uses thread-safe caching to ensure only one key is created per provider instance.
+        /// </summary>
+        /// <param name="logger">Logger adapter for recording key creation operations and diagnostics.</param>
+        /// <param name="ct">Cancellation token to support cooperative cancellation of the key creation process.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains a 
+        /// <see cref="ManagedIdentityKeyInfo"/> with the RSA key, key type, and provider message.
+        /// </returns>
         public async Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(
             ILoggerAdapter logger,
             CancellationToken ct)
         {
             // Return cached if available
-            if (_cached is not null)
+            if (_cachedKey is not null)
             {
                 logger?.Info("[MI][InMemoryKeyProvider] Returning cached key.");
-                return _cached;
+                return _cachedKey;
             }
 
             // Ensure only one creation at a time
@@ -34,10 +45,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
             try
             {
-                if (_cached is not null)
+                if (_cachedKey is not null)
                 {
                     logger?.Verbose(() => "[MI][InMemoryKeyProvider] Cached key created while waiting; returning it.");
-                    return _cached;
+                    return _cachedKey;
                 }
 
                 if (ct.IsCancellationRequested)
@@ -64,12 +75,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                         $"[MI][InMemoryKeyProvider] Exception during RSA creation: {ex.GetType().Name}");
                 }
 
-                _cached = new ManagedIdentityKeyInfo(rsa, ManagedIdentityKeyType.InMemory, message);
+                _cachedKey = new ManagedIdentityKeyInfo(rsa, ManagedIdentityKeyType.InMemory, message);
 
                 logger?.Verbose(() =>
                     $"[MI][InMemoryKeyProvider] Caching key. Success={(rsa != null)}. HasMessage={!string.IsNullOrEmpty(message)}.");
 
-                return _cached;
+                return _cachedKey;
             }
             finally
             {
@@ -77,6 +88,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             }
         }
 
+        /// <summary>
+        /// Creates a new RSA key pair with 2048-bit key size for cryptographic operations.
+        /// Uses platform-specific RSA implementations: RSACng on .NET Framework and RSA.Create() on other platforms.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="RSA"/> instance configured with a 2048-bit key size.
+        /// On .NET Framework, returns <see cref="RSACng"/>; on other platforms, returns the default RSA implementation.
+        /// </returns>
         private static RSA CreateRsaKeyPair()
         {
             RSA rsa;
@@ -87,7 +106,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             // Cross‑platform: RSA.Create() -> CNG (Windows) / OpenSSL (Linux).
             rsa = RSA.Create();
 #endif
-            rsa.KeySize = 2048;
+            rsa.KeySize = Constants.KeySize2048;
             return rsa;
         }
     }

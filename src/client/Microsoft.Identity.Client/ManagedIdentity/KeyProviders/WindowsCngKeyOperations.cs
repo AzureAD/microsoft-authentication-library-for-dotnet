@@ -2,26 +2,53 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity.KeyGuard;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 {
     /// <summary>
-    /// CNG-backed key operations for Windows (KeyGuard + TPM/KSP).
+    /// Provides CNG-backed cryptographic key operations for Windows platforms, supporting both 
+    /// KeyGuard-protected keys (with VBS/TPM integration) and hardware-backed TPM/KSP keys
+    /// for managed identity authentication scenarios.
     /// </summary>
+    /// <remarks>
+    /// This class handles two primary key protection mechanisms:
+    /// <list type="bullet">
+    /// <item><description>KeyGuard: Requires Virtualization Based Security (VBS) and provides enhanced key protection</description></item>
+    /// <item><description>Hardware TPM/KSP: Uses Platform Crypto Provider (PCP) for TPM-backed keys</description></item>
+    /// </list>
+    /// All operations are performed in user scope with silent key access patterns.
+    /// </remarks>
     internal static class WindowsCngKeyOperations
     {
-        private const string SoftwareKspName = "Microsoft Software Key Storage Provider";
-        private const string KeyGuardKeyName = "KeyGuardRSAKey";
         private const string HardwareKeyName = "HardwareRSAKey";
 
-        // --- KeyGuard path (RSA) ---
+        /// <summary>
+        /// Attempts to get or create a KeyGuard-protected RSA key for managed identity operations.
+        /// This method first tries to open an existing key, and if not found, creates a fresh KeyGuard-protected key.
+        /// KeyGuard requires VBS (Virtualization Based Security) to be enabled and supported.
+        /// </summary>
+        /// <param name="logger">Logger adapter for diagnostic messages and error reporting</param>
+        /// <param name="rsa">When this method returns <see langword="true"/>, contains the RSA instance with the KeyGuard-protected key; 
+        /// when this method returns <see langword="false"/>, this parameter is set to <see langword="null"/></param>
+        /// <returns><see langword="true"/> if a KeyGuard-protected RSA key was successfully obtained or created; 
+        /// <see langword="false"/> if KeyGuard is unavailable, VBS is not supported, or the operation failed</returns>
+        /// <remarks>
+        /// <para>This method performs the following operations in sequence:</para>
+        /// <list type="number">
+        /// <item><description>Attempts to open an existing KeyGuard key using the software KSP in user scope</description></item>
+        /// <item><description>If the key doesn't exist, creates a new KeyGuard-protected key</description></item>
+        /// <item><description>Validates that the key is actually KeyGuard-protected</description></item>
+        /// <item><description>If validation fails, recreates the key and re-validates</description></item>
+        /// <item><description>Ensures the RSA key size is at least 2048 bits when possible</description></item>
+        /// </list>
+        /// <para>The method gracefully handles scenarios where VBS is disabled or not supported by returning <see langword="false"/>.</para>
+        /// </remarks>
+        /// <exception cref="PlatformNotSupportedException">Thrown when VBS/Core Isolation is not available on the platform</exception>
+        /// <exception cref="CryptographicException">Thrown when cryptographic operations fail during key creation or access</exception>
         public static bool TryGetOrCreateKeyGuard(ILoggerAdapter logger, out RSA rsa)
         {
             rsa = default(RSA);
@@ -33,8 +60,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 try
                 {
                     key = CngKey.Open(
-                        KeyGuardKeyName,
-                        new CngProvider(SoftwareKspName),
+                        Constants.KeyGuardKeyName,
+                        new CngProvider(Constants.SoftwareKspName),
                         CngKeyOpenOptions.UserKey | CngKeyOpenOptions.Silent);
                 }
                 catch (CryptographicException)
@@ -68,10 +95,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 }
 
                 rsa = new RSACng(key);
-                if (rsa.KeySize < 2048)
+                if (rsa.KeySize < Constants.KeySize2048)
                 {
                     try
-                    { rsa.KeySize = 2048; }
+                    { rsa.KeySize = Constants.KeySize2048; }
                     catch { /* some providers don't allow */ }
                 }
                 return true;
@@ -88,7 +115,28 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             }
         }
 
-        // --- Hardware (TPM/KSP) path (RSA) ---
+        /// <summary>
+        /// Attempts to get or create a hardware-backed RSA key using the Platform Crypto Provider (PCP) 
+        /// for TPM-based key storage and operations.
+        /// </summary>
+        /// <param name="logger">Logger adapter for diagnostic messages and error reporting</param>
+        /// <param name="rsa">When this method returns <see langword="true"/>, contains the RSA instance backed by hardware (TPM); 
+        /// when this method returns <see langword="false"/>, this parameter is set to <see langword="null"/></param>
+        /// <returns><see langword="true"/> if a hardware-backed RSA key was successfully obtained or created; 
+        /// <see langword="false"/> if hardware key operations are not available or the operation failed</returns>
+        /// <remarks>
+        /// <para>This method performs the following operations:</para>
+        /// <list type="number">
+        /// <item><description>Checks if a hardware key with the predefined name already exists in user scope</description></item>
+        /// <item><description>Opens the existing key if found, or creates a new hardware-backed key if not found</description></item>
+        /// <item><description>Configures the key with non-exportable policy (standard for TPM keys)</description></item>
+        /// <item><description>Ensures the RSA key size is at least 2048 bits when supported by the provider</description></item>
+        /// </list>
+        /// <para>The created keys are stored in user scope and are non-exportable for security reasons.
+        /// TPM providers typically ignore post-creation key size changes.</para>
+        /// </remarks>
+        /// <exception cref="CryptographicException">Thrown when hardware key creation, opening, or configuration fails.
+        /// The exception's HResult property provides additional diagnostic information</exception>
         public static bool TryGetOrCreateHardwareRsa(ILoggerAdapter logger, out RSA rsa)
         {
             rsa = default(RSA);
@@ -96,7 +144,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             try
             {
                 // PCP (TPM) in USER scope
-                CngProvider provider = new CngProvider(SoftwareKspName);
+                CngProvider provider = new CngProvider(Constants.SoftwareKspName);
                 CngKeyOpenOptions openOpts = CngKeyOpenOptions.UserKey | CngKeyOpenOptions.Silent;
 
                 CngKey key = CngKey.Exists(HardwareKeyName, provider, openOpts)
@@ -105,10 +153,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
                 rsa = new RSACng(key);
 
-                if (rsa.KeySize < 2048)
+                if (rsa.KeySize < Constants.KeySize2048)
                 {
                     try
-                    { rsa.KeySize = 2048; }
+                    { rsa.KeySize = Constants.KeySize2048; }
                     catch { /* PCP typically ignores post-create change */ }
                 }
 
@@ -122,21 +170,38 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                                        $"HR=0x{e.HResult:X8}. {e.GetType().Name}: {e.Message}");
                 return false;
             }
+        }
 
-            static CngKey CreateUserPcpRsa(CngProvider provider, string name)
+        /// <summary>
+        /// Creates a new RSA key using the Platform Crypto Provider (PCP) in user scope
+        /// with non-exportable policy suitable for TPM-backed operations.
+        /// </summary>
+        /// <param name="provider">The CNG provider to use for key creation (typically PCP for TPM)</param>
+        /// <param name="name">The name to assign to the created key for future reference</param>
+        /// <returns>A new <see cref="CngKey"/> instance configured for signing operations with 2048-bit key size</returns>
+        /// <remarks>
+        /// The created key has the following characteristics:
+        /// <list type="bullet">
+        /// <item><description>Algorithm: RSA</description></item>
+        /// <item><description>Key size: 2048 bits</description></item>
+        /// <item><description>Usage: Signing operations</description></item>
+        /// <item><description>Export policy: None (non-exportable)</description></item>
+        /// <item><description>Scope: User scope</description></item>
+        /// </list>
+        /// </remarks>
+        private static CngKey CreateUserPcpRsa(CngProvider provider, string name)
+        {
+            var ckcParams = new CngKeyCreationParameters
             {
-                var p = new CngKeyCreationParameters
-                {
-                    Provider = provider,
-                    KeyUsage = CngKeyUsages.Signing,
-                    ExportPolicy = CngExportPolicies.None,          // non-exportable (expected for TPM)
-                    KeyCreationOptions = CngKeyCreationOptions.None // USER scope
-                };
+                Provider = provider,
+                KeyUsage = CngKeyUsages.Signing,
+                ExportPolicy = CngExportPolicies.None,          // non-exportable (expected for TPM)
+                KeyCreationOptions = CngKeyCreationOptions.None // USER scope
+            };
 
-                p.Parameters.Add(new CngProperty("Length", BitConverter.GetBytes(2048), CngPropertyOptions.None));
+            ckcParams.Parameters.Add(new CngProperty("Length", BitConverter.GetBytes(Constants.KeySize2048), CngPropertyOptions.None));
 
-                return CngKey.Create(CngAlgorithm.Rsa, name, p);
-            }
+            return CngKey.Create(CngAlgorithm.Rsa, name, ckcParams);
         }
     }
 }

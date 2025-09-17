@@ -11,25 +11,60 @@ using Microsoft.Identity.Client.Core;
 namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 {
     /// <summary>
-    /// Windows policy:
-    ///   1) KeyGuard (CVM/TVM) if available
-    ///   2) Hardware (TPM/KSP via Microsoft Platform Crypto Provider)
-    ///   3) In-memory fallback (delegates to InMemoryManagedIdentityKeyProvider)
+    /// Windows-specific managed identity key provider that implements a hierarchical key selection strategy.
+    /// Attempts to use the most secure key source available in the following priority order:
+    /// 1. KeyGuard (CVM/TVM) if available - provides VBS (Virtualization-based Security) isolation
+    /// 2. Hardware (TPM/KSP via Microsoft Platform Crypto Provider) - hardware-backed keys
+    /// 3. In-memory fallback - software-based keys stored in memory
     /// </summary>
+    /// <remarks>
+    /// This provider ensures that only one key creation operation occurs at a time using a semaphore,
+    /// and caches the created key for subsequent requests to improve performance.
+    /// </remarks>
     internal sealed class WindowsManagedIdentityKeyProvider : IManagedIdentityKeyProvider
     {
         private static readonly SemaphoreSlim s_once = new (1, 1);
-        private volatile ManagedIdentityKeyInfo _cached;
+        private volatile ManagedIdentityKeyInfo _cachedKey;
 
+        /// <summary>
+        /// Gets or creates a managed identity key using the best available security mechanism.
+        /// </summary>
+        /// <param name="logger">Logger adapter for recording key creation attempts and results.</param>
+        /// <param name="ct">Cancellation token to cancel the operation if needed.</param>
+        /// <returns>
+        /// A task that represents the asynchronous key creation operation. 
+        /// The task result contains <see cref="ManagedIdentityKeyInfo"/> with the created key and its type.
+        /// </returns>
+        /// <exception cref="OperationCanceledException">
+        /// Thrown when the operation is cancelled via the <paramref name="ct"/> parameter.
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// This method implements a thread-safe, single-creation pattern using a semaphore.
+        /// If a key has already been created and cached, it returns immediately.
+        /// </para>
+        /// <para>
+        /// The key creation follows this priority order:
+        /// <list type="number">
+        /// <item><description>KeyGuard: Uses VBS isolation for maximum security (RSA-2048)</description></item>
+        /// <item><description>Hardware: Uses TPM or hardware security module (RSA-2048, non-exportable)</description></item>
+        /// <item><description>In-memory: Software fallback when hardware options are unavailable</description></item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// Exceptions during key creation are logged but do not prevent fallback to the next option.
+        /// Only the final in-memory fallback can throw exceptions that terminate the operation.
+        /// </para>
+        /// </remarks>
         public async Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(
             ILoggerAdapter logger,
             CancellationToken ct)
         {
             // Return cached if available
-            if (_cached != null)
+            if (_cachedKey != null)
             {
                 logger?.Info("[MI][WinKeyProvider] Returning cached key.");
-                return _cached;
+                return _cachedKey;
             }
 
             // Ensure only one creation at a time
@@ -38,10 +73,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
             try
             {
-                if (_cached != null)
+                if (_cachedKey != null)
                 {
                     logger?.Verbose(() => "[MI][WinKeyProvider] Cached key created while waiting; returning it.");
-                    return _cached;
+                    return _cachedKey;
                 }
 
                 if (ct.IsCancellationRequested)
@@ -59,9 +94,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                     if (WindowsCngKeyOperations.TryGetOrCreateKeyGuard(logger, out RSA kgRsa))
                     {
                         messageBuilder.AppendLine("KeyGuard RSA key created successfully.");
-                        _cached = new ManagedIdentityKeyInfo(kgRsa, ManagedIdentityKeyType.KeyGuard, messageBuilder.ToString());
+                        _cachedKey = new ManagedIdentityKeyInfo(kgRsa, ManagedIdentityKeyType.KeyGuard, messageBuilder.ToString());
                         logger?.Info("[MI][WinKeyProvider] Using KeyGuard key (RSA).");
-                        return _cached;
+                        return _cachedKey;
                     }
                     else
                     {
@@ -84,9 +119,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                     if (WindowsCngKeyOperations.TryGetOrCreateHardwareRsa(logger, out RSA hwRsa))
                     {
                         messageBuilder.AppendLine("Hardware RSA key created successfully.");
-                        _cached = new ManagedIdentityKeyInfo(hwRsa, ManagedIdentityKeyType.Hardware, messageBuilder.ToString());
+                        _cachedKey = new ManagedIdentityKeyInfo(hwRsa, ManagedIdentityKeyType.Hardware, messageBuilder.ToString());
                         logger?.Info("[MI][WinKeyProvider] Using Hardware key (RSA).");
-                        return _cached;
+                        return _cachedKey;
                     }
                     else
                     {
@@ -110,15 +145,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                     ct.ThrowIfCancellationRequested();
                 }
 
-                var fallback = new InMemoryManagedIdentityKeyProvider();
-                _cached = await fallback.GetOrCreateKeyAsync(logger, ct).ConfigureAwait(false);
+                var fallbackIMMIKP = new InMemoryManagedIdentityKeyProvider();
+                _cachedKey = await fallbackIMMIKP.GetOrCreateKeyAsync(logger, ct).ConfigureAwait(false);
 
                 if (messageBuilder.Length > 0)
                 {
                     logger?.Verbose(() => "[MI][WinKeyProvider] Fallback reasons:\n" + messageBuilder.ToString().Trim());
                 }
 
-                return _cached;
+                return _cachedKey;
 
             }
             finally

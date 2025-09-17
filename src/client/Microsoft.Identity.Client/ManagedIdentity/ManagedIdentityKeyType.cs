@@ -3,5 +3,18 @@
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal enum ManagedIdentityKeyType { KeyGuard, Hardware, InMemory }
+    /// <summary>
+    /// Specifies the type of key storage mechanism used for managed identity authentication.
+    /// </summary>
+    internal enum ManagedIdentityKeyType
+    {
+        // Represents a key stored using a secure key guard mechanism that provides hardware-level protection.
+        KeyGuard,
+
+        // Represents a key stored directly in hardware security modules or trusted platform modules.
+        Hardware,
+
+        // Represents a key stored in memory with software-based protection mechanisms.
+        InMemory
+    }
 }

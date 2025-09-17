@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Client.Core;
@@ -31,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsNotNull(k1);
             Assert.AreSame(k1, k2, "Provider should cache the same ManagedIdentityKeyInfo instance per process.");
             Assert.IsInstanceOfType(k1.Key, typeof(RSA));
-            Assert.IsTrue(k1.Key.KeySize >= 2048);
+            Assert.IsTrue(k1.Key.KeySize >= Constants.KeySize2048);
             Assert.AreEqual(ManagedIdentityKeyType.InMemory, k1.Type);
         }
 
