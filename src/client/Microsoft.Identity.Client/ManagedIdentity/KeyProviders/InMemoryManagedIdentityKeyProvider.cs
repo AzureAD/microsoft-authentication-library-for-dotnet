@@ -97,6 +97,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         /// An <see cref="RSA"/> instance configured with a 2048-bit key size.
         /// On .NET Framework, returns <see cref="RSACng"/>; on other platforms, returns the default RSA implementation.
         /// </returns>
+        /// <remarks>
+        /// This method is public instead of private because it is used in unit tests
+        /// </remarks>
         public static RSA CreateRsaKeyPair()
         {
 #if NET462 || NET472 || NET8_0
