@@ -269,9 +269,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string error,
             string subError = null,
             string correlationId = null,
-            HttpStatusCode? customStatusCode = null)
+            HttpStatusCode? customStatusCode = null,
+            string errorCode = "AADSTS00000")
         {
-            string message = "{\"error\":\"" + error + "\",\"error_description\":\"AADSTS00000: Error for test." +
+            string message = "{\"error\":\"" + error + "\",\"error_description\":\"" + errorCode + ": Error for test." +
                 "Trace ID: f7ec686c-9196-4220-a754-cd9197de44e9Correlation ID: " +
                 "04bb0cae-580b-49ac-9a10-b6c3316b1eaaTimestamp: 2015-09-16 07:24:55Z\"," +
                 "\"error_codes\":[70002,70008],\"timestamp\":\"2015-09-16 07:24:55Z\"," +

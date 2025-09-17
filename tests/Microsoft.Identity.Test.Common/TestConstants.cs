@@ -122,6 +122,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string CiamAuthorityMainFormat = "https://tenant.ciamlogin.com/";
         public const string CiamAuthorityWithFriendlyName = "https://tenant.ciamlogin.com/tenant.onmicrosoft.com";
         public const string CiamAuthorityWithGuid = "https://tenant.ciamlogin.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa";
+        public const string CiamCUDAuthority = "https://login.msidlabsciam.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa/v2.0";
+        public const string CiamCUDAuthorityMalformed = "https://login.msidlabsciam.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa";
 
         public const string B2CLoginGlobal = ".b2clogin.com";
         public const string B2CLoginUSGov = ".b2clogin.us";
@@ -543,6 +545,14 @@ namespace Microsoft.Identity.Test.Unit
    ],
    ""backchannel_user_code_parameter_supported"":true
 }";
+        public static string GetOidcResponse(string authority = null)
+        {
+            if (string.IsNullOrEmpty(authority))
+            {
+                return GenericOidcResponse;
+            }
+            return GenericOidcResponse.Replace("https://demo.duendesoftware.com", authority.TrimEnd('/'));
+        }
 
         public static MsalTokenResponse CreateAadTestTokenResponse()
         {
