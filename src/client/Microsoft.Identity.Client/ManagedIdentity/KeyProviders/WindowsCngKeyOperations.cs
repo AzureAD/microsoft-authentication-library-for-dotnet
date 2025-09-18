@@ -74,21 +74,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 catch (CryptographicException)
                 {
                     // Not found -> create fresh (helper may return null if VBS unavailable)
-                    logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard key not found; creating fresh.");
+                    logger?.Info(() => "[MI][WinKeyProvider] KeyGuard key not found; creating fresh.");
                     key = CreateFresh(logger);
                 }
 
                 // If VBS is unavailable, CreateFresh() returns null. Bail out cleanly.
                 if (key == null)
                 {
-                    logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard unavailable (VBS off or not supported).");
+                    logger?.Info(() => "[MI][WinKeyProvider] KeyGuard unavailable (VBS off or not supported).");
                     return false;
                 }
 
                 // Ensure actually KeyGuard-protected; recreate if not
                 if (!IsKeyGuardProtected(key))
                 {
-                    logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard key found but not protected; recreating.");
+                    logger?.Info(() => "[MI][WinKeyProvider] KeyGuard key found but not protected; recreating.");
                     key.Dispose();
                     key = CreateFresh(logger);
 
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                     if (key == null || !IsKeyGuardProtected(key))
                     {
                         key?.Dispose();
-                        logger?.Verbose(() => "[MI][WinKeyProvider] Unable to obtain a KeyGuard-protected key.");
+                        logger?.Info(() => "[MI][WinKeyProvider] Unable to obtain a KeyGuard-protected key.");
                         return false;
                     }
                 }
@@ -106,19 +106,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 {
                     try
                     { rsa.KeySize = Constants.RsaKeySize; }
-                    catch { logger?.Verbose(() => $"[MI][WinKeyProvider] Unable to extend the size of the KeyGuard key to {Constants.RsaKeySize} bits."); }
+                    catch { logger?.Info(() => $"[MI][WinKeyProvider] Unable to extend the size of the KeyGuard key to {Constants.RsaKeySize} bits."); }
                 }
                 return true;
             }
             catch (PlatformNotSupportedException)
             {
                 // VBS/Core Isolation not available => KeyGuard unavailable
-                logger?.Verbose(() => "[MI][WinKeyProvider] Exception creating KeyGuard key.");
+                logger?.Info(() => "[MI][WinKeyProvider] Exception creating KeyGuard key.");
                 return false;
             }
             catch (CryptographicException ex)
             {
-                logger?.Verbose(() => $"[MI][WinKeyProvider] KeyGuard creation failed due to platform limitation. {ex.GetType().Name}: {ex.Message}");
+                logger?.Info(() => $"[MI][WinKeyProvider] KeyGuard creation failed due to platform limitation. {ex.GetType().Name}: {ex.Message}");
                 return false;
             }
         }
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 {
                     try
                     { rsa.KeySize = Constants.RsaKeySize; }
-                    catch { logger?.Verbose(() => $"[MI][WinKeyProvider] Unable to extend the size of the Hardware key to {Constants.RsaKeySize} bits."); }
+                    catch { logger?.Info(() => $"[MI][WinKeyProvider] Unable to extend the size of the Hardware key to {Constants.RsaKeySize} bits."); }
                 }
 
                 logger?.Info("[MI][WinKeyProvider] Using Hardware key (RSA, PCP user).");
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             catch (CryptographicException e)
             {
                 // Add HResult to make CI diagnostics actionable
-                logger?.Verbose(() => "[MI][WinKeyProvider] Hardware key creation/open failed. " +
+                logger?.Info(() => "[MI][WinKeyProvider] Hardware key creation/open failed. " +
                                        $"HR=0x{e.HResult:X8}. {e.GetType().Name}: {e.Message}");
                 return false;
             }

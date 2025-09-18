@@ -41,24 +41,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             }
 
             // Ensure only one creation at a time
-            logger?.Verbose(() => "[MI][InMemoryKeyProvider] Waiting on creation semaphore.");
+            logger?.Info(() => "[MI][InMemoryKeyProvider] Waiting on creation semaphore.");
             await s_once.WaitAsync(ct).ConfigureAwait(false);
 
             try
             {
                 if (_cachedKey is not null)
                 {
-                    logger?.Verbose(() => "[MI][InMemoryKeyProvider] Cached key created while waiting; returning it.");
+                    logger?.Info(() => "[MI][InMemoryKeyProvider] Cached key created while waiting; returning it.");
                     return _cachedKey;
                 }
 
                 if (ct.IsCancellationRequested)
                 {
-                    logger?.Verbose(() => "[MI][InMemoryKeyProvider] Cancellation requested after entering critical section.");
+                    logger?.Info(() => "[MI][InMemoryKeyProvider] Cancellation requested after entering critical section.");
                     ct.ThrowIfCancellationRequested();
                 }
 
-                logger?.Verbose(() => "[MI][InMemoryKeyProvider] Starting RSA key creation.");
+                logger?.Info(() => "[MI][InMemoryKeyProvider] Starting RSA key creation.");
                 RSA rsa = null;
                 string message;
 
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
                 _cachedKey = new ManagedIdentityKeyInfo(rsa, ManagedIdentityKeyType.InMemory, message);
 
-                logger?.Verbose(() =>
+                logger?.Info(() =>
                     $"[MI][InMemoryKeyProvider] Caching key. Success={(rsa != null)}. HasMessage={!string.IsNullOrEmpty(message)}.");
 
                 return _cachedKey;

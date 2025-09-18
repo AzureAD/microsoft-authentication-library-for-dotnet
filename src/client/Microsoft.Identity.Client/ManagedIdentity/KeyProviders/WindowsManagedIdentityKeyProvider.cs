@@ -68,20 +68,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             }
 
             // Ensure only one creation at a time
-            logger?.Verbose(() => "[MI][WinKeyProvider] Waiting on creation semaphore.");
+            logger?.Info(() => "[MI][WinKeyProvider] Waiting on creation semaphore.");
             await s_once.WaitAsync(ct).ConfigureAwait(false);
 
             try
             {
                 if (_cachedKey != null)
                 {
-                    logger?.Verbose(() => "[MI][WinKeyProvider] Cached key created while waiting; returning it.");
+                    logger?.Info(() => "[MI][WinKeyProvider] Cached key created while waiting; returning it.");
                     return _cachedKey;
                 }
 
                 if (ct.IsCancellationRequested)
                 {
-                    logger?.Verbose(() => "[MI][WinKeyProvider] Cancellation requested after entering critical section.");
+                    logger?.Info(() => "[MI][WinKeyProvider] Cancellation requested after entering critical section.");
                     ct.ThrowIfCancellationRequested();
                 }
 
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                     else
                     {
                         messageBuilder.AppendLine("KeyGuard RSA key creation not available or failed.");
-                        logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard key not available.");
+                        logger?.Info(() => "[MI][WinKeyProvider] KeyGuard key not available.");
                     }
                 }
                 catch (Exception ex)
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 // 2) Hardware TPM/KSP (RSA-2048, non-exportable)
                 try
                 {
-                    logger?.Verbose(() => "[MI][WinKeyProvider] Trying Hardware (TPM/KSP) key.");
+                    logger?.Info(() => "[MI][WinKeyProvider] Trying Hardware (TPM/KSP) key.");
                     if (WindowsCngKeyOperations.TryGetOrCreateHardwareRsa(logger, out RSA hwRsa))
                     {
                         messageBuilder.AppendLine("Hardware RSA key created successfully.");
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                     else
                     {
                         messageBuilder.AppendLine("Hardware RSA key creation not available or failed.");
-                        logger?.Verbose(() => "[MI][WinKeyProvider] Hardware key not available.");
+                        logger?.Info(() => "[MI][WinKeyProvider] Hardware key not available.");
                     }
                 }
                 catch (Exception ex)
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 logger?.Info("[MI][WinKeyProvider] Falling back to in-memory RSA key (software).");
                 if (ct.IsCancellationRequested)
                 {
-                    logger?.Verbose(() => "[MI][WinKeyProvider] Cancellation requested before in-memory fallback.");
+                    logger?.Info(() => "[MI][WinKeyProvider] Cancellation requested before in-memory fallback.");
                     ct.ThrowIfCancellationRequested();
                 }
 
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
                 if (messageBuilder.Length > 0)
                 {
-                    logger?.Verbose(() => "[MI][WinKeyProvider] Fallback reasons:\n" + messageBuilder.ToString().Trim());
+                    logger?.Info(() => "[MI][WinKeyProvider] Fallback reasons:\n" + messageBuilder.ToString().Trim());
                 }
 
                 return _cachedKey;
