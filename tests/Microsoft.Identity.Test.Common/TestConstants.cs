@@ -406,13 +406,6 @@ namespace Microsoft.Identity.Test.Unit
       ""username"":""some_user@contoso.com""
    }";
 
-        // constants for Azure AD Kerberos Features
-        public const string KerberosTestApplicationId = "682992e9-c9c6-49c9-a819-3fbca2dd5111";
-        public const string KerberosServicePrincipalName = "HTTP/msal-kerberos-test.msidlab4.com";
-        public const string KerberosServicePrincipalNameEscaped = "HTTP**msal-kerberos-test.msidlab4.com";
-        public const string AzureADKerberosRealmName = "KERBEROS.MICROSOFTONLINE.COM";
-        public const int KerberosMinMessageBufferLength = 256;
-
         // do not change these constants!
         public const string AadRawClientInfo = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0";
         public const string MsaRawClientInfo = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ";

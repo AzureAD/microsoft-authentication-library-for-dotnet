@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 {

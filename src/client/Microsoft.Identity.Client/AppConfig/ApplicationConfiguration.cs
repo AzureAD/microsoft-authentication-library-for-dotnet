@@ -81,6 +81,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Kerberos Service Ticket container to be used.
         /// </summary>
+        [Obsolete]
         public KerberosTicketContainer TicketContainer { get; set; } = KerberosTicketContainer.IdToken;
 
         [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.")]

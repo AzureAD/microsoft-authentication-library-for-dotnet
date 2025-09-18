@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 
         private class CurrentCredential : Credential
         {
-            internal unsafe override CredentialHandle Structify()
+            internal override unsafe CredentialHandle Structify()
             {
                 return new CredentialHandle((void*)0);
             }
