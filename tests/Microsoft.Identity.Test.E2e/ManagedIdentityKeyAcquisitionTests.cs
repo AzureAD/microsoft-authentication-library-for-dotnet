@@ -3,7 +3,6 @@
 
 using System;
 using System.Security.Cryptography;
-using Microsoft.Identity.Client.ManagedIdentity.KeyGuard;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -34,7 +33,7 @@ namespace Microsoft.Identity.Test.E2E
                 var rsacng = rsa as RSACng;
                 Assert.IsNotNull(rsacng, "Expected RSACng for KeyGuard.");
                 Assert.IsTrue(
-                    KeyGuardHelper.IsKeyGuardProtected(rsacng.Key),
+                    WindowsCngKeyOperations.IsKeyGuardProtected(rsacng.Key),
                     "Expected KeyGuard (VBS) protected key on AzureArc agent.");
             }
         }

@@ -5,7 +5,6 @@ using System;
 using System.Security.Cryptography;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.ManagedIdentity.KeyGuard;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 {
@@ -24,7 +23,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
     /// </remarks>
     internal static class WindowsCngKeyOperations
     {
+        private const string SoftwareKspName = "Microsoft Software Key Storage Provider";
+        private const string KeyGuardKeyName = "KeyGuardRSAKey";
         private const string HardwareKeyName = "HardwareRSAKey";
+        private const string KeyGuardVirtualIsoProperty = "Virtual Iso";
+        private const string VbsNotAvailable = "VBS key isolation is not available";
+
+        // KeyGuard + per-boot flags
+        private const CngKeyCreationOptions NCryptUseVirtualIsolationFlag = (CngKeyCreationOptions)0x00020000;
+        private const CngKeyCreationOptions NCryptUsePerBootKeyFlag = (CngKeyCreationOptions)0x00040000;
 
         /// <summary>
         /// Attempts to get or create a KeyGuard-protected RSA key for managed identity operations.
@@ -60,15 +67,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 try
                 {
                     key = CngKey.Open(
-                        Constants.KeyGuardKeyName,
-                        new CngProvider(Constants.SoftwareKspName),
+                        KeyGuardKeyName,
+                        new CngProvider(SoftwareKspName),
                         CngKeyOpenOptions.UserKey | CngKeyOpenOptions.Silent);
                 }
                 catch (CryptographicException)
                 {
                     // Not found -> create fresh (helper may return null if VBS unavailable)
                     logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard key not found; creating fresh.");
-                    key = KeyGuardHelper.CreateFresh(logger);
+                    key = CreateFresh(logger);
                 }
 
                 // If VBS is unavailable, CreateFresh() returns null. Bail out cleanly.
@@ -79,14 +86,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 }
 
                 // Ensure actually KeyGuard-protected; recreate if not
-                if (!KeyGuardHelper.IsKeyGuardProtected(key))
+                if (!IsKeyGuardProtected(key))
                 {
                     logger?.Verbose(() => "[MI][WinKeyProvider] KeyGuard key found but not protected; recreating.");
                     key.Dispose();
-                    key = KeyGuardHelper.CreateFresh(logger);
+                    key = CreateFresh(logger);
 
                     // Check again after recreate; still null or not protected -> give up KeyGuard path
-                    if (key == null || !KeyGuardHelper.IsKeyGuardProtected(key))
+                    if (key == null || !IsKeyGuardProtected(key))
                     {
                         key?.Dispose();
                         logger?.Verbose(() => "[MI][WinKeyProvider] Unable to obtain a KeyGuard-protected key.");
@@ -95,11 +102,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 }
 
                 rsa = new RSACng(key);
-                if (rsa.KeySize < Constants.KeySize2048)
+                if (rsa.KeySize < Constants.RsaKeySize)
                 {
                     try
-                    { rsa.KeySize = Constants.KeySize2048; }
-                    catch { /* some providers don't allow */ }
+                    { rsa.KeySize = Constants.RsaKeySize; }
+                    catch { logger?.Verbose(() => $"[MI][WinKeyProvider] Unable to extend the size of the KeyGuard key to {Constants.RsaKeySize} bits."); }
                 }
                 return true;
             }
@@ -109,8 +116,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 logger?.Verbose(() => "[MI][WinKeyProvider] Exception creating KeyGuard key.");
                 return false;
             }
-            catch (CryptographicException)
+            catch (CryptographicException ex)
             {
+                logger?.Verbose(() => $"[MI][WinKeyProvider] KeyGuard creation failed due to platform limitation. {ex.GetType().Name}: {ex.Message}");
                 return false;
             }
         }
@@ -144,7 +152,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             try
             {
                 // PCP (TPM) in USER scope
-                CngProvider provider = new CngProvider(Constants.SoftwareKspName);
+                CngProvider provider = new CngProvider(SoftwareKspName);
                 CngKeyOpenOptions openOpts = CngKeyOpenOptions.UserKey | CngKeyOpenOptions.Silent;
 
                 CngKey key = CngKey.Exists(HardwareKeyName, provider, openOpts)
@@ -153,11 +161,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
                 rsa = new RSACng(key);
 
-                if (rsa.KeySize < Constants.KeySize2048)
+                if (rsa.KeySize < Constants.RsaKeySize)
                 {
                     try
-                    { rsa.KeySize = Constants.KeySize2048; }
-                    catch { /* PCP typically ignores post-create change */ }
+                    { rsa.KeySize = Constants.RsaKeySize; }
+                    catch { logger?.Verbose(() => $"[MI][WinKeyProvider] Unable to extend the size of the Hardware key to {Constants.RsaKeySize} bits."); }
                 }
 
                 logger?.Info("[MI][WinKeyProvider] Using Hardware key (RSA, PCP user).");
@@ -199,9 +207,88 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 KeyCreationOptions = CngKeyCreationOptions.None // USER scope
             };
 
-            ckcParams.Parameters.Add(new CngProperty("Length", BitConverter.GetBytes(Constants.KeySize2048), CngPropertyOptions.None));
+            ckcParams.Parameters.Add(new CngProperty("Length", BitConverter.GetBytes(Constants.RsaKeySize), CngPropertyOptions.None));
 
             return CngKey.Create(CngAlgorithm.Rsa, name, ckcParams);
+        }
+
+        /// <summary>
+        /// Creates a new RSA-2048 Key Guard key.
+        /// </summary>
+        /// <param name="logger">Logger adapter for recording diagnostic information and warnings.</param>
+        /// <returns>
+        /// A <see cref="CngKey"/> instance protected by Key Guard if VBS is available; 
+        /// otherwise, <c>null</c> if VBS is not supported on the system.
+        /// </returns>
+        /// <remarks>
+        /// This method attempts to create a cryptographic key with hardware-backed security using 
+        /// Virtualization Based Security (VBS). If VBS is not available, the method logs a warning 
+        /// and returns null, allowing the caller to fall back to software-based key storage.
+        /// </remarks>
+        private static CngKey CreateFresh(ILoggerAdapter logger)
+        {
+            var ckcParams = new CngKeyCreationParameters
+            {
+                Provider = new CngProvider(SoftwareKspName),
+                KeyUsage = CngKeyUsages.AllUsages,
+                ExportPolicy = CngExportPolicies.None,
+                KeyCreationOptions =
+                      CngKeyCreationOptions.OverwriteExistingKey
+                    | NCryptUseVirtualIsolationFlag
+                    | NCryptUsePerBootKeyFlag
+            };
+
+            ckcParams.Parameters.Add(new CngProperty("Length",
+                              BitConverter.GetBytes(Constants.RsaKeySize),
+                              CngPropertyOptions.None));
+
+            try
+            {
+                return CngKey.Create(CngAlgorithm.Rsa, KeyGuardKeyName, ckcParams);
+            }
+            catch (CryptographicException ex)
+                when (IsVbsUnavailable(ex))
+            {
+                logger?.Warning(
+                    $"[MI][KeyGuardHelper] {VbsNotAvailable}; falling back to software keys. " +
+                    "Ensure that Virtualization Based Security (VBS) is enabled on this machine " +
+                    "(e.g. Credential Guard, Hyper-V, or Windows Defender Application Guard). " +
+                    "Inner exception: " + ex.Message);
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the specified CNG key is protected by Key Guard.
+        /// </summary>
+        /// <param name="key">The CNG key to check for Key Guard protection.</param>
+        /// <returns><c>true</c> if the key has the Key Guard flag; otherwise, <c>false</c>.</returns>
+        /// <remarks>
+        /// This method checks for the presence of the Virtual Iso property on the key,
+        /// which indicates that the key is protected by hardware-backed security features.
+        /// </remarks>
+        public static bool IsKeyGuardProtected(CngKey key)
+        {
+            if (!key.HasProperty(KeyGuardVirtualIsoProperty, CngPropertyOptions.None))
+                return false;
+
+            byte[] val = key.GetProperty(KeyGuardVirtualIsoProperty, CngPropertyOptions.None).GetValue();
+            return val?.Length > 0 && val[0] != 0;
+        }
+
+        /// <summary>
+        /// Determines whether a cryptographic exception indicates that VBS is unavailable.
+        /// </summary>
+        /// <param name="ex">The cryptographic exception to examine.</param>
+        /// <returns><c>true</c> if the exception indicates VBS is not supported; otherwise, <c>false</c>.</returns>
+        private static bool IsVbsUnavailable(CryptographicException ex)
+        {
+            // HResult for “NTE_NOT_SUPPORTED” = 0x80890014
+            const int NTE_NOT_SUPPORTED = unchecked((int)0x80890014);
+
+            return ex.HResult == NTE_NOT_SUPPORTED ||
+                   ex.Message.Contains(VbsNotAvailable);
         }
     }
 }

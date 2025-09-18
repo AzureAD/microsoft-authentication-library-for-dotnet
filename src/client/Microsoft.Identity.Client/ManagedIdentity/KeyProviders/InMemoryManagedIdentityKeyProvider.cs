@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
     /// </summary>
     internal sealed class InMemoryManagedIdentityKeyProvider : IManagedIdentityKeyProvider
     {
-        private static readonly SemaphoreSlim s_once = new(1, 1);
+        private static readonly SemaphoreSlim s_once = new (1, 1);
         private volatile ManagedIdentityKeyInfo _cachedKey;
 
         /// <summary>
@@ -120,8 +120,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         private static RSA CreatePortableRsa()
         {
             var rsa = RSA.Create();
-            if (rsa.KeySize < Constants.KeySize2048)
-                rsa.KeySize = Constants.KeySize2048;
+            if (rsa.KeySize < Constants.RsaKeySize)
+                rsa.KeySize = Constants.RsaKeySize;
             return rsa;
         }
 
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
             // Persist key length with the key
             creation.Parameters.Add(
-                new CngProperty("Length", BitConverter.GetBytes(Constants.KeySize2048), CngPropertyOptions.Persist));
+                new CngProperty("Length", BitConverter.GetBytes(Constants.RsaKeySize), CngPropertyOptions.Persist));
 
             // Non-null name => persisted; null would be ephemeral (bad for Schannel)
             string keyName = "MSAL-MTLS-" + Guid.NewGuid().ToString("N");
