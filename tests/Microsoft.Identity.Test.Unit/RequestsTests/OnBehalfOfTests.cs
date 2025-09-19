@@ -19,14 +19,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class OnBehalfOfTests
+    public class OnBehalfOfTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         private MockHttpMessageHandler AddMockHandlerAadSuccess(
             MockHttpManager httpManager,
             string authority = TestConstants.AuthorityCommonTenant,

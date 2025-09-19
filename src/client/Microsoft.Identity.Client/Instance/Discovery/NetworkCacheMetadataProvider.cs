@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Concurrent;
 using Microsoft.Identity.Client.Core;
 
@@ -25,7 +26,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             s_cache.AddOrUpdate(environment, entry, (_, _) => entry);
         }
 
-        public void Clear()
+        internal static void ResetStaticCacheForTest()
         {
             s_cache.Clear();
         }

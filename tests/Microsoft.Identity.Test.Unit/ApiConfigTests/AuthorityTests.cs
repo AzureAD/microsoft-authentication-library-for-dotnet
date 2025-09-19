@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestInitialize]
         public override void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
             base.TestInitialize();
             _harness = base.CreateTestHarness();
             _testRequestContext = new RequestContext(
