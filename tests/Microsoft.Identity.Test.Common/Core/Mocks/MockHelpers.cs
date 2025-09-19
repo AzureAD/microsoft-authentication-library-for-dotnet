@@ -122,7 +122,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
-        public static string GetMsiSuccessfulResponse(int expiresInHours = 1, bool useIsoFormat = false)
+        public static string GetMsiSuccessfulResponse(
+            int expiresInHours = 1,
+            bool useIsoFormat = false,
+            bool mTLSPop = false)
         {
             string expiresOn;
 
@@ -137,9 +140,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
             }
 
+            var tokenType = mTLSPop ? "mtls_pop" : "Bearer";
+
             return
-          "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
-          "\"Bearer\",\"client_id\":\"client_id\"}";
+                "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\"," +
+                "\"token_type\":\"" + tokenType + "\",\"client_id\":\"client_id\"}";
         }
 
         public static string GetMsiErrorBadJson()
@@ -725,7 +730,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(GetMsiSuccessfulResponse()),
+                    Content = new StringContent(GetMsiSuccessfulResponse(mTLSPop: mTLSPop)),
                 }
             };
 

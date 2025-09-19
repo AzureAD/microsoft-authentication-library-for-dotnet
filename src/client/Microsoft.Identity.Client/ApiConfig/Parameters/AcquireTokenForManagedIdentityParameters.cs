@@ -20,6 +20,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string RevokedTokenHash { get; set; }
 
+        public bool IsMtlsPopRequested { get; set; }
+
         public void LogParameters(ILoggerAdapter logger)
         {
             if (logger.IsLoggingEnabled(LogLevel.Info))

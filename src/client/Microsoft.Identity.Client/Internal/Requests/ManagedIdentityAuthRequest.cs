@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Info("[ManagedIdentityRequest] Access token retrieved from cache.");
 
                 try
-                {  
+                {
                     var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
                     // If needed, refreshes token in the background
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            CancellationToken cancellationToken, 
+            CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
             AuthenticationResult authResult;
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // 1) ForceRefresh is requested
                 // 2) Proactive refresh is in effect
                 // 3) Claims are present (revocation flow)
-                if (_managedIdentityParameters.ForceRefresh || 
+                if (_managedIdentityParameters.ForceRefresh ||
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
                     !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
                 {
@@ -197,6 +197,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             logger.Info("[ManagedIdentityRequest] Acquiring a token from the managed identity endpoint.");
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
+
+            _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
 
             ManagedIdentityResponse managedIdentityResponse =
                 await _managedIdentityClient
