@@ -7,6 +7,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal interface ICsrFactory
     {
-        (string csrPem, RSA privateKey) Generate(string clientId, string tenantId, CuidInfo cuid);
+        (string csrPem, RSA privateKey) Generate(RSA rsa, string clientId, string tenantId, CuidInfo cuid);
     }
 }

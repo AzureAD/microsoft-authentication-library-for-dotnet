@@ -256,7 +256,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
-            var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
+
+            var keyInfo = await _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider
+                .GetOrCreateKeyAsync(_requestContext.Logger, _requestContext.UserCancellationToken).ConfigureAwait(false);
+            
+            var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(keyInfo.Key, csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
 

@@ -38,4 +38,4 @@ steps:
     runInParallel: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    testFiltercriteria: 'TestCategory=MI_E2E_Imds'
+    testFiltercriteria: '(TestCategory=MI_E2E_Imds|TestCategory=MI_E2E_KeyAcquisition_Hardware)'

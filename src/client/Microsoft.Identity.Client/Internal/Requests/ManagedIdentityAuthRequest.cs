@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -21,6 +20,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly ManagedIdentityClient _managedIdentityClient;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly ICryptographyManager _cryptoManager;
+        private readonly IManagedIdentityKeyProvider _managedIdentityKeyProvider;
 
         public ManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _managedIdentityParameters = managedIdentityParameters;
             _managedIdentityClient = managedIdentityClient;
             _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
+            _managedIdentityKeyProvider = serviceBundle.PlatformProxy.ManagedIdentityKeyProvider;
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
