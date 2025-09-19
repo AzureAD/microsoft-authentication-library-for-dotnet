@@ -2,3 +2,4 @@ const Microsoft.Identity.Client.MsalError.InvalidCertificate = "invalid_certific
 Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync() -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ImdsV2 = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, string> extraQueryParameters) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+static Microsoft.Identity.Client.ApplicationBase.ResetStateForTest() -> void

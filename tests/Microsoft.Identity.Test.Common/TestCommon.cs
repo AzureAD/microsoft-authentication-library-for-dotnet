@@ -6,10 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
@@ -18,53 +16,21 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
-using Microsoft.Identity.Client.ManagedIdentity;
-using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Test.Common
 {
     internal static class TestCommon
     {
-        public static void ResetInternalStaticCaches()
-        {
-            // This initializes the classes so that the statics inside them are fully initialized, and clears any cached content in them.
-            new InstanceDiscoveryManager(
-                Substitute.For<IHttpManager>(),
-                true, null, null);
-            OidcRetrieverWithCache.ResetCacheForTest();
-            AuthorityManager.ClearValidationCache();
-            SingletonThrottlingManager.GetInstance().ResetCache();
-            ManagedIdentityClient.ResetSourceForTest();
-        }
-
-        public static object GetPropValue(object src, string propName)
-        {
-            object result = null;
-            try
-            {
-                result = src.GetType().GetProperty(propName).GetValue(src, null);
-            }
-            catch
-            {
-                Console.WriteLine($"Property with name {propName}");
-            }
-
-            return result;
-        }
-
         public static IServiceBundle CreateServiceBundleWithCustomHttpManager(
             IHttpManager httpManager,
             LogCallback logCallback = null,
@@ -96,7 +62,11 @@ namespace Microsoft.Identity.Test.Common
                 PlatformProxy = platformProxy,
                 RetryPolicyFactory = new RetryPolicyFactory()
             };
-            return new ServiceBundle(appConfig, clearCaches);
+
+            if (clearCaches)
+                ApplicationBase.ResetStateForTest();
+
+            return new ServiceBundle(appConfig);
         }
 
         public static IServiceBundle CreateDefaultServiceBundle()
