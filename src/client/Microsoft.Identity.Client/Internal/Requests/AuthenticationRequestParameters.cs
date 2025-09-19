@@ -28,6 +28,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly IServiceBundle _serviceBundle;
         private readonly AcquireTokenCommonParameters _commonParameters;
         private string _loginHint;
+        private readonly IAuthenticationOperation _defaultAuthenticationOperation;
+        private IAuthenticationOperationFactory _authOpFactory;          // factory supplying the effective auth scheme
+        private IAuthenticationOperation _resolvedOp;                    // cached result of factory.Create
 
         public AuthenticationRequestParameters(
             IServiceBundle serviceBundle,
@@ -75,6 +78,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             HomeAccountId = homeAccountId;
             CacheKeyComponents = cacheKeyComponents;
+
+            _defaultAuthenticationOperation = _commonParameters.AuthenticationOperation;
         }
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
@@ -127,7 +132,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        public IAuthenticationOperation AuthenticationScheme => _commonParameters.AuthenticationOperation;
+        internal void SetAuthOperationFactory(IAuthenticationOperationFactory factory)
+        {
+            _authOpFactory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _resolvedOp = null; // reset cached value
+        }
+
+        public IAuthenticationOperation AuthenticationScheme
+        {
+            get
+            {
+                if (_resolvedOp == null)
+                {
+                    var factory = _authOpFactory ?? new DefaultAuthOpFactory(_defaultAuthenticationOperation);
+                    _resolvedOp = factory.Create(this);
+                }
+                return _resolvedOp;
+            }
+        }
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
@@ -240,5 +262,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.InfoPii(messageWithPii, builder.ToString());
             }
         }
+    }
+
+    internal sealed class DefaultAuthOpFactory : IAuthenticationOperationFactory
+    {
+        private readonly IAuthenticationOperation _base;
+        public DefaultAuthOpFactory(IAuthenticationOperation op) => _base = op;
+        public IAuthenticationOperation Create(AuthenticationRequestParameters ctx) => _base;
     }
 }
