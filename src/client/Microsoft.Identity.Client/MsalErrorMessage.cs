@@ -445,5 +445,6 @@ namespace Microsoft.Identity.Client
         public const string ForceRefreshAndTokenHasNotCompatible = "Cannot specify ForceRefresh and AccessTokenSha256ToRefresh in the same request.";
         public const string RequestTimeOut = "Request to the endpoint timed out.";
         public const string MalformedOidcAuthorityFormat = "Possible cause: When using Entra External ID, you didn't append /v2.0, for example {0}/v2.0\"";
+        public const string InvalidCertificate = "The certificate received from the Imds server is invalid.";
     }
 }

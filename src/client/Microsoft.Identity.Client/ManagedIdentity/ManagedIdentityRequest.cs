@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
@@ -26,7 +27,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public RequestType RequestType { get; set; }
 
-        public ManagedIdentityRequest(HttpMethod method, Uri endpoint, RequestType requestType = RequestType.ManagedIdentityDefault)
+        public X509Certificate2 MtlsCertificate { get; set; }
+
+        public ManagedIdentityRequest(
+            HttpMethod method,
+            Uri endpoint,
+            RequestType requestType = RequestType.ManagedIdentityDefault,
+            X509Certificate2 mtlsCertificate = null)
         {
             Method = method;
             _baseEndpoint = endpoint;
@@ -34,6 +41,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             BodyParameters = new Dictionary<string, string>();
             QueryParameters = new Dictionary<string, string>();
             RequestType = requestType;
+            MtlsCertificate = mtlsCertificate;
         }
 
         public Uri ComputeUri()
