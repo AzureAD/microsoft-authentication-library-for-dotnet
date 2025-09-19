@@ -366,6 +366,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.IdToken);
             AssertCcsRoutingInformationIsNotSent(factory);
 
+            var acc = (await msalPublicClient.GetAccountsAsync().ConfigureAwait(false)).Single();
+            var claimsPrincipal = acc.GetTenantProfiles().Single().ClaimsPrincipal;
+
+            Assert.AreNotEqual(TokenResponseHelper.NullPreferredUsernameDisplayLabel, acc.Username);
+            Assert.IsNotNull(claimsPrincipal.FindFirst("Name"));
+            Assert.IsNotNull(claimsPrincipal.FindFirst("nbf"));
+            Assert.IsNotNull(claimsPrincipal.FindFirst("exp"));
+
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following: 
             // 1) Add in code to pull the user's password, and put a breakpoint there.
