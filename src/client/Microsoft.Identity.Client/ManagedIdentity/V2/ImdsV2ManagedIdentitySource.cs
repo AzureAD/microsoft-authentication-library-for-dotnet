@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             var keyInfo = await _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider
                 .GetOrCreateKeyAsync(_requestContext.Logger, _requestContext.UserCancellationToken).ConfigureAwait(false);
-            
+
             var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(keyInfo.Key, csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(csr).ConfigureAwait(false);
@@ -280,10 +280,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
             request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
 
+            var tokenType = _isMtlsPopRequested ? "mtls_pop" : "bearer";
+
             request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
             request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
             request.BodyParameters.Add("scope", "https://management.azure.com/.default");
-            request.BodyParameters.Add("token_type", "bearer");
+            request.BodyParameters.Add("token_type", tokenType);
 
             request.RequestType = RequestType.STS;
 

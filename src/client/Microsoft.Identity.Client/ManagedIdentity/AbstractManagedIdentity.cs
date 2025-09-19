@@ -31,9 +31,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected readonly RequestContext _requestContext;
 
+        protected bool _isMtlsPopRequested;
+
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
-        
+
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
             _requestContext = requestContext;
@@ -54,6 +56,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
+
+            _isMtlsPopRequested = parameters.IsMtlsPopRequested;
 
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
 
@@ -83,7 +87,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: request.MtlsCertificate,
-                            validateServerCertificate: GetValidationCallback(), 
+                            validateServerCertificate: GetValidationCallback(),
                             cancellationToken: cancellationToken,
                             retryPolicy: retryPolicy).ConfigureAwait(false);
                 }
@@ -98,7 +102,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: request.MtlsCertificate,
-                            validateServerCertificate: GetValidationCallback(), 
+                            validateServerCertificate: GetValidationCallback(),
                             cancellationToken: cancellationToken,
                             retryPolicy: retryPolicy)
                         .ConfigureAwait(false);
@@ -172,8 +176,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw exception;
             }
 
-            if (managedIdentityResponse == null || 
-                managedIdentityResponse.AccessToken.IsNullOrEmpty() || 
+            if (managedIdentityResponse == null ||
+                managedIdentityResponse.AccessToken.IsNullOrEmpty() ||
                 managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
