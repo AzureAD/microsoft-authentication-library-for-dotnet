@@ -49,20 +49,13 @@ namespace Microsoft.Identity.Client.Region
 
         public RegionManager(
             IHttpManager httpManager,
-            int imdsCallTimeout = 2000,
-            bool shouldClearStaticCache = false) // for test
+            int imdsCallTimeout = 2000) // for test
         {
             _httpManager = httpManager;
             _imdsCallTimeoutMs = imdsCallTimeout;
-
-            if (shouldClearStaticCache)
-            {
-                s_failedAutoDiscovery = false;
-                s_autoDiscoveredRegion = null;
-                s_regionDiscoveryDetails = null;
-            }
         }
 
+        
         public async Task<string> GetAzureRegionAsync(RequestContext requestContext)
         {
             string azureRegionConfig = requestContext.ServiceBundle.Config.AzureRegion;
@@ -105,6 +98,13 @@ namespace Microsoft.Identity.Client.Region
 
             logger.Info(() => $"[Region discovery] Returning user provided region: {azureRegionConfig}.");
             return azureRegionConfig;
+        }
+
+        internal static void ResetStaticCacheForTest()
+        {
+            s_failedAutoDiscovery = false;
+            s_autoDiscoveredRegion = null;
+            s_regionDiscoveryDetails = null;
         }
 
         private static bool IsAutoDiscoveryRequested(string azureRegionConfig)

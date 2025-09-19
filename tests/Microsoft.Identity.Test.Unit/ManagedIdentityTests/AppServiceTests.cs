@@ -31,8 +31,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                
+                
 
                 var mi = miBuilder.Build();
 
@@ -65,8 +65,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                
+                
 
                 ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;
 

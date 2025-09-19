@@ -21,8 +21,7 @@ namespace Microsoft.Identity.Client.Internal
     internal class ServiceBundle : IServiceBundle
     {
         internal ServiceBundle(
-            ApplicationConfiguration config,
-            bool shouldClearCaches = false)
+            ApplicationConfiguration config)
         {
             Config = config;
 
@@ -38,20 +37,13 @@ namespace Microsoft.Identity.Client.Internal
             HttpTelemetryManager = new HttpTelemetryManager();
 
             InstanceDiscoveryManager = new InstanceDiscoveryManager(
-                HttpManager,
-                shouldClearCaches,
+                HttpManager,                
                 config.CustomInstanceDiscoveryMetadata,
                 config.CustomInstanceDiscoveryMetadataUri);
 
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
-            DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();
-
-            if (shouldClearCaches) // for test
-            {
-                AuthorityManager.ClearValidationCache();
-                PoPCryptoProviderFactory.Reset();
-            }
+            DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();           
         }
 
         /// <summary>

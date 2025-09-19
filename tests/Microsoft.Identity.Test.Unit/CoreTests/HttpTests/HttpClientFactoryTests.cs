@@ -13,14 +13,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
-    public class HttpClientFactoryTests
+    public class HttpClientFactoryTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-            // You might need to add a method to clear the HttpClient cache in SimpleHttpClientFactory
-        }
 
         [TestMethod]
         public void TestGetHttpClientWithCustomCallback()

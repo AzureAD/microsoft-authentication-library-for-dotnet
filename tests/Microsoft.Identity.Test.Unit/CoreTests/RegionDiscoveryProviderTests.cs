@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             _apiEvent = new ApiEvent(Guid.NewGuid());
             _apiEvent.ApiId = ApiEvent.ApiIds.AcquireTokenForClient;
             _testRequestContext.ApiEvent = _apiEvent;
-            _regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager, true);
+            _regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager);
         }
 
         [TestCleanup]
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
             _harness?.Dispose();
-            _regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager, true);
+            _regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager);
             _httpManager.Dispose();
             base.TestCleanup();
         }
@@ -164,8 +164,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
 
             _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
-
-            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager, true);
+            RegionManager.ResetStaticCacheForTest();
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager);
             InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(
                 new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 

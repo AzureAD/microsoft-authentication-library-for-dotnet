@@ -12,14 +12,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class MsalTokenCacheKeysTests
+    public class MsalTokenCacheKeysTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         public void MsalAccessTokenCacheKey()
         {

@@ -15,14 +15,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     // Tests in this class will run on .NET Core
     [TestClass]
-    public class ClientCredentialsMtlsPopTests
+    public class ClientCredentialsMtlsPopTests 
     {
         private const string MsiAllowListedAppIdforSNI = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
 
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         [DoNotRunOnLinux] // POP is not supported on Linux

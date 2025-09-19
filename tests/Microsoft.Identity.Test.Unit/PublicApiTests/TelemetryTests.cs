@@ -27,8 +27,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestInitialize]
         public void Initialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
+        {            
             _serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
             _logger = _serviceBundle.ApplicationLogger;
             _platformProxy = _serviceBundle.PlatformProxy;

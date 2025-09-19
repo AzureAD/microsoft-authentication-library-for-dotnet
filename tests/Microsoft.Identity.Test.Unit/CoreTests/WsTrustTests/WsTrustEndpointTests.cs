@@ -11,14 +11,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
     [TestClass]
-    public class WsTrustEndpointTests
+    public class WsTrustEndpointTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         private readonly Uri _uri = new Uri("https://windowsorusernamepasswordendpointurl");
         private readonly string _cloudAudienceUri = "https://cloudAudienceUrn";
 

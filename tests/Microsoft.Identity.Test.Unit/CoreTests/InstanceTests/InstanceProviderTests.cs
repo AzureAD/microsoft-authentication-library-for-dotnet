@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Act
             InstanceDiscoveryMetadataEntry result = staticMetadataProvider2.GetMetadata("env", _logger);
-            staticMetadataProvider2.Clear();
+            NetworkCacheMetadataProvider.ResetStaticCacheForTest();
             InstanceDiscoveryMetadataEntry result2 = staticMetadataProvider2.GetMetadata("env", _logger);
 
             // Assert

@@ -14,14 +14,8 @@ namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     [DeploymentItem(@"Resources\testCert.crtfile")]
-    public class CryptographyTests
+    public class CryptographyTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         [TestCategory("CryptographyTests")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
