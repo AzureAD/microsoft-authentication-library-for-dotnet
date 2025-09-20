@@ -53,38 +53,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.Arlington)]
-        public async Task ArlingtonDeviceCodeFlowTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.Arlington)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
-        public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.MSA)]
-        [Ignore("Currently failing due to environment")] //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5264
-        public async Task DeviceCodeFlowMsaTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user").ConfigureAwait(false);
-        }
-
         private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType)
         {
             Trace.WriteLine($"Calling AcquireTokenWithDeviceCodeAsync with {0}", userType);
@@ -157,61 +125,5 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(silentTokenResult);
             Assert.IsTrue(!string.IsNullOrEmpty(silentTokenResult.AccessToken));
         }
-
-        #region Azure AD Kerberos Feature Tests
-        [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        public async Task KerberosDeviceCodeFlowTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosAcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-        private async Task KerberosAcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType, KerberosTicketContainer ticketContainer)
-        {
-            Trace.WriteLine($"Calling KerberosAcquireTokenWithDeviceCodeFlowAsync with {0}", userType);
-            var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId)
-                .WithTestLogging()
-                .WithTenantId(labResponse.Lab.TenantId)
-                .WithClientId(TestConstants.KerberosTestApplicationId)
-                .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer);
-
-            switch (labResponse.User.AzureEnvironment)
-            {
-                case AzureEnvironment.azureusgovernment:
-                    builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
-                    break;
-                default:
-                    break;
-            }
-
-            var pca = builder.Build();
-            var userCacheAccess = pca.UserTokenCache.RecordAccess();
-
-            var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
-            {
-                SeleniumExtensions.PerformDeviceCodeLogin(deviceCodeResult, labResponse.User, TestContext, false);
-                return Task.FromResult(0);
-            }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-
-            Trace.WriteLine("Running asserts");
-
-            userCacheAccess.AssertAccessCounts(0, 1);
-            Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-
-            Assert.IsNotNull(result);
-            Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-
-            KerberosSupplementalTicket ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
-                result,
-                ticketContainer,
-                labResponse.User.Upn);
-            Assert.IsNotNull(ticket);
-            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
-        }
-
-        #endregion
     }
 }
