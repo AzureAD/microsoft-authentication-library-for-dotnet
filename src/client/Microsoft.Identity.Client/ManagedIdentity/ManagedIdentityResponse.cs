@@ -34,14 +34,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public string ExpiresOn { get; set; }  // The actual property consumers use
 
         [JsonProperty("expires_on")]
-        private string ExpiresOnRaw             // Proxy for "expires_on" JSON field
+        public string ExpiresOnRaw             // Proxy for "expires_on" JSON field
         {
             get => ExpiresOn;                  // When serializing, return ExpiresOn value
             set => ExpiresOn = value;          // When deserializing, store in ExpiresOn
         }
 
         [JsonProperty("expires_in")]
-        private string ExpiresInRaw             // Proxy for "expires_in" JSON field
+        public string ExpiresInRaw             // Proxy for "expires_in" JSON field
         {
             get => null;                       // Never serialize this (return null)
             set => ExpiresOn = value;          // When deserializing, store in ExpiresOn
