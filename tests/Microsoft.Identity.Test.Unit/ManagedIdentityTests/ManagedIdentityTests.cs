@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -1507,6 +1508,39 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             return managedIdentity;
+        }
+
+        [TestMethod]
+        public async Task ManagedIdentityWithExtraQueryParametersTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                var extraQueryParameters = new Dictionary<string, string>
+                    {
+                        { "param1", "value1" },
+                        { "param2", "value2" },
+                        { "custom_param", "custom_value" }
+                    };
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .WithExtraQueryParameters(extraQueryParameters)
+                    .WithHttpManager(httpManager);
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.AppService,
+                    extraQueryParameters: extraQueryParameters);
+
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+            }
         }
     }
 }

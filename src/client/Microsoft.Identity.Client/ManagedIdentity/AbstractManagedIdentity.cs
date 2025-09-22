@@ -70,6 +70,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     _requestContext.Logger);
             }
 
+            request.AddExtraQueryParams(
+                _requestContext.ServiceBundle.Config.ExtraQueryParameters,
+                _requestContext.Logger);
+
             _requestContext.Logger.Info("[Managed Identity] Sending request to managed identity endpoints.");
 
             IRetryPolicy retryPolicy = _requestContext.ServiceBundle.Config.RetryPolicyFactory.GetRetryPolicy(request.RequestType);
