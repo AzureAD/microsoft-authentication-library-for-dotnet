@@ -414,6 +414,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 // Token source should now be IdentityProvider again
                 Assert.AreEqual(TokenSource.IdentityProvider,
                                 result3.AuthenticationResultMetadata.TokenSource);
+
+                // The new access token (with claims) must be different than the initial one
+                Assert.AreNotEqual(result1.AccessToken, result3.AccessToken,
+                    "Claims challenge should result in a new access token different from the initial one.");
             }
         }
 

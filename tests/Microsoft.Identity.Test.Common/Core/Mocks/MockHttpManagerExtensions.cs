@@ -447,7 +447,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 case ManagedIdentitySource.AppService:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
-                    expectedQueryParams.Add("api-version", "2019-08-01");
+                    expectedQueryParams.Add("api-version", "2025-03-30");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
                     break;
