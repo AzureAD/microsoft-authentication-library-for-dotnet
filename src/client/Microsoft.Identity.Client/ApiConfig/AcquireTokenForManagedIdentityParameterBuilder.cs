@@ -80,6 +80,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
+            ApplyMtlsPopAndAttestation(acquireTokenForManagedIdentityParameters: Parameters, acquireTokenCommonParameters: CommonParameters);
             return ManagedIdentityApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
@@ -92,6 +93,13 @@ namespace Microsoft.Identity.Client
             }
 
             return ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity;
+        }
+        private static void ApplyMtlsPopAndAttestation(
+            AcquireTokenCommonParameters acquireTokenCommonParameters,
+            AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
+        {
+            acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
+            acquireTokenForManagedIdentityParameters.AttestationTokenProvider ??= acquireTokenCommonParameters.AttestationTokenProvider;
         }
     }
 }

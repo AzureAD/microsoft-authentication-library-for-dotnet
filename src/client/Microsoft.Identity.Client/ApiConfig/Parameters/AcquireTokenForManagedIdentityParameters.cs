@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
@@ -21,6 +23,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string RevokedTokenHash { get; set; }
 
         public bool IsMtlsPopRequested { get; set; }
+
+        internal Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> AttestationTokenProvider { get; set; }
 
         public void LogParameters(ILoggerAdapter logger)
         {
