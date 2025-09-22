@@ -223,12 +223,6 @@ namespace Microsoft.Identity.Client.Http
             
             requestMessage.Headers.Accept.Clear();
 
-#if NET5_0_OR_GREATER
-            // On .NET 5.0 and later, HTTP2 is supported through the SDK and Entra is HTTP2 compatible
-            // Note that HttpClient.DefaultRequestVersion does not work when using HttpRequestMessage objects
-            requestMessage.Version = HttpVersion.Version20; // Default to HTTP/2
-            requestMessage.VersionPolicy = HttpVersionPolicy.RequestVersionOrLower; // Allow fallback to HTTP/1.1
-#endif
             if (headers != null)
             {
                 foreach (KeyValuePair<string, string> kvp in headers)
