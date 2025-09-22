@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 #endregion Identity 1
 
                 #region Identity 2
-                UserAssignedIdentityId identity2Type = UserAssignedIdentityId.ClientId;
+                UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
                 string identity2Id = TestConstants.ClientId2;
                 var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, identity2Type, identity2Id, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
 
@@ -323,7 +323,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 #endregion Identity 1
 
                 #region Identity 2
-                UserAssignedIdentityId identity2Type = UserAssignedIdentityId.ClientId;
+                UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
                 string identity2Id = TestConstants.ClientId2;
                 var managedIdentityApp2 = await CreateManagedIdentityAsync(
                     httpManager,
