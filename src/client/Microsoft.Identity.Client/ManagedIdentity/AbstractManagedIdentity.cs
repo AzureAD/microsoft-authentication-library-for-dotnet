@@ -61,6 +61,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
 
+            // If PoP was requested and a cert exists, stash it on the per-request parameters.
+            // The request layer will later set AuthenticationOperationOverride based on this.
+            if (_isMtlsPopRequested && request?.MtlsCertificate != null)
+            {
+                parameters.MtlsCertificate = request.MtlsCertificate;
+            }
+
             // Automatically add claims / capabilities if this MI source supports them
             if (_sourceType.SupportsClaimsAndCapabilities())
             {

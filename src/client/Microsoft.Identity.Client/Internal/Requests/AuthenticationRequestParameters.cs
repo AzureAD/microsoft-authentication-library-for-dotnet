@@ -115,6 +115,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
 
+        // Request-scoped override for the authentication operation.
+        // When set, MSAL will use this operation; otherwise it falls back to the common parameters.
+        internal IAuthenticationOperation AuthenticationOperationOverride { get; set; }
+
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>
@@ -127,7 +131,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        public IAuthenticationOperation AuthenticationScheme => _commonParameters.AuthenticationOperation;
+        // Effective operation for this request.
+        // Prefer the override when present; otherwise use the operation coming from common parameters.
+        public IAuthenticationOperation AuthenticationScheme =>
+            AuthenticationOperationOverride ?? _commonParameters.AuthenticationOperation;
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 

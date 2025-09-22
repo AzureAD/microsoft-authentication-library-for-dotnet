@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity;
@@ -39,6 +40,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
+
+            // Ensure cache lookups use the mtls_pop cache key (not Bearer). If we have a persisted cert,
+            // apply the full MtlsPopAuthenticationOperation right now; otherwise we cannot format a
+            // binding certificate on a cache hit, so we only proceed when we have a cert persisted.
+            if (AuthenticationRequestParameters.IsMtlsPopRequested &&
+                AuthenticationRequestParameters.AuthenticationOperationOverride == null)
+            {
+                var cert = _managedIdentityClient.MtlsBindingCertificate;
+                if (cert != null && cert.NotAfter.ToUniversalTime() > System.DateTime.UtcNow.AddMinutes(1))
+                {
+                    AuthenticationRequestParameters.AuthenticationOperationOverride =
+                        new MtlsPopAuthenticationOperation(cert);
+
+                    logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Applied MtlsPopAuthenticationOperation.");
+                }
+            }
 
             // 1. FIRST, handle ForceRefresh
             if (_managedIdentityParameters.ForceRefresh)
@@ -87,7 +104,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return authResult;
             }
 
-            // 3. If we have no ForceRefresh and no claims, we can use the cache
+            // 3. If PoP is requested but we don't yet have a persisted binding certificate,
+            // skip cache to avoid returning a bearer token for a PoP request.
+            if (AuthenticationRequestParameters.IsMtlsPopRequested &&
+                AuthenticationRequestParameters.AuthenticationOperationOverride == null)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
+                logger.Info("[ManagedIdentityRequest] mTLS PoP requested, but no binding certificate is persisted. Skipping cache and acquiring a new token.");
+                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
+                return authResult;
+            }
+
+            // 4. If we have no ForceRefresh and no claims, we can use the cache
             if (cachedAccessTokenItem != null)
             {
                 authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
@@ -141,7 +169,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            CancellationToken cancellationToken,
+            CancellationToken cancellationToken, 
             ILoggerAdapter logger)
         {
             AuthenticationResult authResult;
@@ -161,10 +189,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // 1) ForceRefresh is requested
                 // 2) Proactive refresh is in effect
                 // 3) Claims are present (revocation flow)
+                // 4) PoP requested but no binding certificate / scheme applied yet (avoid Bearer cache).
+                bool mustBypassForPop =
+                    AuthenticationRequestParameters.IsMtlsPopRequested &&
+                    AuthenticationRequestParameters.AuthenticationOperationOverride == null;
+
                 if (_managedIdentityParameters.ForceRefresh ||
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
-                    !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
+                    !string.IsNullOrEmpty(_managedIdentityParameters.Claims) ||
+                    mustBypassForPop)
                 {
+                    if (mustBypassForPop)
+                    {
+                        // Only set this if a more specific reason wasn't already recorded.
+                        if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.ProactivelyRefreshed &&
+                            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.ForceRefreshOrClaims)
+                        {
+                            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
+                        }
+
+                        logger.Info("[ManagedIdentityRequest] mTLS PoP requested and no binding certificate is applied; bypassing cache inside semaphore.");
+                    }
+
                     authResult = await SendTokenRequestForManagedIdentityAsync(logger, cancellationToken).ConfigureAwait(false);
                 }
                 else
@@ -204,6 +250,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 await _managedIdentityClient
                 .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
                 .ConfigureAwait(false);
+
+            // If mTLS PoP is in use and the MI source produced a cert, apply the override NOW
+            // (so the token is saved under the mtls_pop cache key) and persist the cert on the client
+            // so future cache lookups can apply the scheme before lookup.
+            if (AuthenticationRequestParameters.IsMtlsPopRequested &&
+                _managedIdentityParameters.MtlsCertificate != null)
+            {
+                AuthenticationRequestParameters.AuthenticationOperationOverride =
+                    new MtlsPopAuthenticationOperation(_managedIdentityParameters.MtlsCertificate);
+
+                _managedIdentityClient.MtlsBindingCertificate = _managedIdentityParameters.MtlsCertificate; // persist for subsequent calls
+
+                // We no longer need to keep a second reference on the parameters object
+                _managedIdentityParameters.MtlsCertificate = null;
+
+                logger.Info("[ManagedIdentityRequest] mtls_pop: applied scheme prior to caching and persisted binding certificate.");
+            }
 
             var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();

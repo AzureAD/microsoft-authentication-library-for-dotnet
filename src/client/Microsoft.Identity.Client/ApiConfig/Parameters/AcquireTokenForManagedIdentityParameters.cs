@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -21,6 +22,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string RevokedTokenHash { get; set; }
 
         public bool IsMtlsPopRequested { get; set; }
+
+        public X509Certificate2 MtlsCertificate { get; set; }
 
         public void LogParameters(ILoggerAdapter logger)
         {

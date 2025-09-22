@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 if (probeMode)
                 {
-                    requestContext.Logger.Info(() => $"[Managed Identity] IMDSv2 CSR endpoint failure. Exception occurred while sending request to CSR metadata endpoint: ${ex}");
+                    requestContext.Logger.Info(() => $"[Managed Identity] IMDSv2 CSR endpoint failure. Exception occurred while sending request to CSR metadata endpoint: {ex}");
                     return null;
                 }
                 else
