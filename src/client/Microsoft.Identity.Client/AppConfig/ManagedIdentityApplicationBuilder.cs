@@ -115,7 +115,18 @@ namespace Microsoft.Identity.Client
         {
             ValidateUseOfExperimentalFeature();
 
-            Config.ExtraQueryParameters = extraQueryParameters;
+            if (Config.ExtraQueryParameters == null)
+            {
+                Config.ExtraQueryParameters = extraQueryParameters;
+            }
+            else
+            {
+                foreach (var kvp in extraQueryParameters)
+                {
+                    Config.ExtraQueryParameters[kvp.Key] = kvp.Value; // This will overwrite if key exists, or add if new
+                }
+            }
+
             return this;
         }
 

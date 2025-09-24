@@ -1542,5 +1542,37 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
             }
         }
+
+        [TestMethod]
+        public void WithExtraQueryParameters_MultipleCallsMergeValues()
+        {
+            var firstParams = new Dictionary<string, string>
+                {
+                    { "param1", "value1" },
+                    { "param2", "value2" }
+                };
+
+            var secondParams = new Dictionary<string, string>
+                {
+                    { "param3", "value3" },
+                    { "param4", "value4" },
+                    { "param1", "newvalue1" } // This should overwrite the first param1
+                };
+
+            var miBuilder = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(firstParams)
+                .WithExtraQueryParameters(secondParams);
+
+            // Verify that parameters are merged
+            Assert.AreEqual(4, miBuilder.Config.ExtraQueryParameters.Count);
+    
+            // Verify merged values
+            Assert.AreEqual("newvalue1", miBuilder.Config.ExtraQueryParameters["param1"]);  // Overwritten
+            Assert.AreEqual("value2", miBuilder.Config.ExtraQueryParameters["param2"]);     // From first call
+            Assert.AreEqual("value3", miBuilder.Config.ExtraQueryParameters["param3"]);     // From second call  
+            Assert.AreEqual("value4", miBuilder.Config.ExtraQueryParameters["param4"]);     // From second call
+        }
     }
 }
