@@ -1569,10 +1569,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual(4, miBuilder.Config.ExtraQueryParameters.Count);
     
             // Verify merged values
-            Assert.AreEqual("newvalue1", miBuilder.Config.ExtraQueryParameters["param1"]);  // Overwritten
-            Assert.AreEqual("value2", miBuilder.Config.ExtraQueryParameters["param2"]);     // From first call
-            Assert.AreEqual("value3", miBuilder.Config.ExtraQueryParameters["param3"]);     // From second call  
-            Assert.AreEqual("value4", miBuilder.Config.ExtraQueryParameters["param4"]);     // From second call
+            Assert.AreEqual("newvalue1", miBuilder.Config.ExtraQueryParameters["param1"]);
+            Assert.AreEqual("value2", miBuilder.Config.ExtraQueryParameters["param2"]);
+            Assert.AreEqual("value3", miBuilder.Config.ExtraQueryParameters["param3"]);
+            Assert.AreEqual("value4", miBuilder.Config.ExtraQueryParameters["param4"]);
         }
     }
 }
