@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Utils
             {
                 var timestamp = expiresOnUnixTimestamp - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
 
-                // If the timestamp is negative, return the original expiresOnUnixTimestamp. It's format is "seconds from now".
+                // If the timestamp is negative, return the original expiresOnUnixTimestamp. Its format is "seconds from now".
                 if (timestamp < 0)
                 {
                     return expiresOnUnixTimestamp;
