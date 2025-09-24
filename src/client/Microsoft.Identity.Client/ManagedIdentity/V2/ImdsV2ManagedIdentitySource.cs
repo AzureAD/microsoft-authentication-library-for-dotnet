@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                 MsalError.ManagedIdentityRequestFailed,
-                $"[ImdsV2] ${errorMessage}",
+                $"[ImdsV2] {errorMessage}",
                 ex,
                 ManagedIdentitySource.ImdsV2,
                 statusCode);
@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
             request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
-            request.BodyParameters.Add("scope", "https://management.azure.com/.default");
+            request.BodyParameters.Add("scope", resource.TrimEnd('/') + "/.default");
             request.BodyParameters.Add("token_type", tokenType);
 
             request.RequestType = RequestType.STS;

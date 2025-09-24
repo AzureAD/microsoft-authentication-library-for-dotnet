@@ -125,25 +125,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static string GetMsiSuccessfulResponse(
             int expiresInHours = 1,
             bool useIsoFormat = false,
-            bool mTLSPop = false)
+            bool mTLSPop = false,
+            bool imdsV2 = false)
         {
-            string expiresOn;
-
+            var expiresOnKey = imdsV2 ? "expires_in" : "expires_on";
+            string expiresOnValue;
             if (useIsoFormat)
             {
                 // Return ISO 8601 format
-                expiresOn = DateTime.UtcNow.AddHours(expiresInHours).ToString("o", CultureInfo.InvariantCulture);
+                expiresOnValue = DateTime.UtcNow.AddHours(expiresInHours).ToString("o", CultureInfo.InvariantCulture);
             }
             else
             {
                 // Return Unix timestamp format
-                expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
+                expiresOnValue = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
             }
 
             var tokenType = mTLSPop ? "mtls_pop" : "Bearer";
 
             return
-                "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\"," +
+                "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"" + expiresOnKey + "\":\"" + expiresOnValue + "\",\"resource\":\"https://management.azure.com/\"," +
                 "\"token_type\":\"" + tokenType + "\",\"client_id\":\"client_id\"}";
         }
 
@@ -730,7 +731,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(GetMsiSuccessfulResponse(mTLSPop: mTLSPop)),
+                    Content = new StringContent(GetMsiSuccessfulResponse(mTLSPop: mTLSPop, imdsV2: true)),
                 }
             };
 
