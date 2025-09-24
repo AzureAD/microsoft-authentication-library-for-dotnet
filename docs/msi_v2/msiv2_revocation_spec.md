@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the design and implementation details for **certificate revocation** in MSI V2 scenarios.
+This document outlines the design and implementation details for **certificate and token revocation** in MSI V2 scenarios.
 
 In the MSI v2 authentication flow, MSAL first obtains a credential (certificate) from IMDS and uses it to request a token from eSTS. In some cases, eSTS may respond with an error indicating that the certificate/attestation is no longer valid. When this occurs, **MSAL must obtain a new certificate** before retrying the token request with eSTS.
 
@@ -16,9 +16,9 @@ sequenceDiagram
     participant eSTS
 
     Application ->> MSAL: 1. Request Access Token
-    MSAL ->> IMDS: 2. Request Credential (certificate)
-    IMDS -->> MSAL: 3. Return credential (certificate)
-    MSAL ->> eSTS: 4. Exchange credential for Access Token
+    MSAL ->> IMDS: 2. Request Certificate
+    IMDS -->> MSAL: 3. Return Certificate
+    MSAL ->> eSTS: 4. Exchange Certificate for Access Token
     eSTS -->> MSAL: 5. Response (HTTP 200 / error)
 
     alt Token Revoked / Attestation invalid
@@ -49,17 +49,17 @@ sequenceDiagram
     participant Resource
 
     Application ->> MSAL: 1. Request Access Token
-    MSAL ->> IMDS: 2. Request Credential (certificate)
-    IMDS -->> MSAL: 3. Return certificate
-    MSAL ->> eSTS: 4. Exchange certificate for Access Token
+    MSAL ->> IMDS: 2. Request Certificate
+    IMDS -->> MSAL: 3. Return Certificate
+    MSAL ->> eSTS: 4. Exchange Certificate for Access Token
     eSTS -->> MSAL: 5. Return Access Token
     MSAL ->> Application: 6. Return Access Token
 
     Application ->> Resource: 7. Call API with Access Token
     Resource -->> Application: 8. 401 Unauthorized + WWW-Authenticate with claims
     Application ->> MSAL: 9. **Pass the claims** to MSAL
-    MSAL ->> IMDS: 10. **Mint new certificate** via /issuecredential?bypass_cache=true
-    IMDS -->> MSAL: 11. Return new certificate
+    MSAL ->> IMDS: 10. **Mint new Certificate** via /issuecredential?bypass_cache=true
+    IMDS -->> MSAL: 11. Return new Certificate
     MSAL ->> eSTS: 12. Retry Access Token request **with claims**
     eSTS -->> MSAL: 13. Return new Access Token
     MSAL ->> Application: 14. Return new Access Token
@@ -98,7 +98,7 @@ For any of the above codes, **MSAL MUST**:
 
 1. Call the certificate minting endpoint **`/issuecredential?bypass_cache=true`** to force a **new certificate** (ignore any cached/invalid state).
 2. Replace the current certificate with the newly issued one.
-3. **Retry** the token request with eSTS using the new certificate.
+3. **Retry** the token request with eSTS using the new certificate. **(Use STS Retry Policy)**
 4. Emit telemetry (see below).
 
 > These errors reflect invalid or stale certificate/attestation input; remediation is internal to MSAL. No developer action is required.
@@ -169,15 +169,14 @@ return tokenResponse;
 
 ### Test Scenarios and Expected Behavior
 
-The following acceptance tests validate the behavior of MSAL when handling **certificate revocation** and **claims challenge** scenarios.
-
-| **Test Case**                                   | **Description**                                                                                         | **Expected Outcome** |
-|-------------------------------------------------|---------------------------------------------------------------------------------------------------------|----------------------|
-| **AADSTS1000610–14 Auto-Remediation**           | eSTS returns 401 `invalid_client` with any of 1000610–1000614.                                          | MSAL calls `/issuecredential?bypass_cache=true`, obtains a new certificate, retries; success or deterministic failure surfaced. |
-| **Unspecified Credential Issue**                 | eSTS returns `invalid_client` without codes.                                                            | MSAL forces new certificate (bypass cache) and retries. |
-| **Claims Challenge Path**                        | Resource returns 401 with claims; app passes claims to MSAL.                                            | MSAL mints new certificate (`bypass_cache=true`), acquires token **with claims**. |
-| **IMDS/IssueCredential Failure Path**            | `/issuecredential` fails.                                                                               | MSAL returns failure with diagnostics; no infinite retry. |
-| **Telemetry Validation**                         | Verify counter/tags capture AADSTS code, `bypass_cache=true`, and `CredentialOutcome`.                  | Telemetry populated as specified. |
+| **Test Case**                                            | **Description**                                                                                                 | **Expected Outcome** |
+|----------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|----------------------|
+| **AADSTS1000610–14 Auto-Remediation (Retry Succeeds)**   | eSTS returns 401 `invalid_client` with any of 1000610–1000614. MSAL forces new cert via `/issuecredential?bypass_cache=true` and retries. | Token acquisition succeeds after retry. (`CredentialOutcome=Retry Succeeded`) |
+| **AADSTS1000610–14 Auto-Remediation (Retry Fails)**      | Same initial condition as above. New cert minted, retry still fails deterministically (e.g., repeated same code). | Failure surfaced after retry. (`CredentialOutcome=Retry Failed`) |
+| **Unspecified Credential Issue**                         | eSTS returns `invalid_client` without codes. MSAL forces new certificate and retries.                           | Token succeeds or failure surfaced (assert correct `CredentialOutcome`). |
+| **Claims Challenge Path**                                | Resource 401 with claims; app supplies claims; MSAL re-mints cert (`bypass_cache=true`) and retries with claims. | New token with claims. (`CredentialOutcome=Success`) |
+| **IMDS/IssueCredential Failure Path**                    | `/issuecredential` call fails (network / service / malformed).                                                  | Failure returned; no infinite retry. (`CredentialOutcome=Retry Failed` if after a retry attempt) |
+| **Telemetry Validation**                                 | Validate tags (MsiSource, TokenType, bypassCache, KeyType, CredentialOutcome) across above scenarios.            | Telemetry populated exactly as specified. |
 
 ## Client-Side Telemetry
 
@@ -189,10 +188,8 @@ To improve observability and diagnostics of Managed Identity (MSI) scenarios wit
 ### Tags
 Each time we record `MsalMsiCounter`, include:
 
-1. **MsiSource** — `"AppService"`, `"CloudShell"`, `"AzureArc"`, `"ImdsV1"`, `"ImdsV2"`, `"ServiceFabric"`  
-2. **TokenType** — `"Bearer"`, `"POP"`, `"mtls_pop"`  
-3. **bypassCache** — `"true"` / `"false"`  
-4. **CertType** — `"Platform"`, `"inMemory"`, `"UserProvided"`  
-5. **CredentialOutcome** — `Not found` / `Retry Failed` / `Retry Succeeded` / `Success`  
-6. **MsalVersion** — e.g., `"4.61.0"`  
-7. **Platform** — e.g., `"net8.0-linux"`, `"net472-windows"`
+1. **MsiSource** — `"AppService"`, `"CloudShell"`, `"AzureArc"`, `"Imds"`, `"ImdsV2"`, `"ServiceFabric"`
+2. **TokenType** — `"Bearer"`, `"mtls_pop"`  
+3. **bypassCache** — `"true"` / `"false"`
+4. **KeyType** — `"InMemory"`, `"Hardware"`, `"KeyGuard"`  
+5. **CredentialOutcome** — `Not found` / `Retry Failed` / `Retry Succeeded` / `Success`
