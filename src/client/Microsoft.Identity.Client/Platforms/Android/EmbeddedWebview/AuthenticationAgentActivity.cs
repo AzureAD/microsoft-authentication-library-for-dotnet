@@ -13,6 +13,10 @@ using Android.Widget;
 using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
+#if __ANDROID_30__
+using AndroidX.Core.View;
+using AndroidX.Core.Graphics;
+#endif
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {
@@ -25,14 +29,20 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
+            
+            // Enable edge-to-edge for Android API 30+
+            EnableEdgeToEdge();
+            
             // Create your application here
-
             WebView webView = new WebView(this);
             var relativeLayout = new RelativeLayout(this);
             webView.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.MatchParent);
 
             relativeLayout.AddView(webView);
             SetContentView(relativeLayout);
+            
+            // Apply window insets for edge-to-edge layout
+            ApplyWindowInsets(relativeLayout, webView);
 
             string url = Intent.GetStringExtra("Url");
 
@@ -49,6 +59,54 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             _client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
             webView.SetWebViewClient(_client);
             webView.LoadUrl(url);
+        }
+
+        private void EnableEdgeToEdge()
+        {
+#if __ANDROID_30__
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.R) // API 30+
+            {
+                // Enable edge-to-edge
+                Window.SetDecorFitsSystemWindows(false);
+                
+                // For API 35+, ensure proper edge-to-edge behavior
+                if (Build.VERSION.SdkInt >= BuildVersionCodes.VanillaIceCream) // API 35
+                {
+                    // Additional API 35 specific configurations
+                    Window.StatusBarColor = global::Android.Graphics.Color.Transparent;
+                    Window.NavigationBarColor = global::Android.Graphics.Color.Transparent;
+                }
+            }
+#endif
+        }
+
+        private void ApplyWindowInsets(RelativeLayout parentLayout, WebView webView)
+        {
+#if __ANDROID_30__
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.R) // API 30+
+            {
+                ViewCompat.SetOnApplyWindowInsetsListener(parentLayout, (v, insets) =>
+                {
+                    var systemBarsInsets = insets.GetInsets(WindowInsetsCompat.Type.SystemBars());
+                    var imeInsets = insets.GetInsets(WindowInsetsCompat.Type.Ime());
+                    
+                    // Apply padding to avoid system UI overlap
+                    var layoutParams = webView.LayoutParameters as RelativeLayout.LayoutParams;
+                    if (layoutParams != null)
+                    {
+                        layoutParams.SetMargins(
+                            systemBarsInsets.Left,
+                            systemBarsInsets.Top,
+                            systemBarsInsets.Right,
+                            Math.Max(systemBarsInsets.Bottom, imeInsets.Bottom)
+                        );
+                        webView.LayoutParameters = layoutParams;
+                    }
+                    
+                    return WindowInsetsCompat.Consumed;
+                });
+            }
+#endif
         }
 
         public override void Finish()

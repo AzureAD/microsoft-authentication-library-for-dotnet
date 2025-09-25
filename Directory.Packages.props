@@ -32,6 +32,7 @@
     <PackageVersion Include="System.Xml.XDocument" Version="4.3.0" />
     <PackageVersion Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageVersion Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
+    <PackageVersion Include="Xamarin.AndroidX.Core" Version="1.13.1" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <!-- Analyzers and dev packages -->
