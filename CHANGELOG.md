@@ -1,3 +1,10 @@
+4.77.1
+======
+
+* Adjust issuer validation to accept differing paths https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5466
+* Added better error message for OIDC error https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5433
+* Revert changes made for Http2 https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5462
+
 4.77.0
 ======
 ### Features
