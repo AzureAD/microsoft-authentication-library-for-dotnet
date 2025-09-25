@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.Utils;
@@ -99,6 +100,21 @@ namespace Microsoft.Identity.Client
                 Config.ClientCapabilities = clientCapabilities;
             }
 
+            return this;
+        }
+
+        /// <summary>
+        /// TEST HOOK ONLY: override the key provider used by IMDSv2.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal ManagedIdentityApplicationBuilder WithManagedIdentityKeyProviderForTests(IManagedIdentityKeyProvider provider)
+        {
+            if (provider is null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+            
+            Config.ManagedIdentityKeyProviderForTests = provider;
             return this;
         }
 

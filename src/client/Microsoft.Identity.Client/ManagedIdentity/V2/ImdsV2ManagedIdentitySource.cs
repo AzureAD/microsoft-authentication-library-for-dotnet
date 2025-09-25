@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -203,11 +204,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString() }
             };
 
-            string attestationJwt = string.Empty;
-
             // Normalize endpoint
-            string normalizedEndpoint = NormalizeAttestationEndpoint(attestationEndpoint, _requestContext.Logger);
-            if (string.IsNullOrEmpty(normalizedEndpoint))
+            Uri normalizedEndpoint = NormalizeAttestationEndpoint(attestationEndpoint, _requestContext.Logger);
+            if (normalizedEndpoint == null)
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     "attestation_endpoint_invalid",
@@ -215,43 +214,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     null, ManagedIdentitySource.ImdsV2, null);
             }
 
-            if (managedIdentityKeyInfo.Type == ManagedIdentityKeyType.KeyGuard)
-            {
-                // 1) Resolve provider (must be installed via .WithMtlsProofOfPossession(), see #5483)
-                var provider = _requestContext.AttestationTokenProvider
-                    ?? throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                        "attestation_provider_missing",
-                        "[ImdsV2] KeyGuard key requires attestation, but no provider is registered.",
-                        null, ManagedIdentitySource.ImdsV2, null);
-
-                // 2) Ensure the key is RSACng (KeyGuard exposes a CNG handle on Windows)
-                var rsaCng = managedIdentityKeyInfo.Key as System.Security.Cryptography.RSACng
-                    ?? throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                        "keyguard_requires_cng",
-                        "[ImdsV2] KeyGuard attestation currently supports only RSA CNG keys on Windows.",
-                        null, ManagedIdentitySource.ImdsV2, null);
-
-                // 3) Build the attestation input
-                var attestationInput = new AttestationTokenInput
-                {
-                    ClientId = clientId,
-                    AttestationEndpoint = new Uri(normalizedEndpoint), // ensure CsrMetadata exposes this
-                    KeyHandle = rsaCng.Key.Handle // keep rsaCng alive while the provider runs
-                };
-
-                // 4) Obtain the token
-                var attResp = await provider(attestationInput, _requestContext.UserCancellationToken).ConfigureAwait(false);
-
-                if (attResp == null || string.IsNullOrWhiteSpace(attResp.AttestationToken))
-                {
-                    throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                        "attestation_empty",
-                        "[ImdsV2] Attestation provider returned an empty token.",
-                        null, ManagedIdentitySource.ImdsV2, null);
-                }
-
-                attestationJwt = attResp.AttestationToken;
-            }
+            // Ask helper for JWT only for KeyGuard keys
+            string attestationJwt = (managedIdentityKeyInfo.Type == ManagedIdentityKeyType.KeyGuard)
+                ? await GetAttestationJwtAsync(
+                    clientId,
+                    normalizedEndpoint,
+                    managedIdentityKeyInfo,
+                    _requestContext.UserCancellationToken).ConfigureAwait(false)
+                : string.Empty;
 
             var certificateRequestBody = new CertificateRequestBody()
             {
@@ -291,6 +261,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     (int)response.StatusCode);
             }
 
+            if (response == null)
+            {
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    "[ImdsV2] Certificate request returned no response.",
+                    null,
+                    ManagedIdentitySource.ImdsV2,
+                    null);
+            }
+
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
@@ -311,8 +291,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
 
-            var keyInfo = await _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider
-                .GetOrCreateKeyAsync(_requestContext.Logger, _requestContext.UserCancellationToken).ConfigureAwait(false);
+            IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.Config.ManagedIdentityKeyProviderForTests 
+                ?? _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
+
+            ManagedIdentityKeyInfo keyInfo = await keyProvider
+                .GetOrCreateKeyAsync(
+                _requestContext.Logger, 
+                _requestContext.UserCancellationToken)
+                .ConfigureAwait(false);
 
             var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(keyInfo.Key, csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
@@ -368,7 +354,52 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return queryParams;
         }
 
-        private static string NormalizeAttestationEndpoint(string rawEndpoint, ILoggerAdapter logger)
+        private async Task<string> GetAttestationJwtAsync(
+            string clientId, 
+            Uri attestationEndpoint, 
+            ManagedIdentityKeyInfo keyInfo, 
+            CancellationToken cancellationToken)
+        {
+            // Provider is a local dependency; missing provider is a client error (not service)
+            var provider = _requestContext.AttestationTokenProvider;
+
+            // KeyGuard requires RSACng on Windows
+            if (keyInfo.Type == ManagedIdentityKeyType.KeyGuard &&
+                keyInfo.Key is not System.Security.Cryptography.RSACng rsaCng)
+            {
+                throw new MsalClientException(
+                    "keyguard_requires_cng",
+                    "[ImdsV2] KeyGuard attestation currently supports only RSA CNG keys on Windows.");
+            }
+
+            var input = new AttestationTokenInput
+            {
+                ClientId = clientId,
+                AttestationEndpoint = attestationEndpoint,
+                KeyHandle = (keyInfo.Key as System.Security.Cryptography.RSACng)?.Key.Handle
+            };
+
+            var response = await provider(input, cancellationToken).ConfigureAwait(false);
+            if (response == null || string.IsNullOrWhiteSpace(response.AttestationToken))
+            {
+                throw new MsalClientException(
+                    "attestation_empty",
+                    "[ImdsV2] Attestation provider returned an empty token.");
+            }
+
+            Console.WriteLine(response.AttestationToken);
+
+            return response.AttestationToken;
+        }
+
+        /// <summary>
+        /// Temporarily normalize attestation endpoint values to a full https:// URI.
+        /// IMDS team will eventually return a full URI. 
+        /// </summary>
+        /// <param name="rawEndpoint"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        private static Uri NormalizeAttestationEndpoint(string rawEndpoint, ILoggerAdapter logger)
         {
             if (string.IsNullOrWhiteSpace(rawEndpoint))
             {
@@ -382,19 +413,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (Uri.TryCreate(rawEndpoint, UriKind.Absolute, out var absolute) &&
                 (absolute.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase)))
             {
-                return absolute.ToString();
+                return absolute;
             }
 
             // If it has no scheme (common service behavior returning only host)
             // prepend https:// and try again.
-            if (!rawEndpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-                !rawEndpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            if (!rawEndpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             {
                 var candidate = "https://" + rawEndpoint;
                 if (Uri.TryCreate(candidate, UriKind.Absolute, out var httpsUri))
                 {
-                    logger.Info(() => $"[Managed Identity] Normalized attestation endpoint '{rawEndpoint}' -> '{candidate}'.");
-                    return httpsUri.ToString();
+                    logger.Info(() => $"[Managed Identity] Normalized attestation endpoint '{rawEndpoint}' -> '{httpsUri.ToString()}'.");
+                    return httpsUri;
                 }
             }
 
@@ -406,7 +436,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     logger.Warning($"[Managed Identity] Attestation endpoint uses unsupported scheme '{anyUri.Scheme}'. HTTPS is required.");
                     return null;
                 }
-                return anyUri.ToString();
+                return anyUri;
             }
 
             logger.Warning($"[Managed Identity] Failed to normalize attestation endpoint value '{rawEndpoint}'.");

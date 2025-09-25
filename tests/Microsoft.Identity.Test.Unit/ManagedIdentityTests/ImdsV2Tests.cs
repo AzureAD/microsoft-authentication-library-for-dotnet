@@ -5,6 +5,7 @@ using System;
 using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -34,6 +35,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             "1.0.0",
             enablePiiLogging: false
         );
+
+        // Fake attestation provider used by mTLS PoP tests so we never hit the real service
+        private static readonly Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>>
+            s_fakeAttestationProvider =
+                (input, ct) => Task.FromResult(new AttestationTokenResponse
+                {
+                    AttestationToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.attestation.sig"
+                });
+
         public const string Bearer = "Bearer";
         public const string MTLSPoP = "mtls_pop";
 
@@ -63,7 +73,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
             bool addProbeMock = true,
-            bool addSourceCheck = true)
+            bool addSourceCheck = true,
+            bool useInMemoryKeys = false,
+            bool useKeyGuardKeys = false)
         {
             ManagedIdentityApplicationBuilder miBuilder = null;
 
@@ -82,8 +94,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 .WithRetryPolicyFactory(_testRetryPolicyFactory)
                 .WithCsrFactory(_testCsrFactory);
 
-            
-            
+            // Choose deterministic key source for tests.
+            if (useKeyGuardKeys)
+            {
+                // Force KeyGuard keys to deterministically exercise the attestation path.
+                miBuilder.WithManagedIdentityKeyProviderForTests(new TestKeyGuardManagedIdentityKeyProvider());
+            }
+            else if (useInMemoryKeys)
+            {
+                // Default for bearer tests: no attestation.
+                miBuilder.WithManagedIdentityKeyProviderForTests(new InMemoryManagedIdentityKeyProvider());
+            }
+
+            // Disabling shared cache options to avoid cross test pollution.
+            miBuilder.Config.AccessorOptions = null;
 
             var managedIdentityApp = miBuilder.Build();
 
@@ -121,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, useInMemoryKeys: true).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
 
@@ -155,7 +179,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 #region Identity 1
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, useInMemoryKeys: true).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
 
@@ -179,7 +203,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 #region Identity 2
                 UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
                 string identity2Id = "some_other_id";
-                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, identity2Type, identity2Id, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
+                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, identity2Type, identity2Id, addProbeMock: false, addSourceCheck: false, useInMemoryKeys: true).ConfigureAwait(false); // source is already cached
 
                 AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id);
 
@@ -215,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, useInMemoryKeys: true).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredRawCertificate); // cert will be expired on second request
 
@@ -257,12 +281,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, useKeyGuardKeys: true).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, mTLSPop: true);
 
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -274,6 +299,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // TODO: broken until Gladwin's PR is merged in
                 /*result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -296,12 +322,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 #region Identity 1
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, useKeyGuardKeys: true).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, mTLSPop: true);
 
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -330,12 +357,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     identity2Type,
                     identity2Id,
                     addProbeMock: false, 
-                    addSourceCheck: false).ConfigureAwait(false); // source is already cached
+                    addSourceCheck: false,
+                    useKeyGuardKeys: true).ConfigureAwait(false); // source is already cached
 
                 AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id, mTLSPop: true);
 
                 var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result2);
@@ -347,6 +376,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // TODO: broken until Gladwin's PR is merged in
                 /*result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result2);
@@ -371,12 +401,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, useKeyGuardKeys: true).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredRawCertificate, mTLSPop: true);
 
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -391,6 +422,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);

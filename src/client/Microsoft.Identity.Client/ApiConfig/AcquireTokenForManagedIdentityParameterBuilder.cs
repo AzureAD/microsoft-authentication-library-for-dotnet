@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -94,6 +95,24 @@ namespace Microsoft.Identity.Client
 
             return ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity;
         }
+
+        /// <summary>
+        /// TEST HOOK ONLY: Allows unit tests to inject a fake attestation-token provider
+        /// so we don't hit the real attestation service. Not part of the public API.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal AcquireTokenForManagedIdentityParameterBuilder WithAttestationProviderForTests(
+            Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> provider)
+        {
+            if (provider is null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
+            CommonParameters.AttestationTokenProvider = provider;
+            return this;
+        }
+
         private static void ApplyMtlsPopAndAttestation(
             AcquireTokenCommonParameters acquireTokenCommonParameters,
             AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)

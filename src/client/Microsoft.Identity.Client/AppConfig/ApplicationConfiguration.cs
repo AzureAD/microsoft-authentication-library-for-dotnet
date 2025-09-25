@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
@@ -128,6 +129,12 @@ namespace Microsoft.Identity.Client
 
         internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
         internal ICsrFactory CsrFactory { get; set; }
+
+        /// <summary>
+        /// TEST HOOK ONLY: If set, IMDSv2 will use this provider instead of the platform's
+        /// ManagedIdentityKeyProvider. This keeps tests offline and avoids KeyGuard/attestation.
+        /// </summary>
+        internal IManagedIdentityKeyProvider ManagedIdentityKeyProviderForTests { get; set; }
 
         #region ClientCredentials
 
