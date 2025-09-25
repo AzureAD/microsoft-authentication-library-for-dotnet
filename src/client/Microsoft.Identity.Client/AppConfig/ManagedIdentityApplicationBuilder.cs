@@ -103,6 +103,34 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request.
+        /// </summary>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority
+        /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <remarks>This API is experimental and it may change in future versions of the library without a major version increment</remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public ManagedIdentityApplicationBuilder WithExtraQueryParameters(IDictionary<string, string> extraQueryParameters)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            if (Config.ExtraQueryParameters == null)
+            {
+                Config.ExtraQueryParameters = extraQueryParameters;
+            }
+            else
+            {
+                foreach (var kvp in extraQueryParameters)
+                {
+                    Config.ExtraQueryParameters[kvp.Key] = kvp.Value; // This will overwrite if key exists, or add if new
+                }
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Builds an instance of <see cref="IManagedIdentityApplication"/> 
         /// from the parameters set in the <see cref="ManagedIdentityApplicationBuilder"/>.
         /// </summary>

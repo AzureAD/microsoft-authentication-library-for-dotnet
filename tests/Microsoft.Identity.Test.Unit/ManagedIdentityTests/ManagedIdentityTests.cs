@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -1507,6 +1508,71 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             return managedIdentity;
+        }
+
+        [TestMethod]
+        public async Task ManagedIdentityWithExtraQueryParametersTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                var extraQueryParameters = new Dictionary<string, string>
+                    {
+                        { "param1", "value1" },
+                        { "param2", "value2" },
+                        { "custom_param", "custom_value" }
+                    };
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .WithExtraQueryParameters(extraQueryParameters)
+                    .WithHttpManager(httpManager);
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.AppService,
+                    extraQueryParameters: extraQueryParameters);
+
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public void WithExtraQueryParameters_MultipleCallsMergeValues()
+        {
+            var firstParams = new Dictionary<string, string>
+                {
+                    { "param1", "value1" },
+                    { "param2", "value2" }
+                };
+
+            var secondParams = new Dictionary<string, string>
+                {
+                    { "param3", "value3" },
+                    { "param4", "value4" },
+                    { "param1", "newvalue1" } // This should overwrite the first param1
+                };
+
+            var miBuilder = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(firstParams)
+                .WithExtraQueryParameters(secondParams);
+
+            // Verify that parameters are merged
+            Assert.AreEqual(4, miBuilder.Config.ExtraQueryParameters.Count);
+    
+            // Verify merged values
+            Assert.AreEqual("newvalue1", miBuilder.Config.ExtraQueryParameters["param1"]);
+            Assert.AreEqual("value2", miBuilder.Config.ExtraQueryParameters["param2"]);
+            Assert.AreEqual("value3", miBuilder.Config.ExtraQueryParameters["param3"]);
+            Assert.AreEqual("value4", miBuilder.Config.ExtraQueryParameters["param4"]);
         }
     }
 }

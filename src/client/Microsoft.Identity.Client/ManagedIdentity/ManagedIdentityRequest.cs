@@ -72,5 +72,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 logger.Info("[Managed Identity] Passing SHA-256 of the 'revoked' token to Managed Identity endpoint.");
             }
         }
+
+        /// <summary>
+        /// Adds extra query parameters to the Managed Identity request.
+        /// </summary>
+        /// <param name="extraQueryParameters">Dictionary containing additional query parameters to append to the request.
+        /// The parameter can be null.</param>
+        /// <param name="logger">Logger instance for recording the operation.</param>
+        internal void AddExtraQueryParams(IDictionary<string, string> extraQueryParameters, ILoggerAdapter logger)
+        {
+            if (extraQueryParameters != null)
+            {
+                foreach (var kvp in extraQueryParameters)
+                {
+                    QueryParameters[kvp.Key] = kvp.Value;
+                }
+
+                logger.Info($"[Managed Identity] Adding {extraQueryParameters.Count} extra query parameters to Managed Identity request.");
+            }
+        }
     }
 }
