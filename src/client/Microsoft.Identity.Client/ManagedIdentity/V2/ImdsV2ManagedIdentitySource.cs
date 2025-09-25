@@ -387,8 +387,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     "[ImdsV2] Attestation provider returned an empty token.");
             }
 
-            Console.WriteLine(response.AttestationToken);
-
             return response.AttestationToken;
         }
 
