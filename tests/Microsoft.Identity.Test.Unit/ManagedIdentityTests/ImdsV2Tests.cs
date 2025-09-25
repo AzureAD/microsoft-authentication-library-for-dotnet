@@ -25,8 +25,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ImdsV2Tests : TestBase
     {
+        private readonly TestCsrFactory _testCsrFactory = new TestCsrFactory(); 
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
-        private readonly TestCsrFactory _testCsrFactory = new TestCsrFactory();
         private readonly IdentityLoggerAdapter _identityLoggerAdapter = new IdentityLoggerAdapter(
             new TestIdentityLogger(),
             Guid.Empty,

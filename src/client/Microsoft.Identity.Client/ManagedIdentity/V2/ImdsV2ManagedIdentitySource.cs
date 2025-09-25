@@ -45,12 +45,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.CsrMetadataProbe);
 
+            IValidatedProbeEndpointFactory validatedProbeEndpointFactory = requestContext.ServiceBundle.Config.ValidatedProbeEndpointFactory;
+
             HttpResponse response = null;
 
             try
             {
                 response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
-                    ImdsManagedIdentitySource.GetValidatedEndpoint(requestContext.Logger, CsrMetadataPath, queryParams),
+                    validatedProbeEndpointFactory.GetValidatedEndpoint(requestContext.Logger, CsrMetadataPath, queryParams),
                     headers,
                     body: null,
                     method: HttpMethod.Get,

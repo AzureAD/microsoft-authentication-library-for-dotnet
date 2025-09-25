@@ -178,27 +178,31 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static Uri GetValidatedEndpoint(
             ILoggerAdapter logger,
             string subPath,
-            string queryParams = null
+            string queryParams = null,
+            string existingImdsBaseEndpoint = null
             )
         {
-            UriBuilder builder;
-
-            if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
+            string baseEndpoint = null;
+            if (!string.IsNullOrEmpty(existingImdsBaseEndpoint))
+            {
+                logger.Verbose(() => "[Managed Identity] Using IMDS endpoint from an instance of IValidatedProbeEndpointFactory : " + existingImdsBaseEndpoint);
+                baseEndpoint = existingImdsBaseEndpoint;
+            }
+            else if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
             {
                 logger.Verbose(() => "[Managed Identity] Environment variable AZURE_POD_IDENTITY_AUTHORITY_HOST for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);
-                builder = new UriBuilder(EnvironmentVariables.PodIdentityEndpoint)
-                {
-                    Path = subPath
-                };
+                baseEndpoint = EnvironmentVariables.PodIdentityEndpoint;
             }
             else
             {
                 logger.Verbose(() => "[Managed Identity] Unable to find AZURE_POD_IDENTITY_AUTHORITY_HOST environment variable for IMDS, using the default endpoint.");
-                builder = new UriBuilder(DefaultImdsBaseEndpoint)
-                {
-                    Path = subPath
-                };
+                baseEndpoint = DefaultImdsBaseEndpoint;
             }
+
+            UriBuilder builder = new UriBuilder(baseEndpoint)
+            {
+                Path = subPath
+            };
 
             if (!string.IsNullOrEmpty(queryParams))
             {

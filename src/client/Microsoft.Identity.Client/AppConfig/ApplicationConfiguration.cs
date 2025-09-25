@@ -128,6 +128,7 @@ namespace Microsoft.Identity.Client
 
         internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
         internal ICsrFactory CsrFactory { get; set; }
+        internal IValidatedProbeEndpointFactory ValidatedProbeEndpointFactory { get; set; }
 
         #region ClientCredentials
 

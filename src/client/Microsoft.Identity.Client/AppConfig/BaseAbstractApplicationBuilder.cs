@@ -46,6 +46,12 @@ namespace Microsoft.Identity.Client
             {
                 Config.CsrFactory = new DefaultCsrFactory();
             }
+
+            // Ensure the default validated probe endpoint factory is set if the test factory was not provided
+            if (Config.ValidatedProbeEndpointFactory == null)
+            {
+                Config.ValidatedProbeEndpointFactory = new DefaultValidatedProbeEndpointFactory();
+            }
         }
 
         internal ApplicationConfiguration Config { get; }
@@ -261,6 +267,17 @@ namespace Microsoft.Identity.Client
         internal T WithCsrFactory(ICsrFactory factory)
         {
             Config.CsrFactory = factory;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Internal only: Allows tests to inject a custom validated probe endpoint factory.
+        /// </summary>
+        /// <param name="factory">The validated probe endpoint factory to use.</param>
+        /// <returns>The builder for chaining.</returns>
+        internal T WithValidatedProbeEndpointFactory(IValidatedProbeEndpointFactory factory)
+        {
+            Config.ValidatedProbeEndpointFactory = factory;
             return (T)this;
         }
 

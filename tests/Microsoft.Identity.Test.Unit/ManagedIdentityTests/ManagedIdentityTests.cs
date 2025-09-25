@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string ExpectedCorrelationId = "Some GUID";
 
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
+        private readonly TestValidatedProbeEndpointFactory _testValidatedProbeEndpointFactory = new TestValidatedProbeEndpointFactory();
 
         private void AddImdsV2CsrMockHandlerIfNeeded(
             ManagedIdentitySource managedIdentitySource,
@@ -1176,23 +1177,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             string UnsupportedEndpoint = "unsupported://endpoint";
 
             using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
             {
-                // Set unsupported environment variable
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, UnsupportedEndpoint);
 
-                // Create the Managed Identity Application
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithValidatedProbeEndpointFactory(_testValidatedProbeEndpointFactory);
 
-                // Build the application
                 var mi = miBuilder.Build();
 
-                // Attempt to acquire a token and verify an exception is thrown
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
                         .ExecuteAsync()
                         .ConfigureAwait(false)).ConfigureAwait(false);
 
-                // Verify the exception details
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
             }
