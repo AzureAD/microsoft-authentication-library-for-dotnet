@@ -10,14 +10,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
-    public class TenantIdTests
+    public class TenantIdTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [DataTestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.Common, DisplayName = "Common endpoint")]
         [DataRow(TestConstants.AuthorityNotKnownCommon, TestConstants.Common, DisplayName = "Common endpoint")]

@@ -25,15 +25,9 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class IntegratedWindowsAuthAndUsernamePasswordTests
+    public class IntegratedWindowsAuthAndUsernamePasswordTests : TestBase
     {
         private string _password = "x";
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         private MockHttpMessageHandler AddMockHandlerDefaultUserRealmDiscovery(MockHttpManager httpManager)
         {
