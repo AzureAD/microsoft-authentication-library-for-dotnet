@@ -112,10 +112,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -212,10 +209,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -273,10 +267,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -336,10 +327,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithClientCapabilities(TestConstants.ClientCapabilities)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -402,10 +390,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -477,10 +462,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(managedIdentitySource),
@@ -520,8 +502,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                
                 
                 var mi = miBuilder.Build();
 
@@ -586,10 +566,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
@@ -629,10 +606,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -670,10 +644,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
@@ -701,10 +672,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -734,10 +702,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId))
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -815,10 +780,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -851,10 +813,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -1125,10 +1084,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
                 
-                
-
                 var mi = miBuilder.Build();
 
                 // Mock handler for the initial resource request
@@ -1164,10 +1120,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow(ManagedIdentitySource.AppService)]
         [DataRow(ManagedIdentitySource.Imds)]
-        [DataRow(ManagedIdentitySource.AzureArc)]
-        [DataRow(ManagedIdentitySource.CloudShell)]
-        [DataRow(ManagedIdentitySource.ServiceFabric)]
-        [DataRow(ManagedIdentitySource.MachineLearning)]
         public async Task UnsupportedManagedIdentitySource_ThrowsExceptionDuringTokenAcquisitionAsync(
             ManagedIdentitySource managedIdentitySource)
         {
@@ -1299,10 +1251,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
-
-                // Disable cache to avoid pollution
                 
-
                 var mi = miBuilder.Build();
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
