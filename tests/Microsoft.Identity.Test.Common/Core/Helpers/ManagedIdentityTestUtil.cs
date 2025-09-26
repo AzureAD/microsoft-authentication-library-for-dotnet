@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     break;
             }
 
-            // Disabling shared cache options to avoid cross test pollution.
+            
             builder.Config.AccessorOptions = null;
 
             return builder;

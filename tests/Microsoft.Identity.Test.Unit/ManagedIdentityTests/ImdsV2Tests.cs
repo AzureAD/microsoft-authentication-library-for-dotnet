@@ -82,8 +82,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 .WithRetryPolicyFactory(_testRetryPolicyFactory)
                 .WithCsrFactory(_testCsrFactory);
 
-            // Disabling shared cache options to avoid cross test pollution.
-            miBuilder.Config.AccessorOptions = null;
+            
+            
 
             var managedIdentityApp = miBuilder.Build();
 
@@ -177,9 +177,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 #endregion Identity 1
 
                 #region Identity 2
-                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
+                UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
+                string identity2Id = "some_other_id";
+                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, identity2Type, identity2Id, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
 
-                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
+                AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id);
 
                 var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
@@ -321,9 +323,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 #endregion Identity 1
 
                 #region Identity 2
-                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
+                UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
+                string identity2Id = "some_other_id";
+                var managedIdentityApp2 = await CreateManagedIdentityAsync(
+                    httpManager,
+                    identity2Type,
+                    identity2Id,
+                    addProbeMock: false, 
+                    addSourceCheck: false).ConfigureAwait(false); // source is already cached
 
-                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, mTLSPop: true);
+                AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id, mTLSPop: true);
 
                 var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
