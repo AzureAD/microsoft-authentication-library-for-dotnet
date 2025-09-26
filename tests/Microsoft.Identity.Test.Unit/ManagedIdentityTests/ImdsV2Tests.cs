@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 #region Identity 2
                 UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
-                string identity2Id = TestConstants.ClientId2;
+                string identity2Id = "some_other_id";
                 var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, identity2Type, identity2Id, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
 
                 AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id);
@@ -324,7 +324,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 #region Identity 2
                 UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
-                string identity2Id = TestConstants.ClientId2;
+                string identity2Id = "some_other_id";
                 var managedIdentityApp2 = await CreateManagedIdentityAsync(
                     httpManager,
                     identity2Type,
