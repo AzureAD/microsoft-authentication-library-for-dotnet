@@ -6,7 +6,7 @@ This document outlines the design and implementation details for **certificate a
 
 In the MSI v2 authentication flow, MSAL first obtains a credential (certificate) from IMDS and uses it to request a token from eSTS. In some cases, eSTS may respond with an error indicating that the certificate/attestation is no longer valid. When this occurs, **MSAL must obtain a new certificate** before retrying the token request with eSTS.
 
-### certificate revocation
+### certificate revocation (eSTS revokes the certificate during token acquisition) 
 
 ~~~mermaid
 sequenceDiagram
@@ -16,7 +16,7 @@ sequenceDiagram
     participant eSTS
 
     Application ->> MSAL: 1. Request Access Token
-    MSAL ->> IMDS: 2. Request Certificate
+    MSAL ->> IMDS: 2. Request Certificate (with a CSR) via /issuecredential
     IMDS -->> MSAL: 3. Return Certificate
     MSAL ->> eSTS: 4. Exchange Certificate for Access Token
     eSTS -->> MSAL: 5. Response (HTTP 200 / error)
@@ -38,7 +38,7 @@ sequenceDiagram
     MSAL ->> Application: 10. Return Access Token
 ~~~
 
-### claims challenge
+### claims challenge (Reource like Graph, rejects the token while using to gain access) 
 
 ~~~mermaid
 sequenceDiagram
@@ -49,7 +49,7 @@ sequenceDiagram
     participant Resource
 
     Application ->> MSAL: 1. Request Access Token
-    MSAL ->> IMDS: 2. Request Certificate
+    MSAL ->> IMDS: 2. Request Certificate (with a CSR) via /issuecredential
     IMDS -->> MSAL: 3. Return Certificate
     MSAL ->> eSTS: 4. Exchange Certificate for Access Token
     eSTS -->> MSAL: 5. Return Access Token
@@ -71,7 +71,6 @@ sequenceDiagram
 
 - **Revoked/Invalid Certificate (MSAL-handled):** Token request fails due to certificate/attestation issues (AADSTS 1000610–1000614). **MSAL** re-mints the certificate via `/issuecredential?bypass_cache=true` and retries.
 - **Unspecified Credential Issue (MSAL-handled):** eSTS returns `invalid_client` without suberror. **MSAL** treats as credential issue, re-mints certificate, retries.
-- **Claims Challenge (App + MSAL):** Resource returns 401 with claims. **App** passes claims to MSAL. **MSAL** re-mints certificate (`bypass_cache=true`) and acquires token **with claims**.
 
 ## eSTS Response to Indicate Specific Error
 
@@ -103,7 +102,9 @@ For any of the above codes, **MSAL MUST**:
 
 > These errors reflect invalid or stale certificate/attestation input; remediation is internal to MSAL. No developer action is required.
 
-## Resource Token Rejection Scenario (claims challenge)
+## Token Revocation Scenarios
+
+- **Claims Challenge (App + MSAL):** Resource returns 401 with claims. **App** passes claims to MSAL. **MSAL** re-mints certificate (`bypass_cache=true`) and acquires token **with claims**.
 
 A resource may reject a token due to policy/claims requirements. When this occurs:
 
