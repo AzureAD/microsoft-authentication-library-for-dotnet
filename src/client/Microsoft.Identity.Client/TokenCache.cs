@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client
                 // filter by identifier of the user instead
                 accessTokensToDelete.RemoveAll(
                             item => !item.HomeAccountId.Equals(homeAccountId, StringComparison.OrdinalIgnoreCase));
-                requestParams.RequestContext.Logger.Info(() => "Matching entries after filtering by user - " + accessTokensToDelete.Count);
+                requestParams.RequestContext.Logger.Info($"Matching entries after filtering by user - {accessTokensToDelete.Count}");
             }
 
             foreach (var cacheItem in accessTokensToDelete)
