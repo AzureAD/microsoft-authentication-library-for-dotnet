@@ -106,7 +106,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// TEST HOOK ONLY: override the key provider used by IMDSv2.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
         internal ManagedIdentityApplicationBuilder WithManagedIdentityKeyProviderForTests(IManagedIdentityKeyProvider provider)
         {
             if (provider is null)

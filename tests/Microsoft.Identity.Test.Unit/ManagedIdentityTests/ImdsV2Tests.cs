@@ -592,5 +592,100 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidRawCertificate, null));
         }
         #endregion
+
+        #region Attestation Tests
+        [TestMethod]
+        public async Task MtlsPop_AttestationProviderMissing_ThrowsClientException()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var mi = await CreateManagedIdentityAsync(httpManager, useKeyGuardKeys: true).ConfigureAwait(false);
+
+                // CSR for both the probe and the actual request
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        // Intentionally DO NOT call .WithAttestationProviderForTests(...)
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual("attestation_failure", ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_AttestationProviderReturnsNull_ThrowsClientException()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var mi = await CreateManagedIdentityAsync(httpManager, useKeyGuardKeys: true).ConfigureAwait(false);
+
+                // CSR for both the probe and the actual request
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                var nullProvider = new Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>>(
+                    (input, ct) => Task.FromResult<AttestationTokenResponse>(null));
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationProviderForTests(nullProvider)
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_AttestationProviderReturnsEmptyToken_ThrowsClientException()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var mi = await CreateManagedIdentityAsync(httpManager, useKeyGuardKeys: true).ConfigureAwait(false);
+
+                // CSR for both the probe and the actual request
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                var emptyProvider = new Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>>(
+                    (input, ct) => Task.FromResult(new AttestationTokenResponse { AttestationToken = "   " }));
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationProviderForTests(emptyProvider)
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task mTLSPop_RequestedWithoutKeyGuard_ThrowsClientException()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Force in-memory keys (i.e., not KeyGuard)
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    useInMemoryKeys: true
+                ).ConfigureAwait(false);
+
+                // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession() // request PoP on a non-KeyGuard env
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual("mtls_pop_requires_keyguard", ex.ErrorCode);
+            }
+        }
+        #endregion
     }
 }

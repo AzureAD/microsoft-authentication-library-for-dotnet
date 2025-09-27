@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             bool probeMode)
         {
 #if NET462
-            requestContext.Logger.Info(() => "[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
+            requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
             return await Task.FromResult<CsrMetadata>(null).ConfigureAwait(false);
 #else
             var queryParams = ImdsV2QueryParamsHelper(requestContext);
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 if (probeMode)
                 {
-                    requestContext.Logger.Info(() => $"[Managed Identity] IMDSv2 CSR endpoint failure. Exception occurred while sending request to CSR metadata endpoint: ${ex}");
+                    requestContext.Logger.Info($"[Managed Identity] IMDSv2 CSR endpoint failure. Exception occurred while sending request to CSR metadata endpoint: {ex}");
                     return null;
                 }
                 else
@@ -190,8 +190,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
             string clientId,
-            string csr,
             string attestationEndpoint,
+            string csr,
             ManagedIdentityKeyInfo managedIdentityKeyInfo)
         {
             var queryParams = ImdsV2QueryParamsHelper(_requestContext);
@@ -204,24 +204,27 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString() }
             };
 
-            // Normalize endpoint
-            Uri normalizedEndpoint = NormalizeAttestationEndpoint(attestationEndpoint, _requestContext.Logger);
-            if (normalizedEndpoint == null)
+            if (_isMtlsPopRequested && managedIdentityKeyInfo.Type != ManagedIdentityKeyType.KeyGuard)
             {
-                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    "attestation_endpoint_invalid",
-                    $"[ImdsV2] Attestation endpoint '{attestationEndpoint}' is invalid or unsupported.",
-                    null, ManagedIdentitySource.ImdsV2, null);
+                throw new MsalClientException(
+                    "mtls_pop_requires_keyguard",
+                    "[ImdsV2] mTLS Proof-of-Possession requires a KeyGuard-backed key. Enable KeyGuard or use a KeyGuard-supported environment.");
             }
 
+            // TODO: : Normalize and validate attestation endpoint Code needs to be removed 
+            // once IMDS team start returning full URI
+            Uri normalizedEndpoint = NormalizeAttestationEndpoint(attestationEndpoint, _requestContext.Logger);
+
             // Ask helper for JWT only for KeyGuard keys
-            string attestationJwt = (managedIdentityKeyInfo.Type == ManagedIdentityKeyType.KeyGuard)
-                ? await GetAttestationJwtAsync(
+            string attestationJwt = string.Empty;
+            if (managedIdentityKeyInfo.Type == ManagedIdentityKeyType.KeyGuard)
+            {
+                attestationJwt = await GetAttestationJwtAsync(
                     clientId,
                     normalizedEndpoint,
                     managedIdentityKeyInfo,
-                    _requestContext.UserCancellationToken).ConfigureAwait(false)
-                : string.Empty;
+                    _requestContext.UserCancellationToken).ConfigureAwait(false);
+            }
 
             var certificateRequestBody = new CertificateRequestBody()
             {
@@ -261,16 +264,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     (int)response.StatusCode);
             }
 
-            if (response == null)
-            {
-                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.ManagedIdentityRequestFailed,
-                    "[ImdsV2] Certificate request returned no response.",
-                    null,
-                    ManagedIdentitySource.ImdsV2,
-                    null);
-            }
-
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
@@ -304,8 +297,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(
                 csrMetadata.ClientId,
-                csr,
                 csrMetadata.AttestationEndpoint,
+                csr,
                 keyInfo).ConfigureAwait(false);
 
             // transform certificateRequestResponse.Certificate to x509 with private key
@@ -346,6 +339,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
                 requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
                 requestContext.Logger);
+            
             if (userAssignedIdQueryParam != null)
             {
                 queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
@@ -354,13 +348,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return queryParams;
         }
 
+        /// <summary>
+        /// Obtains an attestation JWT for the KeyGuard/CSR payload using the configured
+        /// attestation provider and normalized endpoint.
+        /// </summary>
+        /// <param name="clientId">Client ID to be sent to the attestation provider.</param>
+        /// <param name="attestationEndpoint">The attestation endpoint.</param>
+        /// <param name="keyInfo">The key information.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>JWT string suitable for the IMDSv2 attested POP flow.</returns>
+        /// <exception cref="MsalClientException">Wraps client/network failures.</exception>
+
         private async Task<string> GetAttestationJwtAsync(
             string clientId, 
             Uri attestationEndpoint, 
             ManagedIdentityKeyInfo keyInfo, 
             CancellationToken cancellationToken)
         {
-            // Provider is a local dependency; missing provider is a client error (not service)
+            // Provider is a local dependency; missing provider is a client error
             var provider = _requestContext.AttestationTokenProvider;
 
             // KeyGuard requires RSACng on Windows
@@ -372,6 +377,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     "[ImdsV2] KeyGuard attestation currently supports only RSA CNG keys on Windows.");
             }
 
+            // Attestation token input
             var input = new AttestationTokenInput
             {
                 ClientId = clientId,
@@ -379,17 +385,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 KeyHandle = (keyInfo.Key as System.Security.Cryptography.RSACng)?.Key.Handle
             };
 
+            // response from provider 
             var response = await provider(input, cancellationToken).ConfigureAwait(false);
+
+            // Validate response
             if (response == null || string.IsNullOrWhiteSpace(response.AttestationToken))
             {
                 throw new MsalClientException(
-                    "attestation_empty",
-                    "[ImdsV2] Attestation provider returned an empty token.");
+                    "attestation_failed",
+                    "[ImdsV2] Attestation provider failed to return an attestation token.");
             }
 
+            // Return the JWT
             return response.AttestationToken;
         }
 
+        //To-do : Remove this method once IMDS team start returning full URI
         /// <summary>
         /// Temporarily normalize attestation endpoint values to a full https:// URI.
         /// IMDS team will eventually return a full URI. 

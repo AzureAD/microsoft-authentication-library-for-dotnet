@@ -100,7 +100,6 @@ namespace Microsoft.Identity.Client
         /// TEST HOOK ONLY: Allows unit tests to inject a fake attestation-token provider
         /// so we don't hit the real attestation service. Not part of the public API.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
         internal AcquireTokenForManagedIdentityParameterBuilder WithAttestationProviderForTests(
             Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> provider)
         {
