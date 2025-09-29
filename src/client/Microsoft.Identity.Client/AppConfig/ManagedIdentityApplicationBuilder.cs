@@ -104,20 +104,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// TEST HOOK ONLY: override the key provider used by IMDSv2.
-        /// </summary>
-        internal ManagedIdentityApplicationBuilder WithManagedIdentityKeyProviderForTests(IManagedIdentityKeyProvider provider)
-        {
-            if (provider is null)
-            {
-                throw new ArgumentNullException(nameof(provider));
-            }
-            
-            Config.ManagedIdentityKeyProviderForTests = provider;
-            return this;
-        }
-
-        /// <summary>
         /// Sets Extra Query Parameters for the query string in the HTTP authentication request.
         /// </summary>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority

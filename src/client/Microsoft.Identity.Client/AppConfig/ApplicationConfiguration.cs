@@ -130,12 +130,6 @@ namespace Microsoft.Identity.Client
         internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
         internal ICsrFactory CsrFactory { get; set; }
 
-        /// <summary>
-        /// TEST HOOK ONLY: If set, IMDSv2 will use this provider instead of the platform's
-        /// ManagedIdentityKeyProvider. This keeps tests offline and avoids KeyGuard/attestation.
-        /// </summary>
-        internal IManagedIdentityKeyProvider ManagedIdentityKeyProviderForTests { get; set; }
-
         #region ClientCredentials
 
         // Indicates if claims or assertions are used within the configuration

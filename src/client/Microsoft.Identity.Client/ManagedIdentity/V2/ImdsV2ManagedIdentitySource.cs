@@ -284,8 +284,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
 
-            IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.Config.ManagedIdentityKeyProviderForTests 
-                ?? _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
+            IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
 
             ManagedIdentityKeyInfo keyInfo = await keyProvider
                 .GetOrCreateKeyAsync(
