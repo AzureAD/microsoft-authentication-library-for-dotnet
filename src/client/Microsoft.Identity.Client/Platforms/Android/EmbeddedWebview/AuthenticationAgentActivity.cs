@@ -70,11 +70,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 Window.SetDecorFitsSystemWindows(false);
                 
                 // For API 35+, ensure proper edge-to-edge behavior
-                if (Build.VERSION.SdkInt >= BuildVersionCodes.VanillaIceCream) // API 35
+                if ((int)Build.VERSION.SdkInt >= 35) // API 35 (VanillaIceCream not available in current binding)
                 {
-                    // Additional API 35 specific configurations
-                    Window.StatusBarColor = global::Android.Graphics.Color.Transparent;
-                    Window.NavigationBarColor = global::Android.Graphics.Color.Transparent;
+                    // Additional API 35 specific configurations using SetStatusBarColor/SetNavigationBarColor methods
+                    Window.SetStatusBarColor(global::Android.Graphics.Color.Transparent);
+                    Window.SetNavigationBarColor(global::Android.Graphics.Color.Transparent);
                 }
             }
 #endif
@@ -85,26 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 #if __ANDROID_30__
             if (Build.VERSION.SdkInt >= BuildVersionCodes.R) // API 30+
             {
-                ViewCompat.SetOnApplyWindowInsetsListener(parentLayout, (v, insets) =>
-                {
-                    var systemBarsInsets = insets.GetInsets(WindowInsetsCompat.Type.SystemBars());
-                    var imeInsets = insets.GetInsets(WindowInsetsCompat.Type.Ime());
-                    
-                    // Apply padding to avoid system UI overlap
-                    var layoutParams = webView.LayoutParameters as RelativeLayout.LayoutParams;
-                    if (layoutParams != null)
-                    {
-                        layoutParams.SetMargins(
-                            systemBarsInsets.Left,
-                            systemBarsInsets.Top,
-                            systemBarsInsets.Right,
-                            Math.Max(systemBarsInsets.Bottom, imeInsets.Bottom)
-                        );
-                        webView.LayoutParameters = layoutParams;
-                    }
-                    
-                    return WindowInsetsCompat.Consumed;
-                });
+                ViewCompat.SetOnApplyWindowInsetsListener(parentLayout, new OnApplyWindowInsetsListener(webView));
             }
 #endif
         }
@@ -251,5 +232,38 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 activity.Finish();
             }
         }
+
+#if __ANDROID_30__
+        private class OnApplyWindowInsetsListener : Java.Lang.Object, AndroidX.Core.View.IOnApplyWindowInsetsListener
+        {
+            private readonly WebView _webView;
+
+            public OnApplyWindowInsetsListener(WebView webView)
+            {
+                _webView = webView;
+            }
+
+            public WindowInsetsCompat OnApplyWindowInsets(global::Android.Views.View v, WindowInsetsCompat insets)
+            {
+                var systemBarsInsets = insets.GetInsets(WindowInsetsCompat.Type.SystemBars());
+                var imeInsets = insets.GetInsets(WindowInsetsCompat.Type.Ime());
+                
+                // Apply padding to avoid system UI overlap
+                var layoutParams = _webView.LayoutParameters as RelativeLayout.LayoutParams;
+                if (layoutParams != null)
+                {
+                    layoutParams.SetMargins(
+                        systemBarsInsets.Left,
+                        systemBarsInsets.Top,
+                        systemBarsInsets.Right,
+                        Math.Max(systemBarsInsets.Bottom, imeInsets.Bottom)
+                    );
+                    _webView.LayoutParameters = layoutParams;
+                }
+                
+                return WindowInsetsCompat.Consumed;
+            }
+        }
+#endif
     }
 }
