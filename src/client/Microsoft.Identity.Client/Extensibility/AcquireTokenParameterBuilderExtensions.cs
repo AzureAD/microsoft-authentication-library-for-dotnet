@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client.Advanced  
 {
@@ -16,13 +17,14 @@ namespace Microsoft.Identity.Client.Advanced
         /// <param name="builder">Parameter builder for a acquiring tokens.</param>
         /// <param name="extraHttpHeaders">additional Http Headers to add to the token request.</param>
         /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This method has been moved to the Microsoft.Identity.Client.Extensibility namespace", false)]
         public static T WithExtraHttpHeaders<T>(
             this AbstractAcquireTokenParameterBuilder<T> builder, 
             IDictionary<string, string> extraHttpHeaders)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            builder.CommonParameters.ExtraHttpHeaders = extraHttpHeaders;
-            return (T)builder;
+            return Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithExtraHttpHeaders(builder, extraHttpHeaders);
         }
     }
 }
@@ -42,10 +44,9 @@ namespace Microsoft.Identity.Client.Extensibility
             this AbstractAcquireTokenParameterBuilder<T> builder,
             IDictionary<string, string> extraHttpHeaders)
             where T : AbstractAcquireTokenParameterBuilder<T>
-        {
-            // Delegate to the Advanced implementation to keep a single source of truth.
-            return Advanced.AcquireTokenParameterBuilderExtensions
-                   .WithExtraHttpHeaders(builder, extraHttpHeaders);
+        {            
+            builder.CommonParameters.ExtraHttpHeaders = extraHttpHeaders;
+            return (T)builder;
         }
     }
 }
