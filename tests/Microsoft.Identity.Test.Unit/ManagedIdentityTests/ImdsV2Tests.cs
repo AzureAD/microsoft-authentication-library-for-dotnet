@@ -49,6 +49,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public const string Bearer = "Bearer";
         public const string MTLSPoP = "mtls_pop";
 
+        private const string altUserAssignedId = "some_other_id";
+
         private void AddMocksToGetEntraToken(
             MockHttpManager httpManager,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
@@ -177,13 +179,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
-        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
-        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
-        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.None, null, null)]                                        // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, altUserAssignedId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, altUserAssignedId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, altUserAssignedId)]       // UAMI
         public async Task BearerTokenTokenIsPerIdentity(
             UserAssignedIdentityId userAssignedIdentityId,
-            string userAssignedId)
+            string userAssignedId,
+            string userAssignedId2)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -209,12 +212,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 1
 
+                ApplicationBase.ResetStateForTest();
+
                 #region Identity 2
                 UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
-                string identity2Id = "some_other_id";
-                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, identity2Type, identity2Id, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
+                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, identity2Type, userAssignedId2).ConfigureAwait(false); // source is already cached
 
-                AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id);
+                AddMocksToGetEntraToken(httpManager, identity2Type, userAssignedId2);
 
                 var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
@@ -320,13 +324,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
-        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
-        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
-        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.None, null, null)]                                          // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, altUserAssignedId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, altUserAssignedId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, altUserAssignedId)]       // UAMI
         public async Task mTLSPopTokenTokenIsPerIdentity(
             UserAssignedIdentityId userAssignedIdentityId,
-            string userAssignedId)
+            string userAssignedId,
+            string userAssignedId2)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -358,18 +363,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);*/
                 #endregion Identity 1
 
+                ApplicationBase.ResetStateForTest();
+
                 #region Identity 2
                 UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
-                string identity2Id = "some_other_id";
                 var managedIdentityApp2 = await CreateManagedIdentityAsync(
                     httpManager,
                     identity2Type,
-                    identity2Id,
-                    addProbeMock: false, 
-                    addSourceCheck: false,
+                    userAssignedId2,
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false); // source is already cached
 
-                AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id, mTLSPop: true);
+                AddMocksToGetEntraToken(httpManager, identity2Type, userAssignedId2, mTLSPop: true);
 
                 var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
