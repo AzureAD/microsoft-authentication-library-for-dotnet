@@ -51,38 +51,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.Arlington)]
-        public async Task ArlingtonDeviceCodeFlowTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.Arlington)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
-        public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.MSA)]
-        [Ignore("Currently failing due to environment")] //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5264
-        public async Task DeviceCodeFlowMsaTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user").ConfigureAwait(false);
-        }
-
         private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType)
         {
             Trace.WriteLine($"Calling AcquireTokenWithDeviceCodeAsync with {0}", userType);

@@ -87,13 +87,17 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             string normalizedAuthority = authority.AbsoluteUri.TrimEnd('/');
             string normalizedIssuer = issuer?.TrimEnd('/');
 
-            // Primary validation: check if normalized authority starts with normalized issuer (case-insensitive comparison)
-            if (normalizedAuthority.StartsWith(normalizedIssuer, StringComparison.OrdinalIgnoreCase))
+            // OIDC validation: if the issuer's scheme and host match the authority's, consider it valid
+            if (!string.IsNullOrEmpty(issuer) && Uri.TryCreate(issuer, UriKind.Absolute, out Uri issuerUri))
             {
-                return;
+                if (string.Equals(authority.Scheme, issuerUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(authority.Host, issuerUri.Host, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
             }
 
-            // Extract tenant for CIAM scenarios. In a CIAM scenario the issuer is expected to have "{tenant}.ciamlogin.com"
+            // CIAM-specific validation: In a CIAM scenario the issuer is expected to have "{tenant}.ciamlogin.com"
             // as the host, even when using a custom domain.
             string tenant = null;
             try
