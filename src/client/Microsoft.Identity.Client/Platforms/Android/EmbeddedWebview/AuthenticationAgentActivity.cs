@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
     internal class AuthenticationAgentActivity : Activity
     {
         private const string AboutBlankUri = "about:blank";
+        private const int ApiLevelVanillaIceCream = 35; // Android API 35 (Vanilla Ice Cream)
         private CoreWebViewClient _client;
 
         protected override void OnCreate(Bundle bundle)
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 Window.SetDecorFitsSystemWindows(false);
                 
                 // For API 35+, ensure proper edge-to-edge behavior
-                if ((int)Build.VERSION.SdkInt >= 35) // API 35 (VanillaIceCream not available in current binding)
+                if ((int)Build.VERSION.SdkInt >= ApiLevelVanillaIceCream)
                 {
                     // Additional API 35 specific configurations using SetStatusBarColor/SetNavigationBarColor methods
                     Window.SetStatusBarColor(global::Android.Graphics.Color.Transparent);
@@ -86,6 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             if (Build.VERSION.SdkInt >= BuildVersionCodes.R) // API 30+
             {
                 ViewCompat.SetOnApplyWindowInsetsListener(parentLayout, new OnApplyWindowInsetsListener(webView));
+                ViewCompat.RequestApplyInsets(parentLayout);
             }
 #endif
         }
@@ -248,7 +250,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 var systemBarsInsets = insets.GetInsets(WindowInsetsCompat.Type.SystemBars());
                 var imeInsets = insets.GetInsets(WindowInsetsCompat.Type.Ime());
                 
-                // Apply padding to avoid system UI overlap
+                // Apply margins to avoid system UI overlap
                 var layoutParams = _webView.LayoutParameters as RelativeLayout.LayoutParams;
                 if (layoutParams != null)
                 {
@@ -260,8 +262,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     );
                     _webView.LayoutParameters = layoutParams;
                 }
-                
-                return WindowInsetsCompat.Consumed;
+
+                return insets;
             }
         }
 #endif
