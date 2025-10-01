@@ -327,8 +327,6 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         public PublicClientApplicationBuilder WithKerberosTicketClaim(string servicePrincipalName, KerberosTicketContainer ticketContainer)
         {
-            Config.KerberosServicePrincipalName = servicePrincipalName;
-            Config.TicketContainer = ticketContainer;
             return this;
         }
 

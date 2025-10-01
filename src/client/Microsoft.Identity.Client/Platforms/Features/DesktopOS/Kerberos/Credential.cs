@@ -1,15 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.ComponentModel;
+
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 {
     /// <summary>
     /// Previously authenticated logon data used by a security principal to establish its own identity, 
     /// such as a password, or a Kerberos protocol ticket.
     /// </summary>
+    [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class Credential
     {
-        internal abstract CredentialHandle Structify();
 
         /// <summary>
         /// Create a new <see cref="Credential"/> object.
@@ -22,10 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 
         private class CurrentCredential : Credential
         {
-            internal override unsafe CredentialHandle Structify()
-            {
-                return new CredentialHandle((void*)0);
-            }
+            
         }
     }
 }
