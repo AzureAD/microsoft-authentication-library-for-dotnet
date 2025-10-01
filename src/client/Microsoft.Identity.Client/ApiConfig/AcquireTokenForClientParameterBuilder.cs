@@ -4,20 +4,21 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.OAuth2;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Microsoft.Identity.Client
 {
@@ -99,6 +100,14 @@ namespace Microsoft.Identity.Client
         /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
         {
+#if NET462
+            if (ServiceBundle.Config.IsManagedIdentity)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsNotSupportedForManagedIdentity,
+                    MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
+            }
+#endif
             if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certificateCredential)
             {
                 if (certificateCredential.Certificate == null)
