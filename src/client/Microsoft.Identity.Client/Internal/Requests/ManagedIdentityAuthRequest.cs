@@ -1,15 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -19,8 +20,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
         private readonly ManagedIdentityClient _managedIdentityClient;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
-        private readonly ICryptographyManager _cryptoManager;
-        private readonly IManagedIdentityKeyProvider _managedIdentityKeyProvider;
 
         public ManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
@@ -31,159 +30,328 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             _managedIdentityParameters = managedIdentityParameters;
             _managedIdentityClient = managedIdentityClient;
-            _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
-            _managedIdentityKeyProvider = serviceBundle.PlatformProxy.ManagedIdentityKeyProvider;
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            // 1. FIRST, handle ForceRefresh
+            bool popRequested = _managedIdentityParameters.IsMtlsPopRequested || AuthenticationRequestParameters.IsMtlsPopRequested;
+
+            // If mtls_pop was requested and we already have a persisted cert, apply the op override before cache lookup
+            ApplyMtlsOverrideIfCertPersisted(popRequested, logger);
+
+            // 1) Honor ForceRefresh first (same order as original code)
             if (_managedIdentityParameters.ForceRefresh)
             {
-                //log a warning if Claims are also set
                 if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
                 {
                     logger.Warning("[ManagedIdentityRequest] Both ForceRefresh and Claims are set. Using ForceRefresh to skip cache.");
                 }
 
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("[ManagedIdentityRequest] Skipped using the cache because ForceRefresh was set.");
 
-                // Straight to the MI endpoint
-                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
-                return authResult;
+                // Copy claims (if any) so MI sources can add them
+                if (string.IsNullOrEmpty(_managedIdentityParameters.Claims) && !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+                {
+                    _managedIdentityParameters.Claims = AuthenticationRequestParameters.Claims;
+                }
+
+                return await AcquireFreshTokenAsync(
+                    CacheRefreshReason.ForceRefreshOrClaims,
+                    "[ManagedIdentityRequest] Skipped using the cache because ForceRefresh was set.",
+                    popRequested,
+                    cancellationToken,
+                    logger).ConfigureAwait(false);
             }
 
-            // 2. Otherwise, look for a cached token
-            MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync()
-                .ConfigureAwait(false);
+            // 2) Single cache lookup (do NOT count a hit here)
+            MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
-            // If we have claims, we do NOT use the cached token (but we still need it to compute the hash).
-            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+            // 3) Claims present => force network and compute revoked-token hash (original behavior)
+            bool hasClaims =
+                !string.IsNullOrEmpty(_managedIdentityParameters.Claims) ||
+                !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims);
+
+            if (hasClaims)
             {
-                _managedIdentityParameters.Claims = AuthenticationRequestParameters.Claims;
+                if (string.IsNullOrEmpty(_managedIdentityParameters.Claims))
+                {
+                    _managedIdentityParameters.Claims = AuthenticationRequestParameters.Claims;
+                }
+
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
 
-                // If there is a cached token, compute its hash for the “revoked token” scenario
                 if (cachedAccessTokenItem != null)
                 {
-                    string cachedTokenHash = _cryptoManager.CreateSha256HashHex(cachedAccessTokenItem.Secret);
+                    // Compute revoked‑token hash from the cached token
+                    string cachedTokenHash = ServiceBundle.PlatformProxy.CryptographyManager.CreateSha256HashHex(cachedAccessTokenItem.Secret);
                     _managedIdentityParameters.RevokedTokenHash = cachedTokenHash;
 
-                    logger.Info("[ManagedIdentityRequest] Claims are present. Computed hash of the cached (revoked) token. " +
-                                "Will now request a fresh token from the MI endpoint.");
+                    logger.Info("[ManagedIdentityRequest] Claims present. Computed hash of the cached (revoked) token. Will request a fresh token.");
                 }
                 else
                 {
-                    logger.Info("[ManagedIdentityRequest] Claims are present, but no cached token was found. " +
-                                "Requesting a fresh token from the MI endpoint without a revoked-token hash.");
+                    logger.Info("[ManagedIdentityRequest] Claims present but no cached token found. Requesting a fresh token without revoked-token hash.");
                 }
 
-                // In both cases, we skip using the cached token and get a new one
-                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
-                return authResult;
+                return await AcquireFreshTokenAsync(
+                    CacheRefreshReason.ForceRefreshOrClaims,
+                    "[ManagedIdentityRequest] Claims provided; bypassing cache.",
+                    popRequested,
+                    cancellationToken,
+                    logger).ConfigureAwait(false);
             }
 
-            // 3. If we have no ForceRefresh and no claims, we can use the cache
+            // 4) For IMDSv2 - bypass cache if binding cert is expiring soon (forces cert rotation)
+            if (ShouldBypassCacheForRotation(cachedAccessTokenItem, logger))
+            {
+                cachedAccessTokenItem = null;
+            }
+
+            // 5) If PoP requested but no binding cert has been applied yet, bypass cache and mint one
+            if (popRequested && AuthenticationRequestParameters.AuthenticationOperationOverride == null)
+            {
+                return await AcquireFreshTokenAsync(
+                    CacheRefreshReason.NoCachedAccessToken,
+                    "[ManagedIdentityRequest] mTLS PoP requested but no binding certificate applied; bypassing cache.",
+                    popRequested,
+                    cancellationToken,
+                    logger).ConfigureAwait(false);
+            }
+
+            // 6) No ForceRefresh / no Claims flow: use the cache if possible
             if (cachedAccessTokenItem != null)
             {
-                authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
-
+                // Return cached token to the caller
+                AuthenticationResult fromCache = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                 logger.Info("[ManagedIdentityRequest] Access token retrieved from cache.");
 
                 try
                 {
-                    var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+                    // Decide if we should proactively refresh in the background
+                    bool proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
-                    // If needed, refreshes token in the background
                     if (proactivelyRefresh)
                     {
-                        logger.Info("[ManagedIdentityRequest] Initiating a proactive refresh.");
+                        logger.Info("[ManagedIdentityRequest] Initiating a proactive refresh (background).");
 
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
 
+                        // Kick off the background refresh (cancellable). Any cancellation/errors are handled inside the helper.
                         SilentRequestHelper.ProcessFetchInBackground(
-                        cachedAccessTokenItem,
+                            cachedAccessTokenItem,
                             () =>
                             {
-                                // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
                                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                                return GetAccessTokenAsync(tokenSource.Token, logger);
-                            }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
+                                return AcquireFreshTokenAsync(
+                                    CacheRefreshReason.ProactivelyRefreshed,
+                                    "[ManagedIdentityRequest] Background proactive refresh in progress.",
+                                    popRequested,
+                                    tokenSource.Token,
+                                    logger);
+                            },
+                            logger,
+                            ServiceBundle,
+                            AuthenticationRequestParameters.RequestContext.ApiEvent,
+                            AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
+                            AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
                     }
                 }
                 catch (MsalServiceException e)
                 {
-                    // If background refresh fails, we handle the exception
+                    // If background refresh fails, fall back to the cached token and handle telemetry
                     return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem).ConfigureAwait(false);
                 }
+
+                return fromCache;
             }
-            else
+
+            // 7) No cached token -> go to network
+            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
             {
-                // No cached token
-                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
-                {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
-                }
-
-                logger.Info("[ManagedIdentityRequest] No cached access token found. " +
-                            "Getting a token from the managed identity endpoint.");
-
-                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
             }
 
-            return authResult;
+            logger.Info("[ManagedIdentityRequest] No cached access token found. Getting a token from the managed identity endpoint.");
+
+            return await AcquireFreshTokenAsync(
+                CacheRefreshReason.NoCachedAccessToken,
+                "[ManagedIdentityRequest] Cache miss; acquiring new token.",
+                popRequested,
+                cancellationToken,
+                logger).ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> GetAccessTokenAsync(
+        private void ApplyMtlsOverrideIfCertPersisted(bool popRequested, ILoggerAdapter logger)
+        {
+            if (!popRequested)
+            {
+                return;
+            }
+
+            if (AuthenticationRequestParameters.AuthenticationOperationOverride != null)
+            {
+                return;
+            }
+
+            var cert = _managedIdentityClient.MtlsBindingCertificate;
+            if (cert != null && cert.NotAfter.ToUniversalTime() > DateTime.UtcNow.AddMinutes(1))
+            {
+                AuthenticationRequestParameters.AuthenticationOperationOverride =
+                    new MtlsPopAuthenticationOperation(cert);
+
+                logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Applied MtlsPopAuthenticationOperation before cache lookup.");
+            }
+        }
+
+        private bool ShouldBypassCacheForRotation(MsalAccessTokenCacheItem cachedItem, ILoggerAdapter logger)
+        {
+            if (cachedItem == null)
+                return false;
+
+            var cert = _managedIdentityClient.MtlsBindingCertificate;
+            if (cert == null)
+                return false;
+
+            var remaining = cert.NotAfter.ToUniversalTime() - DateTime.UtcNow;
+            if (remaining > TimeSpan.FromMinutes(1))
+                return false;
+
+            logger.Info("[Managed Identity] mTLS cert expiring soon; bypassing cached access token to rotate cert.");
+            return true;
+        }
+
+        private async Task<AuthenticationResult> AcquireFreshTokenAsync(
+            CacheRefreshReason cacheReason,
+            string logMessage,
+            bool popRequested,
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
-            AuthenticationResult authResult;
-            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+            if (!string.IsNullOrEmpty(logMessage))
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = cacheReason;
+                logger.Info(logMessage);
+            }
 
-            // Requests to a managed identity endpoint must be throttled; 
-            // otherwise, the endpoint will throw a HTTP 429.
+            // Throttle network calls to MI endpoint to avoid HTTP 429s
             logger.Verbose(() => "[ManagedIdentityRequest] Entering managed identity request semaphore.");
             await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
             logger.Verbose(() => "[ManagedIdentityRequest] Entered managed identity request semaphore.");
 
             try
             {
-                // While holding the semaphore, decide whether to bypass the cache.
-                // Re-check because another thread may have filled the cache while we waited.
-                // Bypass when:
-                // 1) ForceRefresh is requested
-                // 2) Proactive refresh is in effect
-                // 3) Claims are present (revocation flow)
-                if (_managedIdentityParameters.ForceRefresh ||
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
-                    !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
+                // If we came here due to a cache miss, re-check after acquiring the semaphore
+                if (cacheReason == CacheRefreshReason.NoCachedAccessToken)
                 {
-                    authResult = await SendTokenRequestForManagedIdentityAsync(logger, cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    logger.Info("[ManagedIdentityRequest] Checking for a cached access token.");
-                    cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
-
-                    // Check the cache again after acquiring the semaphore in case the previous request cached a new token.
-                    if (cachedAccessTokenItem != null)
+                    var recheck = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+                    if (recheck != null)
                     {
-                        authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
-                    }
-                    else
-                    {
-                        authResult = await SendTokenRequestForManagedIdentityAsync(logger, cancellationToken).ConfigureAwait(false);
+                        return CreateAuthenticationResultFromCache(recheck);
                     }
                 }
 
-                return authResult;
+                // If cancellation is already requested and this is a proactive refresh,
+                // fall back to the cached token instead of throwing.
+                if (cancellationToken.IsCancellationRequested &&
+                    cacheReason == CacheRefreshReason.ProactivelyRefreshed)
+                {
+                    var fallback = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+                    if (fallback != null)
+                    {
+                        logger.Info("[ManagedIdentityRequest] Proactive refresh canceled before send; returning cached access token.");
+                        return CreateAuthenticationResultFromCache(fallback);
+                    }
+                }
+
+                // (Keep an early guard for non-proactive paths)
+                cancellationToken.ThrowIfCancellationRequested();
+
+                logger.Info("[ManagedIdentityRequest] Acquiring a token from the managed identity endpoint.");
+
+                await ResolveAuthorityAsync().ConfigureAwait(false);
+
+                // Propagate PoP and claims from common params to MI params
+                _managedIdentityParameters.IsMtlsPopRequested = popRequested;
+
+                if (string.IsNullOrEmpty(_managedIdentityParameters.Claims) &&
+                    !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+                {
+                    _managedIdentityParameters.Claims = AuthenticationRequestParameters.Claims;
+                }
+
+                // Ensure the attestation provider reaches RequestContext for IMDSv2
+                AuthenticationRequestParameters.RequestContext.AttestationTokenProvider ??=
+                    _managedIdentityParameters.AttestationTokenProvider;
+
+                try
+                {
+                    // SECOND (crucial) cancellation guard: right before we hit the wire.
+                    if (cancellationToken.IsCancellationRequested &&
+                        cacheReason == CacheRefreshReason.ProactivelyRefreshed)
+                    {
+                        var fallback = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+                        if (fallback != null)
+                        {
+                            logger.Info("[ManagedIdentityRequest] Proactive refresh canceled at send; returning cached access token.");
+                            return CreateAuthenticationResultFromCache(fallback);
+                        }
+                    }
+
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var managedIdentityResponse = await _managedIdentityClient
+                        .SendTokenRequestForManagedIdentityAsync(
+                            AuthenticationRequestParameters.RequestContext,
+                            _managedIdentityParameters,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+
+                    // AFTER
+                    if (_managedIdentityParameters.MtlsCertificate != null)
+                    {
+                        if (popRequested)
+                        {
+                            AuthenticationRequestParameters.AuthenticationOperationOverride =
+                                new MtlsPopAuthenticationOperation(_managedIdentityParameters.MtlsCertificate);
+                        }
+
+                        // Persist binding for reuse/rotation across calls (Bearer & PoP)
+                        _managedIdentityClient.MtlsBindingCertificate = _managedIdentityParameters.MtlsCertificate;
+                        _managedIdentityParameters.MtlsCertificate = null;
+
+                        logger.Info("[ManagedIdentityRequest] mTLS binding certificate persisted.");
+                    }
+
+                    var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
+                    msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
+
+                    return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+                }
+                catch (TaskCanceledException) when (cacheReason == CacheRefreshReason.ProactivelyRefreshed)
+                {
+                    // If cancellation hits while sending, prefer returning the cached token (test expectation)
+                    var fallback = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+                    if (fallback != null)
+                    {
+                        logger.Info("[ManagedIdentityRequest] Proactive refresh canceled during send; returning cached access token.");
+                        return CreateAuthenticationResultFromCache(fallback);
+                    }
+
+                    throw;
+                }
+                catch (OperationCanceledException) when (cacheReason == CacheRefreshReason.ProactivelyRefreshed)
+                {
+                    var fallback = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+                    if (fallback != null)
+                    {
+                        logger.Info("[ManagedIdentityRequest] Proactive refresh canceled during send; returning cached access token.");
+                        return CreateAuthenticationResultFromCache(fallback);
+                    }
+
+                    throw;
+                }
             }
             finally
             {
@@ -192,45 +360,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private async Task<AuthenticationResult> SendTokenRequestForManagedIdentityAsync(ILoggerAdapter logger, CancellationToken cancellationToken)
-        {
-            logger.Info("[ManagedIdentityRequest] Acquiring a token from the managed identity endpoint.");
-
-            await ResolveAuthorityAsync().ConfigureAwait(false);
-
-            _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
-
-            // Ensure the attestation provider reaches RequestContext for IMDSv2
-            AuthenticationRequestParameters.RequestContext.AttestationTokenProvider ??=
-                _managedIdentityParameters.AttestationTokenProvider;
-
-            ManagedIdentityResponse managedIdentityResponse =
-                await _managedIdentityClient
-                .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
-                .ConfigureAwait(false);
-
-            var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
-            msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
-        }
-
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
         {
-            MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
-
-            if (cachedAccessTokenItem != null)
-            {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-                Metrics.IncrementTotalAccessTokensFromCache();
-                return cachedAccessTokenItem;
-            }
-
-            return null;
+            // Just return what the cache has; do not mark a hit here.
+            return await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
         }
 
         private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
+            // Count the hit only when returning the cached token
+            AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+            Metrics.IncrementTotalAccessTokensFromCache();
+
             AuthenticationResult authResult = new AuthenticationResult(
                                                             cachedAccessTokenItem,
                                                             null,

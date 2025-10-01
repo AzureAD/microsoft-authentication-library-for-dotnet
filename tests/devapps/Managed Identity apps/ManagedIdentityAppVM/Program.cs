@@ -10,6 +10,7 @@ IIdentityLogger identityLogger = new IdentityLogger();
 
 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                 .WithLogging(identityLogger, true)
+                .WithExperimentalFeatures()
                 .Build();
 
 string? scope = "https://management.azure.com";
@@ -22,6 +23,10 @@ do
     {
         var result = await mi.AcquireTokenForManagedIdentity(scope)
             .WithMtlsProofOfPossession()
+            .WithExtraQueryParameters(new Dictionary<string, string>
+            {
+                { "dc", "ESTSR-PUB-CUSC-LZ1-TEST" }
+            })
             .ExecuteAsync().ConfigureAwait(false);
 
         Console.WriteLine("Success");

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(
-            AcquireTokenForManagedIdentityParameters parameters,
+            AcquireTokenForManagedIdentityParameters parameters, 
             CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -54,14 +54,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             HttpResponse response;
 
-            // Convert the scopes to a resource string.
             string resource = parameters.Resource;
-
             _isMtlsPopRequested = parameters.IsMtlsPopRequested;
 
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
 
-            // Automatically add claims / capabilities if this MI source supports them
+            // Bubble cert + CSR to parameters so upper layers can apply mtls_pop before caching
+            if (request != null)
+            {
+                if (request.MtlsCertificate != null)
+                {
+                    parameters.MtlsCertificate = request.MtlsCertificate;
+                }
+
+                if (request.CertificateRequestResponse != null)
+                {
+                    parameters.CertificateRequestResponse = request.CertificateRequestResponse;
+                }
+            }
+
             if (_sourceType.SupportsClaimsAndCapabilities())
             {
                 request.AddClaimsAndCapabilities(
@@ -110,7 +121,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             cancellationToken: cancellationToken,
                             retryPolicy: retryPolicy)
                         .ConfigureAwait(false);
-
                 }
 
                 return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
