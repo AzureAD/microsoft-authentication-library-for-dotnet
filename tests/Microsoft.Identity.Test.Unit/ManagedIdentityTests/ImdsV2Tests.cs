@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, $"{TestConstants.ClientId}-2")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, $"{TestConstants.MiResourceId}-2")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, $"{TestConstants.ObjectId}-2")]
-        public async Task BearerTokenTokenIsPerIdentity(
+        public async Task BearerTokenIsPerIdentity(
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId,
             string userAssignedId2)
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, $"{TestConstants.ClientId}-2")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, $"{TestConstants.MiResourceId}-2")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, $"{TestConstants.ObjectId}-2")]
-        public async Task mTLSPopTokenTokenIsPerIdentity(
+        public async Task mTLSPopTokenIsPerIdentity(
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId,
             string userAssignedId2)
