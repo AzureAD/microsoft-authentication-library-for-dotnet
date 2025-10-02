@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private readonly Uri _imdsEndpoint;
 
+        private static string s_cachedBaseEndpoint = null;
+
         internal ImdsManagedIdentitySource(RequestContext requestContext) : 
             base(requestContext, ManagedIdentitySource.Imds)
         {
@@ -181,25 +183,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string queryParams = null
             )
         {
-            UriBuilder builder;
-
-            if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
+            if (s_cachedBaseEndpoint == null)
             {
-                logger.Verbose(() => "[Managed Identity] Environment variable AZURE_POD_IDENTITY_AUTHORITY_HOST for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);
-                builder = new UriBuilder(EnvironmentVariables.PodIdentityEndpoint)
+                if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
                 {
-                    Path = subPath
-                };
+                    logger.Verbose(() => "[Managed Identity] Environment variable AZURE_POD_IDENTITY_AUTHORITY_HOST for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);
+                    s_cachedBaseEndpoint = EnvironmentVariables.PodIdentityEndpoint;
+                }
+                else
+                {
+                    logger.Verbose(() => "[Managed Identity] Unable to find AZURE_POD_IDENTITY_AUTHORITY_HOST environment variable for IMDS, using the default endpoint.");
+                    s_cachedBaseEndpoint = DefaultImdsBaseEndpoint;
+                }
             }
-            else
+            
+            UriBuilder builder = new UriBuilder(s_cachedBaseEndpoint)
             {
-                logger.Verbose(() => "[Managed Identity] Unable to find AZURE_POD_IDENTITY_AUTHORITY_HOST environment variable for IMDS, using the default endpoint.");
-                builder = new UriBuilder(DefaultImdsBaseEndpoint)
-                {
-                    Path = subPath
-                };
-            }
-
+                Path = subPath
+            };
+            
             if (!string.IsNullOrEmpty(queryParams))
             {
                 builder.Query = queryParams;
