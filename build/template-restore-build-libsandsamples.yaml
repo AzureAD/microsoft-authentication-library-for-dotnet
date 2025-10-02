@@ -47,7 +47,7 @@ steps:
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:TargetNetNext=True'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
     maximumCpuCount: true
