@@ -56,6 +56,19 @@ the certificate should be **rooted (persisted)** in the Windows certificate stor
 
 ---
 
+# Certificate Store Location in Linux 
+- Linux has no OS-backed cert store like Windows.  
+- Define a **per-user store** under the home directory:  ~/.config/msal/certs/
+
+- File naming convention:  
+- `msal_mtls.pfx` (PKCS#12) or  
+- `msal_mtls.pem` (PEM with key + cert).  
+- Permissions:  
+- Directory = `700` (only the user can read/write/execute).  
+- File = `600` (only the user can read/write).  
+
+---
+
 ## 5. Security Considerations
 - Private keys must be generated in **CNG/KeyGuard** with `ExportPolicy = None`.  
 - Keys should **never** be exported or persisted outside the Windows certificate store.  
