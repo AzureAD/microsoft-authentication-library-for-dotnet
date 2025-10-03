@@ -177,13 +177,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
-        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
-        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
-        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
-        public async Task BearerTokenTokenIsPerIdentity(
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, $"{TestConstants.ClientId}-2")]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, $"{TestConstants.MiResourceId}-2")]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, $"{TestConstants.ObjectId}-2")]
+        public async Task BearerTokenIsPerIdentity(
             UserAssignedIdentityId userAssignedIdentityId,
-            string userAssignedId)
+            string userAssignedId,
+            string userAssignedId2)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -210,18 +210,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 #endregion Identity 1
 
                 #region Identity 2
-                UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
-                string identity2Id = "some_other_id";
-                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, identity2Type, identity2Id, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
+                UserAssignedIdentityId userAssignedIdentityId2 = userAssignedIdentityId; // keep the same type, that's the most common scenario
+                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId2, userAssignedId2, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
 
-                AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id);
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId2, userAssignedId2);
 
                 var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result.TokenType, Bearer);
+                Assert.AreEqual(result2.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
 
                 result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -229,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result.TokenType, Bearer);
+                Assert.AreEqual(result2.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 2
 
@@ -320,13 +319,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
-        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
-        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
-        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
-        public async Task mTLSPopTokenTokenIsPerIdentity(
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, $"{TestConstants.ClientId}-2")]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, $"{TestConstants.MiResourceId}-2")]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, $"{TestConstants.ObjectId}-2")]
+        public async Task mTLSPopTokenIsPerIdentity(
             UserAssignedIdentityId userAssignedIdentityId,
-            string userAssignedId)
+            string userAssignedId,
+            string userAssignedId2)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -359,17 +358,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 #endregion Identity 1
 
                 #region Identity 2
-                UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
-                string identity2Id = "some_other_id";
+                UserAssignedIdentityId userAssignedIdentityId2 = userAssignedIdentityId; // keep the same type, that's the most common scenario
                 var managedIdentityApp2 = await CreateManagedIdentityAsync(
                     httpManager,
-                    identity2Type,
-                    identity2Id,
+                    userAssignedIdentityId2,
+                    userAssignedId2,
                     addProbeMock: false, 
                     addSourceCheck: false,
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false); // source is already cached
 
-                AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id, mTLSPop: true);
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId2, userAssignedId2, mTLSPop: true);
 
                 var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
@@ -378,8 +376,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
-                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop BindingCertificate
+                Assert.AreEqual(result2.TokenType, MTLSPoP);
+                // Assert.IsNotNull(result2.BindingCertificate); // TODO: implement mTLS Pop BindingCertificate
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
 
                 // TODO: broken until Gladwin's PR is merged in
@@ -390,8 +388,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
-                // Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop BindingCertificate
+                Assert.AreEqual(result2.TokenType, MTLSPoP);
+                // Assert.IsNotNull(result2.BindingCertificate); // TODO: implement mTLS Pop BindingCertificate
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);*/
                 #endregion Identity 2
 
