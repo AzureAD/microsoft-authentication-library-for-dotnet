@@ -22,9 +22,6 @@ namespace Microsoft.Identity.Client.Platforms.net
     /// See <see href="https://learn.microsoft.com/dotnet/standard/serialization/system-text-json/source-generation-modes?pivots=dotnet-6-0">Source-generation modes in System.Text.Json</see>.
     /// and <see href="https://learn.microsoft.com/dotnet/standard/serialization/system-text-json/source-generation?pivots=dotnet-6-0">How to use source generation in System.Text.Json</see> for official docs.
     /// </summary>
-#pragma warning disable CS0612 // Type or member is obsolete
-    [JsonSerializable(typeof(KerberosSupplementalTicket))]
-#pragma warning restore CS0612 // Type or member is obsolete
     [JsonSerializable(typeof(InstanceDiscoveryResponse))]
     [JsonSerializable(typeof(LocalImdsErrorResponse))]
     [JsonSerializable(typeof(AdalResultWrapper))]
