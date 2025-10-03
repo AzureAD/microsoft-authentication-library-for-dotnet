@@ -1197,6 +1197,11 @@ namespace Microsoft.Identity.Client
         public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
 
         /// <summary>
+        /// <para>What happened?</para> mTLS is not supported for managed identity authentication.
+        /// </summary>
+        public const string MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity";
+
+        /// <summary>
         /// <para>What happened?</para> The operation attempted to force a token refresh while also using a token hash. 
         /// These two options are incompatible because forcing a refresh bypasses token caching, 
         /// which conflicts with token hash validation.
@@ -1206,5 +1211,10 @@ namespace Microsoft.Identity.Client
         /// - If token hashing is required, allow the cached token to be used instead of forcing a refresh.
         /// </summary>
         public const string ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible";
+
+        /// <summary>
+        /// The certificate received from the Imds server is invalid.
+        /// </summary>
+        public const string InvalidCertificate = "invalid_certificate";
     }
 }

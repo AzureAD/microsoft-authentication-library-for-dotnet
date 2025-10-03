@@ -16,9 +16,9 @@ namespace Microsoft.Identity.Client.Region
         public const string PublicEnvForRegional = "login.microsoft.com";
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
-        public RegionAndMtlsDiscoveryProvider(IHttpManager httpManager, bool clearCache)
+        public RegionAndMtlsDiscoveryProvider(IHttpManager httpManager)
         {
-            _regionManager = new RegionManager(httpManager, shouldClearStaticCache: clearCache);
+            _regionManager = new RegionManager(httpManager);
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
@@ -55,6 +55,7 @@ namespace Microsoft.Identity.Client.Region
             string regionalEnv = GetRegionalizedEnvironment(authority, region, requestContext);
             return CreateEntry(authority.Host, regionalEnv);
         }
+        
 
         private static InstanceDiscoveryMetadataEntry CreateEntry(string originalEnv, string regionalEnv)
         {
@@ -68,7 +69,6 @@ namespace Microsoft.Identity.Client.Region
 
         private static string GetRegionalizedEnvironment(Uri authority, string region, RequestContext requestContext)
         {
-
             string host = authority.Host;
 
             if (KnownMetadataProvider.IsPublicEnvironment(host))

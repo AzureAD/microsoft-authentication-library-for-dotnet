@@ -3,6 +3,7 @@
 
 #if NETFRAMEWORK
 using System.Linq;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -17,7 +18,7 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
     /// https://identitydivision.visualstudio.com/IdentityWiki/_wiki/wikis/IdentityWiki.wiki/20601/AAD-Kerberos-for-MSAL 
     /// </summary>
     [TestClass]
-    public class KerberosSupplementalTicketManagerTests
+    public class KerberosSupplementalTicketManagerTests : TestBase
     {
         /// <summary>
         /// Service principal name for testing.
@@ -89,12 +90,6 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
             + "HACEAIPr5g3j7Df0xC2V0FszD9e8GgC_GjNFhaSl0uNXzPoKnI7zwl90zlvJNx4NUh-ZzBbY59JDL6B2o1i9Mb-K3KrGJLRf6s1Mp1Z2lFve6d57eri3EF"
             + "P0lxMESvknYs0zk9Z9yTDxdadAO9R46mrJhPcZSpuip6yexOeT-XoxRZwIdOZVMd1EwXao26q_3BeQ3N19kbkv6Dr9EPCT36_1sTzytcHBein9h4Yixmk9"
             + "sPtueCF3vqdO5Yl3Q0bBrksqFelwZB8sxz9y1vOQ5cfraYJc6JkWRiRy26YFrZe2UnuBGV2ss_1sSm7aE1gaw";
-
-        [TestInitialize]
-        public void TestInit()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         public void FromIdToken_WithKerberosTicket()

@@ -33,6 +33,11 @@ namespace Microsoft.Identity.Client.Http.Retry
             return Task.Delay(milliseconds);
         }
 
+        protected virtual bool ShouldRetry(HttpResponse response, Exception exception)
+        {
+            return HttpRetryConditions.Imds(response, exception);
+        }
+
         public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
         {
             int httpStatusCode = (int)response.StatusCode;
@@ -46,7 +51,7 @@ namespace Microsoft.Identity.Client.Http.Retry
             }
 
             // Check if the status code is retriable and if the current retry count is less than max retries
-            if (HttpRetryConditions.Imds(response, exception) &&
+            if (ShouldRetry(response, exception) &&
                 retryCount < _maxRetries)
             {
                 int retryAfterDelay = httpStatusCode == (int)HttpStatusCode.Gone

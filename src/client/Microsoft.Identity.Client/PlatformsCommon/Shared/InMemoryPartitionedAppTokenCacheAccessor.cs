@@ -256,5 +256,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return ref _tokenCacheAccessorOptions.UseSharedCache ? ref s_entryCount : ref _entryCount;
         }
 
+        public static void ClearStaticCacheForTest()
+        {
+            s_accessTokenCacheDictionary.Clear();
+            s_appMetadataDictionary.Clear();
+            Interlocked.Exchange(ref s_entryCount, 0);
+        }
     }
 }

@@ -374,7 +374,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             HttpStatusCode statusCode = HttpStatusCode.OK,
             string retryAfterHeader = null, // A number of seconds (e.g., "120"), or an HTTP-date in RFC1123 format (e.g., "Fri, 19 Apr 2025 15:00:00 GMT")
             bool capabilityEnabled = false,
-            bool claimsEnabled = false
+            bool claimsEnabled = false,
+            IDictionary<string, string> extraQueryParameters = null
             )
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode)
@@ -392,6 +393,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 resource,
                 capabilityEnabled,
                 claimsEnabled);
+
+            // Add extra query parameters if provided
+            if (extraQueryParameters != null)
+            {
+                foreach (var kvp in extraQueryParameters)
+                {
+                    httpMessageHandler.ExpectedQueryParams[kvp.Key] = kvp.Value;
+                }
+            }
 
             if (managedIdentitySourceType == ManagedIdentitySource.MachineLearning)
             {

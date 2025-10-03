@@ -18,6 +18,8 @@ namespace Microsoft.Identity.Client.Http.Retry
                     return new ImdsRetryPolicy();
                 case RequestType.RegionDiscovery:
                     return new RegionDiscoveryRetryPolicy();
+                case RequestType.CsrMetadataProbe:
+                    return new CsrMetadataProbeRetryPolicy();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(requestType), requestType, "Unknown request type.");
             }

@@ -102,14 +102,90 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
 
             byte[] SignDataAndCacheProvider(string message)
-            {                
+            {
                 // CodeQL [SM03799] PKCS1 padding is for Identity Providers not supporting PSS (older ADFS, dSTS)
                 var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, signaturePadding);
-                
+
                 // Cache only valid RSA crypto providers, which are able to sign data successfully
                 s_certificateToRsaMap[certificate.Thumbprint] = rsa;
                 return signedData;
             }
         }
+
+        /// <summary>
+        /// Attaches a private key to a certificate for use in mTLS authentication.
+        /// </summary>
+        /// <param name="rawCertificate">The certificate received from the Imds server</param>
+        /// <param name="privateKey">The RSA private key to attach</param>
+        /// <returns>An X509Certificate2 with the private key attached</returns>
+        /// <exception cref="ArgumentNullException">Thrown when rawCertificate or privateKey is null</exception>
+        /// <exception cref="FormatException">Thrown when rawCertificate is empty, invalid, and cannot be parsed</exception>
+        internal static X509Certificate2 AttachPrivateKeyToCert(string rawCertificate, RSA privateKey)
+        {
+            if (string.IsNullOrEmpty(rawCertificate))
+                throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate);
+            if (privateKey == null)
+                throw new ArgumentNullException(nameof(privateKey));
+
+            X509Certificate2 certificate = null;
+
+            try
+            {
+                byte[] certBytes = Convert.FromBase64String(rawCertificate);
+                certificate = new X509Certificate2(certBytes);
+            }
+            catch (FormatException ex)
+            {
+                throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate, ex);
+            }
+
+            try
+            {
+#if NET8_0_OR_GREATER
+                // Attach the private key and return a new certificate instance
+                return certificate.CopyWithPrivateKey(privateKey);
+#else
+                // .NET Framework 4.7.2 and .NET Standard 2.0 - manual private key attachment
+                return AttachPrivateKeyToOlderFrameworks(certificate, privateKey);
+#endif
+            }
+            catch (Exception ex)
+            {
+                throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate, ex);
+            }
+        }
+
+#if !NET8_0_OR_GREATER
+        /// <summary>
+        /// Attaches a private key to a certificate for older .NET Framework versions.
+        /// This method uses the older RSACng approach for .NET Framework 4.7.2 and .NET Standard 2.0.
+        /// </summary>
+        /// <param name="certificate">The certificate without private key</param>
+        /// <param name="privateKey">The RSA private key to attach</param>
+        /// <returns>An X509Certificate2 with the private key attached</returns>
+        /// <exception cref="NotSupportedException">Thrown when private key attachment fails</exception>
+        private static X509Certificate2 AttachPrivateKeyToOlderFrameworks(X509Certificate2 certificate, RSA privateKey)
+        {
+            // For older frameworks, we need to use the legacy approach with RSACryptoServiceProvider
+            // First, export the RSA parameters from the provided private key
+            var parameters = privateKey.ExportParameters(includePrivateParameters: true);
+
+            // Create a new RSACryptoServiceProvider with the correct key size
+            int keySize = parameters.Modulus.Length * 8;
+            using (var rsaProvider = new RSACryptoServiceProvider(keySize))
+            {
+                // Import the parameters into the new provider
+                rsaProvider.ImportParameters(parameters);
+
+                // Create a new certificate instance from the raw data
+                var certWithPrivateKey = new X509Certificate2(certificate.RawData);
+
+                // Assign the private key using the legacy property
+                certWithPrivateKey.PrivateKey = rsaProvider;
+
+                return certWithPrivateKey;
+            }
+        }
+#endif
     }
 }

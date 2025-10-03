@@ -21,13 +21,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class LongRunningOnBehalfOfTests
+    public class LongRunningOnBehalfOfTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         public async Task LongRunningObo_RunsSuccessfully_TestAsync()

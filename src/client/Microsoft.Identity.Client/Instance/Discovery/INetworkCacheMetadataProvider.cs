@@ -9,6 +9,5 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     {
         void AddMetadata(string environment, InstanceDiscoveryMetadataEntry entry);
         InstanceDiscoveryMetadataEntry GetMetadata(string environment, ILoggerAdapter logger);
-        void /* for test purposes */ Clear();
     }
 }

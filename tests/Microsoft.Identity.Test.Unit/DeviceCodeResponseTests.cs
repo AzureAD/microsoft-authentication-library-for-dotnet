@@ -8,14 +8,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
-    public class DeviceCodeResponseTests
+    public class DeviceCodeResponseTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         private const string VerificationUrl = "http://verification.url";
         private const string VerificationUri = "http://verification.uri";
 
