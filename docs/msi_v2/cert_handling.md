@@ -48,6 +48,9 @@ the certificate should be **rooted (persisted)** in the Windows certificate stor
   - Remove stale cert from store.  
   - Acquire and persist a new cert from IMDS.  
 
+### Proactive Renewal: Start renewal at half the certificate lifetime (typically, 3.5 days) to avoid expiry during active sessions.
+
+**This is calculated based on the certificate’s NotAfter property (expiration date).**
 ---
 
 ## 4. Error Handling
