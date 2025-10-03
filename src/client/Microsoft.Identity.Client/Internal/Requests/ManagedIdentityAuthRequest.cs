@@ -10,8 +10,10 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.ManagedIdentity.V2.ImdsV2ManagedIdentitySource;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -38,8 +40,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             bool popRequested = _managedIdentityParameters.IsMtlsPopRequested || AuthenticationRequestParameters.IsMtlsPopRequested;
 
-            // If mtls_pop was requested and we already have a persisted cert, apply the op override before cache lookup
-            ApplyMtlsOverrideIfCertPersisted(popRequested, logger);
+            // If mtls_pop was requested and a binding exists for this identity, load it from the user store before cache lookup
+            ApplyMtlsOverrideFromUserStoreIfAvailable(popRequested, logger);
 
             // 1) Honor ForceRefresh first (same order as original code)
             if (_managedIdentityParameters.ForceRefresh)
@@ -103,13 +105,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     logger).ConfigureAwait(false);
             }
 
-            // 4) For IMDSv2 - bypass cache if binding cert is expiring soon (forces cert rotation)
-            if (ShouldBypassCacheForRotation(cachedAccessTokenItem, logger))
-            {
-                cachedAccessTokenItem = null;
-            }
-
-            // 5) If PoP requested but no binding cert has been applied yet, bypass cache and mint one
+            // 4) If PoP requested but no binding cert has been applied yet, bypass cache and mint one
             if (popRequested && AuthenticationRequestParameters.AuthenticationOperationOverride == null)
             {
                 return await AcquireFreshTokenAsync(
@@ -120,7 +116,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     logger).ConfigureAwait(false);
             }
 
-            // 6) No ForceRefresh / no Claims flow: use the cache if possible
+            // 5) No ForceRefresh / no Claims flow: use the cache if possible
             if (cachedAccessTokenItem != null)
             {
                 // Return cached token to the caller
@@ -167,7 +163,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return fromCache;
             }
 
-            // 7) No cached token -> go to network
+            // 6) No cached token -> go to network
             if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
@@ -181,45 +177,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 popRequested,
                 cancellationToken,
                 logger).ConfigureAwait(false);
-        }
-
-        private void ApplyMtlsOverrideIfCertPersisted(bool popRequested, ILoggerAdapter logger)
-        {
-            if (!popRequested)
-            {
-                return;
-            }
-
-            if (AuthenticationRequestParameters.AuthenticationOperationOverride != null)
-            {
-                return;
-            }
-
-            var cert = _managedIdentityClient.MtlsBindingCertificate;
-            if (cert != null && cert.NotAfter.ToUniversalTime() > DateTime.UtcNow.AddMinutes(1))
-            {
-                AuthenticationRequestParameters.AuthenticationOperationOverride =
-                    new MtlsPopAuthenticationOperation(cert);
-
-                logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Applied MtlsPopAuthenticationOperation before cache lookup.");
-            }
-        }
-
-        private bool ShouldBypassCacheForRotation(MsalAccessTokenCacheItem cachedItem, ILoggerAdapter logger)
-        {
-            if (cachedItem == null)
-                return false;
-
-            var cert = _managedIdentityClient.MtlsBindingCertificate;
-            if (cert == null)
-                return false;
-
-            var remaining = cert.NotAfter.ToUniversalTime() - DateTime.UtcNow;
-            if (remaining > TimeSpan.FromMinutes(1))
-                return false;
-
-            logger.Info("[Managed Identity] mTLS cert expiring soon; bypassing cached access token to rotate cert.");
-            return true;
         }
 
         private async Task<AuthenticationResult> AcquireFreshTokenAsync(
@@ -308,21 +265,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             cancellationToken)
                         .ConfigureAwait(false);
 
-                    // AFTER
-                    if (_managedIdentityParameters.MtlsCertificate != null)
+                    // Apply PoP for this call only; no client-side persistence
+                    if (_managedIdentityParameters.MtlsCertificate != null && popRequested)
                     {
-                        if (popRequested)
-                        {
-                            AuthenticationRequestParameters.AuthenticationOperationOverride =
-                                new MtlsPopAuthenticationOperation(_managedIdentityParameters.MtlsCertificate);
-                        }
-
-                        // Persist binding for reuse/rotation across calls (Bearer & PoP)
-                        _managedIdentityClient.MtlsBindingCertificate = _managedIdentityParameters.MtlsCertificate;
-                        _managedIdentityParameters.MtlsCertificate = null;
-
-                        logger.Info("[ManagedIdentityRequest] mTLS binding certificate persisted.");
+                        AuthenticationRequestParameters.AuthenticationOperationOverride =
+                            new MtlsPopAuthenticationOperation(_managedIdentityParameters.MtlsCertificate);
+                        logger.Info("[ManagedIdentityRequest] Applied mTLS PoP operation for current request.");
                     }
+
+                    // Drop our reference to the cert (IMDSv2 source stored it in user store already)
+                    _managedIdentityParameters.MtlsCertificate = null;
 
                     var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
                     msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
@@ -389,5 +341,31 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             return null;
         }
+
+        private void ApplyMtlsOverrideFromUserStoreIfAvailable(bool popRequested, ILoggerAdapter logger)
+        {
+            if (!popRequested)
+                return;
+
+            if (AuthenticationRequestParameters.AuthenticationOperationOverride != null)
+                return;
+
+            // Identity key is MSAL client id (SAMI default or UAMI id)
+            var identityKey = ServiceBundle.Config.ClientId;
+
+            if (ImdsV2ManagedIdentitySource.TryGetImdsV2BindingMetadata(identityKey, out var _, out var subject) &&
+                !string.IsNullOrEmpty(subject))
+            {
+                var cert = MtlsCertStore.FindBySubject(subject);
+                if (cert != null && cert.NotAfter.ToUniversalTime() > DateTime.UtcNow.AddMinutes(1))
+                {
+                    AuthenticationRequestParameters.AuthenticationOperationOverride =
+                        new MtlsPopAuthenticationOperation(cert);
+
+                    logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Applied operation using user-store binding before cache lookup.");
+                }
+            }
+        }
+
     }
 }

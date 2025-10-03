@@ -23,47 +23,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
-        private X509Certificate2 _mtlsBindingCertificate;
 
-        internal X509Certificate2 MtlsBindingCertificate
-        {
-            get => _mtlsBindingCertificate;
-            set
-            {
-                // Interlocked.Exchange returns the old value.
-                var old = Interlocked.Exchange(ref _mtlsBindingCertificate, value);
-                
-                // Dispose the old cert if it is being replaced.
-                if (old != null && !ReferenceEquals(old, value))
-                {
-                    try
-                    { old.Dispose(); }
-                    catch { /* best effort */ }
-                }
-            }
-        }
+        // Per-identity, process-wide. Identity key = MSAL Config.ClientId (SAMI/UAMI).
+        internal static readonly ConcurrentDictionary<string, ImdsV2BindingMetadata> s_imdsV2Binding =
+            new ConcurrentDictionary<string, ImdsV2BindingMetadata>(StringComparer.Ordinal);
 
-        // Identity‑scoped caches (per process). Key should uniquely represent the identity
-        // (e.g., UAMI clientId or system‑assigned, tenant, and CUID where available).
-        private static readonly ConcurrentDictionary<string, X509Certificate2> s_mtlsCertCache =
-            new ConcurrentDictionary<string, X509Certificate2>(StringComparer.Ordinal);
-
-        private static readonly ConcurrentDictionary<string, CertificateRequestResponse> s_certResponseCache =
-            new ConcurrentDictionary<string, CertificateRequestResponse>(StringComparer.Ordinal);
-
-        internal static void ResetSourceAndCertForTest()
+        internal static void ResetSourceAndBindingForTest()
         {
             s_sourceName = ManagedIdentitySource.None;
-
-            foreach (var kvp in s_mtlsCertCache)
-            {
-                try
-                { kvp.Value?.Dispose(); }
-                catch { }
-            }
-
-            s_mtlsCertCache.Clear();
-            s_certResponseCache.Clear();
+            s_imdsV2Binding.Clear();
         }
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
@@ -195,62 +163,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
-        }
-
-        internal static bool TryGetCachedMtlsCertificate(
-            string identityKey,
-            out X509Certificate2 cert,
-            out CertificateRequestResponse response)
-        {
-            cert = null;
-            response = null;
-
-            if (string.IsNullOrEmpty(identityKey))
-            {
-                return false;
-            }
-
-            if (s_mtlsCertCache.TryGetValue(identityKey, out var c))
-            {
-                cert = c;
-            }
-
-            if (s_certResponseCache.TryGetValue(identityKey, out var r))
-            {
-                response = r;
-            }
-
-            return cert != null && response != null;
-        }
-
-        internal static void CacheMtlsCertificate(
-            string identityKey,
-            X509Certificate2 cert,
-            CertificateRequestResponse response)
-        {
-            if (string.IsNullOrEmpty(identityKey) || cert == null || response == null)
-            {
-                return;
-            }
-
-            s_mtlsCertCache[identityKey] = cert;
-            s_certResponseCache[identityKey] = response;
-        }
-
-        internal static bool IsMtlsCertExpiringSoon(string identityKey)
-        {
-            if (string.IsNullOrEmpty(identityKey))
-            {
-                return true;
-            }
-
-            if (!s_mtlsCertCache.TryGetValue(identityKey, out var cert) || cert == null)
-            {
-                return true;
-            }
-
-            var remaining = cert.NotAfter.ToUniversalTime() - DateTime.UtcNow;
-            return remaining <= TimeSpan.FromMinutes(1);
         }
     }
 }

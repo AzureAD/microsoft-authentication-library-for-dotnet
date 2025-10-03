@@ -446,7 +446,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(result.TokenType, MTLSPoP);
                 Assert.IsNotNull(result.BindingCertificate);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
         #endregion mTLS Pop Token Tests
@@ -863,7 +863,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual(TokenSource.IdentityProvider, r2.AuthenticationResultMetadata.TokenSource);
 
             // 3) Reset source + binding caches so next call must mint again
-            ManagedIdentityClient.ResetSourceAndCertForTest();
+            ManagedIdentityClient.ResetSourceAndBindingForTest();
 
             http.AddMockHandler(MockHelpers.MockCsrResponse()); // probe again after reset
             http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe

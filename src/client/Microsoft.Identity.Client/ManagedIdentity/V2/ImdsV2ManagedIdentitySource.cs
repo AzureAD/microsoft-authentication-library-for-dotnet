@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -20,7 +21,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
-    internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
+    internal partial class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
         // used in unit tests
         public const string ImdsV2ApiVersion = "2.0";
@@ -257,12 +258,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
             catch (Exception ex)
             {
+                int? statusCode = response != null ? (int)response.StatusCode : (int?)null;
+
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
                     $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed.",
                     ex,
                     ManagedIdentitySource.ImdsV2,
-                    (int)response.StatusCode);
+                    statusCode);
             }
 
             if (response.StatusCode != HttpStatusCode.OK)
@@ -286,27 +289,31 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
 
             // Key the binding cache by the MSAL ClientId (UAMI) or SAMI’s constant client id.
-            string identityKey = _requestContext.ServiceBundle.Config.ClientId;
+            string mtlsCertCacheKey = _requestContext.ServiceBundle.Config.ClientId;
 
             IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
 
-            // Try to reuse cached binding
-            X509Certificate2 cachedCert = null;
-            CertificateRequestResponse cachedResponse = null;
-            bool haveCached = !string.IsNullOrEmpty(identityKey) &&
-                              ManagedIdentityClient.TryGetCachedMtlsCertificate(identityKey, out cachedCert, out cachedResponse);
-            bool certFresh = haveCached && !ManagedIdentityClient.IsMtlsCertExpiringSoon(identityKey);
-
-            if (haveCached && certFresh)
+            // Reuse path: read IMDSv2 metadata + cert subject and reload cert from user store
+            if (!string.IsNullOrEmpty(mtlsCertCacheKey) &&
+                TryGetImdsV2BindingMetadata(mtlsCertCacheKey, out var cachedResponse, out var cachedSubject))
             {
-                string tokenType = _isMtlsPopRequested ? "mtls_pop" : "bearer";
+                var certFromStore = MtlsCertStore.FindBySubject(cachedSubject);
 
-                var requestFromCache = BuildTokenRequest(resource, cachedResponse, tokenType);
-                requestFromCache.MtlsCertificate = cachedCert;              // ✅ attach cert even for Bearer
-                requestFromCache.CertificateRequestResponse = cachedResponse;
+                // Only reuse if a valid (non‑expiring) cert is present
+                if (certFromStore != null &&
+                    certFromStore.NotAfter.ToUniversalTime() > DateTime.UtcNow.AddMinutes(1))
+                {
+                    string tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
 
-                _requestContext.Logger.Info("[IMDSv2] Using cached mTLS binding (cert + metadata) for identity.");
-                return requestFromCache;
+                    var requestFromCache = BuildTokenRequest(resource, cachedResponse, tokenType);
+                    requestFromCache.MtlsCertificate = certFromStore;   // attach for TLS (and PoP)
+                    requestFromCache.CertificateRequestResponse = cachedResponse;
+
+                    _requestContext.Logger.Info("[IMDSv2] Using user‑store mTLS binding and cached IMDSv2 metadata for identity.");
+                    return requestFromCache;
+                }
+
+                _requestContext.Logger.Info("[IMDSv2] No usable mTLS binding in user store; minting a new binding.");
             }
 
             // Need to mint/rotate binding certificate
@@ -323,24 +330,26 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 csr,
                 keyInfo).ConfigureAwait(false);
 
-            // ✅ IMDS v2 requires client mTLS on the STS call for both Bearer & PoP – always attach & cache the cert
+            // IMDS v2 requires client mTLS on the STS call for both Bearer & PoP – always attach & cache the cert
             X509Certificate2 mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
                 certificateRequestResponse.Certificate,
                 privateKey);
 
-            if (!string.IsNullOrEmpty(identityKey))
+            string subject = MtlsCertStore.InstallAndGetSubject(mtlsCertificate);
+
+            if (!string.IsNullOrEmpty(mtlsCertCacheKey))
             {
-                ManagedIdentityClient.CacheMtlsCertificate(identityKey, mtlsCertificate, certificateRequestResponse);
-                _requestContext.Logger.Info("[IMDSv2] Minted and cached new mTLS certificate for identity.");
+                CacheImdsV2BindingMetadata(mtlsCertCacheKey, certificateRequestResponse, subject);
+                _requestContext.Logger.Info("[IMDSv2] Minted mTLS binding and cached IMDSv2 metadata + cert subject for identity.");
             }
             else
             {
-                _requestContext.Logger.Warning("[IMDSv2] Skipping mTLS cache store due to missing identity key.");
+                _requestContext.Logger.Warning("[IMDSv2] Missing identity key; skipping metadata cache.");
             }
 
-            string tokenTypeFinal = _isMtlsPopRequested ? "mtls_pop" : "bearer";
+            string tokenTypeFinal = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
             var request = BuildTokenRequest(resource, certificateRequestResponse, tokenTypeFinal);
-            request.MtlsCertificate = mtlsCertificate;                     // ✅ attach cert even for Bearer
+            request.MtlsCertificate = mtlsCertificate;                     // attach cert even for Bearer
             request.CertificateRequestResponse = certificateRequestResponse;
 
             return request;
@@ -494,6 +503,40 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             logger.Warning($"[Managed Identity] Failed to normalize attestation endpoint value '{rawEndpoint}'.");
             return null;
+        }
+
+        internal static void CacheImdsV2BindingMetadata(string identityKey, CertificateRequestResponse resp, string certSubject)
+        {
+            if (string.IsNullOrEmpty(identityKey) || resp == null)
+            {
+                return;
+            }
+
+            ManagedIdentityClient.s_imdsV2Binding[identityKey] = new ImdsV2BindingMetadata
+            {
+                Response = resp,
+                CertificateSubject = certSubject
+            };
+        }
+
+        internal static bool TryGetImdsV2BindingMetadata(string identityKey, out CertificateRequestResponse resp, out string certSubject)
+        {
+            resp = null;
+            certSubject = null;
+
+            if (string.IsNullOrEmpty(identityKey))
+            {
+                return false;
+            }
+
+            if (ManagedIdentityClient.s_imdsV2Binding.TryGetValue(identityKey, out var meta) && meta?.Response != null)
+            {
+                resp = meta.Response;
+                certSubject = meta.CertificateSubject;
+                return true;
+            }
+
+            return false;
         }
     }
 }
