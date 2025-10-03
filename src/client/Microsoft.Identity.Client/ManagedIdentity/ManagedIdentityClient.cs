@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             s_sourceName = ManagedIdentitySource.None;
             s_imdsV2Binding.Clear();
+            RemoveAllTestBindingCertsFromUserStoreForTest();
         }
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
@@ -164,5 +165,28 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
         }
+
+        // Test only method to remove all test binding certs from user store.
+        internal static void RemoveAllTestBindingCertsFromUserStoreForTest()
+        {
+            try
+            {
+                using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                store.Open(OpenFlags.ReadWrite);
+                var matches = store.Certificates.Find(
+                    X509FindType.FindBySubjectDistinguishedName,
+                    "CN=Test",
+                    validOnly: false);
+                foreach (var c in matches)
+                {
+                    try
+                    { store.Remove(c); }
+                    catch { }
+                }
+                store.Close();
+            }
+            catch { }
+        }
+
     }
 }

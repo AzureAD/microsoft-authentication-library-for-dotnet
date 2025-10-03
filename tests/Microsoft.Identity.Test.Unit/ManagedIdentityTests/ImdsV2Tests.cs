@@ -432,7 +432,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(result.TokenType, MTLSPoP);
-                Assert.IsNotNull(result.BindingCertificate); // TODO: implement mTLS Pop BindingCertificate
+                Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, mTLSPop: true);
@@ -446,7 +446,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(result.TokenType, MTLSPoP);
                 Assert.IsNotNull(result.BindingCertificate);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
         #endregion mTLS Pop Token Tests
