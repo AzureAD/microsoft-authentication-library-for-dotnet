@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+using System;
+using System.ComponentModel;
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
@@ -13,6 +15,8 @@ namespace Microsoft.Identity.Client.Kerberos
     /// Class for Kerberos tickets that are included as claims and used as a supplemental token in an OAuth/OIDC
     /// protocol response.
     /// </summary>
+    [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public class KerberosSupplementalTicket
     {
         /// <summary>

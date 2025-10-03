@@ -23,6 +23,8 @@ namespace Microsoft.Identity.Client.Kerberos
     /// <summary>
     /// Helper class to manage Kerberos Ticket Claims.
     /// </summary>
+    [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class KerberosSupplementalTicketManager
     {
         private const int DefaultLogonId = 0;
@@ -95,26 +97,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// </remarks>
         public static void SaveToWindowsTicketCache(KerberosSupplementalTicket ticket, long logonId)
         {
-#if !SUPPORTS_WIN32
-            throw new PlatformNotSupportedException("Ticket Cache interface is not supported for this .NET platform. It is supported on .NET Classic, .NET Core and NetStandadrd");
-#else
-            if (!DesktopOsHelper.IsWindows())
-            {
-                throw new PlatformNotSupportedException("Ticket Cache interface is not supported on this OS. It is supported on Windows only.");
-
-            }
-
-            if (ticket == null || string.IsNullOrEmpty(ticket.KerberosMessageBuffer))
-            {
-                throw new ArgumentException("Kerberos Ticket information is not valid");
-            }
-
-            using (var cache = Platforms.Features.DesktopOs.Kerberos.TicketCacheWriter.Connect())
-            {
-                byte[] krbCred = Convert.FromBase64String(ticket.KerberosMessageBuffer);
-                cache.ImportCredential(krbCred, logonId);
-            }
-#endif
+            throw new NotImplementedException("This method is deprecated.");
         }
 
         /// <summary>
@@ -144,20 +127,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// </remarks>
         public static byte[] GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName, long logonId)
         {
-#if !SUPPORTS_WIN32
-            throw new PlatformNotSupportedException("Ticket Cache interface is not supported for this .NET platform. It is supported on .NET Classic, .NET Core and NetStandadrd");
-#else
-            if (!DesktopOsHelper.IsWindows())
-            {
-                throw new PlatformNotSupportedException("Ticket Cache interface is not supported on this OS. It is supported on Windows only.");
-
-            }
-
-            using (var reader = new Platforms.Features.DesktopOs.Kerberos.TicketCacheReader(servicePrincipalName, logonId))
-            {
-                return reader.RequestToken();
-            }
-#endif
+            throw new NotImplementedException("This method is deprecated.");
         }
 
         /// <summary>
@@ -174,33 +144,6 @@ namespace Microsoft.Identity.Client.Kerberos
             }
 
             return null;
-        }
-        
-        /// <summary>
-        /// Generate a Kerberos Ticket Claim string.
-        /// </summary>
-        /// <param name="servicePrincipalName">Service principal name to use.</param>
-        /// <param name="ticketContainer">Ticket container to use.</param>
-        /// <returns>A Kerberos Ticket Claim string if valid service principal name was given. Empty string, otherwise.</returns>
-        internal static string GetKerberosTicketClaim(string servicePrincipalName, KerberosTicketContainer ticketContainer)
-        {
-            if (string.IsNullOrEmpty(servicePrincipalName))
-            {
-                return string.Empty;
-            }
-
-            if (ticketContainer == KerberosTicketContainer.IdToken)
-            {
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    IdTokenAsRepTemplate,
-                    servicePrincipalName);
-            }
-
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                AccessTokenAsRepTemplate,
-                servicePrincipalName);
         }
     }
 }

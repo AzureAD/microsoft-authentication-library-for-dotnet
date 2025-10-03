@@ -1,16 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using System.Diagnostics.Metrics;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using static Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.NativeMethods;
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 
 namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 {
