@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -100,14 +101,25 @@ namespace Microsoft.Identity.Client
         /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
         {
-#if NET462
             if (ServiceBundle.Config.IsManagedIdentity)
             {
-                throw new MsalClientException(
-                    MsalError.MtlsNotSupportedForManagedIdentity,
-                    MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
-            }
+                void MtlsNotSupportedForManagedIdentity()
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsNotSupportedForManagedIdentity,
+                        MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
+                }
+
+                if (DesktopOsHelper.IsWindows() == false)
+                {
+                    MtlsNotSupportedForManagedIdentity();
+                }
+
+#if NET462
+                MtlsNotSupportedForManagedIdentity();
 #endif
+            }
+
             if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certificateCredential)
             {
                 if (certificateCredential.Certificate == null)
