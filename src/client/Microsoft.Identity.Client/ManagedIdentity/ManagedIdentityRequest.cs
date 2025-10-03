@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 
@@ -28,6 +29,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public RequestType RequestType { get; set; }
 
         public X509Certificate2 MtlsCertificate { get; set; }
+
+        internal CertificateRequestResponse CertificateRequestResponse { get; set; }
 
         public ManagedIdentityRequest(
             HttpMethod method,

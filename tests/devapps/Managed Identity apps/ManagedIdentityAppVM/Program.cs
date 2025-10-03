@@ -12,7 +12,7 @@ IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(Manage
                 .WithLogging(identityLogger, true)
                 .Build();
 
-string? scope = "https://management.azure.com";
+string? scope = "https://graph.microsoft.com";
 
 do
 {

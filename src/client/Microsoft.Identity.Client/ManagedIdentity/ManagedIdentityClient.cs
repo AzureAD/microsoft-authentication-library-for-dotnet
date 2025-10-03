@@ -2,14 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -22,9 +24,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
 
-        internal static void ResetSourceForTest()
+        // Per-identity, process-wide. Identity key = MSAL Config.ClientId (SAMI/UAMI).
+        internal static readonly ConcurrentDictionary<string, ImdsV2BindingMetadata> s_imdsV2Binding =
+            new ConcurrentDictionary<string, ImdsV2BindingMetadata>(StringComparer.Ordinal);
+
+        internal static void ResetSourceAndBindingForTest()
         {
             s_sourceName = ManagedIdentitySource.None;
+            s_imdsV2Binding.Clear();
+            RemoveAllTestBindingCertsFromUserStoreForTest();
         }
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
@@ -156,6 +164,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
+        }
+
+        // Test only method to remove all test binding certs from user store.
+        internal static void RemoveAllTestBindingCertsFromUserStoreForTest()
+        {
+            MtlsBindingStore.RemoveBySubjectPrefixForTest("CN=Test");
         }
     }
 }

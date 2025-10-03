@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
             OidcRetrieverWithCache.ResetCacheForTest();
             AuthorityManager.ClearValidationCache();
             SingletonThrottlingManager.GetInstance().ResetCache();
-            ManagedIdentityClient.ResetSourceForTest();
+            ManagedIdentityClient.ResetSourceAndBindingForTest();
             AuthorityManager.ClearValidationCache();
             PoPCryptoProviderFactory.Reset();
 
