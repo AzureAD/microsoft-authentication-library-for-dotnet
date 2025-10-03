@@ -103,20 +103,20 @@ namespace Microsoft.Identity.Client
         {
             if (ServiceBundle.Config.IsManagedIdentity)
             {
-                void MtlsNotSupportedForManagedIdentity()
+                void MtlsNotSupportedForManagedIdentity(string message)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsNotSupportedForManagedIdentity,
-                        MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
+                        message);
                 }
 
                 if (DesktopOsHelper.IsWindows() == false)
                 {
-                    MtlsNotSupportedForManagedIdentity();
+                    MtlsNotSupportedForManagedIdentity(MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
                 }
 
 #if NET462
-                MtlsNotSupportedForManagedIdentity();
+                MtlsNotSupportedForManagedIdentity(MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
 #endif
             }
 
