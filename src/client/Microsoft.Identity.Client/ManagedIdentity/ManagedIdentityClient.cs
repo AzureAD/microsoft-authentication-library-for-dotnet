@@ -169,24 +169,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // Test only method to remove all test binding certs from user store.
         internal static void RemoveAllTestBindingCertsFromUserStoreForTest()
         {
-            try
-            {
-                using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-                store.Open(OpenFlags.ReadWrite);
-                var matches = store.Certificates.Find(
-                    X509FindType.FindBySubjectDistinguishedName,
-                    "CN=Test",
-                    validOnly: false);
-                foreach (var c in matches)
-                {
-                    try
-                    { store.Remove(c); }
-                    catch { }
-                }
-                store.Close();
-            }
-            catch { }
+            MtlsBindingStore.RemoveBySubjectPrefixForTest("CN=Test");
         }
-
     }
 }

@@ -297,11 +297,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (!string.IsNullOrEmpty(mtlsCertCacheKey) &&
                 TryGetImdsV2BindingMetadata(mtlsCertCacheKey, out var cachedResponse, out var cachedSubject))
             {
-                var certFromStore = MtlsCertStore.FindBySubject(cachedSubject);
+                // Pick the freshest cert for the subject (>= 5 min remaining), prune older ones best effort
+                var certFromStore = MtlsBindingStore.GetFreshestBySubject(
+                    cachedSubject,
+                    MtlsBindingStore.MinFreshRemaining,
+                    _requestContext.Logger);
 
-                // Only reuse if a valid (non‑expiring) cert is present
-                if (certFromStore != null &&
-                    certFromStore.NotAfter.ToUniversalTime() > DateTime.UtcNow.AddMinutes(1))
+                if (certFromStore != null)
                 {
                     string tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
 
@@ -309,11 +311,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     requestFromCache.MtlsCertificate = certFromStore;   // attach for TLS (and PoP)
                     requestFromCache.CertificateRequestResponse = cachedResponse;
 
-                    _requestContext.Logger.Info("[IMDSv2] Using user‑store mTLS binding and cached IMDSv2 metadata for identity.");
+                    _requestContext.Logger.Info("[IMDSv2] Using freshest user-store mTLS binding and cached IMDSv2 metadata for identity.");
                     return requestFromCache;
                 }
 
-                _requestContext.Logger.Info("[IMDSv2] No usable mTLS binding in user store; minting a new binding.");
+                _requestContext.Logger.Info("[IMDSv2] No usable mTLS binding (>=5m) in user store; minting a new binding.");
             }
 
             // Need to mint/rotate binding certificate
@@ -330,12 +332,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 csr,
                 keyInfo).ConfigureAwait(false);
 
-            // IMDS v2 requires client mTLS on the STS call for both Bearer & PoP – always attach & cache the cert
-            X509Certificate2 mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
+            var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
                 certificateRequestResponse.Certificate,
                 privateKey);
 
-            string subject = MtlsCertStore.InstallAndGetSubject(mtlsCertificate);
+            // Install + prune, then cache the subject key alongside the response
+            string subject = MtlsBindingStore.InstallAndGetSubject(mtlsCertificate, _requestContext.Logger);
 
             if (!string.IsNullOrEmpty(mtlsCertCacheKey))
             {

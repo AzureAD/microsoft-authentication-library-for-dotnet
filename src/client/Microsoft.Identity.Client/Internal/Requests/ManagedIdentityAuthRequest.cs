@@ -346,26 +346,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!popRequested)
                 return;
-
             if (AuthenticationRequestParameters.AuthenticationOperationOverride != null)
                 return;
 
             // Identity key is MSAL client id (SAMI default or UAMI id)
             var identityKey = ServiceBundle.Config.ClientId;
 
-            if (ImdsV2ManagedIdentitySource.TryGetImdsV2BindingMetadata(identityKey, out var _, out var subject) &&
+            if (ImdsV2ManagedIdentitySource.TryGetImdsV2BindingMetadata(identityKey, out _, out var subject) &&
                 !string.IsNullOrEmpty(subject))
             {
-                var cert = MtlsCertStore.FindBySubject(subject);
-                if (cert != null && cert.NotAfter.ToUniversalTime() > DateTime.UtcNow.AddMinutes(1))
+                var cert = MtlsBindingStore.GetFreshestBySubject(
+                    subject,
+                    MtlsBindingStore.MinFreshRemaining,
+                    logger);
+
+                if (cert != null)
                 {
                     AuthenticationRequestParameters.AuthenticationOperationOverride =
                         new MtlsPopAuthenticationOperation(cert);
 
-                    logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Applied operation using user-store binding before cache lookup.");
+                    logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Using freshest user-store binding (>=5 min).");
                 }
             }
         }
-
     }
 }
