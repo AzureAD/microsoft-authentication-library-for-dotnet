@@ -56,6 +56,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             using (_logger.LogMethodDuration())
             {
+                // ADFS is not supported with broker
+                if (authorityType == AuthorityType.Adfs)
+                {
+                    _logger.Info("[Android broker] ADFS authority type is not supported with broker.");
+                    return false;
+                }
+
                 bool canInvoke = CanSwitchToBroker();
                 _logger.Verbose(()=>"[Android broker] Can invoke broker? " + canInvoke);
 
