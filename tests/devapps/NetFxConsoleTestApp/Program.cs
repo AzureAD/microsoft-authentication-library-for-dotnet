@@ -62,7 +62,7 @@ namespace NetFx
         private static readonly string s_confidentialClientSecret =
             Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET");
 
-        // https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/ADALTesting/providers/Microsoft.KeyVault/vaults/buildautomation/secrets
+        // https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/ID4STesting/providers/Microsoft.KeyVault/vaults/ID4sKeyVault/secrets
         private static readonly string s_secretForPoPValidationRequest =
             Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET");
 
