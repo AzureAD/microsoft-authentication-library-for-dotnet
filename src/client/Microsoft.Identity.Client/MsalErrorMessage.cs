@@ -445,5 +445,14 @@ namespace Microsoft.Identity.Client
         public const string ForceRefreshAndTokenHasNotCompatible = "Cannot specify ForceRefresh and AccessTokenSha256ToRefresh in the same request.";
         public const string RequestTimeOut = "Request to the endpoint timed out.";
         public const string MalformedOidcAuthorityFormat = "Possible cause: When using Entra External ID, you didn't append /v2.0, for example {0}/v2.0\"";
+
+        public static string JsonEncoderIntrinsicsUnsupported(string processArchitecture, bool is64BitProcess, string hwIntrinsicEnvValue)
+        {
+            return $"JSON encoding failed due to unavailable hardware intrinsics (SIMD/SSSE3). " +
+                   $"Process architecture: {processArchitecture}, " +
+                   $"Is 64-bit process: {is64BitProcess}, " +
+                   $"DOTNET_EnableHWIntrinsic: {hwIntrinsicEnvValue ?? "(not set)"}. " +
+                   "Mitigation: Run as 64-bit process, update runtime, or set environment variable DOTNET_EnableHWIntrinsic=0 to force the non-SIMD code path.";
+        }
     }
 }

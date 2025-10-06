@@ -842,6 +842,12 @@ namespace Microsoft.Identity.Client
         public const string InvalidJsonClaimsFormat = "invalid_json_claims_format";
 
         /// <summary>
+        /// <para>What happens?</para>The JSON encoder failed due to unavailable hardware intrinsics (SIMD/SSSE3). This typically occurs on 32-bit processes or systems with hardware intrinsics disabled.
+        /// <para>Mitigation</para>Run the process as 64-bit, update the runtime, or set the environment variable DOTNET_EnableHWIntrinsic=0 to force the non-SIMD code path.
+        /// </summary>
+        public const string JsonEncoderIntrinsicsUnsupported = "json_encoder_intrinsics_unsupported";
+
+        /// <summary>
         /// <para>What happens?</para>The authority configured at the application level is different than the authority configured at the request level
         /// <para>Mitigation</para>Ensure the same authority type is used
         /// </summary>
