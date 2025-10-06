@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.MtlsPop;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.Identity.Test.Unit.PublicApiTests;
@@ -174,8 +175,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.InMemory).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
@@ -198,8 +202,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        //[DataTestMethod]
-        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataTestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
@@ -207,8 +210,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 #region Identity 1
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
 
@@ -268,8 +273,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredRawCertificate); // cert will be expired on second request
@@ -303,8 +310,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, mTLSPop: true);
@@ -333,8 +342,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        //[DataTestMethod]
-        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataTestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
@@ -342,8 +350,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 #region Identity 1
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
@@ -418,8 +428,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId, TestConstants.ExpiredRawCertificate, mTLSPop: true);
@@ -455,8 +467,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncSucceeds()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 var handler = httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
                 await CreateManagedIdentityAsync(httpManager, addProbeMock: false).ConfigureAwait(false);
@@ -466,8 +480,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncSucceedsAfterRetry()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
                 // First attempt fails with INTERNAL_SERVER_ERROR (500)
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.InternalServerError));
 
@@ -479,8 +496,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithMissingServerHeader()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: null));
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
@@ -493,8 +512,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithInvalidFormat()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "I_MDS/150.870.65.1854"));
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
@@ -507,8 +528,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsAfterMaxRetries()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 const int Num500Errors = 1 + TestCsrMetadataProbeRetryPolicy.ExponentialStrategyNumRetries;
                 for (int i = 0; i < Num500Errors; i++)
                 {
@@ -525,8 +548,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncFails404WhichIsNonRetriableAndRetryPolicyIsNotTriggeredAsync()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.NotFound));
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
@@ -611,8 +636,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task MtlsPop_AttestationProviderMissing_ThrowsClientException()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
@@ -632,8 +659,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task MtlsPop_AttestationProviderReturnsNull_ThrowsClientException()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 var mi = await CreateManagedIdentityAsync(httpManager,  managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
@@ -656,8 +685,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task MtlsPop_AttestationProviderReturnsEmptyToken_ThrowsClientException()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
@@ -680,8 +711,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task mTLSPop_RequestedWithoutKeyGuard_ThrowsClientException()
         {
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 // Force in-memory keys (i.e., not KeyGuard)
                 var managedIdentityApp = await CreateManagedIdentityAsync(
                     httpManager,
@@ -707,8 +740,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task ImdsV2_CertCache_ReusesBinding_OnForceRefreshAsync()
         {
+            using (new EnvVariableContext())
             using (var http = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(http)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory)
@@ -758,9 +793,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task ImdsV2_CertCache_Isolates_SAMI_and_UAMI_IdentitiesAsync()
         {
+            using (new EnvVariableContext())
             // --- SAMI ---
             using (var httpSami = new MockHttpManager())
             {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
                 var samiBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpSami)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory)
@@ -820,110 +857,115 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task ImdsV2_CertCache_Reset_ClearsBindingAndSource_ReissuesOnNextCall()
         {
-            using var http = new MockHttpManager();
-
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+            using (new EnvVariableContext())
+            using (var http = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                 .WithHttpManager(http)
                 .WithRetryPolicyFactory(_testRetryPolicyFactory)
                 .WithCsrFactory(_testCsrFactory);
 
-            // Avoid shared token cache
-            miBuilder.Config.AccessorOptions = null;
+                // Avoid shared token cache
+                miBuilder.Config.AccessorOptions = null;
 
-            var mi = miBuilder.Build();
+                var mi = miBuilder.Build();
 
-            // In‑memory keys for bearer path
-            var pp = Substitute.For<IPlatformProxy>();
-            pp.ManagedIdentityKeyProvider.Returns(new InMemoryManagedIdentityKeyProvider());
-            (mi as ManagedIdentityApplication).ServiceBundle.SetPlatformProxyForTest(pp);
+                // In‑memory keys for bearer path
+                var pp = Substitute.For<IPlatformProxy>();
+                pp.ManagedIdentityKeyProvider.Returns(new InMemoryManagedIdentityKeyProvider());
+                (mi as ManagedIdentityApplication).ServiceBundle.SetPlatformProxyForTest(pp);
 
-            // 1) First acquisition: mint + token
-            http.AddMockHandler(MockHelpers.MockCsrResponse()); // probe
-            http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
-            http.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
-            // STS (POST, bearer)
-            http.AddMockHandler(
-                MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
+                // 1) First acquisition: mint + token
+                http.AddMockHandler(MockHelpers.MockCsrResponse()); // probe
+                http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
+                http.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+                // STS (POST, bearer)
+                http.AddMockHandler(
+                    MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
 
-            var r1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                             .ExecuteAsync().ConfigureAwait(false);
-            Assert.IsNotNull(r1.AccessToken);
-            Assert.AreEqual(TokenSource.IdentityProvider, r1.AuthenticationResultMetadata.TokenSource);
+                var r1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                 .ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(r1.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, r1.AuthenticationResultMetadata.TokenSource);
 
-            // 2) ForceRefresh: reuse binding (no /issuecredential)
-            http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe only
-                                                                // STS (POST, bearer)
-            http.AddMockHandler(
-                MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
+                // 2) ForceRefresh: reuse binding (no /issuecredential)
+                http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe only
+                                                                    // STS (POST, bearer)
+                http.AddMockHandler(
+                    MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
 
-            var r2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                             .WithForceRefresh(true)
-                             .ExecuteAsync().ConfigureAwait(false);
-            Assert.IsNotNull(r2.AccessToken);
-            Assert.AreEqual(TokenSource.IdentityProvider, r2.AuthenticationResultMetadata.TokenSource);
+                var r2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                 .WithForceRefresh(true)
+                                 .ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(r2.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, r2.AuthenticationResultMetadata.TokenSource);
 
-            // 3) Reset source + binding caches so next call must mint again
-            ManagedIdentityClient.ResetSourceAndBindingForTest();
+                // 3) Reset source + binding caches so next call must mint again
+                ManagedIdentityClient.ResetSourceAndBindingForTest();
 
-            http.AddMockHandler(MockHelpers.MockCsrResponse()); // probe again after reset
-            http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
-            http.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
-            // STS (POST, bearer)
-            http.AddMockHandler(
-                MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
+                http.AddMockHandler(MockHelpers.MockCsrResponse()); // probe again after reset
+                http.AddMockHandler(MockHelpers.MockCsrResponse()); // non-probe
+                http.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+                // STS (POST, bearer)
+                http.AddMockHandler(
+                    MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
 
-            var r3 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                             .WithForceRefresh(true)
-                             .ExecuteAsync().ConfigureAwait(false);
-            Assert.IsNotNull(r3.AccessToken);
-            Assert.AreEqual(TokenSource.IdentityProvider, r3.AuthenticationResultMetadata.TokenSource);
+                var r3 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                 .WithForceRefresh(true)
+                                 .ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(r3.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, r3.AuthenticationResultMetadata.TokenSource);
+            }
         }
 
         [TestMethod]
         public async Task ImdsV2_TokenCacheMiss_ValidCert_SkipsIssueCredential_GoesDirectToToken_Async()
         {
-            using var http = new MockHttpManager();
-
-            var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+            using (new EnvVariableContext())
+            using (var http = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                 .WithHttpManager(http)
                 .WithRetryPolicyFactory(_testRetryPolicyFactory)
                 .WithCsrFactory(_testCsrFactory);
-            miBuilder.Config.AccessorOptions = null;
+                miBuilder.Config.AccessorOptions = null;
 
-            var mi = miBuilder.Build();
+                var mi = miBuilder.Build();
 
-            // In‑memory keys for bearer path
-            var pp = Substitute.For<IPlatformProxy>();
-            pp.ManagedIdentityKeyProvider.Returns(new InMemoryManagedIdentityKeyProvider());
-            (mi as ManagedIdentityApplication).ServiceBundle.SetPlatformProxyForTest(pp);
+                // In‑memory keys for bearer path
+                var pp = Substitute.For<IPlatformProxy>();
+                pp.ManagedIdentityKeyProvider.Returns(new InMemoryManagedIdentityKeyProvider());
+                (mi as ManagedIdentityApplication).ServiceBundle.SetPlatformProxyForTest(pp);
 
-            // First call: mint + token (fills binding cache)
-            http.AddMockHandler(MockHelpers.MockCsrResponse());               // probe
-            http.AddMockHandler(MockHelpers.MockCsrResponse());               // non-probe
-            http.AddMockHandler(MockHelpers.MockCertificateRequestResponse()); // /issuecredential
-                                                                               // STS (POST, bearer)
-            http.AddMockHandler(
-                MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
+                // First call: mint + token (fills binding cache)
+                http.AddMockHandler(MockHelpers.MockCsrResponse());               // probe
+                http.AddMockHandler(MockHelpers.MockCsrResponse());               // non-probe
+                http.AddMockHandler(MockHelpers.MockCertificateRequestResponse()); // /issuecredential
+                                                                                   // STS (POST, bearer)
+                http.AddMockHandler(
+                    MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
 
-            var r1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                             .ExecuteAsync()
-                             .ConfigureAwait(false);
-            Assert.IsNotNull(r1.AccessToken);
+                var r1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                 .ExecuteAsync()
+                                 .ConfigureAwait(false);
+                Assert.IsNotNull(r1.AccessToken);
 
-            // Force token cache miss but keep binding fresh: CSR (non-probe) + token (NO /issuecredential)
-            http.AddMockHandler(MockHelpers.MockCsrResponse());               // non-probe
-                                                                              // STS (POST, bearer)
-            http.AddMockHandler(
-                MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
+                // Force token cache miss but keep binding fresh: CSR (non-probe) + token (NO /issuecredential)
+                http.AddMockHandler(MockHelpers.MockCsrResponse());               // non-probe
+                                                                                  // STS (POST, bearer)
+                http.AddMockHandler(
+                    MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, mTLSPop: false));
 
-            var r2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                             .WithForceRefresh(true)
-                             .ExecuteAsync()
-                             .ConfigureAwait(false);
-            Assert.IsNotNull(r2.AccessToken);
-            Assert.AreEqual(TokenSource.IdentityProvider, r2.AuthenticationResultMetadata.TokenSource);
+                var r2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                 .WithForceRefresh(true)
+                                 .ExecuteAsync()
+                                 .ConfigureAwait(false);
+                Assert.IsNotNull(r2.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, r2.AuthenticationResultMetadata.TokenSource);
+            }
         }
-
         #endregion
     }
 }

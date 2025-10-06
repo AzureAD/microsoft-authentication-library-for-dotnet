@@ -24,14 +24,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
 
-        // Per-identity, process-wide. Identity key = MSAL Config.ClientId (SAMI/UAMI).
-        internal static readonly ConcurrentDictionary<string, ImdsV2BindingMetadata> s_imdsV2Binding =
+        internal static readonly ConcurrentDictionary<string, ImdsV2BindingMetadata> s_identityToBindingMetadataMap =
             new ConcurrentDictionary<string, ImdsV2BindingMetadata>(StringComparer.Ordinal);
 
         internal static void ResetSourceAndBindingForTest()
         {
             s_sourceName = ManagedIdentitySource.None;
-            s_imdsV2Binding.Clear();
+            s_identityToBindingMetadataMap.Clear();
             RemoveAllTestBindingCertsFromUserStoreForTest();
         }
 

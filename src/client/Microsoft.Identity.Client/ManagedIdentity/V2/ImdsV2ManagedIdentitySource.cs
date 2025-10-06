@@ -287,38 +287,77 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
-
-            // Key the binding cache by the MSAL ClientId (UAMI) or SAMI’s constant client id.
-            string mtlsCertCacheKey = _requestContext.ServiceBundle.Config.ClientId;
+            string identityKey = _requestContext.ServiceBundle.Config.ClientId;
 
             IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
 
             // Reuse path: read IMDSv2 metadata + cert subject and reload cert from user store
-            if (!string.IsNullOrEmpty(mtlsCertCacheKey) &&
-                TryGetImdsV2BindingMetadata(mtlsCertCacheKey, out var cachedResponse, out var cachedSubject))
+            // Prefer per‑identity reuse first (subject + metadata)
+            // per-identity reuse branch
+            if (!string.IsNullOrEmpty(identityKey) &&
+                TryGetImdsV2BindingMetadata(identityKey, out var resp, out var subject))
             {
-                // Pick the freshest cert for the subject (>= 5 min remaining), prune older ones best effort
-                var certFromStore = MtlsBindingStore.GetFreshestBySubject(
-                    cachedSubject,
-                    MtlsBindingStore.MinFreshRemaining,
-                    _requestContext.Logger);
-
-                if (certFromStore != null)
+                var cert = MtlsCertStore.FindFreshestBySubject(subject, cleanupOlder: true);
+                if (MtlsCertStore.IsCurrentlyValid(cert))
                 {
-                    string tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
+                    var tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
 
-                    var requestFromCache = BuildTokenRequest(resource, cachedResponse, tokenType);
-                    requestFromCache.MtlsCertificate = certFromStore;   // attach for TLS (and PoP)
-                    requestFromCache.CertificateRequestResponse = cachedResponse;
+                    var request = BuildTokenRequest(
+                        resource,
+                        resp.MtlsAuthenticationEndpoint, // endpoint from metadata
+                        csrMetadata.TenantId,            // CURRENT identity
+                        csrMetadata.ClientId,            // CURRENT identity
+                        tokenType);
 
-                    _requestContext.Logger.Info("[IMDSv2] Using freshest user-store mTLS binding and cached IMDSv2 metadata for identity.");
-                    return requestFromCache;
+                    request.MtlsCertificate = cert;
+                    request.CertificateRequestResponse = resp;
+
+                    if (MtlsCertStore.IsBeyondHalfLife(cert))
+                    {
+                        _requestContext.Logger.Info("[IMDSv2] mTLS binding at/after half-life (reused for this request).");
+                    }
+
+                    return request;
                 }
 
-                _requestContext.Logger.Info("[IMDSv2] No usable mTLS binding (>=5m) in user store; minting a new binding.");
+                _requestContext.Logger.Info("[IMDSv2] No usable mTLS binding found; minting a new one.");
             }
 
-            // Need to mint/rotate binding certificate
+            // PoP-only cross-identity binding reuse, but with the CURRENT identity’s identity parameters
+            // Cross-identity PoP fallback: reuse an existing user-store binding,
+            // but ALWAYS use the CURRENT identity’s client/tenant from csrMetadata.
+            if (_isMtlsPopRequested &&
+                TryGetAnyImdsV2BindingMetadata(out var anyResp, out var anySubject))
+            {
+                var cert = MtlsCertStore.FindFreshestBySubject(anySubject, cleanupOlder: true);
+                if (MtlsCertStore.IsCurrentlyValid(cert))
+                {
+                    if (!string.IsNullOrEmpty(identityKey))
+                    {
+                        CacheImdsV2BindingMetadata(identityKey, anyResp, anySubject);
+                    }
+
+                    var request = BuildTokenRequest(
+                        resource,
+                        anyResp.MtlsAuthenticationEndpoint,  // reuse endpoint
+                        csrMetadata.TenantId,                // use CURRENT identity's tenant
+                        csrMetadata.ClientId,                // use CURRENT identity's client
+                        Constants.MtlsPoPTokenType);
+
+                    request.MtlsCertificate = cert;
+                    request.CertificateRequestResponse = anyResp;
+
+                    // optional: log half-life, rotation hook later
+                    if (MtlsCertStore.IsBeyondHalfLife(cert))
+                    {
+                        _requestContext.Logger.Info("[IMDSv2] mTLS binding at/after half-life (reused for this request).");
+                    }
+
+                    return request;
+                }
+            }
+
+            // Mint binding certificate
             ManagedIdentityKeyInfo keyInfo = await keyProvider
                 .GetOrCreateKeyAsync(_requestContext.Logger, _requestContext.UserCancellationToken)
                 .ConfigureAwait(false);
@@ -327,22 +366,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 .Generate(keyInfo.Key, csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
             var certificateRequestResponse = await ExecuteCertificateRequestAsync(
-                csrMetadata.ClientId,
-                csrMetadata.AttestationEndpoint,
-                csr,
-                keyInfo).ConfigureAwait(false);
+                csrMetadata.ClientId, csrMetadata.AttestationEndpoint, csr, keyInfo).ConfigureAwait(false);
 
+            // Attach private key
             var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
-                certificateRequestResponse.Certificate,
-                privateKey);
+                certificateRequestResponse.Certificate, privateKey);
 
-            // Install + prune, then cache the subject key alongside the response
-            string subject = MtlsBindingStore.InstallAndGetSubject(mtlsCertificate, _requestContext.Logger);
+            // Install + remember subject (prune older)
+            subject = MtlsBindingStore.InstallAndGetSubject(mtlsCertificate, _requestContext.Logger);
+            MtlsBindingStore.PruneOlder(subject, mtlsCertificate.Thumbprint, _requestContext.Logger);
 
-            if (!string.IsNullOrEmpty(mtlsCertCacheKey))
+            if (!string.IsNullOrEmpty(identityKey))
             {
-                CacheImdsV2BindingMetadata(mtlsCertCacheKey, certificateRequestResponse, subject);
-                _requestContext.Logger.Info("[IMDSv2] Minted mTLS binding and cached IMDSv2 metadata + cert subject for identity.");
+                CacheImdsV2BindingMetadata(identityKey, certificateRequestResponse, subject);
+                _requestContext.Logger.Info("[IMDSv2] Minted mTLS binding and cached IMDSv2 metadata + subject.");
             }
             else
             {
@@ -350,35 +387,32 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             string tokenTypeFinal = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
-            var request = BuildTokenRequest(resource, certificateRequestResponse, tokenTypeFinal);
-            request.MtlsCertificate = mtlsCertificate;                     // attach cert even for Bearer
-            request.CertificateRequestResponse = certificateRequestResponse;
-
-            return request;
+            var finalRequest = BuildTokenRequest(resource, certificateRequestResponse.MtlsAuthenticationEndpoint, certificateRequestResponse.TenantId, certificateRequestResponse.ClientId, tokenTypeFinal);
+            finalRequest.MtlsCertificate = mtlsCertificate;
+            finalRequest.CertificateRequestResponse = certificateRequestResponse;
+            return finalRequest;
         }
 
-        private ManagedIdentityRequest BuildTokenRequest(string resource, CertificateRequestResponse resp, string tokenType)
+        private ManagedIdentityRequest BuildTokenRequest(string resource, string mtlsAuthenticationEndpoint, string tenantId, string clientId, string tokenType)
         {
-            // Build STS endpoint: {mtlsAuthEndpoint}/{tenantId}/oauth2/v2.0/token
-            var stsUri = new Uri($"{resp.MtlsAuthenticationEndpoint}/{resp.TenantId}{AcquireEntraTokenPath}");
+            var stsUri = new Uri($"{mtlsAuthenticationEndpoint}/{tenantId}{AcquireEntraTokenPath}");
 
             var request = new ManagedIdentityRequest(HttpMethod.Post, stsUri)
             {
                 RequestType = RequestType.STS
             };
 
-            // Standard MSAL identification headers
             var idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
             foreach (var idParam in idParams)
             {
                 request.Headers[idParam.Key] = idParam.Value;
             }
+
             request.Headers.Add(OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString());
             request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
             request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
 
-            // Body
-            request.BodyParameters.Add("client_id", resp.ClientId);
+            request.BodyParameters.Add("client_id", clientId);
             request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
             request.BodyParameters.Add("scope", resource.TrimEnd('/') + "/.default");
             request.BodyParameters.Add("token_type", tokenType);
@@ -510,32 +544,43 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal static void CacheImdsV2BindingMetadata(string identityKey, CertificateRequestResponse resp, string certSubject)
         {
             if (string.IsNullOrEmpty(identityKey) || resp == null)
-            {
                 return;
-            }
 
-            ManagedIdentityClient.s_imdsV2Binding[identityKey] = new ImdsV2BindingMetadata
-            {
-                Response = resp,
-                CertificateSubject = certSubject
-            };
+            ManagedIdentityClient.s_identityToBindingMetadataMap[identityKey] =
+                new ImdsV2BindingMetadata { Response = resp, CertificateSubject = certSubject };
         }
 
         internal static bool TryGetImdsV2BindingMetadata(string identityKey, out CertificateRequestResponse resp, out string certSubject)
         {
             resp = null;
             certSubject = null;
-
             if (string.IsNullOrEmpty(identityKey))
-            {
                 return false;
-            }
 
-            if (ManagedIdentityClient.s_imdsV2Binding.TryGetValue(identityKey, out var meta) && meta?.Response != null)
+            if (ManagedIdentityClient.s_identityToBindingMetadataMap
+                .TryGetValue(identityKey, out var meta) && meta?.Response != null)
             {
                 resp = meta.Response;
                 certSubject = meta.CertificateSubject;
                 return true;
+            }
+            return false;
+        }
+
+        internal static bool TryGetAnyImdsV2BindingMetadata(out CertificateRequestResponse resp, out string certSubject)
+        {
+            resp = null;
+            certSubject = null;
+
+            foreach (var kvp in ManagedIdentityClient.s_identityToBindingMetadataMap)
+            {
+                var meta = kvp.Value;
+                if (meta?.Response != null && !string.IsNullOrWhiteSpace(meta.CertificateSubject))
+                {
+                    resp = meta.Response;
+                    certSubject = meta.CertificateSubject;
+                    return true;
+                }
             }
 
             return false;

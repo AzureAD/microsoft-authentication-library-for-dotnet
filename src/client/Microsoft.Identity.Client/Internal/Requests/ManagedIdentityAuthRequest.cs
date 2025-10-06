@@ -265,7 +265,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             cancellationToken)
                         .ConfigureAwait(false);
 
-                    // Apply PoP for this call only; no client-side persistence
+                    // After SendTokenRequestForManagedIdentityAsync returns
                     if (_managedIdentityParameters.MtlsCertificate != null && popRequested)
                     {
                         AuthenticationRequestParameters.AuthenticationOperationOverride =
@@ -273,7 +273,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         logger.Info("[ManagedIdentityRequest] Applied mTLS PoP operation for current request.");
                     }
 
-                    // Drop our reference to the cert (IMDSv2 source stored it in user store already)
+                    // Drop our reference (store already persisted it earlier in the source)
                     _managedIdentityParameters.MtlsCertificate = null;
 
                     var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
@@ -355,17 +355,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (ImdsV2ManagedIdentitySource.TryGetImdsV2BindingMetadata(identityKey, out _, out var subject) &&
                 !string.IsNullOrEmpty(subject))
             {
-                var cert = MtlsBindingStore.GetFreshestBySubject(
-                    subject,
-                    MtlsBindingStore.MinFreshRemaining,
-                    logger);
-
-                if (cert != null)
+                var cert = MtlsCertStore.FindFreshestBySubject(subject, cleanupOlder: true);
+                if (MtlsCertStore.IsCurrentlyValid(cert))
                 {
                     AuthenticationRequestParameters.AuthenticationOperationOverride =
                         new MtlsPopAuthenticationOperation(cert);
 
-                    logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Using freshest user-store binding (>=5 min).");
+                    logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Applied operation using user‑store binding (freshest, valid).");
                 }
             }
         }

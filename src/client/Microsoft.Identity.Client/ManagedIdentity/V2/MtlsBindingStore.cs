@@ -9,175 +9,120 @@ using Microsoft.Identity.Client.Core;
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     /// <summary>
-    /// Centralized helper for installing, locating and pruning IMDSv2 client mTLS binding certs
-    /// from the CurrentUser\My store.
+    /// Centralized helper for installing and retrieving mTLS binding certs
+    /// from CurrentUser\My with a freshness policy and best-effort pruning.
     /// </summary>
     internal static class MtlsBindingStore
     {
-        // Minimum remaining lifetime required to reuse a binding.
-        internal static readonly TimeSpan MinFreshRemaining = TimeSpan.FromMinutes(5);
+        // Treat certs expiring within this window as "not fresh"
+        internal static readonly TimeSpan FreshnessBuffer = TimeSpan.FromMinutes(5);
 
-        /// <summary>
-        /// Installs the certificate in CurrentUser\My, removes any exact-duplicate thumbprints,
-        /// and best-effort prunes older certs for the same subject. Returns the subject DN used
-        /// as lookup key.
-        /// </summary>
         internal static string InstallAndGetSubject(X509Certificate2 cert, ILoggerAdapter logger = null)
         {
             if (cert == null)
                 return null;
 
-            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-
             try
             {
+                using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                 store.Open(OpenFlags.ReadWrite);
 
-                // Avoid duplicates by thumbprint
-                foreach (var dup in store.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false))
-                {
-                    try
-                    { store.Remove(dup); }
-                    catch { /* best effort */ }
-                }
+                // Avoid dup by thumbprint
+                var dups = store.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false);
+                foreach (var d in dups)
+                { try { store.Remove(d); } catch { } }
 
                 store.Add(cert);
-
-                // Best effort prune for same subject (keep newly added one)
-                TryPruneOlderForSubject(store, cert.Subject, keepThumbprint: cert.Thumbprint, logger);
+                store.Close();
             }
-            catch
+            catch (Exception ex)
             {
-                // If store operations fail, carry on; the cert is still available in-memory for this call.
-            }
-            finally
-            {
-                try
-                { store.Close(); }
-                catch { }
+                logger?.Verbose(() => $"[Managed Identity] Failed to install binding cert: {ex.Message}");
             }
 
             return cert.Subject;
         }
 
-        /// <summary>
-        /// Returns the freshest (max NotAfter) cert for the given subject that still has at least
-        /// <paramref name="minFreshRemaining"/> lifetime. Best-effort prunes older certs for the same subject.
-        /// Returns null if nothing qualifies.
-        /// </summary>
-        internal static X509Certificate2 GetFreshestBySubject(
-            string subject,
-            TimeSpan minFreshRemaining,
-            ILoggerAdapter logger = null)
+        internal static X509Certificate2 GetFreshestBySubject(string subject, ILoggerAdapter logger = null)
         {
             if (string.IsNullOrWhiteSpace(subject))
                 return null;
 
-            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            bool rw = true;
             try
             {
-                // Try RW to allow pruning; fall back to RO if needed.
-                store.Open(OpenFlags.ReadWrite);
-            }
-            catch
-            {
-                rw = false;
-                try
-                { store.Open(OpenFlags.ReadOnly); }
-                catch { return null; }
-            }
+                using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                store.Open(OpenFlags.ReadOnly);
 
-            try
-            {
-                var all = store.Certificates
-                               .Find(X509FindType.FindBySubjectDistinguishedName, subject, validOnly: false)
-                               .OfType<X509Certificate2>()
-                               .ToList();
+                var freshest = store.Certificates
+                    .Find(X509FindType.FindBySubjectDistinguishedName, subject, validOnly: false)
+                    .Cast<X509Certificate2>()
+                    .OrderByDescending(c => c.NotAfter.ToUniversalTime())
+                    .FirstOrDefault();
 
-                if (all.Count == 0)
-                {
+                if (freshest == null)
                     return null;
-                }
 
-                var freshest = all.OrderByDescending(c => c.NotAfter).First();
-
-                // Best effort prune older ones (only if RW)
-                if (rw)
+                // Freshness check (5 minutes)
+                if (freshest.NotAfter.ToUniversalTime() <= DateTime.UtcNow.Add(FreshnessBuffer))
                 {
-                    foreach (var c in all)
-                    {
-                        if (!string.Equals(c.Thumbprint, freshest.Thumbprint, StringComparison.OrdinalIgnoreCase))
-                        {
-                            try
-                            { store.Remove(c); }
-                            catch { /* best effort */ }
-                        }
-                    }
-                }
-
-                var remaining = freshest.NotAfter.ToUniversalTime() - DateTime.UtcNow;
-                if (remaining <= minFreshRemaining)
-                {
-                    // Treat as non-usable -> force mint
+                    logger?.Info("[Managed Identity] Found binding in user store, but not fresh; minting new binding.");
                     return null;
                 }
 
                 return freshest;
             }
-            finally
+            catch (Exception ex)
             {
-                try
-                { store.Close(); }
-                catch { }
+                logger?.Verbose(() => $"[Managed Identity] Failed to read binding cert from user store: {ex.Message}");
+                return null;
             }
         }
 
-        /// <summary>
-        /// Test-only utility to scrub all certs whose subject starts with the prefix.
-        /// </summary>
+        internal static void PruneOlder(string subject, string keepThumbprint, ILoggerAdapter logger = null)
+        {
+            if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(keepThumbprint))
+                return;
+
+            try
+            {
+                using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                store.Open(OpenFlags.ReadWrite);
+
+                var matches = store.Certificates.Find(
+                    X509FindType.FindBySubjectDistinguishedName, subject, validOnly: false);
+
+                foreach (var c in matches.Cast<X509Certificate2>())
+                {
+                    if (!string.Equals(c.Thumbprint, keepThumbprint, StringComparison.OrdinalIgnoreCase))
+                    {
+                        try
+                        { store.Remove(c); }
+                        catch { }
+                    }
+                }
+            }
+            catch { /* best-effort */ }
+        }
+
+        // TEST ONLY — keep in test assembly if you prefer; exposed here for convenience
         internal static void RemoveBySubjectPrefixForTest(string subjectPrefix)
         {
             try
             {
                 using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                 store.Open(OpenFlags.ReadWrite);
-                foreach (var c in store.Certificates.OfType<X509Certificate2>())
+                foreach (var c in store.Certificates)
                 {
-                    if (c.Subject?.StartsWith(subjectPrefix, StringComparison.OrdinalIgnoreCase) == true)
+                    if (!string.IsNullOrEmpty(c.Subject) &&
+                        c.Subject.StartsWith(subjectPrefix, StringComparison.OrdinalIgnoreCase))
                     {
                         try
                         { store.Remove(c); }
-                        catch { /* best effort */ }
+                        catch { }
                     }
                 }
-                store.Close();
             }
-            catch { /* best effort */ }
-        }
-
-        private static void TryPruneOlderForSubject(
-            X509Store store,
-            string subject,
-            string keepThumbprint,
-            ILoggerAdapter logger)
-        {
-            try
-            {
-                var toRemove = store.Certificates
-                    .Find(X509FindType.FindBySubjectDistinguishedName, subject, validOnly: false)
-                    .OfType<X509Certificate2>()
-                    .Where(c => !string.Equals(c.Thumbprint, keepThumbprint, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-                foreach (var c in toRemove)
-                {
-                    try
-                    { store.Remove(c); }
-                    catch { /* best effort */ }
-                }
-            }
-            catch { /* best effort */ }
+            catch { }
         }
     }
 }
