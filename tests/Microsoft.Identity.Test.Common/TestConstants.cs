@@ -594,7 +594,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ConfidentialClientId = "ConfidentialClientId";
         public const string ClientRedirectUri = "http://localhost:8080";
         public static readonly SortedSet<string> s_supportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" }, StringComparer.OrdinalIgnoreCase);
-        public const string ADFS2019ClientSecretURL = "https://ID4sKeyVault.vault.azure.net/secrets/ADFS2019ClientCredSecret/";
+        public const string ADFS2019ClientSecretURL = "https://id4skeyvault.vault.azure.net/secrets/ADFS2019ClientCredSecret/";
         public const string ADFS2019ClientSecretName = "ADFS2019ClientCredSecret";
     }
 }
