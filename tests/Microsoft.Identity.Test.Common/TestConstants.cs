@@ -246,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string MsalCCAKeyVaultUri = "https://ID4sKeyVault.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
         public const string MsalCCAKeyVaultSecretName = "MSIDLAB4-IDLABS-APP-AzureADMyOrg-CC";
-        public const string MsalOBOKeyVaultUri = "https://ID4sKeyVault.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
+        public const string MsalOBOKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
         public const string MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret";
         public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string MsalArlingtonOBOKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
