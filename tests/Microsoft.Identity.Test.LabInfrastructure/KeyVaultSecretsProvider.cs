@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// The KeyVault maintained by the MSAL.NET team and have full control over. 
         /// Should be used temporarily - secrets should be stored and managed by MSID Lab.
         /// </summary>
-        public const string MsalTeam = "https://buildautomation.vault.azure.net/";
+        public const string MsalTeam = "https://id4skeyvault.vault.azure.net/";
     }
 
     public class KeyVaultSecretsProvider : IDisposable
