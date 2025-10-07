@@ -1,1 +1,4 @@
-#nullable enable
+Microsoft.Identity.Client.Broker.BrokerExtension
+static Microsoft.Identity.Client.Broker.BrokerExtension.WithBroker(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder, Microsoft.Identity.Client.BrokerOptions brokerOptions) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.Broker.BrokerExtension.WithBrokerPreview(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder, bool enableBroker = true) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.Broker.BrokerExtension.WithSsoPolicy(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder) -> Microsoft.Identity.Client.PublicClientApplicationBuilder

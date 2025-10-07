@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -15,28 +15,28 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Authentication;
 using Microsoft.OneAuthInterop;
+using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
 {
     /// <summary>
     /// Adapter layer to wrap OneAuth C# projections and provide compatibility with existing MSAL.NET broker interface
     /// </summary>
-    internal class OneAuthAdapter : IBroker, IDisposable
+    internal class OneAuthBroker : IBroker, IDisposable
     {
         private readonly ILoggerAdapter _logger;
+        private readonly IntPtr _parentHandle = IntPtr.Zero;
+        private readonly BrokerOptions _brokerOptions;
         private readonly OneAuthCs _oneAuth;
         private bool _initialized = false;
 
-        public OneAuthAdapter(ILoggerAdapter logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _oneAuth = new OneAuthCs();
-        }
-
         public bool IsInitialized => _initialized;
 
-        public bool IsPopSupported => false; // OneAuth broker doesn't support PoP tokens yet
+        public bool IsPopSupported => true; 
 
         /// <summary>
         /// Initialize OneAuth with the given configuration
@@ -46,17 +46,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             string redirectUri,
             string applicationName = null)
         {
-            try
+            // OneAuth initialization now happens in the constructor via Startup call
+            // This method now just returns the initialization status
+            if (_initialized)
             {
-                // TODO: Implement proper OneAuth initialization with real config objects
-                // For now, just mark as initialized to allow SignInInteractively to work
-                _initialized = true;
-                _logger?.Info("[OneAuth] Adapter initialized (basic implementation - needs real OneAuth config)");
+                _logger?.Info($"[OneAuth] OneAuth is initialized and ready for clientId: {clientId}");
                 return true;
             }
-            catch (Exception ex)
+            else
             {
-                _logger?.Error($"[OneAuth] Failed to initialize: {ex}");
+                _logger?.Warning($"[OneAuth] OneAuth initialization is not yet fully implemented. " +
+                    $"Cannot process requests for clientId: {clientId}. " +
+                    "Startup method requires specific OneAuth configuration objects that need to be documented.");
                 return false;
             }
         }
@@ -81,10 +82,134 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             }
         }
 
+        private static IntPtr GetParentWindow(CoreUIParent uiParent)
+        {
+            if (uiParent?.OwnerWindow is IntPtr ptr)
+            {
+                return ptr;
+            }
+
+            return IntPtr.Zero;
+        }
+
+        public OneAuthBroker(
+            CoreUIParent uiParent,
+            ApplicationConfiguration appConfig,
+            ILoggerAdapter logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _oneAuth = new OneAuthCs();
+
+            // Set parent window handle for OneAuth UI on Windows
+            _parentHandle = GetParentWindow(uiParent);
+            
+            // Broker options cannot be null
+            _brokerOptions = appConfig.BrokerOptions ?? throw new ArgumentNullException(nameof(appConfig.BrokerOptions));
+
+            // Initialize OneAuth by calling Startup with required configuration objects
+            InitializeOneAuth(appConfig);
+        }
+
+        /// <summary>
+        /// Initialize OneAuth by calling the Startup method with proper configuration objects
+        /// </summary>
+        private void InitializeOneAuth(ApplicationConfiguration appConfig)
+        {
+            try
+            {
+                _logger?.Info("[OneAuth] Starting OneAuth initialization via Startup method");
+
+                // For now, create a minimal implementation that attempts to call Startup
+                // This will need to be completed once the exact OneAuth constructor requirements are known
+                _logger?.Warning("[OneAuth] OneAuth initialization is not yet fully implemented - Startup method requires specific configuration objects");
+
+                // Mark as not initialized until proper configuration objects can be created
+                //_initialized = false;
+
+                // TODO: Uncomment and complete once OneAuth package documentation is available
+
+                var oneAuthAppConfig = CreateConfiguredAppConfig(appConfig);
+                var aadConfig = CreateConfiguredAadConfig(appConfig);
+                var msaConfig = CreateConfiguredMsaConfig(appConfig);
+                //var telemetryConfig = ;
+
+                var startupError = _oneAuth.Startup(oneAuthAppConfig, aadConfig, msaConfig, null);
+
+                if (startupError != null)
+                {
+                    _logger?.Error($"[OneAuth] Startup failed with error: {startupError}");
+                    _initialized = false;
+                }
+                else
+                {
+                    _initialized = true;
+                    _logger?.Info("[OneAuth] OneAuth successfully initialized via Startup method");
+                    
+                    // Set up logging
+                    _oneAuth.SetLogPiiEnabled(_logger.PiiLoggingEnabled);
+                    _oneAuth.SetLogCallback((level, message, identifiableInfo) =>
+                    {
+                        _logger?.Info($"[OneAuth] {message}");
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"[OneAuth] Failed to initialize OneAuth: {ex}");
+                _initialized = false;
+            }
+        }
+
+        // TODO: Implement these methods once OneAuth constructor requirements are documented
+        private Microsoft.OneAuthInterop.AppConfig CreateConfiguredAppConfig(ApplicationConfiguration appConfig)
+        {
+            return new Microsoft.OneAuthInterop.AppConfig(
+                appId: appConfig.ClientId,                    // string appId
+                appName: "MSAL.NET OneAuth Broker",          // string appName  
+                appVersion: "1.0.0",                         // string appVersion
+                languageCode: "en-US"                        // string languageCode
+                                                             // Optional: hrdAppId parameter for the second constructor
+            );
+        }
+
+        private Microsoft.OneAuthInterop.AadConfig CreateConfiguredAadConfig(ApplicationConfiguration appConfig)
+        {
+            var aadConfig = new Microsoft.OneAuthInterop.AadConfig(
+                clientId: appConfig.ClientId,                        // string clientId
+                redirectUri: appConfig.RedirectUri,                  // string redirectUri
+                defaultSignInResource: "https://graph.microsoft.com/.default", // string defaultSignInResource
+                capabilities: appConfig.ClientCapabilities?.ToList() ?? new List<string>(), // List<string> capabilities
+                allowSameRealm: true                                // bool allowSameRealm
+            );
+
+            return aadConfig;
+        }
+
+        private Microsoft.OneAuthInterop.MsaConfig CreateConfiguredMsaConfig(ApplicationConfiguration appConfig)
+        {
+            // MSA (Microsoft Account) default sign-in scope
+            // For MSA scenarios, we typically use basic profile scopes or Microsoft Graph
+            var defaultSignInScope = "https://graph.microsoft.com/User.Read";
+
+            var msaConfig = new Microsoft.OneAuthInterop.MsaConfig(
+                clientId: appConfig.ClientId,                        // string clientId
+                redirectUri: appConfig.RedirectUri,                  // string redirectUri
+                defaultSignInScope: defaultSignInScope               // string defaultSignInScope
+            );
+
+            return msaConfig;
+        }
+
+        private Microsoft.OneAuthInterop.TelemetryConfig CreateConfiguredTelemetryConfig(ApplicationConfiguration appConfig)
+        {
+            // Will be implemented based on actual OneAuth TelemetryConfig constructor requirements
+            throw new NotImplementedException("OneAuth TelemetryConfig creation not yet implemented");
+        }
+
         public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
             // For now, return false to indicate OneAuth is not ready yet
-            return false;
+            return true;
         }
 
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
@@ -165,18 +290,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
                 _logger?.Info("[OneAuth] Calling SignInInteractively using OneAuth C# API");
 
                 // Create UxContext for OneAuth UI handling
-                var uxContext = new UxContext(IntPtr.Zero, IntPtr.Zero, "OneAuth");
+                var uxContext = new UxContext(_parentHandle, IntPtr.Zero, "OneAuth");
 
                 // Create account hint
                 string accountHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
-
-                // Convert MSAL parameters to OneAuth AuthParameters (actual OneAuth package type)
-                var authenticationParameters = OneAuthParameterMappers.ToOneAuthAuthParameters(
-                    authenticationRequestParameters, 
-                    acquireTokenInteractiveParameters);
-
-                // Convert MSAL parameters to OneAuth SignInBehaviorParameters
-                var signInBehaviorParameters = OneAuthParameterMappers.ToOneAuthSignInBehaviorParameters(acquireTokenInteractiveParameters);
 
                 // Create TelemetryParameters for OneAuth
                 var telemetryParameters = new TelemetryParameters(
@@ -185,25 +302,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
                     authenticationRequestParameters.CorrelationId.ToString("D"));
 
                 // Log what we're about to send to OneAuth (using internal representation for logging)
-                var internalAuthParams = OneAuthParameterMappers.ToOneAuthInternalAuthParameters(
-                    authenticationRequestParameters, 
-                    acquireTokenInteractiveParameters);
-
-                _logger?.Info($"[OneAuth] Calling OneAuth SignInInteractively with:");
-                _logger?.Info($"[OneAuth] - Authority: {internalAuthParams.Authority}");
-                _logger?.Info($"[OneAuth] - Target: {internalAuthParams.Target}");
-                _logger?.Info($"[OneAuth] - AuthenticationScheme: {internalAuthParams.AuthenticationScheme}");
-                _logger?.Info($"[OneAuth] - Claims: {internalAuthParams.Claims}");
-                _logger?.Info($"[OneAuth] - AccountHint: {accountHint ?? "N/A"}");
-                _logger?.Info($"[OneAuth] - AdditionalParameters count: {internalAuthParams.AdditionalParameters?.Count ?? 0}");
-                _logger?.Info($"[OneAuth] - Capabilities count: {internalAuthParams.Capabilities?.Count ?? 0}");
+                var oneAuthParams = OneAuthParameterMappers.CreateDirectOneAuthParameters(
+                    authenticationRequestParameters,
+                    _logger);
 
                 // Call OneAuth SignInInteractively with the correct signature
                 var authResult = await _oneAuth.SignInInteractively(
                     uxContext,
                     accountHint,
-                    authenticationParameters,  // Now using proper OneAuth AuthParameters type
-                    signInBehaviorParameters,
+                    oneAuthParams,  // ← Uses actual OneAuth AuthParameters!
+                    null,
                     telemetryParameters).ConfigureAwait(false);
 
                 // Convert OneAuth result to MSAL token response

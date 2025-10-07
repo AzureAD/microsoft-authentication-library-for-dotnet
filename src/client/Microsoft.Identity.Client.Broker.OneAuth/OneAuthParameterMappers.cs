@@ -5,8 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Authentication;
 using Microsoft.OneAuthInterop;
 
@@ -15,96 +23,96 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
     /// <summary>
     /// OneAuth types - these match the OneAuth API specification
     /// </summary>
-    internal enum AuthenticationScheme
-    {
-        Bearer = 1,
-        Pop = 2,
-        SshCert = 3,
-        External = 4,
-        Extension = 5
-    }
+    //internal enum AuthenticationScheme
+    //{
+    //    Bearer = 1,
+    //    Pop = 2,
+    //    SshCert = 3,
+    //    External = 4,
+    //    Extension = 5
+    //}
 
-    internal enum RequestOption
-    {
-        None = 0,
-        SendX5C = 1
-    }
+    //internal enum RequestOption
+    //{
+    //    None = 0,
+    //    SendX5C = 1
+    //}
 
-    internal enum RequestOptionState
-    {
-        Disabled = 0,
-        Enabled = 1
-    }
+    //internal enum RequestOptionState
+    //{
+    //    Disabled = 0,
+    //    Enabled = 1
+    //}
 
-    internal enum PreferredAuthMethod
-    {
-        None = 0,
-        Account = 1,
-        Interactive = 2,
-        Silent = 3
-    }
+    //internal enum PreferredAuthMethod
+    //{
+    //    None = 0,
+    //    Account = 1,
+    //    Interactive = 2,
+    //    Silent = 3
+    //}
 
     /// <summary>
     /// OneAuth AuthenticationParameters class matching the specification provided
     /// </summary>
-    internal sealed class AuthenticationParameters
-    {
-        /// <summary>
-        /// Authentication scheme to use for the authentication operation.
-        /// </summary>
-        public AuthenticationScheme AuthenticationScheme { get; set; }
+    //internal sealed class AuthenticationParameters
+    //{
+    //    /// <summary>
+    //    /// Authentication scheme to use for the authentication operation.
+    //    /// </summary>
+    //    public AuthenticationScheme AuthenticationScheme { get; set; }
 
-        /// <summary>
-        /// Authority URL, can be empty.
-        /// </summary>
-        public string Authority { get; set; } = string.Empty;
+    //    /// <summary>
+    //    /// Authority URL, can be empty.
+    //    /// </summary>
+    //    public string Authority { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Target resource that the client is attempting to gain access to.
-        /// </summary>
-        public string Target { get; set; } = string.Empty;
+    //    /// <summary>
+    //    /// Target resource that the client is attempting to gain access to.
+    //    /// </summary>
+    //    public string Target { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Claims to be sent to the authentication server in JSON format.
-        /// </summary>
-        public string Claims { get; set; } = string.Empty;
+    //    /// <summary>
+    //    /// Claims to be sent to the authentication server in JSON format.
+    //    /// </summary>
+    //    public string Claims { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Indicates to the security token provider if your application is capable of complying 
-        /// and/or participating in/with a particular feature.
-        /// </summary>
-        public List<string> Capabilities { get; set; } = new List<string>();
+    //    /// <summary>
+    //    /// Indicates to the security token provider if your application is capable of complying 
+    //    /// and/or participating in/with a particular feature.
+    //    /// </summary>
+    //    public List<string> Capabilities { get; set; } = new List<string>();
 
-        /// <summary>
-        /// Additional parameters to be sent to the /Authorize endpoint
-        /// </summary>
-        public Dictionary<string, string> AdditionalParameters { get; set; } = new Dictionary<string, string>();
+    //    /// <summary>
+    //    /// Additional parameters to be sent to the /Authorize endpoint
+    //    /// </summary>
+    //    public Dictionary<string, string> AdditionalParameters { get; set; } = new Dictionary<string, string>();
 
-        /// <summary>
-        /// Client ID of child nested application for which tokens are being requested
-        /// </summary>
-        public string NestedClientId { get; set; } = string.Empty;
+    //    /// <summary>
+    //    /// Client ID of child nested application for which tokens are being requested
+    //    /// </summary>
+    //    public string NestedClientId { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Redirect URI of child nested application for which tokens are being requested
-        /// </summary>
-        public string NestedRedirectUri { get; set; } = string.Empty;
+    //    /// <summary>
+    //    /// Redirect URI of child nested application for which tokens are being requested
+    //    /// </summary>
+    //    public string NestedRedirectUri { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Request options for the request
-        /// </summary>
-        public Dictionary<RequestOption, RequestOptionState> RequestOptions { get; set; } = new Dictionary<RequestOption, RequestOptionState>();
+    //    /// <summary>
+    //    /// Request options for the request
+    //    /// </summary>
+    //    public Dictionary<RequestOption, RequestOptionState> RequestOptions { get; set; } = new Dictionary<RequestOption, RequestOptionState>();
 
-        /// <summary>
-        /// Whether the supplied authority is an ADFS server that supports OIDC.
-        /// </summary>
-        public bool IsAdfs { get; set; } = false;
+    //    /// <summary>
+    //    /// Whether the supplied authority is an ADFS server that supports OIDC.
+    //    /// </summary>
+    //    public bool IsAdfs { get; set; } = false;
 
-        /// <summary>
-        /// The preferred authentication method for the request
-        /// </summary>
-        public PreferredAuthMethod PreferredAuthMethod { get; set; } = PreferredAuthMethod.None;
-    }
+    //    /// <summary>
+    //    /// The preferred authentication method for the request
+    //    /// </summary>
+    //    public PreferredAuthMethod PreferredAuthMethod { get; set; } = PreferredAuthMethod.None;
+    //}
 
     /// <summary>
     /// Maps MSAL.NET parameters to OneAuth parameters using real OneAuth types
@@ -114,48 +122,48 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
         /// <summary>
         /// Map MSAL parameters to OneAuth configuration (legacy dictionary format for compatibility)
         /// </summary>
-        public static Dictionary<string, object> CreateAuthParameters(AuthenticationRequestParameters authRequestParams)
-        {
-            var parameters = new Dictionary<string, object>();
+        //public static Dictionary<string, object> CreateAuthParameters(AuthenticationRequestParameters authRequestParams)
+        //{
+        //    var parameters = new Dictionary<string, object>();
 
-            if (authRequestParams != null)
-            {
-                // Basic parameters that we know MSAL uses
-                if (!string.IsNullOrEmpty(authRequestParams.AppConfig.ClientId))
-                    parameters["clientId"] = authRequestParams.AppConfig.ClientId;
+        //    if (authRequestParams != null)
+        //    {
+        //        // Basic parameters that we know MSAL uses
+        //        if (!string.IsNullOrEmpty(authRequestParams.AppConfig.ClientId))
+        //            parameters["clientId"] = authRequestParams.AppConfig.ClientId;
 
-                if (authRequestParams.Scope?.Any() == true)
-                    parameters["scopes"] = authRequestParams.Scope;
+        //        if (authRequestParams.Scope?.Any() == true)
+        //            parameters["scopes"] = authRequestParams.Scope;
 
-                if (authRequestParams.RedirectUri != null)
-                    parameters["redirectUri"] = authRequestParams.RedirectUri.ToString();
+        //        if (authRequestParams.RedirectUri != null)
+        //            parameters["redirectUri"] = authRequestParams.RedirectUri.ToString();
 
-                if (authRequestParams.Authority != null)
-                    parameters["authority"] = authRequestParams.Authority.ToString();
+        //        if (authRequestParams.Authority != null)
+        //            parameters["authority"] = authRequestParams.Authority.ToString();
 
-                if (!string.IsNullOrEmpty(authRequestParams.LoginHint))
-                    parameters["loginHint"] = authRequestParams.LoginHint;
+        //        if (!string.IsNullOrEmpty(authRequestParams.LoginHint))
+        //            parameters["loginHint"] = authRequestParams.LoginHint;
 
-                // Add correlation ID for telemetry
-                parameters["correlationId"] = authRequestParams.CorrelationId.ToString();
-            }
+        //        // Add correlation ID for telemetry
+        //        parameters["correlationId"] = authRequestParams.CorrelationId.ToString();
+        //    }
 
-            return parameters;
-        }
+        //    return parameters;
+        //}
 
         /// <summary>
         /// Create UX context parameters
         /// </summary>
-        public static Dictionary<string, object> CreateUxContext(AuthenticationRequestParameters authRequestParams)
-        {
-            var uxContext = new Dictionary<string, object>();
+        //public static Dictionary<string, object> CreateUxContext(AuthenticationRequestParameters authRequestParams)
+        //{
+        //    var uxContext = new Dictionary<string, object>();
 
-            // Basic UX parameters
-            uxContext["correlationId"] = authRequestParams?.CorrelationId.ToString() ?? Guid.NewGuid().ToString();
-            uxContext["parentWindowHandle"] = IntPtr.Zero; // Default for now
+        //    // Basic UX parameters
+        //    uxContext["correlationId"] = authRequestParams?.CorrelationId.ToString() ?? Guid.NewGuid().ToString();
+        //    uxContext["parentWindowHandle"] = IntPtr.Zero; // Default for now
 
-            return uxContext;
-        }
+        //    return uxContext;
+        //}
 
         /// <summary>
         /// Create telemetry parameters
@@ -177,350 +185,214 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
         /// <summary>
         /// Create sign-in behavior parameters
         /// </summary>
-        public static Dictionary<string, object> CreateSignInBehaviorParameters(AcquireTokenInteractiveParameters interactiveParams)
-        {
-            var behaviorParams = new Dictionary<string, object>();
+        //public static Dictionary<string, object> CreateSignInBehaviorParameters(AcquireTokenInteractiveParameters interactiveParams)
+        //{
+        //    var behaviorParams = new Dictionary<string, object>();
 
-            if (interactiveParams != null)
-            {
-                // Map prompt behavior
-                if (interactiveParams.Prompt != null)
-                {
-                    behaviorParams["prompt"] = interactiveParams.Prompt.ToString();
-                }
+        //    if (interactiveParams != null)
+        //    {
+        //        // Map prompt behavior
+        //        if (interactiveParams.Prompt != null)
+        //        {
+        //            behaviorParams["prompt"] = interactiveParams.Prompt.ToString();
+        //        }
 
-                // Add additional interactive parameters that OneAuth might need
-                if (interactiveParams.Account != null)
-                {
-                    behaviorParams["accountHint"] = interactiveParams.Account.Username;
-                }
+        //        // Add additional interactive parameters that OneAuth might need
+        //        if (interactiveParams.Account != null)
+        //        {
+        //            behaviorParams["accountHint"] = interactiveParams.Account.Username;
+        //        }
 
-                // Add login hint if available
-                if (!string.IsNullOrEmpty(interactiveParams.LoginHint))
-                {
-                    behaviorParams["loginHint"] = interactiveParams.LoginHint;
-                }
+        //        // Add login hint if available
+        //        if (!string.IsNullOrEmpty(interactiveParams.LoginHint))
+        //        {
+        //            behaviorParams["loginHint"] = interactiveParams.LoginHint;
+        //        }
 
-                // Add extra scopes to consent if available
-                if (interactiveParams.ExtraScopesToConsent?.Any() == true)
-                {
-                    behaviorParams["extraScopesToConsent"] = interactiveParams.ExtraScopesToConsent;
-                }
+        //        // Add extra scopes to consent if available
+        //        if (interactiveParams.ExtraScopesToConsent?.Any() == true)
+        //        {
+        //            behaviorParams["extraScopesToConsent"] = interactiveParams.ExtraScopesToConsent;
+        //        }
 
-                // Add web view preferences
-                behaviorParams["useEmbeddedWebView"] = interactiveParams.UseEmbeddedWebView.ToString();
+        //        // Add web view preferences
+        //        behaviorParams["useEmbeddedWebView"] = interactiveParams.UseEmbeddedWebView.ToString();
 
-                // Add code verifier if available (for PKCE)
-                if (!string.IsNullOrEmpty(interactiveParams.CodeVerifier))
-                {
-                    behaviorParams["codeVerifier"] = interactiveParams.CodeVerifier;
-                }
+        //        // Add code verifier if available (for PKCE)
+        //        if (!string.IsNullOrEmpty(interactiveParams.CodeVerifier))
+        //        {
+        //            behaviorParams["codeVerifier"] = interactiveParams.CodeVerifier;
+        //        }
 
-                // Add custom web UI indicator
-                if (interactiveParams.CustomWebUi != null)
-                {
-                    behaviorParams["hasCustomWebUi"] = true;
-                }
-            }
+        //        // Add custom web UI indicator
+        //        if (interactiveParams.CustomWebUi != null)
+        //        {
+        //            behaviorParams["hasCustomWebUi"] = true;
+        //        }
+        //    }
 
-            return behaviorParams;
-        }
+        //    return behaviorParams;
+        //}
 
         /// <summary>
         /// Main conversion method that creates OneAuth AuthParameters directly
         /// This maps MSAL parameters to the actual OneAuth package AuthParameters type
         /// </summary>
-        public static Microsoft.OneAuthInterop.AuthParameters ToOneAuthAuthParameters(
+        //public static Microsoft.OneAuthInterop.AuthParameters ToOneAuthAuthParameters(
+        //    AuthenticationRequestParameters authRequestParams,
+        //    AcquireTokenInteractiveParameters interactiveParams = null)
+        //{
+        //    if (authRequestParams == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(authRequestParams));
+        //    }
+
+        //    // Create our internal AuthenticationParameters first
+        //    var internalAuthParams = ToOneAuthInternalAuthParameters(authRequestParams, interactiveParams);
+
+        //    // Convert to actual OneAuth AuthParameters
+        //    return ToOneAuthAuthParams(internalAuthParams);
+        //}
+
+        public static Microsoft.OneAuthInterop.AuthParameters CreateDirectOneAuthParameters(
             AuthenticationRequestParameters authRequestParams,
-            AcquireTokenInteractiveParameters interactiveParams = null)
+            ILoggerAdapter logger)
         {
             if (authRequestParams == null)
             {
                 throw new ArgumentNullException(nameof(authRequestParams));
             }
 
-            // Create our internal AuthenticationParameters first
-            var internalAuthParams = ToOneAuthInternalAuthParameters(authRequestParams, interactiveParams);
+            var oneAuthParams = new Microsoft.OneAuthInterop.AuthParameters();
 
-            // Convert to actual OneAuth AuthParameters
-            return ToOneAuthAuthParams(internalAuthParams);
-        }
+            // 2. Authority - Extract canonical authority URL (critical for guest tenant scenarios)
+            oneAuthParams.Authority = authRequestParams.Authority?.AuthorityInfo?.CanonicalAuthority?.ToString() ?? string.Empty;
 
-        /// <summary>
-        /// Converts MSAL AuthenticationRequestParameters to our internal AuthenticationParameters structure
-        /// This creates our internal representation based on your OneAuth specification
-        /// </summary>
-        internal static AuthenticationParameters ToOneAuthInternalAuthParameters(
-            AuthenticationRequestParameters authRequestParams,
-            AcquireTokenInteractiveParameters interactiveParams = null)
-        {
-            if (authRequestParams == null)
-            {
-                throw new ArgumentNullException(nameof(authRequestParams));
-            }
+            // 3. Target - Combine MSAL scopes into space-separated string per OAuth2 spec
+            oneAuthParams.Target = authRequestParams.Scope?.Any() == true ?
+                string.Join(" ", authRequestParams.Scope) : string.Empty;
 
-            var oneAuthParams = new AuthenticationParameters
-            {
-                // Map authentication scheme - determine based on MSAL auth operation
-                AuthenticationScheme = MapToOneAuthAuthenticationScheme(authRequestParams.AuthenticationScheme),
+            // 4. AccessTokenToRenew - Not used in MSAL scenarios, leave empty
+            oneAuthParams.AccessTokenToRenew = string.Empty;
 
-                // Map authority - use the canonical authority URL
-                Authority = authRequestParams.Authority?.AuthorityInfo?.CanonicalAuthority?.ToString() ?? string.Empty,
+            // 5. Claims - Use merged claims and client capabilities from MSAL in JSON format
+            oneAuthParams.Claims = authRequestParams.ClaimsAndClientCapabilities ?? string.Empty;
 
-                // Map target (scopes) - combine scopes into space-separated string
-                Target = MapScopesToTarget(authRequestParams.Scope),
+            // 6. Capabilities - Extract MSAL client capabilities (long lived tokens, True MAM, etc.)
+            oneAuthParams.Capabilities = authRequestParams.AppConfig?.ClientCapabilities?.ToList() ?? new List<string>();
 
-                // Map claims if available
-                Claims = authRequestParams.ClaimsAndClientCapabilities ?? string.Empty,
+            // 7. AdditionalParameters - Build OAuth2 /Authorize endpoint parameters
+            oneAuthParams.AdditionalParameters = BuildOneAuthAdditionalParameters(authRequestParams, logger);
 
-                // Map capabilities
-                Capabilities = MapCapabilities(authRequestParams),
+            // 8. PopParameters - Set to null (would need specific PoP token configuration)
+            oneAuthParams.PopParameters = null;
 
-                // Map additional parameters
-                AdditionalParameters = MapAdditionalParameters(authRequestParams, interactiveParams),
+            // 9. NestedClientId - Empty for standard scenarios (used for child nested apps)
+            oneAuthParams.NestedClientId = string.Empty;
 
-                // Map nested client info - empty for standard scenarios
-                NestedClientId = string.Empty,
-                NestedRedirectUri = string.Empty,
+            // 10. NestedRedirectUri - Empty for standard scenarios (used for child nested apps)
+            oneAuthParams.NestedRedirectUri = string.Empty;
 
-                // Map request options
-                RequestOptions = MapRequestOptions(authRequestParams),
+            // 11. RequestOptions - Map MSAL request options to OneAuth format
+            //oneAuthParams.RequestOptions = BuildOneAuthRequestOptions(authRequestParams);
 
-                // Check if authority is ADFS
-                IsAdfs = authRequestParams.Authority?.AuthorityInfo?.AuthorityType == AuthorityType.Adfs,
+            // 12. IsAdfs - Detect if authority is ADFS server with OIDC support
+            oneAuthParams.IsAdfs = authRequestParams.Authority?.AuthorityInfo?.AuthorityType == AuthorityType.Adfs;
 
-                // Map preferred authentication method
-                PreferredAuthMethod = MapPreferredAuthMethod(authRequestParams, interactiveParams)
-            };
+            // 13. PreferredAuthMethod - Determine optimal authentication method
+            //oneAuthParams.PreferredAuthMethod = DetermineOneAuthPreferredAuthMethod(authRequestParams, interactiveParams);
 
             return oneAuthParams;
         }
 
         /// <summary>
-        /// Create OneAuth SignInBehaviorParameters from MSAL interactive parameters
+        /// Maps MSAL IAuthenticationOperation to OneAuth AuthenticationScheme enum
+        /// Uses the actual Microsoft.OneAuthInterop.AuthScheme enum values
         /// </summary>
-        public static SignInBehaviorParameters ToOneAuthSignInBehaviorParameters(
-            AcquireTokenInteractiveParameters interactiveParams)
-        {
-            // Create OneAuth SignInBehaviorParameters - this assumes the type exists in OneAuth package
-            var behaviorParams = new SignInBehaviorParameters();
+        //private static Microsoft.OneAuthInterop.AuthScheme MapMsalToOneAuthScheme(Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation authOperation)
+        //{
+        //    if (authOperation == null)
+        //        return Microsoft.OneAuthInterop.AuthScheme.Bearer; // Default to Bearer (OAuth2)
 
-            if (interactiveParams != null)
-            {
-                // Map prompt behavior to OneAuth prompt (if SignInBehaviorParameters has Prompt property)
-                // This will need to be adjusted based on actual OneAuth SignInBehaviorParameters structure
-            }
-
-            return behaviorParams;
-        }
+        //    // Map MSAL access token type to OneAuth AuthScheme
+        //    return authOperation.AccessTokenType?.ToLowerInvariant() switch
+        //    {
+        //        "bearer" => Microsoft.OneAuthInterop.AuthScheme.Bearer,  // OAuth2
+        //        "pop" => Microsoft.OneAuthInterop.AuthScheme.PoP,       // PoP with OAuth2
+        //        "basic" => Microsoft.OneAuthInterop.AuthScheme.Basic,   // HTTP Basic
+        //        "negotiate" => Microsoft.OneAuthInterop.AuthScheme.Negotiate, // SPNEGO
+        //        "ntlm" => Microsoft.OneAuthInterop.AuthScheme.Ntlm,     // Windows Challenge/Response
+        //        "liveid" => Microsoft.OneAuthInterop.AuthScheme.LiveId, // LiveId RPS tokens
+        //        _ => Microsoft.OneAuthInterop.AuthScheme.Bearer         // Default to Bearer
+        //    };
+        //}
 
         /// <summary>
-        /// Converts our internal AuthenticationParameters to OneAuth AuthParameters
-        /// This bridges the gap between our specification and the actual OneAuth package types
+        /// Builds additional parameters dictionary for OneAuth /Authorize endpoint
+        /// Maps core OAuth2/OIDC parameters and MSAL-specific parameters
         /// </summary>
-        private static Microsoft.OneAuthInterop.AuthParameters ToOneAuthAuthParams(AuthenticationParameters authParams)
-        {
-            if (authParams == null)
-                throw new ArgumentNullException(nameof(authParams));
-
-            // Create OneAuth AuthParameters using the actual OneAuth package type
-            var oneAuthAuthParams = new Microsoft.OneAuthInterop.AuthParameters();
-
-            // Map properties from our AuthenticationParameters to OneAuth AuthParameters
-            // The exact property names will depend on what's actually available in the OneAuth package
-
-            try
-            {
-                // Use reflection to set properties safely until we know the exact structure
-                var oneAuthType = oneAuthAuthParams.GetType();
-                
-                // Map Authority
-                if (!string.IsNullOrEmpty(authParams.Authority))
-                {
-                    var authorityProp = oneAuthType.GetProperty("Authority");
-                    authorityProp?.SetValue(oneAuthAuthParams, authParams.Authority);
-                }
-
-                // Map Target
-                if (!string.IsNullOrEmpty(authParams.Target))
-                {
-                    var targetProp = oneAuthType.GetProperty("Target");
-                    targetProp?.SetValue(oneAuthAuthParams, authParams.Target);
-                }
-
-                // Map Claims
-                if (!string.IsNullOrEmpty(authParams.Claims))
-                {
-                    var claimsProp = oneAuthType.GetProperty("Claims");
-                    claimsProp?.SetValue(oneAuthAuthParams, authParams.Claims);
-                }
-
-                // Map other properties as available...
-                // This is a safe approach that won't fail if properties don't exist
-
-            }
-            catch (Exception)
-            {
-                // If property mapping fails, we'll work with basic AuthParameters
-                // This ensures the code doesn't crash if the OneAuth structure is different
-            }
-
-            return oneAuthAuthParams;
-        }
-
-        /// <summary>
-        /// Maps MSAL authentication scheme to OneAuth authentication scheme
-        /// </summary>
-        private static AuthenticationScheme MapToOneAuthAuthenticationScheme(Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation authOperation)
-        {
-            if (authOperation == null)
-                return AuthenticationScheme.Bearer; // Default to Bearer
-
-            // Map based on the authentication operation type
-            switch (authOperation.AccessTokenType?.ToLowerInvariant())
-            {
-                case "bearer":
-                    return AuthenticationScheme.Bearer;
-                case "pop":
-                    return AuthenticationScheme.Pop;
-                case "ssh-cert":
-                    return AuthenticationScheme.SshCert;
-                default:
-                    return AuthenticationScheme.Bearer; // Default fallback
-            }
-        }
-
-        /// <summary>
-        /// Maps MSAL scopes to OneAuth target format
-        /// </summary>
-        private static string MapScopesToTarget(IEnumerable<string> scopes)
-        {
-            if (scopes?.Any() != true)
-                return string.Empty;
-
-            // Join scopes with space separator as is common in OAuth2
-            return string.Join(" ", scopes);
-        }
-
-        /// <summary>
-        /// Maps MSAL capabilities to OneAuth capabilities list
-        /// </summary>
-        private static List<string> MapCapabilities(AuthenticationRequestParameters authRequestParams)
-        {
-            var capabilities = new List<string>();
-
-            // Add capabilities from client capabilities if available
-            if (authRequestParams.AppConfig?.ClientCapabilities?.Any() == true)
-            {
-                capabilities.AddRange(authRequestParams.AppConfig.ClientCapabilities);
-            }
-
-            return capabilities;
-        }
-
-        /// <summary>
-        /// Maps additional parameters from both authentication and interactive parameters
-        /// </summary>
-        private static Dictionary<string, string> MapAdditionalParameters(
+        private static Dictionary<string, string> BuildOneAuthAdditionalParameters(
             AuthenticationRequestParameters authRequestParams,
-            AcquireTokenInteractiveParameters interactiveParams)
+             ILoggerAdapter logger)
         {
-            var additionalParams = new Dictionary<string, string>();
+            var parameters = new Dictionary<string, string>();
 
-            // Add correlation ID for tracing
-            additionalParams["correlation_id"] = authRequestParams.CorrelationId.ToString();
-
-            // Add client ID
+            // Core OAuth2/OIDC parameters
             if (!string.IsNullOrEmpty(authRequestParams.AppConfig?.ClientId))
-            {
-                additionalParams["client_id"] = authRequestParams.AppConfig.ClientId;
-            }
+                parameters["client_id"] = authRequestParams.AppConfig.ClientId;
 
-            // Add redirect URI
             if (authRequestParams.RedirectUri != null)
+                parameters["redirect_uri"] = authRequestParams.RedirectUri.ToString();
+
+            // Tracking and correlation for debugging
+            parameters["correlation_id"] = authRequestParams.CorrelationId.ToString();
+
+            if (authRequestParams.AppConfig.MultiCloudSupportEnabled)
             {
-                additionalParams["redirect_uri"] = authRequestParams.RedirectUri.ToString();
+                parameters["instance_aware"] = "true";
             }
 
-            // Add login hint
-            if (!string.IsNullOrEmpty(authRequestParams.LoginHint))
+            //pass client sku and ver
+            Dictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(logger);
+            parameters["msal_client_sku"] = msalIdParams[MsalIdParameter.Product];
+            parameters["msal_client_ver"] = msalIdParams[MsalIdParameter.Version];
+
+            if(authRequestParams.AuthenticationScheme.AccessTokenType == "ssh-cert")
             {
-                additionalParams["login_hint"] = authRequestParams.LoginHint;
+                parameters["key_id"] = authRequestParams.AuthenticationScheme.KeyId;
+                foreach (KeyValuePair<string, string> kvp in authRequestParams.AuthenticationScheme.GetTokenRequestParams())
+                {
+                    parameters[kvp.Key] = kvp.Value;
+                }
             }
 
-            // Add domain hint if available from account
-            if (!string.IsNullOrEmpty(authRequestParams.Account?.Environment))
+            // MSAL extra query parameters (preserve app-specific parameters)
+            if (authRequestParams.ExtraQueryParameters != null)
             {
-                additionalParams["domain_hint"] = authRequestParams.Account.Environment;
+                foreach (KeyValuePair<string, string> kvp in authRequestParams.ExtraQueryParameters)
+                {
+                    parameters[kvp.Key] = kvp.Value;
+                }
             }
 
-            // Add prompt parameter from interactive params
-            if (interactiveParams?.Prompt != null)
-            {
-                additionalParams["prompt"] = interactiveParams.Prompt.PromptValue;
-            }
-
-            // Add extra scopes to consent from interactive params
-            if (interactiveParams?.ExtraScopesToConsent?.Any() == true)
-            {
-                additionalParams["extra_scopes"] = string.Join(" ", interactiveParams.ExtraScopesToConsent);
-            }
-
-            // Add code verifier for PKCE if available
-            if (!string.IsNullOrEmpty(interactiveParams?.CodeVerifier))
-            {
-                additionalParams["code_verifier"] = interactiveParams.CodeVerifier;
-            }
-
-            // Add web view preference
-            if (interactiveParams != null)
-            {
-                additionalParams["use_embedded_webview"] = interactiveParams.UseEmbeddedWebView.ToString();
-            }
-
-            return additionalParams;
+            return parameters;
         }
 
         /// <summary>
         /// Maps MSAL request options to OneAuth request options
         /// </summary>
-        private static Dictionary<RequestOption, RequestOptionState> MapRequestOptions(
-            AuthenticationRequestParameters authRequestParams)
-        {
-            var requestOptions = new Dictionary<RequestOption, RequestOptionState>();
+        //private static Dictionary<RequestOption, RequestOptionState> MapRequestOptions(
+        //    AuthenticationRequestParameters authRequestParams)
+        //{
+        //    var requestOptions = new Dictionary<RequestOption, RequestOptionState>();
 
-            // Add request options based on MSAL configuration
-            if (authRequestParams.SendX5C)
-            {
-                requestOptions[RequestOption.SendX5C] = RequestOptionState.Enabled;
-            }
+        //    // Add request options based on MSAL configuration
+        //    if (authRequestParams.SendX5C)
+        //    {
+        //        requestOptions[RequestOption.SendX5C] = RequestOptionState.Enabled;
+        //    }
 
-            return requestOptions;
-        }
-
-        /// <summary>
-        /// Maps preferred authentication method based on MSAL parameters
-        /// </summary>
-        private static PreferredAuthMethod MapPreferredAuthMethod(
-            AuthenticationRequestParameters authRequestParams,
-            AcquireTokenInteractiveParameters interactiveParams)
-        {
-            // Determine preferred auth method based on available parameters
-            
-            // If we have an account, prefer that method
-            if (authRequestParams.Account != null)
-            {
-                return PreferredAuthMethod.Account;
-            }
-
-            // If we have a login hint, prefer interactive with hint
-            if (!string.IsNullOrEmpty(authRequestParams.LoginHint))
-            {
-                return PreferredAuthMethod.Interactive;
-            }
-
-            // Default to None to let OneAuth decide
-            return PreferredAuthMethod.None;
-        }
+        //    return requestOptions;
+        //}
     }
 }

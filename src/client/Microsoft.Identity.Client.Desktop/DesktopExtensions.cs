@@ -3,11 +3,11 @@
 
 using System;
 using System.ComponentModel;
-using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Broker.OneAuth;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Desktop.WebView2WebUi;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
+using Microsoft.Identity.Client.Platforms.Features.OneAuthBroker;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Desktop
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Desktop
                      (uiParent, appConfig, logger) =>
                      {
                          logger.Info("[RuntimeBroker] WAM supported OS.");
-                         return new RuntimeBroker(uiParent, appConfig, logger);
+                         return new OneAuthBroker(uiParent, appConfig, logger);
                      };
             }
             else

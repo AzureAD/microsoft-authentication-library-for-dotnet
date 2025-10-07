@@ -49,7 +49,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" />
-    <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
+    <ProjectReference Include="..\Microsoft.Identity.Client.Broker.OneAuth\Microsoft.Identity.Client.Broker.OneAuth.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
     
     <!-- This package is being built against netcore3.1, which causes this analyzer to produce errors in MSAL netcore3.1, even though MSAL isn't built against that-->
