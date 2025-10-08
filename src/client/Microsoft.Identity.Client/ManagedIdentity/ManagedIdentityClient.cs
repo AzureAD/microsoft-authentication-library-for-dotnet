@@ -24,8 +24,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
 
-        internal static readonly ConcurrentDictionary<string, ImdsV2BindingMetadata> s_identityToBindingMetadataMap =
-            new ConcurrentDictionary<string, ImdsV2BindingMetadata>(StringComparer.Ordinal);
+        internal static readonly ConcurrentDictionary<string, ImdsV2BindingMetadata> s_identityToBindingMetadataMap 
+            = new ConcurrentDictionary<string, ImdsV2BindingMetadata>(StringComparer.Ordinal);
 
         internal static void ResetSourceAndBindingForTest()
         {

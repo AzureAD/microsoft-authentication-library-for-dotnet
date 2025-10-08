@@ -9,12 +9,14 @@ using Microsoft.Identity.Client.Core;
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     /// <summary>
-    /// Centralized helper for installing and retrieving mTLS binding certs
-    /// from CurrentUser\My with a freshness policy and best-effort pruning.
+    /// Installs/locates/prunes binding certificates in CurrentUser\My,
+    /// plus freshness/half-life logic. 
+    /// To-Do : use expires_on from the token response to determine freshness.
+    /// IMDS team will be adding this value in the future.
     /// </summary>
     internal static class MtlsBindingStore
     {
-        // Treat certs expiring within this window as "not fresh"
+        // Certs expiring within this window are considered “not fresh”
         internal static readonly TimeSpan FreshnessBuffer = TimeSpan.FromMinutes(5);
 
         internal static string InstallAndGetSubject(X509Certificate2 cert, ILoggerAdapter logger = null)
@@ -27,13 +29,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                 store.Open(OpenFlags.ReadWrite);
 
-                // Avoid dup by thumbprint
                 var dups = store.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false);
                 foreach (var d in dups)
                 { try { store.Remove(d); } catch { } }
 
                 store.Add(cert);
-                store.Close();
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 if (freshest == null)
                     return null;
 
-                // Freshness check (5 minutes)
+                // Freshness = must be > now + buffer
                 if (freshest.NotAfter.ToUniversalTime() <= DateTime.UtcNow.Add(FreshnessBuffer))
                 {
                     logger?.Info("[Managed Identity] Found binding in user store, but not fresh; minting new binding.");
@@ -73,9 +73,67 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
             catch (Exception ex)
             {
-                logger?.Verbose(() => $"[Managed Identity] Failed to read binding cert from user store: {ex.Message}");
+                logger?.Verbose(() => $"[Managed Identity] Failed to read binding cert: {ex.Message}");
                 return null;
             }
+        }
+
+        internal static X509Certificate2 FindByThumbprint(string thumbprint)
+        {
+            if (string.IsNullOrWhiteSpace(thumbprint))
+                return null;
+
+            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            var res = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
+            return res.Count > 0 ? res[0] : null;
+        }
+
+        internal static X509Certificate2 ResolveByThumbprintThenSubject(
+            string thumbprint,
+            string subject,
+            bool cleanupOlder,
+            out string resolvedThumbprint)
+        {
+            resolvedThumbprint = null;
+
+            var exact = FindByThumbprint(thumbprint);
+            if (IsCurrentlyValid(exact))
+            {
+                resolvedThumbprint = exact.Thumbprint;
+                return exact;
+            }
+
+            var freshest = GetFreshestBySubject(subject);
+            if (IsCurrentlyValid(freshest))
+            {
+                resolvedThumbprint = freshest.Thumbprint;
+
+                if (cleanupOlder && !string.IsNullOrWhiteSpace(subject))
+                {
+                    PruneOlder(subject, freshest.Thumbprint);
+                }
+
+                return freshest;
+            }
+
+            return null;
+        }
+
+        internal static bool IsCurrentlyValid(X509Certificate2 cert)
+            => cert != null && DateTime.UtcNow < cert.NotAfter.ToUniversalTime();
+
+        internal static bool IsBeyondHalfLife(X509Certificate2 cert)
+        {
+            if (cert == null)
+                return false;
+            var nb = cert.NotBefore.ToUniversalTime();
+            var na = cert.NotAfter.ToUniversalTime();
+            if (na <= nb)
+                return true; // defensive
+
+            var halfLife = nb + TimeSpan.FromTicks((na - nb).Ticks / 2);
+            return DateTime.UtcNow >= halfLife;
         }
 
         internal static void PruneOlder(string subject, string keepThumbprint, ILoggerAdapter logger = null)
@@ -101,10 +159,28 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     }
                 }
             }
-            catch { /* best-effort */ }
+            catch
+            {
+                // best effort
+            }
         }
 
-        // TEST ONLY — keep in test assembly if you prefer; exposed here for convenience
+        // Test-only helpers if you need them
+        internal static void RemoveAllBySubject(string subject)
+        {
+            if (string.IsNullOrWhiteSpace(subject))
+                return;
+            try
+            {
+                using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                store.Open(OpenFlags.ReadWrite);
+                var matches = store.Certificates.Find(X509FindType.FindBySubjectDistinguishedName, subject, false);
+                foreach (var c in matches)
+                { try { store.Remove(c); } catch { } }
+            }
+            catch { }
+        }
+
         internal static void RemoveBySubjectPrefixForTest(string subjectPrefix)
         {
             try

@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +20,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.ManagedIdentity.V2.ImdsV2ManagedIdentitySource;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
@@ -287,110 +290,36 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
-            string identityKey = _requestContext.ServiceBundle.Config.ClientId;
+            var identityKey = _requestContext.ServiceBundle.Config.ClientId;
+            var keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
 
-            IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
+            var certMgr = new MsiCertManager(_requestContext);
 
-            // Reuse path: read IMDSv2 metadata + cert subject and reload cert from user store
-            // Prefer per‑identity reuse first (subject + metadata)
-            // per-identity reuse branch
-            if (!string.IsNullOrEmpty(identityKey) &&
-                TryGetImdsV2BindingMetadata(identityKey, out var resp, out var subject))
-            {
-                var cert = MtlsCertStore.FindFreshestBySubject(subject, cleanupOlder: true);
-                if (MtlsCertStore.IsCurrentlyValid(cert))
+            // Lazy mint function: CSR + /issuecredential; manager attaches key & installs.
+            var tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
+
+            var (cert, resp) = await certMgr.GetOrMintBindingAsync(
+                identityKey,
+                tokenType,
+                async ct =>
                 {
-                    var tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
+                    var keyInfo = await keyProvider.GetOrCreateKeyAsync(_requestContext.Logger, ct).ConfigureAwait(false);
+                    var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory
+                        .Generate(keyInfo.Key, csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
-                    var request = BuildTokenRequest(
-                        resource,
-                        resp.MtlsAuthenticationEndpoint, // endpoint from metadata
-                        csrMetadata.TenantId,            // CURRENT identity
-                        csrMetadata.ClientId,            // CURRENT identity
-                        tokenType);
+                    var r = await ExecuteCertificateRequestAsync(
+                        csrMetadata.ClientId, csrMetadata.AttestationEndpoint, csr, keyInfo).ConfigureAwait(false);
 
-                    request.MtlsCertificate = cert;
-                    request.CertificateRequestResponse = resp;
+                    return (r, privateKey);
+                },
+                _requestContext.UserCancellationToken
+            ).ConfigureAwait(false);
 
-                    if (MtlsCertStore.IsBeyondHalfLife(cert))
-                    {
-                        _requestContext.Logger.Info("[IMDSv2] mTLS binding at/after half-life (reused for this request).");
-                    }
+            var request = BuildTokenRequest(resource, resp.MtlsAuthenticationEndpoint, resp.TenantId, resp.ClientId, tokenType);
+            request.MtlsCertificate = cert;
+            request.CertificateRequestResponse = resp;
+            return request;
 
-                    return request;
-                }
-
-                _requestContext.Logger.Info("[IMDSv2] No usable mTLS binding found; minting a new one.");
-            }
-
-            // PoP-only cross-identity binding reuse, but with the CURRENT identity’s identity parameters
-            // Cross-identity PoP fallback: reuse an existing user-store binding,
-            // but ALWAYS use the CURRENT identity’s client/tenant from csrMetadata.
-            if (_isMtlsPopRequested &&
-                TryGetAnyImdsV2BindingMetadata(out var anyResp, out var anySubject))
-            {
-                var cert = MtlsCertStore.FindFreshestBySubject(anySubject, cleanupOlder: true);
-                if (MtlsCertStore.IsCurrentlyValid(cert))
-                {
-                    if (!string.IsNullOrEmpty(identityKey))
-                    {
-                        CacheImdsV2BindingMetadata(identityKey, anyResp, anySubject);
-                    }
-
-                    var request = BuildTokenRequest(
-                        resource,
-                        anyResp.MtlsAuthenticationEndpoint,  // reuse endpoint
-                        csrMetadata.TenantId,                // use CURRENT identity's tenant
-                        csrMetadata.ClientId,                // use CURRENT identity's client
-                        Constants.MtlsPoPTokenType);
-
-                    request.MtlsCertificate = cert;
-                    request.CertificateRequestResponse = anyResp;
-
-                    // optional: log half-life, rotation hook later
-                    if (MtlsCertStore.IsBeyondHalfLife(cert))
-                    {
-                        _requestContext.Logger.Info("[IMDSv2] mTLS binding at/after half-life (reused for this request).");
-                    }
-
-                    return request;
-                }
-            }
-
-            // Mint binding certificate
-            ManagedIdentityKeyInfo keyInfo = await keyProvider
-                .GetOrCreateKeyAsync(_requestContext.Logger, _requestContext.UserCancellationToken)
-                .ConfigureAwait(false);
-
-            var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory
-                .Generate(keyInfo.Key, csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
-
-            var certificateRequestResponse = await ExecuteCertificateRequestAsync(
-                csrMetadata.ClientId, csrMetadata.AttestationEndpoint, csr, keyInfo).ConfigureAwait(false);
-
-            // Attach private key
-            var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
-                certificateRequestResponse.Certificate, privateKey);
-
-            // Install + remember subject (prune older)
-            subject = MtlsBindingStore.InstallAndGetSubject(mtlsCertificate, _requestContext.Logger);
-            MtlsBindingStore.PruneOlder(subject, mtlsCertificate.Thumbprint, _requestContext.Logger);
-
-            if (!string.IsNullOrEmpty(identityKey))
-            {
-                CacheImdsV2BindingMetadata(identityKey, certificateRequestResponse, subject);
-                _requestContext.Logger.Info("[IMDSv2] Minted mTLS binding and cached IMDSv2 metadata + subject.");
-            }
-            else
-            {
-                _requestContext.Logger.Warning("[IMDSv2] Missing identity key; skipping metadata cache.");
-            }
-
-            string tokenTypeFinal = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
-            var finalRequest = BuildTokenRequest(resource, certificateRequestResponse.MtlsAuthenticationEndpoint, certificateRequestResponse.TenantId, certificateRequestResponse.ClientId, tokenTypeFinal);
-            finalRequest.MtlsCertificate = mtlsCertificate;
-            finalRequest.CertificateRequestResponse = certificateRequestResponse;
-            return finalRequest;
         }
 
         private ManagedIdentityRequest BuildTokenRequest(string resource, string mtlsAuthenticationEndpoint, string tenantId, string clientId, string tokenType)
@@ -541,48 +470,82 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return null;
         }
 
-        internal static void CacheImdsV2BindingMetadata(string identityKey, CertificateRequestResponse resp, string certSubject)
+        internal static void CacheImdsV2BindingMetadata(
+            string identityKey,
+            CertificateRequestResponse resp,
+            string subject,
+            string thumbprint,
+            string tokenType)
         {
-            if (string.IsNullOrEmpty(identityKey) || resp == null)
+            if (string.IsNullOrEmpty(identityKey) || resp == null ||
+                string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(thumbprint) ||
+                string.IsNullOrEmpty(tokenType))
+            {
                 return;
+            }
 
-            ManagedIdentityClient.s_identityToBindingMetadataMap[identityKey] =
-                new ImdsV2BindingMetadata { Response = resp, CertificateSubject = certSubject };
+            var meta = ManagedIdentityClient.s_identityToBindingMetadataMap
+                .GetOrAdd(identityKey, _ => new ImdsV2BindingMetadata());
+
+            meta.Response = resp;
+            meta.Subject ??= subject; // set once
+            meta.ThumbprintsByTokenType[tokenType] = thumbprint;
         }
 
-        internal static bool TryGetImdsV2BindingMetadata(string identityKey, out CertificateRequestResponse resp, out string certSubject)
+        internal static bool TryGetImdsV2BindingMetadata(
+            string identityKey,
+            string tokenType,
+            out CertificateRequestResponse resp,
+            out string subject,
+            out string thumbprint)
         {
             resp = null;
-            certSubject = null;
-            if (string.IsNullOrEmpty(identityKey))
+            subject = null;
+            thumbprint = null;
+            if (string.IsNullOrEmpty(identityKey) || string.IsNullOrEmpty(tokenType))
                 return false;
 
-            if (ManagedIdentityClient.s_identityToBindingMetadataMap
-                .TryGetValue(identityKey, out var meta) && meta?.Response != null)
+            if (ManagedIdentityClient.s_identityToBindingMetadataMap.TryGetValue(identityKey, out var meta)
+                && meta?.Response != null
+                && !string.IsNullOrEmpty(meta.Subject)
+                && meta.ThumbprintsByTokenType.TryGetValue(tokenType, out var tp)
+                && !string.IsNullOrEmpty(tp))
             {
                 resp = meta.Response;
-                certSubject = meta.CertificateSubject;
+                subject = meta.Subject;
+                thumbprint = tp;
                 return true;
             }
             return false;
         }
 
-        internal static bool TryGetAnyImdsV2BindingMetadata(out CertificateRequestResponse resp, out string certSubject)
+        // PoP-only cross-identity fallback for the unit test
+        internal static bool TryGetAnyImdsV2BindingMetadata(
+            string tokenType,
+            out CertificateRequestResponse resp,
+            out string subject,
+            out string thumbprint)
         {
             resp = null;
-            certSubject = null;
+            subject = null;
+            thumbprint = null;
+            if (!string.Equals(tokenType, Constants.MtlsPoPTokenType, StringComparison.OrdinalIgnoreCase))
+                return false;
 
-            foreach (var kvp in ManagedIdentityClient.s_identityToBindingMetadataMap)
+            foreach (var kv in ManagedIdentityClient.s_identityToBindingMetadataMap)
             {
-                var meta = kvp.Value;
-                if (meta?.Response != null && !string.IsNullOrWhiteSpace(meta.CertificateSubject))
+                var m = kv.Value;
+                if (m?.Response == null || string.IsNullOrEmpty(m.Subject))
+                    continue;
+
+                if (m.ThumbprintsByTokenType.TryGetValue(tokenType, out var tp) && !string.IsNullOrEmpty(tp))
                 {
-                    resp = meta.Response;
-                    certSubject = meta.CertificateSubject;
+                    resp = m.Response;
+                    subject = m.Subject;
+                    thumbprint = tp;
                     return true;
                 }
             }
-
             return false;
         }
     }

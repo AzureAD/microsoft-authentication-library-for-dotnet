@@ -346,17 +346,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!popRequested)
                 return;
+
             if (AuthenticationRequestParameters.AuthenticationOperationOverride != null)
                 return;
+
+            var tokenType = popRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
 
             // Identity key is MSAL client id (SAMI default or UAMI id)
             var identityKey = ServiceBundle.Config.ClientId;
 
-            if (ImdsV2ManagedIdentitySource.TryGetImdsV2BindingMetadata(identityKey, out _, out var subject) &&
-                !string.IsNullOrEmpty(subject))
+            if (ImdsV2ManagedIdentitySource.TryGetImdsV2BindingMetadata(identityKey, tokenType, out _, out var subject, out _) 
+                && !string.IsNullOrEmpty(subject))
             {
-                var cert = MtlsCertStore.FindFreshestBySubject(subject, cleanupOlder: true);
-                if (MtlsCertStore.IsCurrentlyValid(cert))
+                var cert = MtlsBindingStore.GetFreshestBySubject(subject, logger);
+                if (MtlsBindingStore.IsCurrentlyValid(cert))
                 {
                     AuthenticationRequestParameters.AuthenticationOperationOverride =
                         new MtlsPopAuthenticationOperation(cert);
