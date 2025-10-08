@@ -37,12 +37,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public InstanceDiscoveryManager(
           IHttpManager httpManager,
-          bool /* for test */ shouldClearCaches,
           InstanceDiscoveryResponse userProvidedInstanceDiscoveryResponse = null,
           Uri userProvidedInstanceDiscoveryUri = null) :
             this(
                 httpManager,                
-                shouldClearCaches,
                 userProvidedInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProvidedInstanceDiscoveryResponse) : null,
                 userProvidedInstanceDiscoveryUri,
                 null, null, null, null)
@@ -51,7 +49,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public /* public for test */ InstanceDiscoveryManager(
             IHttpManager httpManager,
-            bool shouldClearCaches,
             IUserMetadataProvider userMetadataProvider = null,
             Uri userProvidedInstanceDiscoveryUri = null,
             IKnownMetadataProvider knownMetadataProvider = null,
@@ -72,12 +69,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     userProvidedInstanceDiscoveryUri);
 
             _regionDiscoveryProvider = regionDiscoveryProvider ??
-                new RegionAndMtlsDiscoveryProvider(_httpManager, shouldClearCaches);
+                new RegionAndMtlsDiscoveryProvider(_httpManager);
 
-            if (shouldClearCaches)
-            {
-                _networkCacheMetadataProvider.Clear();
-            }
+            
         }
 
         public InstanceDiscoveryMetadataEntry GetMetadataEntryAvoidNetwork(

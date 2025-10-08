@@ -30,14 +30,8 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class CacheSerializationTests
+    public class CacheSerializationTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         private static readonly IEnumerable<string> s_appMetadataKeys = new[]
         {
             StorageJsonKeys.ClientId ,

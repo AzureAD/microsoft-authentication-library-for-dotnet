@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     break;
 
                 case ManagedIdentitySource.Imds:
+                case ManagedIdentitySource.ImdsV2:
                     Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", endpoint);
                     break;
 
@@ -59,11 +60,15 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
                     Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", thumbprint);
                     break;
+
                 case ManagedIdentitySource.MachineLearning:
                     Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
                     Environment.SetEnvironmentVariable("MSI_SECRET", secret);
                     Environment.SetEnvironmentVariable("DEFAULT_IDENTITY_CLIENT_ID", "fake_DEFAULT_IDENTITY_CLIENT_ID");
                     break;
+
+                default:
+                    throw new NotImplementedException($"Setting environment variables for {managedIdentitySource} is not implemented.");
             }
         }
 
@@ -123,7 +128,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     break;
             }
 
-            // Disabling shared cache options to avoid cross test pollution.
+            
             builder.Config.AccessorOptions = null;
 
             return builder;

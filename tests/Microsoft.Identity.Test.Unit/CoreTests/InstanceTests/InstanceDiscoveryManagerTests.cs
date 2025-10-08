@@ -62,7 +62,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid(), null);
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                false,
                 null,
                 null,
                 _knownMetadataProvider,
@@ -103,7 +102,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             _discoveryManager = new InstanceDiscoveryManager(
               _harness.HttpManager,
-              false,
               null,
               null,
               _knownMetadataProvider,
@@ -143,7 +141,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             _discoveryManager = new InstanceDiscoveryManager(
               _harness.HttpManager,
-              false,
               null,
               null,
               _knownMetadataProvider,
@@ -285,7 +282,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Arrange
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                false,
                 null,
                 null,
                 _knownMetadataProvider,
@@ -323,7 +319,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Arrange
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                false,
                 _userMetadataProvider,
                 null,
                 _knownMetadataProvider,
@@ -363,7 +358,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
-                false,
                 null,
                 customDiscoveryEndpoint,
                 _knownMetadataProvider,

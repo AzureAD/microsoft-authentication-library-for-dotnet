@@ -2,15 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client
@@ -28,6 +24,8 @@ namespace Microsoft.Identity.Client
         : ApplicationBase,
             IManagedIdentityApplication
     {
+        internal ManagedIdentityClient ManagedIdentityClient { get; }
+        
         internal ManagedIdentityApplication(
             ApplicationConfiguration configuration)
             : base(configuration)
@@ -37,6 +35,8 @@ namespace Microsoft.Identity.Client
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
 
             this.ServiceBundle.ApplicationLogger.Verbose(()=>$"ManagedIdentityApplication {configuration.GetHashCode()} created");
+        
+            ManagedIdentityClient = new ManagedIdentityClient();
         }
 
         // Stores all app tokens
@@ -55,13 +55,28 @@ namespace Microsoft.Identity.Client
                 resource);
         }
 
+        /// <inheritdoc/>
+        public async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync()
+        {
+            if (ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None)
+            {
+                return ManagedIdentityClient.s_sourceName;
+            }
+
+            // Create a temporary RequestContext for the CSR metadata probe request.
+            var csrMetadataProbeRequestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, CancellationToken.None);
+
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(csrMetadataProbeRequestContext).ConfigureAwait(false);
+        }
+
         /// <summary>
         /// Detects and returns the managed identity source available on the environment.
         /// </summary>
         /// <returns>Managed identity source detected on the environment if any.</returns>
+        [Obsolete("Use GetManagedIdentitySourceAsync() instead. \"ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;\"")]
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
-            return ManagedIdentityClient.GetManagedIdentitySource();
+            return ManagedIdentityClient.GetManagedIdentitySourceNoImdsV2();
         }
     }
 }

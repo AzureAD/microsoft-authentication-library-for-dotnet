@@ -491,7 +491,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     break;
             }
 
-            // Disabling shared cache options to avoid cross test pollution.
+            
             builder.Config.AccessorOptions = null;
 
             IManagedIdentityApplication mia = builder.WithClientCapabilities(new[] { "cp1" })

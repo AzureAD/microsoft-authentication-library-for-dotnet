@@ -37,6 +37,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpRequestMessage ActualRequestMessage { get; private set; }
         public Dictionary<string, string> ActualRequestPostData { get; private set; }
         public HttpRequestHeaders ActualRequestHeaders { get; private set; }
+        public IList<string> PresentRequestHeaders { get; set; }
+
         public X509Certificate2 ExpectedMtlsBindingCertificate { get; set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -174,6 +176,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private void ValidateHeaders(HttpRequestMessage request)
         {
+            if (PresentRequestHeaders != null)
+            {
+                foreach (var headerName in PresentRequestHeaders)
+                {
+                    Assert.IsTrue(request.Headers.Contains(headerName),
+                        $"Expected request header to be present: {headerName}.");
+                }
+            }
+
             ActualRequestHeaders = request.Headers;
             if (ExpectedRequestHeaders != null)
             {

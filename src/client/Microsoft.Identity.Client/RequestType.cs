@@ -26,6 +26,11 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Region Discovery request, used for region discovery operations with exponential backoff retry strategy.
         /// </summary>
-        RegionDiscovery
+        RegionDiscovery,
+
+        /// <summary>
+        /// CSR Metadata Probe request, used to probe an IMDSv2 managed identity for metadata to be used in acquiring a token.
+        /// </summary>
+        CsrMetadataProbe
     }
 }

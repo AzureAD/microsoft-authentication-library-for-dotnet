@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             ManagedIdentityRequest request = new ManagedIdentityRequest(System.Net.Http.HttpMethod.Get, _endpoint);
 
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = ArcApiVersion;
             request.QueryParameters["resource"] = resource;
 
-            return request;
+            return Task.FromResult(request);
         }
 
         protected override async Task<ManagedIdentityResponse> HandleResponseAsync(
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 var authHeaderValue = "Basic " + File.ReadAllText(splitChallenge[1]);
 
-                ManagedIdentityRequest request = CreateRequest(parameters.Resource);
+                ManagedIdentityRequest request = await CreateRequestAsync(parameters.Resource).ConfigureAwait(false);
 
                 _requestContext.Logger.Verbose(() => "[Managed Identity] Adding authorization header to the request.");
                 request.Headers.Add("Authorization", authHeaderValue);
