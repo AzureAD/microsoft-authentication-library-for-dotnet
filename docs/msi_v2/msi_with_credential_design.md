@@ -27,8 +27,9 @@ sequenceDiagram
     participant ESTS as Entra STS (mTLS)
 
     App  ->> MSAL: AcquireToken
+    MSAL -> MSAL: Detect that MSIv2 is available, otherwise bail
     MSAL -> MSAL: Create the strongest key possible, e.g. in the TPM
-    MSAL ->> MAA: Acquire an attestation token, which proves the key strenght
+    MSAL ->> MAA: Acquire an attestation token, which proves the key strength
     MSAL ->> IMDS: Certificate Signing Request with (key, attestation token)
     IMDS -->> MSAL: Certificate associated with key
     MSAL ->> ESTS: Open mTLS connection to ESTS with this certificate and acquire token
