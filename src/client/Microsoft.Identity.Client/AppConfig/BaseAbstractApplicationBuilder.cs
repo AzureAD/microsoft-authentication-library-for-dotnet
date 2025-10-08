@@ -176,6 +176,7 @@ namespace Microsoft.Identity.Client
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
         /// was already set on the application builder by calling <see cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
         /// <seealso cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithDebugLoggingCallback(
             LogLevel logLevel = LogLevel.Info,
             bool enablePiiLogging = false,
@@ -225,6 +226,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientName">The name of the SDK API for telemetry purposes.</param>
         /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithClientName(string clientName)
         {
             Config.ClientName = GetValueIfNotEmpty(Config.ClientName, clientName);
@@ -236,6 +238,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientVersion">The version of the calling SDK for telemetry purposes.</param>
         /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithClientVersion(string clientVersion)
         {
             Config.ClientVersion = GetValueIfNotEmpty(Config.ClientVersion, clientVersion);
