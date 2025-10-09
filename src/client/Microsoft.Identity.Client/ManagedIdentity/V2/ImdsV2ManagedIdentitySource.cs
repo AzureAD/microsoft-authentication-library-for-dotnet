@@ -24,6 +24,28 @@ using static Microsoft.Identity.Client.ManagedIdentity.V2.ImdsV2ManagedIdentityS
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
+    /// <summary>
+    /// Provides authentication capabilities for Azure Managed Identities using the IMDSv2 protocol.
+    /// This implementation handles certificate-based authentication flows, including certificate
+    /// management, CSR (Certificate Signing Request) handling, and mTLS communication with Azure AD.
+    /// </summary>
+    /// <remarks>
+    /// The IMDSv2 authentication flow consists of several steps:
+    /// 1. Probing/retrieving metadata from the IMDS endpoint to verify availability
+    /// 2. Creating or retrieving certificates for mTLS authentication
+    /// 3. Requesting tokens using the appropriate certificate
+    /// 
+    /// For security and performance, this implementation:
+    /// - Uses certificate caching and reuse when possible
+    /// - Handles different token types (Bearer and PoP)
+    /// - Supports attestation for KeyGuard-protected keys
+    /// - Maintains separate certificate mappings per identity and token type
+    /// 
+    /// This class interacts with:
+    /// - MsiCertManager: Handles certificate lifecycle operations
+    /// - MtlsBindingStore: Manages certificate persistence in the system store
+    /// - BindingMetadataPersistence: Provides storage of identity-to-certificate mappings
+    /// </remarks>
     internal partial class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
         // used in unit tests
@@ -32,6 +54,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public const string CertificateRequestPath = "/metadata/identity/issuecredential";
         public const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
+        /// <summary>
+        /// Retrieves CSR (Certificate Signing Request) metadata from the IMDS endpoint.
+        /// This metadata is required to properly generate certificates for managed identity authentication.
+        /// </summary>
+        /// <param name="requestContext">Context for the current request, including logging</param>
+        /// <param name="probeMode">When true, failures are treated as availability signals rather than errors</param>
+        /// <returns>CSR metadata if available, or null if unavailable or in probe mode with failures</returns>
         public static async Task<CsrMetadata> GetCsrMetadataAsync(
             RequestContext requestContext,
             bool probeMode)
@@ -108,6 +137,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 #endif
         }
 
+        /// <summary>
+        /// Creates a properly formatted exception for metadata probe failures.
+        /// </summary>
         private static void ThrowProbeFailedException(
             String errorMessage,
             Exception ex = null,
@@ -121,6 +153,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 statusCode);
         }
 
+        /// <summary>
+        /// Validates the CSR metadata response from IMDS, checking for required headers and format.
+        /// </summary>
+        /// <returns>True if the response is valid, false if invalid in probe mode (throws otherwise)</returns>
         private static bool ValidateCsrMetadataResponse(
             HttpResponse response,
             ILoggerAdapter logger,
@@ -166,6 +202,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return true;
         }
 
+        /// <summary>
+        /// Parses and validates the CSR metadata from an HTTP response.
+        /// </summary>
+        /// <returns>A parsed CsrMetadata object</returns>
         private static CsrMetadata TryCreateCsrMetadata(
             HttpResponse response,
             ILoggerAdapter logger,
@@ -184,15 +224,32 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return csrMetadata;
         }
 
+        /// <summary>
+        /// Factory method to create a new instance of the IMDSv2 managed identity source.
+        /// </summary>
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
             return new ImdsV2ManagedIdentitySource(requestContext);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the IMDSv2 managed identity source.
+        /// </summary>
         internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.ImdsV2)
         { }
 
+        /// <summary>
+        /// Requests a certificate from the IMDS endpoint using a CSR.
+        /// For KeyGuard-backed keys, includes attestation token in the request.
+        /// </summary>
+        /// <param name="clientId">Client ID of the managed identity</param>
+        /// <param name="attestationEndpoint">Endpoint for attestation services</param>
+        /// <param name="csr">Certificate Signing Request in PEM format</param>
+        /// <param name="managedIdentityKeyInfo">Information about the key used for the CSR</param>
+        /// <returns>Certificate request response containing the issued certificate</returns>
+        /// <exception cref="MsalClientException">Thrown when attestation requirements aren't met</exception>
+        /// <exception cref="MsalServiceException">Thrown for service communication errors</exception>
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
             string clientId,
             string attestationEndpoint,
@@ -287,6 +344,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return certificateRequestResponse;
         }
 
+        /// <summary>
+        /// Creates an authentication request for the managed identity.
+        /// This is the core method that implements the certificate-based authentication flow.
+        /// </summary>
+        /// <param name="resource">Target resource for which to acquire a token</param>
+        /// <returns>A prepared managed identity request with appropriate certificate binding</returns>
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
@@ -322,6 +385,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         }
 
+        /// <summary>
+        /// Constructs a token request to the STS endpoint using the provided parameters.
+        /// </summary>
+        /// <param name="resource">Resource to acquire a token for</param>
+        /// <param name="mtlsAuthenticationEndpoint">MTLS authentication endpoint from certificate response</param>
+        /// <param name="tenantId">Tenant ID for the managed identity</param>
+        /// <param name="clientId">Client ID for the managed identity</param>
+        /// <param name="tokenType">Type of token to request (Bearer or PoP)</param>
+        /// <returns>A prepared request object with appropriate headers and parameters</returns>
         private ManagedIdentityRequest BuildTokenRequest(string resource, string mtlsAuthenticationEndpoint, string tenantId, string clientId, string tokenType)
         {
             var stsUri = new Uri($"{mtlsAuthenticationEndpoint}/{tenantId}{AcquireEntraTokenPath}");
@@ -349,6 +421,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return request;
         }
 
+        /// <summary>
+        /// Creates query parameters for IMDSv2 API calls, including API version and user-assigned identity parameters when applicable.
+        /// </summary>
         private static string ImdsV2QueryParamsHelper(RequestContext requestContext)
         {
             var queryParams = $"cred-api-version={ImdsV2ApiVersion}";
@@ -470,6 +545,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return null;
         }
 
+        /// <summary>
+        /// Caches binding metadata for a specific identity and token type.
+        /// This allows certificate reuse across authentication requests for the same identity.
+        /// </summary>
+        /// <param name="identityKey">The identity key (client ID)</param>
+        /// <param name="resp">Certificate response data</param>
+        /// <param name="subject">Certificate subject DN</param>
+        /// <param name="thumbprint">Certificate thumbprint</param>
+        /// <param name="tokenType">Token type (Bearer or PoP)</param>
+        /// <remarks>
+        /// The subject is set only once per identity (first-wins) while thumbprints may update
+        /// during certificate rotation.
+        /// </remarks>
         internal static void CacheImdsV2BindingMetadata(
             string identityKey,
             CertificateRequestResponse resp,
@@ -478,8 +566,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             string tokenType)
         {
             if (string.IsNullOrEmpty(identityKey) || resp == null ||
-                string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(thumbprint) ||
-                string.IsNullOrEmpty(tokenType))
+                string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(thumbprint))
             {
                 return;
             }
@@ -487,11 +574,29 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var meta = ManagedIdentityClient.s_identityToBindingMetadataMap
                 .GetOrAdd(identityKey, _ => new ImdsV2BindingMetadata());
 
-            meta.Response = resp;
-            meta.Subject ??= subject; // set once
-            meta.ThumbprintsByTokenType[tokenType] = thumbprint;
+            meta.Subject ??= subject;
+
+            if (string.Equals(tokenType, Constants.MtlsPoPTokenType, StringComparison.OrdinalIgnoreCase))
+            {
+                meta.PopResponse = resp;
+                meta.PopThumbprint = thumbprint;
+            }
+            else
+            {
+                meta.BearerResponse = resp;
+                meta.BearerThumbprint = thumbprint;
+            }
         }
 
+        /// <summary>
+        /// Attempts to retrieve binding metadata for a specific identity and token type.
+        /// </summary>
+        /// <param name="identityKey">The identity key (client ID) to look up</param>
+        /// <param name="tokenType">Token type (Bearer or PoP)</param>
+        /// <param name="resp">Output parameter for the certificate response</param>
+        /// <param name="subject">Output parameter for the certificate subject</param>
+        /// <param name="thumbprint">Output parameter for the certificate thumbprint</param>
+        /// <returns>True if binding metadata was found, false otherwise</returns>
         internal static bool TryGetImdsV2BindingMetadata(
             string identityKey,
             string tokenType,
@@ -502,24 +607,42 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             resp = null;
             subject = null;
             thumbprint = null;
-            if (string.IsNullOrEmpty(identityKey) || string.IsNullOrEmpty(tokenType))
+
+            if (string.IsNullOrEmpty(identityKey))
                 return false;
 
-            if (ManagedIdentityClient.s_identityToBindingMetadataMap.TryGetValue(identityKey, out var meta)
-                && meta?.Response != null
-                && !string.IsNullOrEmpty(meta.Subject)
-                && meta.ThumbprintsByTokenType.TryGetValue(tokenType, out var tp)
-                && !string.IsNullOrEmpty(tp))
+            if (!ManagedIdentityClient.s_identityToBindingMetadataMap.TryGetValue(identityKey, out var meta) ||
+                meta == null || string.IsNullOrEmpty(meta.Subject))
             {
-                resp = meta.Response;
-                subject = meta.Subject;
-                thumbprint = tp;
-                return true;
+                return false;
             }
-            return false;
+
+            subject = meta.Subject;
+
+            if (string.Equals(tokenType, Constants.MtlsPoPTokenType, StringComparison.OrdinalIgnoreCase))
+            {
+                resp = meta.PopResponse;
+                thumbprint = meta.PopThumbprint;
+            }
+            else
+            {
+                resp = meta.BearerResponse;
+                thumbprint = meta.BearerThumbprint;
+            }
+
+            return resp != null && !string.IsNullOrEmpty(thumbprint);
         }
 
-        // PoP-only cross-identity fallback for the unit test
+        /// <summary>
+        /// Attempts to retrieve any available PoP binding metadata from any identity.
+        /// This is primarily used for test scenarios or when sharing certificates across identities.
+        /// Only applies to PoP tokens - Bearer tokens must match the specific identity.
+        /// </summary>
+        /// <param name="tokenType">Token type (must be PoP)</param>
+        /// <param name="resp">Output parameter for the certificate response</param>
+        /// <param name="subject">Output parameter for the certificate subject</param>
+        /// <param name="thumbprint">Output parameter for the certificate thumbprint</param>
+        /// <returns>True if any binding metadata was found, false otherwise</returns>
         internal static bool TryGetAnyImdsV2BindingMetadata(
             string tokenType,
             out CertificateRequestResponse resp,
@@ -529,23 +652,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             resp = null;
             subject = null;
             thumbprint = null;
+
             if (!string.Equals(tokenType, Constants.MtlsPoPTokenType, StringComparison.OrdinalIgnoreCase))
+            {
                 return false;
+            }
 
             foreach (var kv in ManagedIdentityClient.s_identityToBindingMetadataMap)
             {
                 var m = kv.Value;
-                if (m?.Response == null || string.IsNullOrEmpty(m.Subject))
-                    continue;
-
-                if (m.ThumbprintsByTokenType.TryGetValue(tokenType, out var tp) && !string.IsNullOrEmpty(tp))
+                if (m?.PopResponse != null && !string.IsNullOrEmpty(m.PopThumbprint) && !string.IsNullOrEmpty(m.Subject))
                 {
-                    resp = m.Response;
+                    resp = m.PopResponse;
                     subject = m.Subject;
-                    thumbprint = tp;
+                    thumbprint = m.PopThumbprint;
                     return true;
                 }
             }
+
             return false;
         }
     }

@@ -346,17 +346,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!popRequested)
                 return;
-
             if (AuthenticationRequestParameters.AuthenticationOperationOverride != null)
                 return;
 
             var tokenType = popRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
-
-            // Identity key is MSAL client id (SAMI default or UAMI id)
             var identityKey = ServiceBundle.Config.ClientId;
 
-            if (ImdsV2ManagedIdentitySource.TryGetImdsV2BindingMetadata(identityKey, tokenType, out _, out var subject, out _) 
-                && !string.IsNullOrEmpty(subject))
+            // Try in-memory first; if not present, attempt store rehydration
+            if (!ImdsV2ManagedIdentitySource.TryGetImdsV2BindingMetadata(identityKey, tokenType, out var resp, out var subject, out var tp))
+            {
+                BindingMetadataPersistence.TryRehydrateFromStore(
+                    identityKey, tokenType, logger, out resp, out subject, out tp);
+
+                if (resp != null && !string.IsNullOrEmpty(subject) && !string.IsNullOrEmpty(tp))
+                {
+                    ImdsV2ManagedIdentitySource.CacheImdsV2BindingMetadata(identityKey, resp, subject, tp, tokenType);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(subject))
             {
                 var cert = MtlsBindingStore.GetFreshestBySubject(subject, logger);
                 if (MtlsBindingStore.IsCurrentlyValid(cert))
@@ -364,7 +372,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.AuthenticationOperationOverride =
                         new MtlsPopAuthenticationOperation(cert);
 
-                    logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Applied operation using user‑store binding (freshest, valid).");
+                    logger.Info("[ManagedIdentityRequest] mTLS PoP requested. Applied operation using user-store binding (freshest, valid).");
                 }
             }
         }
