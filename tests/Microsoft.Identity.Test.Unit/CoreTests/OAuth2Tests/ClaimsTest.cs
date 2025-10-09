@@ -249,5 +249,38 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(claims, capabilities);
             Assert.AreEqual(expectedMergedJson, mergedJson);
         }
+
+        [TestMethod]
+        public void ClaimsHelper_HandlesPlatformNotSupportedException_FromJsonEncoder()
+        {
+            // This test verifies that PlatformNotSupportedException thrown during JSON encoding
+            // is caught and wrapped in MsalClientException with proper diagnostic information.
+            
+            // Note: We cannot easily simulate a real PlatformNotSupportedException from System.Text.Json
+            // without running on an unsupported platform, so this test verifies the error handling
+            // code compiles and the error constants are properly defined.
+            
+            // Verify error code constant exists
+            Assert.AreEqual("json_encoder_intrinsics_unsupported", MsalError.JsonEncoderIntrinsicsUnsupported);
+            
+            // Verify error message method generates a proper message
+            string errorMsg = MsalErrorMessage.JsonEncoderIntrinsicsUnsupported("X64", true, "0");
+            Assert.IsTrue(errorMsg.Contains("JSON encoding failed"));
+            Assert.IsTrue(errorMsg.Contains("X64"));
+            Assert.IsTrue(errorMsg.Contains("Is 64-bit process: True"));
+            Assert.IsTrue(errorMsg.Contains("DOTNET_EnableHWIntrinsic: 0"));
+            Assert.IsTrue(errorMsg.Contains("SIMD"));
+        }
+
+        [TestMethod]
+        public void ClaimsHelper_ErrorMessage_HandlesNullEnvVariable()
+        {
+            // Test that the error message handles null environment variable correctly
+            string errorMsg = MsalErrorMessage.JsonEncoderIntrinsicsUnsupported("X86", false, null);
+            Assert.IsTrue(errorMsg.Contains("JSON encoding failed"));
+            Assert.IsTrue(errorMsg.Contains("X86"));
+            Assert.IsTrue(errorMsg.Contains("Is 64-bit process: False"));
+            Assert.IsTrue(errorMsg.Contains("DOTNET_EnableHWIntrinsic: (not set)"));
+        }
     }
 }

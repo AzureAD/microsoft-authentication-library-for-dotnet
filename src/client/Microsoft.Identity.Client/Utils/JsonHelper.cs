@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -145,7 +147,21 @@ namespace Microsoft.Identity.Client.Utils
         }
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
-        internal static string JsonObjectToString(JsonObject jsonObject) => jsonObject.ToJsonString();
+        internal static string JsonObjectToString(JsonObject jsonObject)
+        {
+            try
+            {
+                return jsonObject.ToJsonString();
+            }
+            catch (PlatformNotSupportedException pns)
+            {
+                throw CreateJsonEncoderException(pns);
+            }
+            catch (TypeInitializationException tie) when (tie.InnerException is PlatformNotSupportedException)
+            {
+                throw CreateJsonEncoderException(tie.InnerException as PlatformNotSupportedException);
+            }
+        }
 
         internal static JsonObject ParseIntoJsonObject(string json) => JsonNode.Parse(json).AsObject();
 
@@ -168,23 +184,34 @@ namespace Microsoft.Identity.Client.Utils
         /// </remarks>
         internal static JObject Merge(JObject originalJson, JObject newContent)
         {
-            // Output buffer to store the merged JSON
-            var outputBuffer = new ArrayBufferWriter<byte>();
-
-            // Parse the original and new JSON content
-            using (JsonDocument jDoc1 = JsonDocument.Parse(originalJson.ToJsonString()))
-            using (JsonDocument jDoc2 = JsonDocument.Parse(newContent.ToJsonString()))
-            using (var jsonWriter = new Utf8JsonWriter(outputBuffer, new JsonWriterOptions { Indented = true }))
+            try
             {
-                // Merge the JSON elements
-                MergeJsonElements(jsonWriter, jDoc1.RootElement, jDoc2.RootElement);
+                // Output buffer to store the merged JSON
+                var outputBuffer = new ArrayBufferWriter<byte>();
+
+                // Parse the original and new JSON content
+                using (JsonDocument jDoc1 = JsonDocument.Parse(originalJson.ToJsonString()))
+                using (JsonDocument jDoc2 = JsonDocument.Parse(newContent.ToJsonString()))
+                using (var jsonWriter = new Utf8JsonWriter(outputBuffer, new JsonWriterOptions { Indented = true }))
+                {
+                    // Merge the JSON elements
+                    MergeJsonElements(jsonWriter, jDoc1.RootElement, jDoc2.RootElement);
+                }
+
+                // Convert the merged JSON to a UTF-8 encoded string
+                string mergedJsonString = Encoding.UTF8.GetString(outputBuffer.WrittenSpan);
+
+                // Parse the merged JSON string to a JObject
+                return ParseIntoJsonObject(mergedJsonString);
             }
-
-            // Convert the merged JSON to a UTF-8 encoded string
-            string mergedJsonString = Encoding.UTF8.GetString(outputBuffer.WrittenSpan);
-
-            // Parse the merged JSON string to a JObject
-            return ParseIntoJsonObject(mergedJsonString);
+            catch (PlatformNotSupportedException pns)
+            {
+                throw CreateJsonEncoderException(pns);
+            }
+            catch (TypeInitializationException tie) when (tie.InnerException is PlatformNotSupportedException)
+            {
+                throw CreateJsonEncoderException(tie.InnerException as PlatformNotSupportedException);
+            }
         }
 
         // Merges two JSON elements based on their value kind
@@ -283,6 +310,19 @@ namespace Microsoft.Identity.Client.Utils
 
             // End writing the merged array
             jsonWriter.WriteEndArray();
+        }
+
+        private static MsalClientException CreateJsonEncoderException(PlatformNotSupportedException innerException)
+        {
+            string processArchitecture = RuntimeInformation.ProcessArchitecture.ToString();
+            bool is64BitProcess = Environment.Is64BitProcess;
+            string hwIntrinsicEnvValue = Environment.GetEnvironmentVariable("DOTNET_EnableHWIntrinsic") 
+                                         ?? Environment.GetEnvironmentVariable("COMPlus_EnableHWIntrinsic");
+
+            return new MsalClientException(
+                MsalError.JsonEncoderIntrinsicsUnsupported,
+                MsalErrorMessage.JsonEncoderIntrinsicsUnsupported(processArchitecture, is64BitProcess, hwIntrinsicEnvValue),
+                innerException);
         }
 #else
         internal static string JsonObjectToString(JObject jsonObject) => jsonObject.ToString(Formatting.None);

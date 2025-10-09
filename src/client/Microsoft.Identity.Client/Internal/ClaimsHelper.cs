@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text;
@@ -29,10 +31,21 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (clientCapabilities != null && clientCapabilities.Any())
             {
-                JObject capabilitiesJson = CreateClientCapabilitiesRequestJson(clientCapabilities);
-                JObject mergedClaimsAndCapabilities = MergeClaimsIntoCapabilityJson(claims, capabilitiesJson);
+                try
+                {
+                    JObject capabilitiesJson = CreateClientCapabilitiesRequestJson(clientCapabilities);
+                    JObject mergedClaimsAndCapabilities = MergeClaimsIntoCapabilityJson(claims, capabilitiesJson);
 
-                return JsonHelper.JsonObjectToString(mergedClaimsAndCapabilities);
+                    return JsonHelper.JsonObjectToString(mergedClaimsAndCapabilities);
+                }
+                catch (PlatformNotSupportedException pns)
+                {
+                    throw CreateJsonEncoderException(pns);
+                }
+                catch (TypeInitializationException tie) when (tie.InnerException is PlatformNotSupportedException)
+                {
+                    throw CreateJsonEncoderException(tie.InnerException as PlatformNotSupportedException);
+                }
             }
 
             return claims;
@@ -90,6 +103,19 @@ namespace Microsoft.Identity.Client.Internal
                     }
                 }
             };
+        }
+
+        private static MsalClientException CreateJsonEncoderException(PlatformNotSupportedException innerException)
+        {
+            string processArchitecture = RuntimeInformation.ProcessArchitecture.ToString();
+            bool is64BitProcess = Environment.Is64BitProcess;
+            string hwIntrinsicEnvValue = Environment.GetEnvironmentVariable("DOTNET_EnableHWIntrinsic") 
+                                         ?? Environment.GetEnvironmentVariable("COMPlus_EnableHWIntrinsic");
+
+            return new MsalClientException(
+                MsalError.JsonEncoderIntrinsicsUnsupported,
+                MsalErrorMessage.JsonEncoderIntrinsicsUnsupported(processArchitecture, is64BitProcess, hwIntrinsicEnvValue),
+                innerException);
         }
     }
 }
