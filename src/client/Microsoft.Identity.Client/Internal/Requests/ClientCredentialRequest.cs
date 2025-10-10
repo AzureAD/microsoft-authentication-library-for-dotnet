@@ -335,7 +335,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var dict = new Dictionary<string, string>
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
-                [OAuth2Parameter.Scope] = AuthenticationRequestParameters.Scope.AsSingleString()
+                [OAuth2Parameter.Scope] = AuthenticationRequestParameters.Scope.AsSingleString(),
+                [OAuth2Parameter.ClientInfo] = "2"
             };
 
             return dict;
