@@ -54,6 +54,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public const string CertificateRequestPath = "/metadata/identity/issuecredential";
         public const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
+        // Preview feature flag: enable IMDSv2 for Bearer (probe allowed)
+        // Accepts: "1", "true", "yes", "on" (case-insensitive)
+        internal const string EnvImdsV2Bearer = "MSAL_EXPERIMENTAL_IMDSV2_BEARER";
+
         /// <summary>
         /// Retrieves CSR (Certificate Signing Request) metadata from the IMDS endpoint.
         /// This metadata is required to properly generate certificates for managed identity authentication.
@@ -69,6 +73,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
             return await Task.FromResult<CsrMetadata>(null).ConfigureAwait(false);
 #else
+            // >>> Preview gate: only allow IMDSv2 probe when the env switch is ON.
+            //     If probe is skipped, caller will fall back to classic IMDS automatically.
+            if (probeMode && !IsImdsV2BearerEnabled(requestContext.Logger))
+            {
+                requestContext.Logger.Info("[Managed Identity] IMDSv2 probe skipped (Bearer preview flag is OFF). Falling back to classic IMDS.");
+                return null;
+            }
+
             var queryParams = ImdsV2QueryParamsHelper(requestContext);
 
             var headers = new Dictionary<string, string>
@@ -671,6 +683,44 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Is IMDSv2 Bearer token support enabled via environment variable?
+        /// checks EnvImdsV2Bearer environment variable.
+        /// if not set or set to false, IMDSv2 probe for Bearer is disabled.
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        private static bool IsImdsV2BearerEnabled(ILoggerAdapter logger)
+        {
+            string v = null;
+            try
+            { v = Environment.GetEnvironmentVariable(EnvImdsV2Bearer); }
+            catch { /* ignore */ }
+
+            if (string.IsNullOrWhiteSpace(v))
+            {
+                logger?.Verbose(() => $"[Managed Identity] {EnvImdsV2Bearer} not set; IMDSv2 probe disabled for Bearer.");
+                return false;
+            }
+
+            bool enabled =
+                v.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                v.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+                v.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+                v.Equals("on", StringComparison.OrdinalIgnoreCase);
+
+            if (enabled)
+            {
+                logger?.Info($"[Managed Identity] {EnvImdsV2Bearer}=true — enabling IMDSv2 probe for Bearer.");
+            }
+            else
+            {
+                logger?.Info($"[Managed Identity] {EnvImdsV2Bearer} set to '{v}' — IMDSv2 probe disabled for Bearer.");
+            }
+
+            return enabled;
         }
     }
 }

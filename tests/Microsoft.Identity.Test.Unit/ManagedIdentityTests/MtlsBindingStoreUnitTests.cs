@@ -327,5 +327,83 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             Assert.IsFalse(ImdsV2ManagedIdentitySource.TryGetImdsV2BindingMetadata(id2, Constants.BearerTokenType, out _, out _, out _));
         }
+
+        // A cert with a private key should be usable for signing
+        [TestMethod]
+        public void IsPrivateKeyUsable_ReturnsTrue_ForCertWithPrivateKey()
+        {
+            var subject = $"{Prefix}{Guid.NewGuid()}, DC=unit";
+            var certWithKey = CertHelper.CreateSelfSigned(
+                subject,
+                DateTimeOffset.UtcNow.AddMinutes(-1),
+                DateTimeOffset.UtcNow.AddHours(1));
+
+            // Install and fetch from store (sanity)
+            MtlsBindingStore.InstallAndGetSubject(certWithKey);
+            var fetched = MtlsBindingStore.GetFreshestBySubject(subject);
+            Assert.IsNotNull(fetched, "Freshest certificate should be present in the store.");
+            Assert.IsTrue(fetched.HasPrivateKey, "Sanity check: certificate should have a private key.");
+
+            // Private-key probe should succeed
+            Assert.IsTrue(MtlsBindingStore.IsPrivateKeyUsable(fetched),
+                "Certificate with a usable private key should return true.");
+        }
+
+        // Same cert material but public-only (no private key) should be considered unusable
+        [TestMethod]
+        public void IsPrivateKeyUsable_ReturnsFalse_ForPublicOnlyCert()
+        {
+            var subject = $"{Prefix}{Guid.NewGuid()}, DC=unit";
+            var certWithKey = CertHelper.CreateSelfSigned(
+                subject,
+                DateTimeOffset.UtcNow.AddMinutes(-1),
+                DateTimeOffset.UtcNow.AddHours(1));
+
+            // Install the with-key version first
+            MtlsBindingStore.InstallAndGetSubject(certWithKey);
+
+            // Create a public-only view of the same certificate (no private key)
+            var publicOnly = new X509Certificate2(certWithKey.Export(X509ContentType.Cert));
+
+            // Replace in the store: InstallAndGetSubject de-dups by thumbprint, so this
+            // will remove the with-key instance and leave the public-only instance.
+            MtlsBindingStore.InstallAndGetSubject(publicOnly);
+
+            var fetched = MtlsBindingStore.GetFreshestBySubject(subject);
+            Assert.IsNotNull(fetched, "Public-only certificate should be present in the store.");
+            Assert.IsFalse(fetched.HasPrivateKey, "Sanity check: fetched certificate should not have a private key.");
+
+            // Private-key probe should fail
+            Assert.IsFalse(MtlsBindingStore.IsPrivateKeyUsable(fetched),
+                "Public-only certificate should return false for private key usability.");
+        }
+
+        // Optional: once detected as unusable, removal by thumbprint should clean up the store
+        [TestMethod]
+        public void RemoveByThumbprint_AfterUnusableKeyDetection_RemovesCert()
+        {
+            var subject = $"{Prefix}{Guid.NewGuid()}, DC=unit";
+            var certWithKey = CertHelper.CreateSelfSigned(
+                subject,
+                DateTimeOffset.UtcNow.AddMinutes(-1),
+                DateTimeOffset.UtcNow.AddHours(1));
+
+            // Install with private key first
+            MtlsBindingStore.InstallAndGetSubject(certWithKey);
+
+            // Replace with a public-only instance (same thumbprint)
+            var publicOnly = new X509Certificate2(certWithKey.Export(X509ContentType.Cert));
+            MtlsBindingStore.InstallAndGetSubject(publicOnly);
+
+            var fetched = MtlsBindingStore.GetFreshestBySubject(subject);
+            Assert.IsNotNull(fetched);
+            Assert.IsFalse(MtlsBindingStore.IsPrivateKeyUsable(fetched),
+                "Setup expects the certificate to be public-only (unusable).");
+
+            // Remove and verify gone
+            MtlsBindingStore.RemoveByThumbprint(fetched.Thumbprint);
+            Assert.IsFalse(CertHelper.ExistsByThumbprint(fetched.Thumbprint),
+                "Certificate should be removed from the store after removal by thumbprint.");
+        }
     }
 }

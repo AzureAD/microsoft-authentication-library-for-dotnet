@@ -50,7 +50,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             GetOrMintBindingAsync(
                 string identityKey,
                 string tokenType,
-                Func<CancellationToken, Task<(CertificateRequestResponse resp, AsymmetricAlgorithm privateKey)>> mintBindingAsync,
+                Func<CancellationToken, Task<(CertificateRequestResponse resp, 
+                    AsymmetricAlgorithm privateKey)>> mintBindingAsync,
                 CancellationToken ct)
         {
             // 1) Reuse from in-memory mapping (with rehydration fallback)
@@ -363,6 +364,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (!MtlsBindingStore.IsCurrentlyValid(resolved))
                 return false;
 
+            // When machine reboots the KeyGuard key may become unusable
+            // this will ensure we delete the x509 cert and mint a new one
+            if (!MtlsBindingStore.IsPrivateKeyUsable(resolved, _ctx.Logger))
+            {
+                _ctx.Logger.Info($"[IMDSv2] Binding cert {resolved.Thumbprint} has unusable private key. Removing and minting fresh.");
+
+                try
+                {
+                    MtlsBindingStore.RemoveByThumbprint(resolved.Thumbprint, _ctx.Logger);
+                }
+                catch { }
+                return false;
+            }
+
             // Update cache if thumbprint changed
             if (!StringComparer.OrdinalIgnoreCase.Equals(tp, resolvedTp))
                 ImdsV2ManagedIdentitySource.CacheImdsV2BindingMetadata(identityKey, cachedResp, subject, resolvedTp, tokenType);
@@ -397,6 +412,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             var c = MtlsBindingStore.ResolveByThumbprintThenSubject(anyTp, anySubject, cleanupOlder: true, out _, _ctx.Logger);
             if (!MtlsBindingStore.IsCurrentlyValid(c))
                 return false;
+
+            // When machine reboots the KeyGuard key may become unusable
+            // this will ensure we delete the x509 cert and mint a new one
+            if (!MtlsBindingStore.IsPrivateKeyUsable(c, _ctx.Logger))
+            {
+                _ctx.Logger.Info($"[IMDSv2] Borrowed binding cert {c.Thumbprint} has unusable private key. Removing and minting fresh.");
+                
+                try
+                { 
+                    MtlsBindingStore.RemoveByThumbprint(c.Thumbprint, _ctx.Logger); 
+                }
+                catch { }
+                return false;
+            }
 
             cert = c;
             resp = anyResp;
