@@ -58,7 +58,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (cert == null)
                 return false;
 
-            bool isValid = DateTime.UtcNow < cert.NotAfter.ToUniversalTime();
+            var now = DateTime.UtcNow;
+            bool isValid = now >= cert.NotBefore.ToUniversalTime() &&
+                          now < cert.NotAfter.ToUniversalTime();
             return isValid;
         }
 

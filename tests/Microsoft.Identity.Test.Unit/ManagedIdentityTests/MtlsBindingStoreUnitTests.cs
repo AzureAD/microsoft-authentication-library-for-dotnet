@@ -405,5 +405,169 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsFalse(CertHelper.ExistsByThumbprint(fetched.Thumbprint),
                 "Certificate should be removed from the store after removal by thumbprint.");
         }
+
+        // Direct test for IsCurrentlyValid with current, expired, and future certificates
+        [TestMethod]
+        public void IsCurrentlyValid_ReturnsTrueOnlyForValidCertificates()
+        {
+            var subject = $"{Prefix}{Guid.NewGuid()}, DC=unit";
+            
+            var expired = CertHelper.CreateSelfSigned(
+                subject, 
+                DateTimeOffset.UtcNow.AddHours(-2), 
+                DateTimeOffset.UtcNow.AddHours(-1)); // Already expired
+            
+            var valid = CertHelper.CreateSelfSigned(
+                subject, 
+                DateTimeOffset.UtcNow.AddHours(-1), 
+                DateTimeOffset.UtcNow.AddHours(1)); // Currently valid
+            
+            var future = CertHelper.CreateSelfSigned(
+                subject, 
+                DateTimeOffset.UtcNow.AddHours(1), 
+                DateTimeOffset.UtcNow.AddHours(2)); // Not valid yet (future start date)            
+            Assert.IsFalse(MtlsBindingStore.IsCurrentlyValid(expired), "Expired certificate should not be valid");
+            Assert.IsTrue(MtlsBindingStore.IsCurrentlyValid(valid), "Currently valid certificate should be valid");
+            Assert.IsFalse(MtlsBindingStore.IsCurrentlyValid(future), "Future certificate should not be valid yet");
+            Assert.IsFalse(MtlsBindingStore.IsCurrentlyValid(null), "Null certificate should not be valid");
+        }
+
+        // Test for RemoveAllBySubject
+        [TestMethod]
+        public void RemoveAllBySubject_RemovesAllCertificatesWithSubject()
+        {
+            var subject = $"{Prefix}{Guid.NewGuid()}, DC=unit";
+            var differentSubject = $"{Prefix}{Guid.NewGuid()}, DC=unit";
+            
+            // Create 3 certs with same subject and 1 with different subject
+            var cert1 = CertHelper.CreateSelfSigned(subject, DateTimeOffset.UtcNow.AddMinutes(-40), DateTimeOffset.UtcNow.AddMinutes(20));
+            var cert2 = CertHelper.CreateSelfSigned(subject, DateTimeOffset.UtcNow.AddMinutes(-20), DateTimeOffset.UtcNow.AddMinutes(40));
+            var cert3 = CertHelper.CreateSelfSigned(subject, DateTimeOffset.UtcNow.AddMinutes(-10), DateTimeOffset.UtcNow.AddMinutes(60));
+            var otherCert = CertHelper.CreateSelfSigned(differentSubject, DateTimeOffset.UtcNow.AddMinutes(-5), DateTimeOffset.UtcNow.AddMinutes(30));
+            
+            // Install all certs
+            MtlsBindingStore.InstallAndGetSubject(cert1);
+            MtlsBindingStore.InstallAndGetSubject(cert2);
+            MtlsBindingStore.InstallAndGetSubject(cert3);
+            MtlsBindingStore.InstallAndGetSubject(otherCert);
+            
+            // Remove all with matching subject
+            MtlsBindingStore.RemoveAllBySubject(subject);
+            
+            // Verify all matching certs are gone
+            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            var matches = store.Certificates.Find(X509FindType.FindBySubjectDistinguishedName, subject, false);
+            var otherMatches = store.Certificates.Find(X509FindType.FindBySubjectDistinguishedName, differentSubject, false);
+            
+            Assert.AreEqual(0, matches.Count, "All certificates with the target subject should be removed");
+            Assert.AreEqual(1, otherMatches.Count, "Certificates with different subjects should not be affected");
+            Assert.AreEqual(otherCert.Thumbprint, otherMatches[0].Thumbprint, "The unrelated certificate should remain intact");
+        }
+
+        // Test for PurgeExpiredBeyondWindow
+        [TestMethod]
+        public void PurgeExpiredBeyondWindow_RemovesOnlyStaleExpiredCerts()
+        {
+            var subject = $"{Prefix}{Guid.NewGuid()}, DC=unit";
+            var now = DateTimeOffset.UtcNow;
+            
+            // Create 3 certs with varying expiration dates
+            var validCert = CertHelper.CreateSelfSigned(
+                subject, now.AddDays(-10), now.AddDays(10)); // Valid
+                
+            var recentlyExpired = CertHelper.CreateSelfSigned(
+                subject, now.AddDays(-20), now.AddDays(-3)); // Expired but within 7-day window
+                
+            var staleExpired = CertHelper.CreateSelfSigned(
+                subject, now.AddDays(-30), now.AddDays(-10)); // Expired beyond 7-day window
+            
+            // Install all certs
+            MtlsBindingStore.InstallAndGetSubject(validCert);
+            MtlsBindingStore.InstallAndGetSubject(recentlyExpired);
+            MtlsBindingStore.InstallAndGetSubject(staleExpired);
+            
+            // Run the purge operation
+            MtlsBindingStore.PurgeExpiredBeyondWindow(subject);
+            
+            // Check what remains in the store
+            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            var remainingCerts = store.Certificates
+                .Find(X509FindType.FindBySubjectDistinguishedName, subject, false)
+                .OfType<X509Certificate2>()
+                .ToList();
+            
+            Assert.AreEqual(2, remainingCerts.Count, "Should keep valid and recently expired certs");
+            
+            var remainingThumbprints = remainingCerts.Select(c => c.Thumbprint).ToList();
+            CollectionAssert.Contains(remainingThumbprints, validCert.Thumbprint, "Valid certificate should be kept");
+            CollectionAssert.Contains(remainingThumbprints, recentlyExpired.Thumbprint, "Recently expired certificate should be kept");
+            CollectionAssert.DoesNotContain(remainingThumbprints, staleExpired.Thumbprint, "Stale expired certificate should be removed");
+        }
+
+        // Test input validation on various methods
+        [TestMethod]
+        public void InputValidation_NullOrEmptyInputs()
+        {
+            // Test with null/empty subject
+            Assert.IsNull(MtlsBindingStore.GetFreshestBySubject(null), "GetFreshestBySubject with null subject should return null");
+            Assert.IsNull(MtlsBindingStore.GetFreshestBySubject(""), "GetFreshestBySubject with empty subject should return null");
+            
+            // Test with null certificate
+            Assert.IsNull(MtlsBindingStore.InstallAndGetSubject(null), "InstallAndGetSubject with null cert should return null");
+            
+            // Verify RemoveAllBySubject with null/empty doesn't throw
+            MtlsBindingStore.RemoveAllBySubject(null); // Should not throw
+            MtlsBindingStore.RemoveAllBySubject(""); // Should not throw
+            
+            // Verify RemoveByThumbprint with null/empty doesn't throw
+            MtlsBindingStore.RemoveByThumbprint(null); // Should not throw
+            MtlsBindingStore.RemoveByThumbprint(""); // Should not throw
+            
+            // Test resolution with null/empty inputs
+            string resolvedThumbprint;
+            var result = MtlsBindingStore.ResolveByThumbprintThenSubject(null, null, false, out resolvedThumbprint);
+            Assert.IsNull(result, "Resolution with null inputs should return null");
+            Assert.IsNull(resolvedThumbprint, "Resolved thumbprint should be null with invalid inputs");
+        }
+
+        // Test boundary cases for certificate expiration and purging
+        [TestMethod]
+        public void ExpirationWindow_BoundaryCases()
+        {
+            var subject = $"{Prefix}{Guid.NewGuid()}, DC=unit";
+            var now = DateTimeOffset.UtcNow;
+            
+            // Create certificates at various points around the expiration window boundary
+            var justInsideWindow = CertHelper.CreateSelfSigned(
+                subject, 
+                now.AddDays(-14), 
+                now.AddDays(-6.9)); // Expired 6.9 days ago (just inside 7-day window)
+                
+            var justOutsideWindow = CertHelper.CreateSelfSigned(
+                subject, 
+                now.AddDays(-14), 
+                now.AddDays(-7.1)); // Expired 7.1 days ago (just outside 7-day window)
+            
+            MtlsBindingStore.InstallAndGetSubject(justInsideWindow);
+            MtlsBindingStore.InstallAndGetSubject(justOutsideWindow);
+            
+            // Run purge and check what remains
+            MtlsBindingStore.PurgeExpiredBeyondWindow(subject);
+            
+            // Check if justInsideWindow is kept and justOutsideWindow is purged
+            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            
+            var insideCert = store.Certificates.Find(
+                X509FindType.FindByThumbprint, justInsideWindow.Thumbprint, false);
+                
+            var outsideCert = store.Certificates.Find(
+                X509FindType.FindByThumbprint, justOutsideWindow.Thumbprint, false);
+            
+            Assert.AreEqual(1, insideCert.Count, "Certificate just inside the purge window should be kept");
+            Assert.AreEqual(0, outsideCert.Count, "Certificate just outside the purge window should be removed");
+        }
     }
 }
