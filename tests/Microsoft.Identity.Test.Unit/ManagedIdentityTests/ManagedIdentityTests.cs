@@ -42,6 +42,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
+        private void AddImdsV2CsrMockHandlerIfNeeded(
+            ManagedIdentitySource managedIdentitySource,
+            MockHttpManager httpManager)
+        {
+            if (managedIdentitySource == ManagedIdentitySource.Imds)
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponseFailure());
+            }
+        }
+
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
@@ -92,6 +102,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -140,6 +151,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
@@ -187,6 +199,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -244,6 +257,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -302,6 +316,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -365,6 +380,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -539,6 +555,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -578,6 +595,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -615,6 +633,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
@@ -1012,6 +1031,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder
@@ -1052,6 +1072,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder
@@ -1306,6 +1327,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)

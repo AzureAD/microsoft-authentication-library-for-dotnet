@@ -24,6 +24,9 @@ do
             .WithMtlsProofOfPossession()
             .ExecuteAsync().ConfigureAwait(false);
 
+        Console.WriteLine(result.AccessToken);
+        Console.WriteLine(result.BindingCertificate);
+
         Console.WriteLine("Success");
         Console.ReadLine();
     }

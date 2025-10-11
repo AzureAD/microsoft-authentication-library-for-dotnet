@@ -179,7 +179,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.InMemory).ConfigureAwait(false);
 
@@ -215,7 +214,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 #region Identity 1
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
@@ -280,7 +278,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId).ConfigureAwait(false);
 
@@ -319,7 +316,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
@@ -361,7 +357,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 #region Identity 1
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
@@ -441,7 +436,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
@@ -482,7 +476,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var handler = httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
@@ -497,7 +490,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 // First attempt fails with INTERNAL_SERVER_ERROR (500)
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.InternalServerError));
@@ -514,7 +506,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: null));
 
@@ -533,8 +524,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
 
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
-
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "I_MDS/150.870.65.1854"));
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
@@ -551,7 +540,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 const int Num500Errors = 1 + TestCsrMetadataProbeRetryPolicy.ExponentialStrategyNumRetries;
                 for (int i = 0; i < Num500Errors; i++)
@@ -573,7 +561,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.NotFound));
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
@@ -662,7 +649,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
@@ -687,7 +673,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var mi = await CreateManagedIdentityAsync(httpManager,  managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
@@ -715,7 +700,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
@@ -743,7 +727,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 // Force in-memory keys (i.e., not KeyGuard)
                 var managedIdentityApp = await CreateManagedIdentityAsync(
@@ -774,7 +757,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var http = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(http)
@@ -831,7 +813,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpSami = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var samiBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpSami)
@@ -896,7 +877,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var http = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                 .WithHttpManager(http)
@@ -965,7 +945,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var http = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(ImdsV2ManagedIdentitySource.EnvImdsV2Bearer, "1");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                 .WithHttpManager(http)

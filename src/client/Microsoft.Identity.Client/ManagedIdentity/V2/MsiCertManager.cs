@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// </remarks>
     internal sealed class MsiCertManager
     {
+        private static Random s_random = new Random();
+
         private readonly RequestContext _ctx;
 
         /// <summary>
@@ -117,8 +119,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 try
                 {
-                    // Stable jitter (0..300s) from identityKey+tokenType (net48 safe)
-                    var delay = ComputeStableJitter(identityKey, tokenType, 300);
+                    var delay = ComputeStableJitter();
                     if (delay > TimeSpan.Zero)
                         await Task.Delay(delay).ConfigureAwait(false);
 
@@ -169,23 +170,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// This ensures multiple processes don't all try to rotate at exactly the same moment,
         /// while maintaining stability (same input always produces same delay).
         /// </summary>
-        /// <param name="identityKey">Identity key for jitter calculation</param>
-        /// <param name="tokenType">Token type for jitter calculation</param>
-        /// <param name="maxSeconds">Maximum jitter in seconds</param>
         /// <returns>A TimeSpan representing the jitter delay</returns>
-        private static TimeSpan ComputeStableJitter(string identityKey, string tokenType, int maxSeconds)
+        private static TimeSpan ComputeStableJitter()
         {
-            try
-            {
-                using var sha = SHA256.Create();
-                var data = Encoding.UTF8.GetBytes(identityKey + "|" + tokenType);
-                var h = sha.ComputeHash(data);
-                // Use first 2 bytes for bounded delay (net48-friendly)
-                int val = (h[0] << 8) | h[1];
-                int seconds = val % (maxSeconds + 1);
-                return TimeSpan.FromSeconds(seconds);
-            }
-            catch { return TimeSpan.Zero; }
+            int jitter = s_random.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds);
+            return TimeSpan.FromSeconds(jitter);
         }
 
         /// <summary>

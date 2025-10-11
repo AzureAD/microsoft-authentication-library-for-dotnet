@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return source;
             }
 
-            // probe IMDSv2
+            // probe IMDSv2 
             var response = await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext, probeMode: true).ConfigureAwait(false);
             if (response != null)
             {
