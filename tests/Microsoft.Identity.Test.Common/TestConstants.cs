@@ -247,9 +247,10 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
+        public const string MsalCCAKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
+
         public const string MsalCCAKeyVaultSecretName = "MSIDLAB4-IDLABS-APP-AzureADMyOrg-CC";
-        public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
+        public const string MsalOBOKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
         public const string MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret";
         public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string MsalArlingtonOBOKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
@@ -408,13 +409,6 @@ namespace Microsoft.Identity.Test.Unit
       ""token_type"":""Bearer"",
       ""username"":""some_user@contoso.com""
    }";
-
-        // constants for Azure AD Kerberos Features
-        public const string KerberosTestApplicationId = "682992e9-c9c6-49c9-a819-3fbca2dd5111";
-        public const string KerberosServicePrincipalName = "HTTP/msal-kerberos-test.msidlab4.com";
-        public const string KerberosServicePrincipalNameEscaped = "HTTP**msal-kerberos-test.msidlab4.com";
-        public const string AzureADKerberosRealmName = "KERBEROS.MICROSOFTONLINE.COM";
-        public const int KerberosMinMessageBufferLength = 256;
 
         // do not change these constants!
         public const string AadRawClientInfo = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0";
@@ -631,7 +625,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ConfidentialClientId = "ConfidentialClientId";
         public const string ClientRedirectUri = "http://localhost:8080";
         public static readonly SortedSet<string> s_supportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" }, StringComparer.OrdinalIgnoreCase);
-        public const string ADFS2019ClientSecretURL = "https://buildautomation.vault.azure.net/secrets/ADFS2019ClientCredSecret/";
+        public const string ADFS2019ClientSecretURL = "https://id4skeyvault.vault.azure.net/secrets/ADFS2019ClientCredSecret/";
         public const string ADFS2019ClientSecretName = "ADFS2019ClientCredSecret";
     }
 }

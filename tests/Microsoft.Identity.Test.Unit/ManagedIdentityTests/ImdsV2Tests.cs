@@ -208,7 +208,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
         public async Task BearerTokenTokenIsPerIdentity(
             UserAssignedIdentityId userAssignedIdentityId,
-            string userAssignedId)
+            string userAssignedId,
+            string userAssignedId2)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -238,18 +239,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 #endregion Identity 1
 
                 #region Identity 2
-                UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
-                string identity2Id = "some_other_id";
-                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, identity2Type, identity2Id, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
+                UserAssignedIdentityId userAssignedIdentityId2 = userAssignedIdentityId; // keep the same type, that's the most common scenario
+                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId2, userAssignedId2, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
 
-                AddMocksToGetEntraToken(httpManager, identity2Type, identity2Id);
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId2, userAssignedId2);
 
                 var result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result.TokenType, Bearer);
+                Assert.AreEqual(result2.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
 
                 result2 = await managedIdentityApp2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result.TokenType, Bearer);
+                Assert.AreEqual(result2.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 2
 
@@ -351,7 +351,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
         public async Task mTLSPopTokenTokenIsPerIdentity(
             UserAssignedIdentityId userAssignedIdentityId,
-            string userAssignedId)
+            string userAssignedId,
+            string userAssignedId2)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -386,12 +387,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 #endregion Identity 1
 
                 #region Identity 2
-                UserAssignedIdentityId identity2Type = userAssignedIdentityId; // keep the same type, that's the most common scenario
-                string identity2Id = "some_other_id";
+                UserAssignedIdentityId userAssignedIdentityId2 = userAssignedIdentityId; // keep the same type, that's the most common scenario
                 var managedIdentityApp2 = await CreateManagedIdentityAsync(
                     httpManager,
-                    identity2Type,
-                    identity2Id,
+                    userAssignedIdentityId2,
+                    userAssignedId2,
                     addProbeMock: false, 
                     addSourceCheck: false,
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false); // source is already cached
