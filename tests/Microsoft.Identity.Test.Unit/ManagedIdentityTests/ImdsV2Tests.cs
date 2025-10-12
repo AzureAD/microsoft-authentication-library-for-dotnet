@@ -990,6 +990,148 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(TokenSource.IdentityProvider, r2.AuthenticationResultMetadata.TokenSource);
             }
         }
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UMAI by ClientId
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)]  // UMAI by ResourceId
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UMAI by ObjectId
+        public async Task mTLSPop_UamiFirst_ThenSami_MintsDistinctBinding(
+            UserAssignedIdentityId uamiKind,
+            string uamiId)
+        {
+            using (new EnvVariableContext())
+            using (var http = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // --- UMAI first ---
+                var uami = await CreateManagedIdentityAsync(
+                    http,
+                    uamiKind,
+                    uamiId,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // UMAI mint uses ValidRawCertificate (binding A)
+                AddMocksToGetEntraToken(
+                    http,
+                    uamiKind,
+                    uamiId,
+                    certificateRequestCertificate: TestConstants.ValidRawCertificate,
+                    mTLSPop: true,
+                    expectNewCertificate: true);
+
+                var rUami = await uami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                      .WithMtlsProofOfPossession()
+                                      .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                                      .ExecuteAsync()
+                                      .ConfigureAwait(false);
+
+                Assert.IsNotNull(rUami);
+                Assert.IsNotNull(rUami.AccessToken);
+                Assert.AreEqual(MTLSPoP, rUami.TokenType);
+                Assert.IsNotNull(rUami.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, rUami.AuthenticationResultMetadata.TokenSource);
+                var thumbUami = rUami.BindingCertificate.Thumbprint;
+
+                // --- SAMI second (must NOT reuse UMAI's binding) ---
+                // Reuse cached source; no extra probe
+                var sami = await CreateManagedIdentityAsync(
+                    http,
+                    addProbeMock: false,
+                    addSourceCheck: false,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // SAMI mint uses a different cert payload (binding B)
+                // Using ExpiredRawCertificate is fine in tests (TLS isn't validated by the mock).
+                AddMocksToGetEntraToken(
+                    http,
+                    UserAssignedIdentityId.None,
+                    userAssignedId: null,
+                    certificateRequestCertificate: TestConstants.ExpiredRawCertificate,
+                    mTLSPop: true,
+                    expectNewCertificate: true);
+
+                var rSami = await sami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                      .WithMtlsProofOfPossession()
+                                      .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                                      .ExecuteAsync()
+                                      .ConfigureAwait(false);
+
+                Assert.IsNotNull(rSami);
+                Assert.IsNotNull(rSami.AccessToken);
+                Assert.AreEqual(MTLSPoP, rSami.TokenType);
+                Assert.IsNotNull(rSami.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, rSami.AuthenticationResultMetadata.TokenSource);
+                var thumbSami = rSami.BindingCertificate.Thumbprint;
+
+                // The heart of this regression: UMAI binding must not be reused by SAMI
+                Assert.AreNotEqual(thumbUami, thumbSami, "SAMI must not reuse UMAI's binding certificate.");
+            }
+        }
+
+        [TestMethod]
+        public async Task mTLSPop_SamiFirst_ThenUami_MintsDistinctBinding()
+        {
+            using (new EnvVariableContext())
+            using (var http = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // --- SAMI first ---
+                var sami = await CreateManagedIdentityAsync(
+                    http,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // SAMI mint uses ValidRawCertificate (binding A)
+                AddMocksToGetEntraToken(
+                    http,
+                    UserAssignedIdentityId.None,
+                    userAssignedId: null,
+                    certificateRequestCertificate: TestConstants.ValidRawCertificate,
+                    mTLSPop: true,
+                    expectNewCertificate: true);
+
+                var rSami = await sami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                      .WithMtlsProofOfPossession()
+                                      .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                                      .ExecuteAsync()
+                                      .ConfigureAwait(false);
+
+                Assert.IsNotNull(rSami.BindingCertificate);
+                var thumbSami = rSami.BindingCertificate.Thumbprint;
+
+                // --- UMAI second (must mint its own binding) ---
+                var uami = await CreateManagedIdentityAsync(
+                    http,
+                    UserAssignedIdentityId.ClientId,
+                    TestConstants.ClientId2,    // use a distinct UMAI id
+                    addProbeMock: false,
+                    addSourceCheck: false,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // UMAI mint uses a different cert payload (binding B)
+                AddMocksToGetEntraToken(
+                    http,
+                    UserAssignedIdentityId.ClientId,
+                    TestConstants.ClientId2,
+                    certificateRequestCertificate: TestConstants.ExpiredRawCertificate,
+                    mTLSPop: true,
+                    expectNewCertificate: true);
+
+                var rUami = await uami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                                      .WithMtlsProofOfPossession()
+                                      .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                                      .ExecuteAsync()
+                                      .ConfigureAwait(false);
+
+                Assert.IsNotNull(rUami.BindingCertificate);
+                var thumbUami = rUami.BindingCertificate.Thumbprint;
+
+                // UMAI must not reuse SAMI's binding
+                Assert.AreNotEqual(thumbSami, thumbUami, "UMAI must not reuse SAMI's binding certificate.");
+            }
+        }
+
         #endregion
     }
 }

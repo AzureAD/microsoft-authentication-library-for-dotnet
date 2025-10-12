@@ -20,8 +20,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// <remarks>
     /// Strategy:
     ///  1) Reuse per-identity binding if valid (preferred).
-    ///  2) For PoP only, optionally reuse binding from any identity (test support).
-    ///  3) Mint when missing.
+    ///  2) Mint when missing.
     /// Rotation:
     ///  - If we reuse a cert at/after half-life → schedule proactive rotation (background).
     ///  - Rotation uses a cross-process named mutex + stable jitter so only one process mints.
@@ -67,24 +66,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 return (cert, resp);
             }
 
-            // 2) PoP-only cross-identity reuse (test support)
-            if (string.Equals(tokenType, Constants.MtlsPoPTokenType, StringComparison.OrdinalIgnoreCase) &&
-                TryBuildFromAnyMapping(Constants.MtlsPoPTokenType, out cert, out resp))
-            {
-                ImdsV2ManagedIdentitySource.CacheImdsV2BindingMetadata(
-                    identityKey, resp, cert.Subject, cert.Thumbprint, tokenType);
-
-                _ctx.Logger.Info("[IMDSv2] Reused PoP binding from another identity (test scenario).");
-
-                if (MtlsBindingStore.IsBeyondHalfLife(cert))
-                {
-                    _ctx.Logger.Info("[IMDSv2] Reused PoP binding is at/after half-life; scheduling proactive rotation.");
-                    ScheduleProactiveRotation(identityKey, tokenType, mintBindingAsync);
-                }
-                return (cert, resp);
-            }
-
-            // 3) Mint + install + prune (foreground path keeps only the newest for this subject)
+            // 2) Mint + install + prune (foreground path keeps only the newest for this subject)
             var (newResp, privKey) = await mintBindingAsync(ct).ConfigureAwait(false);
 
             if (privKey is not RSA rsa)
@@ -373,51 +355,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             cert = resolved;
             resp = cachedResp;
-            return true;
-        }
-
-        /// <summary>
-        /// For PoP tokens only, attempts to find any valid certificate from any identity.
-        /// This is primarily used for test scenarios or when sharing certificates across identities.
-        /// </summary>
-        /// <param name="tokenType">The token type (must be PoP)</param>
-        /// <param name="cert">Output parameter for the retrieved certificate</param>
-        /// <param name="resp">Output parameter for the certificate metadata</param>
-        /// <returns>True if a valid certificate was found; otherwise, false</returns>
-        private bool TryBuildFromAnyMapping(
-            string tokenType,
-            out X509Certificate2 cert,
-            out CertificateRequestResponse resp)
-        {
-            cert = null;
-            resp = null;
-
-            if (!ImdsV2ManagedIdentitySource.TryGetAnyImdsV2BindingMetadata(
-                    tokenType, out var anyResp, out var anySubject, out var anyTp))
-            {
-                return false;
-            }
-
-            var c = MtlsBindingStore.ResolveByThumbprintThenSubject(anyTp, anySubject, cleanupOlder: true, out _, _ctx.Logger);
-            if (!MtlsBindingStore.IsCurrentlyValid(c))
-                return false;
-
-            // When machine reboots the KeyGuard key may become unusable
-            // this will ensure we delete the x509 cert and mint a new one
-            if (!MtlsBindingStore.IsPrivateKeyUsable(c, _ctx.Logger))
-            {
-                _ctx.Logger.Info($"[IMDSv2] Borrowed binding cert {c.Thumbprint} has unusable private key. Removing and minting fresh.");
-                
-                try
-                { 
-                    MtlsBindingStore.RemoveByThumbprint(c.Thumbprint, _ctx.Logger); 
-                }
-                catch { }
-                return false;
-            }
-
-            cert = c;
-            resp = anyResp;
             return true;
         }
     }
