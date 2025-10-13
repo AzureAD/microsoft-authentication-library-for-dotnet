@@ -33,7 +33,7 @@
 // - MSI_MTLS_TEST_CERT_THUMBPRINT or MSI_MTLS_TEST_CERT_SUBJECT [+ MSI_MTLS_TEST_CERT_STORE_LOC, MSI_MTLS_TEST_CERT_STORE_NAME]
 //   → override client cert from Windows cert store
 //
-// NuGet: Microsoft.Identity.Client (>= 4.61.0)
+// NuGet: Microsoft.Identity.Client (Internal -Preview. Refer to the .md file)
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -803,3 +803,4 @@ internal class Program
         }
     }
 }
+
