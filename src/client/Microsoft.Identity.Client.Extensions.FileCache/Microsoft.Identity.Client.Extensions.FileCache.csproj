@@ -28,13 +28,9 @@
   </PropertyGroup>
 
   <!-- ─── File inclusions ───────────────────────────────────────────────── -->
-  <ItemGroup>
-    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
-  </ItemGroup>
 
   <!-- ─── References ────────────────────────────────────────────────────── -->
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Identity.Client.Extensions.FileCache\Microsoft.Identity.Client.Extensions.FileCache.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 

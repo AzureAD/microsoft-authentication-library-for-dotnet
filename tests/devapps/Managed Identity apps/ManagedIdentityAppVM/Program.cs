@@ -8,11 +8,12 @@ using Microsoft.Identity.Client.MtlsPop;
 
 IIdentityLogger identityLogger = new IdentityLogger();
 
-IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithLogging(identityLogger, true)
-                .Build();
+IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
+    .Create(ManagedIdentityId.SystemAssigned)
+    .WithLogging(identityLogger, true)
+    .Build();
 
-string? scope = "https://management.azure.com";
+string? scope = "https://graph.microsoft.com";
 
 do
 {

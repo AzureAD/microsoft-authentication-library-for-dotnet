@@ -1,0 +1,18 @@
+Microsoft.Identity.Client.Extensions.FileCache.CacheValue
+Microsoft.Identity.Client.Extensions.FileCache.CacheValue.CacheValue() -> void
+Microsoft.Identity.Client.Extensions.FileCache.CacheValue.CacheValue(byte[] payload, System.DateTimeOffset expiresOnUtc) -> void
+Microsoft.Identity.Client.Extensions.FileCache.CacheValue.CacheValue(byte[] payload, System.DateTimeOffset expiresOnUtc, System.DateTimeOffset refreshOnUtc) -> void
+Microsoft.Identity.Client.Extensions.FileCache.CacheValue.ExpiresOnUtc.get -> System.DateTimeOffset
+Microsoft.Identity.Client.Extensions.FileCache.CacheValue.HasRefreshOnUtc.get -> bool
+Microsoft.Identity.Client.Extensions.FileCache.CacheValue.Payload.get -> byte[]
+Microsoft.Identity.Client.Extensions.FileCache.CacheValue.RefreshOnUtc.get -> System.DateTimeOffset
+Microsoft.Identity.Client.Extensions.FileCache.ISecureTokenCache
+Microsoft.Identity.Client.Extensions.FileCache.ISecureTokenCache.GetOrCreateAsync(string bucket, string keyId, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<Microsoft.Identity.Client.Extensions.FileCache.CacheValue>> factory, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<byte[]>
+Microsoft.Identity.Client.Extensions.FileCache.ISecureTokenCache.TryReadAsync(string bucket, string keyId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<byte[]>
+Microsoft.Identity.Client.Extensions.FileCache.ISecureTokenCache.WriteAsync(string bucket, string keyId, Microsoft.Identity.Client.Extensions.FileCache.CacheValue value, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task
+Microsoft.Identity.Client.Extensions.FileCache.SecureTokenFileCache
+Microsoft.Identity.Client.Extensions.FileCache.SecureTokenFileCache.GetOrCreateAsync(string bucket, string keyId, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<Microsoft.Identity.Client.Extensions.FileCache.CacheValue>> factory, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<byte[]>
+Microsoft.Identity.Client.Extensions.FileCache.SecureTokenFileCache.SecureTokenFileCache() -> void
+Microsoft.Identity.Client.Extensions.FileCache.SecureTokenFileCache.SecureTokenFileCache(string baseDirectory, string fileNameTemplate) -> void
+Microsoft.Identity.Client.Extensions.FileCache.SecureTokenFileCache.TryReadAsync(string bucket, string keyId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<byte[]>
+Microsoft.Identity.Client.Extensions.FileCache.SecureTokenFileCache.WriteAsync(string bucket, string keyId, Microsoft.Identity.Client.Extensions.FileCache.CacheValue value, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task
