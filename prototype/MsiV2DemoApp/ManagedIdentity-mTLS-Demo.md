@@ -24,12 +24,12 @@ uses the **binding certificate** to call an **mTLS-protected** Graph test endpoi
 This demo consumes **preview builds** from the **IDDP** Azure Artifacts feed.
 
 - **Core MSAL**  
-  *Package Details*: Azure Artifacts → Microsoft.Identity.Client → `4.77.0-msi-v2-pkg2`  
-  Link: https://identitydivision.visualstudio.com/Engineering/_artifacts/feed/IDDP/NuGet/Microsoft.Identity.Client/overview/4.77.0-msi-v2-pkg2
+  *Package Details*: Azure Artifacts → Microsoft.Identity.Client → `4.77.0-msi-v2-package1`  
+  Link: https://identitydivision.visualstudio.com/Engineering/_artifacts/feed/IDDP/NuGet/Microsoft.Identity.Client/overview/4.77.0-msi-v2-package1
 
 - **mTLS PoP helper**  
-  *Package Details*: Azure Artifacts → Microsoft.Identity.Client.MtlsPop → `4.77.0-msi-v2-pkg2-preview`  
-  Link: https://identitydivision.visualstudio.com/Engineering/_artifacts/feed/IDDP/NuGet/Microsoft.Identity.Client.MtlsPop/overview/4.77.0-msi-v2-pkg2-preview
+  *Package Details*: Azure Artifacts → Microsoft.Identity.Client.MtlsPop → `4.77.0-msi-v2-package1-preview`  
+  Link: https://identitydivision.visualstudio.com/Engineering/_artifacts/feed/IDDP/NuGet/Microsoft.Identity.Client.MtlsPop/overview/4.77.0-msi-v2-package1-preview 
 
 **NuGet source (IDDP feed)**  
 `https://pkgs.dev.azure.com/identitydivision/Engineering/_packaging/IDDP/nuget/v3/index.json`
