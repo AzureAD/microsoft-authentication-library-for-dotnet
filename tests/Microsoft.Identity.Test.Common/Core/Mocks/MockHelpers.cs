@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             )
         {
             return CreateSuccessResponseMessage(
-                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\"\"client_info\":\"" + CreateClientInfo(null, null, addXms_acb) + "\"}");
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"client_info\":\"" + CreateClientInfo(null, null, addXms_acb) + "\"}");
         }
 
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(
