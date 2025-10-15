@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +26,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool IsMtlsPopRequested { get; set; }
 
         internal Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> AttestationTokenProvider { get; set; }
+
+        internal X509Certificate2 MtlsCertificate { get; set; }
 
         public void LogParameters(ILoggerAdapter logger)
         {

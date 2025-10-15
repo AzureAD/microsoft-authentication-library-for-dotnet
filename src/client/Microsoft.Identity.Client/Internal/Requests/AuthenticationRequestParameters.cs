@@ -127,7 +127,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        public IAuthenticationOperation AuthenticationScheme => _commonParameters.AuthenticationOperation;
+        private IAuthenticationOperation _requestOverrideScheme;
+
+        /// <summary>
+        /// Effective authentication operation (scheme) for this request.
+        /// Defaults to the app's configured operation unless a request-scoped override is applied.
+        /// </summary>
+        public IAuthenticationOperation AuthenticationScheme
+        {
+            get => _requestOverrideScheme ?? _commonParameters.AuthenticationOperation;  // <-- correct fallback
+            internal set => _requestOverrideScheme = value;  // internal set satisfies the “make it settable?” review
+        }
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 

@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.IO;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -21,6 +22,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
+
+        // Holds the most recently minted mTLS binding certificate for this application instance.
+        internal X509Certificate2 RuntimeMtlsBindingCertificate { get; private set; }
 
         internal static void ResetSourceForTest()
         {
@@ -156,6 +160,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
+        }
+
+        internal void SetRuntimeMtlsBindingCertificate(X509Certificate2 cert)
+        {
+            var old = RuntimeMtlsBindingCertificate;
+            RuntimeMtlsBindingCertificate = cert;
+            //dispose prior stored cert on replacement
+            old?.Dispose();
         }
     }
 }
