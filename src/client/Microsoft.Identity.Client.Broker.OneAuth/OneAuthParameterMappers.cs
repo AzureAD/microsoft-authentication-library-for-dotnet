@@ -16,7 +16,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Authentication;
-using Microsoft.OneAuthInterop;
+using Microsoft.Authentication.Client;
 
 namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
 {
@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
         //    return ToOneAuthAuthParams(internalAuthParams);
         //}
 
-        public static Microsoft.OneAuthInterop.AuthParameters CreateDirectOneAuthParameters(
+        public static Microsoft.Authentication.Client.AuthenticationParameters CreateDirectOneAuthParameters(
             AuthenticationRequestParameters authRequestParams,
             ILoggerAdapter logger)
         {
@@ -263,7 +263,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
                 throw new ArgumentNullException(nameof(authRequestParams));
             }
 
-            var oneAuthParams = new Microsoft.OneAuthInterop.AuthParameters();
+            var oneAuthParams = new Microsoft.Authentication.Client.AuthenticationParameters();
 
             // 2. Authority - Extract canonical authority URL (critical for guest tenant scenarios)
             oneAuthParams.Authority = authRequestParams.Authority?.AuthorityInfo?.CanonicalAuthority?.ToString() ?? string.Empty;
@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             oneAuthParams.AdditionalParameters = BuildOneAuthAdditionalParameters(authRequestParams, logger);
 
             // 8. PopParameters - Set to null (would need specific PoP token configuration)
-            oneAuthParams.PopParameters = null;
+            //oneAuthParams. = null;
 
             // 9. NestedClientId - Empty for standard scenarios (used for child nested apps)
             oneAuthParams.NestedClientId = string.Empty;
@@ -299,6 +299,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             // 12. IsAdfs - Detect if authority is ADFS server with OIDC support
             oneAuthParams.IsAdfs = authRequestParams.Authority?.AuthorityInfo?.AuthorityType == AuthorityType.Adfs;
 
+            oneAuthParams.AuthenticationScheme = authRequestParams.AuthenticationScheme?.AccessTokenType switch
+            {
+                "basic" => Microsoft.Authentication.Client.AuthenticationScheme.Basic,
+                "negotiate" => Microsoft.Authentication.Client.AuthenticationScheme.Negotiate,
+                "ntlm" => Microsoft.Authentication.Client.AuthenticationScheme.Ntlm,
+                "liveid" => Microsoft.Authentication.Client.AuthenticationScheme.LiveId,
+                _ => Microsoft.Authentication.Client.AuthenticationScheme.Bearer, // Default to Bearer
+            };
             // 13. PreferredAuthMethod - Determine optimal authentication method
             //oneAuthParams.PreferredAuthMethod = DetermineOneAuthPreferredAuthMethod(authRequestParams, interactiveParams);
 

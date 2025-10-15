@@ -373,7 +373,6 @@ namespace NetDesktopWinForms
                 AuthenticationResult result = await RunAtiAsync(await pca.ConfigureAwait(false)).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
-
             }
             catch (Exception ex)
             {

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Broker.OneAuth;
 using System.Windows.Forms;
 
 namespace WAMClassLibrary

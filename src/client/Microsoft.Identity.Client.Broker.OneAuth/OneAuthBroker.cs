@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Authentication;
-using Microsoft.OneAuthInterop;
+using Microsoft.Authentication.Client;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.AuthScheme.PoP;
@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
         private readonly ILoggerAdapter _logger;
         private readonly IntPtr _parentHandle = IntPtr.Zero;
         private readonly BrokerOptions _brokerOptions;
-        private readonly OneAuthCs _oneAuth;
+        //private readonly Authenticator _oneAuth;
         private bool _initialized = false;
 
         public bool IsInitialized => _initialized;
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             {
                 if (_initialized)
                 {
-                    _oneAuth?.Shutdown();
+                    Authenticator.Shutdown();
                     _initialized = false;
                     _logger?.Info("[OneAuth] OneAuth shutdown completed");
                 }
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             ILoggerAdapter logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _oneAuth = new OneAuthCs();
+            //_oneAuth = new OneAuthCs();
 
             // Set parent window handle for OneAuth UI on Windows
             _parentHandle = GetParentWindow(uiParent);
@@ -115,92 +115,116 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
         /// </summary>
         private void InitializeOneAuth(ApplicationConfiguration appConfig)
         {
-            try
-            {
-                _logger?.Info("[OneAuth] Starting OneAuth initialization via Startup method");
+            _initialized = true;
+            return;
+            //try
+            //{
+            //    _logger?.Info("[OneAuth] Starting OneAuth initialization via Startup method");
 
-                // For now, create a minimal implementation that attempts to call Startup
-                // This will need to be completed once the exact OneAuth constructor requirements are known
-                _logger?.Warning("[OneAuth] OneAuth initialization is not yet fully implemented - Startup method requires specific configuration objects");
+            //    // For now, create a minimal implementation that attempts to call Startup
+            //    // This will need to be completed once the exact OneAuth constructor requirements are known
+            //    _logger?.Warning("[OneAuth] OneAuth initialization is not yet fully implemented - Startup method requires specific configuration objects");
 
-                // Mark as not initialized until proper configuration objects can be created
-                //_initialized = false;
+            //    // Mark as not initialized until proper configuration objects can be created
+            //    _initialized = false;
 
-                // TODO: Uncomment and complete once OneAuth package documentation is available
+            //    var oneAuthAppConfig = CreateConfiguredAppConfig(appConfig);
+            //    var aadConfig = CreateConfiguredAadConfig(appConfig);
+            //    var msaConfig = CreateConfiguredMsaConfig(appConfig);
+            //    //var telemetryConfig = ;
+            //    //var applConfig = new Microsoft.OneAuthInterop.AppConfig(
+            //    //    appId: "com.microsoft.OneAuthDotNetTest",
+            //    //    appName: "OneAuthTest",
+            //    //    appVersion: "0.0.0",
+            //    //    languageCode: "en"
+            //    //);
 
-                var oneAuthAppConfig = CreateConfiguredAppConfig(appConfig);
-                var aadConfig = CreateConfiguredAadConfig(appConfig);
-                var msaConfig = CreateConfiguredMsaConfig(appConfig);
-                //var telemetryConfig = ;
+            //    //var aadConfig = new Microsoft.OneAuthInterop.AadConfig
+            //    //(
+            //    //    clientId: "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+            //    //    redirectUri: "urn:ietf:wg:oauth:2.0:oob",
+            //    //    defaultSignInResource: "https://graph.microsoft.com",
+            //    //    capabilities: appConfig.ClientCapabilities?.ToList() ?? new List<string>(), // List<string> capabilities
+            //    //    allowSameRealm: true
+            //    //);
 
-                var startupError = _oneAuth.Startup(oneAuthAppConfig, aadConfig, msaConfig, null);
+            //    //var msaConfig = new Microsoft.OneAuthInterop.MsaConfig
+            //    //(
+            //    //    clientId: "00000000480728C5",
+            //    //    redirectUri: "https://login.live.com/oauth20_desktop.srf",
+            //    //    defaultSignInScope: "https://graph.microsoft.com/.default"
+            //    //);
 
-                if (startupError != null)
-                {
-                    _logger?.Error($"[OneAuth] Startup failed with error: {startupError}");
-                    _initialized = false;
-                }
-                else
-                {
-                    _initialized = true;
-                    _logger?.Info("[OneAuth] OneAuth successfully initialized via Startup method");
-                    
-                    // Set up logging
-                    _oneAuth.SetLogPiiEnabled(_logger.PiiLoggingEnabled);
-                    _oneAuth.SetLogCallback((level, message, identifiableInfo) =>
-                    {
-                        _logger?.Info($"[OneAuth] {message}");
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger?.Error($"[OneAuth] Failed to initialize OneAuth: {ex}");
-                _initialized = false;
-            }
+            //    var startupError = _oneAuth.Startup(oneAuthAppConfig, aadConfig, msaConfig, null);
+
+            //    if (startupError != null)
+            //    {
+            //        _logger?.Error($"[OneAuth] Startup failed with error: {startupError}");
+            //        _initialized = false;
+            //    }
+            //    else
+            //    {
+            //        _initialized = true;
+            //        _logger?.Info("[OneAuth] OneAuth successfully initialized via Startup method");
+
+            //        // Set up logging
+            //        _oneAuth.SetLogPiiEnabled(_logger.PiiLoggingEnabled);
+            //        _oneAuth.SetLogCallback((level, message, identifiableInfo) =>
+            //        {
+            //            _logger?.Info($"[OneAuth] {message}");
+            //        });
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger?.Error($"[OneAuth] Failed to initialize OneAuth: {ex}");
+            //    _initialized = false;
+            //}
         }
 
-        // TODO: Implement these methods once OneAuth constructor requirements are documented
-        private Microsoft.OneAuthInterop.AppConfig CreateConfiguredAppConfig(ApplicationConfiguration appConfig)
+        private Microsoft.Authentication.Client.AppConfiguration CreateConfiguredAppConfig(ApplicationConfiguration appConfig)
         {
-            return new Microsoft.OneAuthInterop.AppConfig(
-                appId: appConfig.ClientId,                    // string appId
-                appName: "MSAL.NET OneAuth Broker",          // string appName  
-                appVersion: "1.0.0",                         // string appVersion
-                languageCode: "en-US"                        // string languageCode
-                                                             // Optional: hrdAppId parameter for the second constructor
-            );
+            return new Microsoft.Authentication.Client.AppConfiguration
+            {
+                ApplicationId = appConfig.ClientId,                    // string ApplicationId
+                AppName = "MSAL.NET OneAuth Broker",                   // string AppName  
+                AppVersion = "1.0.0",                                  // string AppVersion
+                LanguageCode = "en-US"                                 // string LanguageCode
+                // Optional: HrdApplicationId can be set if needed
+            };
         }
 
-        private Microsoft.OneAuthInterop.AadConfig CreateConfiguredAadConfig(ApplicationConfiguration appConfig)
+        private Microsoft.Authentication.Client.AadConfiguration CreateConfiguredAadConfig(ApplicationConfiguration appConfig)
         {
-            var aadConfig = new Microsoft.OneAuthInterop.AadConfig(
-                clientId: appConfig.ClientId,                        // string clientId
-                redirectUri: appConfig.RedirectUri,                  // string redirectUri
-                defaultSignInResource: "https://graph.microsoft.com/.default", // string defaultSignInResource
-                capabilities: appConfig.ClientCapabilities?.ToList() ?? new List<string>(), // List<string> capabilities
-                allowSameRealm: true                                // bool allowSameRealm
-            );
+            var aadConfig = new Microsoft.Authentication.Client.AadConfiguration
+            {
+                ClientId = Guid.TryParse(appConfig.ClientId, out var guid) ? guid : Guid.Empty,
+                RedirectUri = appConfig.RedirectUri,
+                DefaultSignInResource = "https://graph.microsoft.com/.default",
+                Capabilities = appConfig.ClientCapabilities?.ToList() ?? new List<string>(),
+                AllowSameRealmAccount = true
+            };
 
             return aadConfig;
         }
 
-        private Microsoft.OneAuthInterop.MsaConfig CreateConfiguredMsaConfig(ApplicationConfiguration appConfig)
+        private Microsoft.Authentication.Client.MsaConfiguration CreateConfiguredMsaConfig(ApplicationConfiguration appConfig)
         {
             // MSA (Microsoft Account) default sign-in scope
             // For MSA scenarios, we typically use basic profile scopes or Microsoft Graph
             var defaultSignInScope = "https://graph.microsoft.com/User.Read";
 
-            var msaConfig = new Microsoft.OneAuthInterop.MsaConfig(
-                clientId: appConfig.ClientId,                        // string clientId
-                redirectUri: appConfig.RedirectUri,                  // string redirectUri
-                defaultSignInScope: defaultSignInScope               // string defaultSignInScope
-            );
+            var msaConfig = new Microsoft.Authentication.Client.MsaConfiguration
+            {
+                ClientId = appConfig.ClientId,                        // string clientId
+                RedirectUri = appConfig.RedirectUri,                  // string redirectUri
+                DefaultSignInScope = defaultSignInScope               // string defaultSignInScope
+            };
 
             return msaConfig;
         }
 
-        private Microsoft.OneAuthInterop.TelemetryConfig CreateConfiguredTelemetryConfig(ApplicationConfiguration appConfig)
+        private Microsoft.Authentication.Client.TelemetryConfiguration CreateConfiguredTelemetryConfig(ApplicationConfiguration appConfig)
         {
             // Will be implemented based on actual OneAuth TelemetryConfig constructor requirements
             throw new NotImplementedException("OneAuth TelemetryConfig creation not yet implemented");
@@ -212,13 +236,102 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             return true;
         }
 
+        public async Task SignInTest()
+        {
+            var appConfig = new Microsoft.Authentication.Client.AppConfiguration
+            {
+                ApplicationId = "com.microsoft.OneAuthDotNetTest",
+                AppName = "OneAuthTest",
+                AppVersion = "0.0.0",
+                LanguageCode = "en"
+            };
+
+            var aadConfig = new Microsoft.Authentication.Client.AadConfiguration
+            {
+                ClientId = Guid.Parse("d3590ed6-52b3-4102-aeff-aad2292ab01c"),
+                RedirectUri = "urn:ietf:wg:oauth:2.0:oob",
+                DefaultSignInResource = "https://graph.microsoft.com",
+                Capabilities = new List<string>(), // List<string> capabilities
+                AllowSameRealmAccount = true
+            };
+
+            var msaConfig = new Microsoft.Authentication.Client.MsaConfiguration
+            {
+                ClientId = "00000000480728C5",
+                RedirectUri = "https://login.live.com/oauth20_desktop.srf",
+                DefaultSignInScope = "https://graph.microsoft.com/.default"
+            };
+
+            await Authenticator.Startup(appConfig, aadConfig, msaConfig, null);
+            //if (startupError != null)
+            //{
+            //    _logger?.Error($"[OneAuth] SignInTest startup failed: {startupError}");
+            //    return;
+            //}
+
+            //var telemetryParameters = new Microsoft.Authentication.Client.TelemetryParameters(
+            //    "OneAuth",
+            //    "SignInTest",
+            //    "fsdfsgsagsagas");
+
+            var authResult = await Authenticator.SignInInteractively(
+                uxContext: Microsoft.Authentication.Client.UxContext.Default,
+                accountHint: "",
+                authenticationParameters: null,
+                signInBehaviorParameters: null,
+                telemetryParameters: new TelemetryParameters()
+            );
+
+            _logger?.Info($"[OneAuth] SignInTest completed with result: {authResult}");
+            Authenticator.Shutdown();
+
+        }
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            _logger?.Info("[OneAuth] AcquireTokenInteractiveAsync called - not yet implemented");
-            // TODO: Implement OneAuth silent token acquisition
-            return await Task.FromResult<MsalTokenResponse>(null).ConfigureAwait(false);
+            _logger?.Info("[OneAuth] AcquireTokenInteractiveAsync called");
+
+            // Use TaskCompletionSource to properly handle the STA thread requirement
+            var tcs = new TaskCompletionSource<MsalTokenResponse>();
+            
+            Thread thread = new Thread(new ThreadStart(() =>
+            {
+                try
+                {
+                    // Invoke SignInTest to test OneAuth functionality
+                    SignInTest().GetAwaiter().GetResult();
+                    
+                    // Run the async method synchronously on the STA thread
+                    // var result = SignInInteractivelyAsync(
+                    //     authenticationRequestParameters,
+                    //     acquireTokenInteractiveParameters).GetAwaiter().GetResult();
+                    // tcs.SetResult(result);
+                    
+                    // For now, just return a default response since SignInInteractivelyAsync is commented out
+                    var defaultResponse = new MsalTokenResponse
+                    {
+                        Error = MsalError.UnknownBrokerError,
+                        ErrorDescription = "SignInInteractivelyAsync is currently commented out - only SignInTest is executing",
+                        CorrelationId = authenticationRequestParameters.CorrelationId.ToString()
+                    };
+                    tcs.SetResult(defaultResponse);
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Error($"[OneAuth] Exception in STA thread: {ex}");
+                    tcs.SetException(ex);
+                }           
+            }))
+            {
+                IsBackground = false
+            };
+            
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join(); // Wait for the thread to complete to ensure proper cleanup
+            
+            return await tcs.Task.ConfigureAwait(false);
         }
 
         public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
@@ -296,23 +409,23 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
                 string accountHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
 
                 // Create TelemetryParameters for OneAuth
-                var telemetryParameters = new TelemetryParameters(
-                    "OneAuth", 
-                    "SignInInteractively", 
-                    authenticationRequestParameters.CorrelationId.ToString("D"));
+                //var telemetryParameters = new Microsoft.Authentication.Client.TelemetryParameters(
+                //    "OneAuth", 
+                //    "SignInInteractively", 
+                //    authenticationRequestParameters.CorrelationId.ToString("D"));
 
                 // Log what we're about to send to OneAuth (using internal representation for logging)
                 var oneAuthParams = OneAuthParameterMappers.CreateDirectOneAuthParameters(
                     authenticationRequestParameters,
                     _logger);
 
-                // Call OneAuth SignInInteractively with the correct signature
-                var authResult = await _oneAuth.SignInInteractively(
+                // Call OneAuth directly since we're already running on STA thread
+                AuthResult authResult = await Authenticator.SignInInteractively(
                     uxContext,
                     accountHint,
-                    oneAuthParams,  // ← Uses actual OneAuth AuthParameters!
+                    oneAuthParams,
                     null,
-                    telemetryParameters).ConfigureAwait(false);
+                    telemetryParameters: new TelemetryParameters()).ConfigureAwait(false);
 
                 // Convert OneAuth result to MSAL token response
                 return ConvertOneAuthResultToMsalTokenResponse(authResult, authenticationRequestParameters);

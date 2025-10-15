@@ -1,0 +1,4 @@
+Microsoft.Identity.Client.Broker.OneAuth.BrokerExtension
+static Microsoft.Identity.Client.Broker.OneAuth.BrokerExtension.WithBroker(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder, Microsoft.Identity.Client.BrokerOptions brokerOptions) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.Broker.OneAuth.BrokerExtension.WithBrokerPreview(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder, bool enableBroker = true) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+static Microsoft.Identity.Client.Broker.OneAuth.BrokerExtension.WithSsoPolicy(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
