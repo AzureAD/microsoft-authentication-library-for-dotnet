@@ -358,16 +358,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// <returns>JWT string suitable for the IMDSv2 attested POP flow.</returns>
         /// <exception cref="MsalClientException">Wraps client/network failures.</exception>
 
+        /// <summary>
+        /// Obtains an attestation JWT for the KeyGuard/CSR payload using the configured
+        /// attestation provider and normalized endpoint. Now uses AttestationTokenMemoryCache.
+        /// </summary>
         private async Task<string> GetAttestationJwtAsync(
-            string clientId, 
-            Uri attestationEndpoint, 
-            ManagedIdentityKeyInfo keyInfo, 
+            string clientId,
+            Uri attestationEndpoint,
+            ManagedIdentityKeyInfo keyInfo,
             CancellationToken cancellationToken)
         {
-            // Provider is a local dependency; missing provider is a client error
             var provider = _requestContext.AttestationTokenProvider;
 
-            // KeyGuard requires RSACng on Windows
             if (keyInfo.Type == ManagedIdentityKeyType.KeyGuard &&
                 keyInfo.Key is not System.Security.Cryptography.RSACng rsaCng)
             {
@@ -376,7 +378,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     "[ImdsV2] KeyGuard attestation currently supports only RSA CNG keys on Windows.");
             }
 
-            // Attestation token input
             var input = new AttestationTokenInput
             {
                 ClientId = clientId,
@@ -384,19 +385,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 KeyHandle = (keyInfo.Key as System.Security.Cryptography.RSACng)?.Key.Handle
             };
 
-            // response from provider 
-            var response = await provider(input, cancellationToken).ConfigureAwait(false);
+            // Use in-memory cache (phase 1). Caches per key handle (or 0 if unavailable).
+            var cached = await AttestationTokenMemoryCache
+                .GetOrCreateAsync(input, provider, cancellationToken)
+                .ConfigureAwait(false);
 
-            // Validate response
-            if (response == null || string.IsNullOrWhiteSpace(response.AttestationToken))
+            if (cached == null || string.IsNullOrWhiteSpace(cached.AttestationToken))
             {
                 throw new MsalClientException(
                     "attestation_failed",
                     "[ImdsV2] Attestation provider failed to return an attestation token.");
             }
 
-            // Return the JWT
-            return response.AttestationToken;
+            return cached.AttestationToken;
         }
 
         //To-do : Remove this method once IMDS team start returning full URI
