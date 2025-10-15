@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.AuthenticationResult.AcbAuthN.get -> System.Collections.Generic.List<string>
+Microsoft.Identity.Client.AuthenticationResult.AcbAuthN.set -> void

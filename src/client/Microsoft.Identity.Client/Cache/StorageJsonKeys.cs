@@ -44,5 +44,6 @@ namespace Microsoft.Identity.Client.Cache
 
         public const string CacheExtensions = "ext";
         public const string PersistedCacheParameters = "persisted_cache_parameters";
+        public const string AcbAuthN = "xms_acb";
     }
 }

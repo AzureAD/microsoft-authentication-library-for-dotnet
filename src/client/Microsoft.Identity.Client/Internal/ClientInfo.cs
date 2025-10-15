@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
@@ -23,6 +24,9 @@ namespace Microsoft.Identity.Client.Internal
 
         [JsonProperty(ClientInfoClaim.UniqueTenantIdentifier)]
         public string UniqueTenantIdentifier { get; set; }
+
+        [JsonProperty(ClientInfoClaim.AcbAuthN)]
+        public List<string> AcbAuthN { get; set; }
 
         public static ClientInfo CreateFromJson(string clientInfo)
         {

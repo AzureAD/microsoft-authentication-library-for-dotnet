@@ -7,5 +7,6 @@ namespace Microsoft.Identity.Client.Internal
     {
         public const string UniqueIdentifier = "uid";
         public const string UniqueTenantIdentifier = "utid";
+        public const string AcbAuthN = "xms_acb";
     }
 }

@@ -37,7 +37,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = null,
             string oboCacheKey = null,
             IEnumerable<string> persistedCacheParameters = null,
-            SortedList<string, string> cacheKeyComponents = null)
+            SortedList<string, string> cacheKeyComponents = null,
+            List<string> acbAuthN = null)
             : this(
                 scopes: ScopeHelper.OrderScopesAlphabetically(response.Scope), // order scopes to avoid cache duplication. This is not in the hot path.
                 cachedAt: DateTimeOffset.UtcNow,
@@ -54,6 +55,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+            AcbAuthN = acbAuthN;
 
             InitializeAdditionalCacheKeyComponents(cacheKeyComponents);
 #if !MOBILE
@@ -288,6 +290,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         internal IDictionary<string, string> PersistedCacheParameters { get; private set; }
 
+        internal List<string> AcbAuthN { get; private set; }
+
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
@@ -322,6 +326,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string scopes = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target);
             var additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.CacheExtensions);
             var persistedCacheParameters = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.PersistedCacheParameters);
+            string acbAuthN = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.AcbAuthN);
 
             var item = new MsalAccessTokenCacheItem(
                 scopes: scopes,
@@ -341,6 +346,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             item.PersistedCacheParameters = persistedCacheParameters;
             item.OboCacheKey = oboCacheKey;
+            item.AcbAuthN = string.IsNullOrWhiteSpace(acbAuthN) ? null : acbAuthN.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
             item.PopulateFieldsFromJObject(j);
 
             item.InitCacheKey();
@@ -365,6 +371,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 json,
                 StorageJsonKeys.RefreshOn,
                 RefreshOn.HasValue ? DateTimeHelpers.DateTimeToUnixTimestamp(RefreshOn.Value) : null);
+            SetItemIfValueNotNull(json, StorageJsonKeys.AcbAuthN, AcbAuthN != null && AcbAuthN.Any() ? string.Join(" ", AcbAuthN) : null);
 
             // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compatibility

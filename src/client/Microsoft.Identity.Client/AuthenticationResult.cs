@@ -135,7 +135,8 @@ namespace Microsoft.Identity.Client
             ApiEvent apiEvent,
             Account account,
             string spaAuthCode,
-            IReadOnlyDictionary<string, string> additionalResponseParameters)
+            IReadOnlyDictionary<string, string> additionalResponseParameters,
+            List<string> acbAuthN = null)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
 
@@ -198,6 +199,7 @@ namespace Microsoft.Identity.Client
 
             AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
             AuthenticationResultMetadata.TelemetryTokenType = authenticationScheme.TelemetryTokenType;
+            AcbAuthN = acbAuthN;
         }
 
         //Default constructor for testing
@@ -317,6 +319,11 @@ namespace Microsoft.Identity.Client
         /// Contains metadata for the Authentication result.
         /// </summary>
         public AuthenticationResultMetadata AuthenticationResultMetadata { get; set; }
+
+        /// <summary>
+        /// Represents the xms_acb claim in AuthN Tokens acquired from ESTS
+        /// </summary>
+        public List<string> AcbAuthN { get; set; }
 
         /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so
