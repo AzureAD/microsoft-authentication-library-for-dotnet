@@ -24,7 +24,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
 
         // Holds the most recently minted mTLS binding certificate for this application instance.
-        internal X509Certificate2 RuntimeMtlsBindingCertificate { get; private set; }
+        private X509Certificate2 _runtimeMtlsBindingCertificate;
+        internal X509Certificate2 RuntimeMtlsBindingCertificate => Volatile.Read(ref _runtimeMtlsBindingCertificate);
 
         internal static void ResetSourceForTest()
         {
@@ -162,12 +163,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return false;
         }
 
+        /// <summary>
+        /// Sets the in-memory binding certificate used to prime the mtls_pop scheme on subsequent requests.
+        /// </summary>
+        /// <remarks>
+        /// Disposing an <see cref="X509Certificate2"/> releases resources for this in-memory instance;
+        /// it does <b>not</b> remove a certificate from any OS certificate store (store removal requires <see cref="X509Store.Remove(X509Certificate2)"/>).
+        /// </remarks>
         internal void SetRuntimeMtlsBindingCertificate(X509Certificate2 cert)
         {
-            var old = RuntimeMtlsBindingCertificate;
-            RuntimeMtlsBindingCertificate = cert;
-            //dispose prior stored cert on replacement
-            old?.Dispose();
+            // Atomically swap the reference and dispose the previous one (if different).
+            var old = System.Threading.Interlocked.Exchange(ref _runtimeMtlsBindingCertificate, cert);
+
+            // If the same instance is passed again, do not dispose it (it is now the current value).
+            if (!object.ReferenceEquals(old, cert))
+            {
+                old?.Dispose();
+            }
         }
     }
 }

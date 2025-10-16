@@ -43,14 +43,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
             
             // Prime the scheme before any cache lookup if we already have a binding cert from a prior mint
-            if (AuthenticationRequestParameters.IsMtlsPopRequested &&
-                !(AuthenticationRequestParameters.AuthenticationScheme is MtlsPopAuthenticationOperation))
+            if (AuthenticationRequestParameters.IsMtlsPopRequested)
             {
                 var priorCert = _managedIdentityClient.RuntimeMtlsBindingCertificate;
                 if (priorCert != null)
                 {
                     AuthenticationRequestParameters.AuthenticationScheme = new MtlsPopAuthenticationOperation(priorCert);
-                    AuthenticationRequestParameters.RequestContext.Logger.Info("[ManagedIdentity] Using prior mTLS binding certificate for cache lookup.");
+
+                    logger.Info("[ManagedIdentity] Using prior mTLS binding certificate for cache lookup.");
+                    logger.InfoPii(
+                        () => $"[ManagedIdentity][PII] Prior mTLS cert thumbprint: {priorCert.Thumbprint}",
+                        () => "[ManagedIdentity][PII] Prior mTLS cert thumbprint: ***");
                 }
             }
 
@@ -223,20 +226,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (AuthenticationRequestParameters.IsMtlsPopRequested
-                && _managedIdentityParameters.MtlsCertificate != null
-                && !(AuthenticationRequestParameters.AuthenticationScheme is MtlsPopAuthenticationOperation))
+            if (AuthenticationRequestParameters.IsMtlsPopRequested && _managedIdentityParameters.MtlsCertificate != null)
             {
-                // Remember the cert for future requests (same app instance) BEFORE we clear it.
+                // Remember the cert...
                 _managedIdentityClient.SetRuntimeMtlsBindingCertificate(_managedIdentityParameters.MtlsCertificate);
 
-                // Apply mTLS scheme BEFORE caching so the token is stored under the mtls_pop key.
+                // Apply mTLS scheme BEFORE caching...
                 AuthenticationRequestParameters.AuthenticationScheme =
                     new MtlsPopAuthenticationOperation(_managedIdentityParameters.MtlsCertificate);
 
-                // Do not hold cert past this request boundary
                 _managedIdentityParameters.MtlsCertificate = null;
-
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
                     "[ManagedIdentity] Applied mtls_pop scheme prior to caching.");
             }

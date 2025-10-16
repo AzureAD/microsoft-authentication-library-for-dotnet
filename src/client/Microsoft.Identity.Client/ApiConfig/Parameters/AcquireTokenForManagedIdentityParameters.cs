@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                      Resource: {Resource}
                      Claims: {!string.IsNullOrEmpty(Claims)}
                      RevokedTokenHash: {!string.IsNullOrEmpty(RevokedTokenHash)}
+                     IsMtlsPopRequested: {IsMtlsPopRequested}
                      """);
             }
         }
