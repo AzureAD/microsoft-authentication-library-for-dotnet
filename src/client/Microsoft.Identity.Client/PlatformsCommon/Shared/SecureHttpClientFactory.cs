@@ -12,13 +12,14 @@ using Microsoft.Identity.Client.ManagedIdentity;
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     /// <summary>
-    /// A simple implementation of the HttpClient factory that uses a managed HttpClientHandler
+    /// An implementation of the HttpClient factory that uses a managed HttpClientHandler.
+    /// This factory is intended to be used by MTLS scenarios or where server certificate validation is required.
     /// </summary>
     /// <remarks>
     /// .NET should use the IHttpClientFactory, but MSAL cannot take a dependency on it.
     /// .NET should use SocketHandler, but UseDefaultCredentials doesn't work with it 
     /// </remarks>
-    internal class SimpleHttpClientFactory : IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
+    public class SecureHttpClientFactory : IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
@@ -61,11 +62,20 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #endif
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public HttpClient GetHttpClient()
         {
             return s_httpClientPool.GetOrAdd("non_mtls", CreateHttpClient());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x509Certificate2"></param>
+        /// <returns></returns>
         public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
         {
             if (x509Certificate2 == null)
@@ -88,6 +98,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="validateServerCert"></param>
+        /// <returns></returns>
         // This method is used for Service Fabric scenarios where a custom server certificate validation callback is required.
         // It allows the caller to provide a custom HttpClientHandler with the callback.
         // The server cert rotates so we need a new HttpClient for each call.

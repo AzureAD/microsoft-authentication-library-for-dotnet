@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual IMsalHttpClientFactory CreateDefaultHttpClientFactory()
         {
-            return new SimpleHttpClientFactory();
+            return new SecureHttpClientFactory();
         }
 
         /// <summary>

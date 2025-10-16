@@ -1,0 +1,7 @@
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.PlatformsCommon.Shared.SecureHttpClientFactory
+Microsoft.Identity.Client.PlatformsCommon.Shared.SecureHttpClientFactory.GetHttpClient() -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.PlatformsCommon.Shared.SecureHttpClientFactory.GetHttpClient(System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> validateServerCert) -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.PlatformsCommon.Shared.SecureHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.PlatformsCommon.Shared.SecureHttpClientFactory.SecureHttpClientFactory() -> void
