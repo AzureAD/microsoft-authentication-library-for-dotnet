@@ -26,7 +26,9 @@ namespace Microsoft.Identity.Client.Internal
         public string UniqueTenantIdentifier { get; set; }
 
         [JsonProperty(ClientInfoClaim.AcbAuthN)]
-        public List<string> AcbAuthN { get; set; }
+        private IEnumerable<string> AcbAuthNRaw { get; set; }
+
+        public string AcbAuthN => string.Join(" ", AcbAuthNRaw);
 
         public static ClientInfo CreateFromJson(string clientInfo)
         {

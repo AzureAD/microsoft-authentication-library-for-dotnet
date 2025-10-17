@@ -82,7 +82,9 @@ namespace Microsoft.Identity.Client
                         requestParams.AuthenticationScheme.KeyId,
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                         requestParams.PersistedCacheParameters,
-                        requestParams.CacheKeyComponents);
+                        requestParams.CacheKeyComponents,
+                        response.AcbAuthN);
+                //TODO need client info here
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))

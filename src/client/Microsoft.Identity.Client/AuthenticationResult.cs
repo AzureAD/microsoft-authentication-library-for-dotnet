@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
+using System.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -136,7 +137,7 @@ namespace Microsoft.Identity.Client
             Account account,
             string spaAuthCode,
             IReadOnlyDictionary<string, string> additionalResponseParameters,
-            List<string> acbAuthN = null)
+            string acbAuthN = null)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
 
@@ -168,9 +169,37 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
-            AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
-                                                                    (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
-                                                                    additionalResponseParameters;
+
+            if (!string.IsNullOrEmpty(acbAuthN))
+            {
+                if (msalAccessTokenCacheItem.PersistedCacheParameters?.Count > 0)
+                {
+                    msalAccessTokenCacheItem.PersistedCacheParameters.Add("xms_acb", acbAuthN);
+                    AdditionalResponseParameters = (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters;
+                }
+                else
+                {
+                    if (additionalResponseParameters == null)
+                    {
+                        additionalResponseParameters = new Dictionary<string, string> { { "xms_acb", acbAuthN } };
+                    }
+                    else
+                    {
+                        Dictionary<string, string> tempParams = additionalResponseParameters.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                        tempParams.Add("xms_acb", acbAuthN);
+                        additionalResponseParameters = tempParams;
+                    }
+
+                    AdditionalResponseParameters = additionalResponseParameters;
+                }
+            }
+            else
+            {
+                AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
+                                                                        (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
+                                                                        additionalResponseParameters;
+            }
+
             if (msalAccessTokenCacheItem != null)
             {
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
@@ -199,7 +228,6 @@ namespace Microsoft.Identity.Client
 
             AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
             AuthenticationResultMetadata.TelemetryTokenType = authenticationScheme.TelemetryTokenType;
-            AcbAuthN = acbAuthN;
         }
 
         //Default constructor for testing
@@ -319,11 +347,6 @@ namespace Microsoft.Identity.Client
         /// Contains metadata for the Authentication result.
         /// </summary>
         public AuthenticationResultMetadata AuthenticationResultMetadata { get; set; }
-
-        /// <summary>
-        /// Represents the xms_acb claim in AuthN Tokens acquired from ESTS
-        /// </summary>
-        public List<string> AcbAuthN { get; set; }
 
         /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so

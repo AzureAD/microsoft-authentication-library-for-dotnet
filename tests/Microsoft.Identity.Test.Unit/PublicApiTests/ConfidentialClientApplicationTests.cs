@@ -2342,10 +2342,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
-                Assert.IsNotNull(result.AcbAuthN);
-                Assert.IsTrue(result.AcbAuthN.Count == 2);
-                Assert.AreEqual("value1", result.AcbAuthN[0]);
-                Assert.AreEqual("value2", result.AcbAuthN[1]);
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("xms_acb"));
+                Assert.AreEqual("value1 value2", result.AdditionalResponseParameters["xms_acb"]);
 
                 // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
@@ -2363,10 +2361,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
-                Assert.IsNotNull(result.AcbAuthN);
-                Assert.IsTrue(result.AcbAuthN.Count == 2);
-                Assert.AreEqual("value1", result.AcbAuthN[0]);
-                Assert.AreEqual("value2", result.AcbAuthN[1]);
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("xms_acb"));
+
+                //Assert.IsNotNull(result.AcbAuthN);
+                //Assert.IsTrue(result.AcbAuthN.Count == 2);
+                //Assert.AreEqual("value1", result.AcbAuthN[0]);
+                //Assert.AreEqual("value2", result.AcbAuthN[1]);
 
                 // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);

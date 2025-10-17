@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string oboCacheKey = null,
             IEnumerable<string> persistedCacheParameters = null,
             SortedList<string, string> cacheKeyComponents = null,
-            List<string> acbAuthN = null)
+            string acbAuthN = null)
             : this(
                 scopes: ScopeHelper.OrderScopesAlphabetically(response.Scope), // order scopes to avoid cache duplication. This is not in the hot path.
                 cachedAt: DateTimeOffset.UtcNow,
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         internal IDictionary<string, string> PersistedCacheParameters { get; private set; }
 
-        internal List<string> AcbAuthN { get; private set; }
+        internal string AcbAuthN { get; private set; }
 
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             item.PersistedCacheParameters = persistedCacheParameters;
             item.OboCacheKey = oboCacheKey;
-            item.AcbAuthN = string.IsNullOrWhiteSpace(acbAuthN) ? null : acbAuthN.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            item.AcbAuthN = acbAuthN;
             item.PopulateFieldsFromJObject(j);
 
             item.InitCacheKey();
@@ -371,7 +371,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 json,
                 StorageJsonKeys.RefreshOn,
                 RefreshOn.HasValue ? DateTimeHelpers.DateTimeToUnixTimestamp(RefreshOn.Value) : null);
-            SetItemIfValueNotNull(json, StorageJsonKeys.AcbAuthN, AcbAuthN != null && AcbAuthN.Any() ? string.Join(" ", AcbAuthN) : null);
+            SetItemIfValueNotNull(json, StorageJsonKeys.AcbAuthN, AcbAuthN);
 
             // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compatibility

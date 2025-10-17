@@ -327,16 +327,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 //client_info is not returned from managed identity flows because there is no user present.
                 clientInfoFromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
+                ValidateAccountIdentifiers(clientInfoFromServer);
             }
 
-            ValidateAccountIdentifiers(clientInfoFromServer);
-
+            msalTokenResponse.AcbAuthN = clientInfoFromServer.AcbAuthN;
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
             var atItem = tuple.Item1;
             var idtItem = tuple.Item2;
             Account account = tuple.Item3;
+
+            //TODO Get client info from response and use it to 
 
             return new AuthenticationResult(
                 atItem,
