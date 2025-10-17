@@ -36,12 +36,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //http proxy base URL 
         private static readonly string s_baseURL = "https://service.msidlab.com/";
 
-        //Shared User Assigned Client ID
+        //Shared User Assigned Client ID - Consolidated UAMI for both MSI endpoints and Key Vault access
         private const string UserAssignedClientID = "45344e7d-c562-4be6-868f-18dac789c021";
         
+        //Lab Access Client ID for certificate-based authentication to lab resources
         private const string LabAccessClientID = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
-
-        private const string LabVaultAccessUserAssignedClientID = "4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6";
 
         private const string UserAssignedObjectID = "a38637b6-b365-4652-af1f-cf5d8cf829ad";
 
@@ -191,8 +190,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={MsiAzureResource.WebApp}&uri=";
 
-                //Create CCA with Proxy
-                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, LabVaultAccessUserAssignedClientID, UserAssignedIdentityId.ClientId);
+                //Create CCA with Proxy - using the consolidated UAMI for both MSI and Key Vault access
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, UserAssignedClientID, UserAssignedIdentityId.ClientId);
 
                 AuthenticationResult result;
                 //Act
