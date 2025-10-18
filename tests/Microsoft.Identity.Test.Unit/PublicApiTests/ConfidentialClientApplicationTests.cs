@@ -436,7 +436,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExtraQueryParameters("parameter=x")
+                                                              .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                               .BuildConcrete();
                 var appCacheAccess = cca.AppTokenCache.RecordAccess();
                 var userCacheAccess = cca.UserTokenCache.RecordAccess();
@@ -464,7 +464,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithAuthority(new Uri(TestConstants.OnPremiseAuthority), false)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExtraQueryParameters("parameter=x")
+                                                              .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                               .BuildConcrete();
                 var appCacheAccess = cca.AppTokenCache.RecordAccess();
                 var userCacheAccess = cca.UserTokenCache.RecordAccess();
@@ -1271,7 +1271,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     var uri = await app
                         .GetAuthorizationRequestUrl(TestConstants.s_scope)
                         .WithLoginHint(TestConstants.DisplayableId)
-                        .WithExtraQueryParameters("login_hint=some@value.com")
+                        .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)> { { "login_hint", ("some@value.com", false) } })
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
 

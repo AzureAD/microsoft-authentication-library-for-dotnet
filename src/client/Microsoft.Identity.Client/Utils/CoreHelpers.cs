@@ -140,6 +140,24 @@ namespace Microsoft.Identity.Client.Utils
             return ParseKeyValueList(input, delimiter, urlDecode, true, requestContext);
         }
 
+        // Helper method intended to help deprecate some WithExtraQueryParameters APIs.
+        // Convert from Dictionary<string, string> to Dictionary<string, (string value, bool includeInCacheKey)>,
+        // with all includeInCacheKey set to false by default to maintain existing behavior of those older APIs.
+        internal static IDictionary<string, (string value, bool includeInCacheKey)> ConvertToTupleParameters(IDictionary<string, string> parameters)
+        {
+            if (parameters == null)
+            {
+                return null;
+            }
+
+            var result = new Dictionary<string, (string value, bool includeInCacheKey)>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kvp in parameters)
+            {
+                result[kvp.Key] = (kvp.Value, false); // Include all parameters in cache key by default
+            }
+            return result;
+        }
+
         internal static IReadOnlyList<string> SplitWithQuotes(string input, char delimiter)
         {
             if (string.IsNullOrWhiteSpace(input))

@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, (string value, bool includeInCacheKey)> extraQueryParameters) -> T
+Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, (string value, bool includeInCacheKey)> extraQueryParameters) -> T

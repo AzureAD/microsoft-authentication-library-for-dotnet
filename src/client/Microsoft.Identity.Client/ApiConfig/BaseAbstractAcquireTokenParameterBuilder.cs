@@ -89,10 +89,46 @@ namespace Microsoft.Identity.Client
         /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete("This method is deprecated. Please use the WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
         public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
         {
-            CommonParameters.ExtraQueryParameters = extraQueryParameters ??
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            return WithExtraQueryParameters(CoreHelpers.ConvertToTupleParameters(extraQueryParameters));
+        }
+
+        /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request with control over which parameters are included in the cache key
+        /// </summary>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
+        /// For each parameter, you can specify whether it should be included in the cache key.
+        /// The parameter can be null.</param>
+        /// <returns>The builder to chain .With methods.</returns>
+        public T WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)> extraQueryParameters)
+        {
+            if (extraQueryParameters == null)
+            {
+                CommonParameters.ExtraQueryParameters = null;
+                return this as T;
+            }
+
+            // Add each parameter to ExtraQueryParameters and, if requested, to CacheKeyComponents
+            foreach (var kvp in extraQueryParameters)
+            {
+                CommonParameters.ExtraQueryParameters = CommonParameters.ExtraQueryParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                CommonParameters.ExtraQueryParameters[kvp.Key] = kvp.Value.value;
+
+                if (kvp.Value.includeInCacheKey)
+                {
+                    CommonParameters.CacheKeyComponents = CommonParameters.CacheKeyComponents ?? new SortedList<string, Func<CancellationToken, Task<string>>>();
+
+                    // Capture the value in a local to avoid closure issues
+                    string valueToCache = kvp.Value.value;
+
+                    // Add to cache key components - uses a func that returns the value as a task
+                    CommonParameters.CacheKeyComponents[kvp.Key] = (CancellationToken _) => Task.FromResult(valueToCache);
+                }
+            }
+
             return this as T;
         }
 
