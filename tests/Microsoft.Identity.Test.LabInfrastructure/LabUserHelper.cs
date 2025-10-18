@@ -5,6 +5,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -45,6 +47,119 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
+        public static Task<object> GetKVLabData(string secret)
+        {
+            try
+            {
+                var keyVaultSecret = KeyVaultSecretsProviderMsal.GetSecretByName(secret);
+                string labData = keyVaultSecret.Value;
+                
+                if (string.IsNullOrEmpty(labData))
+                {
+                    throw new LabUserNotFoundException(new UserQuery(), $"Found no content for secret '{secret}' in Key Vault.");
+                }
+
+                // Check if the value is JSON by trying to parse it
+                if (IsValidJson(labData))
+                {
+                    var response = JsonConvert.DeserializeObject<LabResponse>(labData) ?? throw new LabUserNotFoundException(new UserQuery(), $"Failed to deserialize Key Vault secret '{secret}' to LabResponse.");
+
+                    Debug.WriteLine($"Key Vault lab data retrieved from secret '{secret}' (JSON): " + 
+                        (response.User?.Upn ?? response.App?.AppId ?? response.Lab?.TenantId ?? "Unknown"));
+                    return Task.FromResult<object>(response);
+                }
+                else
+                {
+                    // Return raw string value if not JSON
+                    Debug.WriteLine($"Key Vault secret '{secret}' retrieved (raw): {labData}");
+                    return Task.FromResult<object>(labData);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException($"Failed to retrieve or parse Key Vault secret '{secret}'. See inner exception.", e);
+            }
+
+            // Helper method to validate if a string is valid JSON
+            static bool IsValidJson(string value)
+            {
+                try
+                {
+                    JsonConvert.DeserializeObject(value);
+                    return true;
+                }
+                catch (JsonException)
+                {
+                    return false;
+                }
+            }
+        }
+
+        public static LabResponse MergeKVLabData(params string[] secrets)
+        {
+            if (secrets == null || secrets.Length == 0)
+            {
+                throw new ArgumentException("At least one secret name must be provided.", nameof(secrets));
+            }
+
+            try
+            {
+                LabResponse mergedResponse = null;
+                
+                foreach (string secret in secrets)
+                {
+                    var data = GetKVLabData(secret).Result;
+                    
+                    if (data is LabResponse labResponse)
+                    {
+                        if (mergedResponse == null)
+                        {
+                            // First LabResponse becomes the base
+                            mergedResponse = labResponse;
+                        }
+                        else
+                        {
+                            // Merge subsequent LabResponses
+                            mergedResponse = MergeLabResponses(mergedResponse, labResponse);
+                        }
+                    }
+                    else if (data is string rawValue)
+                    {
+                        // Handle raw string values if needed
+                        Debug.WriteLine($"Skipping raw string value from secret '{secret}': {rawValue}");
+                    }
+                }
+
+                if (mergedResponse == null)
+                {
+                    throw new LabUserNotFoundException(new UserQuery(), $"Failed to create merged LabResponse from secrets: {string.Join(", ", secrets)}");
+                }
+
+                Debug.WriteLine($"Merged lab data from secrets [{string.Join(", ", secrets)}]: " + 
+                    (mergedResponse.User?.Upn ?? mergedResponse.App?.AppId ?? mergedResponse.Lab?.TenantId ?? "Unknown"));
+                
+                return mergedResponse;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException($"Failed to merge Key Vault secrets: {string.Join(", ", secrets)}. See inner exception.", e);
+            }
+        }
+
+        private static LabResponse MergeLabResponses(LabResponse primary, LabResponse secondary)
+        {
+            var primaryJson = JObject.FromObject(primary);
+            var secondaryJson = JObject.FromObject(secondary);
+            
+            primaryJson.Merge(secondaryJson, new JsonMergeSettings
+            {
+                MergeArrayHandling = MergeArrayHandling.Union,
+                MergeNullValueHandling = MergeNullValueHandling.Ignore
+            });
+            
+            return primaryJson.ToObject<LabResponse>();
+        }
+
         [Obsolete("Use GetSpecificUserAsync instead", true)]
         public static Task<LabResponse> GetLabUserDataForSpecificUserAsync(string upn)
         {
@@ -56,32 +171,17 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             string result = await s_labService.GetLabResponseAsync(uri).ConfigureAwait(false);
             return result;
         }
-
-        /// <summary>
-        /// Returns the AAD cloud user idlab1@msidlab4.onmicrosoft.com
-        /// </summary>
-        /// <returns></returns>
         public static Task<LabResponse> GetDefaultUserAsync()
         {
-            return GetLabUserDataAsync(UserQuery.PublicAadUserQuery);
+            return Task.FromResult(MergeKVLabData("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
         }
-
-        /// <summary>
-        /// Returns the AAD cloud user idlab@msidlab4.onmicrosoft.com
-        /// </summary>
-        /// <returns></returns>
         public static Task<LabResponse> GetDefaultUser2Async()
         {
-            return GetLabUserDataAsync(UserQuery.PublicAadUser2Query);
+            return Task.FromResult(MergeKVLabData("MSAL-User-Default2-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
         }
-
-        /// <summary>
-        /// Returns the AAD cloud user idlab@msidlab4.onmicrosoft.com
-        /// </summary>
-        /// <returns></returns>
         public static Task<LabResponse> GetDefaultUser3Async()
         {
-            return GetLabUserDataAsync(UserQuery.PublicAadUser3Query);
+            return Task.FromResult(MergeKVLabData("MSAL-User-XCG-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
         }
 
         public static Task<LabResponse> GetMsaUserAsync()
@@ -175,11 +275,21 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             try
             {
-                return s_labService.GetUserSecretAsync(userLabName).Result;
+                // Try to fetch password from MSIDLab Key Vault first
+                var keyVaultSecret = KeyVaultSecretsProviderMsid.GetSecretByName(userLabName);
+                string password = keyVaultSecret.Value;
+                
+                if (!string.IsNullOrEmpty(password))
+                {
+                    Debug.WriteLine($"Password retrieved from Key Vault for: {userLabName}");
+                    return password;
+                }
+                
+                throw new InvalidOperationException($"Password secret '{userLabName}' found but was empty in Key Vault.");
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException("Test setup: cannot get the user password. See inner exception.", e);
+                throw new InvalidOperationException($"Test setup: cannot get the user password from Key Vault secret '{userLabName}'. See inner exception.", e);
             }
         }
     }
