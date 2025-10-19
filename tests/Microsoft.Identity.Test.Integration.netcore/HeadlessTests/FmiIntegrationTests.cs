@@ -248,6 +248,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             //Create application
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
@@ -256,6 +257,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             //Acquire Token
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
