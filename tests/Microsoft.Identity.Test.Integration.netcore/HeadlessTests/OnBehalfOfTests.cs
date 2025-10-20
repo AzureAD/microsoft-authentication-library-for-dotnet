@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string PublicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
+        const string PublicClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f";
         const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();

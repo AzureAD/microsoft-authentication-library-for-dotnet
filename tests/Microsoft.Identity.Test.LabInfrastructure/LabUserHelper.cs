@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<object> GetKVLabData(string secret)
         {
+            // TODO: Implement caching similar to GetLabUserDataAsync to avoid repeated Key Vault calls
             try
             {
                 var keyVaultSecret = KeyVaultSecretsProviderMsal.GetSecretByName(secret);
@@ -263,6 +264,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static string FetchUserPassword(string userLabName)
         {
+            // TODO: Implement caching similar to GetLabUserDataAsync to avoid repeated Key Vault calls
             if (string.IsNullOrWhiteSpace(userLabName))
             {
                 throw new InvalidOperationException("Error: lab name is not set on user. Password retrieval failed.");
