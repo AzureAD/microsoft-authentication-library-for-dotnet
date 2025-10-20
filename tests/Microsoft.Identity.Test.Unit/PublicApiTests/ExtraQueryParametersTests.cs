@@ -28,7 +28,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
 
 #pragma warning disable CS0618 // Type or member is obsolete
                 // Create a confidential client application with a default extra query parameter
