@@ -38,10 +38,10 @@ namespace Microsoft.Identity.Test.E2E
         [TestCategory("MI_E2E_Imds")]
         [DataTestMethod]
         [DataRow(null /*SAMI*/, null, DisplayName = "SAMI")]
-        [DataRow("45344e7d-c562-4be6-868f-18dac789c021", "clientid", DisplayName = "UAMI-ClientId")]
-        [DataRow("/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/Msal_Integration_tests",
+        [DataRow("8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7", "clientid", DisplayName = "UAMI-ClientId")]
+        [DataRow("/subscriptions/6f52c299-a200-4fe1-8822-a3b61cf1f931/resourcegroups/DevOpsHostedAgents/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ID4SMSIHostedAgent_UAMI",
          "resourceid", DisplayName = "UAMI-ResourceId")]
-        [DataRow("a38637b6-b365-4652-af1f-cf5d8cf829ad", "objectid", DisplayName = "UAMI-ObjectId")]
+        [DataRow("0651a6fc-fbf5-4904-9e48-16f63ec1f2b1", "objectid", DisplayName = "UAMI-ObjectId")]
         public async Task AcquireToken_OnImds_Succeeds(string id, string idType)
         {
             var mi = BuildMi(id, idType);
