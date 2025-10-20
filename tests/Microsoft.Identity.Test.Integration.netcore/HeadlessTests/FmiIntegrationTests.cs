@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
     {
         private byte[] _serializedCache;
         private const string Testslice = "dc=ESTSR-PUB-WUS-LZ1-TEST"; //Updated slice for regional tests
-        private Dictionary<string, (string, bool)> TestsliceQueryParam = new Dictionary<string, (string value, bool includeInCacheKey)> { { "domain_hint", ("mydomain.com", false) } };
+        private Dictionary<string, (string, bool)> TestsliceQueryParam = new Dictionary<string, (string value, bool includeInCacheKey)> { { "dc", ("ESTSR-PUB-WUS-LZ1-TEST", false) } };
         private const string AzureRegion = "westus3";
         private const string TenantId = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca"; //Tenant Id for the test app
      
