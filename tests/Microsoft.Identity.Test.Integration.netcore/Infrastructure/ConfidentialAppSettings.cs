@@ -37,9 +37,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
     {
         private class PublicCloudConfidentialAppSettings : IConfidentialAppSettings
         {
-            public string ClientId => UseAppIdUri? "api://88f91eac-c606-4c67-a0e2-a5e8a186854f" : "88f91eac-c606-4c67-a0e2-a5e8a186854f";
+            public string ClientId => UseAppIdUri? "api://54a2d933-8bf8-483b-a8f8-0a31924f3c1f" : "54a2d933-8bf8-483b-a8f8-0a31924f3c1f";
 
-            public string TenantId => "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
+            public string TenantId => "10c419d4-4a50-45b2-aa4e-919fb84df24f";
 
             public string Environment => "login.microsoftonline.com";
 
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string GetSecret()
             {
-                return GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalCCAKeyVaultSecretName).Value;
+                return GetSecretLazy(KeyVaultInstance.MsalTeam, TestConstants.MsalCCAKeyVaultSecretNameID4S).Value;
             }
         }
 

@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string PublicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
+        const string PublicClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f";
         const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
         private string _confidentialClientSecret;
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LongRunningAndNormalObo_WithDifferentKeys_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LongRunningThenNormalObo_WithTheSameKey_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task InitiateLRWithCustomKey_ThenAcquireLRWithSameKey_Succeeds_TestAsync()
         {
             // Arrange
-            LabUser user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            LabUser user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -319,7 +319,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -376,7 +376,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task WithDifferentScopes_TestAsync()
         {
             string[] scopes2 = { "api://eec635da-5760-452d-940a-448220db047c/access_as_user" };
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
