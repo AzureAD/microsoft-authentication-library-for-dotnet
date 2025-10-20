@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.E2E
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_Imds")]
         [DataTestMethod]
-        [DataRow(null /*SAMI*/, null, DisplayName = "SAMI")]
+        [DataRow("8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7", "clientid", DisplayName = "SAMI-as-UAMI")]
         [DataRow("8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7", "clientid", DisplayName = "UAMI-ClientId")]
         [DataRow("/subscriptions/6f52c299-a200-4fe1-8822-a3b61cf1f931/resourcegroups/DevOpsHostedAgents/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ID4SMSIHostedAgent_UAMI",
          "resourceid", DisplayName = "UAMI-ResourceId")]
