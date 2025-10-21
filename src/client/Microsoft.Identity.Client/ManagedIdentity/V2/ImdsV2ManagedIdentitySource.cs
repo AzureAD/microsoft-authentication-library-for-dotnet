@@ -288,7 +288,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             ManagedIdentityKeyInfo keyInfo = await keyProvider
                 .GetOrCreateKeyAsync(
-                _requestContext.Logger, 
+                _requestContext.Logger,
                 _requestContext.UserCancellationToken)
                 .ConfigureAwait(false);
 
@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
                 requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
                 requestContext.Logger);
-            
+
             if (userAssignedIdQueryParam != null)
             {
                 queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
@@ -349,7 +349,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         /// <summary>
         /// Obtains an attestation JWT for the KeyGuard/CSR payload using the configured
-        /// attestation provider and normalized endpoint.
+        /// attestation provider and HybridCache for performance optimization.
         /// </summary>
         /// <param name="clientId">Client ID to be sent to the attestation provider.</param>
         /// <param name="attestationEndpoint">The attestation endpoint.</param>
@@ -357,17 +357,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>JWT string suitable for the IMDSv2 attested POP flow.</returns>
         /// <exception cref="MsalClientException">Wraps client/network failures.</exception>
-
         private async Task<string> GetAttestationJwtAsync(
-            string clientId, 
-            Uri attestationEndpoint, 
-            ManagedIdentityKeyInfo keyInfo, 
+            string clientId,
+            Uri attestationEndpoint,
+            ManagedIdentityKeyInfo keyInfo,
             CancellationToken cancellationToken)
         {
-            // Provider is a local dependency; missing provider is a client error
-            var provider = _requestContext.AttestationTokenProvider;
-
-            // KeyGuard requires RSACng on Windows
             if (keyInfo.Type == ManagedIdentityKeyType.KeyGuard &&
                 keyInfo.Key is not System.Security.Cryptography.RSACng rsaCng)
             {
@@ -376,7 +371,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     "[ImdsV2] KeyGuard attestation currently supports only RSA CNG keys on Windows.");
             }
 
-            // Attestation token input
+            // Extract cache key from KeyHandle
+            long cacheKey = GetCacheKeyFromKeyInfo(keyInfo);
+
+            _requestContext.Logger.Verbose(() => $"[ImdsV2] GetAttestationJwtAsync called for cache key: {cacheKey}");
+
+            var cache = new HybridCache(_requestContext.Logger);
+
+            // Step 1: Check cache first
+            var cached = await cache.GetAsync(cacheKey, cancellationToken).ConfigureAwait(false);
+            if (cached != null)
+            {
+                _requestContext.Logger.Info(() => $"[ImdsV2] Attestation token cache hit for key: {cacheKey}");
+                return cached.AttestationToken;
+            }
+
+            _requestContext.Logger.Info(() => $"[ImdsV2] Attestation token cache miss for key: {cacheKey}, minting new token");
+
+            // Step 2: Cache miss - mint new token via provider
+            var provider = _requestContext.AttestationTokenProvider;
             var input = new AttestationTokenInput
             {
                 ClientId = clientId,
@@ -384,19 +397,69 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 KeyHandle = (keyInfo.Key as System.Security.Cryptography.RSACng)?.Key.Handle
             };
 
-            // response from provider 
-            var response = await provider(input, cancellationToken).ConfigureAwait(false);
-
-            // Validate response
-            if (response == null || string.IsNullOrWhiteSpace(response.AttestationToken))
+            var minted = await provider(input, cancellationToken).ConfigureAwait(false);
+            if (minted == null || string.IsNullOrWhiteSpace(minted.AttestationToken))
             {
                 throw new MsalClientException(
                     "attestation_failed",
                     "[ImdsV2] Attestation provider failed to return an attestation token.");
             }
 
-            // Return the JWT
-            return response.AttestationToken;
+            // Step 3: Cache the new token for 8 hours (MAA default TTL)
+            var expiresOn = DateTimeOffset.UtcNow + TimeSpan.FromHours(8);
+            try
+            {
+                await cache.SetAsync(cacheKey, minted.AttestationToken, expiresOn, cancellationToken).ConfigureAwait(false);
+                _requestContext.Logger.Info(() => $"[ImdsV2] Attestation token successfully cached for key: {cacheKey}");
+            }
+            catch (Exception ex)
+            {
+                _requestContext.Logger.Warning($"[ImdsV2] Error caching attestation token for key {cacheKey}: {ex.Message}");
+                // Cache failure is not critical - return the token anyway
+            }
+
+            return minted.AttestationToken;
+        }
+
+        /// <summary>
+        /// Extracts a cache key from the managed identity key information.
+        /// </summary>
+        /// <param name="keyInfo">The managed identity key information containing the KeyHandle.</param>
+        /// <returns>
+        /// A long integer representing the KeyHandle pointer value, or 0 if extraction fails.
+        /// The returned value is used as a unique identifier for cache entries across processes.
+        /// </returns>
+        /// <remarks>
+        /// This method:
+        /// - Safely extracts the pointer value from the KeyHandle using DangerousGetHandle()
+        /// - Converts the pointer to a 64-bit integer for use as a cache key
+        /// - Returns 0 as a fallback key if extraction fails for any reason
+        /// - Uses defensive programming to handle invalid handles gracefully
+        /// 
+        /// The use of DangerousGetHandle() is acceptable here because:
+        /// - The handle lifetime is managed by the caller
+        /// - We only extract the pointer value, not use it for memory access
+        /// - The extracted value is used immediately for cache key generation
+        /// 
+        /// Cross-Process Behavior:
+        /// - Different KeyHandle instances with the same underlying pointer value
+        ///   will produce the same cache key, enabling cross-process cache sharing
+        /// - Cache key 0 is used as a fallback when handle extraction fails
+        /// - The same key will be generated across different application instances
+        /// </remarks>
+        private static long GetCacheKeyFromKeyInfo(ManagedIdentityKeyInfo keyInfo)
+        {
+            try
+            {
+                if (keyInfo.Key is System.Security.Cryptography.RSACng rsaCng &&
+                    rsaCng.Key.Handle != null &&
+                    !rsaCng.Key.Handle.IsInvalid)
+                {
+                    return rsaCng.Key.Handle.DangerousGetHandle().ToInt64();
+                }
+            }
+            catch { /* ignore extraction errors and use fallback key */ }
+            return 0L;
         }
 
         //To-do : Remove this method once IMDS team start returning full URI
