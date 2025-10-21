@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task CreateWwwAuthenticateResponseFromKeyVaultUrlAsync()
         {
             WwwAuthenticateParameters authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(                
-                "https://buildautomation.vault.azure.net/secrets/CertName/CertVersion",
+                "https://id4skeyvault.vault.azure.net/secrets/CertName/CertVersion",
                 "Bearer")
                 .ConfigureAwait(false);
 
