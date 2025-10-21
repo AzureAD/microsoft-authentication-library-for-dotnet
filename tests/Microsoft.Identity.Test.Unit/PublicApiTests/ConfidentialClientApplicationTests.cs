@@ -2343,7 +2343,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
                 Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("xms_acb"));
-                Assert.AreEqual("value1 value2", result.AdditionalResponseParameters["xms_acb"]);
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["xms_acb"]);
 
                 // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
@@ -2362,7 +2362,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
                 Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("xms_acb"));
-                Assert.AreEqual("value1 value2", result.AdditionalResponseParameters["xms_acb"]);
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["xms_acb"]);
 
                 // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
