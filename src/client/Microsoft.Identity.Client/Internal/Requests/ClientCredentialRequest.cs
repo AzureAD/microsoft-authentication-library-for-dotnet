@@ -309,8 +309,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent,
                                                             account: null,
                                                             spaAuthCode: null,
-                                                            additionalResponseParameters: null,
-                                                            acbAuthN: cachedAccessTokenItem.AcbAuthN);
+                                                            additionalResponseParameters: null);
             return authResult;
         }
 

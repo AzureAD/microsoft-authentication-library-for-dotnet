@@ -136,8 +136,7 @@ namespace Microsoft.Identity.Client
             ApiEvent apiEvent,
             Account account,
             string spaAuthCode,
-            IReadOnlyDictionary<string, string> additionalResponseParameters,
-            string acbAuthN = null)
+            IReadOnlyDictionary<string, string> additionalResponseParameters)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
 
@@ -170,35 +169,9 @@ namespace Microsoft.Identity.Client
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
 
-            if (!string.IsNullOrEmpty(acbAuthN))
-            {
-                if (msalAccessTokenCacheItem.PersistedCacheParameters?.Count > 0)
-                {
-                    msalAccessTokenCacheItem.PersistedCacheParameters.Add("xms_acb", acbAuthN);
-                    AdditionalResponseParameters = (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters;
-                }
-                else
-                {
-                    if (additionalResponseParameters == null)
-                    {
-                        additionalResponseParameters = new Dictionary<string, string> { { "xms_acb", acbAuthN } };
-                    }
-                    else
-                    {
-                        Dictionary<string, string> tempParams = additionalResponseParameters.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                        tempParams.Add("xms_acb", acbAuthN);
-                        additionalResponseParameters = tempParams;
-                    }
-
-                    AdditionalResponseParameters = additionalResponseParameters;
-                }
-            }
-            else
-            {
-                AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
-                                                                        (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
-                                                                        additionalResponseParameters;
-            }
+            AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
+                                                                    (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
+                                                                    additionalResponseParameters;
 
             if (msalAccessTokenCacheItem != null)
             {

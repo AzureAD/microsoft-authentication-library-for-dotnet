@@ -330,7 +330,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 ValidateAccountIdentifiers(clientInfoFromServer);
             }
 
-            msalTokenResponse.AcbAuthN = clientInfoFromServer.AcbAuthN;
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
             var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
@@ -338,7 +337,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var idtItem = tuple.Item2;
             Account account = tuple.Item3;
 
-            //TODO Get client info from response and use it to 
+            atItem.AddPersistedCacheParameters(clientInfoFromServer.AdditionalResponseParameters);
 
             return new AuthenticationResult(
                 atItem,
@@ -349,8 +348,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
                 msalTokenResponse.SpaAuthCode,
-                msalTokenResponse.CreateExtensionDataStringMap(),
-                acbAuthN: clientInfoFromServer.AcbAuthN);
+                msalTokenResponse.CreateExtensionDataStringMap());
         }
 
         protected virtual void ValidateAccountIdentifiers(ClientInfo fromServer)
