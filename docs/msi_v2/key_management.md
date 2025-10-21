@@ -15,7 +15,7 @@ In MSI v2, before MSAL can do anything with IMDS or ESTS, it needs a key pair. T
 
 MSAL implements a hierarchical key provider strategy:
 
-### KeyGuard (awlays for PoP)
+### KeyGuard (always for PoP)
 - Requires Virtualization-Based Security (VBS).
 - Keys are isolated in a secure enclave.
 - Strongest guarantee that the private key cannot be exfiltrated.
