@@ -135,8 +135,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// </summary>
         public IAuthenticationOperation AuthenticationScheme
         {
-            get => _requestOverrideScheme ?? _commonParameters.AuthenticationOperation;  // <-- correct fallback
-            internal set => _requestOverrideScheme = value;  // internal set satisfies the “make it settable?” review
+            get => _requestOverrideScheme ?? _commonParameters.AuthenticationOperation;
+            internal set => _requestOverrideScheme = value;
         }
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;

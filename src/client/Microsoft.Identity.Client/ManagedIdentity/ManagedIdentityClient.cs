@@ -164,22 +164,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         /// <summary>
-        /// Sets the in-memory binding certificate used to prime the mtls_pop scheme on subsequent requests.
+        /// Sets (or replaces) the in-memory binding certificate used to prime the mtls_pop scheme on subsequent requests.
+        /// The certificate is intentionally NOT disposed here to avoid invalidating caller-held references (e.g., via AuthenticationResult).
         /// </summary>
         /// <remarks>
-        /// Disposing an <see cref="X509Certificate2"/> releases resources for this in-memory instance;
-        /// it does <b>not</b> remove a certificate from any OS certificate store (store removal requires <see cref="X509Store.Remove(X509Certificate2)"/>).
+        /// Lifetime considerations:
+        /// - The binding certificate is ephemeral and valid for the token’s binding duration.
+        /// - If rotation occurs, older certificates will be eligible for GC once no longer referenced.
+        /// - Explicit disposal can be revisited if a deterministic rotation / shutdown strategy is introduced.
         /// </remarks>
         internal void SetRuntimeMtlsBindingCertificate(X509Certificate2 cert)
         {
-            // Atomically swap the reference and dispose the previous one (if different).
-            var old = System.Threading.Interlocked.Exchange(ref _runtimeMtlsBindingCertificate, cert);
-
-            // If the same instance is passed again, do not dispose it (it is now the current value).
-            if (!object.ReferenceEquals(old, cert))
-            {
-                old?.Dispose();
-            }
+            Volatile.Write(ref _runtimeMtlsBindingCertificate, cert);
         }
     }
 }
