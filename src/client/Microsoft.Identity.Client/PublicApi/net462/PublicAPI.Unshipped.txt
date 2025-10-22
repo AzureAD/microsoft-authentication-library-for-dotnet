@@ -1,3 +1,4 @@
+Microsoft.Identity.Client.AuthenticationResult.CreateAuthorizationHeader() -> Microsoft.Identity.Abstractions.AuthorizationHeaderInformation
 Microsoft.Identity.Client.IMsalMtlsHttpClientFactory
 Microsoft.Identity.Client.IMsalMtlsHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
 Microsoft.Identity.Client.PlatformsCommon.Shared.SecureHttpClientFactory

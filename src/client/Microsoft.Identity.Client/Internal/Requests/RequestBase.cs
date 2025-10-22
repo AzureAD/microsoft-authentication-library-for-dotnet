@@ -348,7 +348,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
                 msalTokenResponse.SpaAuthCode,
-                msalTokenResponse.CreateExtensionDataStringMap());
+                msalTokenResponse.CreateExtensionDataStringMap(),
+                AuthenticationRequestParameters.AppConfig.ClientCredentialCertificate);
         }
 
         protected virtual void ValidateAccountIdentifiers(ClientInfo fromServer)
