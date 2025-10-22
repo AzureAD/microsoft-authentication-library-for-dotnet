@@ -1,4 +1,7 @@
-﻿// Managed Identity + mTLS PoP + mTLS resource call (Console Demo)
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+// Managed Identity + mTLS PoP + mTLS resource call (Console Demo)
 // .NET 8 
 //
 // Menu:
@@ -56,6 +59,8 @@ internal class Program
     private const string DefaultScope = "https://graph.microsoft.com";
     private const string DefaultResourceUrl = "https://mtlstb.graph.microsoft.com/v1.0/applications";
     private const int SW_MAXIMIZE = 3;
+    // Warn once per run when full-token view is enabled
+    private static bool sFullTokenWarned = false;
 
     [DllImport("kernel32.dll", SetLastError = true)] private static extern IntPtr GetConsoleWindow();
     [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
@@ -102,31 +107,42 @@ internal class Program
                 {
                     // Acquire tokens
                     case "1":
-                        lastSami = await AcquireAndShowAsync("SAMI", sami, DefaultScope, forceRefresh: true, useMtls: true, showFullToken);
-                        break;
-                    case "1a":
-                        lastSami = await AcquireAndShowAsync("SAMI", sami, DefaultScope, forceRefresh: false, useMtls: true, showFullToken);
-                        break;
-                    case "2":
-                        lastUami = await AcquireAndShowAsync("UAMI", uami, DefaultScope, forceRefresh: true, useMtls: true, showFullToken);
-                        break;
-                    case "2a":
-                        lastUami = await AcquireAndShowAsync("UAMI", uami, DefaultScope, forceRefresh: false, useMtls: true, showFullToken);
+                        lastSami = await AcquireAndShowAsync("SAMI", sami, DefaultScope, forceRefresh: true, useMtls: true, showFullToken).ConfigureAwait(false);
                         break;
 
-                    // Call resource (mTLS)
-                    case "3":
-                        lastSami = await CallResourceFlowAsync("SAMI", sami, lastSami, resourceUrl, propertyName, showFullToken);
+                    case "1a":
+                        lastSami = await AcquireAndShowAsync("SAMI", sami, DefaultScope, forceRefresh: false, useMtls: true, showFullToken).ConfigureAwait(false);
                         break;
+
+                    case "2":
+                        lastUami = await AcquireAndShowAsync("UAMI", uami, DefaultScope, forceRefresh: true, useMtls: true, showFullToken).ConfigureAwait(false);
+                        break;
+
+                    case "2a":
+                        lastUami = await AcquireAndShowAsync("UAMI", uami, DefaultScope, forceRefresh: false, useMtls: true, showFullToken).ConfigureAwait(false);
+                        break;
+
+                    // Call resource (mTLS) - SAMI
+                    case "3":
+                        lastSami = await CallResourceFlowAsync("SAMI", sami, lastSami, resourceUrl, propertyName, showFullToken).ConfigureAwait(false);
+                        break;
+
+                    // Call resource (mTLS) - UAMI
                     case "4":
-                        lastUami = await CallResourceFlowAsync("UAMI", uami, lastUami, resourceUrl, propertyName, showFullToken);
+                        lastUami = await CallResourceFlowAsync("UAMI", uami, lastUami, resourceUrl, propertyName, showFullToken).ConfigureAwait(false);
                         break;
 
                     // Display & Toggles
                     case "f":
                         showFullToken = !showFullToken;
                         PrintInfo($"Full token display is now {(showFullToken ? "ON" : "OFF")}.");
+                        if (showFullToken && !sFullTokenWarned)
+                        {
+                            ShowFullTokenWarning();
+                            sFullTokenWarned = true;
+                        }
                         break;
+
                     case "l":
                         showLogs = !showLogs;
                         logger.Enabled = showLogs;
@@ -221,6 +237,16 @@ internal class Program
             .WithLogging(logger, enablePiiLogging: false)
             .Build();
 
+    /// <summary>
+    /// acquire token and show summary.
+    /// </summary>
+    /// <param name="label"></param>
+    /// <param name="app"></param>
+    /// <param name="scope"></param>
+    /// <param name="forceRefresh"></param>
+    /// <param name="useMtls"></param>
+    /// <param name="showFullToken"></param>
+    /// <returns></returns>
     private static async Task<AuthenticationResult?> AcquireAndShowAsync(
         string label,
         IManagedIdentityApplication app,
@@ -241,6 +267,14 @@ internal class Program
         return result;
     }
 
+    /// <summary>
+    /// print token summary info.
+    /// </summary>
+    /// <param name="label"></param>
+    /// <param name="result"></param>
+    /// <param name="mtlsRequested"></param>
+    /// <param name="forced"></param>
+    /// <param name="showFullToken"></param>
     private static void PrintTokenSummary(string label, AuthenticationResult result, bool mtlsRequested, bool forced, bool showFullToken)
     {
         var ts = result.AuthenticationResultMetadata?.TokenSource.ToString() ?? "Unknown";
@@ -287,6 +321,7 @@ internal class Program
         {
             Console.WriteLine();
             Console.WriteLine("  Access Token   :");
+            WithColor(ConsoleColor.Yellow, () => Console.WriteLine("    [Sensitive] Handle with care. Do not share/copy."));
             Console.WriteLine($"    {result.AccessToken}");
         }
         else
@@ -314,6 +349,16 @@ internal class Program
         Console.WriteLine($"  {Glyphs.Check} Token acquisition complete.");
     }
 
+    /// <summary>
+    /// call resource flow: ensure token+cert, then call resource over mTLS.
+    /// </summary>
+    /// <param name="label"></param>
+    /// <param name="app"></param>
+    /// <param name="lastResult"></param>
+    /// <param name="resourceUrl"></param>
+    /// <param name="propertyName"></param>
+    /// <param name="showFullToken"></param>
+    /// <returns></returns>
     private static async Task<AuthenticationResult?> CallResourceFlowAsync(
         string label,
         IManagedIdentityApplication app,
@@ -325,7 +370,7 @@ internal class Program
         // Ensure token+cert (use cache if valid, else fetch)
         if (lastResult == null || lastResult.ExpiresOn <= DateTimeOffset.UtcNow.AddMinutes(2))
         {
-            lastResult = await AcquireAndShowAsync(label, app, DefaultScope, forceRefresh: false, useMtls: true, showFullToken);
+            lastResult = await AcquireAndShowAsync(label, app, DefaultScope, forceRefresh: false, useMtls: true, showFullToken).ConfigureAwait(false);
             if (lastResult == null) return lastResult;
         }
 
@@ -340,6 +385,15 @@ internal class Program
         return lastResult;
     }
 
+    /// <summary>
+    /// call resource over mTLS with given cert + token.
+    /// </summary>
+    /// <param name="url"></param>
+    /// <param name="clientCertificate"></param>
+    /// <param name="tokenType"></param>
+    /// <param name="accessToken"></param>
+    /// <param name="propertyName"></param>
+    /// <returns></returns>
     private static async Task CallResourceWithMtlsAsync(
     Uri url,
     X509Certificate2 clientCertificate,
@@ -511,6 +565,12 @@ internal class Program
         return token[..60] + "..." + token[^20..];
     }
 
+    /// <summary>
+    /// read a claim from JWT token (null if not present).
+    /// </summary>
+    /// <param name="jwt"></param>
+    /// <param name="claim"></param>
+    /// <returns></returns>
     private static string? TryReadClaim(string jwt, string claim)
     {
         try
@@ -525,6 +585,11 @@ internal class Program
         catch { return null; }
     }
 
+    /// <summary>
+    /// read cnf.x5t#S256 from JWT token (null if not present).
+    /// </summary>
+    /// <param name="jwt"></param>
+    /// <returns></returns>
     private static string? TryReadCnfX5tS256(string jwt)
     {
         try
@@ -544,16 +609,29 @@ internal class Program
         catch { return null; }
     }
 
+    /// <summary>
+    /// compute cert SHA-256 and return Base64Url-encoded string for x5t#S256.
+    /// </summary>
+    /// <param name="cert"></param>
+    /// <returns></returns>
     private static string ComputeX5tS256(X509Certificate2 cert)
     {
         var hash = SHA256.HashData(cert.RawData);
         return ToBase64Url(hash);
     }
 
+    /// <summary>
+    /// to Base64Url encoding (no padding, - and _).
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
     private static string ToBase64Url(byte[] data) =>
         Convert.ToBase64String(data).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
-    // ---------- Cert override (optional, DEV) ----------
+    /// <summary>
+    /// optionally load cert override from Windows cert store (DEV only).
+    /// </summary>
+    /// <returns></returns>
     private static X509Certificate2? TryLoadStoreCertOverride()
     {
         var thumb = Environment.GetEnvironmentVariable("MSI_MTLS_TEST_CERT_THUMBPRINT");
@@ -604,7 +682,9 @@ internal class Program
         }
     }
 
-    // ---------- Pretty console output + colored menu ----------
+    /// <summary>
+    /// print banner.
+    /// </summary>
     private static void WriteBanner()
     {
         Console.WriteLine();
@@ -616,6 +696,9 @@ internal class Program
         });
     }
 
+    /// <summary>
+    /// write AI-style hello message.
+    /// </summary>
     private static void WriteAiHello()
     {
         Console.WriteLine();
@@ -624,6 +707,14 @@ internal class Program
         Console.WriteLine();
     }
 
+    /// <summary>
+    /// print menu.
+    /// </summary>
+    /// <param name="uamiClientId"></param>
+    /// <param name="resourceUrl"></param>
+    /// <param name="property"></param>
+    /// <param name="showLogs"></param>
+    /// <param name="showFullToken"></param>
     private static void PrintMenu(string uamiClientId, string resourceUrl, string property, bool showLogs, bool showFullToken)
     {
         WriteSection("Acquire Tokens", ConsoleColor.Green);
@@ -651,6 +742,9 @@ internal class Program
         WriteItem("  Q   - Quit", ConsoleColor.Red);
     }
 
+    /// <summary>
+    /// print footer.
+    /// </summary>
     private static void PrintFooter()
     {
         Console.WriteLine();
@@ -661,6 +755,10 @@ internal class Program
         });
     }
 
+    /// <summary>
+    /// boxed title.
+    /// </summary>
+    /// <param name="title"></param>
     private static void Boxed(string title)
     {
         Console.WriteLine();
@@ -672,15 +770,30 @@ internal class Program
         });
     }
 
+    /// <summary>
+    /// write a section header with color.
+    /// </summary>
+    /// <param name="title"></param>
+    /// <param name="color"></param>
     private static void WriteSection(string title, ConsoleColor color)
     {
         Console.WriteLine();
         WithColor(color, () => Console.WriteLine($"[{title}]"));
     }
 
+    /// <summary>
+    /// write an item line with color.
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="color"></param>
     private static void WriteItem(string text, ConsoleColor color) =>
         WithColor(color, () => Console.WriteLine(text));
 
+    /// <summary>
+    /// with temporary console color.
+    /// </summary>
+    /// <param name="color"></param>
+    /// <param name="action"></param>
     private static void WithColor(ConsoleColor color, Action action)
     {
         var old = Console.ForegroundColor;
@@ -689,11 +802,30 @@ internal class Program
         finally { Console.ForegroundColor = old; }
     }
 
+    /// <summary>
+    /// print an info message.
+    /// </summary>
+    /// <param name="msg"></param>
     private static void PrintInfo(string msg) => Console.WriteLine($"[INFO] {msg}");
+    /// <summary>
+    /// print a warning message.
+    /// </summary>
+    /// <param name="msg"></param>
     private static void PrintWarn(string msg) => WithColor(ConsoleColor.Yellow, () => Console.WriteLine($"[WARN] {msg}"));
+    /// <summary>
+    /// print an error message.
+    /// </summary>
+    /// <param name="title"></param>
+    /// <param name="detail"></param>
     private static void PrintError(string title, string detail) =>
         WithColor(ConsoleColor.Red, () => Console.WriteLine($"[ERROR] {title}: {detail}"));
 
+    /// <summary>
+    /// Indent each line of a string with the given prefix.
+    /// </summary>
+    /// <param name="s"></param>
+    /// <param name="prefix"></param>
+    /// <returns></returns>
     private static string Indent(string s, string prefix)
     {
         using var sr = new StringReader(s);
@@ -706,7 +838,9 @@ internal class Program
         return sb.ToString();
     }
 
-    // ---------- Glyphs + Spinner (Unicode → ASCII fallback) ----------
+    /// <summary>
+    /// Glyphs for console output (Unicode vs ASCII).
+    /// </summary>
     private static class Glyphs
     {
         public static bool Unicode => Console.OutputEncoding.CodePage == 65001;
@@ -719,6 +853,9 @@ internal class Program
             : new[] { "-", "\\", "|", "/" };                     // ASCII spinner
     }
 
+    /// <summary>
+    /// Utility for showing an animated spinner during async work.
+    /// </summary>
     private static class Ui
     {
         public static async Task<T> WithSpinnerAsync<T>(string message, Func<Task<T>> work, int intervalMs = 80)
@@ -732,13 +869,13 @@ internal class Program
                 {
                     var frame = frames[i++ % frames.Length];
                     Console.Write($"\r{frame} {message}   ");
-                    try { await Task.Delay(intervalMs, cts.Token); } catch { /* ignore */ }
+                    try { await Task.Delay(intervalMs, cts.Token).ConfigureAwait(false); } catch { /* ignore */ }
                 }
             });
 
             try
             {
-                var result = await work();
+                var result = await work().ConfigureAwait(false);
                 cts.Cancel();
                 Console.WriteLine($"\r{Glyphs.Check} {message}                ");
                 return result;
@@ -752,10 +889,12 @@ internal class Program
         }
 
         public static async Task WithSpinnerAsync(string message, Func<Task> work, int intervalMs = 80) =>
-            await WithSpinnerAsync<object>(message, async () => { await work(); return new object(); }, intervalMs);
+            await WithSpinnerAsync<object>(message, async () => { await work().ConfigureAwait(false); return new object(); }, intervalMs).ConfigureAwait(false);
     }
 
-    // ---------- Toggleable MSAL logger (OFF by default) ----------
+    /// <summary>
+    /// toggleable MSAL logger for console output.
+    /// </summary>
     private sealed class ToggleableLogger : IIdentityLogger
     {
         public bool Enabled { get; set; } = false;
@@ -769,7 +908,10 @@ internal class Program
         }
     }
 
-    // ---------- Maximize console window (Windows only) ----------
+    /// <summary>
+    /// maximize console window (Windows only).
+    /// </summary>
+    /// <param name="silent"></param>
     private static void TryMaximizeConsoleWindow(bool silent)
     {
         try
@@ -801,6 +943,22 @@ internal class Program
         {
             if (!silent) PrintWarn("Maximize not supported in this host.");
         }
+    }
+
+    /// <summary>
+    /// Show security warning about full token display.
+    /// </summary>
+    private static void ShowFullTokenWarning()
+    {
+        WithColor(ConsoleColor.Yellow, () =>
+        {
+            Console.WriteLine();
+            Console.WriteLine("  ⚠ SECURITY REMINDER: Full access tokens are highly sensitive.");
+            Console.WriteLine("     • Avoid screenshots and screen sharing while visible.");
+            Console.WriteLine("     • Do not paste into chats, tickets, or logs.");
+            Console.WriteLine("     • Treat like a password/secret; clear the screen after use (C).");
+            Console.WriteLine();
+        });
     }
 }
 
