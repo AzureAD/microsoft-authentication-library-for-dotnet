@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client
         /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>The builder to chain the .With methods.</returns>
-        [Obsolete("This method is deprecated. Please use the WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
+        [Obsolete("This method is deprecated. Use the WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
         public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
         {
             return WithExtraQueryParameters(CoreHelpers.ConvertToTupleParameters(extraQueryParameters));
