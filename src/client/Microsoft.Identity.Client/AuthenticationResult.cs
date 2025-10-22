@@ -6,13 +6,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -135,7 +136,8 @@ namespace Microsoft.Identity.Client
             ApiEvent apiEvent,
             Account account,
             string spaAuthCode,
-            IReadOnlyDictionary<string, string> additionalResponseParameters)
+            IReadOnlyDictionary<string, string> additionalResponseParameters,
+            X509Certificate2 bindingCertificate = null)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
 
@@ -198,6 +200,7 @@ namespace Microsoft.Identity.Client
 
             AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
             AuthenticationResultMetadata.TelemetryTokenType = authenticationScheme.TelemetryTokenType;
+            BindingCertificate = bindingCertificate;
         }
 
         //Default constructor for testing
@@ -332,9 +335,13 @@ namespace Microsoft.Identity.Client
         /// HttpResponseMessage r = await client.GetAsync(urlOfTheProtectedApi);
         /// </code>
         /// </example>
-        public string CreateAuthorizationHeader()
+        public AuthorizationHeaderInformation CreateAuthorizationHeader()
         {
-            return $"{_authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType} {AccessToken}";
+            return new AuthorizationHeaderInformation()
+            {
+                AuthorizationHeaderValue = $"{_authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType} {AccessToken}",
+                BindingCertificate = BindingCertificate
+            };
         }
     }
 }

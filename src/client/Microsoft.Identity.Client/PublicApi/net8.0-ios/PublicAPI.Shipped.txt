@@ -340,7 +340,6 @@ Microsoft.Identity.Client.AuthenticationResult.AuthenticationResult(string acces
 Microsoft.Identity.Client.AuthenticationResult.AuthenticationResultMetadata.get -> Microsoft.Identity.Client.AuthenticationResultMetadata
 Microsoft.Identity.Client.AuthenticationResult.ClaimsPrincipal.get -> System.Security.Claims.ClaimsPrincipal
 Microsoft.Identity.Client.AuthenticationResult.CorrelationId.get -> System.Guid
-Microsoft.Identity.Client.AuthenticationResult.CreateAuthorizationHeader() -> string
 Microsoft.Identity.Client.AuthenticationResult.ExpiresOn.get -> System.DateTimeOffset
 Microsoft.Identity.Client.AuthenticationResult.ExtendedExpiresOn.get -> System.DateTimeOffset
 Microsoft.Identity.Client.AuthenticationResult.IdToken.get -> string
