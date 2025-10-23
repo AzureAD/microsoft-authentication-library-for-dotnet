@@ -4,6 +4,15 @@ parameters:
 
 steps:
 
+# Ensure the exact SDK is available on the agent
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK 8.0.415'
+  inputs:
+    packageType: 'sdk'
+    version: '8.0.415'
+    includePreviewVersions: false
+    performMultiLevelLookup: true
+
 # Restore 
 - task: DotNetCoreCLI@2
   displayName: Restore E2E project
