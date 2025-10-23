@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.Utils
             var result = new Dictionary<string, (string value, bool includeInCacheKey)>(StringComparer.OrdinalIgnoreCase);
             foreach (var kvp in parameters)
             {
-                result[kvp.Key] = (kvp.Value, false); // Include all parameters in cache key by default
+                result[kvp.Key] = (kvp.Value, false); // Exclude all parameters from cache key by default
             }
             return result;
         }

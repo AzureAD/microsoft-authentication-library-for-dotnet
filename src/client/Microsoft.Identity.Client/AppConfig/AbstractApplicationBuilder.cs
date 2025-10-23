@@ -318,11 +318,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Sets Extra Query Parameters for the query string in the HTTP authentication request with control over which parameters are included in the cache key
         /// </summary>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
-        /// For each parameter, you can specify whether it should be included in the cache key.
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority, and merged with those added to the request-level WithExtraQueryParameters API.
+        /// Each dictionary entry maps a parameter name to a tuple containing:
+        /// - Value: The parameter value that will be appended to the query string
+        /// - IncludeInCacheKey: Whether this parameter should be included when computing the token's cache key.
+        /// To help ensure the correct token is returned from the cache, IncludeInCacheKey should be true if the parameter affects token content or validity (e.g., resource-specific claims or parameters).
         /// The parameter can be null.</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)> extraQueryParameters)
+        /// <returns>The builder to chain .With methods.</returns>
+        public T WithExtraQueryParameters(IDictionary<string, (string Value, bool IncludeInCacheKey)> extraQueryParameters)
         {
             if (extraQueryParameters == null)
             {
@@ -335,15 +338,15 @@ namespace Microsoft.Identity.Client
             {
                 Config.ExtraQueryParameters = Config.ExtraQueryParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 
-                Config.ExtraQueryParameters[kvp.Key] = kvp.Value.value;
+                Config.ExtraQueryParameters[kvp.Key] = kvp.Value.Value;
 
-                if (kvp.Value.includeInCacheKey)
+                if (kvp.Value.IncludeInCacheKey)
                 {
                     // Initialize the cache key components if needed
                     Config.CacheKeyComponents = Config.CacheKeyComponents ?? new SortedList<string, string>();
 
                     // Add to cache key components - uses a func that returns the value as a task
-                    Config.CacheKeyComponents[kvp.Key] = kvp.Value.value;
+                    Config.CacheKeyComponents[kvp.Key] = kvp.Value.Value;
                 }
             }
 
