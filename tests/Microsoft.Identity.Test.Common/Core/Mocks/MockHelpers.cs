@@ -625,7 +625,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"cuId\": { \"vmId\": \"fake_vmId\" }," +
                 "\"clientId\": \"" + TestConstants.ClientId + "\"," +
                 "\"tenantId\": \"" + TestConstants.TenantId + "\"," +
-                "\"attestationEndpoint\": \"fake_attestation_endpoint\"" +
+                "\"attestationEndpoint\": \"https://fake_attestation_endpoint\"" +
                 "}";
 
             var handler = new MockHttpMessageHandler()

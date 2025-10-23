@@ -32,6 +32,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             s_sourceName = ManagedIdentitySource.None;
         }
 
+        internal static void ResetSourceAndBindingForTest()
+        {
+            ResetSourceForTest();
+            ImdsV2ManagedIdentitySource.ResetBindingCachesForTest();
+        }
+
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
             RequestContext requestContext,
             AcquireTokenForManagedIdentityParameters parameters,

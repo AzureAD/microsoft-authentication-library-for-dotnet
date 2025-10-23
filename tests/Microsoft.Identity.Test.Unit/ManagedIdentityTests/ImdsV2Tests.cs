@@ -215,10 +215,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(result.TokenType, Bearer);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 1
-
+                ApplicationBase.ResetStateForTest();
                 #region Identity 2
                 UserAssignedIdentityId userAssignedIdentityId2 = userAssignedIdentityId; // keep the same type, that's the most common scenario
-                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId2, userAssignedId2, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false); // source is already cached
+                var managedIdentityApp2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId2, userAssignedId2, addProbeMock: true, addSourceCheck: false).ConfigureAwait(false); // source is already cached
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId2, userAssignedId2);
 
@@ -370,14 +370,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 1
-
+                ApplicationBase.ResetStateForTest();
                 #region Identity 2
                 UserAssignedIdentityId userAssignedIdentityId2 = userAssignedIdentityId; // keep the same type, that's the most common scenario
                 var managedIdentityApp2 = await CreateManagedIdentityAsync(
                     httpManager,
                     userAssignedIdentityId2,
                     userAssignedId2,
-                    addProbeMock: false, 
+                    addProbeMock: true, 
                     addSourceCheck: false,
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false); // source is already cached
 

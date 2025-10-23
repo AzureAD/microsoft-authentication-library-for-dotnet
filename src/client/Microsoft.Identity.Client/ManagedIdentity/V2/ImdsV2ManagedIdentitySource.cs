@@ -6,12 +6,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.ManagedIdentity.V2.Cache;
+using Microsoft.Identity.Client.ManagedIdentity.V2.Cache.Abstractions;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -21,6 +25,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
+        private readonly MsiCertManager _certMgr = 
+            new MsiCertManager(InMemoryMtlsCertCache.Shared, ImdsV2BindingCache.Shared, MtlsBindingStore.Default);
+
         // used in unit tests
         public const string ImdsV2ApiVersion = "2.0";
         public const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
@@ -196,14 +203,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             var queryParams = ImdsV2QueryParamsHelper(_requestContext);
 
-            // TODO: add bypass_cache query param in case of token revocation. Boolean: true/false
-
             var headers = new Dictionary<string, string>
             {
                 { "Metadata", "true" },
                 { OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString() }
             };
 
+            _requestContext.Logger.Info(() => $"[Managed Identity] tokenType={(_isMtlsPopRequested ? "mtls_pop" : "bearer")}");
+
+            // mTLS PoP requires KeyGuard; keep this guard.
             if (_isMtlsPopRequested && managedIdentityKeyInfo.Type != ManagedIdentityKeyType.KeyGuard)
             {
                 throw new MsalClientException(
@@ -211,17 +219,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     "[ImdsV2] mTLS Proof-of-Possession requires a KeyGuard-backed key. Enable KeyGuard or use a KeyGuard-supported environment.");
             }
 
-            // TODO: : Normalize and validate attestation endpoint Code needs to be removed 
-            // once IMDS team start returning full URI
-            Uri normalizedEndpoint = NormalizeAttestationEndpoint(attestationEndpoint, _requestContext.Logger);
-
-            // Ask helper for JWT only for KeyGuard keys
-            string attestationJwt = string.Empty;
-            if (managedIdentityKeyInfo.Type == ManagedIdentityKeyType.KeyGuard)
+            // Only produce attestation for PoP.
+            string attestationJwt = null;
+            var attestationEndpointUri = new Uri(attestationEndpoint);
+            if (_isMtlsPopRequested)
             {
                 attestationJwt = await GetAttestationJwtAsync(
                     clientId,
-                    normalizedEndpoint,
+                    attestationEndpointUri,
                     managedIdentityKeyInfo,
                     _requestContext.UserCancellationToken).ConfigureAwait(false);
             }
@@ -234,11 +239,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             string body = JsonHelper.SerializeToJson(certificateRequestBody);
 
-            IRetryPolicyFactory retryPolicyFactory = _requestContext.ServiceBundle.Config.RetryPolicyFactory;
-            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
+            IRetryPolicy retryPolicy = _requestContext.ServiceBundle.Config.RetryPolicyFactory
+                .GetRetryPolicy(RequestType.Imds);
 
-            HttpResponse response = null;
-
+            HttpResponse response;
             try
             {
                 response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
@@ -251,17 +255,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     mtlsCertificate: null,
                     validateServerCertificate: null,
                     cancellationToken: _requestContext.UserCancellationToken,
-                    retryPolicy: retryPolicy)
-                .ConfigureAwait(false);
+                    retryPolicy: retryPolicy).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
-                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed.",
+                    "[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed.",
                     ex,
                     ManagedIdentitySource.ImdsV2,
-                    (int)response.StatusCode);
+                    null);
             }
 
             if (response.StatusCode != HttpStatusCode.OK)
@@ -276,57 +279,47 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             var certificateRequestResponse = JsonHelper.DeserializeFromJson<CertificateRequestResponse>(response.Body);
             CertificateRequestResponse.Validate(certificateRequestResponse);
-
             return certificateRequestResponse;
         }
 
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
+            string tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
+            string identityKey = _requestContext.ServiceBundle.Config.ClientId ?? csrMetadata.ClientId;
 
-            IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
-
-            ManagedIdentityKeyInfo keyInfo = await keyProvider
-                .GetOrCreateKeyAsync(
-                _requestContext.Logger, 
-                _requestContext.UserCancellationToken)
-                .ConfigureAwait(false);
-
-            var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(keyInfo.Key, csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
-
-            var certificateRequestResponse = await ExecuteCertificateRequestAsync(
+            var (cert, resp) = await _certMgr.GetOrMintBindingAsync(
+                identityKey,
+                csrMetadata.TenantId,
                 csrMetadata.ClientId,
-                csrMetadata.AttestationEndpoint,
-                csr,
-                keyInfo).ConfigureAwait(false);
+                tokenType,
+                async ct =>
+                {
+                    var keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
+                    var keyInfo = await keyProvider.GetOrCreateKeyAsync(_requestContext.Logger, ct).ConfigureAwait(false);
 
-            // transform certificateRequestResponse.Certificate to x509 with private key
-            var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
-                certificateRequestResponse.Certificate,
-                privateKey);
+                    var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory
+                        .Generate(keyInfo.Key, csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
 
-            ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.MtlsAuthenticationEndpoint}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
+                    // /issuecredential is called ONLY here (on a miss)
+                    var issueResp = await ExecuteCertificateRequestAsync(
+                        csrMetadata.ClientId, csrMetadata.AttestationEndpoint, csr, keyInfo).ConfigureAwait(false);
 
-            var idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
-            foreach (var idParam in idParams)
-            {
-                request.Headers[idParam.Key] = idParam.Value;
-            }
-            request.Headers.Add(OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString());
-            request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
-            request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
+                    return (issueResp, privateKey);
+                },
+                _requestContext.UserCancellationToken
+            ).ConfigureAwait(false);
 
-            var tokenType = _isMtlsPopRequested ? "mtls_pop" : "bearer";
+            var request = TokenRequestBuilder.BuildTokenRequest(
+                _requestContext,
+                resource,
+                resp.MtlsAuthenticationEndpoint,
+                resp.TenantId,
+                resp.ClientId,
+                tokenType,
+                cert);
 
-            request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
-            request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
-            request.BodyParameters.Add("scope", resource.TrimEnd('/') + "/.default");
-            request.BodyParameters.Add("token_type", tokenType);
-
-            request.RequestType = RequestType.STS;
-
-            request.MtlsCertificate = mtlsCertificate;
-
+            request.MtlsCertificate = cert;
             return request;
         }
 
@@ -364,8 +357,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             ManagedIdentityKeyInfo keyInfo, 
             CancellationToken cancellationToken)
         {
-            // Provider is a local dependency; missing provider is a client error
-            var provider = _requestContext.AttestationTokenProvider;
+            Func<AttestationTokenInput, CancellationToken, 
+                Task<AttestationTokenResponse>> provider = _requestContext.AttestationTokenProvider;
+            
+            if (provider == null)
+            {
+                throw new MsalClientException(
+                    "attestation_provider_not_configured",
+                    "[ImdsV2] No attestation provider is configured. Configure RequestContext.AttestationTokenProvider for mTLS PoP.");
+            }
 
             // KeyGuard requires RSACng on Windows
             if (keyInfo.Type == ManagedIdentityKeyType.KeyGuard &&
@@ -399,56 +399,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return response.AttestationToken;
         }
 
-        //To-do : Remove this method once IMDS team start returning full URI
-        /// <summary>
-        /// Temporarily normalize attestation endpoint values to a full https:// URI.
-        /// IMDS team will eventually return a full URI. 
-        /// </summary>
-        /// <param name="rawEndpoint"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        private static Uri NormalizeAttestationEndpoint(string rawEndpoint, ILoggerAdapter logger)
+        internal static void ResetBindingCachesForTest()
         {
-            if (string.IsNullOrWhiteSpace(rawEndpoint))
-            {
-                return null;
-            }
-
-            // Trim whitespace
-            rawEndpoint = rawEndpoint.Trim();
-
-            // If it already parses as an absolute URI with https, keep it.
-            if (Uri.TryCreate(rawEndpoint, UriKind.Absolute, out var absolute) &&
-                (absolute.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase)))
-            {
-                return absolute;
-            }
-
-            // If it has no scheme (common service behavior returning only host)
-            // prepend https:// and try again.
-            if (!rawEndpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            {
-                var candidate = "https://" + rawEndpoint;
-                if (Uri.TryCreate(candidate, UriKind.Absolute, out var httpsUri))
-                {
-                    logger.Info(() => $"[Managed Identity] Normalized attestation endpoint '{rawEndpoint}' -> '{httpsUri.ToString()}'.");
-                    return httpsUri;
-                }
-            }
-
-            // Final attempt: reject http (non‑TLS) or malformed
-            if (Uri.TryCreate(rawEndpoint, UriKind.Absolute, out var anyUri))
-            {
-                if (!anyUri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
-                {
-                    logger.Warning($"[Managed Identity] Attestation endpoint uses unsupported scheme '{anyUri.Scheme}'. HTTPS is required.");
-                    return null;
-                }
-                return anyUri;
-            }
-
-            logger.Warning($"[Managed Identity] Failed to normalize attestation endpoint value '{rawEndpoint}'.");
-            return null;
+            InMemoryMtlsCertCache.Shared.ClearForTest();
+            ImdsV2BindingCache.Shared.ClearForTest();
+            MsiCertManager.ResetStoreEnsureFlagsForTest();
         }
     }
 }
