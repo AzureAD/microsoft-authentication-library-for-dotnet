@@ -89,17 +89,17 @@ namespace Microsoft.Identity.Client.Cache.Items
             return cacheParameters;
         }
         
-        internal void AddPersistedCacheParameters(Dictionary<string, string> additionalPersistedCacheParameters)
+        internal void AddAdditionalCacheParameters(Dictionary<string, string> additionalCacheParameters)
         {
-            if (additionalPersistedCacheParameters != null)
+            if (additionalCacheParameters != null)
             {
                 if (PersistedCacheParameters == null)
                 {
-                    PersistedCacheParameters = new Dictionary<string, string>(additionalPersistedCacheParameters);
+                    PersistedCacheParameters = new Dictionary<string, string>(additionalCacheParameters);
                 }
                 else
                 {
-                    foreach (var kvp in additionalPersistedCacheParameters)
+                    foreach (var kvp in additionalCacheParameters)
                     {
                         PersistedCacheParameters[kvp.Key] = kvp.Value;
                     }
@@ -306,8 +306,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// These are acquired from the response and are stored in the cache for later use.
         /// </summary>
         internal IDictionary<string, string> PersistedCacheParameters { get; private set; }
-
-        internal string AcbAuthN { get; private set; }
 
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;

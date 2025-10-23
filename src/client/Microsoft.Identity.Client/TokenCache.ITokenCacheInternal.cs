@@ -83,7 +83,6 @@ namespace Microsoft.Identity.Client
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                         requestParams.PersistedCacheParameters,
                         requestParams.CacheKeyComponents);
-                //TODO need client info here
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))

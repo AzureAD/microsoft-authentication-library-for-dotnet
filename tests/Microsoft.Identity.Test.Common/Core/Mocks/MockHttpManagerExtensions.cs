@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             var handler = new MockHttpMessageHandler()
             {
                 ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = addClientInfo? MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithClientInfoMessage(token, expiresIn, tokenType, addClientInfo)
+                ResponseMessage = addClientInfo? MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithClientInfoMessage(token, expiresIn, tokenType, true)
                                                  : MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token, expiresIn, tokenType),
                 UnexpectedRequestHeaders = unexpectedHttpHeaders,
                 ExpectedPostData = expectedPostData

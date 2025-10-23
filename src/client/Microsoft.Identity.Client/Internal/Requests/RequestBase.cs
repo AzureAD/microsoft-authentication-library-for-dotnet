@@ -337,7 +337,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var idtItem = tuple.Item2;
             Account account = tuple.Item3;
 
-            atItem.AddPersistedCacheParameters(clientInfoFromServer.AdditionalResponseParameters);
+            atItem.AddAdditionalCacheParameters(clientInfoFromServer.AdditionalResponseParameters);
 
             return new AuthenticationResult(
                 atItem,
