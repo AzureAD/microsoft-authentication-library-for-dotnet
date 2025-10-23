@@ -468,8 +468,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         /* ignore release errors to prevent masking original exceptions */
                     }
                 }
-                }
             }
+        }
 
         /// <summary>
         /// Loads the file cache data from the persistent storage file.
