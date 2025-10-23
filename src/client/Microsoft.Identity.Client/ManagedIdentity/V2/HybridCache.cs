@@ -46,12 +46,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     internal class HybridCache : IHybridCache, IDisposable
     {
         /// <summary>
-        /// Buffer time subtracted from token expiration to account for clock skew and ensure
-        /// tokens are refreshed before they actually expire.
-        /// </summary>
-        private static readonly TimeSpan s_expirySkew = TimeSpan.FromMinutes(2);
-
-        /// <summary>
         /// In-memory cache for fast access within the current process.
         /// Key: Cache key as string representation.
         /// Value: Cache entry containing token data and metadata.
@@ -92,10 +86,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         private bool _disposed;
 
         /// <summary>
+        /// Timeout for mutex acquisition operations. Configurable for unit tests.
+        /// </summary>
+        private readonly TimeSpan _mutexTimeout;
+
+        /// <summary>
+        /// Buffer time subtracted from token expiration to account for clock skew.
+        /// Configurable for unit tests.
+        /// </summary>
+        private readonly TimeSpan _expirySkew;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="HybridCache"/> class.
         /// Uses a fixed cache directory in the user's local application data folder.
         /// </summary>
         /// <param name="logger">Logger instance for diagnostics and debugging information.</param>
+        /// <param name="mutexTimeout">Timeout for mutex acquisition operations. Defaults to 30 seconds. Use shorter values for unit tests.</param>
+        /// <param name="expirySkew">Buffer time for token expiry calculations. Defaults to 2 minutes. Use shorter values for unit tests.</param>
         /// <remarks>
         /// The constructor:
         /// - Creates the cache directory if it doesn't exist
@@ -115,9 +122,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// <exception cref="DirectoryNotFoundException">
         /// Thrown when the cache directory path is invalid.
         /// </exception>
-        public HybridCache(ILoggerAdapter logger)
+        public HybridCache(
+            ILoggerAdapter logger,
+            TimeSpan? mutexTimeout = null,
+            TimeSpan? expirySkew = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            // Configure timeouts - use shorter values for unit tests to improve test performance
+            _mutexTimeout = mutexTimeout ?? TimeSpan.FromSeconds(30);
+            _expirySkew = expirySkew ?? TimeSpan.FromMinutes(2);
 
             // Fixed cache location in user's local app data
             var cacheDirectory = Path.Combine(
@@ -132,7 +146,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             // Create named mutex for cross-process synchronization
             // Using a deterministic name based on cache file path to ensure same mutex across processes
             _mutexName = $"Global\\MSAL_AttestationCache_{_cacheFilePath.GetHashCode():X8}";
-            _namedMutex = new Mutex(false, _mutexName);
+                _namedMutex = new Mutex(false, _mutexName);
 
             _logger.Info(() => $"[HybridCache] Cache initialized. File path: {_cacheFilePath}, Mutex: {_mutexName}");
         }
@@ -189,7 +203,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // Step 1: Check in-memory cache first (fastest path)
                 if (s_memoryCache.TryGetValue(keyString, out var memoryEntry))
                 {
-                    if (!string.IsNullOrEmpty(memoryEntry.Token) && now + s_expirySkew < memoryEntry.ExpiresOnUtc)
+                    if (!string.IsNullOrEmpty(memoryEntry.Token) && now + _expirySkew < memoryEntry.ExpiresOnUtc)
                     {
                         _logger.Info(() => $"[HybridCache] Cache hit in memory for key: {key}");
                         return new AttestationTokenResponse { AttestationToken = memoryEntry.Token };
@@ -209,7 +223,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                     if (fileCache.TryGetValue(keyString, out var fileEntry))
                     {
-                        if (!string.IsNullOrEmpty(fileEntry.Token) && now + s_expirySkew < fileEntry.ExpiresOnUtc)
+                        if (!string.IsNullOrEmpty(fileEntry.Token) && now + _expirySkew < fileEntry.ExpiresOnUtc)
                         {
                             // Step 3: Found valid token in file cache, populate in-memory cache
                             s_memoryCache.TryAdd(keyString, fileEntry);
@@ -427,11 +441,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 _logger.Verbose(() => $"[HybridCache] Attempting to acquire mutex: {_mutexName}");
 
                 // Try to acquire mutex with timeout to avoid deadlocks
-                mutexAcquired = _namedMutex.WaitOne(TimeSpan.FromSeconds(30));
+                mutexAcquired = _namedMutex.WaitOne(_mutexTimeout);
                 if (!mutexAcquired)
                 {
-                    _logger.Warning($"[HybridCache] Failed to acquire mutex within timeout of 30 seconds: {_mutexName}");
-                    throw new TimeoutException("Failed to acquire cache mutex within timeout period of 30 seconds");
+                    _logger.Warning($"[HybridCache] Failed to acquire mutex within timeout of {_mutexTimeout.TotalSeconds} seconds: {_mutexName}");
+                    throw new TimeoutException($"Failed to acquire cache mutex within timeout period of {_mutexTimeout.TotalSeconds} seconds");
                 }
 
                 _logger.Verbose(() => $"[HybridCache] Mutex acquired successfully: {_mutexName}");
@@ -454,8 +468,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         /* ignore release errors to prevent masking original exceptions */
                     }
                 }
+                }
             }
-        }
 
         /// <summary>
         /// Loads the file cache data from the persistent storage file.
@@ -503,7 +517,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                 foreach (var kvp in cache)
                 {
-                    if (now + s_expirySkew >= kvp.Value.ExpiresOnUtc)
+                    if (now + _expirySkew >= kvp.Value.ExpiresOnUtc)
                     {
                         keysToRemove.Add(kvp.Key);
                     }
