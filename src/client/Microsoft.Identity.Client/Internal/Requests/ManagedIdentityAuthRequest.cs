@@ -45,14 +45,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // Prime the scheme before any cache lookup if we already have a binding cert from a prior mint
             if (AuthenticationRequestParameters.IsMtlsPopRequested)
             {
-                var priorCert = _managedIdentityClient.RuntimeMtlsBindingCertificate;
-                if (priorCert != null)
+                if (_managedIdentityClient.RuntimeMtlsBindingCertificate != null)
                 {
-                    AuthenticationRequestParameters.AuthenticationScheme = new MtlsPopAuthenticationOperation(priorCert);
+                    AuthenticationRequestParameters.AuthenticationScheme = new MtlsPopAuthenticationOperation(_managedIdentityClient.RuntimeMtlsBindingCertificate);
 
                     logger.Info("[ManagedIdentity] Using prior mTLS binding certificate for cache lookup.");
                     logger.InfoPii(
-                        () => $"[ManagedIdentity][PII] Prior mTLS cert thumbprint: {priorCert.Thumbprint}",
+                        () => $"[ManagedIdentity][PII] Prior mTLS cert thumbprint: {_managedIdentityClient.RuntimeMtlsBindingCertificate.Thumbprint}",
                         () => "[ManagedIdentity][PII] Prior mTLS cert thumbprint: ***");
                 }
             }
