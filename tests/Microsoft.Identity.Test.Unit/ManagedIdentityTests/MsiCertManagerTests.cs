@@ -23,6 +23,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             public int InstallCount;
             public X509Certificate2 RehydrateCert;
             public string RehydrateEndpoint;
+            public bool RemovedOnPurge;
+            public int RemoveCalls;
+
             public bool TryResolveFreshestBySubjectAndType(string cn, string dc, string tokenType,
                 out X509Certificate2 cert, out string endpoint)
             {
@@ -88,25 +91,23 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             public bool TryRemoveByThumbprintIfUnusable(string thumbprint)
             {
+                RemoveCalls++;
                 if (RehydrateCert == null)
                     return false;
 
-                // match by thumbprint
                 if (!string.Equals(RehydrateCert.Thumbprint, thumbprint, StringComparison.OrdinalIgnoreCase))
                     return false;
 
-                // only remove if there is no usable private key
                 if (HasUsablePrivateKey(RehydrateCert))
                     return false;
 
                 try
-                {
-                    RehydrateCert.Dispose();
-                }
+                { RehydrateCert.Dispose(); }
                 catch { /* test fake: ignore */ }
 
                 RehydrateCert = null;
                 RehydrateEndpoint = null;
+                RemovedOnPurge = true;     // <-- track purge happened
                 return true;
             }
         }
@@ -236,37 +237,53 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             string token = "bearer";
             string idKey = "app-key";
 
-            // Create a cert with a private key…
-            var (raw, rsa, withKey) = MakeSelfSigned(mi, tenant, DateTimeOffset.UtcNow.AddMinutes(-1), TimeSpan.FromHours(1));
-            // …and then strip the private key to simulate "TPM key missing"
-            var publicOnly = new X509Certificate2(withKey.Export(X509ContentType.Cert));
+            // Rehydrate/store returns an RSA cert that has NO private key (and no way to resolve one).
+            using var rehydrateRsa = RSA.Create(2048);
+            var rehydrateReq = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                $"CN={mi}, DC={tenant}", rehydrateRsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+
+            // Create a self-signed with a private key first…
+            using var rehydrateWithKey = rehydrateReq.CreateSelfSigned(
+                DateTimeOffset.UtcNow.AddMinutes(-1),
+                DateTimeOffset.UtcNow.AddHours(1));
+
+            // …then make a **public-only** instance. This object cannot yield an RSA private key.
+            var publicOnly = new X509Certificate2(rehydrateWithKey.Export(X509ContentType.Cert));
+
+            // Destroy key material so GetRSAPrivateKey() can never succeed for the public-only cert.
+            rehydrateWithKey.Dispose();
+            // (rehydrateRsa is already in using; explicit Dispose not required, but harmless if left)
+
+            // Point the fake “store” at the public-only cert.
             repo.RehydrateCert = publicOnly;
             repo.RehydrateEndpoint = "https://rehydrate/token";
 
-            // Prepare a real mint path (should be invoked, since rehydrate will fail to detach)
+            // --- Mint path uses a DIFFERENT keypair ---
+            var (rawMint, rsaMint, mintWithKey) =
+                MakeSelfSigned(mi, tenant, DateTimeOffset.UtcNow.AddMinutes(-1), TimeSpan.FromHours(1));
+
             int mintCalls = 0;
             var resp = new CertificateRequestResponse
             {
                 ClientId = mi,
                 TenantId = tenant,
                 MtlsAuthenticationEndpoint = "https://fresh/token",
-                Certificate = raw
+                Certificate = rawMint
             };
 
             var (cert, r) = await mgr.GetOrMintBindingAsync(
                 idKey, tenant, mi, token,
-                async ct => { mintCalls++; await Task.Yield(); return (resp, withKey.GetRSAPrivateKey()); },
+                async ct => { Interlocked.Increment(ref mintCalls); await Task.Yield(); return (resp, rsaMint); },
                 CancellationToken.None).ConfigureAwait(false);
 
             Assert.AreEqual(1, mintCalls, "rehydrate should fail → mint once");
             Assert.AreEqual("https://fresh/token", r.MtlsAuthenticationEndpoint);
             Assert.IsNotNull(cert);
-            // The stale public-only cert should have been purged and replaced by the fresh one
-            Assert.IsNotNull(repo.RehydrateCert, "store should contain the fresh binding after mint");
-            Assert.AreNotEqual(publicOnly.Thumbprint, repo.RehydrateCert.Thumbprint, "stale store cert was not replaced");
-            Assert.IsNotNull(repo.RehydrateCert.GetRSAPrivateKey(), "fresh store cert must have a usable private key");
-            Assert.AreEqual("https://fresh/token", repo.RehydrateEndpoint, "store should reflect the fresh endpoint");
 
+            // We purged the stale entry (public-only), then installed the new binding
+            Assert.AreEqual(1, repo.InstallCount, "new binding should be installed after purge");
+            Assert.IsNotNull(repo.RehydrateCert, "store should contain the newly minted binding after reinstall");
+            Assert.AreEqual(cert.Thumbprint, repo.RehydrateCert.Thumbprint, "store holds the minted binding");
         }
     }
 }

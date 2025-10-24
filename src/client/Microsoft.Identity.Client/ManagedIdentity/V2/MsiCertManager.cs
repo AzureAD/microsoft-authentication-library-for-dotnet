@@ -97,19 +97,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
 
                 // ---- 2) Cross-process rehydrate from store ----
-                // ---- 2) Cross-process rehydrate from store ----
                 if (_repo.TryResolveFreshestBySubjectAndType(
-                        subjectCn: managedIdentityId,
-                        subjectDc: tenantId,
-                        tokenType: tokenType,
-                        cert: out var storeCert,
-                        mtlsEndpoint: out var endpoint))
+        subjectCn: managedIdentityId,
+        subjectDc: tenantId,
+        tokenType: tokenType,
+        cert: out var storeCert,
+        mtlsEndpoint: out var endpoint))
                 {
-                    // Capture the thumbprint BEFORE disposing; needed for purge if the key is unusable
-                    var thumb = storeCert?.Thumbprint;
+                    // capture thumbprint before dispose so we can purge if it’s unusable
+                    string thumb = null;
+                    try
+                    { thumb = storeCert.Thumbprint; }
+                    catch { /* ignore */ }
 
                     var detached = TryCreateDetachedWithSameKey(storeCert);
-                    storeCert?.Dispose();
+                    storeCert.Dispose();
 
                     if (detached != null)
                     {
@@ -131,20 +133,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         return (detached, respFromStore);
                     }
 
-                    // Key unusable: purge the stale store entry so we don't keep rehydrating it
-                    try
+                    // No usable private key: purge the stale public-only cert so future rehydrate doesn't keep hitting it
+                    if (!string.IsNullOrEmpty(thumb))
                     {
-                        if (!string.IsNullOrEmpty(thumb))
-                        {
-                            _repo.TryRemoveByThumbprintIfUnusable(thumb);
-                        }
+                        try
+                        { _repo.TryRemoveByThumbprintIfUnusable(thumb); }
+                        catch { /* best effort */ }
                     }
-                    catch
-                    {
-                        // best-effort
-                    }
-
-                    // fall through to mint
+                    // fall through to mint…
                 }
 
                 // ---- 3) Mint new (CSR -> /issuecredential) ONLY IF all above missed ----
