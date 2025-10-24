@@ -34,7 +34,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1,1,,";
         private const string ApiIdAndCorrelationIdSection =
             "1003,ad8c894a-557f-48c0-b045-c129590c344e";
-        private const string InvalidGrantError = "invalid_grant";
         private const string UPApiId = "1003";
         private const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
         private static readonly string[] s_b2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
@@ -116,63 +115,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
             await RunB2CHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        private async Task CheckTelemetryHeadersAsync(
-            LabResponse labResponse)
-        {
-            var factory = new HttpSnifferClientFactory();
-
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority(Authority)
-                .WithHttpClientFactory(factory)
-                .Build();
-
-            await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
-
-            #pragma warning disable CS0618 // Type or member is obsolete
-            AuthenticationResult authResult = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
-                    .WithCorrelationId(CorrelationId)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-            #pragma warning restore CS0618
-
-            Assert.IsNotNull(authResult);
-            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNotNull(authResult.IdToken);
-            Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
-            AssertTelemetryHeaders(factory, true, labResponse);
-        }
-
-        private async Task RunAcquireTokenWithUsernameIncorrectPasswordAsync(
-            IPublicClientApplication msalPublicClient,
-            string userName)
-        {
-            try
-            {
-                #pragma warning disable CS0618 // Type or member is obsolete
-                var result = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, userName, "incorrectPass")
-
-                    .WithCorrelationId(CorrelationId)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-                #pragma warning restore CS0618
-            }
-            catch (MsalServiceException ex)
-            {
-                Assert.IsTrue(!string.IsNullOrWhiteSpace(ex.CorrelationId));
-                Assert.AreEqual(400, ex.StatusCode);
-                Assert.AreEqual(InvalidGrantError, ex.ErrorCode);
-                Assert.IsTrue(ex.Message.StartsWith("AADSTS50126"));
-
-                return;
-            }
-
-            Assert.Fail("Bad exception or no exception thrown");
         }
 
         private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "", bool isPublicClient = true, Cloud cloud = Cloud.Public)
