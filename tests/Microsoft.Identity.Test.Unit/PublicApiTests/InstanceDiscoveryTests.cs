@@ -69,8 +69,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [WorkItem(5545)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5545
         public async Task NoInstanceDiscovery_AirgappedCould_TestAsync()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            using (new EnvVariableContext())
             {
+                Environment.SetEnvironmentVariable("REGION_NAME", TestConstants.Region);
 
                 // Instance discovery explicitly disabled
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -81,8 +83,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithInstanceDiscovery(false)
                                                               .Build();
 
-                // Direct token request (no instance discovery mock!)
-                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                // Direct token request (no instance discovery mock!)                
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 // Act
@@ -99,16 +100,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task HttpErrorsInDiscoveryShouldBeIgnored_AirgappedCould_TestAsync()
         {
             using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            using (new EnvVariableContext())
             {
+                Environment.SetEnvironmentVariable("REGION_NAME", TestConstants.Region);
+
                 // Instance discovery explicitly disabled
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithAuthority(TestConstants.AuthorityNotKnownTenanted)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)                                                          
+                                                              .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                                                               .Build();
-
-                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
