@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity;
@@ -39,6 +41,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
+            
+            // Prime the scheme before any cache lookup if we already have a binding cert from a prior mint
+            if (AuthenticationRequestParameters.IsMtlsPopRequested)
+            {
+                if (_managedIdentityClient.RuntimeMtlsBindingCertificate != null)
+                {
+                    AuthenticationRequestParameters.AuthenticationScheme = new MtlsPopAuthenticationOperation(_managedIdentityClient.RuntimeMtlsBindingCertificate);
+
+                    logger.Info("[ManagedIdentity] Using prior mTLS binding certificate for cache lookup.");
+                    logger.InfoPii(
+                        () => $"[ManagedIdentity][PII] Prior mTLS cert thumbprint: {_managedIdentityClient.RuntimeMtlsBindingCertificate.Thumbprint}",
+                        () => "[ManagedIdentity][PII] Prior mTLS cert thumbprint: ***");
+                }
+            }
 
             // 1. FIRST, handle ForceRefresh
             if (_managedIdentityParameters.ForceRefresh)
@@ -208,6 +224,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 await _managedIdentityClient
                 .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
                 .ConfigureAwait(false);
+
+            if (AuthenticationRequestParameters.IsMtlsPopRequested && _managedIdentityParameters.MtlsCertificate != null)
+            {
+                // Remember the cert...
+                _managedIdentityClient.SetRuntimeMtlsBindingCertificate(_managedIdentityParameters.MtlsCertificate);
+
+                // Apply mTLS scheme BEFORE caching...
+                AuthenticationRequestParameters.AuthenticationScheme =
+                    new MtlsPopAuthenticationOperation(_managedIdentityParameters.MtlsCertificate);
+
+                _managedIdentityParameters.MtlsCertificate = null;
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    "[ManagedIdentity] Applied mtls_pop scheme prior to caching.");
+            }
 
             var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
