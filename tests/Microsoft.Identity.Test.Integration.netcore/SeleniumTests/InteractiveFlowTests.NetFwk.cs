@@ -67,16 +67,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
-        public async Task Interactive_AdfsV4_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
         public async Task InteractiveConsentPromptAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -89,9 +79,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #if IGNORE_FEDERATED
         [Ignore]
 #endif
-        public async Task Interactive_AdfsV2019_FederatedAsync()
+        public async Task Interactive_Adfs_FederatedAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -164,9 +154,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #if IGNORE_FEDERATED
         [Ignore]
 #endif
-        public async Task Interactive_AdfsV2019_DirectAsync()
+        public async Task Interactive_Adfs_DirectAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
         }      
 

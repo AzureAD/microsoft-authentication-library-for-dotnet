@@ -43,6 +43,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+            
+            // Configure TLS 1.3 for ADFS 2022 connectivity (multiple approaches for .NET 8)
+            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls13 | System.Net.SecurityProtocolType.Tls12;
+            
+            // Also set for HttpClient in .NET 8
+            AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
         }
 
         #region Happy Path Tests
@@ -87,9 +93,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #if IGNORE_FEDERATED
         [Ignore]
 #endif
-        public async Task ROPC_ADFSv4Federated_Async()
+        public async Task ROPC_AdfsFederated_Async()
         {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -97,9 +103,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #if IGNORE_FEDERATED
         [Ignore]
 #endif
-        public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
+        public async Task ROPC_AdfsFederated_WithMetadata_Async()
         {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
             string federationMetadata = File.ReadAllText(@"federationMetadata.xml").ToString();
             await RunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
         }
@@ -111,7 +117,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #endif
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
 
             var user = labResponse.User;
             Uri authorityUri = new Uri(Adfs2019LabConstants.Authority);
@@ -405,7 +411,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
             }
-
 
             Assert.IsNotNull(authResult);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
