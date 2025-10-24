@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 requestContext.Logger.Error($"[Instance Discovery] Instance discovery failed - invalid instance! ");
                 throw;
             }
-            catch (Exception e) 
+            catch (HttpRequestException e) 
             { 
                 requestContext.Logger.Warning(
                     $"[Instance Discovery] Instance Discovery failed. MSAL will continue without network instance metadata. \n\r" +
