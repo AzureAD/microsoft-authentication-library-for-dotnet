@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NetCoreWinFormsWAM": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

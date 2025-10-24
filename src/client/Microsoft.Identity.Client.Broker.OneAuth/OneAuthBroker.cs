@@ -31,7 +31,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
         private readonly ILoggerAdapter _logger;
         private readonly IntPtr _parentHandle = IntPtr.Zero;
         private readonly BrokerOptions _brokerOptions;
+        private readonly ApplicationConfiguration _appConfig;
         //private readonly Authenticator _oneAuth;
+
         private bool _initialized = false;
 
         public bool IsInitialized => _initialized;
@@ -98,6 +100,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             ILoggerAdapter logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
             //_oneAuth = new OneAuthCs();
 
             // Set parent window handle for OneAuth UI on Windows
@@ -299,23 +302,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             {
                 try
                 {
-                    // Invoke SignInTest to test OneAuth functionality
-                    SignInTest().GetAwaiter().GetResult();
+                    // Invoke SignInTest to test OneAuth functionality (commented out)
+                    // SignInTest().GetAwaiter().GetResult();
                     
-                    // Run the async method synchronously on the STA thread
-                    // var result = SignInInteractivelyAsync(
-                    //     authenticationRequestParameters,
-                    //     acquireTokenInteractiveParameters).GetAwaiter().GetResult();
-                    // tcs.SetResult(result);
-                    
-                    // For now, just return a default response since SignInInteractivelyAsync is commented out
-                    var defaultResponse = new MsalTokenResponse
-                    {
-                        Error = MsalError.UnknownBrokerError,
-                        ErrorDescription = "SignInInteractivelyAsync is currently commented out - only SignInTest is executing",
-                        CorrelationId = authenticationRequestParameters.CorrelationId.ToString()
-                    };
-                    tcs.SetResult(defaultResponse);
+                    // Run SignInInteractivelyAsync method synchronously on the STA thread
+                    var result = SignInInteractivelyAsync(
+                        authenticationRequestParameters,
+                        acquireTokenInteractiveParameters).GetAwaiter().GetResult();
+                    tcs.SetResult(result);
                 }
                 catch (Exception ex)
                 {
@@ -400,13 +394,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
                     throw new InvalidOperationException("OneAuth adapter is not initialized");
                 }
 
+                // Create OneAuth configurations using the stored app config
+                var oneAuthAppConfig = CreateConfiguredAppConfig(_appConfig);
+                var aadConfig = CreateConfiguredAadConfig(_appConfig);
+                var msaConfig = CreateConfiguredMsaConfig(_appConfig);
+                
+                // Call Authenticator.Startup with the configured parameters
+                await Authenticator.Startup(oneAuthAppConfig, aadConfig, msaConfig, null);
+                
                 _logger?.Info("[OneAuth] Calling SignInInteractively using OneAuth C# API");
 
                 // Create UxContext for OneAuth UI handling
                 var uxContext = new UxContext(_parentHandle, IntPtr.Zero, "OneAuth");
 
                 // Create account hint
-                string accountHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
+                //string accountHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
 
                 // Create TelemetryParameters for OneAuth
                 //var telemetryParameters = new Microsoft.Authentication.Client.TelemetryParameters(
@@ -422,17 +424,33 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
                 // Call OneAuth directly since we're already running on STA thread
                 AuthResult authResult = await Authenticator.SignInInteractively(
                     uxContext,
-                    accountHint,
+                    "",
                     oneAuthParams,
                     null,
                     telemetryParameters: new TelemetryParameters()).ConfigureAwait(false);
 
                 // Convert OneAuth result to MSAL token response
-                return ConvertOneAuthResultToMsalTokenResponse(authResult, authenticationRequestParameters);
+                var result = ConvertOneAuthResultToMsalTokenResponse(authResult, authenticationRequestParameters);
+                
+                // Shutdown Authenticator after completing the authentication
+                Authenticator.Shutdown();
+                
+                return result;
             }
             catch (Exception ex)
             {
                 _logger?.Error($"[OneAuth] Interactive authentication failed: {ex}");
+                
+                // Ensure Authenticator is shutdown even on error
+                try
+                {
+                    Authenticator.Shutdown();
+                }
+                catch (Exception shutdownEx)
+                {
+                    _logger?.Warning($"[OneAuth] Failed to shutdown Authenticator after error: {shutdownEx}");
+                }
+                
                 return new MsalTokenResponse
                 {
                     Error = MsalError.UnknownBrokerError,

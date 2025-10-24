@@ -346,11 +346,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OneAuthBroker
             var parameters = new Dictionary<string, string>();
 
             // Core OAuth2/OIDC parameters
-            if (!string.IsNullOrEmpty(authRequestParams.AppConfig?.ClientId))
-                parameters["client_id"] = authRequestParams.AppConfig.ClientId;
+            //if (!string.IsNullOrEmpty(authRequestParams.AppConfig?.ClientId))
+            //    parameters["client_id"] = authRequestParams.AppConfig.ClientId;
 
-            if (authRequestParams.RedirectUri != null)
-                parameters["redirect_uri"] = authRequestParams.RedirectUri.ToString();
+            //if (authRequestParams.RedirectUri != null)
+            //    parameters["redirect_uri"] = authRequestParams.RedirectUri.ToString();
 
             // Tracking and correlation for debugging
             parameters["correlation_id"] = authRequestParams.CorrelationId.ToString();
