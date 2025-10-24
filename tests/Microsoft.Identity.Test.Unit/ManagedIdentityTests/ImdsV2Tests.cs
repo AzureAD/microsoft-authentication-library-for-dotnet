@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
-        public async Task mTLSPopTokenIsReAcquiredWhenCertificatIsExpired(
+        public async Task mTLSPopTokenIsReAcquiredWhenCertificateIsExpired(
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
@@ -294,8 +294,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                // TODO: Add functionality to check cert expiration in the cache
                 /**
+                // TODO: Add functionality to check cert expiration in the cache
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
 
                 result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -303,16 +303,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithAttestationProviderForTests(s_fakeAttestationProvider)
                     .ExecuteAsync().ConfigureAwait(false);
 
-                //result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                //    .WithMtlsProofOfPossession()
-                //    .WithAttestationProviderForTests(s_fakeAttestationProvider)
-                //    .ExecuteAsync().ConfigureAwait(false);
-
-                //Assert.IsNotNull(result);
-                //Assert.IsNotNull(result.AccessToken);
-                //Assert.AreEqual(result.TokenType, MTLSPoP);
-                //Assert.IsNotNull(result.BindingCertificate);
-                //Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.IsNotNull(result.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                */
             }
         }
 
