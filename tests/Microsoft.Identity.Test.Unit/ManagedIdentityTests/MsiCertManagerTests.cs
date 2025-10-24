@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -72,6 +72,43 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             public void PurgeExpiredBeyondWindow(string cn, string dc, TimeSpan g) { }
             public void RemoveAllWithFriendlyNamePrefixForTest(string p) { }
+
+            private static bool HasUsablePrivateKey(X509Certificate2 c)
+            {
+                try
+                {
+                    using var rsa = c.GetRSAPrivateKey();
+                    return rsa != null;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            public bool TryRemoveByThumbprintIfUnusable(string thumbprint)
+            {
+                if (RehydrateCert == null)
+                    return false;
+
+                // match by thumbprint
+                if (!string.Equals(RehydrateCert.Thumbprint, thumbprint, StringComparison.OrdinalIgnoreCase))
+                    return false;
+
+                // only remove if there is no usable private key
+                if (HasUsablePrivateKey(RehydrateCert))
+                    return false;
+
+                try
+                {
+                    RehydrateCert.Dispose();
+                }
+                catch { /* test fake: ignore */ }
+
+                RehydrateCert = null;
+                RehydrateEndpoint = null;
+                return true;
+            }
         }
 
         private static (string raw, RSA rsa, X509Certificate2 withKey) MakeSelfSigned(string cn, string dc, DateTimeOffset nb, TimeSpan lifetime)
@@ -186,6 +223,50 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
             Assert.AreEqual(1, mintCalls, "exactly one mint under contention");
             Assert.IsTrue(results.Select(r => r.cert.Thumbprint).Distinct().Count() == 1);
+        }
+
+        [TestMethod]
+        public async Task StoreRehydrate_WithPublicOnlyCert_PurgesStore_ThenMints()
+        {
+            var repo = new FakeRepo();
+            var mgr = new MsiCertManager(InMemoryMtlsCertCache.Shared, ImdsV2BindingCache.Shared, repo);
+
+            string tenant = Guid.NewGuid().ToString();
+            string mi = Guid.NewGuid().ToString();
+            string token = "bearer";
+            string idKey = "app-key";
+
+            // Create a cert with a private key…
+            var (raw, rsa, withKey) = MakeSelfSigned(mi, tenant, DateTimeOffset.UtcNow.AddMinutes(-1), TimeSpan.FromHours(1));
+            // …and then strip the private key to simulate "TPM key missing"
+            var publicOnly = new X509Certificate2(withKey.Export(X509ContentType.Cert));
+            repo.RehydrateCert = publicOnly;
+            repo.RehydrateEndpoint = "https://rehydrate/token";
+
+            // Prepare a real mint path (should be invoked, since rehydrate will fail to detach)
+            int mintCalls = 0;
+            var resp = new CertificateRequestResponse
+            {
+                ClientId = mi,
+                TenantId = tenant,
+                MtlsAuthenticationEndpoint = "https://fresh/token",
+                Certificate = raw
+            };
+
+            var (cert, r) = await mgr.GetOrMintBindingAsync(
+                idKey, tenant, mi, token,
+                async ct => { mintCalls++; await Task.Yield(); return (resp, withKey.GetRSAPrivateKey()); },
+                CancellationToken.None).ConfigureAwait(false);
+
+            Assert.AreEqual(1, mintCalls, "rehydrate should fail → mint once");
+            Assert.AreEqual("https://fresh/token", r.MtlsAuthenticationEndpoint);
+            Assert.IsNotNull(cert);
+            // The stale public-only cert should have been purged and replaced by the fresh one
+            Assert.IsNotNull(repo.RehydrateCert, "store should contain the fresh binding after mint");
+            Assert.AreNotEqual(publicOnly.Thumbprint, repo.RehydrateCert.Thumbprint, "stale store cert was not replaced");
+            Assert.IsNotNull(repo.RehydrateCert.GetRSAPrivateKey(), "fresh store cert must have a usable private key");
+            Assert.AreEqual("https://fresh/token", repo.RehydrateEndpoint, "store should reflect the fresh endpoint");
+
         }
     }
 }

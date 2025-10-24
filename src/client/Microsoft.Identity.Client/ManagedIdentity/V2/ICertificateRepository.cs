@@ -17,5 +17,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         // Cleanup helpers
         void PurgeExpiredBeyondWindow(string subjectCn, string subjectDc, TimeSpan grace);
         void RemoveAllWithFriendlyNamePrefixForTest(string friendlyNamePrefix);
+        bool TryRemoveByThumbprintIfUnusable(string thumbprint);
     }
 }

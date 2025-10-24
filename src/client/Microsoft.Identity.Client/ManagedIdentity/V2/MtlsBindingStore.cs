@@ -216,5 +216,52 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 return false;
             }
         }
+
+        public bool TryRemoveByThumbprintIfUnusable(string thumbprint)
+        {
+            if (string.IsNullOrWhiteSpace(thumbprint))
+                return false;
+
+            try
+            {
+                using (var store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+                {
+                    store.Open(OpenFlags.ReadWrite);
+                    bool removedAny = false;
+
+                    // FindByThumbprint returns a collection; loop to handle duplicates
+                    var matches = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false);
+                    foreach (var c in matches)
+                    {
+                        string fn = null;
+                        try
+                        { fn = c.FriendlyName; }
+                        catch { fn = null; }
+
+                        // Only touch certs that we tagged (safety)
+                        if (string.IsNullOrEmpty(fn) || !BindingFriendlyName.HasOurPrefix(fn))
+                            continue;
+
+                        bool unusable;
+                        try
+                        { unusable = !IsPrivateKeyUsable(c); }
+                        catch { unusable = true; } // treat exceptions as unusable
+
+                        if (unusable)
+                        {
+                            try
+                            { store.Remove(c); removedAny = true; }
+                            catch { /* ignore */ }
+                        }
+                    }
+
+                    return removedAny;
+                }
+            }
+            catch
+            {
+                return false; // best effort
+            }
+        }
     }
 }

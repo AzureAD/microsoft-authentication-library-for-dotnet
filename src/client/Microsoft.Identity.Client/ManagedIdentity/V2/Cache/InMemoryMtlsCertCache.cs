@@ -53,6 +53,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2.Cache
                 return false;
             }
 
+            // Drop entries whose private key is not usable (e.g., after reboot)
+            try
+            {
+                if (!MtlsBindingStore.IsPrivateKeyUsable(best.Certificate))
+                {
+                    bucket.Remove(best);
+                    return false;
+                }
+            }
+            catch
+            {
+                bucket.Remove(best);
+                return false;
+            }
+
             entry = best;
             return true;
         }
@@ -97,6 +112,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2.Cache
                     // Validity check
                     if (cert.NotAfter.ToUniversalTime() <= now.UtcDateTime)
                         continue;
+
+                    // Private key usability check: drop unusable entries
+                    try
+                    {
+                        if (!MtlsBindingStore.IsPrivateKeyUsable(cert))
+                        {
+                            // Best-effort removal to keep cache clean; safe due to internal locking
+                            bucket.Remove(e);
+                            continue;
+                        }
+                    }
+                    catch
+                    {
+                        bucket.Remove(e);
+                        continue;
+                    }
 
                     // Subject CN/DC match
                     var subject = cert.Subject;

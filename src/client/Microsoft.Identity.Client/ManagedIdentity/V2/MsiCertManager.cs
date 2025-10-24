@@ -97,6 +97,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
 
                 // ---- 2) Cross-process rehydrate from store ----
+                // ---- 2) Cross-process rehydrate from store ----
                 if (_repo.TryResolveFreshestBySubjectAndType(
                         subjectCn: managedIdentityId,
                         subjectDc: tenantId,
@@ -104,8 +105,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         cert: out var storeCert,
                         mtlsEndpoint: out var endpoint))
                 {
+                    // Capture the thumbprint BEFORE disposing; needed for purge if the key is unusable
+                    var thumb = storeCert?.Thumbprint;
+
                     var detached = TryCreateDetachedWithSameKey(storeCert);
-                    storeCert.Dispose();
+                    storeCert?.Dispose();
 
                     if (detached != null)
                     {
@@ -126,7 +130,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         _bindingCache.Cache(identityKey, tokenType, respFromStore, detached.Subject);
                         return (detached, respFromStore);
                     }
-                    // else: unusable key -> fall through to mint
+
+                    // Key unusable: purge the stale store entry so we don't keep rehydrating it
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(thumb))
+                        {
+                            _repo.TryRemoveByThumbprintIfUnusable(thumb);
+                        }
+                    }
+                    catch
+                    {
+                        // best-effort
+                    }
+
+                    // fall through to mint
                 }
 
                 // ---- 3) Mint new (CSR -> /issuecredential) ONLY IF all above missed ----
