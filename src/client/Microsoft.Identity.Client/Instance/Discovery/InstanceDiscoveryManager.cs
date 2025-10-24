@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             catch (Exception e) 
             { 
                 requestContext.Logger.Warning(
-                    $"[Instance Discovery] Instance Discovery failed due to Exception. MSAL will continue without network instance metadata. \n\r" +
+                    $"[Instance Discovery] Instance Discovery failed. MSAL will continue without network instance metadata. \n\r" +
                     $" Exception: {e} ");
                 
                 return 
