@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.IO;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -21,6 +22,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
+
+        // Holds the most recently minted mTLS binding certificate for this application instance.
+        private X509Certificate2 _runtimeMtlsBindingCertificate;
+        internal X509Certificate2 RuntimeMtlsBindingCertificate => Volatile.Read(ref _runtimeMtlsBindingCertificate);
 
         internal static void ResetSourceForTest()
         {
@@ -156,6 +161,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
+        }
+
+        /// <summary>
+        /// Sets (or replaces) the in-memory binding certificate used to prime the mtls_pop scheme on subsequent requests.
+        /// The certificate is intentionally NOT disposed here to avoid invalidating caller-held references (e.g., via AuthenticationResult).
+        /// </summary>
+        /// <remarks>
+        /// Lifetime considerations:
+        /// - The binding certificate is ephemeral and valid for the token’s binding duration.
+        /// - If rotation occurs, older certificates will be eligible for GC once no longer referenced.
+        /// - Explicit disposal can be revisited if a deterministic rotation / shutdown strategy is introduced.
+        /// </remarks>
+        internal void SetRuntimeMtlsBindingCertificate(X509Certificate2 cert)
+        {
+            Volatile.Write(ref _runtimeMtlsBindingCertificate, cert);
         }
     }
 }
