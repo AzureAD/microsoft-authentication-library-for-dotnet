@@ -43,12 +43,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
-            
-            // Configure TLS 1.3 for ADFS 2022 connectivity (multiple approaches for .NET 8)
-            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls13 | System.Net.SecurityProtocolType.Tls12;
-            
-            // Also set for HttpClient in .NET 8
-            AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
         }
 
         #region Happy Path Tests
