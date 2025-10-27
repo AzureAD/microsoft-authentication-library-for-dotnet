@@ -448,5 +448,7 @@ namespace Microsoft.Identity.Client
         public const string RequestTimeOut = "Request to the endpoint timed out.";
         public const string MalformedOidcAuthorityFormat = "Possible cause: When using Entra External ID, you didn't append /v2.0, for example {0}/v2.0\"";
         public const string InvalidCertificate = "The certificate received from the Imds server is invalid.";
+        public const string AlreadyFellBackToImdsV1 = "A Bearer token has already been received; Please restart the application to receive a mTLS PoP token.";
+        public const string MtlsPopTokenNotSupportedinImdsV1 = "A mTLS PoP token cannot be requested because the applications source was determined to be ImdsV1.";
     }
 }

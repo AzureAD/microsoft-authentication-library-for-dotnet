@@ -1216,5 +1216,16 @@ namespace Microsoft.Identity.Client
         /// The certificate received from the Imds server is invalid.
         /// </summary>
         public const string InvalidCertificate = "invalid_certificate";
+
+        /// <summary>
+        /// The system has already fallen back IMDS V1 and can only get Bearer tokens.
+        /// It needs to be restarted to get mTLS PoP tokens.
+        /// </summary>
+        public const string AlreadyFellBackToImdsV1 = "already_fell_back_to_imds_v1";
+
+        /// <summary>
+        /// mTLS PoP tokens are not supported in IMDS V1.
+        /// </summary>
+        public const string MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1";
     }
 }

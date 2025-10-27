@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     source = await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
                 }
-                // Otherwise, check if the source has already been set to ImdsV2 (via this method, or GetManagedIdentitySourceAsync in ManagedIdentityApplication.cs) and mTLS PoP was NOT requested
+                // If the source has already been set to ImdsV2 (via this method, or GetManagedIdentitySourceAsync in ManagedIdentityApplication.cs) and mTLS PoP was NOT requested
                 // In this case, we need to fall back to ImdsV1, because ImdsV2 currently only supports mTLS PoP requests
                 else if ((s_sourceName == ManagedIdentitySource.ImdsV2) && !isMtlsPopRequested)
                 {
@@ -68,6 +68,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 else
                 {
                     source = s_sourceName;
+                }
+
+                // If the source is determined to be ImdsV1 and mTLS PoP was requested, throw an exception since ImdsV1 does not support mTLS PoP
+                if ((source == ManagedIdentitySource.DefaultToImds) && isMtlsPopRequested)
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsPopTokenNotSupportedinImdsV1,
+                        MsalErrorMessage.MtlsPopTokenNotSupportedinImdsV1);
                 }
 
                 return source switch

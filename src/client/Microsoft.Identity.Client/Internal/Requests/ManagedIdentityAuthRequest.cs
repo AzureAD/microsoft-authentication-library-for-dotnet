@@ -251,6 +251,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (cachedAccessTokenItem != null)
             {
+                if (_managedIdentityParameters.IsMtlsPopRequested && (cachedAccessTokenItem.TokenType == "Bearer"))
+                {
+                    throw new MsalClientException(
+                        MsalError.AlreadyFellBackToImdsV1,
+                        MsalErrorMessage.AlreadyFellBackToImdsV1);
+                }
+
                 AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                 Metrics.IncrementTotalAccessTokensFromCache();
                 return cachedAccessTokenItem;
