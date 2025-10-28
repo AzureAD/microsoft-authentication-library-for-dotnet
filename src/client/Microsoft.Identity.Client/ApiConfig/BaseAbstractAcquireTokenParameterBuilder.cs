@@ -113,6 +113,8 @@ namespace Microsoft.Identity.Client
                 return this as T;
             }
 
+            CommonParameters.ExtraQueryParameters = CommonParameters.ExtraQueryParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
             // Add each parameter to ExtraQueryParameters and, if requested, to CacheKeyComponents
             foreach (var kvp in extraQueryParameters)
             {

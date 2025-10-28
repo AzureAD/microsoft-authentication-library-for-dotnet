@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public Guid UserProvidedCorrelationId { get; set; }
         public bool UseCorrelationIdFromUser { get; set; }
         public IEnumerable<string> Scopes { get; set; }
-        public IDictionary<string, string> ExtraQueryParameters { get; set; } = new Dictionary<string, string>();
+        public IDictionary<string, string> ExtraQueryParameters { get; set; }
         public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
         public IAuthenticationOperation AuthenticationOperation { get; set; } = new BearerAuthenticationOperation();
