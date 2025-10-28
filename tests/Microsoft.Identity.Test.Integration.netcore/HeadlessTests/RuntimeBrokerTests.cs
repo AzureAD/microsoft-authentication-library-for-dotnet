@@ -488,9 +488,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
             //Arrange
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             
-            string popUser = "popUser@msidlab4.onmicrosoft.com";
+            string popUser = "MSAL-User-POP@id4slab1.onmicrosoft.com";
 
-            string[] scopes = { "https://msidlab4.sharepoint.com/user.read" };
+            string[] scopes = { "https://id4slab1.sharepoint.com/user.read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
 
@@ -526,7 +526,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             //Arrange
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
-            string popUser = "popUser@msidlab4.onmicrosoft.com";
+            string popUser = "MSAL-User-POP@id4slab1.onmicrosoft.com";
 
             string[] scopes = { "user.read" };
 
