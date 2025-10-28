@@ -1,13 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.MtlsPop.Attestation;
-using Microsoft.Win32.SafeHandles;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.MtlsPop
 {
@@ -24,6 +20,22 @@ namespace Microsoft.Identity.Client.MtlsPop
         public static AcquireTokenForManagedIdentityParameterBuilder WithMtlsProofOfPossession(
             this AcquireTokenForManagedIdentityParameterBuilder builder)
         {
+            void MtlsNotSupportedForManagedIdentity(string message)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsNotSupportedForManagedIdentity,
+                    message);
+            }
+
+            if (!DesktopOsHelper.IsWindows())
+            {
+                MtlsNotSupportedForManagedIdentity(MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
+            }
+
+#if NET462
+            MtlsNotSupportedForManagedIdentity(MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
+#endif
+
             builder.CommonParameters.IsMtlsPopRequested = true;
             AddRuntimeSupport(builder);
             return builder;

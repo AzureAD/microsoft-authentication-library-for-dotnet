@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using System.IO;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using System.Security.Cryptography.X509Certificates;
@@ -37,18 +37,47 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
-            AbstractManagedIdentity msi = await GetOrSelectManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
+            AbstractManagedIdentity msi = await GetOrSelectManagedIdentitySourceAsync(requestContext, parameters.IsMtlsPopRequested).ConfigureAwait(false);
             return await msi.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
-        private async Task<AbstractManagedIdentity> GetOrSelectManagedIdentitySourceAsync(RequestContext requestContext)
+        private async Task<AbstractManagedIdentity> GetOrSelectManagedIdentitySourceAsync(RequestContext requestContext, bool isMtlsPopRequested)
         {
             using (requestContext.Logger.LogMethodDuration())
             {
                 requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source if not cached. Cached value is {s_sourceName} ");
 
-                var source = (s_sourceName != ManagedIdentitySource.None) ? s_sourceName : await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
+                var source = ManagedIdentitySource.None;
+
+                // If the source is not already set, determine it
+                if (s_sourceName == ManagedIdentitySource.None)
+                {
+                    source = await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
+                }
+                // If the source has already been set to ImdsV2 (via this method, or GetManagedIdentitySourceAsync in ManagedIdentityApplication.cs) and mTLS PoP was NOT requested
+                // In this case, we need to fall back to ImdsV1, because ImdsV2 currently only supports mTLS PoP requests
+                else if ((s_sourceName == ManagedIdentitySource.ImdsV2) && !isMtlsPopRequested)
+                {
+                    requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but mTLS PoP was not requested. Falling back to ImdsV1 for this request only. Please use the \"WithMtlsProofOfPossession\" API to request a token via ImdsV2.");
+
+                    // keep the cached source (s_sourceName) as ImdsV2, since the developer may decide to use mTLS PoP in subsequent requests
+
+                    source = ManagedIdentitySource.DefaultToImds;
+                }
+                else
+                {
+                    source = s_sourceName;
+                }
+
+                // If the source is determined to be ImdsV1 and mTLS PoP was requested, throw an exception since ImdsV1 does not support mTLS PoP
+                if ((source == ManagedIdentitySource.DefaultToImds) && isMtlsPopRequested)
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsPopTokenNotSupportedinImdsV1,
+                        MsalErrorMessage.MtlsPopTokenNotSupportedinImdsV1);
+                }
+
                 return source switch
                 {
                     ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
@@ -66,14 +95,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method is perf sensitive any changes should be benchmarked.
         internal async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(RequestContext requestContext)
         {
+            // First check env vars to avoid the probe if possible
             ManagedIdentitySource source = GetManagedIdentitySourceNoImdsV2(requestContext.Logger);
 
+            // If a source is detected via env vars, use it
             if (source != ManagedIdentitySource.DefaultToImds)
             {
+                s_sourceName = source;
                 return source;
             }
 
-            // probe IMDSv2
+            // Otherwise, probe IMDSv2
             var response = await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext, probeMode: true).ConfigureAwait(false);
             if (response != null)
             {
