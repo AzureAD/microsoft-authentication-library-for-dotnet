@@ -356,7 +356,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
-        public async Task ApplicationsCannotSwitchBetweenImdsV1AndImdsV2(
+        public async Task ApplicationsCannotSwitchBetweenImdsVersionsForPreview(
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
@@ -395,7 +395,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.AlreadyFellBackToImdsV1, ex.ErrorCode);
+                Assert.AreEqual(MsalError.CannotSwitchBetweenImdsVersionsForPreview, ex.ErrorCode);
             }
         }
         #endregion Failure Tests

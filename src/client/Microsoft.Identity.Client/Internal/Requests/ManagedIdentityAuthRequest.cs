@@ -254,8 +254,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (_managedIdentityParameters.IsMtlsPopRequested && (cachedAccessTokenItem.TokenType == "Bearer"))
                 {
                     throw new MsalClientException(
-                        MsalError.AlreadyFellBackToImdsV1,
-                        MsalErrorMessage.AlreadyFellBackToImdsV1);
+                        MsalError.CannotSwitchBetweenImdsVersionsForPreview,
+                        MsalErrorMessage.CannotSwitchBetweenImdsVersionsForPreview);
                 }
 
                 AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
