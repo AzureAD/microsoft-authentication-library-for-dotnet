@@ -38,11 +38,11 @@ namespace Microsoft.Identity.Test.E2E
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_Imds")]
         [DataTestMethod]
-        [DataRow(null /*SAMI*/, null, DisplayName = "SAMI")]
-        [DataRow("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6", "clientid", DisplayName = "UAMI-ClientId")]
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImds_Succeeds-SAMI")]
+        [DataRow("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6", "clientid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ClientId")]
         [DataRow("/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/LabVaultAccess_UAMI",
-         "resourceid", DisplayName = "UAMI-ResourceId")]
-        [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "UAMI-ObjectId")]
+         "resourceid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ResourceId")]
+        [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ObjectId")]
         public async Task AcquireToken_OnImds_Succeeds(string id, string idType)
         {
             var mi = BuildMi(id, idType);
@@ -68,11 +68,11 @@ namespace Microsoft.Identity.Test.E2E
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_Imds")]
         [DataTestMethod]
-        [DataRow(null /*SAMI*/, null, DisplayName = "SAMI")]
-        [DataRow("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6", "clientid", DisplayName = "UAMI-ClientId")]
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-SAMI")]
+        [DataRow("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6", "clientid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ClientId")]
         [DataRow("/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/LabVaultAccess_UAMI",
-         "resourceid", DisplayName = "UAMI-ResourceId")]
-        [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "UAMI-ObjectId")]
+         "resourceid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ResourceId")]
+        [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ObjectId")]
         public async Task AcquireToken_OnImds_Fails_WithMtlsProofOfPossession(string id, string idType)
         {
             var mi = BuildMi(id, idType);
