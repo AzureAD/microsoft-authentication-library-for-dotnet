@@ -67,9 +67,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #if IGNORE_FEDERATED
         [Ignore]
 #endif
-        public async Task ROPC_AdfsFederated_Async()
+        public async Task ROPC_ADFSv4Federated_Async()
         {
-            var labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #endif
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
 
             var user = labResponse.User;
             Uri authorityUri = new Uri(Adfs2019LabConstants.Authority);
