@@ -34,10 +34,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 "uti": "6nciX02SMki9k73-F1sZAA",
                 "ver": "2.0"
              */
-            var addIdToken = TestConstants.CreateAadTestTokenResponse().IdToken;
+            var addIdToken = TestConstants.CreateAadTestTokenResponseWithMsalUserDefault().IdToken;
             var parsedToken = IdToken.Parse(addIdToken);
 
-            CoreAssert.AreEqual("Cloud IDLAB Basic User", parsedToken.Name, parsedToken.ClaimsPrincipal.FindFirst("name").Value);
+            CoreAssert.AreEqual("MSAL User Default", parsedToken.Name, parsedToken.ClaimsPrincipal.FindFirst("name").Value);
             CoreAssert.AreEqual("9f4880d8-80ba-4c40-97bc-f7a23c703084", parsedToken.ObjectId, parsedToken.ClaimsPrincipal.FindFirst("oid").Value);
             CoreAssert.AreEqual("MSAL-User-Default@id4slab1.onmicrosoft.com", parsedToken.PreferredUsername, parsedToken.ClaimsPrincipal.FindFirst("preferred_username").Value);
             CoreAssert.AreEqual("Y6YkBdHNNLHNmTKel9KhRz8wrasxdLRFiP14BRPWrn4", parsedToken.Subject, parsedToken.ClaimsPrincipal.FindFirst("sub").Value);
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual("1538538422", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "iat").Value);
             Assert.AreEqual("1538538422", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "nbf").Value);
             Assert.AreEqual("1538542322", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "exp").Value);
-            Assert.AreEqual("Cloud IDLAB Basic User", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "name").Value);
+            Assert.AreEqual("MSAL User Default", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "name").Value);
             Assert.AreEqual("9f4880d8-80ba-4c40-97bc-f7a23c703084", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "oid").Value);
             Assert.AreEqual("MSAL-User-Default@id4slab1.onmicrosoft.com", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "preferred_username").Value);
             Assert.AreEqual("Y6YkBdHNNLHNmTKel9KhRz8wrasxdLRFiP14BRPWrn4", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "sub").Value);

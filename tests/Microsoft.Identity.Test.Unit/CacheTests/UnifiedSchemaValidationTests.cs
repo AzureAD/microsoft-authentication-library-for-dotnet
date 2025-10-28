@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string expectedAccountKey = "9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca-login.microsoftonline.com";
             Assert.AreEqual(expectedAccountKey, key.iOSAccount);
 
-            string expectedGenericKey = "MSAL-User-Default@id4slab1.onmicrosoft.com";
+            string expectedGenericKey = "msal-user-default@id4slab1.onmicrosoft.com";
             Assert.AreEqual(expectedGenericKey, key.iOSGeneric);
 
             Assert.AreEqual(1003, key.iOSType);
@@ -912,7 +912,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string expectedAccountKey = "9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca-login.microsoftonline.com";
             Assert.AreEqual(expectedAccountKey, key.iOSAccount);
 
-            string expectedGenericKey = "MSAL-User-Default@id4slab1.onmicrosoft.com";
+            string expectedGenericKey = "msal-user-default@id4slab1.onmicrosoft.com";
             Assert.AreEqual(expectedGenericKey, key.iOSGeneric);
 
             Assert.AreEqual(1003, key.iOSType);
