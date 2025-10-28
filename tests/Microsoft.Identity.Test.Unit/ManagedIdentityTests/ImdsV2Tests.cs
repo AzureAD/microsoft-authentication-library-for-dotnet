@@ -1,14 +1,18 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
@@ -735,6 +739,795 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual("mtls_pop_requires_keyguard", ex.ErrorCode);
             }
         }
+        #endregion
+
+        #region cached certificate tests
+        [TestMethod]
+        public async Task mTLSPop_ForceRefresh_UsesCachedCert_NoIssueCredential_PostsCanonicalClientId_AndSkipsAttestation()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Start clean across tests
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // First acquire: full flow (CSR + issuecredential + token)
+                AddMocksToGetEntraToken(httpManager, mTLSPop: true);
+
+                int attestationCalls = 0;
+                Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> countingProvider =
+                    (input, ct) =>
+                    {
+                        Interlocked.Increment(ref attestationCalls);
+                        return Task.FromResult(new AttestationTokenResponse { AttestationToken = "header.payload.sig" });
+                    };
+
+                var result1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(countingProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(ImdsV2Tests.MTLSPoP, result1.TokenType);
+                Assert.IsNotNull(result1.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(1, attestationCalls, "Attestation must be called exactly once on first mint.");
+
+                // Second acquire: FORCE REFRESH to bypass token cache.
+                // Expect: 1x getplatformmetadata + token request. NO /issuecredential. Attestation NOT called again.
+                MockHelpers.AddMocksToGetEntraTokenUsingCachedCert(
+                    httpManager,
+                    _identityLoggerAdapter,
+                    mTLSPop: true,
+                    assertClientId: true,                 // assert canonical client_id is posted
+                    expectedClientId: TestConstants.ClientId);
+
+                var result2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithForceRefresh(true)                // if your API is parameterless, use .WithForceRefresh()
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(countingProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(ImdsV2Tests.MTLSPoP, result2.TokenType);
+                Assert.IsNotNull(result2.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(1, attestationCalls, "Attestation must NOT be invoked on refresh when cert is cached.");
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, TestConstants.ClientId + "-2")]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, TestConstants.MiResourceId + "-2")]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, TestConstants.ObjectId + "-2")]
+        public async Task mTLSPop_CachedCertIsPerIdentity_OnRefresh_Identity1UsesCache_Identity2Mints(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId1,
+            string userAssignedId2)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // Identity 1 – first acquire (mint)
+                var mi1 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId1, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId1, mTLSPop: true);
+
+                var result1 = await mi1.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                // Identity 1 – force refresh (should use cached cert → NO /issuecredential)
+                MockHelpers.AddMocksToGetEntraTokenUsingCachedCert(
+                    httpManager,
+                    _identityLoggerAdapter,
+                    mTLSPop: true,
+                    assertClientId: true,
+                    expectedClientId: TestConstants.ClientId,
+                    userAssignedIdentityId: userAssignedIdentityId,
+                    userAssignedId: userAssignedId1
+                );
+
+                var result1Refresh = await mi1.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithForceRefresh(true)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result1Refresh.AuthenticationResultMetadata.TokenSource);
+
+                // Identity 2 – new identity (should MINT again → requires /issuecredential)
+                var mi2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId2, addProbeMock: false, addSourceCheck: false, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId2, mTLSPop: true);
+
+                var result2 = await mi2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+        #endregion
+
+        #region Cert cache tests
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null,                    /*isUami*/ false)] // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId,  /*isUami*/ true)]  // UAMI by client_id
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, /*isUami*/ true)] // UAMI by resource_id
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId,  /*isUami*/ true)]  // UAMI by object_id
+        public async Task mTLSPopTokenHappyPath_LongLivedCert_IdentityMapping(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId,
+            bool isUami)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // Force KeyGuard so the PoP path is taken
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    userAssignedIdentityId,
+                    userAssignedId,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard
+                ).ConfigureAwait(false);
+
+                // --- First acquire: MINT (CSR + issuecredential + token) with a long-lived cert ---
+                // Use the known-good cert that matches TestCsrFactory's RSA and already has a far NotAfter (>= 20 years)
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId,
+                    userAssignedId,
+                    certificateRequestCertificate: TestConstants.ValidRawCertificate,
+                    mTLSPop: true);
+
+                var first = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(first);
+                Assert.AreEqual(MTLSPoP, first.TokenType, "Token type must be mtls_pop");
+                Assert.IsNotNull(first.BindingCertificate, "Binding certificate should be present on mTLS PoP tokens");
+                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+
+                Assert.IsTrue(first.BindingCertificate.NotAfter.ToUniversalTime() >= DateTime.UtcNow.AddYears(20).AddDays(-1),
+                    $"Binding cert NotAfter {first.BindingCertificate.NotAfter:u} should be >= ~20 years from now.");
+
+                var second = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(second);
+                Assert.AreEqual(MTLSPoP, second.TokenType);
+                Assert.IsNotNull(second.BindingCertificate, "Binding certificate should be present on cached mTLS PoP tokens");
+                Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
+
+                // Optional: Same thumbprint between the two (same cached binding cert)
+                Assert.AreEqual(first.BindingCertificate.Thumbprint, second.BindingCertificate.Thumbprint,
+                    "Cached mTLS flow should reuse the same binding certificate.");
+
+                // Your existing CN assertion against the baked-in TestConstants.ValidRawCertificate
+                AssertCertCN(first.BindingCertificate, "Test");
+                AssertCertCN(second.BindingCertificate, "Test");
+            }
+        }
+
+        /// <summary>
+        /// Create TWO long-lived (20y) raw DER (base64) certs with the CSR key:
+        ///   - One for SAMI (CN=SAMI-20Y)
+        ///   - One for UAMI (CN=UAMI-20Y)
+        /// Then run mint + cached flows and assert thumbprints.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null,                      /*aliasLabel*/ "SAMI")] // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId,    /*aliasLabel*/ "UAMI-ClientId")]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId,/*aliasLabel*/ "UAMI-ResourceId")]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId,    /*aliasLabel*/ "UAMI-ObjectId")]
+        public async Task mTLSPop_LongLivedCerts_SamiVsUami_DistinctAndCached(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId,
+            string aliasLabel)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // Create the two test certs (20-year) from the SAME RSA as CSR (XmlPrivateKey)
+                string rawCertSami = CreateRawCertFromXml("CN=SAMI-20Y", notAfterUtc: DateTimeOffset.UtcNow.AddYears(20));
+                string rawCertUami = CreateRawCertFromXml("CN=UAMI-20Y", notAfterUtc: DateTimeOffset.UtcNow.AddYears(20));
+
+                // Build an MI app for the row's identity kind (force KeyGuard so mTLS path is used)
+                var mi = await CreateManagedIdentityAsync(
+                    httpManager,
+                    userAssignedIdentityId,
+                    userAssignedId,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // --- First acquire (MINT): return the identity-specific cert we want ---
+                // SAMI → use rawCertSami ; UAMI (any alias) → use rawCertUami
+                string selectedCert = (userAssignedIdentityId == UserAssignedIdentityId.None) ? rawCertSami : rawCertUami;
+
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId,
+                    userAssignedId,
+                    certificateRequestCertificate: selectedCert,
+                    mTLSPop: true);
+
+                var first = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(first);
+                Assert.AreEqual(MTLSPoP, first.TokenType, $"[{aliasLabel}] token type must be mtls_pop");
+                Assert.IsNotNull(first.BindingCertificate, $"[{aliasLabel}] binding cert missing");
+                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource, $"[{aliasLabel}] first acquire must mint from IDP");
+                Assert.IsTrue(first.BindingCertificate.NotAfter.ToUniversalTime() >= DateTime.UtcNow.AddYears(20).AddDays(-1),
+                    $"[{aliasLabel}] NotAfter {first.BindingCertificate.NotAfter:u} should be ~20y+");
+
+                var thumb1 = first.BindingCertificate.Thumbprint;
+
+                // --- Second acquire: cached; cert should be the SAME (cached binding cert) ---
+                var second = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(second);
+                Assert.AreEqual(MTLSPoP, second.TokenType, $"[{aliasLabel}] cached token type");
+                Assert.IsNotNull(second.BindingCertificate, $"[{aliasLabel}] cached binding cert missing");
+                Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource, $"[{aliasLabel}] second acquire should be from cache");
+                Assert.AreEqual(thumb1, second.BindingCertificate.Thumbprint, $"[{aliasLabel}] cached must reuse same binding cert");
+
+                var expectedCn = (userAssignedIdentityId == UserAssignedIdentityId.None) ? "SAMI-20Y" : "UAMI-20Y";
+                AssertCertCN(first.BindingCertificate, expectedCn);
+                AssertCertCN(second.BindingCertificate, expectedCn);
+            }
+        }
+
+        /// <summary>
+        /// End-to-end: mint SAMI & UAMI in one test and prove their binding certs differ,
+        /// while each identity reuses its own binding cert from cache.
+        /// </summary>
+        [TestMethod]
+        public async Task mTLSPop_LongLivedCerts_SamiAndUami_ThumbprintsDiffer_AndEachCaches()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // Make two long-lived certs **from the CSR key** so AttachPrivateKey succeeds
+                string rawCertSami = CreateRawCertForCsrKey("CN=SAMI-20Y", DateTimeOffset.UtcNow.AddYears(20));
+                string rawCertUami = CreateRawCertForCsrKey("CN=UAMI-20Y", DateTimeOffset.UtcNow.AddYears(20));
+
+                // ---------- SAMI ----------
+                var sami = await CreateManagedIdentityAsync(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.None,
+                    userAssignedId: null,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard
+                ).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.None,
+                    userAssignedId: null,
+                    certificateRequestCertificate: rawCertSami,
+                    mTLSPop: true);
+
+                var s1 = await sami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(s1.BindingCertificate);
+                AssertCertCN(s1.BindingCertificate, "SAMI-20Y");
+
+                var samiThumb = s1.BindingCertificate.Thumbprint;
+
+                // cached
+                var s2 = await sami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, s2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(samiThumb, s2.BindingCertificate.Thumbprint, "SAMI must reuse cached binding cert");
+
+                // ---------- UAMI (client_id) ----------
+                var uami = await CreateManagedIdentityAsync(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId,
+                    userAssignedId: TestConstants.ClientId,
+                    addProbeMock: false,
+                    addSourceCheck: false,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard
+                ).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId,
+                    userAssignedId: TestConstants.ClientId,
+                    certificateRequestCertificate: rawCertUami,
+                    mTLSPop: true);
+
+                var u1 = await uami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(u1.BindingCertificate);
+                AssertCertCN(u1.BindingCertificate, "UAMI-20Y");
+
+                var uamiThumb = u1.BindingCertificate.Thumbprint;
+
+                var u2 = await uami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, u2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(uamiThumb, u2.BindingCertificate.Thumbprint, "UAMI must reuse cached binding cert");
+
+                // Cross-identity certs must differ
+                Assert.AreNotEqual(samiThumb, uamiThumb, "SAMI and UAMI must use different binding certs");
+            }
+        }
+
+        /// <summary>
+        /// Subject mapping test that mirrors prod: CN=canonical client_id, DC=tenant id.
+        /// - SAMI → CN = Constants.ManagedIdentityDefaultClientId
+        /// - UAMI (client_id|object_id|resource_id) → CN = TestConstants.ClientId (canonical)
+        /// Both assert DC = TestConstants.TenantId and cert cache reuse.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null,                    /*label*/ "SAMI", /*isUami*/ false)]
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId,  /*label*/ "UAMI-ClientId", /*isUami*/ true)]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId,  /*label*/ "UAMI-ObjectId", /*isUami*/ true)]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId,/*label*/"UAMI-ResourceId",/*isUami*/ true)]
+        public async Task mTLSPop_SubjectCnDc_MatchesMetadata_AndCaches(
+            UserAssignedIdentityId idKind,
+            string idValue,
+            string label,
+            bool isUami)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // Expected mapping (mirrors your live logs)
+                string expectedCn = isUami ? TestConstants.ClientId : Constants.ManagedIdentityDefaultClientId;
+                string expectedDc = TestConstants.TenantId;
+
+                // Mint a 20-year cert with Subject "CN=<expectedCn>, DC=<expectedDc>" using the CSR key
+                string rawCert = CreateRawCertForCsrKeyWithCnDc(expectedCn, expectedDc, DateTimeOffset.UtcNow.AddYears(20));
+
+                var mi = await CreateManagedIdentityAsync(httpManager, idKind, idValue, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard)
+                    .ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager, idKind, idValue, certificateRequestCertificate: rawCert, mTLSPop: true);
+
+                var first = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(MTLSPoP, first.TokenType, $"[{label}]");
+                AssertCertSubjectCnDc(first.BindingCertificate, expectedCn, expectedDc, label);
+
+                var second = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource, $"[{label}] cache");
+                Assert.AreEqual(first.BindingCertificate.Thumbprint, second.BindingCertificate.Thumbprint, $"[{label}] thumbprint must be stable");
+                AssertCertSubjectCnDc(second.BindingCertificate, expectedCn, expectedDc, label);
+            }
+        }
+
+        [TestMethod]
+        public async Task mTLSPoP_Uami_ClientIdThenObjectId_MintsThenCaches_SubjectCNIsClientId()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                string expectedCn = TestConstants.ClientId;
+                string expectedDc = TestConstants.TenantId;
+                string rawCert = CreateRawCertForCsrKeyWithCnDc(expectedCn, expectedDc, DateTimeOffset.UtcNow.AddYears(20));
+
+                // (1) client_id → MINT (CSR + issuecredential + token)
+                var miClientId = await CreateManagedIdentityAsync(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId,
+                    userAssignedId: TestConstants.ClientId,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId,
+                    userAssignedId: TestConstants.ClientId,
+                    certificateRequestCertificate: rawCert,
+                    mTLSPop: true);
+
+                var c1 = await miClientId.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(MTLSPoP, c1.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider, c1.AuthenticationResultMetadata.TokenSource);
+                AssertCertSubjectCnDc(c1.BindingCertificate, expectedCn, expectedDc, "[client_id]");
+
+                // (2) object_id → MINT (new alias → its own cache key)
+                var miObjectId = await CreateManagedIdentityAsync(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.ObjectId,
+                    userAssignedId: TestConstants.ObjectId,
+                    addProbeMock: false,
+                    addSourceCheck: false,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.ObjectId,
+                    userAssignedId: TestConstants.ObjectId,
+                    certificateRequestCertificate: rawCert,
+                    mTLSPop: true);
+
+                var o1 = await miObjectId.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(MTLSPoP, o1.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider, o1.AuthenticationResultMetadata.TokenSource);
+                AssertCertSubjectCnDc(o1.BindingCertificate, expectedCn, expectedDc, "[object_id first]");
+                var objectIdThumb = o1.BindingCertificate.Thumbprint;
+
+                // (3) object_id again → CACHED
+                var o2 = await miObjectId.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, o2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(objectIdThumb, o2.BindingCertificate.Thumbprint);
+                AssertCertSubjectCnDc(o2.BindingCertificate, expectedCn, expectedDc, "[object_id second]");
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, "object_id")]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, "resource_id")]
+        public async Task mTLSPoP_Uami_ClientIdThenAlias_MintsThenCaches_SubjectCNIsClientId(
+            UserAssignedIdentityId aliasKind,
+            string aliasValue,
+            string label)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                string expectedCn = TestConstants.ClientId;
+                string expectedDc = TestConstants.TenantId;
+                string rawCert = CreateRawCertForCsrKeyWithCnDc(expectedCn, expectedDc, DateTimeOffset.UtcNow.AddYears(20));
+
+                // (1) client_id → MINT (CSR + issuecredential + token)
+                var miClientId = await CreateManagedIdentityAsync(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId,
+                    userAssignedId: TestConstants.ClientId,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId,
+                    userAssignedId: TestConstants.ClientId,
+                    certificateRequestCertificate: rawCert,
+                    mTLSPop: true);
+
+                var c1 = await miClientId.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(MTLSPoP, c1.TokenType, "[client_id]");
+                Assert.AreEqual(TokenSource.IdentityProvider, c1.AuthenticationResultMetadata.TokenSource, "[client_id] should mint");
+                AssertCertSubjectCnDc(c1.BindingCertificate, expectedCn, expectedDc, "[client_id]");
+
+                // (2) alias (object_id/resource_id) → MINT (new alias → new cache key)
+                var miAlias = await CreateManagedIdentityAsync(
+                    httpManager,
+                    userAssignedIdentityId: aliasKind,
+                    userAssignedId: aliasValue,
+                    addProbeMock: false,
+                    addSourceCheck: false,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId: aliasKind,
+                    userAssignedId: aliasValue,
+                    certificateRequestCertificate: rawCert,
+                    mTLSPop: true);
+
+                var a1 = await miAlias.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(MTLSPoP, a1.TokenType, $"[{label} first]");
+                Assert.AreEqual(TokenSource.IdentityProvider, a1.AuthenticationResultMetadata.TokenSource, $"[{label} first] should mint");
+                AssertCertSubjectCnDc(a1.BindingCertificate, expectedCn, expectedDc, $"[{label} first]");
+                var aliasThumb = a1.BindingCertificate.Thumbprint;
+
+                // (3) alias again → CACHED (no /issuecredential; no extra mocks needed)
+                var a2 = await miAlias.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, a2.AuthenticationResultMetadata.TokenSource, $"[{label} second] should be cached");
+                Assert.AreEqual(aliasThumb, a2.BindingCertificate.Thumbprint, $"[{label}] cached binding cert must match");
+                AssertCertSubjectCnDc(a2.BindingCertificate, expectedCn, expectedDc, $"[{label} second]");
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, "UAMI-ClientId")]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, "UAMI-ObjectId")]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, "UAMI-ResourceId")]
+        [DataRow(UserAssignedIdentityId.None, null, "SAMI")]
+        public async Task mTLSPop_ShortLivedCert_LessThan24h_NotCached_ReMints(
+            UserAssignedIdentityId idKind,
+            string idValue,
+            string label)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // short-lived cert #1: < 24h => must NOT be cached
+                var rawShort1 = CreateRawCertForCsrKeyWithCnDc(
+                    cn: (idKind == UserAssignedIdentityId.None ? Constants.ManagedIdentityDefaultClientId : TestConstants.ClientId),
+                    dc: TestConstants.TenantId,
+                    notAfterUtc: DateTimeOffset.UtcNow.AddHours(23));
+
+                // short-lived cert #2: also < 24h (ensures new thumbprint on re-mint)
+                var rawShort2 = CreateRawCertForCsrKeyWithCnDc(
+                    cn: (idKind == UserAssignedIdentityId.None ? Constants.ManagedIdentityDefaultClientId : TestConstants.ClientId),
+                    dc: TestConstants.TenantId,
+                    notAfterUtc: DateTimeOffset.UtcNow.AddHours(23).AddMinutes(5));
+
+                var mi = await CreateManagedIdentityAsync(httpManager, idKind, idValue, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard)
+                    .ConfigureAwait(false);
+
+                // FIRST acquire -> MINT with short-lived cert #1
+                AddMocksToGetEntraToken(httpManager, idKind, idValue, certificateRequestCertificate: rawShort1, mTLSPop: true);
+
+                var first = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource, $"[{label}] first must mint.");
+
+                // SECOND acquire -> FORCE REFRESH to bypass AT cache; since cert #1 wasn't cached, we must mint again.
+                AddMocksToGetEntraToken(httpManager, idKind, idValue, certificateRequestCertificate: rawShort2, mTLSPop: true);
+
+                var second = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithForceRefresh(true) // <-- key change
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, second.AuthenticationResultMetadata.TokenSource, $"[{label}] second must mint (no cert cache for <24h).");
+                Assert.AreNotEqual(first.BindingCertificate.Thumbprint, second.BindingCertificate.Thumbprint, $"[{label}] re-mint should produce a new binding cert.");
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, "UAMI-ClientId")]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, "UAMI-ObjectId")]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, "UAMI-ResourceId")]
+        [DataRow(UserAssignedIdentityId.None, null, "SAMI")]
+        public async Task mTLSPop_CertAtLeast24h_IsCached_ReusedOnSecondAcquire(
+            UserAssignedIdentityId idKind,
+            string idValue,
+            string label)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // NotAfter >= 24h + 1min → should be cached and reused
+                var rawLong = CreateRawCertForCsrKeyWithCnDc(
+                    cn: (idKind == UserAssignedIdentityId.None ? Constants.ManagedIdentityDefaultClientId : TestConstants.ClientId),
+                    dc: TestConstants.TenantId,
+                    notAfterUtc: DateTimeOffset.UtcNow.AddHours(24).AddMinutes(1));
+
+                var mi = await CreateManagedIdentityAsync(httpManager, idKind, idValue, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard)
+                    .ConfigureAwait(false);
+
+                // First acquire → MINT
+                AddMocksToGetEntraToken(httpManager, idKind, idValue, certificateRequestCertificate: rawLong, mTLSPop: true);
+
+                var first = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource, $"[{label}] first must mint long-lived cert.");
+
+                // Second acquire → CACHED (no /issuecredential mocks needed)
+                var second = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(s_fakeAttestationProvider)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource, $"[{label}] second should be cache.");
+                Assert.AreEqual(first.BindingCertificate.Thumbprint, second.BindingCertificate.Thumbprint, $"[{label}] cached cert must be reused.");
+            }
+        }
+        #endregion
+
+        #region Cert cache test helpers
+
+        // Build a base64 DER cert (public part only) whose public key == the CSR key used by tests
+        private static string CreateRawCertForCsrKey(string subjectCN, DateTimeOffset notAfter)
+        {
+            using var rsa = TestCsrFactory.CreateMockRsa(); // same key the CSR factory uses
+            return CreateRawCertFromKey(rsa, subjectCN, notAfter);
+        }
+
+        // Build a base64 DER cert (public part only) with Subject "CN=<cn>, DC=<dc>" and CSR key
+        private static string CreateRawCertForCsrKeyWithCnDc(string cn, string dc, DateTimeOffset notAfterUtc)
+        {
+            using var rsa = TestCsrFactory.CreateMockRsa();
+            var subject = $"CN={cn}, DC={dc}";
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                new X500DistinguishedName(subject),
+                rsa,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            var notBefore = DateTimeOffset.UtcNow.AddMinutes(-2);
+            using var cert = req.CreateSelfSigned(notBefore, notAfterUtc);
+            return Convert.ToBase64String(cert.Export(X509ContentType.Cert));
+        }
+
+        private static string CreateRawCertFromKey(RSA key, string subjectCN, DateTimeOffset notAfter)
+        {
+            var now = DateTimeOffset.UtcNow.AddMinutes(-2);
+
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                new X500DistinguishedName(subjectCN),
+                key,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            using var cert = req.CreateSelfSigned(now, notAfter);
+            // Return public portion only; the product code attaches the private key
+            return Convert.ToBase64String(cert.Export(X509ContentType.Cert));
+        }
+
+        private static RSA RsaFromXml(string xml)
+        {
+            var rsa = RSA.Create();
+
+            var settings = new XmlReaderSettings
+            {
+                DtdProcessing = DtdProcessing.Prohibit,
+                XmlResolver = null
+            };
+
+            var doc = new XmlDocument { XmlResolver = null };
+            using (var sr = new StringReader(xml))
+            using (var xr = XmlReader.Create(sr, settings))
+            {
+                doc.Load(xr);
+            }
+
+            byte[] B64(string s) => Convert.FromBase64String(s);
+
+            var p = new RSAParameters
+            {
+                Modulus = B64(doc.DocumentElement["Modulus"].InnerText),
+                Exponent = B64(doc.DocumentElement["Exponent"].InnerText),
+                P = B64(doc.DocumentElement["P"].InnerText),
+                Q = B64(doc.DocumentElement["Q"].InnerText),
+                DP = B64(doc.DocumentElement["DP"].InnerText),
+                DQ = B64(doc.DocumentElement["DQ"].InnerText),
+                InverseQ = B64(doc.DocumentElement["InverseQ"].InnerText),
+                D = B64(doc.DocumentElement["D"].InnerText),
+            };
+
+            rsa.ImportParameters(p);
+            return rsa;
+        }
+
+        private static string CreateRawCertFromXml(string subjectCN, DateTimeOffset notAfterUtc)
+        {
+            using var rsa = RsaFromXml(TestConstants.XmlPrivateKey); // same RSA as CSR/keyguard in tests
+
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                new X500DistinguishedName(subjectCN),
+                rsa,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            var notBefore = DateTimeOffset.UtcNow.AddMinutes(-2);
+            using var cert = req.CreateSelfSigned(notBefore, notAfterUtc);
+
+            // IMPORTANT: return **public part only** – product code attaches the private key
+            return Convert.ToBase64String(cert.Export(X509ContentType.Cert));
+        }
+
+        private static void AssertCertCN(X509Certificate2 cert, string expectedCn)
+        {
+            // SimpleName returns the CN without the "CN=" prefix
+            var cn = cert.GetNameInfo(X509NameType.SimpleName, forIssuer: false);
+
+            // Defensive fallback in case SimpleName is empty on some runtimes
+            if (string.IsNullOrEmpty(cn) && !string.IsNullOrEmpty(cert.Subject))
+            {
+                var subject = cert.Subject; // e.g. "CN=SAMI-20Y"
+                const string cnPrefix = "CN=";
+                var idx = subject.IndexOf(cnPrefix, StringComparison.OrdinalIgnoreCase);
+                if (idx >= 0)
+                {
+                    var end = subject.IndexOf(',', idx);
+                    cn = (end > idx ? subject.Substring(idx + cnPrefix.Length, end - (idx + cnPrefix.Length))
+                                    : subject.Substring(idx + cnPrefix.Length)).Trim();
+                }
+            }
+
+            Assert.AreEqual(expectedCn, cn, $"Expected CN={expectedCn}, got Subject='{cert.Subject}'.");
+        }
+
+        // Parse a specific RDN (e.g., "CN" or "DC") out of the subject
+        private static string GetRdn(X509Certificate2 cert, string rdn)
+        {
+            var dn = cert?.SubjectName?.Name ?? string.Empty;
+            foreach (var part in dn.Split(','))
+            {
+                var kv = part.Trim().Split('=');
+                if (kv.Length == 2 && kv[0].Trim().Equals(rdn, StringComparison.OrdinalIgnoreCase))
+                    return kv[1].Trim();
+            }
+            return null;
+        }
+
+        private static void AssertCertSubjectCnDc(X509Certificate2 cert, string expectedCn, string expectedDc, string label)
+        {
+            Assert.IsNotNull(cert);
+            var cn = GetRdn(cert, "CN");
+            var dc = GetRdn(cert, "DC");
+
+            Assert.AreEqual(expectedCn, cn, $"[{label}] CN mismatch. Subject='{cert.Subject}'");
+            Assert.AreEqual(expectedDc, dc, $"[{label}] DC mismatch. Subject='{cert.Subject}'");
+        }
+
         #endregion
     }
 }
