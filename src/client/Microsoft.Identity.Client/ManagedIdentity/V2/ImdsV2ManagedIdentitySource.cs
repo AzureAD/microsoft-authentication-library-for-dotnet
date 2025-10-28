@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString() }
             };
 
-            if (_isMtlsPopRequested && managedIdentityKeyInfo.Type != ManagedIdentityKeyType.KeyGuard)
+            if (managedIdentityKeyInfo.Type != ManagedIdentityKeyType.KeyGuard)
             {
                 throw new MsalClientException(
                     "mtls_pop_requires_keyguard",
@@ -316,12 +316,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
             request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
 
-            var tokenType = _isMtlsPopRequested ? "mtls_pop" : "bearer";
-
             request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
             request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
             request.BodyParameters.Add("scope", resource.TrimEnd('/') + "/.default");
-            request.BodyParameters.Add("token_type", tokenType);
+            request.BodyParameters.Add("token_type", "mtls_pop");
 
             request.RequestType = RequestType.STS;
 

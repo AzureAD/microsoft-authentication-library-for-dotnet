@@ -96,25 +96,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
         {
-            if (ServiceBundle.Config.IsManagedIdentity)
-            {
-                void MtlsNotSupportedForManagedIdentity(string message)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsNotSupportedForManagedIdentity,
-                        message);
-                }
-
-                if (!DesktopOsHelper.IsWindows())
-                {
-                    MtlsNotSupportedForManagedIdentity(MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
-                }
-
-#if NET462
-                MtlsNotSupportedForManagedIdentity(MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
-#endif
-            }
-
             if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certificateCredential)
             {
                 if (certificateCredential.Certificate == null)

@@ -61,6 +61,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
 
+            // When IMDSv2 mints a binding certificate during this request (via CSR),
+            // it's exposed via request.MtlsCertificate. Bubble it up so the request
+            // layer can set the mtls_pop scheme
+            if (parameters.IsMtlsPopRequested && request?.MtlsCertificate != null)
+            {
+                parameters.MtlsCertificate = request.MtlsCertificate;
+            }
+
             // Automatically add claims / capabilities if this MI source supports them
             if (_sourceType.SupportsClaimsAndCapabilities())
             {
