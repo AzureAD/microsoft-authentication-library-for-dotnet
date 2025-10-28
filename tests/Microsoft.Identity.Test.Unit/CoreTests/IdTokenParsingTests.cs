@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 "exp": 1538542322,
                 "name": "Cloud IDLAB Basic User",
                 "oid": "9f4880d8-80ba-4c40-97bc-f7a23c703084",
-                "preferred_username": "idlab@msidlab4.onmicrosoft.com",
+                "preferred_username": "MSAL-User-Default@id4slab1.onmicrosoft.com",
                 "sub": "Y6YkBdHNNLHNmTKel9KhRz8wrasxdLRFiP14BRPWrn4",
                 "tid": "f645ad92-e38d-4d1a-b510-d1b09a74a8ca",
                 "uti": "6nciX02SMki9k73-F1sZAA",
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             CoreAssert.AreEqual("Cloud IDLAB Basic User", parsedToken.Name, parsedToken.ClaimsPrincipal.FindFirst("name").Value);
             CoreAssert.AreEqual("9f4880d8-80ba-4c40-97bc-f7a23c703084", parsedToken.ObjectId, parsedToken.ClaimsPrincipal.FindFirst("oid").Value);
-            CoreAssert.AreEqual("idlab@msidlab4.onmicrosoft.com", parsedToken.PreferredUsername, parsedToken.ClaimsPrincipal.FindFirst("preferred_username").Value);
+            CoreAssert.AreEqual("MSAL-User-Default@id4slab1.onmicrosoft.com", parsedToken.PreferredUsername, parsedToken.ClaimsPrincipal.FindFirst("preferred_username").Value);
             CoreAssert.AreEqual("Y6YkBdHNNLHNmTKel9KhRz8wrasxdLRFiP14BRPWrn4", parsedToken.Subject, parsedToken.ClaimsPrincipal.FindFirst("sub").Value);
             CoreAssert.AreEqual("f645ad92-e38d-4d1a-b510-d1b09a74a8ca", parsedToken.TenantId, parsedToken.ClaimsPrincipal.FindFirst("tid").Value);
 
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual("1538542322", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "exp").Value);
             Assert.AreEqual("Cloud IDLAB Basic User", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "name").Value);
             Assert.AreEqual("9f4880d8-80ba-4c40-97bc-f7a23c703084", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "oid").Value);
-            Assert.AreEqual("idlab@msidlab4.onmicrosoft.com", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "preferred_username").Value);
+            Assert.AreEqual("MSAL-User-Default@id4slab1.onmicrosoft.com", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "preferred_username").Value);
             Assert.AreEqual("Y6YkBdHNNLHNmTKel9KhRz8wrasxdLRFiP14BRPWrn4", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "sub").Value);
             Assert.AreEqual("f645ad92-e38d-4d1a-b510-d1b09a74a8ca", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "tid").Value);
             Assert.AreEqual("6nciX02SMki9k73-F1sZAA", parsedToken.ClaimsPrincipal.Claims.Single(c => c.Type == "uti").Value);
