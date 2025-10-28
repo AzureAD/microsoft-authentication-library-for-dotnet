@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Verify final cache state
                 Assert.AreEqual(4, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should have 4 app tokens in cache");
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should have 2 user tokens in cache");
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should have 1 user token in cache");
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count, "Should have 1 refresh token in cache");
             }
         }
