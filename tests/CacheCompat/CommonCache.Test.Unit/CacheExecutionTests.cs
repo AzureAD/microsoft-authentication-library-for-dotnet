@@ -21,10 +21,10 @@ namespace CommonCache.Test.Unit
         {
             var labUser = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             return new LabUserData(
-              labUser.Upn,
-              labUser.GetOrFetchPassword(),
-              labUser.AppId,
-              labUser.TenantId);
+              labUser.User.Upn,
+              labUser.User.GetOrFetchPassword(),
+              labUser.App.AppId,
+              labUser.User.TenantId);
         }
 
         [AssemblyInitialize]
