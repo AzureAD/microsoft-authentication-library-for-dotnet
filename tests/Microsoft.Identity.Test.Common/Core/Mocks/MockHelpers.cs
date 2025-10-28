@@ -125,7 +125,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static string GetMsiSuccessfulResponse(
             int expiresInHours = 1,
             bool useIsoFormat = false,
-            bool mTLSPop = false,
             bool imdsV2 = false)
         {
             var expiresOnKey = imdsV2 ? "expires_in" : "expires_on";
@@ -141,7 +140,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 expiresOnValue = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
             }
 
-            var tokenType = mTLSPop ? "mtls_pop" : "Bearer";
+            var tokenType = imdsV2 ? "mtls_pop" : "Bearer";
 
             return
                 "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"" + expiresOnKey + "\":\"" + expiresOnValue + "\",\"resource\":\"https://management.azure.com/\"," +
@@ -708,8 +707,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponse(
-            IdentityLoggerAdapter identityLoggerAdapter,
-            bool mTLSPop = false)
+            IdentityLoggerAdapter identityLoggerAdapter)
         {
             IDictionary<string, string> expectedPostData = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>
@@ -727,8 +725,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 expectedRequestHeaders[idParam.Key] = idParam.Value;
             }
 
-            var tokenType = mTLSPop ? "mtls_pop" : "bearer";
-            expectedPostData.Add("token_type", tokenType);
+            expectedPostData.Add("token_type", "mtls_pop");
 
             var handler = new MockHttpMessageHandler()
             {
@@ -739,7 +736,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(GetMsiSuccessfulResponse(mTLSPop: mTLSPop, imdsV2: true)),
+                    Content = new StringContent(GetMsiSuccessfulResponse(imdsV2: true)),
                 }
             };
 
@@ -780,7 +777,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(GetMsiSuccessfulResponse(mTLSPop: mTLSPop, imdsV2: true)),
+                    Content = new StringContent(GetMsiSuccessfulResponse(imdsV2: true)),
                 }
             };
         }
@@ -814,7 +811,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             else
             {
                 httpManager.AddMockHandler(
-                    MockHelpers.MockImdsV2EntraTokenRequestResponse(identityLoggerAdapter, mTLSPop));
+                    MockHelpers.MockImdsV2EntraTokenRequestResponse(identityLoggerAdapter));
             }
         }
     }

@@ -31,8 +31,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public MockHttpManager(
             bool disableInternalRetries = false,
             string testName = null,
-            Func<MockHttpMessageHandler> messageHandlerFunc = null,
-            Func<HttpClient> validateServerCertificateCallback = null,
+            Func<MockHttpMessageHandler> messageHandlerFunc = null,            
             bool invokeNonMtlsHttpManagerFactory = false)
         {
             _httpManager = invokeNonMtlsHttpManagerFactory
@@ -160,7 +159,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 messageHandler.ClientCertificates.Add(mtlsBindingCert);
             }
-
             var httpClient = new HttpClient(messageHandler)
             {
                 MaxResponseContentBufferSize = HttpClientConfig.MaxResponseContentBufferSizeInBytes

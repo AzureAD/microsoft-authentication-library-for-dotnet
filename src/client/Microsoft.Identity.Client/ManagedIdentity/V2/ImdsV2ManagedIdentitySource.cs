@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString() }
             };
 
-            if (_isMtlsPopRequested && managedIdentityKeyInfo.Type != ManagedIdentityKeyType.KeyGuard)
+            if (managedIdentityKeyInfo.Type != ManagedIdentityKeyType.KeyGuard)
             {
                 throw new MsalClientException(
                     "mtls_pop_requires_keyguard",
