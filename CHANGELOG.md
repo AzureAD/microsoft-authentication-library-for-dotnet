@@ -1,3 +1,13 @@
+4.78.0
+======
+### Changes
+* Update SDK version from 8.0.404 to 8.0.415. [#5543](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5543)
+* Hide / deprecate some obscure APIs. [#5484](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5484)
+
+### Bug Fixes
+* Support Android edge-to-edge. [#5499](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5499)
+* Android broker does not support ADFS authority. [#5522](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5522)
+
 4.77.1
 ======
 
