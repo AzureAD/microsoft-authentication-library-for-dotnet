@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetHybridSpaAccontAsync()
         {
-            return GetLabUserDataAsync(UserQuery.HybridSpaUserQuery);
+            return Task.FromResult(MergeKVLabData("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
         }
 
         public static Task<LabResponse> GetB2CLocalAccountAsync()
