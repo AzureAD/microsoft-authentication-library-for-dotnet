@@ -2,10 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -21,6 +23,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
     {
+        // Central, process-local cache for mTLS binding (cert + endpoint + canonical client_id).
+        internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
+
+        // Per-key async de-duplication so concurrent callers don’t double-mint.
+        internal static readonly ConcurrentDictionary<string, SemaphoreSlim> s_perKeyGates =
+            new ConcurrentDictionary<string, SemaphoreSlim>(StringComparer.Ordinal);
+
         // used in unit tests
         public const string ImdsV2ApiVersion = "2.0";
         public const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
@@ -211,17 +220,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     "[ImdsV2] mTLS Proof-of-Possession requires a KeyGuard-backed key. Enable KeyGuard or use a KeyGuard-supported environment.");
             }
 
-            // TODO: : Normalize and validate attestation endpoint Code needs to be removed 
-            // once IMDS team start returning full URI
-            Uri normalizedEndpoint = NormalizeAttestationEndpoint(attestationEndpoint, _requestContext.Logger);
-
             // Ask helper for JWT only for KeyGuard keys
             string attestationJwt = string.Empty;
+            var attestationUri = new Uri(attestationEndpoint);
+
             if (managedIdentityKeyInfo.Type == ManagedIdentityKeyType.KeyGuard)
             {
                 attestationJwt = await GetAttestationJwtAsync(
                     clientId,
-                    normalizedEndpoint,
+                    attestationUri,
                     managedIdentityKeyInfo,
                     _requestContext.UserCancellationToken).ConfigureAwait(false);
             }
@@ -256,12 +263,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
             catch (Exception ex)
             {
+                int? statusCode = response != null ? (int?)response.StatusCode : null;
+
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
-                    $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed.",
+                    "[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed.",
                     ex,
                     ManagedIdentitySource.ImdsV2,
-                    (int)response.StatusCode);
+                    statusCode);
             }
 
             if (response.StatusCode != HttpStatusCode.OK)
@@ -284,46 +293,80 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
 
-            IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
+            string certCacheKey = _requestContext.ServiceBundle.Config.ClientId;
 
-            ManagedIdentityKeyInfo keyInfo = await keyProvider
-                .GetOrCreateKeyAsync(
-                _requestContext.Logger, 
-                _requestContext.UserCancellationToken)
+            var certEndpointAndClientId = await GetOrCreateMtlsBindingAsync(
+                cacheKey: certCacheKey,
+                async () =>
+                {
+                    IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
+
+                    ManagedIdentityKeyInfo keyInfo = await keyProvider
+                        .GetOrCreateKeyAsync(_requestContext.Logger, _requestContext.UserCancellationToken)
+                        .ConfigureAwait(false);
+
+                    var csrAndKey = _requestContext.ServiceBundle.Config.CsrFactory.Generate(
+                        keyInfo.Key,
+                        csrMetadata.ClientId,
+                        csrMetadata.TenantId,
+                        csrMetadata.CuId);
+
+                    string csr = csrAndKey.csrPem;
+                    var privateKey = csrAndKey.privateKey;
+
+                    var certificateRequestResponse = await ExecuteCertificateRequestAsync(
+                        csrMetadata.ClientId,
+                        csrMetadata.AttestationEndpoint,
+                        csr,
+                        keyInfo).ConfigureAwait(false);
+
+                    X509Certificate2 mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
+                        certificateRequestResponse.Certificate,
+                        privateKey);
+
+                    // Base endpoint = "{mtlsAuthEndpoint}/{tenantId}"
+                    string endpointBase =
+                        (certificateRequestResponse.MtlsAuthenticationEndpoint).TrimEnd('/') +
+                        "/" +
+                        (certificateRequestResponse.TenantId).Trim('/');
+
+                    // Canonical GUID to use as client_id in the token call
+                    string clientIdGuid = certificateRequestResponse.ClientId;
+
+                    return Tuple.Create(mtlsCertificate, endpointBase, clientIdGuid);
+                },
+                _requestContext.UserCancellationToken, 
+                _requestContext.Logger)
                 .ConfigureAwait(false);
 
-            var (csr, privateKey) = _requestContext.ServiceBundle.Config.CsrFactory.Generate(keyInfo.Key, csrMetadata.ClientId, csrMetadata.TenantId, csrMetadata.CuId);
+            X509Certificate2 bindingCertificate = certEndpointAndClientId.Item1;
+            string endpointBaseForToken = certEndpointAndClientId.Item2;
+            string clientIdForToken = certEndpointAndClientId.Item3;
 
-            var certificateRequestResponse = await ExecuteCertificateRequestAsync(
-                csrMetadata.ClientId,
-                csrMetadata.AttestationEndpoint,
-                csr,
-                keyInfo).ConfigureAwait(false);
+            ManagedIdentityRequest request = new ManagedIdentityRequest(
+                HttpMethod.Post,
+                new Uri(endpointBaseForToken + AcquireEntraTokenPath));
 
-            // transform certificateRequestResponse.Certificate to x509 with private key
-            var mtlsCertificate = CommonCryptographyManager.AttachPrivateKeyToCert(
-                certificateRequestResponse.Certificate,
-                privateKey);
+            Dictionary<string, string> idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
 
-            ManagedIdentityRequest request = new(HttpMethod.Post, new Uri($"{certificateRequestResponse.MtlsAuthenticationEndpoint}/{certificateRequestResponse.TenantId}{AcquireEntraTokenPath}"));
-
-            var idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
-            foreach (var idParam in idParams)
+            foreach (KeyValuePair<string, string> idParam in idParams)
             {
                 request.Headers[idParam.Key] = idParam.Value;
             }
+
             request.Headers.Add(OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString());
             request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
             request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
 
-            request.BodyParameters.Add("client_id", certificateRequestResponse.ClientId);
+            var tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
+
+            request.BodyParameters.Add("client_id", clientIdForToken);
             request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
             request.BodyParameters.Add("scope", resource.TrimEnd('/') + "/.default");
-            request.BodyParameters.Add("token_type", "mtls_pop");
+            request.BodyParameters.Add("token_type", tokenType);
 
             request.RequestType = RequestType.STS;
-
-            request.MtlsCertificate = mtlsCertificate;
+            request.MtlsCertificate = bindingCertificate;
 
             return request;
         }
@@ -397,56 +440,82 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return response.AttestationToken;
         }
 
-        //To-do : Remove this method once IMDS team start returning full URI
+        // ...unchanged usings and class header...
+
         /// <summary>
-        /// Temporarily normalize attestation endpoint values to a full https:// URI.
-        /// IMDS team will eventually return a full URI. 
+        /// Read-through cache: try cache; if missing, run async factory once (per key),
+        /// store the result, and return it. Thread-safe for the given cacheKey.
         /// </summary>
-        /// <param name="rawEndpoint"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        private static Uri NormalizeAttestationEndpoint(string rawEndpoint, ILoggerAdapter logger)
+        private static async Task<Tuple<X509Certificate2, string, string>> GetOrCreateMtlsBindingAsync(
+            string cacheKey,
+            Func<Task<Tuple<X509Certificate2, string, string>>> factory,
+            CancellationToken cancellationToken,
+            ILoggerAdapter logger)
         {
-            if (string.IsNullOrWhiteSpace(rawEndpoint))
+            if (string.IsNullOrWhiteSpace(cacheKey))
+                throw new ArgumentException("cacheKey must be non-empty.", nameof(cacheKey));
+            if (factory is null)
+                throw new ArgumentNullException(nameof(factory));
+
+            X509Certificate2 cachedCertificate;
+            string cachedEndpointBase;
+            string cachedClientId;
+
+            // 1) Only lookup by cacheKey
+            if (s_mtlsCertificateCache.TryGet(cacheKey, out var cached, logger))
             {
-                return null;
+                cachedCertificate = cached.Certificate;
+                cachedEndpointBase = cached.Endpoint;
+                cachedClientId = cached.ClientId;
+
+                return Tuple.Create(cachedCertificate, cachedEndpointBase, cachedClientId);
             }
 
-            // Trim whitespace
-            rawEndpoint = rawEndpoint.Trim();
+            // 2) Gate per cacheKey
+            var gate = s_perKeyGates.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
+            await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-            // If it already parses as an absolute URI with https, keep it.
-            if (Uri.TryCreate(rawEndpoint, UriKind.Absolute, out var absolute) &&
-                (absolute.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase)))
+            try
             {
-                return absolute;
-            }
-
-            // If it has no scheme (common service behavior returning only host)
-            // prepend https:// and try again.
-            if (!rawEndpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            {
-                var candidate = "https://" + rawEndpoint;
-                if (Uri.TryCreate(candidate, UriKind.Absolute, out var httpsUri))
+                // Re-check after acquiring the gate
+                if (s_mtlsCertificateCache.TryGet(cacheKey, out cached, logger))
                 {
-                    logger.Info(() => $"[Managed Identity] Normalized attestation endpoint '{rawEndpoint}' -> '{httpsUri.ToString()}'.");
-                    return httpsUri;
+                    cachedCertificate = cached.Certificate;
+                    cachedEndpointBase = cached.Endpoint;
+                    cachedClientId = cached.ClientId;
+                    return Tuple.Create(cachedCertificate, cachedEndpointBase, cachedClientId);
                 }
-            }
 
-            // Final attempt: reject http (non‑TLS) or malformed
-            if (Uri.TryCreate(rawEndpoint, UriKind.Absolute, out var anyUri))
+                // 3) Mint + cache under the provided cacheKey
+                var created = await factory().ConfigureAwait(false);
+
+                s_mtlsCertificateCache.Set(cacheKey,
+                    new CertificateCacheValue(created.Item1, created.Item2, created.Item3),
+                    logger);
+
+                return created;
+            }
+            finally
             {
-                if (!anyUri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
-                {
-                    logger.Warning($"[Managed Identity] Attestation endpoint uses unsupported scheme '{anyUri.Scheme}'. HTTPS is required.");
-                    return null;
-                }
-                return anyUri;
+                gate.Release();
+            }
+        }
+
+        internal static void ResetCertCacheForTest()
+        {
+            // Clear caches so each test starts fresh
+            if (s_mtlsCertificateCache != null)
+            {
+                s_mtlsCertificateCache.Clear();
             }
 
-            logger.Warning($"[Managed Identity] Failed to normalize attestation endpoint value '{rawEndpoint}'.");
-            return null;
+            foreach (var gate in s_perKeyGates.Values)
+            {
+                try
+                { gate.Dispose(); }
+                catch { }
+            }
+            s_perKeyGates.Clear();
         }
     }
 }

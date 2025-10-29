@@ -24,12 +24,6 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
 
                 // Default: Trace (respects listeners; safe for all app types)
                 Trace.WriteLine(lineText);
-
-                // Opt-in console mirroring for local debugging
-                if (Environment.GetEnvironmentVariable("MSAL_MTLSPOP_LOG_TO_CONSOLE") == "1")
-                {
-                    Console.WriteLine(lineText);
-                }
             }
             catch
             {
