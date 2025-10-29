@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             var userAssignedIdQueryParam = GetUserAssignedIdQueryParam(
                 _requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
                 _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
-                _requestContext.Logger);
+                _requestContext.Logger,
+                imdsV1: true);
             if (userAssignedIdQueryParam != null)
             {
                 request.QueryParameters[userAssignedIdQueryParam.Value.Key] = userAssignedIdQueryParam.Value.Value;
@@ -89,7 +90,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static KeyValuePair<string, string>? GetUserAssignedIdQueryParam(
             AppConfig.ManagedIdentityIdType idType,
             string userAssignedId,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            bool imdsV1 = false)
         {
             switch (idType)
             {
@@ -99,7 +101,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 case AppConfig.ManagedIdentityIdType.ResourceId:
                     logger?.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                    return new KeyValuePair<string, string>(Constants.ManagedIdentityResourceIdImds, userAssignedId);
+                    return new KeyValuePair<string, string>(imdsV1 ? Constants.ManagedIdentityResourceIdImds : Constants.ManagedIdentityResourceId, userAssignedId);
 
                 case AppConfig.ManagedIdentityIdType.ObjectId:
                     logger?.Info("[Managed Identity] Adding user assigned object id to the request.");
