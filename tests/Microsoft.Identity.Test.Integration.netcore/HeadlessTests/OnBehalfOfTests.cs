@@ -13,6 +13,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -179,8 +180,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Setup: Get lab user, create PCA and get user tokens
             var user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
 
+            // Use legacy configuration for regional test due to cross-tenant compatibility requirements
+            var legacySettings = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy);
             var pca = PublicClientApplicationBuilder
-                    .Create(PublicClientID)
+                    .Create(legacySettings.ClientId)
                     .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                     .Build();
 
@@ -502,10 +505,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private ConfidentialClientApplication BuildCca(string tenantId, bool withRegion = false)
         {
+            // Use legacy configuration for regional tests due to Azure AD policy restrictions
+            var settings = withRegion ? 
+                ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy) : 
+                ConfidentialAppSettings.GetSettings(Cloud.Public);
+
             var builder = ConfidentialClientApplicationBuilder
-             .Create(OboConfidentialClientID)
+             .Create(withRegion ? OboConfidentialClientID : settings.ClientId)
              .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), true)
-             .WithClientSecret(_confidentialClientSecret)
+             .WithClientSecret(withRegion ? _confidentialClientSecret : settings.GetSecret())
              .WithLegacyCacheCompatibility(false);
 
             if (withRegion)

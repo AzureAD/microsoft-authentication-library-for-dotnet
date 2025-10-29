@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string MsiResource = "scope";
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
+        // TODO: Tenant Migration - Migrated to new id4slab1 tenant, legacy values: f645ad92-e38d-4d1a-b510-d1b09a74a8ca, 88f91eac-c606-4c67-a0e2-a5e8a186854f
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/10c419d4-4a50-45b2-aa4e-919fb84df24f/v2.0";
         public const string PublicCloudConfidentialClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f";
         public const string AutomationTestCertName = "LabAuth.MSIDLab.com";
@@ -74,6 +75,9 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
+        // TODO: Tenant Migration - Regional endpoint may need update after migration
+        // Current: centralus (old tenant), New: eastus2 (id4slab1 tenant)
+        // Note: Regional endpoints may not work with new tenant due to AADSTS100007 restrictions
         public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
         public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
@@ -201,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string PKeyAuthResponse = "PKeyAuth Context=\"context\",Version=\"1.0\"";
 
         public const string RegionName = "REGION_NAME";
-        public const string Region = "centralus";
+        public const string Region = "centralus"; // TODO: Tenant Migration - Update for new tenant (id4slab1) is in eastus2
         public const string InvalidRegion = "invalidregion";
         public const int TimeoutInMs = 2000;
         public const string ImdsHost = "169.254.169.254";
@@ -247,7 +251,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string MsalCCAKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
 
         public const string MsalCCAKeyVaultSecretName = "MSIDLAB4-IDLABS-APP-AzureADMyOrg-CC";
-        public const string MsalCCAKeyVaultSecretNameID4S = "MSAL-APP-AzureADMultipleOrgs";
+        // TODO: Tenant Migration - New secret name for id4slab1 tenant: "MSAL-APP-AzureADMultipleOrgs"
         public const string MsalOBOKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
         public const string MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret";
         public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
@@ -577,13 +581,6 @@ namespace Microsoft.Identity.Test.Unit
         public static MsalTokenResponse CreateAadTestTokenResponseWithFoci()
         {
             const string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.\",\"client_info\":\"" + AadRawClientInfo + "\",\"foci\":\"1\"}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        public static MsalTokenResponse CreateAadTestTokenResponseWithMsalUserDefault()
-        {
-            const string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiTVNBTCBVc2VyIERlZmF1bHQiLCJvaWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJNU0FMLVVzZXItRGVmYXVsdEBpZDRzbGFiMS5vbm1pY3Jvc29mdC5jb20iLCJzdWIiOiJZNllrQmRITk5MSE5tVEtlbDlLaFJ6OHdyYXN4ZExSRmlQMTRCUlBXcm40IiwidGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIiwidXRpIjoiNm5jaVgwMlNNa2k5azczLUYxc1pBQSIsInZlciI6IjIuMCJ9.\",\"client_info\":\"" + AadRawClientInfo + "\"}";
             var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
             return msalTokenResponse;
         }

@@ -13,7 +13,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         Public,
         Adfs,
         PPE,
-        Arlington
+        Arlington,
+        PublicLegacy  // For regional tests that need original MSIDLAB4 configuration
     }
 
     public interface IConfidentialAppSettings
@@ -37,6 +38,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
     {
         private class PublicCloudConfidentialAppSettings : IConfidentialAppSettings
         {
+            // TODO: Tenant Migration - Migrated to new id4slab1 tenant for non-regional tests
+            // Regional tests still use legacy configuration due to AADSTS100007 restrictions
             public string ClientId => UseAppIdUri? "api://54a2d933-8bf8-483b-a8f8-0a31924f3c1f" : "54a2d933-8bf8-483b-a8f8-0a31924f3c1f";
 
             public string TenantId => "10c419d4-4a50-45b2-aa4e-919fb84df24f";
@@ -60,7 +63,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string GetSecret()
             {
-                return GetSecretLazy(KeyVaultInstance.MsalTeam, TestConstants.MsalCCAKeyVaultSecretNameID4S).Value;
+                // TODO: Tenant Migration - Migrated to new id4slab1 key vault configuration
+                return GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-APP-AzureADMultipleOrgs").Value;
             }
         }
 
@@ -158,8 +162,42 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public bool InstanceDiscoveryEndpoint { get; set; } = true;
         }   
 
+        private class PublicLegacyCloudConfidentialAppSettings : IConfidentialAppSettings
+        {
+            // Legacy MSIDLAB4 configuration for regional tests only
+            // Regional endpoints require original tenant due to AADSTS100007 restrictions
+            public string ClientId => UseAppIdUri? "api://88f91eac-c606-4c67-a0e2-a5e8a186854f" : "88f91eac-c606-4c67-a0e2-a5e8a186854f";
+
+            public string TenantId => "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
+
+            public string Environment => "login.microsoftonline.com";
+
+            public string[] AppScopes => new[] { "https://vault.azure.net/.default" };
+
+            public string Authority => $@"https://{Environment}/{TenantId}";
+
+            public Cloud Cloud => Cloud.PublicLegacy;
+
+            public bool UseAppIdUri { get; set; }
+
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
+
+            public X509Certificate2 GetCertificate()
+            {
+                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
+            }
+
+            public string GetSecret()
+            {
+                return GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalCCAKeyVaultSecretName).Value;
+            }
+        }
+
         private static Lazy<IConfidentialAppSettings> s_publicCloudSettings =
             new Lazy<IConfidentialAppSettings>(() => new PublicCloudConfidentialAppSettings());
+        
+        private static Lazy<IConfidentialAppSettings> s_publicLegacyCloudSettings =
+            new Lazy<IConfidentialAppSettings>(() => new PublicLegacyCloudConfidentialAppSettings());
         
         private static Lazy<IConfidentialAppSettings> s_ppeCloudSettings =
             new Lazy<IConfidentialAppSettings>(() => new PpeConfidentialAppSettings());
@@ -176,6 +214,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             {
                 case Cloud.Public:
                     return s_publicCloudSettings.Value;
+                case Cloud.PublicLegacy:
+                    return s_publicLegacyCloudSettings.Value;
                 case Cloud.PPE:
                     return s_ppeCloudSettings.Value;
                 case Cloud.Arlington:

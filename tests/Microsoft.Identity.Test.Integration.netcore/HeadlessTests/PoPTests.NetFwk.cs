@@ -302,10 +302,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
+            // Use the lab response app and tenant for consistency instead of mixing configurations
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .Create(labResponse.App.AppId)
+                .WithAuthority($"https://login.microsoftonline.com/{labResponse.User.TenantId}")
+                .WithClientSecret(settings.GetSecret()) // Still use the certificate/secret from settings
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -321,7 +322,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                settings.ClientId,
+                labResponse.App.AppId, // Use consistent app ID from lab response
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
