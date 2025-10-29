@@ -489,8 +489,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // 3) Mint + cache under the provided cacheKey
                 var created = await factory().ConfigureAwait(false);
 
-                s_mtlsCertificateCache.Set(
-                    cacheKey, created.Item1, created.Item2, created.Item3, logger);
+                s_mtlsCertificateCache.Set(cacheKey,
+                    new CertificateCacheValue(created.Item1, created.Item2, created.Item3),
+                    logger);
 
                 return created;
             }

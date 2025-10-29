@@ -17,16 +17,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// Try to get a cached certificate+endpoint+clientId for the specified cacheKey.
         /// Returns true and non-null outputs if found and not expired.
         /// </summary>
-        bool TryGet(string cacheKey, out CertificateCacheValue value, ILoggerAdapter logger = null);
+        bool TryGet(
+            string cacheKey, 
+            out CertificateCacheValue value, 
+            ILoggerAdapter logger = null);
 
         /// <summary>
         /// Insert or replace the cached certificate+endpoint+clientId for cacheKey.
         /// </summary>
         void Set(
             string cacheKey,
-            X509Certificate2 certificate,
-            string endpoint,
-            string clientId,
+            in CertificateCacheValue value,
             ILoggerAdapter logger = null);
 
         /// <summary>Remove an entry if present.</summary>

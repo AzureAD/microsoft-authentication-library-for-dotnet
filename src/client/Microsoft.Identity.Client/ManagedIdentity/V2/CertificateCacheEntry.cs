@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// </summary>
         /// <param name="nowUtc"></param>
         /// <returns></returns>
-        public bool IsExpiredUtc(DateTimeOffset nowUtc) => nowUtc >= NotAfterUtc;
+        public bool IsExpiredUtc(DateTimeOffset nowUtc) => nowUtc >= (NotAfterUtc - MinRemainingLifetime);
 
         /// <summary>
         /// dispose the entry and its certificate.
@@ -72,14 +72,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 return; // already disposed
             }
 
-            try
-            {
-                Certificate.Dispose();
-            }
-            catch
-            {
-                // defensive: some platforms throw on double/invalid dispose; we swallow to keep eviction robust
-            }
+            // Idempotent due to the atomic guard
+            Certificate.Dispose();
         }
     }
 }

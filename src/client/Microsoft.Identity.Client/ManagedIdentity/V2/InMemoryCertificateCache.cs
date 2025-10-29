@@ -52,22 +52,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// <inheritdoc />
         public void Set(
             string cacheKey,
-            X509Certificate2 certificate,
-            string endpoint,
-            string clientId,
+            in CertificateCacheValue value,
             ILoggerAdapter logger = null)
         {
             ThrowIfDisposed();
             ValidateCacheKey(cacheKey);
 
-            if (certificate is null)
-                throw new ArgumentNullException(nameof(certificate));
-            if (string.IsNullOrWhiteSpace(endpoint))
-                throw new ArgumentException("Endpoint must be non-empty.", nameof(endpoint));
-            if (string.IsNullOrWhiteSpace(clientId))
-                throw new ArgumentException("ClientId must be non-empty.", nameof(clientId));
+            if (value.Certificate is null)
+                throw new ArgumentNullException(nameof(value.Certificate));
+            if (string.IsNullOrWhiteSpace(value.Endpoint))
+                throw new ArgumentException("Endpoint must be non-empty.", nameof(value.Endpoint));
+            if (string.IsNullOrWhiteSpace(value.ClientId))
+                throw new ArgumentException("ClientId must be non-empty.", nameof(value.ClientId));
 
-            var notAfterUtc = ToNotAfterUtc(certificate);
+            var notAfterUtc = ToNotAfterUtc(value.Certificate);
             var nowUtc = DateTimeOffset.UtcNow;
 
             // Enforce minimum remaining lifetime (e.g., 24h).
@@ -75,14 +73,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 var remaining = notAfterUtc - nowUtc;
                 logger?.Verbose(() =>
-                    "[CertCache] Skipping certificate with insufficient remaining lifetime (" +
-                    $"{remaining.TotalHours:F2}h) (key='{Mask(cacheKey)}').");
+                    "[CertCache] Skipping certificate with insufficient remaining lifetime " +
+                    $"({remaining.TotalHours:F2}h) (key='{Mask(cacheKey)}').");
                 return;
             }
 
             // Cache owns its copy; it will dispose upon eviction.
-            var cachedCopy = new X509Certificate2(certificate);
-            var newEntry = new CertificateCacheEntry(cachedCopy, notAfterUtc, endpoint, clientId);
+            var cachedCopy = new X509Certificate2(value.Certificate);
+            var newEntry = new CertificateCacheEntry(cachedCopy, notAfterUtc, value.Endpoint, value.ClientId);
 
             _entriesByCacheKey.AddOrUpdate(
                 cacheKey,
@@ -93,7 +91,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 },
                 (_, old) =>
                 {
-                    // Defensive: don't double-dispose in weird interleavings
                     if (!old.IsDisposed)
                     {
                         old.Dispose();

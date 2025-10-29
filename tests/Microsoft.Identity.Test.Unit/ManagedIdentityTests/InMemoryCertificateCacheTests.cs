@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
@@ -44,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             const string ep = "https://mtls.endpoint";
             const string cid = "11111111-1111-1111-1111-111111111111";
 
-            cache.Set(key, cert, ep, cid);
+            cache.Set(key, new CertificateCacheValue(cert, ep, cid));
 
             var ok = cache.TryGet(key, out var value);
             Assert.IsTrue(ok);
@@ -72,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Certificate lifetime shorter than product threshold (24h)
             using var shortCert = CreateSelfSignedCert(TimeSpan.FromHours(1));
-            cache.Set("short-key", shortCert, "https://mtls", "client-guid");
+            cache.Set("short-key", new CertificateCacheValue(shortCert, "https://mtls", "client-guid"));
 
             var ok = cache.TryGet("short-key", out _);
             Assert.IsFalse(ok, "Cache should skip certs with remaining lifetime < 24h.");
@@ -86,8 +87,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using var certB = CreateSelfSignedCert(TimeSpan.FromDays(3), "CN=B");
 
             const string key = "replace-key";
-            cache.Set(key, certA, "https://ep", "cid");
-            cache.Set(key, certB, "https://ep", "cid");
+            cache.Set(key, new CertificateCacheValue(certA, "https://ep", "cid"));
+            cache.Set(key, new CertificateCacheValue(certB, "https://ep", "cid"));
 
             var ok = cache.TryGet(key, out var v);
             Assert.IsTrue(ok);
@@ -108,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var cache = new InMemoryCertificateCache();
             using var cert = CreateSelfSignedCert(TimeSpan.FromDays(2));
 
-            cache.Set("k1", cert, "https://ep", "cid");
+            cache.Set("k1", new CertificateCacheValue(cert, "https://ep", "cid"));
             var removed = cache.Remove("k1");
             Assert.IsTrue(removed);
 
@@ -123,8 +124,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using var c1 = CreateSelfSignedCert(TimeSpan.FromDays(2));
             using var c2 = CreateSelfSignedCert(TimeSpan.FromDays(2));
 
-            cache.Set("k1", c1, "https://ep1", "cid1");
-            cache.Set("k2", c2, "https://ep2", "cid2");
+            cache.Set("k1", new CertificateCacheValue(c1, "https://ep1", "cid1"));
+            cache.Set("k2", new CertificateCacheValue(c2, "https://ep2", "cid2"));
 
             cache.Clear();
 
@@ -143,10 +144,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.ThrowsException<ArgumentException>(() => cache.TryGet(null, out _));
 
             // Set
-            Assert.ThrowsException<ArgumentException>(() => cache.Set(" ", cert, "ep", "cid"));
-            Assert.ThrowsException<ArgumentNullException>(() => cache.Set("k", null, "ep", "cid"));
-            Assert.ThrowsException<ArgumentException>(() => cache.Set("k", cert, " ", "cid"));
-            Assert.ThrowsException<ArgumentException>(() => cache.Set("k", cert, "ep", " "));
+            Assert.ThrowsException<ArgumentException>(() => cache.Set(" ", new CertificateCacheValue(cert, "ep", "cid")));
+            Assert.ThrowsException<ArgumentNullException>(() => cache.Set("k", new CertificateCacheValue(null, "ep", "cid"))); // This will throw as expected in the test
+            Assert.ThrowsException<ArgumentException>(() => cache.Set("k", new CertificateCacheValue(cert, " ", "cid")));
+            Assert.ThrowsException<ArgumentException>(() => cache.Set("k", new CertificateCacheValue(cert, "ep", " ")));
 
             // Remove
             Assert.ThrowsException<ArgumentException>(() => cache.Remove(""));
@@ -161,9 +162,43 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             Assert.ThrowsException<ObjectDisposedException>(() => cache.TryGet("k", out _));
             using var cert = CreateSelfSignedCert(TimeSpan.FromDays(2));
-            Assert.ThrowsException<ObjectDisposedException>(() => cache.Set("k", cert, "ep", "cid"));
+            Assert.ThrowsException<ObjectDisposedException>(() => cache.Set("k", new CertificateCacheValue(cert, "ep", "cid")));
             Assert.ThrowsException<ObjectDisposedException>(() => cache.Remove("k"));
             Assert.ThrowsException<ObjectDisposedException>(() => cache.Clear());
+        }
+
+        [TestMethod]
+        public void Set_Skips_When_Lifetime_Equals_MinRemainingLifetime()
+        {
+            using var cert = CreateSelfSignedCert(CertificateCacheEntry.MinRemainingLifetime);
+            var cache = new InMemoryCertificateCache();
+            cache.Set("eq-threshold", new CertificateCacheValue(cert, "https://ep", "cid"));
+            Assert.IsFalse(cache.TryGet("eq-threshold", out _), "Exact threshold should be skipped (<= comparison).");
+        }
+
+        [TestMethod]
+        public void TryGet_Evicts_When_Remaining_Lifetime_Below_Threshold()
+        {
+            using var longCert = CreateSelfSignedCert(TimeSpan.FromHours(30));
+            var cache = new InMemoryCertificateCache();
+            cache.Set("will-expire", new CertificateCacheValue(longCert, "https://ep", "cid"));
+
+            // Use reflection to inject an entry whose NotAfterUtc makes remaining lifetime < MinRemainingLifetime
+            var field = typeof(InMemoryCertificateCache).GetField("_entriesByCacheKey",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var dict = (ConcurrentDictionary<string, CertificateCacheEntry>)field.GetValue(cache);
+
+            // Remaining lifetime 23h (< 24h) triggers expiration on access
+            var expiredEntry = new CertificateCacheEntry(
+                certificate: new X509Certificate2(longCert),
+                notAfterUtc: DateTimeOffset.UtcNow.AddHours(23),
+                endpoint: "https://ep",
+                clientId: "cid");
+
+            dict["will-expire"] = expiredEntry;
+
+            var ok = cache.TryGet("will-expire", out _);
+            Assert.IsFalse(ok, "Entry should be evicted when remaining lifetime drops below threshold.");
         }
     }
 
@@ -187,7 +222,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void IsExpiredUtc_Boundary()
         {
-            using var cert = MakeCert(TimeSpan.FromHours(2));
+            // Choose a lifetime > MinRemainingLifetime (24h) so boundary is in the future.
+            using var cert = MakeCert(TimeSpan.FromHours(26));
             var notAfterUtc = cert.NotAfter.ToUniversalTime();
 
             var entry = new CertificateCacheEntry(
@@ -196,12 +232,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 endpoint: "https://ep",
                 clientId: "cid");
 
-            // Before notAfter -> not expired
-            Assert.IsFalse(entry.IsExpiredUtc(DateTimeOffset.UtcNow));
+            var boundary = new DateTimeOffset(notAfterUtc).Add(-CertificateCacheEntry.MinRemainingLifetime);
 
-            // After notAfter -> expired
-            var later = new DateTimeOffset(notAfterUtc).AddMinutes(1);
-            Assert.IsTrue(entry.IsExpiredUtc(later));
+            // Just before boundary -> not expired
+            Assert.IsFalse(entry.IsExpiredUtc(boundary.AddSeconds(-1)));
+
+            // At boundary -> expired
+            Assert.IsTrue(entry.IsExpiredUtc(boundary));
+
+            // After boundary -> expired
+            Assert.IsTrue(entry.IsExpiredUtc(boundary.AddMinutes(1)));
         }
 
         [TestMethod]
@@ -221,6 +261,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // No throw on second dispose
             entry.Dispose();
             Assert.IsTrue(entry.IsDisposed);
+        }
+
+        [TestMethod]
+        public void IsExpiredUtc_WellBeforeBoundary_NotExpired()
+        {
+            using var cert = MakeCert(TimeSpan.FromHours(48));
+            var entry = new CertificateCacheEntry(
+                certificate: new X509Certificate2(cert),
+                notAfterUtc: cert.NotAfter.ToUniversalTime(),
+                endpoint: "https://ep",
+                clientId: "cid");
+
+            // Far before boundary
+            Assert.IsFalse(entry.IsExpiredUtc(DateTimeOffset.UtcNow));
         }
     }
 
