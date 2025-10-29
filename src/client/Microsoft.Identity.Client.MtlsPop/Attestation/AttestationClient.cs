@@ -8,7 +8,7 @@ using Microsoft.Win32.SafeHandles;
 namespace Microsoft.Identity.Client.MtlsPop.Attestation
 {
     /// <summary>
-    /// Managed façade for <c>AttestationClientLib.dll</c>.  Holds initialization state,
+    /// Managed façade for <c>AttestationClientLib.dll</c>. Holds initialization state,
     /// does ref-count hygiene on <see cref="SafeNCryptKeyHandle"/>, and returns a JWT.
     /// </summary>
     internal sealed class AttestationClient : IDisposable
@@ -16,25 +16,18 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
         private bool _initialized;
 
         /// <summary>
-        /// AttestationClient constructor. Pro-actively verifies the native DLL.
+        /// AttestationClient constructor. Relies on the default OS loader to locate the native DLL.
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         public AttestationClient()
         {
-            /* step 0 ── ensure the resolver probes all valid locations
-               (env override → app base → System32/SysWOW64 → PATH) */
-            NativeDllResolver.EnsureLoaded();
-
-            /* step 1 ── optional proactive verification (non-fatal)
-               Keep the probe for diagnostics, but do NOT throw here; if the DLL
-               is truly unavailable/mismatched, InitAttestationLib will fail. */
             string dllError = NativeDiagnostics.ProbeNativeDll();
-            // intentionally not throwing on dllError to avoid path-specific false negatives
+            // intentionally not throwing on dllError
 
-            /* step 2 ── load & initialize (logger is required by native lib) */
+            // Load & initialize (logger is required by native lib)
             var info = new AttestationClientLib.AttestationLogInfo
             {
-                Log = AttestationLogger.ConsoleLogger, // minimal rooted delegate; works on netstandard2.0 & net8.0
+                Log = AttestationLogger.ConsoleLogger,
                 Ctx = IntPtr.Zero
             };
 
@@ -52,7 +45,7 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
         {
             if (!_initialized)
                 return new(AttestationStatus.NotInitialized, null, -1,
-                           "Native library not initialized.");
+                    "Native library not initialized.");
 
             IntPtr buf = IntPtr.Zero;
             bool addRef = false;
@@ -62,14 +55,14 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
                 keyHandle.DangerousAddRef(ref addRef);
 
                 int rc = AttestationClientLib.AttestKeyGuardImportKey(
-                             endpoint, null, null, keyHandle, out buf, clientId);
+                    endpoint, null, null, keyHandle, out buf, clientId);
 
                 if (rc != 0)
                     return new(AttestationStatus.NativeError, null, rc, null);
 
                 if (buf == IntPtr.Zero)
                     return new(AttestationStatus.TokenEmpty, null, 0,
-                               "rc==0 but token buffer was null.");
+                        "rc==0 but token buffer was null.");
 
                 string jwt = Marshal.PtrToStringAnsi(buf)!;
                 return new(AttestationStatus.Success, jwt, 0, null);
