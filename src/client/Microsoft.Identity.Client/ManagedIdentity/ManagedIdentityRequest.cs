@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
@@ -26,7 +27,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public RequestType RequestType { get; set; }
 
-        public ManagedIdentityRequest(HttpMethod method, Uri endpoint, RequestType requestType = RequestType.ManagedIdentityDefault)
+        public X509Certificate2 MtlsCertificate { get; set; }
+
+        public ManagedIdentityRequest(
+            HttpMethod method,
+            Uri endpoint,
+            RequestType requestType = RequestType.ManagedIdentityDefault,
+            X509Certificate2 mtlsCertificate = null)
         {
             Method = method;
             _baseEndpoint = endpoint;
@@ -34,6 +41,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             BodyParameters = new Dictionary<string, string>();
             QueryParameters = new Dictionary<string, string>();
             RequestType = requestType;
+            MtlsCertificate = mtlsCertificate;
         }
 
         public Uri ComputeUri()
@@ -62,6 +70,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 QueryParameters["token_sha256_to_refresh"] = parameters.RevokedTokenHash;
                 logger.Info("[Managed Identity] Passing SHA-256 of the 'revoked' token to Managed Identity endpoint.");
+            }
+        }
+
+        /// <summary>
+        /// Adds extra query parameters to the Managed Identity request.
+        /// </summary>
+        /// <param name="extraQueryParameters">Dictionary containing additional query parameters to append to the request.
+        /// The parameter can be null.</param>
+        /// <param name="logger">Logger instance for recording the operation.</param>
+        internal void AddExtraQueryParams(IDictionary<string, string> extraQueryParameters, ILoggerAdapter logger)
+        {
+            if (extraQueryParameters != null)
+            {
+                foreach (var kvp in extraQueryParameters)
+                {
+                    QueryParameters[kvp.Key] = kvp.Value;
+                }
+
+                logger.Info($"[Managed Identity] Adding {extraQueryParameters.Count} extra query parameters to Managed Identity request.");
             }
         }
     }

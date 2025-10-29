@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestInitialize]
         public async Task TestInitializeAsync()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
             _harness = new AcquireTokenInteractiveBuilderHarness();
             await _harness.SetupAsync()
                           .ConfigureAwait(false);

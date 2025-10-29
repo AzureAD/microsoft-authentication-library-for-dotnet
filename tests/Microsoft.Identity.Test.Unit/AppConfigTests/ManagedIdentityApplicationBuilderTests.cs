@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         [TestMethod]
