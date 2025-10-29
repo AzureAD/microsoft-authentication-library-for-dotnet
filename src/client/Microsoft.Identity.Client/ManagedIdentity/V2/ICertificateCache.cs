@@ -11,18 +11,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// Process-local cache for an mTLS certificate and its endpoint.
     /// Expiration is based solely on certificate.NotAfter.
     /// </summary>
-    internal interface ICertificateCache : IDisposable
+    internal interface ICertificateCache
     {
         /// <summary>
         /// Try to get a cached certificate+endpoint+clientId for the specified cacheKey.
         /// Returns true and non-null outputs if found and not expired.
         /// </summary>
-        bool TryGet(
-            string cacheKey,
-            out X509Certificate2 certificate,
-            out string endpoint,
-            out string clientId,
-            ILoggerAdapter logger = null);
+        bool TryGet(string cacheKey, out CertificateCacheValue value, ILoggerAdapter logger = null);
 
         /// <summary>
         /// Insert or replace the cached certificate+endpoint+clientId for cacheKey.

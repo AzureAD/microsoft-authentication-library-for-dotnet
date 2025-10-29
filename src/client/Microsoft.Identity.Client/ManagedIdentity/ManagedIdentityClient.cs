@@ -28,30 +28,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private X509Certificate2 _runtimeMtlsBindingCertificate;
         internal X509Certificate2 RuntimeMtlsBindingCertificate => Volatile.Read(ref _runtimeMtlsBindingCertificate);
 
-        // Central, process-local cache for mTLS binding (cert + endpoint + canonical client_id).
-        internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
-
-        // Per-key async de-duplication so concurrent callers don’t double-mint.
-        internal static readonly ConcurrentDictionary<string, SemaphoreSlim> s_perKeyGates =
-            new ConcurrentDictionary<string, SemaphoreSlim>(StringComparer.Ordinal);
-
         internal static void ResetSourceForTest()
         {
             s_sourceName = ManagedIdentitySource.None;
 
-            // Clear caches so each test starts fresh
-            if (s_mtlsCertificateCache != null)
-            {
-                s_mtlsCertificateCache.Clear();
-            }
-
-            foreach (var gate in s_perKeyGates.Values)
-            {
-                try
-                { gate.Dispose(); }
-                catch { }
-            }
-            s_perKeyGates.Clear();
+            // Clear cert caches so each test starts fresh
+            ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
         }
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(

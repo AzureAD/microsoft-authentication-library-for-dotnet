@@ -10,112 +10,73 @@ using Microsoft.Identity.Client.Core;
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     /// <summary>
-    /// certificate+endpoint+clientId cache stored in process memory.
+    /// Certificate + endpoint + clientId cache stored in process memory.
     /// </summary>
-    internal sealed class InMemoryCertificateCache : ICertificateCache
+    internal sealed class InMemoryCertificateCache : ICertificateCache, IDisposable
     {
         private readonly ConcurrentDictionary<string, CertificateCacheEntry> _entriesByCacheKey =
             new ConcurrentDictionary<string, CertificateCacheEntry>(StringComparer.Ordinal);
 
         private int _disposed;
 
-        /// <summary>
-        /// try to get a cached certificate+endpoint+clientId for the specified cacheKey.
-        /// </summary>
-        /// <param name="cacheKey"></param>
-        /// <param name="certificate"></param>
-        /// <param name="endpoint"></param>
-        /// <param name="clientId"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalClientException"></exception>
+        /// <inheritdoc />
         public bool TryGet(
-            string cacheKey, 
-            out X509Certificate2 certificate, 
-            out string endpoint, 
-            out string clientId,
+            string cacheKey,
+            out CertificateCacheValue value,
             ILoggerAdapter logger = null)
         {
-            certificate = null;
-            endpoint = null;
-            clientId = null;
+            ThrowIfDisposed();
+            ValidateCacheKey(cacheKey);
 
-            if (cacheKey == null)
-                throw new MsalClientException(nameof(cacheKey));
-            if (Volatile.Read(ref _disposed) != 0)
-                return false;
+            value = default;
 
-            CertificateCacheEntry entry;
-            if (_entriesByCacheKey.TryGetValue(cacheKey, out entry))
+            if (_entriesByCacheKey.TryGetValue(cacheKey, out var entry))
             {
-                var nowUtc = DateTimeOffset.UtcNow;
-
-                if (entry.IsExpiredUtc(nowUtc))
+                if (TryEvictIfExpired(cacheKey, entry, logger))
                 {
-                    CertificateCacheEntry removed;
-                    if (_entriesByCacheKey.TryRemove(cacheKey, out removed))
-                    {
-                        removed.Dispose();
-                        if (logger != null)
-                            logger.Verbose(() => "[CertCache] Evicted expired entry (key='" + Mask(cacheKey) + "').");
-                    }
                     return false;
                 }
 
                 // Return a clone so the caller can dispose independently.
-                certificate = new X509Certificate2(entry.Certificate);
-                endpoint = entry.Endpoint;
-                clientId = entry.ClientId;
+                var certClone = new X509Certificate2(entry.Certificate);
+                value = new CertificateCacheValue(certClone, entry.Endpoint, entry.ClientId);
 
-                if (logger != null)
-                    logger.Verbose(() => "[CertCache] HIT (key='" + Mask(cacheKey) + "').");
+                logger?.Verbose(() => "[CertCache] HIT (key='" + Mask(cacheKey) + "').");
                 return true;
             }
 
-            if (logger != null)
-                logger.Verbose(() => "[CertCache] MISS (key='" + Mask(cacheKey) + "').");
+            logger?.Verbose(() => "[CertCache] MISS (key='" + Mask(cacheKey) + "').");
             return false;
         }
 
-        /// <summary>
-        /// sets the cached certificate+endpoint+clientId for cacheKey.
-        /// </summary>
-        /// <param name="cacheKey"></param>
-        /// <param name="certificate"></param>
-        /// <param name="endpoint"></param>
-        /// <param name="clientId"></param>
-        /// <param name="logger"></param>
-        /// <exception cref="MsalClientException"></exception>
-        /// <exception cref="ObjectDisposedException"></exception>
+        /// <inheritdoc />
         public void Set(
-            string cacheKey, 
-            X509Certificate2 certificate, 
-            string endpoint, 
+            string cacheKey,
+            X509Certificate2 certificate,
+            string endpoint,
             string clientId,
             ILoggerAdapter logger = null)
         {
-            if (cacheKey == null)
-                throw new MsalClientException(nameof(cacheKey));
-            if (certificate == null)
-                throw new MsalClientException(nameof(certificate));
+            ThrowIfDisposed();
+            ValidateCacheKey(cacheKey);
+
+            if (certificate is null)
+                throw new ArgumentNullException(nameof(certificate));
             if (string.IsNullOrWhiteSpace(endpoint))
-                throw new MsalClientException("Endpoint must be non-empty.", nameof(endpoint));
+                throw new ArgumentException("Endpoint must be non-empty.", nameof(endpoint));
             if (string.IsNullOrWhiteSpace(clientId))
-                throw new MsalClientException("ClientId must be non-empty.", nameof(clientId));
-            if (Volatile.Read(ref _disposed) != 0)
-                throw new ObjectDisposedException(nameof(InMemoryCertificateCache));
+                throw new ArgumentException("ClientId must be non-empty.", nameof(clientId));
 
             var notAfterUtc = ToNotAfterUtc(certificate);
             var nowUtc = DateTimeOffset.UtcNow;
 
+            // Enforce minimum remaining lifetime (e.g., 24h).
             if (notAfterUtc <= nowUtc + CertificateCacheEntry.MinRemainingLifetime)
             {
-                if (logger != null)
-                {
-                    var remaining = notAfterUtc - nowUtc;
-                    logger.Verbose(() => "[CertCache] Skipping certificate with insufficient remaining lifetime (" +
-                                           $"{remaining.TotalHours:F2}h) (key='{Mask(cacheKey)}').");
-                }
+                var remaining = notAfterUtc - nowUtc;
+                logger?.Verbose(() =>
+                    "[CertCache] Skipping certificate with insufficient remaining lifetime (" +
+                    $"{remaining.TotalHours:F2}h) (key='{Mask(cacheKey)}').");
                 return;
             }
 
@@ -127,64 +88,110 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 cacheKey,
                 _ =>
                 {
-                    if (logger != null)
-                        logger.Verbose(() => "[CertCache] SET (key='" + Mask(cacheKey) + "').");
+                    logger?.Verbose(() => "[CertCache] SET (key='" + Mask(cacheKey) + "').");
                     return newEntry;
                 },
                 (_, old) =>
                 {
-                    old.Dispose();
-                    if (logger != null)
-                        logger.Verbose(() => "[CertCache] REPLACE (key='" + Mask(cacheKey) + "').");
+                    // Defensive: don't double-dispose in weird interleavings
+                    if (!old.IsDisposed)
+                    {
+                        old.Dispose();
+                    }
+                    logger?.Verbose(() => "[CertCache] REPLACE (key='" + Mask(cacheKey) + "').");
                     return newEntry;
                 });
         }
 
-        /// <summary>
-        /// removes an entry fromn the cache, if present.
-        /// </summary>
-        /// <param name="cacheKey"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalClientException"></exception>
+        /// <inheritdoc />
         public bool Remove(string cacheKey, ILoggerAdapter logger = null)
         {
-            if (cacheKey == null)
-                throw new MsalClientException(nameof(cacheKey));
-            CertificateCacheEntry entry;
-            if (_entriesByCacheKey.TryRemove(cacheKey, out entry))
+            ThrowIfDisposed();
+            ValidateCacheKey(cacheKey);
+
+            if (_entriesByCacheKey.TryRemove(cacheKey, out var entry))
             {
-                entry.Dispose();
-                if (logger != null)
-                    logger.Verbose(() => "[CertCache] REMOVE (key='" + Mask(cacheKey) + "').");
+                if (!entry.IsDisposed)
+                {
+                    entry.Dispose();
+                }
+                logger?.Verbose(() => "[CertCache] REMOVE (key='" + Mask(cacheKey) + "').");
                 return true;
             }
             return false;
         }
 
-        /// <summary>
-        /// for testing: clears all entries.
-        /// </summary>
-        /// <param name="logger"></param>
+        /// <inheritdoc />
         public void Clear(ILoggerAdapter logger = null)
         {
+            ThrowIfDisposed();
+
             foreach (var kvp in _entriesByCacheKey)
             {
-                CertificateCacheEntry entry;
-                if (_entriesByCacheKey.TryRemove(kvp.Key, out entry))
+                if (_entriesByCacheKey.TryRemove(kvp.Key, out var entry))
                 {
-                    entry.Dispose();
+                    if (!entry.IsDisposed)
+                    {
+                        entry.Dispose();
+                    }
                 }
             }
-            if (logger != null)
-                logger.Verbose(() => "[CertCache] CLEAR.");
+
+            logger?.Verbose(() => "[CertCache] CLEAR.");
         }
 
         public void Dispose()
         {
             if (Interlocked.Exchange(ref _disposed, 1) != 0)
                 return;
-            Clear();
+
+            // Dispose entries and empty the map
+            foreach (var kvp in _entriesByCacheKey)
+            {
+                if (_entriesByCacheKey.TryRemove(kvp.Key, out var entry))
+                {
+                    if (!entry.IsDisposed)
+                    {
+                        entry.Dispose();
+                    }
+                }
+            }
+        }
+
+        // --- helpers ---
+
+        private void ThrowIfDisposed()
+        {
+            if (Volatile.Read(ref _disposed) != 0)
+            {
+                throw new ObjectDisposedException(nameof(InMemoryCertificateCache));
+            }
+        }
+
+        private static void ValidateCacheKey(string cacheKey)
+        {
+            if (string.IsNullOrWhiteSpace(cacheKey))
+                throw new ArgumentException("Cache key must be non-empty.", nameof(cacheKey));
+        }
+
+        private bool TryEvictIfExpired(string cacheKey, CertificateCacheEntry entry, ILoggerAdapter logger)
+        {
+            var nowUtc = DateTimeOffset.UtcNow;
+            if (!entry.IsExpiredUtc(nowUtc))
+            {
+                return false;
+            }
+
+            if (_entriesByCacheKey.TryRemove(cacheKey, out var removed))
+            {
+                if (!removed.IsDisposed)
+                {
+                    removed.Dispose();
+                }
+                logger?.Verbose(() => "[CertCache] Evicted expired entry (key='" + Mask(cacheKey) + "').");
+            }
+
+            return true;
         }
 
         private static DateTimeOffset ToNotAfterUtc(X509Certificate2 cert)
@@ -198,15 +205,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         /// <summary>
-        /// used for logging cache keys without exposing full values.
+        /// Used for logging cache keys without exposing full values.
         /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="s">The sensitive string.</param>
+        /// <returns>Masked representation.</returns>
         private static string Mask(string s)
         {
             if (string.IsNullOrEmpty(s))
                 return "<empty>";
-            var take = Math.Min(8, s.Length);
+
+            // Do not reveal full value for short keys
+            if (s.Length <= 8)
+                return $"…({s.Length})";
+
+            var take = 8;
             return "…" + s.Substring(s.Length - take, take) + "(" + s.Length + ")";
         }
     }
