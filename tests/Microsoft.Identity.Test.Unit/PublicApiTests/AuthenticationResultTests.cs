@@ -7,10 +7,12 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Client.AuthScheme.Bearer;
+using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -270,6 +272,333 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 propsWithPublicSetter,
                 "All non-obsolete public properties should expose a public setter."
             );
+        }
+
+        /// <summary>
+        /// Tests that the BindingCertificate property can be set and retrieved correctly.
+        /// </summary>
+        [TestMethod]
+        public void BindingCertificate_Property_CanBeSetAndRetrieved()
+        {
+            // Arrange
+            var bindingCertificate = CertHelper.GetOrCreateTestCert();
+            var accessToken = "test-access-token";
+
+            var ar = new AuthenticationResult(
+                accessToken,
+                false,
+                "uid",
+                DateTime.UtcNow.AddHours(1),
+                DateTime.UtcNow.AddHours(2),
+                "tid",
+                new Account("aid", "user", "env"),
+                "idt",
+                new[] { "scope" },
+                Guid.NewGuid(),
+                "Bearer",
+                new AuthenticationResultMetadata(TokenSource.Cache))
+            {
+                BindingCertificate = bindingCertificate
+            };
+
+            // Assert
+            Assert.IsNotNull(ar.BindingCertificate, "BindingCertificate should not be null");
+            Assert.AreEqual(bindingCertificate, ar.BindingCertificate, "BindingCertificate should match the provided certificate");
+        }
+
+        /// <summary>
+        /// Tests that the BindingCertificate property can be null.
+        /// </summary>
+        [TestMethod]
+        public void BindingCertificate_Property_CanBeNull()
+        {
+            // Arrange
+            var accessToken = "test-access-token";
+
+            var ar = new AuthenticationResult(
+                accessToken,
+                false,
+                "uid",
+                DateTime.UtcNow.AddHours(1),
+                DateTime.UtcNow.AddHours(2),
+                "tid",
+                new Account("aid", "user", "env"),
+                "idt",
+                new[] { "scope" },
+                Guid.NewGuid(),
+                "Bearer",
+                new AuthenticationResultMetadata(TokenSource.Cache))
+            {
+                BindingCertificate = null
+            };
+
+            // Assert
+            Assert.IsNull(ar.BindingCertificate, "BindingCertificate should be null when not provided");
+        }
+
+        /// <summary>
+        /// Tests that CreateAuthorizationHeaderBound returns correct AuthorizationHeaderInformation with binding certificate.
+        /// </summary>
+        [TestMethod]
+        public void CreateAuthorizationHeaderBound_WithBindingCertificate_ReturnsCorrectHeaderInformation()
+        {
+            // Arrange
+            var bindingCertificate = CertHelper.GetOrCreateTestCert();
+            var accessToken = "test-access-token";
+            var tokenType = "Bearer";
+
+            var ar = new AuthenticationResult(
+                accessToken,
+                false,
+                "uid",
+                DateTime.UtcNow.AddHours(1),
+                DateTime.UtcNow.AddHours(2),
+                "tid",
+                new Account("aid", "user", "env"),
+                "idt",
+                new[] { "scope" },
+                Guid.NewGuid(),
+                tokenType,
+                new AuthenticationResultMetadata(TokenSource.Cache))
+            {
+                BindingCertificate = bindingCertificate
+            };
+
+            // Act
+            var headerInfo = ar.CreateAuthorizationHeaderBound();
+
+            // Assert
+            Assert.IsNotNull(headerInfo, "AuthorizationHeaderInformation should not be null");
+            Assert.AreEqual($"{tokenType} {accessToken}", headerInfo.AuthorizationHeaderValue, 
+                "AuthorizationHeaderValue should match expected format");
+            Assert.AreEqual(bindingCertificate, headerInfo.BindingCertificate, 
+                "BindingCertificate should match the certificate from AuthenticationResult");
+        }
+
+        /// <summary>
+        /// Tests that CreateAuthorizationHeaderBound works with null binding certificate.
+        /// </summary>
+        [TestMethod]
+        public void CreateAuthorizationHeaderBound_WithNullBindingCertificate_ReturnsHeaderInformationWithNullCertificate()
+        {
+            // Arrange
+            var accessToken = "test-access-token";
+            var tokenType = "PoP";
+
+            var ar = new AuthenticationResult(
+                accessToken,
+                false,
+                "uid",
+                DateTime.UtcNow.AddHours(1),
+                DateTime.UtcNow.AddHours(2),
+                "tid",
+                new Account("aid", "user", "env"),
+                "idt",
+                new[] { "scope" },
+                Guid.NewGuid(),
+                tokenType,
+                new AuthenticationResultMetadata(TokenSource.Cache))
+            {
+                BindingCertificate = null
+            };
+
+            // Act
+            var headerInfo = ar.CreateAuthorizationHeaderBound();
+
+            // Assert
+            Assert.IsNotNull(headerInfo, "AuthorizationHeaderInformation should not be null");
+            Assert.AreEqual($"{tokenType} {accessToken}", headerInfo.AuthorizationHeaderValue, 
+                "AuthorizationHeaderValue should match expected format");
+            Assert.IsNull(headerInfo.BindingCertificate, 
+                "BindingCertificate should be null when AuthenticationResult has null BindingCertificate");
+        }
+
+        /// <summary>
+        /// Tests that CreateAuthorizationHeaderBound uses the correct token type in authorization header.
+        /// </summary>
+        [TestMethod]
+        public void CreateAuthorizationHeaderBound_WithCustomTokenType_UsesCorrectTokenType()
+        {
+            // Arrange
+            var bindingCertificate = CertHelper.GetOrCreateTestCert();
+            var accessToken = "custom-token";
+            var customTokenType = "CustomType";
+
+            var ar = new AuthenticationResult(
+                accessToken,
+                false,
+                "uid",
+                DateTime.UtcNow.AddHours(1),
+                DateTime.UtcNow.AddHours(2),
+                "tid",
+                new Account("aid", "user", "env"),
+                "idt",
+                new[] { "scope" },
+                Guid.NewGuid(),
+                customTokenType,
+                new AuthenticationResultMetadata(TokenSource.Cache))
+            {
+                BindingCertificate = bindingCertificate
+            };
+
+            // Act
+            var headerInfo = ar.CreateAuthorizationHeaderBound();
+
+            // Assert
+            Assert.IsNotNull(headerInfo, "AuthorizationHeaderInformation should not be null");
+            Assert.AreEqual($"{customTokenType} {accessToken}", headerInfo.AuthorizationHeaderValue, 
+                "AuthorizationHeaderValue should use the custom token type");
+            Assert.AreEqual(bindingCertificate, headerInfo.BindingCertificate, 
+                "BindingCertificate should match the provided certificate");
+        }
+
+        /// <summary>
+        /// Tests that CreateAuthorizationHeaderBound and CreateAuthorizationHeader return the same authorization header value.
+        /// </summary>
+        [TestMethod]
+        public void CreateAuthorizationHeaderBound_AuthorizationHeaderValue_MatchesCreateAuthorizationHeader()
+        {
+            // Arrange
+            var bindingCertificate = CertHelper.GetOrCreateTestCert();
+            var accessToken = "test-token";
+            var tokenType = "Bearer";
+
+            var ar = new AuthenticationResult(
+                accessToken,
+                false,
+                "uid",
+                DateTime.UtcNow.AddHours(1),
+                DateTime.UtcNow.AddHours(2),
+                "tid",
+                new Account("aid", "user", "env"),
+                "idt",
+                new[] { "scope" },
+                Guid.NewGuid(),
+                tokenType,
+                new AuthenticationResultMetadata(TokenSource.Cache))
+            {
+                BindingCertificate = bindingCertificate
+            };
+
+            // Act
+            var headerInfo = ar.CreateAuthorizationHeaderBound();
+            var directHeader = ar.CreateAuthorizationHeader();
+
+            // Assert
+            Assert.AreEqual(directHeader, headerInfo.AuthorizationHeaderValue, 
+                "CreateAuthorizationHeaderBound().AuthorizationHeaderValue should match CreateAuthorizationHeader()");
+        }
+
+        /// <summary>
+        /// Tests the internal constructor with binding certificate using cache items.
+        /// </summary>
+        [TestMethod]
+        public void InternalConstructor_WithBindingCertificate_SetsBindingCertificateProperty()
+        {
+            // Arrange
+            var bindingCertificate = CertHelper.GetOrCreateTestCert();
+            var correlationId = Guid.NewGuid();
+            var account = new Account("test-account-id", "test-user", "test-env");
+            var authScheme = new BearerAuthenticationOperation();
+            var tokenSource = TokenSource.Cache;
+            var apiEvent = new ApiEvent(correlationId);
+            var clientInfo = MockHelpers.CreateClientInfo();
+
+            // Create simple cache items with mocked data
+            var accessTokenCacheItem = new MsalAccessTokenCacheItem(
+                "login.microsoftonline.com",
+                "test-client-id",
+                "scope1 scope2",
+                "test-tenant-id",
+                null,
+                DateTimeOffset.UtcNow,
+                DateTimeOffset.UtcNow.AddHours(1),
+                DateTimeOffset.UtcNow.AddHours(2),
+                clientInfo,
+                "test-home-account-id");
+            accessTokenCacheItem.Secret = "test-access-token";
+
+            var idTokenCacheItem = new MsalIdTokenCacheItem(
+                "login.microsoftonline.com",
+                "test-client-id",
+                MockHelpers.CreateIdToken("test-unique-id", "test@example.com"),
+                clientInfo,
+                "test-home-account-id",
+                "test-tenant-id");
+
+            // Act
+            var result = new AuthenticationResult(
+                accessTokenCacheItem,
+                idTokenCacheItem,
+                authScheme,
+                correlationId,
+                tokenSource,
+                apiEvent,
+                account,
+                null, // spaAuthCode
+                null, // additionalResponseParameters
+                bindingCertificate);
+
+            // Assert
+            Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should not be null");
+            Assert.AreEqual(bindingCertificate, result.BindingCertificate, "BindingCertificate should match the provided certificate");
+            Assert.AreEqual("test-access-token", result.AccessToken, "AccessToken should be set from cache item");
+            Assert.AreEqual(correlationId, result.CorrelationId, "CorrelationId should be set");
+        }
+
+        /// <summary>
+        /// Tests the internal constructor with null binding certificate using cache items.
+        /// </summary>
+        [TestMethod]
+        public void InternalConstructor_WithNullBindingCertificate_SetsBindingCertificateToNull()
+        {
+            // Arrange
+            var correlationId = Guid.NewGuid();
+            var account = new Account("test-account-id", "test-user", "test-env");
+            var authScheme = new BearerAuthenticationOperation();
+            var tokenSource = TokenSource.Broker;
+            var apiEvent = new ApiEvent(correlationId);
+            var clientInfo = MockHelpers.CreateClientInfo();
+
+            // Create simple cache items with mocked data
+            var accessTokenCacheItem = new MsalAccessTokenCacheItem(
+                "login.microsoftonline.com",
+                "test-client-id",
+                "scope1 scope2",
+                "test-tenant-id",
+                null,
+                DateTimeOffset.UtcNow,
+                DateTimeOffset.UtcNow.AddHours(1),
+                DateTimeOffset.UtcNow.AddHours(2),
+                clientInfo,
+                "test-home-account-id");
+            accessTokenCacheItem.Secret = "test-access-token-2";
+
+            var idTokenCacheItem = new MsalIdTokenCacheItem(
+                "login.microsoftonline.com",
+                "test-client-id",
+                MockHelpers.CreateIdToken("test-unique-id-2", "test2@example.com"),
+                clientInfo,
+                "test-home-account-id",
+                "test-tenant-id");
+
+            // Act
+            var result = new AuthenticationResult(
+                accessTokenCacheItem,
+                idTokenCacheItem,
+                authScheme,
+                correlationId,
+                tokenSource,
+                apiEvent,
+                account,
+                null, // spaAuthCode
+                null, // additionalResponseParameters
+                null); // bindingCertificate
+
+            // Assert
+            Assert.IsNull(result.BindingCertificate, "BindingCertificate should be null when not provided");
+            Assert.AreEqual("test-access-token-2", result.AccessToken, "AccessToken should be set");
+            Assert.AreEqual(correlationId, result.CorrelationId, "CorrelationId should be set");
         }
     }
 }

@@ -4,15 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Client.AuthScheme;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -123,7 +121,6 @@ namespace Microsoft.Identity.Client
                 tokenType,
                 authenticationResultMetadata)
         {
-
         }
 
         internal AuthenticationResult(
@@ -135,7 +132,32 @@ namespace Microsoft.Identity.Client
             ApiEvent apiEvent,
             Account account,
             string spaAuthCode,
-            IReadOnlyDictionary<string, string> additionalResponseParameters)
+            IReadOnlyDictionary<string, string> additionalResponseParameters) :
+                this(
+                    msalAccessTokenCacheItem,
+                    msalIdTokenCacheItem,
+                    authenticationScheme,
+                    correlationID,
+                    tokenSource,
+                    apiEvent,
+                    account,
+                    spaAuthCode,
+                    additionalResponseParameters,
+                    bindingCertificate: null)
+        {
+        }
+
+        internal AuthenticationResult(
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem,
+            IAuthenticationOperation authenticationScheme,
+            Guid correlationID,
+            TokenSource tokenSource,
+            ApiEvent apiEvent,
+            Account account,
+            string spaAuthCode,
+            IReadOnlyDictionary<string, string> additionalResponseParameters,
+            X509Certificate2 bindingCertificate)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
 
@@ -198,6 +220,7 @@ namespace Microsoft.Identity.Client
 
             AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
             AuthenticationResultMetadata.TelemetryTokenType = authenticationScheme.TelemetryTokenType;
+            BindingCertificate = bindingCertificate;
         }
 
         //Default constructor for testing
@@ -335,6 +358,31 @@ namespace Microsoft.Identity.Client
         public string CreateAuthorizationHeader()
         {
             return $"{_authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType} {AccessToken}";
+        }
+
+        /// <summary>
+        /// Creates the content for an HTTP authorization header from this authentication result, so
+        /// that you can call a protected API with using certificate binding (aka mTLS PoP).
+        /// </summary>
+        /// <returns>Created authorization header of the form "Bearer {AccessToken}" with bound certificate</returns>
+        /// <example>
+        /// Here is how you can call a protected API from this authentication result:
+        /// <code>
+        /// var authHeader = result.CreateAuthorizationHeaderBound();
+        /// HttpClientHandler handler = new();
+        /// handler.ClientCertificates.Add(authHeader.BindingCertificate);
+        /// HttpClient client = new HttpClient(handler);
+        /// client.DefaultRequestHeaders.Add("Authorization", authHeader.AuthorizationHeaderValue);
+        /// HttpResponseMessage r = await client.GetAsync(urlOfTheProtectedApi);
+        /// </code>
+        /// </example>
+        public AuthorizationHeaderInformation CreateAuthorizationHeaderBound()
+        {
+            return new AuthorizationHeaderInformation()
+            {
+                AuthorizationHeaderValue = CreateAuthorizationHeader(),
+                BindingCertificate = BindingCertificate
+            };
         }
     }
 }

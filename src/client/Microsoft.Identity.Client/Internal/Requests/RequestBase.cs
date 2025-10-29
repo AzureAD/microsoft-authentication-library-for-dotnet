@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -13,17 +11,12 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
-using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
-using Microsoft.Identity.Client.Internal.Broker;
-using System.Runtime.ConstrainedExecution;
-using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -348,7 +341,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
                 msalTokenResponse.SpaAuthCode,
-                msalTokenResponse.CreateExtensionDataStringMap());
+                msalTokenResponse.CreateExtensionDataStringMap(),
+                AuthenticationRequestParameters.AppConfig.ClientCredentialCertificate);
         }
 
         protected virtual void ValidateAccountIdentifiers(ClientInfo fromServer)

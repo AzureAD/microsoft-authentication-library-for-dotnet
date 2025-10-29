@@ -150,6 +150,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Identity.Abstractions" />
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
   </ItemGroup>
 
