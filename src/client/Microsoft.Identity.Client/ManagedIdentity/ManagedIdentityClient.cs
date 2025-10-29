@@ -52,30 +52,31 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source if not cached. Cached value is {s_sourceName} ");
 
-                var source = ManagedIdentitySource.None;
+                ManagedIdentitySource source;
 
-                // If the source is not already set, determine it
+                // Establish or reuse cached source
                 if (s_sourceName == ManagedIdentitySource.None)
                 {
+                    // First invocation: detect and cache
                     source = await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
-                }
-                // If the source has already been set to ImdsV2 (via this method, or GetManagedIdentitySourceAsync in ManagedIdentityApplication.cs) and mTLS PoP was NOT requested
-                // In this case, we need to fall back to ImdsV1, because ImdsV2 currently only supports mTLS PoP requests
-                else if ((s_sourceName == ManagedIdentitySource.ImdsV2) && !isMtlsPopRequested)
-                {
-                    requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but mTLS PoP was not requested. Falling back to ImdsV1 for this request only. Please use the \"WithMtlsProofOfPossession\" API to request a token via ImdsV2.");
-
-                    // keep the cached source (s_sourceName) as ImdsV2, since the developer may decide to use mTLS PoP in subsequent requests
-
-                    source = ManagedIdentitySource.DefaultToImds;
                 }
                 else
                 {
+                    // Reuse cached value
                     source = s_sourceName;
                 }
 
-                // If the source is determined to be ImdsV1 and mTLS PoP was requested, throw an exception since ImdsV1 does not support mTLS PoP
-                if ((source == ManagedIdentitySource.DefaultToImds) && isMtlsPopRequested)
+                // Per-request fallback: IMDSv2 currently only supports mTLS PoP.
+                // If the request did not ask for mTLS PoP, use IMDSv1 (DefaultToImds) just for this call.
+                if (source == ManagedIdentitySource.ImdsV2 && !isMtlsPopRequested)
+                {
+                    requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but mTLS PoP was not requested. Falling back to ImdsV1 for this request only. Please use the \"WithMtlsProofOfPossession\" API to request a token via ImdsV2.");
+                    // Do NOT modify s_sourceName; keep cached ImdsV2 so future PoP requests can leverage it.
+                    source = ManagedIdentitySource.DefaultToImds;
+                }
+
+                // If the per-request source is ImdsV1 but caller requested mTLS PoP, this is unsupported.
+                if (source == ManagedIdentitySource.DefaultToImds && isMtlsPopRequested)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopTokenNotSupportedinImdsV1,
