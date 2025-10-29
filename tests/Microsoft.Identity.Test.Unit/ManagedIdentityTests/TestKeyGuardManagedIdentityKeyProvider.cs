@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,10 +17,29 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     /// </summary>
     internal sealed class TestKeyGuardManagedIdentityKeyProvider : IManagedIdentityKeyProvider
     {
-        public Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(ILoggerAdapter logger, CancellationToken cancellationToken)
+        // Keep a single ManagedIdentityKeyInfo per provider instance
+        private readonly ManagedIdentityKeyInfo _keyInfo;
+
+        /// <summary>
+        /// Creates a provider with a fresh 2048-bit RSACng key.
+        /// </summary>
+        public TestKeyGuardManagedIdentityKeyProvider()
+            : this(new RSACng(2048))
+        { }
+
+        /// <summary>
+        /// Creates a provider that will always return the supplied RSACng key.
+        /// Useful when you want two identities with different, fixed keys.
+        /// </summary>
+        public TestKeyGuardManagedIdentityKeyProvider(RSACng fixedKey)
         {
-            var rsacng = new RSACng(2048);
-            return Task.FromResult(new ManagedIdentityKeyInfo(rsacng, ManagedIdentityKeyType.KeyGuard, "Test KeyGuard Provider"));
+            _keyInfo = new ManagedIdentityKeyInfo(
+                fixedKey,
+                ManagedIdentityKeyType.KeyGuard,
+                "Test KeyGuard Provider (fixed)");
         }
+
+        public Task<ManagedIdentityKeyInfo> GetOrCreateKeyAsync(ILoggerAdapter logger, CancellationToken cancellationToken)
+            => Task.FromResult(_keyInfo);
     }
 }
