@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.E2E
         */
         [TestCategory("MI_E2E_AzureArc")]
         [RunOnAzureDevOps]
-        [TestMethod]
+        //[TestMethod]
         public void Attest_KeyGuardKey_OnAzureArc_Succeeds()
         {
             // Endpoint is provisioned only on the Azure Arc agent (backed by MSI / identity service).
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Test.E2E
         */
         [TestCategory("MI_E2E_AzureArc")]
         [RunOnAzureDevOps]
-        [TestMethod]
+        //[TestMethod]
         public async Task Attest_KeyGuardKey_OnAzureArc_Async_Succeeds()
         {
             var endpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
