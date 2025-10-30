@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -37,12 +38,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public InstanceDiscoveryManager(
           IHttpManager httpManager,
-          bool /* for test */ shouldClearCaches,
           InstanceDiscoveryResponse userProvidedInstanceDiscoveryResponse = null,
           Uri userProvidedInstanceDiscoveryUri = null) :
             this(
                 httpManager,                
-                shouldClearCaches,
                 userProvidedInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProvidedInstanceDiscoveryResponse) : null,
                 userProvidedInstanceDiscoveryUri,
                 null, null, null, null)
@@ -51,7 +50,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public /* public for test */ InstanceDiscoveryManager(
             IHttpManager httpManager,
-            bool shouldClearCaches,
             IUserMetadataProvider userMetadataProvider = null,
             Uri userProvidedInstanceDiscoveryUri = null,
             IKnownMetadataProvider knownMetadataProvider = null,
@@ -72,12 +70,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     userProvidedInstanceDiscoveryUri);
 
             _regionDiscoveryProvider = regionDiscoveryProvider ??
-                new RegionAndMtlsDiscoveryProvider(_httpManager, shouldClearCaches);
+                new RegionAndMtlsDiscoveryProvider(_httpManager);
 
-            if (shouldClearCaches)
-            {
-                _networkCacheMetadataProvider.Clear();
-            }
+            
         }
 
         public InstanceDiscoveryMetadataEntry GetMetadataEntryAvoidNetwork(
@@ -196,28 +191,26 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             {
                 return await _networkMetadataProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false);
             }
-            catch (MsalServiceException ex)
+            catch (MsalServiceException ex) when (ex.ErrorCode == MsalError.InvalidInstance)
             {
                 if (!requestContext.ServiceBundle.Config.Authority.AuthorityInfo.ValidateAuthority)
                 {
-                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery as validate authority is set to false. ");
+                    requestContext.Logger.Info($"[Instance Discovery] Skipping Instance discovery as validate authority is set to false. {ex}");
                     return CreateEntryForSingleAuthority(authorityUri);
                 }
 
-                // Validate Authority exception
-                if (ex.ErrorCode == MsalError.InvalidInstance)
-                {
-                    requestContext.Logger.Error("[Instance Discovery] Instance discovery failed - invalid instance!");
-                    throw;
-                }
-
-                string message =
-                    "[Instance Discovery] Instance Discovery failed. Potential cause: no network connection or discovery endpoint is busy. See exception below. MSAL will continue without network instance metadata. ";
-
-                requestContext.Logger.WarningPii(message + " Authority: " + authorityUri, message);
-                requestContext.Logger.WarningPii(ex);
-
-                return _knownMetadataProvider.GetMetadata(authorityUri.Host, Enumerable.Empty<string>(), requestContext.Logger);
+                requestContext.Logger.Error($"[Instance Discovery] Instance discovery failed - invalid instance! ");
+                throw;
+            }
+            catch (Exception e) 
+            { 
+                requestContext.Logger.Warning(
+                    $"[Instance Discovery] Instance Discovery failed. MSAL will continue without network instance metadata. \n\r" +
+                    $" Exception: {e} ");
+                
+                return 
+                    _knownMetadataProvider.GetMetadata(authorityUri.Host, Enumerable.Empty<string>(), requestContext.Logger)
+                ?? CreateEntryForSingleAuthority(authorityUri);
             }
         }
 

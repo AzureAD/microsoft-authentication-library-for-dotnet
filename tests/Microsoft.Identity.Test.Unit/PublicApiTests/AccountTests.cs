@@ -23,16 +23,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
 
     [TestClass]
-    public class AccountTests
+    public class AccountTests : TestBase
     {
         // Some tests load the TokenCache from a file and use this clientId
         private const string ClientIdInFile = "0615b6ca-88d4-4884-8729-b178178f7c27";
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         public void Constructor_IdIsNotRequired()
