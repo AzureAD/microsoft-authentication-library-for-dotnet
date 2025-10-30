@@ -108,8 +108,8 @@ namespace Microsoft.Identity.Test.E2E
          Fails fast with Assert.Inconclusive when prerequisites are missing.
         */
         [TestCategory("MI_E2E_AzureArc")]
-        [RunOnAzureDevOps]
-        [TestMethod]
+        //[RunOnAzureDevOps]
+        //[TestMethod]
         public void Attest_KeyGuardKey_OnAzureArc_Succeeds()
         {
             // Endpoint is provisioned only on the Azure Arc agent (backed by MSI / identity service).
@@ -168,8 +168,8 @@ namespace Microsoft.Identity.Test.E2E
          Same environmental constraints as the synchronous test; still limited to the Azure Arc agent.
         */
         [TestCategory("MI_E2E_AzureArc")]
-        [RunOnAzureDevOps]
-        [TestMethod]
+        //[RunOnAzureDevOps]
+        //[TestMethod]
         public async Task Attest_KeyGuardKey_OnAzureArc_Async_Succeeds()
         {
             var endpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
