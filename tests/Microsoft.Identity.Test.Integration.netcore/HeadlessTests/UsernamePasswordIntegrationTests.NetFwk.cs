@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         #region Happy Path Tests

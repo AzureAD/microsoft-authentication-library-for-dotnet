@@ -5,6 +5,7 @@ using System;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+using JsonIgnore = System.Text.Json.Serialization.JsonIgnoreAttribute;
 #else
 using Microsoft.Identity.Json;
 #endif
@@ -29,8 +30,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         /// <remarks>The date is represented as the number of seconds from "1970-01-01T0:0:0Z UTC" 
         /// (corresponds to the token's exp claim).</remarks>
+        [JsonIgnore]
+        public string ExpiresOn { get; set; }  // The actual property consumers use
+
         [JsonProperty("expires_on")]
-        public string ExpiresOn { get; set; }
+        public string ExpiresOnRaw             // Proxy for "expires_on" JSON field
+        {
+            get => ExpiresOn;                  // When serializing, return ExpiresOn value
+            set => ExpiresOn = value;          // When deserializing, store in ExpiresOn
+        }
+
+        [JsonProperty("expires_in")]
+        public string ExpiresInRaw             // Proxy for "expires_in" JSON field
+        {
+            get => null;                       // Never serialize this (return null)
+            set => ExpiresOn = value;          // When deserializing, store in ExpiresOn
+        }
 
         /// <summary>
         /// The resource the access token was requested for.
