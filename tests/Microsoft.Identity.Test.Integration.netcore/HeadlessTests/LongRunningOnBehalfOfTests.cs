@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string PublicClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f";
+        const string PublicClientID = "570fe028-52ba-4097-8eb5-0849a2772a30"; // Public client ID from id4slab1 KeyVault
         const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
         private string _confidentialClientSecret;
@@ -375,7 +375,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task WithDifferentScopes_TestAsync()
         {
-            string[] scopes2 = { "api://eec635da-5760-452d-940a-448220db047c/access_as_user" };
+            string[] scopes2 = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
             var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)

@@ -64,6 +64,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public string GetSecret()
             {
                 // TODO: Tenant Migration - Migrated to new id4slab1 key vault configuration
+                // Using MSAL-APP-AzureADMultipleOrgs secret for the migrated app
                 return GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-APP-AzureADMultipleOrgs").Value;
             }
         }

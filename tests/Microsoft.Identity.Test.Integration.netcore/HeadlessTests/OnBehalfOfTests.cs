@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string PublicClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f";
+        const string PublicClientID = "570fe028-52ba-4097-8eb5-0849a2772a30"; // Public client ID from id4slab1 KeyVault
         const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();
@@ -180,10 +180,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Setup: Get lab user, create PCA and get user tokens
             var user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
 
-            // Use legacy configuration for regional test due to cross-tenant compatibility requirements
-            var legacySettings = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy);
+            // Use the correct public client ID from KeyVault for all tests
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var publicClientId = labResponse.App.AppId;
             var pca = PublicClientApplicationBuilder
-                    .Create(legacySettings.ClientId)
+                    .Create(publicClientId)
                     .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                     .Build();
 
@@ -505,10 +506,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private ConfidentialClientApplication BuildCca(string tenantId, bool withRegion = false)
         {
-            // Use legacy configuration for regional tests due to Azure AD policy restrictions
-            var settings = withRegion ? 
-                ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy) : 
-                ConfidentialAppSettings.GetSettings(Cloud.Public);
+            // Use migrated configuration for all tests - Updated for ID4SLAB1 tenant migration
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
 
             var builder = ConfidentialClientApplicationBuilder
              .Create(withRegion ? OboConfidentialClientID : settings.ClientId)
