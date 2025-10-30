@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
@@ -168,7 +169,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             if (AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition))
             {
-                bool removed = partition.TryRemove(item.CacheKey, out _);                
+                bool removed = partition.TryRemove(item.CacheKey, out _);
                 if (removed)
                 {
                     System.Threading.Interlocked.Decrement(ref GetEntryCountRef());
@@ -364,6 +365,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private ref int GetEntryCountRef()
         {
             return ref _tokenCacheAccessorOptions.UseSharedCache ? ref s_entryCount : ref _entryCount;
+        }
+
+        public static void ClearStaticCacheForTest()
+        {
+            s_accessTokenCacheDictionary.Clear();
+            s_refreshTokenCacheDictionary.Clear();
+            s_idTokenCacheDictionary.Clear();
+            s_accountCacheDictionary.Clear();
+            s_appMetadataDictionary.Clear();
+            Interlocked.Exchange(ref s_entryCount, 0);
         }
     }
 }

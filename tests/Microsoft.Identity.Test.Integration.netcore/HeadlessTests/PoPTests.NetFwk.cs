@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();           
+            ApplicationBase.ResetStateForTest();
         }
 
         [RunOn(TargetFrameworks.NetCore)]
