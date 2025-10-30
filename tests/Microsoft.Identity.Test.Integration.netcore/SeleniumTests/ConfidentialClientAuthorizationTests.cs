@@ -82,14 +82,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetHybridSpaAccontAsync().ConfigureAwait(false);
 
-            var result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, 
-                "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", false, 
+            var result = await RunTestForUserAsync(ConfidentialClientID, labResponse,
+                "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", false,
                 "http://localhost:3000/auth/implicit-redirect").ConfigureAwait(false);
 
             Assert.IsNotNull(result.SpaAuthCode);
 
-            //result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, 
-            //    "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", false, 
+            //result = await RunTestForUserAsync(ConfidentialClientID, labResponse,
+            //    "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", false,
             //    "http://localhost:3000/auth/implicit-redirect", false).ConfigureAwait(false);
 
             //Assert.IsNull(result.SpaAuthCode);
