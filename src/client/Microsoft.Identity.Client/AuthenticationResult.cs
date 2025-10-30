@@ -13,7 +13,6 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
-using System.Linq;
 
 namespace Microsoft.Identity.Client
 {
