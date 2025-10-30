@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 ManagedIdentitySource source;
 
-                // Establish or reuse cached source
+                // If the source is not already set, determine it
                 if (s_sourceName == ManagedIdentitySource.None)
                 {
                     // First invocation: detect and cache
@@ -66,16 +66,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     source = s_sourceName;
                 }
 
-                // Per-request fallback: IMDSv2 currently only supports mTLS PoP.
-                // If the request did not ask for mTLS PoP, use IMDSv1 (DefaultToImds) just for this call.
+                // If the source has already been set to ImdsV2 (via this method,
+                // or GetManagedIdentitySourceAsync in ManagedIdentityApplication.cs) and mTLS PoP was NOT requested
+                // In this case, we need to fall back to ImdsV1, because ImdsV2 currently only supports mTLS PoP requests
                 if (source == ManagedIdentitySource.ImdsV2 && !isMtlsPopRequested)
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but mTLS PoP was not requested. Falling back to ImdsV1 for this request only. Please use the \"WithMtlsProofOfPossession\" API to request a token via ImdsV2.");
-                    // Do NOT modify s_sourceName; keep cached ImdsV2 so future PoP requests can leverage it.
+                    // Do NOT modify s_sourceName; keep cached ImdsV2 so future PoP
+                    // requests can leverage it.
                     source = ManagedIdentitySource.DefaultToImds;
                 }
 
-                // If the per-request source is ImdsV1 but caller requested mTLS PoP, this is unsupported.
+                // If the source is determined to be ImdsV1 and mTLS PoP was requested,
+                // throw an exception since ImdsV1 does not support mTLS PoP
                 if (source == ManagedIdentitySource.DefaultToImds && isMtlsPopRequested)
                 {
                     throw new MsalClientException(
