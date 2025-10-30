@@ -83,11 +83,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
 
             var user = labResponse.User;
-            Uri authorityUri = new Uri(Adfs2019LabConstants.Authority);
+            // Use the new ADFS authority and disable validation since ADFS infrastructure is not fully available
+            Uri authorityUri = new Uri("https://fs.id4slab1.com/adfs");
             
             var msalPublicClient = PublicClientApplicationBuilder
-                .Create(Adfs2019LabConstants.PublicClientId)
-                .WithAuthority(authorityUri)
+                .Create(labResponse.App.AppId)
+                .WithAuthority(authorityUri, validateAuthority: false)
                 .WithTestLogging()
                 .Build();
 

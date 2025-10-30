@@ -72,12 +72,16 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         private class AdfsConfidentialAppSettings : IConfidentialAppSettings
         {
             private const string AdfsCertName = "IDLABS-APP-Confidential-Client-Cert-OnPrem";
+            private static readonly Lazy<LabResponse> s_adfsLabResponse = new Lazy<LabResponse>(() =>
+            {
+                return LabUserHelper.GetDefaultAdfsUserAsync().GetAwaiter().GetResult();
+            });
 
-            public string ClientId => Adfs2019LabConstants.ConfidentialClientId;
+            public string ClientId => s_adfsLabResponse.Value.App.AppId;
 
             public string TenantId => "";
 
-            public string Environment => "fs.msidlab8.com/adfs";
+            public string Environment => "fs.id4slab1.com/adfs";
 
             public string[] AppScopes => new[] { "openid", "profile" };
 
@@ -94,7 +98,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string GetSecret()
             {                
-                return GetSecretLazy(KeyVaultInstance.MsalTeam, Adfs2019LabConstants.ADFS2019ClientSecretName).Value;
+                // Use the default app secret from the lab response
+                return GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-App-Default").Value;
             }
 
             public string Authority => $@"https://{Environment}";

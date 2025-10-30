@@ -225,9 +225,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             if (directToAdfs)
             {
                 pca = PublicClientApplicationBuilder
-                    .Create(Adfs2019LabConstants.PublicClientId)
-                    .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
-                    .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                    .Create(labResponse.App.AppId)
+                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithAdfsAuthority("https://fs.id4slab1.com/adfs", validateAuthority: false)
                     .WithTestLogging()
                     .Build();
             }
