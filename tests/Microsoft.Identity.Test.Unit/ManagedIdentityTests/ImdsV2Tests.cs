@@ -1462,5 +1462,42 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         #endregion
+        
+        #region Fallback Behavior Tests
+        // Verifies non-mTLS request after IMDSv2 detection falls back per-request to IMDSv1 (Bearer),
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
+        public async Task NonMtlsRequest_FallbackToImdsV1(
+            UserAssignedIdentityId idKind,
+            string idValue)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, idKind, idValue, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // Fallback token (Bearer) mock
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.ImdsEndpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.Imds,
+                    userAssignedIdentityId: idKind,
+                    userAssignedId: idValue);
+
+                var token = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    // No .WithMtlsProofOfPossession() => triggers fallback
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(Bearer, token.TokenType);
+                Assert.IsNull(token.BindingCertificate, "Bearer token should not have binding certificate.");
+                Assert.AreEqual(TokenSource.IdentityProvider, token.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+        #endregion
     }
 }
