@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private static readonly TimeSpan s_timeout = TimeSpan.FromMinutes(1);
 
         private static readonly string[] s_scopes = { "User.Read" };
-        private const string ConfidentialClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f"; //id4slab1.com app
         private const string CertificateName = "LabAuth";
 
         private static KeyVaultSecretsProvider s_secretProvider;
@@ -62,18 +61,18 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task SeleniumGetAuthCode_RedeemForAt_CommonAuthority_Async()
         {
             // Arrange
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             
-            await RunTestForUserAsync(ConfidentialClientID, labResponse, "https://login.microsoftonline.com/common", false).ConfigureAwait(false);
-            await RunTestForUserAsync(ConfidentialClientID, labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}", false).ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse.App.AppId, labResponse, "https://login.microsoftonline.com/common", false).ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse.App.AppId, labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}", false).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task GetTokenByAuthCode_WithPKCE_Async()
         {
             // Arrange
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await RunTestForUserAsync(ConfidentialClientID, labResponse, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse.App.AppId, labResponse, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -82,13 +81,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetHybridSpaAccontAsync().ConfigureAwait(false);
 
-            var result = await RunTestForUserAsync(ConfidentialClientID, labResponse, 
+            var result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, 
                 "https://login.microsoftonline.com/10c419d4-4a50-45b2-aa4e-919fb84df24f", false, 
                 "http://localhost:3000/auth/implicit-redirect").ConfigureAwait(false);
 
             Assert.IsNotNull(result.SpaAuthCode);
 
-            //result = await RunTestForUserAsync(ConfidentialClientID, labResponse, 
+            //result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, 
             //    "https://login.microsoftonline.com/10c419d4-4a50-45b2-aa4e-919fb84df24f", false, 
             //    "http://localhost:3000/auth/implicit-redirect", false).ConfigureAwait(false);
 
