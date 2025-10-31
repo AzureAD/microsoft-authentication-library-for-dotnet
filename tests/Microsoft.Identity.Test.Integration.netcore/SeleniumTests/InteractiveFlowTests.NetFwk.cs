@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
