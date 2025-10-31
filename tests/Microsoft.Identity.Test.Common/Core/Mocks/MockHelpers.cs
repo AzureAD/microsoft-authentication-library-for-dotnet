@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             if (CreateClientInfoForS2S)
             {
-                return Base64UrlHelpers.Encode("{\"authZ\":[\"value1\",\"value2\"]}");
+                return Base64UrlHelpers.Encode("{\"authz\":[\"value1\",\"value2\"]}");
             }
 
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");

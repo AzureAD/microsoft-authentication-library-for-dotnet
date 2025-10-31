@@ -2310,8 +2310,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
-                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authZ"));
-                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authZ"]);
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authz"));
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authz"]);
 
                 // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
@@ -2329,8 +2329,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
-                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authZ"));
-                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authZ"]);
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authz"));
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authz"]);
 
                 // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
