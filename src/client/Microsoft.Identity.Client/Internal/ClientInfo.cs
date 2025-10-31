@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal
                 var decodedBytes = Base64UrlHelpers.DecodeBytes(clientInfo);
                 
                 // Deserialize into a dictionary to get all properties
-                var allProperties = JsonHelper.DeserializeFromJson<IDictionary<string, object>>(decodedBytes);
+                var allProperties = JsonHelper.DeserializeFromJson<Dictionary<string, object>>(decodedBytes);
                 
                 var clientInfoObj = new ClientInfo();
                 var additionalParams = new Dictionary<string, string>();
