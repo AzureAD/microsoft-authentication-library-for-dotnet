@@ -62,6 +62,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
                     break;
                 default:
+                    // Use tenant-specific authority to avoid AADSTS50059 with single-tenant apps
+                    builder.WithAuthority($"https://login.microsoftonline.com/{labResponse.User.TenantId}");
                     break;
             }
 
@@ -95,6 +97,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
                     break;
                 default:
+                    // Use tenant-specific authority to avoid AADSTS50059 with single-tenant apps
+                    builder.WithAuthority($"https://login.microsoftonline.com/{labResponse.User.TenantId}");
                     break;
             }
 
