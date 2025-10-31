@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ROPC_PopTestWithRSAAsync()
         {
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
 
             // Use the lab response app and tenant for consistency instead of mixing configurations
             var confidentialApp = ConfidentialClientApplicationBuilder

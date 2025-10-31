@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task Interactive_AADAsync()
         {
             // Arrange
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
