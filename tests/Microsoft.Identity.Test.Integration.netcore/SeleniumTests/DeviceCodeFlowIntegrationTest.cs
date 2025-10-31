@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task DeviceCodeFlowTestAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task SilentTokenAfterDeviceCodeFlowWithBrokerTestAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             await AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
@@ -62,8 +62,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
                     break;
                 default:
-                    // Use tenant-specific authority to avoid AADSTS50059 with single-tenant apps
-                    builder.WithAuthority($"https://login.microsoftonline.com/{labResponse.User.TenantId}");
                     break;
             }
 
@@ -97,8 +95,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
                     break;
                 default:
-                    // Use tenant-specific authority to avoid AADSTS50059 with single-tenant apps
-                    builder.WithAuthority($"https://login.microsoftonline.com/{labResponse.User.TenantId}");
                     break;
             }
 

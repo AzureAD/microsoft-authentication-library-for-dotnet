@@ -170,6 +170,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             return Task.FromResult(MergeKVLabData("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
         }
+        
+        public static Task<LabResponse> GetDefaultUserWithMultiTenantAppAsync()
+        {
+            return Task.FromResult(MergeKVLabData("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgs"));
+        }
         public static Task<LabResponse> GetDefaultUser2Async()
         {
             return Task.FromResult(MergeKVLabData("MSAL-User-Default2-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
