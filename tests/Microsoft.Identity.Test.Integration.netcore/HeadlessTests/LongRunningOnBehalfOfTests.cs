@@ -22,22 +22,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string PublicClientID = "570fe028-52ba-4097-8eb5-0849a2772a30"; // Public client ID from id4slab1 KeyVault
         const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
         private string _confidentialClientSecret;
+        private string _multiTenantAppId; // Will be set in test initialize
 
         private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
 
         #region Test Hooks
         [TestInitialize]
-        public void TestInitialize()
+        public async Task TestInitializeAsync()
         {
             ApplicationBase.ResetStateForTest();
             if (string.IsNullOrEmpty(_confidentialClientSecret))
             {
                 _confidentialClientSecret = _keyVault.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
             }
+            
+            // Get the multi-tenant app ID for use in tests
+            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+            _multiTenantAppId = labResponse.App.AppId;
         }
 
         #endregion
@@ -52,9 +56,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LongRunningAndNormalObo_WithDifferentKeys_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(_multiTenantAppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -104,9 +108,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LongRunningThenNormalObo_WithTheSameKey_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(_multiTenantAppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -177,9 +181,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task InitiateLRWithCustomKey_ThenAcquireLRWithSameKey_Succeeds_TestAsync()
         {
             // Arrange
-            LabUser user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            LabUser user1 = (await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false)).User;
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(_multiTenantAppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -248,9 +252,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            LabUser user1 = (await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(_multiTenantAppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -319,9 +323,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(_multiTenantAppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -376,9 +380,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task WithDifferentScopes_TestAsync()
         {
             string[] scopes2 = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(_multiTenantAppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
                 .Build();

@@ -25,11 +25,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string PublicClientID = "570fe028-52ba-4097-8eb5-0849a2772a30"; // Public client ID from id4slab1 KeyVault
         const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();
         private string _confidentialClientSecret;
+        private string _multiTenantAppId; // Will be set in test initialize
 
         private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
         private readonly KeyVaultSecretsProvider _keyVaultMsidLab = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
@@ -37,13 +37,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         #region Test Hooks
 
         [TestInitialize]
-        public void TestInitialize()
+        public async Task TestInitializeAsync()
         {
             ApplicationBase.ResetStateForTest();
             if (string.IsNullOrEmpty(_confidentialClientSecret))
             {
                 _confidentialClientSecret = _keyVault.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
             }
+            
+            // Get the multi-tenant app ID for use in tests
+            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+            _multiTenantAppId = labResponse.App.AppId;
         }
 
         #endregion
@@ -59,14 +63,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task OboAndSilent_ReturnsCorrectTokens_TestAsync(bool serializeCache, bool usePartitionedSerializationCache)
         {
             // Setup: Get lab users, create PCA and get user tokens
-            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false)).User;
             var user2 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
+            var labResponse1 = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             var partitionedInMemoryTokenCache = new InMemoryPartitionedTokenCache();
             var nonPartitionedInMemoryTokenCache = new InMemoryTokenCache();
             var oboTokens = new HashSet<string>();
 
             var pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(labResponse1.App.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -299,11 +304,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task WithCache_TestAsync()
         {
-            LabUser user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+            LabUser user = labResponse.User;
 
             var factory = new HttpSnifferClientFactory();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(PublicClientID)
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId)
                                                                  .WithAuthority(TestConstants.AuthorityOrganizationsTenant)
                                                                  .WithRedirectUri(TestConstants.RedirectUri)
                                                                  .WithTestLogging()
@@ -425,7 +431,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult;
 
             var pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(_multiTenantAppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .WithTestLogging()
                 .Build();

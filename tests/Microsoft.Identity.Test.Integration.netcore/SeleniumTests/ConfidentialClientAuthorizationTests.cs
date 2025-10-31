@@ -79,11 +79,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task GetTokenByAuthCode_HybridSPA_Async()
         {
             // Arrange
-            LabResponse labResponse = await LabUserHelper.GetHybridSpaAccontAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
 
             var result = await RunTestForUserAsync(labResponse.App.AppId, labResponse, 
-                "https://login.microsoftonline.com/10c419d4-4a50-45b2-aa4e-919fb84df24f", false, 
-                "http://localhost:3000/auth/implicit-redirect").ConfigureAwait(false);
+                $"https://login.microsoftonline.com/{labResponse.User.TenantId}", false).ConfigureAwait(false);
 
             Assert.IsNotNull(result.SpaAuthCode);
 

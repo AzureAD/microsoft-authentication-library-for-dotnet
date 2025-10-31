@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task InteractiveConsentPromptAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
 
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, true).ConfigureAwait(false);
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
