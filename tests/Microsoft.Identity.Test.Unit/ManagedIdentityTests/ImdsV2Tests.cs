@@ -54,6 +54,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public const string Bearer = "Bearer";
         public const string MTLSPoP = "mtls_pop";
 
+        [TestInitialize]
+        public void ImdsV2Tests_Init()
+        {
+            // Clean persisted store so prior DataRows/runs don't leak into this test
+            if (ImdsV2TestStoreCleaner.IsWindows)
+            {
+                // A broad sweep is simplest and safe for our fake endpoints/certs
+                ImdsV2TestStoreCleaner.RemoveAllTestArtifacts();
+            }
+        }
+
         private void AddMocksToGetEntraToken(
             MockHttpManager httpManager,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,

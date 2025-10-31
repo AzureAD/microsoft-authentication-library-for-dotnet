@@ -440,8 +440,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return response.AttestationToken;
         }
 
-        // ...unchanged usings and class header...
-
         /// <summary>
         /// Read-through cache: try cache; if missing, run async factory once (per key),
         /// store the result, and return it. Thread-safe for the given cacheKey.
@@ -457,21 +455,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
 
-            X509Certificate2 cachedCertificate;
-            string cachedEndpointBase;
-            string cachedClientId;
-
-            // 1) Only lookup by cacheKey
+            // 1) In-memory cache first
             if (s_mtlsCertificateCache.TryGet(cacheKey, out var cached, logger))
             {
-                cachedCertificate = cached.Certificate;
-                cachedEndpointBase = cached.Endpoint;
-                cachedClientId = cached.ClientId;
-
-                return Tuple.Create(cachedCertificate, cachedEndpointBase, cachedClientId);
+                return Tuple.Create(cached.Certificate, cached.Endpoint, cached.ClientId);
             }
 
-            // 2) Gate per cacheKey
+            // 2) Per-key gate
             var gate = s_perKeyGates.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
             await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
 
@@ -480,18 +470,37 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // Re-check after acquiring the gate
                 if (s_mtlsCertificateCache.TryGet(cacheKey, out cached, logger))
                 {
-                    cachedCertificate = cached.Certificate;
-                    cachedEndpointBase = cached.Endpoint;
-                    cachedClientId = cached.ClientId;
-                    return Tuple.Create(cachedCertificate, cachedEndpointBase, cachedClientId);
+                    return Tuple.Create(cached.Certificate, cached.Endpoint, cached.ClientId);
                 }
 
-                // 3) Mint + cache under the provided cacheKey
+                // 3) Persistent store (best-effort).
+                if (PersistentCertificateStore.TryFind(cacheKey, out var persisted, logger))
+                {
+                    if (persisted.Certificate.HasPrivateKey)
+                    {
+                        var v = new CertificateCacheValue(persisted.Certificate, persisted.Endpoint, persisted.ClientId);
+                        s_mtlsCertificateCache.Set(cacheKey, in v, logger);
+                        return Tuple.Create(v.Certificate, v.Endpoint, v.ClientId);
+                    }
+                    else
+                    {
+                        // Not usable for mTLS; dispose clone and mint a new one
+                        persisted.Certificate.Dispose();
+                        logger?.Verbose(() => "[PersistentCert] Skipping persisted cert without private key; minting new.");
+                    }
+                }
+
+                // 4) Mint + back-fill caches
                 var created = await factory().ConfigureAwait(false);
 
-                s_mtlsCertificateCache.Set(cacheKey,
-                    new CertificateCacheValue(created.Item1, created.Item2, created.Item3),
-                    logger);
+                var createdValue = new CertificateCacheValue(created.Item1, created.Item2, created.Item3);
+                s_mtlsCertificateCache.Set(cacheKey, in createdValue, logger);
+
+                // 5) Best-effort persist for future runs (mutex & dedup inside)
+                PersistentCertificateStore.TryPersist(cacheKey, created.Item1, created.Item2, created.Item3, logger);
+
+                // 6) Keep store tidy 
+                PersistentCertificateStore.TryPruneAliasOlderThan(cacheKey, created.Item1.NotAfter.ToUniversalTime(), logger);
 
                 return created;
             }
