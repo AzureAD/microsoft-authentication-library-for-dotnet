@@ -337,7 +337,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var idtItem = tuple.Item2;
             Account account = tuple.Item3;
 #if !MOBILE
-            atItem.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
+            atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
 #endif
             return new AuthenticationResult(
                 atItem,
