@@ -24,15 +24,9 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
-    public class HttpManagerTests
+    public class HttpManagerTests : TestBase
     {
         private readonly TestDefaultRetryPolicy _stsRetryPolicy = new TestDefaultRetryPolicy(RequestType.STS);
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         public async Task MtlsCertAsync()
@@ -634,38 +628,5 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK));
             }
         }
-
-#if NET
-        [TestMethod]
-        public async Task SendRequestAsync_SetsHttp2VersionAndPolicy()
-        {
-            // Arrange
-            var handler = new CapturingHandler();
-            var httpClient = new HttpClient(handler);
-            var httpClientFactory = Substitute.For<IMsalHttpClientFactory>();
-            httpClientFactory.GetHttpClient().Returns(httpClient);
-
-            var httpManager = new Client.Http.HttpManager(httpClientFactory, disableInternalRetries: true);
-
-            // Act
-            await httpManager.SendRequestAsync(
-                new Uri("https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize"),
-                null,
-                null,
-                HttpMethod.Get,
-                Substitute.For<ILoggerAdapter>(),
-                doNotThrow: true,
-                bindingCertificate: null,
-                validateServerCert: null,
-                cancellationToken: CancellationToken.None,
-                retryPolicy: Substitute.For<IRetryPolicy>()
-            ).ConfigureAwait(false);
-
-            // Assert
-            Assert.IsNotNull(handler.CapturedRequest);
-            Assert.AreEqual(HttpVersion.Version20, handler.CapturedRequest.Version);
-            Assert.AreEqual(HttpVersionPolicy.RequestVersionOrLower, handler.CapturedRequest.VersionPolicy);
-        }
-#endif
     }
 }

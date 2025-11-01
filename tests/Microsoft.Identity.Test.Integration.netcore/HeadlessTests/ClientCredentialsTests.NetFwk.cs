@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         // regression test based on SAL introducing a new SKU value and making ESTS not issue the refresh_in value

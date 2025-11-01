@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
+                
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
+                
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
+                
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
+                
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
+                
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
+                
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -368,7 +368,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
+                
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 

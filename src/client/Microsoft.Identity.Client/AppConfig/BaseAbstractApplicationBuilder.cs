@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Http.Retry;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
@@ -38,6 +39,12 @@ namespace Microsoft.Identity.Client
             if (Config.RetryPolicyFactory == null)
             {
                 Config.RetryPolicyFactory = new RetryPolicyFactory();
+            }
+
+            // Ensure the default csr factory is set if the test factory was not provided
+            if (Config.CsrFactory == null)
+            {
+                Config.CsrFactory = new DefaultCsrFactory();
             }
         }
 
@@ -169,6 +176,7 @@ namespace Microsoft.Identity.Client
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
         /// was already set on the application builder by calling <see cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
         /// <seealso cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithDebugLoggingCallback(
             LogLevel logLevel = LogLevel.Info,
             bool enablePiiLogging = false,
@@ -218,6 +226,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientName">The name of the SDK API for telemetry purposes.</param>
         /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithClientName(string clientName)
         {
             Config.ClientName = GetValueIfNotEmpty(Config.ClientName, clientName);
@@ -229,6 +238,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientVersion">The version of the calling SDK for telemetry purposes.</param>
         /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithClientVersion(string clientVersion)
         {
             Config.ClientVersion = GetValueIfNotEmpty(Config.ClientVersion, clientVersion);
@@ -243,6 +253,17 @@ namespace Microsoft.Identity.Client
         internal T WithRetryPolicyFactory(IRetryPolicyFactory factory)
         {
             Config.RetryPolicyFactory = factory;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Internal only: Allows tests to inject a custom csr factory.
+        /// </summary>
+        /// <param name="factory">The csr factory to use.</param>
+        /// <returns>The builder for chaining.</returns>
+        internal T WithCsrFactory(ICsrFactory factory)
+        {
+            Config.CsrFactory = factory;
             return (T)this;
         }
 

@@ -85,7 +85,15 @@ namespace Microsoft.Identity.Client.Utils
             // Example: "1697490590" (Unix timestamp representing seconds since 1970-01-01)
             if (long.TryParse(dateTimeStamp, out long expiresOnUnixTimestamp))
             {
-                return expiresOnUnixTimestamp - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
+                var timestamp = expiresOnUnixTimestamp - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
+
+                // If the timestamp is negative, return the original expiresOnUnixTimestamp. Its format is "seconds from now".
+                if (timestamp < 0)
+                {
+                    return expiresOnUnixTimestamp;
+                }
+
+                return timestamp;
             }
 
             // Try parsing as ISO 8601 
