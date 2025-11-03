@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
@@ -75,6 +76,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+
+            // Validate the cached token using the authentication operation
+            if (AuthenticationRequestParameters.AuthenticationScheme != null &&
+                cachedAccessTokenItem != null)
+            {
+                var cacheValidationData = new MsalCacheValidationData();
+                cacheValidationData.PersistedCacheParameters = cachedAccessTokenItem.PersistedCacheParameters;
+                if (!AuthenticationRequestParameters.AuthenticationScheme.ValidateCachedToken(cacheValidationData))
+                {
+                    logger.Info("[ClientCredentialRequest] Cached token failed authentication operation validation.");
+                    cachedAccessTokenItem = null;
+                }
+            }
 
             // No access token or cached access token needs to be refreshed 
             if (cachedAccessTokenItem != null)

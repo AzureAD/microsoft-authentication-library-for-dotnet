@@ -43,6 +43,13 @@ namespace Microsoft.Identity.Client.AuthScheme
         IReadOnlyDictionary<string, string> GetTokenRequestParams();
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cachedTokenItem"></param>
+        /// <returns></returns>
+        bool ValidateCachedToken(MsalCacheValidationData cachedTokenItem);
+
+        /// <summary>
         /// Key ID of the public / private key pair used by the encryption algorithm, if any. 
         /// Tokens obtained by authentication schemes that use this are bound to the KeyId, i.e. 
         /// if a different kid is presented, the access token cannot be used.

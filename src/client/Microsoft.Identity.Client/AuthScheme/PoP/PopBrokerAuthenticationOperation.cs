@@ -40,5 +40,11 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             return CollectionHelpers.GetEmptyDictionary<string, string>();
         }
+
+        bool ValidateCachedToken(MsalCacheValidationData cachedTokenItem)
+        {
+            // no-op
+            return true;
+        }
     }
 }
