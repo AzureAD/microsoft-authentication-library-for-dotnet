@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client
     /// It is important to reuse HttpClient instances to avoid socket exhaustion.
     /// Do not create a new HttpClient for each call to <see cref="GetHttpClient(X509Certificate2)"/>.
     /// If your application requires Integrated Windows Authentication, set <see cref="HttpClientHandler.UseDefaultCredentials"/> to true.
-    /// This interface is designed to support MTLS scenarios.
+    /// This interface is designed to support mTLS scenarios.
     /// </remarks>
     public interface IMsalMtlsHttpClientFactory : IMsalHttpClientFactory
     {
