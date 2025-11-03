@@ -370,7 +370,7 @@ namespace Microsoft.Identity.Client
         /// <example>
         /// Here is how you can call a protected API from this authentication result:
         /// <code>
-        /// var authHeader = result.CreateAuthorizationHeaderBound();
+        /// var authHeader = result.CreateAuthorizationHeaderInformation();
         /// HttpClientHandler handler = new();
         /// handler.ClientCertificates.Add(authHeader.BindingCertificate);
         /// HttpClient client = new HttpClient(handler);
@@ -378,7 +378,7 @@ namespace Microsoft.Identity.Client
         /// HttpResponseMessage r = await client.GetAsync(urlOfTheProtectedApi);
         /// </code>
         /// </example>
-        public AuthorizationHeaderInformation CreateAuthorizationHeaderBound()
+        public AuthorizationHeaderInformation CreateAuthorizationHeaderInformation()
         {
             return new AuthorizationHeaderInformation()
             {

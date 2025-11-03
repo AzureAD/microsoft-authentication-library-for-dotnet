@@ -337,10 +337,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         /// <summary>
-        /// Tests that CreateAuthorizationHeaderBound returns correct AuthorizationHeaderInformation with binding certificate.
+        /// Tests that CreateAuthorizationHeaderInformation returns correct AuthorizationHeaderInformation with binding certificate.
         /// </summary>
         [TestMethod]
-        public void CreateAuthorizationHeaderBound_WithBindingCertificate_ReturnsCorrectHeaderInformation()
+        public void CreateAuthorizationHeaderInformation_WithBindingCertificate_ReturnsCorrectHeaderInformation()
         {
             // Arrange
             var bindingCertificate = CertHelper.GetOrCreateTestCert();
@@ -365,7 +365,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             };
 
             // Act
-            var headerInfo = ar.CreateAuthorizationHeaderBound();
+            var headerInfo = ar.CreateAuthorizationHeaderInformation();
 
             // Assert
             Assert.IsNotNull(headerInfo, "AuthorizationHeaderInformation should not be null");
@@ -376,10 +376,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         /// <summary>
-        /// Tests that CreateAuthorizationHeaderBound works with null binding certificate.
+        /// Tests that CreateAuthorizationHeaderInformation works with null binding certificate.
         /// </summary>
         [TestMethod]
-        public void CreateAuthorizationHeaderBound_WithNullBindingCertificate_ReturnsHeaderInformationWithNullCertificate()
+        public void CreateAuthorizationHeaderInformation_WithNullBindingCertificate_ReturnsHeaderInformationWithNullCertificate()
         {
             // Arrange
             var accessToken = "test-access-token";
@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             };
 
             // Act
-            var headerInfo = ar.CreateAuthorizationHeaderBound();
+            var headerInfo = ar.CreateAuthorizationHeaderInformation();
 
             // Assert
             Assert.IsNotNull(headerInfo, "AuthorizationHeaderInformation should not be null");
@@ -414,10 +414,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         /// <summary>
-        /// Tests that CreateAuthorizationHeaderBound uses the correct token type in authorization header.
+        /// Tests that CreateAuthorizationHeaderInformation uses the correct token type in authorization header.
         /// </summary>
         [TestMethod]
-        public void CreateAuthorizationHeaderBound_WithCustomTokenType_UsesCorrectTokenType()
+        public void CreateAuthorizationHeaderInformation_WithCustomTokenType_UsesCorrectTokenType()
         {
             // Arrange
             var bindingCertificate = CertHelper.GetOrCreateTestCert();
@@ -442,7 +442,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             };
 
             // Act
-            var headerInfo = ar.CreateAuthorizationHeaderBound();
+            var headerInfo = ar.CreateAuthorizationHeaderInformation();
 
             // Assert
             Assert.IsNotNull(headerInfo, "AuthorizationHeaderInformation should not be null");
@@ -453,10 +453,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         /// <summary>
-        /// Tests that CreateAuthorizationHeaderBound and CreateAuthorizationHeader return the same authorization header value.
+        /// Tests that CreateAuthorizationHeaderInformation and CreateAuthorizationHeader return the same authorization header value.
         /// </summary>
         [TestMethod]
-        public void CreateAuthorizationHeaderBound_AuthorizationHeaderValue_MatchesCreateAuthorizationHeader()
+        public void CreateAuthorizationHeaderInformation_AuthorizationHeaderValue_MatchesCreateAuthorizationHeader()
         {
             // Arrange
             var bindingCertificate = CertHelper.GetOrCreateTestCert();
@@ -481,12 +481,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             };
 
             // Act
-            var headerInfo = ar.CreateAuthorizationHeaderBound();
+            var headerInfo = ar.CreateAuthorizationHeaderInformation();
             var directHeader = ar.CreateAuthorizationHeader();
 
             // Assert
             Assert.AreEqual(directHeader, headerInfo.AuthorizationHeaderValue, 
-                "CreateAuthorizationHeaderBound().AuthorizationHeaderValue should match CreateAuthorizationHeader()");
+                "CreateAuthorizationHeaderInformation().AuthorizationHeaderValue should match CreateAuthorizationHeader()");
         }
 
         /// <summary>
