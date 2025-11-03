@@ -162,5 +162,11 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
             return sb.ToString();
         }
+
+        bool ValidateCachedToken(MsalCacheValidationData cachedTokenItem)
+        {
+            // no-op
+            return true;
+        }
     }
 }

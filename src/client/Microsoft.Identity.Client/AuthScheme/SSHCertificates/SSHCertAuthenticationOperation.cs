@@ -53,5 +53,11 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
                 { OAuth2Parameter.RequestConfirmation , _jwk }
             };
         }
+
+        bool ValidateCachedToken(MsalCacheValidationData cachedTokenItem)
+        {
+            // no-op
+            return true;
+        }
     }
 }

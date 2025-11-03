@@ -30,5 +30,11 @@ namespace Microsoft.Identity.Client.AuthScheme.Bearer
             // ESTS issues Bearer tokens by default, no need for any extra params
             return CollectionHelpers.GetEmptyDictionary<string, string>();
         }
+
+        bool ValidateCachedToken(MsalCacheValidationData cachedTokenItem)
+        {
+            // no-op
+            return true;
+        }
     }
 }
