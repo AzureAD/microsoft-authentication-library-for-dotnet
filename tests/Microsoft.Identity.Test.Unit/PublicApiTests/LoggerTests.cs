@@ -20,15 +20,13 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
-    public class LoggerTests
+    public class LoggerTests : TestBase
     {
         private LogCallback _callback;
 
         [TestInitialize]
         public void TestInit()
         {
-            TestCommon.ResetInternalStaticCaches();
-
             _callback = Substitute.For<LogCallback>();
         }
 
