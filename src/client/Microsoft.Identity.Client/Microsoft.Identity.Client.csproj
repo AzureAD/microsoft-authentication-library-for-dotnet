@@ -153,7 +153,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.Abstractions" />
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
   </ItemGroup>
 
@@ -161,5 +160,4 @@
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Shipped.txt" />
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Unshipped.txt" />
   </ItemGroup>
-
 </Project>

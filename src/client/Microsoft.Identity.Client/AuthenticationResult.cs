@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -360,31 +359,6 @@ namespace Microsoft.Identity.Client
         public string CreateAuthorizationHeader()
         {
             return $"{_authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType} {AccessToken}";
-        }
-
-        /// <summary>
-        /// Creates the content for an HTTP authorization header from this authentication result, so
-        /// that you can call a protected API with using certificate binding (aka mTLS PoP).
-        /// </summary>
-        /// <returns>Created authorization header of the form "Bearer {AccessToken}" with bound certificate</returns>
-        /// <example>
-        /// Here is how you can call a protected API from this authentication result:
-        /// <code>
-        /// var authHeader = result.CreateAuthorizationHeaderInformation();
-        /// HttpClientHandler handler = new();
-        /// handler.ClientCertificates.Add(authHeader.BindingCertificate);
-        /// HttpClient client = new HttpClient(handler);
-        /// client.DefaultRequestHeaders.Add("Authorization", authHeader.AuthorizationHeaderValue);
-        /// HttpResponseMessage r = await client.GetAsync(urlOfTheProtectedApi);
-        /// </code>
-        /// </example>
-        public AuthorizationHeaderInformation CreateAuthorizationHeaderInformation()
-        {
-            return new AuthorizationHeaderInformation()
-            {
-                AuthorizationHeaderValue = CreateAuthorizationHeader(),
-                BindingCertificate = BindingCertificate
-            };
         }
     }
 }
