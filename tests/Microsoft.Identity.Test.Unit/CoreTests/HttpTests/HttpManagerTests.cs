@@ -24,15 +24,9 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
-    public class HttpManagerTests
+    public class HttpManagerTests : TestBase
     {
         private readonly TestDefaultRetryPolicy _stsRetryPolicy = new TestDefaultRetryPolicy(RequestType.STS);
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         public async Task MtlsCertAsync()

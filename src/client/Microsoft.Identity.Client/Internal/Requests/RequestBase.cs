@@ -317,20 +317,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // developer passed in user object.
             AuthenticationRequestParameters.RequestContext.Logger.Info("Checking client info returned from the server..");
 
-            ClientInfo fromServer = null;
+            ClientInfo clientInfoFromServer = null;
 
-            if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
-                AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity &&
+            if (AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenByRefreshToken &&
                 AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs &&
                 !(msalTokenResponse.ClientInfo is null))
             {
-                //client_info is not returned from client credential and managed identity flows because there is no user present.
-                fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
+                //client_info is not returned from managed identity flows because there is no user present.
+                clientInfoFromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
+                ValidateAccountIdentifiers(clientInfoFromServer);
             }
-
-            ValidateAccountIdentifiers(fromServer);
 
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
@@ -338,7 +336,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var atItem = tuple.Item1;
             var idtItem = tuple.Item2;
             Account account = tuple.Item3;
-
+#if !MOBILE
+            atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
+#endif
             return new AuthenticationResult(
                 atItem,
                 idtItem,

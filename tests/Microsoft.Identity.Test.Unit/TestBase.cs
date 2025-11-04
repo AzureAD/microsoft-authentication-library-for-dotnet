@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit
             Trace.WriteLine("Framework: .NET ");
 #endif
             Trace.WriteLine("Test started " + TestContext.TestName);
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         [TestCleanup]

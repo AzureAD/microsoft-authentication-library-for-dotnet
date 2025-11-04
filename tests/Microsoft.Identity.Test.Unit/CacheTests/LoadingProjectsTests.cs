@@ -9,14 +9,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class LoadingProjectsTests
+    public class LoadingProjectsTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         public void CanDeserializeTokenCache()
         {
