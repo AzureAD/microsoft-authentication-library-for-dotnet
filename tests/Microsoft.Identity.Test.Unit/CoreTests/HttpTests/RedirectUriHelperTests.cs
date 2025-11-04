@@ -13,14 +13,8 @@ using Microsoft.Identity.Client.Internal.Logger;
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
-    public class RedirectUriHelperTests
+    public class RedirectUriHelperTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         public void ValidateRedirectUri_Throws()
         {

@@ -3,6 +3,7 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.MtlsPop;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -37,11 +38,11 @@ namespace Microsoft.Identity.Test.E2E
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_Imds")]
         [DataTestMethod]
-        [DataRow(null /*SAMI*/, null, DisplayName = "SAMI")]
-        [DataRow("8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7", "clientid", DisplayName = "UAMI-ClientId")]
-        [DataRow("/subscriptions/6f52c299-a200-4fe1-8822-a3b61cf1f931/resourcegroups/DevOpsHostedAgents/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ID4SMSIHostedAgent_UAMI",
-         "resourceid", DisplayName = "UAMI-ResourceId")]
-        [DataRow("0651a6fc-fbf5-4904-9e48-16f63ec1f2b1", "objectid", DisplayName = "UAMI-ObjectId")]
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImds_Succeeds-SAMI")]
+        [DataRow("8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7", "clientid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ClientId")]
+        [DataRow("/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/LabVaultAccess_UAMI",
+         "resourceid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ResourceId")]
+        [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ObjectId")]
         public async Task AcquireToken_OnImds_Succeeds(string id, string idType)
         {
             var mi = BuildMi(id, idType);
@@ -62,6 +63,27 @@ namespace Microsoft.Identity.Test.E2E
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(result.AccessToken, second.AccessToken);
+        }
+
+        [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_Imds")]
+        [DataTestMethod]
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-SAMI")]
+        [DataRow("8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7", "clientid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ClientId")]
+        [DataRow("/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/LabVaultAccess_UAMI",
+         "resourceid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ResourceId")]
+        [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ObjectId")]
+        public async Task AcquireToken_OnImds_Fails_WithMtlsProofOfPossession(string id, string idType)
+        {
+            var mi = BuildMi(id, idType);
+
+            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                await mi.AcquireTokenForManagedIdentity(ArmScope)
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync().ConfigureAwait(false)
+            ).ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
         }
     }
 }
