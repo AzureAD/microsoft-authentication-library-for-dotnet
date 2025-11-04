@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo);
                 throw;
-            }           
+            }
         }
 
         private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         ServiceBundle.PlatformProxy.GetProductName(),
                         errorCodeToLog,
                         apiEvent.ApiId,
-                        apiEvent.CallerSdkApiId, 
+                        apiEvent.CallerSdkApiId,
                         apiEvent.CallerSdkVersion,
                         cacheRefreshReason,
                         apiEvent.TokenType);
@@ -267,12 +267,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-id", out callerSdkId))
             {
                 AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-id");
-            } 
+            }
             else
             {
                 callerSdkId = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientName;
             }
-            
+
             if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-ver", out callerSdkVer))
             {
                 AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-ver");
