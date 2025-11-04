@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.E2E
         [DataRow("8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7", "clientid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ClientId")]
         [DataRow("/subscriptions/6f52c299-a200-4fe1-8822-a3b61cf1f931/resourcegroups/DevOpsHostedAgents/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ID4SMSIHostedAgent_UAMI",
          "resourceid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ResourceId")]
-        [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ObjectId")]
+        [DataRow("0651a6fc-fbf5-4904-9e48-16f63ec1f2b1", "objectid", DisplayName = "AcquireToken_OnImds_Succeeds-UAMI-ObjectId")]
         public async Task AcquireToken_OnImds_Succeeds(string id, string idType)
         {
             var mi = BuildMi(id, idType);
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.E2E
         [DataRow("8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7", "clientid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ClientId")]
         [DataRow("/subscriptions/6f52c299-a200-4fe1-8822-a3b61cf1f931/resourcegroups/DevOpsHostedAgents/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ID4SMSIHostedAgent_UAMI",
          "resourceid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ResourceId")]
-        [DataRow("1eee55b7-168a-46be-8d19-30e830ee9611", "objectid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ObjectId")]
+        [DataRow("0651a6fc-fbf5-4904-9e48-16f63ec1f2b1", "objectid", DisplayName = "AcquireToken_OnImds_Fails_WithMtlsProofOfPossession-UAMI-ObjectId")]
         public async Task AcquireToken_OnImds_Fails_WithMtlsProofOfPossession(string id, string idType)
         {
             var mi = BuildMi(id, idType);
