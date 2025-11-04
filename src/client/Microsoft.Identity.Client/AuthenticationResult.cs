@@ -4,12 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -120,6 +123,7 @@ namespace Microsoft.Identity.Client
                 tokenType,
                 authenticationResultMetadata)
         {
+
         }
 
         internal AuthenticationResult(
@@ -131,32 +135,7 @@ namespace Microsoft.Identity.Client
             ApiEvent apiEvent,
             Account account,
             string spaAuthCode,
-            IReadOnlyDictionary<string, string> additionalResponseParameters) :
-                this(
-                    msalAccessTokenCacheItem,
-                    msalIdTokenCacheItem,
-                    authenticationScheme,
-                    correlationID,
-                    tokenSource,
-                    apiEvent,
-                    account,
-                    spaAuthCode,
-                    additionalResponseParameters,
-                    bindingCertificate: null)
-        {
-        }
-
-        internal AuthenticationResult(
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem,
-            IAuthenticationOperation authenticationScheme,
-            Guid correlationID,
-            TokenSource tokenSource,
-            ApiEvent apiEvent,
-            Account account,
-            string spaAuthCode,
-            IReadOnlyDictionary<string, string> additionalResponseParameters,
-            X509Certificate2 bindingCertificate)
+            IReadOnlyDictionary<string, string> additionalResponseParameters)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
 
@@ -188,11 +167,9 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
-
             AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
                                                                     (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
                                                                     additionalResponseParameters;
-
             if (msalAccessTokenCacheItem != null)
             {
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
@@ -221,7 +198,6 @@ namespace Microsoft.Identity.Client
 
             AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
             AuthenticationResultMetadata.TelemetryTokenType = authenticationScheme.TelemetryTokenType;
-            BindingCertificate = bindingCertificate;
         }
 
         //Default constructor for testing

@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,12 +13,17 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.IdentityModel.Abstractions;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
+using Microsoft.Identity.Client.Internal.Broker;
+using System.Runtime.ConstrainedExecution;
+using Microsoft.Identity.Client.AuthScheme;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -310,18 +317,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // developer passed in user object.
             AuthenticationRequestParameters.RequestContext.Logger.Info("Checking client info returned from the server..");
 
-            ClientInfo clientInfoFromServer = null;
+            ClientInfo fromServer = null;
 
-            if (AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity &&
+            if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
+                AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenByRefreshToken &&
                 AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs &&
                 !(msalTokenResponse.ClientInfo is null))
             {
-                //client_info is not returned from managed identity flows because there is no user present.
-                clientInfoFromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
-                ValidateAccountIdentifiers(clientInfoFromServer);
+                //client_info is not returned from client credential and managed identity flows because there is no user present.
+                fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
             }
+
+            ValidateAccountIdentifiers(fromServer);
 
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
@@ -329,9 +338,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var atItem = tuple.Item1;
             var idtItem = tuple.Item2;
             Account account = tuple.Item3;
-#if !MOBILE
-            atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
-#endif
+
             return new AuthenticationResult(
                 atItem,
                 idtItem,
@@ -341,8 +348,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
                 msalTokenResponse.SpaAuthCode,
-                msalTokenResponse.CreateExtensionDataStringMap(),
-                AuthenticationRequestParameters.AppConfig.ClientCredentialCertificate);
+                msalTokenResponse.CreateExtensionDataStringMap());
         }
 
         protected virtual void ValidateAccountIdentifiers(ClientInfo fromServer)

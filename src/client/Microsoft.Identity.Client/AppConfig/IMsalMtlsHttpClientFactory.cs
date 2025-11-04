@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// A factory responsible for creating HttpClient instances configured for mutual TLS (mTLS).
     /// This factory is intended for use to secure communication with Azure AD using mTLS.
-    /// For more details on HttpClient instancing, see https://learn.microsoft.com/dotnet/api/system.net.http.httpclient?view=net-7.0#instancing.
+    /// For more details on HttpClient instancing, see https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient?view=net-8.0#instancing.
     /// </summary>
     /// <remarks>
     /// Implementations of this interface must be thread-safe.
