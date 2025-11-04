@@ -51,5 +51,36 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var missing = FriendlyNameCodec.Prefix + "alias=a";
             Assert.IsFalse(FriendlyNameCodec.TryDecode(missing, out _, out _));
         }
+
+        [TestMethod]
+        public void EncodeDecode_Roundtrip()
+        {
+            string alias = "my-alias-123";
+            string ep = "https://ep/base";
+            Assert.IsTrue(FriendlyNameCodec.TryEncode(alias, ep, out var fn));
+            Assert.IsTrue(FriendlyNameCodec.TryDecode(fn, out var a2, out var e2));
+            Assert.AreEqual(alias, a2);
+            Assert.AreEqual(ep, e2);
+        }
+
+        [TestMethod]
+        public void Encode_Rejects_Illegal()
+        {
+            // '|' is illegal by design
+            Assert.IsFalse(FriendlyNameCodec.TryEncode("bad|alias", "https://ok", out _));
+            Assert.IsFalse(FriendlyNameCodec.TryEncode("ok", "https://bad|ep", out _));
+        }
+
+        [TestMethod]
+        public void Decode_Ignores_Unknown_Tags_LastWins()
+        {
+            var fn = FriendlyNameCodec.Prefix +
+                     FriendlyNameCodec.TagAlias + "=a|" +
+                     "xtra=foo|" +
+                     FriendlyNameCodec.TagEp + "=E";
+            Assert.IsTrue(FriendlyNameCodec.TryDecode(fn, out var a, out var e));
+            Assert.AreEqual("a", a);
+            Assert.AreEqual("E", e);
+        }
     }
 }

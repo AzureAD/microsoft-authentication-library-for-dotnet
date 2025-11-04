@@ -358,5 +358,191 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 RemoveAliasFromStore(alias);
             }
         }
+
+        #region Additional tests
+
+        [TestMethod]
+        public void TryPersist_DoesNotPersist_When_NoPrivateKey()
+        {
+            if (!IsWindows)
+            { Assert.Inconclusive("Windows-only"); return; }
+
+            var alias = "alias-nokey-" + Guid.NewGuid().ToString("N");
+            var ep = "https://fake_mtls/tenantX";
+            var guid = Guid.NewGuid().ToString("D");
+
+            try
+            {
+                // Create a cert WITH key, then strip the key by exporting only the public part
+                using var withKey = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromDays(2));
+                using var pubOnly = new X509Certificate2(withKey.Export(X509ContentType.Cert)); // public-only
+                Assert.IsFalse(pubOnly.HasPrivateKey, "Test setup must produce a public-only cert.");
+
+                // Persist should no-op for no-private-key
+                PersistentCertificateStore.TryPersist(alias, pubOnly, ep, "ignored", Logger);
+
+                // Should not find anything for alias
+                Assert.IsFalse(PersistentCertificateStore.TryFind(alias, out _, Logger));
+            }
+            finally
+            {
+                RemoveAliasFromStore(alias);
+            }
+        }
+
+        [TestMethod]
+        public void TryFind_Boundary_Exactly24h_IsRejected()
+        {
+            if (!IsWindows)
+            { Assert.Inconclusive("Windows-only"); return; }
+
+            var alias = "alias-24h-exact-" + Guid.NewGuid().ToString("N");
+            var ep = "https://fake_mtls/tenantY";
+            var guid = Guid.NewGuid().ToString("D");
+
+            try
+            {
+                // Our CreateSelfSignedWithKey uses notBefore = now-2m, so lifetime of (24h + 2m)
+                // yields NotAfter ≈ (now + 24h). That should be rejected by policy (<= 24h is insufficient).
+                using var exactly24h = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromHours(24).Add(TimeSpan.FromMinutes(2)));
+
+                PersistentCertificateStore.TryPersist(alias, exactly24h, ep, "ignored", Logger);
+                Assert.IsFalse(PersistentCertificateStore.TryFind(alias, out _, Logger),
+                    "Exactly-24h remaining should be rejected by policy.");
+            }
+            finally
+            {
+                RemoveAliasFromStore(alias);
+            }
+        }
+
+        [TestMethod]
+        public void TryFind_Boundary_JustOver24h_IsAccepted()
+        {
+            if (!IsWindows)
+            { Assert.Inconclusive("Windows-only"); return; }
+
+            var alias = "alias-24h-plus-" + Guid.NewGuid().ToString("N");
+            var ep = "https://fake_mtls/tenantY";
+            var guid = Guid.NewGuid().ToString("D");
+
+            try
+            {
+                // 24h + 3m lifetime (with notBefore = now-2m) → NotAfter ≈ now + 24h + 1m → acceptable
+                using var over24h = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromHours(24).Add(TimeSpan.FromMinutes(3)));
+
+                PersistentCertificateStore.TryPersist(alias, over24h, ep, "ignored", Logger);
+                Assert.IsTrue(PersistentCertificateStore.TryFind(alias, out var v, Logger),
+                    "Slightly-over-24h remaining should be accepted.");
+                Assert.AreEqual(ep, v.Endpoint);
+                Assert.AreEqual(guid, v.ClientId);
+            }
+            finally
+            {
+                RemoveAliasFromStore(alias);
+            }
+        }
+
+        [TestMethod]
+        public void TryFind_Returns_Newest_Endpoint_And_ClientId()
+        {
+            if (!IsWindows)
+            { Assert.Inconclusive("Windows-only"); return; }
+
+            var alias = "alias-newest-ep-" + Guid.NewGuid().ToString("N");
+            var epOld = "https://fake_mtls/tenant/OLD";
+            var epNew = "https://fake_mtls/tenant/NEW";
+            var guidOld = Guid.NewGuid().ToString("D");
+            var guidNew = Guid.NewGuid().ToString("D");
+
+            try
+            {
+                using var older = CreateSelfSignedWithKey("CN=" + guidOld, TimeSpan.FromDays(2));
+                using var newer = CreateSelfSignedWithKey("CN=" + guidNew, TimeSpan.FromDays(3));
+
+                PersistentCertificateStore.TryPersist(alias, older, epOld, "ignored", Logger);
+                PersistentCertificateStore.TryPersist(alias, newer, epNew, "ignored", Logger);
+
+                Assert.IsTrue(PersistentCertificateStore.TryFind(alias, out var v, Logger), "Expected find for alias.");
+                Assert.AreEqual(guidNew, v.ClientId, "ClientId must reflect the newest NotAfter entry.");
+                Assert.AreEqual(epNew, v.Endpoint, "Endpoint must come from the newest NotAfter entry.");
+            }
+            finally
+            {
+                RemoveAliasFromStore(alias);
+            }
+        }
+
+        [TestMethod]
+        public void TryFind_Isolated_Per_Alias_No_Cross_Talk()
+        {
+            if (!IsWindows)
+            { Assert.Inconclusive("Windows-only"); return; }
+
+            var alias1 = "alias-a-" + Guid.NewGuid().ToString("N");
+            var alias2 = "alias-b-" + Guid.NewGuid().ToString("N");
+            var ep1 = "https://fake_mtls/tenantA";
+            var ep2 = "https://fake_mtls/tenantB";
+            var guid1 = Guid.NewGuid().ToString("D");
+            var guid2 = Guid.NewGuid().ToString("D");
+
+            try
+            {
+                using var c1 = CreateSelfSignedWithKey("CN=" + guid1, TimeSpan.FromDays(3));
+                using var c2 = CreateSelfSignedWithKey("CN=" + guid2, TimeSpan.FromDays(3));
+
+                PersistentCertificateStore.TryPersist(alias1, c1, ep1, "ignored", Logger);
+                PersistentCertificateStore.TryPersist(alias2, c2, ep2, "ignored", Logger);
+
+                Assert.IsTrue(PersistentCertificateStore.TryFind(alias1, out var v1, Logger));
+                Assert.AreEqual(ep1, v1.Endpoint);
+                Assert.AreEqual(guid1, v1.ClientId);
+
+                Assert.IsTrue(PersistentCertificateStore.TryFind(alias2, out var v2, Logger));
+                Assert.AreEqual(ep2, v2.Endpoint);
+                Assert.AreEqual(guid2, v2.ClientId);
+            }
+            finally
+            {
+                RemoveAliasFromStore(alias1);
+                RemoveAliasFromStore(alias2);
+            }
+        }
+
+        [TestMethod]
+        public void TryFind_Prefers_Newest_Among_Many()
+        {
+            if (!IsWindows)
+            { Assert.Inconclusive("Windows-only"); return; }
+
+            var alias = "alias-many-" + Guid.NewGuid().ToString("N");
+            var ep1 = "https://fake_mtls/ep1";
+            var ep2 = "https://fake_mtls/ep2";
+            var ep3 = "https://fake_mtls/ep3";
+            var g1 = Guid.NewGuid().ToString("D");
+            var g2 = Guid.NewGuid().ToString("D");
+            var g3 = Guid.NewGuid().ToString("D");
+
+            try
+            {
+                using var c1 = CreateSelfSignedWithKey("CN=" + g1, TimeSpan.FromDays(1));
+                using var c2 = CreateSelfSignedWithKey("CN=" + g2, TimeSpan.FromDays(2));
+                using var c3 = CreateSelfSignedWithKey("CN=" + g3, TimeSpan.FromDays(3)); // newest
+
+                PersistentCertificateStore.TryPersist(alias, c1, ep1, "ignored", Logger);
+                PersistentCertificateStore.TryPersist(alias, c2, ep2, "ignored", Logger);
+                PersistentCertificateStore.TryPersist(alias, c3, ep3, "ignored", Logger);
+
+                Assert.IsTrue(PersistentCertificateStore.TryFind(alias, out var v, Logger), "Expected find.");
+                Assert.AreEqual(g3, v.ClientId);
+                Assert.AreEqual(ep3, v.Endpoint);
+            }
+            finally
+            {
+                RemoveAliasFromStore(alias);
+            }
+        }
+
+        #endregion
     }
 }
