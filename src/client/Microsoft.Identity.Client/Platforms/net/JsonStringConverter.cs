@@ -38,5 +38,17 @@ namespace Microsoft.Identity.Client.Platforms.net
         {
             writer.WriteStringValue(value);
         }
+
+        //Provides Support for reading dictionary key strings
+        public override string ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return reader.GetString();
+        }
+
+        //Provides Support for writing dictionary key strings
+        public override void WriteAsPropertyName(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        {
+            writer.WritePropertyName(value);
+        }
     }
 }

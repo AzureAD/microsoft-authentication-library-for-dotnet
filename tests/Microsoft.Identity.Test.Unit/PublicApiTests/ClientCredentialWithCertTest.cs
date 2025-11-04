@@ -23,6 +23,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Client.Internal.JsonWebToken;
 using Microsoft.Identity.Client.RP;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -1016,6 +1017,43 @@ namespace Microsoft.Identity.Test.Unit
                 });
 
                 Assert.IsTrue(exception.Message.Contains("Value cannot be null"));
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_ShouldSendClientInfoParameter_WithValueTwo_Async()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // Set up the expected POST data to include client_info = "2"
+                var expectedPostData = new Dictionary<string, string>
+                {
+                    [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
+                    [OAuth2Parameter.Scope] = TestConstants.s_scope.AsSingleString(),
+                    [OAuth2Parameter.ClientInfo] = "2"
+                };
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    expectedPostData: expectedPostData);
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
