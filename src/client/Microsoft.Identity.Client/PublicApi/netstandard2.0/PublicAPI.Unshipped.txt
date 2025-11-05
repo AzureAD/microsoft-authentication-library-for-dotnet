@@ -2,10 +2,8 @@ const Microsoft.Identity.Client.MsalError.CannotSwitchBetweenImdsVersionsForPrev
 const Microsoft.Identity.Client.MsalError.InvalidCertificate = "invalid_certificate" -> string
 const Microsoft.Identity.Client.MsalError.MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity" -> string
 const Microsoft.Identity.Client.MsalError.MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1" -> string
-Microsoft.Identity.Client.AuthScheme.ValidateCachedToken(Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData cachedTokenItem) -> bool
-Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData
-Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.MsalCacheValidationData() -> void
-Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.PersistedCacheParameters.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
 Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync() -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ImdsV2 = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, string> extraQueryParameters) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
