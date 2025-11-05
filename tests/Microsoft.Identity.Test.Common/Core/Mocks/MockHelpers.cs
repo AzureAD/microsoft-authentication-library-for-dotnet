@@ -184,8 +184,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"correlation_id\":\"77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\",\"error_uri\":\"https://westus2.login.microsoft.com/error?code=500011\"}";
         }
 
-        public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)
+        public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid, bool CreateClientInfoForS2S = false)
         {
+            if (CreateClientInfoForS2S)
+            {
+                return Base64UrlHelpers.Encode("{\"authz\":[\"value1\",\"value2\"]}");
+            }
+
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
         }
 
@@ -366,6 +371,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             return CreateSuccessResponseMessage(
                 "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\"}");
+        }
+
+        public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseWithClientInfoMessage(
+            string token = "header.payload.signature",
+            string expiry = "3599",
+            string tokenType = "Bearer",
+            bool CreateClientInfoForS2S = false
+            )
+        {
+            return CreateSuccessResponseMessage(
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"client_info\":\"" + CreateClientInfo(null, null, CreateClientInfoForS2S) + "\"}");
         }
 
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(
