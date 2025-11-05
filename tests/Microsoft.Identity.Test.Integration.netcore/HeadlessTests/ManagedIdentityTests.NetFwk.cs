@@ -36,14 +36,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //http proxy base URL 
         private static readonly string s_baseURL = "https://service.msidlab.com/";
 
-        //Shared User Assigned Client ID
-        private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
+        //Shared User Assigned Client ID - Consolidated UAMI for both MSI endpoints and Key Vault access
+        private const string UserAssignedClientID = "45344e7d-c562-4be6-868f-18dac789c021";
         
+        //Lab Access Client ID for certificate-based authentication to lab resources
         private const string LabAccessClientID = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
 
-        private const string LabVaultAccessUserAssignedClientID = "4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6";
-
-        private const string UserAssignedObjectID = "9fc6a41b-e161-43ba-90ba-12f172141c23";
+        private const string UserAssignedObjectID = "a38637b6-b365-4652-af1f-cf5d8cf829ad";
 
         //Non Existent User Assigned Client/Object ID 
         private const string SomeRandomGuid = "f07359bb-f4f6-4e3c-ba9f-ccdf48eb80ce";
@@ -55,7 +54,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //Resource ID of the User Assigned Identity 
         private const string UamiResourceId = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
             "resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/" +
-            "MSAL_MSI_USERID";
+            "Msal_Integration_tests";
 
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
@@ -191,8 +190,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={MsiAzureResource.WebApp}&uri=";
 
-                //Create CCA with Proxy
-                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, LabVaultAccessUserAssignedClientID, UserAssignedIdentityId.ClientId);
+                //Create CCA with Proxy - using the consolidated UAMI for both MSI and Key Vault access
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, UserAssignedClientID, UserAssignedIdentityId.ClientId);
 
                 AuthenticationResult result;
                 //Act
@@ -491,7 +490,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     break;
             }
 
-            // Disabling shared cache options to avoid cross test pollution.
+            
             builder.Config.AccessorOptions = null;
 
             IManagedIdentityApplication mia = builder.WithClientCapabilities(new[] { "cp1" })

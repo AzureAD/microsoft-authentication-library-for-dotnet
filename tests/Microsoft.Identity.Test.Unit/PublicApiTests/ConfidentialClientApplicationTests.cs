@@ -2289,6 +2289,69 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        public async Task ConfidentialClient_acquireTokenForClient_ReturnsAuthZTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(addClientInfo: true);
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authz"));
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                Assert.AreEqual("[\"value1\",\"value2\"]", result.AdditionalResponseParameters["authz"]);
+#else
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authz"]);
+#endif
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
+
+                // call AcquireTokenForClientAsync again to get result back from the cache
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authz"));
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                Assert.AreEqual("[\"value1\",\"value2\"]", result.AdditionalResponseParameters["authz"]);
+#else
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authz"]);
+#endif
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                appCacheAccess.AssertAccessCounts(2, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
+            }
+        }
+
         private static string ComputeSHA256Hex(string token)
         {
             var cryptoMgr = new CommonCryptographyManager();

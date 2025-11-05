@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity;
@@ -18,23 +19,42 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class ManagedIdentityAuthRequest : RequestBase
     {
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
+        private readonly ManagedIdentityClient _managedIdentityClient;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly ICryptographyManager _cryptoManager;
+        private readonly IManagedIdentityKeyProvider _managedIdentityKeyProvider;
 
         public ManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenForManagedIdentityParameters managedIdentityParameters)
+            AcquireTokenForManagedIdentityParameters managedIdentityParameters,
+            ManagedIdentityClient managedIdentityClient)
             : base(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
         {
             _managedIdentityParameters = managedIdentityParameters;
+            _managedIdentityClient = managedIdentityClient;
             _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
+            _managedIdentityKeyProvider = serviceBundle.PlatformProxy.ManagedIdentityKeyProvider;
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
+            
+            // Prime the scheme before any cache lookup if we already have a binding cert from a prior mint
+            if (AuthenticationRequestParameters.IsMtlsPopRequested)
+            {
+                if (_managedIdentityClient.RuntimeMtlsBindingCertificate != null)
+                {
+                    AuthenticationRequestParameters.AuthenticationScheme = new MtlsPopAuthenticationOperation(_managedIdentityClient.RuntimeMtlsBindingCertificate);
+
+                    logger.Info("[ManagedIdentity] Using prior mTLS binding certificate for cache lookup.");
+                    logger.InfoPii(
+                        () => $"[ManagedIdentity][PII] Prior mTLS cert thumbprint: {_managedIdentityClient.RuntimeMtlsBindingCertificate.Thumbprint}",
+                        () => "[ManagedIdentity][PII] Prior mTLS cert thumbprint: ***");
+                }
+            }
 
             // 1. FIRST, handle ForceRefresh
             if (_managedIdentityParameters.ForceRefresh)
@@ -91,7 +111,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Info("[ManagedIdentityRequest] Access token retrieved from cache.");
 
                 try
-                {  
+                {
                     var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
                     // If needed, refreshes token in the background
@@ -137,7 +157,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            CancellationToken cancellationToken, 
+            CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
             AuthenticationResult authResult;
@@ -157,7 +177,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // 1) ForceRefresh is requested
                 // 2) Proactive refresh is in effect
                 // 3) Claims are present (revocation flow)
-                if (_managedIdentityParameters.ForceRefresh || 
+                if (_managedIdentityParameters.ForceRefresh ||
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
                     !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
                 {
@@ -194,13 +214,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            ManagedIdentityClient managedIdentityClient = 
-                new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
+            _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
+
+            // Ensure the attestation provider reaches RequestContext for IMDSv2
+            AuthenticationRequestParameters.RequestContext.AttestationTokenProvider ??=
+                _managedIdentityParameters.AttestationTokenProvider;
 
             ManagedIdentityResponse managedIdentityResponse =
-                await managedIdentityClient
-                .SendTokenRequestForManagedIdentityAsync(_managedIdentityParameters, cancellationToken)
+                await _managedIdentityClient
+                .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
                 .ConfigureAwait(false);
+
+            if (AuthenticationRequestParameters.IsMtlsPopRequested && _managedIdentityParameters.MtlsCertificate != null)
+            {
+                // Remember the cert...
+                _managedIdentityClient.SetRuntimeMtlsBindingCertificate(_managedIdentityParameters.MtlsCertificate);
+
+                // Apply mTLS scheme BEFORE caching...
+                AuthenticationRequestParameters.AuthenticationScheme =
+                    new MtlsPopAuthenticationOperation(_managedIdentityParameters.MtlsCertificate);
+
+                _managedIdentityParameters.MtlsCertificate = null;
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    "[ManagedIdentity] Applied mtls_pop scheme prior to caching.");
+            }
 
             var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
@@ -214,6 +251,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (cachedAccessTokenItem != null)
             {
+                if (_managedIdentityParameters.IsMtlsPopRequested && (cachedAccessTokenItem.TokenType == "Bearer"))
+                {
+                    throw new MsalClientException(
+                        MsalError.CannotSwitchBetweenImdsVersionsForPreview,
+                        MsalErrorMessage.CannotSwitchBetweenImdsVersionsForPreview);
+                }
+
                 AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                 Metrics.IncrementTotalAccessTokensFromCache();
                 return cachedAccessTokenItem;

@@ -88,6 +88,25 @@ namespace Microsoft.Identity.Client.Cache.Items
 #endif
             return cacheParameters;
         }
+        
+        internal void AddAdditionalCacheParameters(Dictionary<string, string> additionalCacheParameters)
+        {
+            if (additionalCacheParameters != null)
+            {
+                if (PersistedCacheParameters == null)
+                {
+                    PersistedCacheParameters = new Dictionary<string, string>(additionalCacheParameters);
+                }
+                else
+                {
+                    foreach (var kvp in additionalCacheParameters)
+                    {
+                        PersistedCacheParameters[kvp.Key] = kvp.Value;
+                    }
+                }
+            }
+        }
+
 #endif
         internal /* for test */ MsalAccessTokenCacheItem(
             string preferredCacheEnv,
