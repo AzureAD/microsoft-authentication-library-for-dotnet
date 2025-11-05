@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         private readonly MsalServiceException _ex2 = new MsalServiceException("code2", "msg2");
 
         [TestMethod]
-        public void GetRemovesExpired_Async()
+        public void GetRemovesExpired()
         {
             // Arrange
             ThrottlingCache cache = new ThrottlingCache();
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         }
 
         [TestMethod]
-        public void TestCleanup_Async()
+        public void TestCleanup()
         {
             // Arrange
             ThrottlingCache cache = new ThrottlingCache(50);
