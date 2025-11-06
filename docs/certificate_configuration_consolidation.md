@@ -2,9 +2,9 @@
 
 ## Overview
 
-The `CertificateConfiguration` class and `WithCertificateConfiguration` method provide a unified, consolidated API for configuring certificates in MSAL.NET confidential client applications. This replaces the need to use multiple overloads of `WithCertificate`, `WithClientClaims`, and request-level `WithMtlsProofOfPossession` methods.
+This document describes the consolidated API for configuring certificates in MSAL.NET confidential client applications. The consolidation addresses the fragmentation of multiple certificate-related APIs and provides a clear, unified approach.
 
-## Problem Statement
+## Background: The Fragmentation Problem
 
 Previously, MSAL.NET had multiple certificate-related APIs scattered across different builder classes:
 
@@ -14,32 +14,119 @@ Previously, MSAL.NET had multiple certificate-related APIs scattered across diff
 4. `WithClientClaims(certificate, claims, merge, sendX5C)` - Certificate with claims and X5C
 5. `ConfidentialClientApplicationBuilderForResourceProviders.WithCertificate(...)` - Extension with serial number association
 6. `AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession()` - mTLS PoP at request level
+7. Various `WithClientAssertion` overloads for custom assertions
 
-This fragmentation made it difficult for developers to understand which method to use for their specific scenario.
+This fragmentation made it difficult for developers to:
+- Understand which method to use for their scenario
+- Discover all available certificate options
+- Combine multiple certificate features
+- Migrate between different authentication patterns
 
-## Solution
+## Solution: Two Complementary APIs
 
-The new consolidated API uses a configuration object pattern:
+### 1. CertificateConfiguration (Simple Scenarios)
+
+For most certificate-based authentication scenarios, use the new `CertificateConfiguration` class with `WithCertificateConfiguration()`:
 
 ```csharp
-var certificateConfig = new CertificateConfiguration(certificate)
+var certConfig = new CertificateConfiguration(certificate)
 {
     SendX5C = true,
-    AssociateTokensWithCertificateSerialNumber = true,
-    ClaimsToSign = customClaims,
-    MergeWithDefaultClaims = true,
-    EnableMtlsProofOfPossession = true
+    EnableMtlsProofOfPossession = true,
+    UseBearerTokenWithMtls = false,  // PoP or Bearer
+    Claims = claimsChallenge
 };
 
 var app = ConfidentialClientApplicationBuilder
     .Create(clientId)
-    .WithAuthority(authority)
-    .WithAzureRegion(region)
-    .WithCertificateConfiguration(certificateConfig)
+    .WithCertificateConfiguration(certConfig)
     .Build();
 ```
 
-## CertificateConfiguration Properties
+**Best for:**
+- Certificate-based client authentication
+- mTLS scenarios with certificates
+- Standard certificate workflows
+- Most confidential client applications
+
+### 2. WithClientAssertion with AssertionResponse (Advanced Scenarios)
+
+For advanced scenarios requiring custom assertion logic or external assertion providers, use the existing `WithClientAssertion` API with a delegate:
+
+```csharp
+// Future enhancement aligned with PR #5399
+var app = ConfidentialClientApplicationBuilder
+    .Create(clientId)
+    .WithClientAssertion(async (options, ct) => 
+    {
+        // Custom logic to generate or retrieve assertion
+        string jwt = await GenerateCustomAssertionAsync(options, ct);
+        
+        // Return assertion with optional certificate for token binding
+        return new ClientSignedAssertion
+        {
+            Assertion = jwt,
+            // Certificate optional - for mTLS token binding
+            // Certificate = cert  // if needed
+        };
+    })
+    .Build();
+```
+
+**Best for:**
+- Custom assertion generation logic
+- External assertion providers (e.g., Key Vault, HSM)
+- Federated credentials
+- Non-certificate-based client credentials
+- Managed Identity with assertions (future)
+
+## Design Philosophy
+
+### Alignment with PR #5399
+
+This consolidation aligns with the vision outlined in [PR #5399](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5399), which proposes a unified approach for client assertions:
+
+**Key Principles:**
+1. **Forward Compatibility**: APIs designed to accommodate future enhancements
+2. **Separation of Concerns**: 
+   - `CertificateConfiguration` for certificate workflows
+   - `WithClientAssertion` for assertion workflows
+3. **Optional Token Binding**: Support both bearer and PoP tokens with mTLS
+4. **Extensibility**: New properties can be added without breaking changes
+
+### Relationship to Existing APIs
+
+```
+┌─────────────────────────────────────────────────┐
+│    Confidential Client Builder                   │
+├─────────────────────────────────────────────────┤
+│                                                   │
+│  Certificate-Based                                │
+│  ┌─────────────────────────────────┐             │
+│  │ WithCertificateConfiguration()  │             │
+│  │   - Simple certificate setup    │             │
+│  │   - mTLS with PoP/Bearer        │             │
+│  │   - Claims challenge support    │             │
+│  └─────────────────────────────────┘             │
+│                                                   │
+│  Assertion-Based                                  │
+│  ┌─────────────────────────────────┐             │
+│  │ WithClientAssertion()           │             │
+│  │   - Custom assertion logic      │             │
+│  │   - External providers          │             │
+│  │   - Federated credentials       │             │
+│  │   - Optional cert for binding   │             │
+│  └─────────────────────────────────┘             │
+│                                                   │
+│  Secret-Based (unchanged)                         │
+│  ┌─────────────────────────────────┐             │
+│  │ WithClientSecret()              │             │
+│  └─────────────────────────────────┘             │
+│                                                   │
+└─────────────────────────────────────────────────┘
+```
+
+## CertificateConfiguration API
 
 ### Certificate (Required)
 - **Type**: `X509Certificate2`
@@ -399,15 +486,64 @@ var result = await app.AcquireTokenForClient(scopes).ExecuteAsync();
 
 ## Benefits of the Consolidated API
 
-1. **Clarity**: All certificate-related options are in one place
-2. **Discoverability**: Developers can see all available options through IntelliSense
-3. **Maintainability**: Easier to add new certificate options in the future
-4. **Type Safety**: Configuration object ensures valid combinations
-5. **Simplicity**: Reduces the number of methods developers need to learn
+### For Developers
+1. **Clarity**: All certificate-related options in one place
+2. **Discoverability**: All options visible through IntelliSense
+3. **Type Safety**: Configuration object ensures valid combinations
+4. **Simplicity**: Fewer methods to learn
+5. **Flexibility**: Choose between PoP and bearer tokens with mTLS
+
+### For MSAL Maintainability
+1. **Reduced API Surface**: Fewer overloads to maintain
+2. **Forward Compatibility**: Easy to add new properties
+3. **Consistency**: Unified pattern for configuration
+4. **Clear Migration Path**: From old APIs to new
+
+### Relationship to Future Work
+
+This consolidation provides the foundation for:
+
+**Issue #5568 Goals:**
+- Single, intuitive API for certificate scenarios
+- Clear distinction between certificate and assertion workflows
+- Support for both bearer and PoP tokens over mTLS
+- Built-in support for claims challenge scenarios
+
+**PR #5399 Vision:**
+- `AssertionResponse` pattern for advanced scenarios
+- Token binding certificate as optional property
+- Extensible design for future assertion types
+- Unified approach across all client credential types
 
 ## Backward Compatibility
 
-All existing `WithCertificate` and `WithClientClaims` methods remain available and fully functional. The new `WithCertificateConfiguration` method is an additive change that provides a better developer experience without breaking existing code.
+**All existing APIs remain fully functional:**
+- `WithCertificate(certificate)`
+- `WithCertificate(certificate, sendX5C)`
+- `WithClientClaims(certificate, claims, merge)`
+- `WithClientClaims(certificate, claims, merge, sendX5C)`
+- `WithMtlsProofOfPossession()` at request level
+- `WithClientAssertion()` overloads
+
+**Migration is optional** - developers can:
+1. Continue using existing APIs indefinitely
+2. Migrate gradually to the new API
+3. Mix old and new APIs during transition
+
+**No breaking changes** - this is an additive enhancement.
+
+## Use Case Matrix
+
+| Scenario | Recommended API | Example |
+|----------|----------------|---------|
+| Basic certificate auth | `CertificateConfiguration` | Authentication with cert |
+| Certificate + X5C | `CertificateConfiguration.SendX5C` | SNI certificate scenarios |
+| mTLS with PoP tokens | `CertificateConfiguration.EnableMtlsProofOfPossession` | Secure token binding |
+| mTLS with bearer tokens | `CertificateConfiguration.UseBearerTokenWithMtls = true` | mTLS transport only |
+| Claims challenge | `CertificateConfiguration.Claims` | Conditional Access |
+| Custom client assertions | `WithClientAssertion` | Key Vault, HSM, federated creds |
+| Client secret | `WithClientSecret` | Development/testing |
+| Cache partitioning by cert | `CertificateConfiguration.AssociateTokensWithCertificateSerialNumber` | Resource providers |
 
 ## See Also
 
