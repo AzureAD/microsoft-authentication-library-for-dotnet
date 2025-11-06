@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 ValidateResponseFromBroker(response);
                 Metrics.IncrementTotalAccessTokensFromBroker();
-                return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
+                return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response, cancellationToken).ConfigureAwait(false);
             }
 
             return null;

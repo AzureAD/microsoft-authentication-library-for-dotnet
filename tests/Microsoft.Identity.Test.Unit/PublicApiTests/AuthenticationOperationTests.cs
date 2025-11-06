@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -187,6 +188,56 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                      .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.TokenTypeMismatch, ex.ErrorCode);
+            }
+        }
+
+        private class TestOperation : IAuthenticationOperation2
+        {
+            public string AuthorizationHeaderPrefix => "TestToken";
+            public string KeyId => "keyid";
+            public IReadOnlyDictionary<string, string> GetTokenRequestParams()
+            {
+                return new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } };
+            }
+            public void FormatResult(AuthenticationResult authenticationResult)
+            {
+                Assert.Fail("should not be called, FormatResultAsync should be called");
+            }
+
+            public Task FormatResultAsync(AuthenticationResult authenticationResult, CancellationToken cancellationToken = default)
+            {
+                authenticationResult.AccessToken = "IAuthenticationOperation2" + authenticationResult.AccessToken;
+                return Task.CompletedTask;
+            }
+
+            public int TelemetryTokenType => 5; // Extension
+            public string AccessTokenType => "bearer";
+        }
+
+        [TestMethod]
+        public async Task IAsyncOperation2_Async()
+        {
+            // Arrang           
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithExperimentalFeatures()
+                                                                            .WithClientSecret(TestConstants.ClientSecret)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                httpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
+
+                // Act
+                var result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthenticationOperation(new TestOperation())
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsTrue(result.AccessToken.StartsWith("IAuthenticationOperation2"));
+                Assert.AreEqual($"TestToken {result.AccessToken}", result.CreateAuthorizationHeader() );
+                
             }
         }
 

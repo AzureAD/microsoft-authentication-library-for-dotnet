@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No access token or cached access token needs to be refreshed 
             if (cachedAccessTokenItem != null)
             {
-                authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+                authResult = await CreateAuthenticationResultFromCacheAsync(cachedAccessTokenItem).ConfigureAwait(false);
 
                 try
                 {
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 catch (MsalServiceException e)
                 {
-                    return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem).ConfigureAwait(false);
+                    return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem, cancellationToken).ConfigureAwait(false);
                 }
             }
             else
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (ServiceBundle.Config.AppTokenProvider == null)
             {
                 MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
-                return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+                return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
             }
 
             // Get a token from the app provider delegate
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     else
                     {
                         logger.Verbose(() => "[ClientCredentialRequest] Checking for a cached access token.");
-                        authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+                        authResult = await CreateAuthenticationResultFromCacheAsync(cachedAccessTokenItem).ConfigureAwait(false);
                     }
                 }
                 
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
             tokenResponse.CorrelationId = appTokenProviderParameters.CorrelationId;
 
-            AuthenticationResult authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(tokenResponse)
+            AuthenticationResult authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(tokenResponse, cancellationToken)
                 .ConfigureAwait(false);
 
             return authResult;
@@ -298,9 +298,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// </summary>
         /// <param name="cachedAccessTokenItem"></param>
         /// <returns></returns>
-        private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        private Task<AuthenticationResult> CreateAuthenticationResultFromCacheAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
-            AuthenticationResult authResult = new AuthenticationResult(
+            return AuthenticationResult.CreateAsync(
                                                             cachedAccessTokenItem,
                                                             null,
                                                             AuthenticationRequestParameters.AuthenticationScheme,
@@ -310,7 +310,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             account: null,
                                                             spaAuthCode: null,
                                                             additionalResponseParameters: null);
-            return authResult;
         }
 
         /// <summary>

@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                         + cachedAccessTokenItem.RefreshOn.HasValue);
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     Metrics.IncrementTotalAccessTokensFromCache();
-                    authResult = await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
+                    authResult = await CreateAuthenticationResultAsync(cachedAccessTokenItem, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 if (cachedAccessTokenItem != null && e.IsRetryable)
                 {
                     logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
-                    return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
+                    return await CreateAuthenticationResultAsync(cachedAccessTokenItem, cancellationToken).ConfigureAwait(false);
                 }
 
                 logger.Warning("Failed to refresh the RT and cannot use existing AT (expired or missing). ");
@@ -152,15 +152,15 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(appRefreshToken, _silentRequest, AuthenticationRequestParameters, cancellationToken)
                     .ConfigureAwait(false);
             }
-            return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem, CancellationToken ct)
         {
             var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
             var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
 
-            return new AuthenticationResult(
+            return await AuthenticationResult.CreateAsync(
                 cachedAccessTokenItem,
                 msalIdTokenItem,
                 AuthenticationRequestParameters.AuthenticationScheme,
@@ -169,7 +169,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account, 
                 spaAuthCode: null,
-                additionalResponseParameters: null);
+                additionalResponseParameters: null, 
+                cancellationToken: ct).ConfigureAwait(false);
         }       
 
         private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)

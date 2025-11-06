@@ -20,7 +20,10 @@ namespace Microsoft.Identity.Client.Extensibility
         public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; set; }
 
         /// <summary>
-        /// Enables the developer to provide a custom authentication extension.
+        /// Inject an authentication operation. This is used for POP and composite tokens. 
+        /// IAuthencationOperation has a KeyID property that is used to bind tokens to a key. This affects how tokens are cached.
+        /// 
+        /// Important: Use IAuthenticationOperation2 instead, for asynchronous token formatting.
         /// </summary>
         public IAuthenticationOperation AuthenticationOperation { get; set; }
 

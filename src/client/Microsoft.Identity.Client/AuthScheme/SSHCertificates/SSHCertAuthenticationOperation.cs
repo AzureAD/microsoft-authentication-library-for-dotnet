@@ -3,13 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
 {
-    internal class SSHCertAuthenticationOperation : IAuthenticationOperation
+    internal class SSHCertAuthenticationOperation : IAuthenticationOperation2
     {
         internal const string SSHCertTokenType = "ssh-cert";
         private readonly string _jwk;
@@ -39,6 +41,11 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
         public string AccessTokenType => SSHCertTokenType;
 
         public string KeyId { get; }
+
+        public Task FormatResultAsync(AuthenticationResult authenticationResult, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
 
         public void FormatResult(AuthenticationResult authenticationResult)
         {
