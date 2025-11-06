@@ -17,7 +17,7 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class CacheFallbackOperationsTests
+    public class CacheFallbackOperationsTests 
     {
         private InMemoryLegacyCachePersistence _legacyCachePersistence;
         private ILoggerAdapter _logger;
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
 
             // Methods in CacheFallbackOperations silently catch all exceptions and log them;
             // By setting this to null, logging will fail, making the test fail.
