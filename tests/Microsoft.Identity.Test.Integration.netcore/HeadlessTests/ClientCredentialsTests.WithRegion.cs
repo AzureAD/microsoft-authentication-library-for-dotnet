@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
             else
             {
-                builder.WithCertificate(settings.GetCertificate());
+                builder.WithCertificate(settings.Certificate);
             }
 
             builder.WithAuthority($@"https://{settings.Environment}/{settings.TenantId}")
@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var manager = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
 
             var jwtToken = new JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
-            var cert = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy).GetCertificate(); // Use legacy config for regional tests
+            var cert = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy).Certificate; // Use legacy config for regional tests
 
             return jwtToken.Sign(cert, true, true);
         }

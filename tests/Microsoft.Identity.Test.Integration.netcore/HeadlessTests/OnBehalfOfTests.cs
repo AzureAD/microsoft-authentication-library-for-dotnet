@@ -520,7 +520,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var builder = ConfidentialClientApplicationBuilder
              .Create(withRegion ? OboConfidentialClientID : settings.ClientId)
              .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), true)
-             .WithClientSecret(withRegion ? _confidentialClientSecret : settings.GetSecret())
+             .WithClientSecret(withRegion ? _confidentialClientSecret : settings.Secret)
              .WithLegacyCacheCompatibility(false);
 
             if (withRegion)

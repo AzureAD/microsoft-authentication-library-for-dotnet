@@ -139,11 +139,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 if (cloud == Cloud.Arlington)
                 {
-                    clientAppBuilder.WithClientSecret(settings.GetSecret());
+                    clientAppBuilder.WithClientSecret(settings.Secret);
                 }
                 else
                 {
-                    clientAppBuilder.WithCertificate(settings.GetCertificate(), true);
+                    clientAppBuilder.WithCertificate(settings.Certificate, true);
                 }
 
                  clientApp = clientAppBuilder.Build();

@@ -23,8 +23,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         string TenantId { get; }
         string Environment { get; }
         string[] AppScopes { get; }
-        X509Certificate2 GetCertificate();
-        string GetSecret();
+        X509Certificate2 Certificate { get; }
+        string Secret { get; }
 
         string Authority { get; }
 
@@ -56,17 +56,12 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public bool InstanceDiscoveryEndpoint { get; set; } = true;
 
-            public X509Certificate2 GetCertificate()
-            {
-                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
-            }
+            public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
 
-            public string GetSecret()
-            {
+            public string Secret => 
                 // TODO: Tenant Migration - Migrated to new id4slab1 key vault configuration
                 // Using MSAL-APP-AzureADMultipleOrgs secret for the migrated app
-                return GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-APP-AzureADMultipleOrgs").Value;
-            }
+                GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-APP-AzureADMultipleOrgs").Value;
         }
 
         private class AdfsConfidentialAppSettings : IConfidentialAppSettings
@@ -85,10 +80,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string[] AppScopes => new[] { "openid", "profile" };
 
-            public X509Certificate2 GetCertificate()
-            {
-                return s_certLazy.Value;
-            }
+            public X509Certificate2 Certificate => s_certLazy.Value;
 
             private static Lazy<X509Certificate2> s_certLazy => new Lazy<X509Certificate2>(() =>
             {
@@ -96,11 +88,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
                 return kv.GetCertificateWithPrivateMaterialAsync(AdfsCertName).GetAwaiter().GetResult();
             });
 
-            public string GetSecret()
-            {                
+            public string Secret =>
                 // Use the default app secret from the lab response
-                return GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-App-Default").Value;
-            }
+                GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-App-Default").Value;
 
             public string Authority => $@"https://{Environment}";
 
@@ -121,15 +111,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string[] AppScopes => new[] { $"{ClientId}/.default" };
 
-            public X509Certificate2 GetCertificate()
-            {
-                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
-            }
+            public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
 
-            public string GetSecret()
-            {
-                throw new NotImplementedException();
-            }
+            public string Secret => throw new NotImplementedException();
             public string Authority => $@"https://{Environment}/{TenantId}";
 
             public Cloud Cloud => Cloud.PPE;
@@ -149,15 +133,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string[] AppScopes => new[] { "https://graph.microsoft.com/.default" };
 
-            public X509Certificate2 GetCertificate()
-            {
-                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
-            }
+            public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
 
-            public string GetSecret()
-            {
-                return GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalArlingtonCCAKeyVaultSecretName).Value;
-            }
+            public string Secret => GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalArlingtonCCAKeyVaultSecretName).Value;
 
             public string Authority => $@"https://{Environment}/{TenantId}";
 
@@ -188,15 +166,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public bool InstanceDiscoveryEndpoint { get; set; } = true;
 
-            public X509Certificate2 GetCertificate()
-            {
-                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
-            }
+            public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
 
-            public string GetSecret()
-            {
-                return GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalCCAKeyVaultSecretName).Value;
-            }
+            public string Secret => GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalCCAKeyVaultSecretName).Value;
         }
 
         private static Lazy<IConfidentialAppSettings> s_publicCloudSettings =
