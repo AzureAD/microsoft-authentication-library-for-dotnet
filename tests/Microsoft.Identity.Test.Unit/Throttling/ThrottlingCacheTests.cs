@@ -18,16 +18,15 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         private readonly MsalServiceException _ex2 = new MsalServiceException("code2", "msg2");
 
         [TestMethod]
-        public async Task GetRemovesExpired_Async()
+        public void GetRemovesExpired()
         {
             // Arrange
             ThrottlingCache cache = new ThrottlingCache();
             
-            cache.AddAndCleanup("k1", new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(1)), _logger); // expired
+            cache.AddAndCleanup("k1", new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(-10000)), _logger); // expired
             cache.AddAndCleanup("k2", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(10000)), _logger);
 
             // Act
-            await Task.Delay(1).ConfigureAwait(false);
             bool isFound1 = cache.TryGetOrRemoveExpired("k1", _logger, out MsalServiceException foundEx1);
             bool isFound2 = cache.TryGetOrRemoveExpired("k2", _logger, out MsalServiceException foundEx2);
 
@@ -39,16 +38,15 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         }
 
         [TestMethod]
-        public async Task TestCleanup_Async()
+        public void TestCleanup()
         {
             // Arrange
             ThrottlingCache cache = new ThrottlingCache(50);
 
-            cache.AddAndCleanup("k1", new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(1)), _logger); // expired
+            cache.AddAndCleanup("k1", new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(-10000)), _logger); // expired
             cache.AddAndCleanup("k2", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(10000)), _logger);
             
             // Act - should trigger a cleanup
-            await Task.Delay(50).ConfigureAwait(false);
             cache.AddAndCleanup("k3", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(1000)), _logger);
 
             // Assert
