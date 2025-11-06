@@ -68,7 +68,7 @@ namespace NetCoreTestApp
             var ccaSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             s_clientIdForConfidentialApp = ccaSettings.ClientId;
             s_ccaAuthority = ccaSettings.Authority;
-            s_confidentialClientCertificate = ccaSettings.GetCertificate();
+            s_confidentialClientCertificate = ccaSettings.Certificate;
 
             var pca = CreatePca();
             RunConsoleAppLogicAsync(pca).Wait();
