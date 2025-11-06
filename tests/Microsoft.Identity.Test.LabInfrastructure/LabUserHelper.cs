@@ -48,12 +48,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        public static Task<object> GetKVLabData(string secret)
+        private static async Task<LabResponse> GetKVLabDataAsync(string secret)
         {
             // TODO: Implement caching similar to GetLabUserDataAsync to avoid repeated Key Vault calls
             try
             {
-                var keyVaultSecret = KeyVaultSecretsProviderMsal.GetSecretByName(secret);
+                var keyVaultSecret = await KeyVaultSecretsProviderMsal.GetSecretByNameAsync(secret).ConfigureAwait(false);
                 string labData = keyVaultSecret.Value;
                 
                 if (string.IsNullOrEmpty(labData))
@@ -67,12 +67,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 {
                     var response = JsonConvert.DeserializeObject<LabResponse>(labData) ?? throw new LabUserNotFoundException(new UserQuery(), $"Failed to deserialize Key Vault secret '{secret}' to LabResponse.");
                     Debug.WriteLine($"KeyVault '{secret}': {response.User?.Upn ?? response.App?.AppId ?? response.Lab?.TenantId ?? "Unknown"}");
-                    return Task.FromResult<object>(response);
+                    return response;
                 }
                 else
                 {
-                    Debug.WriteLine($"KeyVault '{secret}': raw string ({labData.Length} chars)");
-                    return Task.FromResult<object>(labData);
+                    Debug.WriteLine($"KeyVault '{secret}': raw string ({labData.Length} chars) - expected JSON for LabResponse");
+                    throw new LabUserNotFoundException(new UserQuery(), $"Key Vault secret '{secret}' contains non-JSON data, expected LabResponse JSON.");
                 }
             }
             catch (Exception e)
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
 
-        public static LabResponse MergeKVLabData(params string[] secrets)
+        public static async Task<LabResponse> MergeKVLabDataAsync(params string[] secrets)
         {
             if (secrets == null || secrets.Length == 0)
             {
@@ -109,18 +109,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 
                 foreach (string secret in secrets)
                 {
-                    var data = GetKVLabData(secret).Result;
+                    var labResponse = await GetKVLabDataAsync(secret).ConfigureAwait(false);
                     
-                    if (data is LabResponse labResponse)
+                    if (mergedResponse == null)
                     {
-                        if (mergedResponse == null)
-                        {
-                            mergedResponse = labResponse;
-                        }
-                        else
-                        {
-                            mergedResponse = MergeLabResponses(mergedResponse, labResponse);
-                        }
+                        mergedResponse = labResponse;
+                    }
+                    else
+                    {
+                        mergedResponse = MergeLabResponses(mergedResponse, labResponse);
                     }
                 }
 
@@ -168,25 +165,25 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         }
         public static Task<LabResponse> GetDefaultUserAsync()
         {
-            return Task.FromResult(MergeKVLabData("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
+            return MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
         }
         
         public static Task<LabResponse> GetDefaultUserWithMultiTenantAppAsync()
         {
-            return Task.FromResult(MergeKVLabData("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgs-JSON"));
+            return MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgs-JSON");
         }
         public static Task<LabResponse> GetDefaultUser2Async()
         {
-            return Task.FromResult(MergeKVLabData("MSAL-User-Default2-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
+            return MergeKVLabDataAsync("MSAL-User-Default2-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
         }
         public static Task<LabResponse> GetDefaultUser3Async()
         {
-            return Task.FromResult(MergeKVLabData("MSAL-User-XCG-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
+            return MergeKVLabDataAsync("MSAL-User-XCG-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
         }
 
         public static Task<LabResponse> GetDefaultAdfsUserAsync()
         {
-            return Task.FromResult(MergeKVLabData("MSAL-USER-FedDefault-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
+            return MergeKVLabDataAsync("MSAL-USER-FedDefault-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
         }
 
         public static Task<LabResponse> GetMsaUserAsync()
@@ -196,7 +193,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetHybridSpaAccontAsync()
         {
-            return Task.FromResult(MergeKVLabData("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-App-Default-JSON"));
+            return MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
         }
 
         public static Task<LabResponse> GetB2CLocalAccountAsync()
