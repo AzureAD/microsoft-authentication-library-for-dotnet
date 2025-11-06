@@ -62,37 +62,23 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     throw new LabUserNotFoundException(new UserQuery(), $"Found no content for secret '{secret}' in Key Vault.");
                 }
 
-                // Check if the value is JSON by trying to parse it
-                if (IsValidJson(labData))
+                try
                 {
+                    // Parse JSON directly - let JsonException bubble up if invalid
                     var response = JsonConvert.DeserializeObject<LabResponse>(labData) ?? throw new LabUserNotFoundException(new UserQuery(), $"Failed to deserialize Key Vault secret '{secret}' to LabResponse.");
                     Debug.WriteLine($"KeyVault '{secret}': {response.User?.Upn ?? response.App?.AppId ?? response.Lab?.TenantId ?? "Unknown"}");
                     return response;
                 }
-                else
+                catch (JsonException jsonEx)
                 {
-                    Debug.WriteLine($"KeyVault '{secret}': raw string ({labData.Length} chars) - expected JSON for LabResponse");
-                    throw new LabUserNotFoundException(new UserQuery(), $"Key Vault secret '{secret}' contains non-JSON data, expected LabResponse JSON.");
+                    Debug.WriteLine($"KeyVault '{secret}': invalid JSON ({labData.Length} chars) - {jsonEx.Message}");
+                    throw new LabUserNotFoundException(new UserQuery(), $"Key Vault secret '{secret}' contains invalid JSON for LabResponse. {jsonEx.Message}");
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!(e is LabUserNotFoundException))
             {
                 Debug.WriteLine($"KeyVault '{secret}' failed: {e.Message}");
                 throw new InvalidOperationException($"Failed to retrieve or parse Key Vault secret '{secret}'. See inner exception.", e);
-            }
-
-            // Helper method to validate if a string is valid JSON
-            static bool IsValidJson(string value)
-            {
-                try
-                {
-                    JsonConvert.DeserializeObject(value);
-                    return true;
-                }
-                catch (JsonException)
-                {
-                    return false;
-                }
             }
         }
 
