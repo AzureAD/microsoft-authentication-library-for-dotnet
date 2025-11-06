@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();
         private string _confidentialClientSecret;
-        private string _multiTenantAppId; // Will be set in test initialize
 
         private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
         private readonly KeyVaultSecretsProvider _keyVaultMsidLab = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
@@ -37,17 +36,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         #region Test Hooks
 
         [TestInitialize]
-        public async Task TestInitializeAsync()
+        public void TestInitialize()
         {
             ApplicationBase.ResetStateForTest();
             if (string.IsNullOrEmpty(_confidentialClientSecret))
             {
                 _confidentialClientSecret = _keyVault.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
             }
-            
-            // Get the multi-tenant app ID for use in tests
-            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            _multiTenantAppId = labResponse.App.AppId;
         }
 
         #endregion
@@ -426,12 +421,20 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task<IConfidentialClientApplication> RunOnBehalfOfTestAsync(
             LabUser user,
             bool silentCallShouldSucceed,
-            bool forceRefresh = false)
+            bool forceRefresh = false,
+            string multiTenantAppId = null)
         {
             AuthenticationResult authResult;
 
+            // Get multiTenantAppId if not provided
+            if (string.IsNullOrEmpty(multiTenantAppId))
+            {
+                var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+                multiTenantAppId = labResponse.App.AppId;
+            }
+
             var pca = PublicClientApplicationBuilder
-                .Create(_multiTenantAppId)
+                .Create(multiTenantAppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .WithTestLogging()
                 .Build();
