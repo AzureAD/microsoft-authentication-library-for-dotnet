@@ -898,6 +898,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             // Build a CCA whose assertion‑delegate returns NO JWT (error case)
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures(true)
                         .WithClientSecret(TestConstants.ClientSecret)
                         .WithClientAssertion(
                             (opts, ct) => Task.FromResult(new ClientSignedAssertion
