@@ -301,7 +301,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                         .BuildConcrete();
 
                 // Step 1: Request with both req_param_1 and req_param_2 in the cache key
-                Console.WriteLine("Step 1: Both parameters in cache key");
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_both_params");
                 var result1 = await app.AcquireTokenForClient(TestConstants.s_scope)
                                       .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
@@ -318,7 +317,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Step 2: Request with same parameters, but only req_param_1 in the cache key
                 // Cache key is different now (only includes req_param_1), so should make new token request
-                Console.WriteLine("Step 2: Only req_param_1 in cache key");
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_one_param");
                 var result2 = await app.AcquireTokenForClient(TestConstants.s_scope)
                                       .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
@@ -335,7 +333,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Step 3: Request with only req_param_1, included in cache key
                 // Cache key matches step 2, should use cached token
-                Console.WriteLine("Step 3: Only req_param_1 in cache key, should hit cache");
                 var result3 = await app.AcquireTokenForClient(TestConstants.s_scope)
                                       .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
                                       {
@@ -347,6 +344,96 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("token_with_one_param", result3.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result3.AuthenticationResultMetadata.TokenSource, "Should retrieve from cache since cache key matches step 2");
                 Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should still have 2 tokens in cache");
+            }
+        }
+
+        [TestMethod]
+        public async Task WithExtraQueryParameters_ParameterOrderDoesNotAffectCacheKey_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // Step 1: Create app without extra query parameters
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithClientSecret(TestConstants.ClientSecret)
+                                                        .WithHttpManager(httpManager)
+                                                        .BuildConcrete();
+
+                // Step 2: Make token request with parameters in order: req_param_1, req_param_2, req_param_3
+                // Parameters 1 and 3 are in cache key, parameter 2 is not
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_params_order1");
+                var result1 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                      .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                      {
+                                  { "req_param_1", ("value1", true) },   // Include in cache key
+                                  { "req_param_2", ("value2", false) },  // NOT in cache key
+                                  { "req_param_3", ("value3", true) }    // Include in cache key
+                                      })
+                                      .ExecuteAsync()
+                                      .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_params_order1", result1.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should have 1 token after first request");
+
+                // Step 3: Make token request with same parameters but in different order: req_param_3, req_param_1, req_param_2
+                // Same cache key parameters (1 and 3), so should hit cache
+                var result2 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                      .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                      {
+                                  { "req_param_3", ("value3", true) },   // Include in cache key (reordered)
+                                  { "req_param_1", ("value1", true) },   // Include in cache key (reordered)
+                                  { "req_param_2", ("value2", false) }   // NOT in cache key (reordered)
+                                      })
+                                      .ExecuteAsync()
+                                      .ConfigureAwait(false);
+
+                // Should get the same token from cache since the cache key parameters are the same (just reordered)
+                Assert.AreEqual("token_with_params_order1", result2.AccessToken,
+                    "Should return same token regardless of parameter order");
+                Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource,
+                    "Should retrieve from cache when cache key parameters match (order-independent)");
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count,
+                    "Should still have only 1 token in cache");
+
+                // Step 4: Make another request with a different ordering to triple-check
+                var result3 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                      .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                      {
+                                  { "req_param_2", ("value2", false) },  // NOT in cache key (at start this time)
+                                  { "req_param_3", ("value3", true) },   // Include in cache key
+                                  { "req_param_1", ("value1", true) }    // Include in cache key
+                                      })
+                                      .ExecuteAsync()
+                                      .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_params_order1", result3.AccessToken,
+                    "Should return same token with yet another parameter order");
+                Assert.AreEqual(TokenSource.Cache, result3.AuthenticationResultMetadata.TokenSource,
+                    "Should retrieve from cache (order-independent)");
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count,
+                    "Should still have only 1 token in cache");
+
+                // Step 5: Verify that changing values (not just order) does create a new cache entry
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_different_values");
+                var result4 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                      .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                      {
+                                  { "req_param_1", ("different_value1", true) },  // Different value, in cache key
+                                  { "req_param_2", ("value2", false) },           // Same value, not in cache key
+                                  { "req_param_3", ("value3", true) }             // Same value, in cache key
+                                      })
+                                      .ExecuteAsync()
+                                      .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_different_values", result4.AccessToken,
+                    "Should get new token when cache key parameter value changes");
+                Assert.AreEqual(TokenSource.IdentityProvider, result4.AuthenticationResultMetadata.TokenSource,
+                    "Should make new request when cache key parameter value is different");
+                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count,
+                    "Should now have 2 tokens in cache (different cache keys)");
             }
         }
     }
