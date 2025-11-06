@@ -50,6 +50,28 @@ namespace Microsoft.Identity.Client
                 });
             }
 
+            // Auto-apply mTLS PoP if enabled via CertificateConfiguration
+            if (confidentialClientApplicationExecutor.ServiceBundle.Config.IsMtlsPopEnabledByCertificateConfiguration)
+            {
+                // Apply mTLS - either PoP or Bearer based on configuration
+                if (confidentialClientApplicationExecutor.ServiceBundle.Config.UseBearerTokenWithMtls)
+                {
+                    // Use bearer token over mTLS
+                    builder.ApplyMtlsBearerAuthentication();
+                }
+                else
+                {
+                    // Use PoP token with mTLS (default)
+                    builder.WithMtlsProofOfPossession();
+                }
+            }
+
+            // Auto-apply claims if specified in CertificateConfiguration
+            if (!string.IsNullOrWhiteSpace(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateConfigurationClaims))
+            {
+                builder.WithClaims(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateConfigurationClaims);
+            }
+
             return builder;
         }
 
@@ -110,6 +132,29 @@ namespace Microsoft.Identity.Client
             }
 
             CommonParameters.IsMtlsPopRequested = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Internal method to apply mTLS bearer authentication (bearer token over mTLS transport).
+        /// This is called automatically when CertificateConfiguration.UseBearerTokenWithMtls is true.
+        /// </summary>
+        internal AcquireTokenForClientParameterBuilder ApplyMtlsBearerAuthentication()
+        {
+            if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certificateCredential)
+            {
+                if (certificateCredential.Certificate == null)
+                {
+                    throw new MsalClientException(
+                    MsalError.MtlsCertificateNotProvided,
+                    MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+                }
+
+                CommonParameters.AuthenticationOperation = new MtlsBearerAuthenticationOperation(certificateCredential.Certificate);
+                CommonParameters.MtlsCertificate = certificateCredential.Certificate;               
+            }
+
+            CommonParameters.IsMtlsPopRequested = true; // Still uses mTLS transport
             return this;
         }
 

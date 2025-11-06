@@ -175,6 +175,77 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Configures the certificate with all related options for the confidential client application.
+        /// This is the recommended consolidated API for certificate configuration that replaces multiple 
+        /// WithCertificate and WithClientClaims overloads. Use <see cref="CertificateConfiguration"/> to 
+        /// specify certificate options including X5C, claims, serial number association, and mTLS PoP.
+        /// See https://aka.ms/msal-net-certificate-configuration for details.
+        /// </summary>
+        /// <param name="certificateConfiguration">The certificate configuration containing all certificate-related options.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <exception cref="ArgumentNullException">Thrown when certificateConfiguration is null.</exception>
+        /// <exception cref="MsalClientException">Thrown when the certificate does not have a private key.</exception>
+        /// <remarks>
+        /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
+        /// </remarks>
+        public ConfidentialClientApplicationBuilder WithCertificateConfiguration(CertificateConfiguration certificateConfiguration)
+        {
+            if (certificateConfiguration == null)
+            {
+                throw new ArgumentNullException(nameof(certificateConfiguration));
+            }
+
+            var certificate = certificateConfiguration.Certificate;
+
+            if (certificate == null)
+            {
+                throw new ArgumentNullException(nameof(certificateConfiguration.Certificate));
+            }
+
+            if (!certificate.HasPrivateKey)
+            {
+                throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificateConfiguration.Certificate)));
+            }
+
+            // Set up the client credential based on whether custom claims are specified
+            if (certificateConfiguration.ClaimsToSign != null && certificateConfiguration.ClaimsToSign.Any())
+            {
+                Config.ClientCredential = new CertificateAndClaimsClientCredential(
+                    certificate,
+                    certificateConfiguration.ClaimsToSign,
+                    certificateConfiguration.MergeWithDefaultClaims);
+            }
+            else
+            {
+                Config.ClientCredential = new CertificateClientCredential(certificate);
+            }
+
+            // Set X5C configuration
+            Config.SendX5C = certificateConfiguration.SendX5C;
+
+            // Set certificate serial number association for token partitioning (RP scenarios)
+            if (certificateConfiguration.AssociateTokensWithCertificateSerialNumber)
+            {
+                Config.CertificateIdToAssociateWithToken = certificate.SerialNumber;
+            }
+
+            // Store mTLS PoP configuration for later use at request time
+            if (certificateConfiguration.EnableMtlsProofOfPossession)
+            {
+                Config.IsMtlsPopEnabledByCertificateConfiguration = true;
+                Config.UseBearerTokenWithMtls = certificateConfiguration.UseBearerTokenWithMtls;
+            }
+
+            // Store claims for use at request time (for claims challenge scenarios)
+            if (!string.IsNullOrWhiteSpace(certificateConfiguration.Claims))
+            {
+                Config.CertificateConfigurationClaims = certificateConfiguration.Claims;
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Sets the application secret
         /// </summary>
         /// <param name="clientSecret">Secret string previously shared with AAD at application registration to prove the identity

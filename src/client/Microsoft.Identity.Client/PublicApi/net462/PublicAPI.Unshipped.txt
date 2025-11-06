@@ -8,3 +8,21 @@ Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsy
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ImdsV2 = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, string> extraQueryParameters) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
 static Microsoft.Identity.Client.ApplicationBase.ResetStateForTest() -> void
+Microsoft.Identity.Client.CertificateConfiguration
+Microsoft.Identity.Client.CertificateConfiguration.AssociateTokensWithCertificateSerialNumber.get -> bool
+Microsoft.Identity.Client.CertificateConfiguration.AssociateTokensWithCertificateSerialNumber.set -> void
+Microsoft.Identity.Client.CertificateConfiguration.Certificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.CertificateConfiguration.CertificateConfiguration(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> void
+Microsoft.Identity.Client.CertificateConfiguration.ClaimsToSign.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.CertificateConfiguration.ClaimsToSign.set -> void
+Microsoft.Identity.Client.CertificateConfiguration.EnableMtlsProofOfPossession.get -> bool
+Microsoft.Identity.Client.CertificateConfiguration.EnableMtlsProofOfPossession.set -> void
+Microsoft.Identity.Client.CertificateConfiguration.MergeWithDefaultClaims.get -> bool
+Microsoft.Identity.Client.CertificateConfiguration.MergeWithDefaultClaims.set -> void
+Microsoft.Identity.Client.CertificateConfiguration.SendX5C.get -> bool
+Microsoft.Identity.Client.CertificateConfiguration.SendX5C.set -> void
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithCertificateConfiguration(Microsoft.Identity.Client.CertificateConfiguration certificateConfiguration) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.CertificateConfiguration.Claims.get -> string
+Microsoft.Identity.Client.CertificateConfiguration.Claims.set -> void
+Microsoft.Identity.Client.CertificateConfiguration.UseBearerTokenWithMtls.get -> bool
+Microsoft.Identity.Client.CertificateConfiguration.UseBearerTokenWithMtls.set -> void

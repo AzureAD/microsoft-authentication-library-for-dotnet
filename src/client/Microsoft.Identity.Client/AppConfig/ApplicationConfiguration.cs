@@ -126,6 +126,24 @@ namespace Microsoft.Identity.Client
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
         public string CertificateIdToAssociateWithToken { get; set; }
 
+        /// <summary>
+        /// Indicates whether mTLS PoP was enabled via CertificateConfiguration.
+        /// This is used to automatically apply mTLS PoP settings at request time.
+        /// </summary>
+        public bool IsMtlsPopEnabledByCertificateConfiguration { get; set; } = false;
+
+        /// <summary>
+        /// When using mTLS with certificate, determines whether to request a bearer token (true) 
+        /// or a PoP token (false). Only applicable when IsMtlsPopEnabledByCertificateConfiguration is true.
+        /// </summary>
+        public bool UseBearerTokenWithMtls { get; set; } = false;
+
+        /// <summary>
+        /// Claims to be included in token requests, typically from claims challenge scenarios.
+        /// Stored from CertificateConfiguration for use at request time.
+        /// </summary>
+        public string CertificateConfigurationClaims { get; set; }
+
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
         internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
