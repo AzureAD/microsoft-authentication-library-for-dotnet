@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.AreEqual(s_testCertificate, config.Certificate);
             Assert.IsFalse(config.SendX5C);
-            Assert.IsFalse(config.AssociateTokensWithCertificateSerialNumber);
             Assert.IsNull(config.ClaimsToSign);
             Assert.IsTrue(config.MergeWithDefaultClaims);
             Assert.IsFalse(config.EnableMtlsProofOfPossession);
@@ -55,7 +54,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var config = new CertificateConfiguration(s_testCertificate)
             {
                 SendX5C = true,
-                AssociateTokensWithCertificateSerialNumber = true,
                 ClaimsToSign = claims,
                 MergeWithDefaultClaims = false,
                 EnableMtlsProofOfPossession = true,
@@ -65,7 +63,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.AreEqual(s_testCertificate, config.Certificate);
             Assert.IsTrue(config.SendX5C);
-            Assert.IsTrue(config.AssociateTokensWithCertificateSerialNumber);
             Assert.AreEqual(claims, config.ClaimsToSign);
             Assert.IsFalse(config.MergeWithDefaultClaims);
             Assert.IsTrue(config.EnableMtlsProofOfPossession);
@@ -74,13 +71,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithCertificateConfiguration_BasicCertificate()
+        public void WithCertificate_BasicCertificate()
         {
             var certConfig = new CertificateConfiguration(s_testCertificate);
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithCertificateConfiguration(certConfig)
+                .WithCertificate(certConfig)
                 .BuildConcrete();
 
             Assert.IsNotNull(app);
@@ -88,7 +85,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithCertificateConfiguration_WithX5C()
+        public void WithCertificate_WithX5C()
         {
             var certConfig = new CertificateConfiguration(s_testCertificate)
             {
@@ -97,30 +94,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithCertificateConfiguration(certConfig)
+                .WithCertificate(certConfig)
                 .BuildConcrete();
 
             Assert.IsTrue(app.AppConfig.SendX5C);
         }
 
         [TestMethod]
-        public void WithCertificateConfiguration_WithSerialNumberAssociation()
-        {
-            var certConfig = new CertificateConfiguration(s_testCertificate)
-            {
-                AssociateTokensWithCertificateSerialNumber = true
-            };
-
-            var app = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithCertificateConfiguration(certConfig)
-                .BuildConcrete();
-
-            Assert.AreEqual(s_testCertificate.SerialNumber, app.AppConfig.CertificateIdToAssociateWithToken);
-        }
-
-        [TestMethod]
-        public void WithCertificateConfiguration_WithClaims()
+        public void WithCertificate_WithClaims()
         {
             var claims = new Dictionary<string, string> { { "client_ip", "192.168.1.1" } };
             var certConfig = new CertificateConfiguration(s_testCertificate)
@@ -131,14 +112,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithCertificateConfiguration(certConfig)
+                .WithCertificate(certConfig)
                 .BuildConcrete();
 
             Assert.IsNotNull(app.AppConfig.ClientCredential);
         }
 
         [TestMethod]
-        public void WithCertificateConfiguration_WithMtlsPoP()
+        public void WithCertificate_WithMtlsPoP()
         {
             var certConfig = new CertificateConfiguration(s_testCertificate)
             {
@@ -147,14 +128,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithCertificateConfiguration(certConfig)
+                .WithCertificate(certConfig)
                 .BuildConcrete();
 
             Assert.IsTrue(app.AppConfig.IsMtlsPopEnabledByCertificateConfiguration);
         }
 
         [TestMethod]
-        public void WithCertificateConfiguration_AllOptions()
+        public void WithCertificate_AllOptions()
         {
             var claims = new Dictionary<string, string> 
             { 
@@ -175,7 +156,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithCertificateConfiguration(certConfig)
+                .WithCertificate(certConfig)
                 .BuildConcrete();
 
             Assert.IsTrue(app.AppConfig.SendX5C);
@@ -186,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithCertificateConfiguration_UseBearerTokenWithMtls()
+        public void WithCertificate_UseBearerTokenWithMtls()
         {
             var certConfig = new CertificateConfiguration(s_testCertificate)
             {
@@ -196,7 +177,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithCertificateConfiguration(certConfig)
+                .WithCertificate(certConfig)
                 .BuildConcrete();
 
             Assert.IsTrue(app.AppConfig.IsMtlsPopEnabledByCertificateConfiguration);
@@ -204,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithCertificateConfiguration_WithClaimsChallenge()
+        public void WithCertificate_WithClaimsChallenge()
         {
             var claimsChallengeValue = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"urn:microsoft:req1\"}}}";
             
@@ -215,23 +196,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithCertificateConfiguration(certConfig)
+                .WithCertificate(certConfig)
                 .BuildConcrete();
 
             Assert.AreEqual(claimsChallengeValue, app.AppConfig.CertificateConfigurationClaims);
         }
 
         [TestMethod]
-        public void WithCertificateConfiguration_NullConfiguration_ThrowsArgumentNullException()
+        public void WithCertificate_NullConfiguration_ThrowsArgumentNullException()
         {
             Assert.ThrowsException<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithCertificateConfiguration(null));
+                    .WithCertificate(null));
         }
 
         [TestMethod]
-        public void WithCertificateConfiguration_CertificateWithoutPrivateKey_ThrowsMsalClientException()
+        public void WithCertificate_CertificateWithoutPrivateKey_ThrowsMsalClientException()
         {
             // Create a certificate without private key (just the public key)
             var certWithoutPrivateKey = new X509Certificate2(s_testCertificate.Export(X509ContentType.Cert));
@@ -241,13 +222,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var ex = Assert.ThrowsException<MsalClientException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithCertificateConfiguration(certConfig));
+                    .WithCertificate(certConfig));
 
             Assert.AreEqual(MsalError.CertWithoutPrivateKey, ex.ErrorCode);
         }
 
         [TestMethod]
-        public async Task AcquireTokenForClient_WithCertificateConfiguration_AutoEnablesMtlsPoP()
+        public async Task AcquireTokenForClient_WithCertificate_AutoEnablesMtlsPoP()
         {
             const string region = "eastus";
 
@@ -269,7 +250,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .Create(TestConstants.ClientId)
                         .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                        .WithCertificateConfiguration(certConfig)
+                        .WithCertificate(certConfig)
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 

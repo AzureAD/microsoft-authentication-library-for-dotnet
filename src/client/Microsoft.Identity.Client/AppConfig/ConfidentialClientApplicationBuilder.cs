@@ -175,10 +175,9 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Configures the certificate with all related options for the confidential client application.
-        /// This is the recommended consolidated API for certificate configuration that replaces multiple 
-        /// WithCertificate and WithClientClaims overloads. Use <see cref="CertificateConfiguration"/> to 
-        /// specify certificate options including X5C, claims, serial number association, and mTLS PoP.
+        /// Configures certificate-based authentication with advanced options.
+        /// This method provides a unified way to configure all certificate-related settings including
+        /// X5C, mTLS, claims, and more. For simple certificate authentication, use <see cref="WithCertificate(X509Certificate2)"/>.
         /// See https://aka.ms/msal-net-certificate-configuration for details.
         /// </summary>
         /// <param name="certificateConfiguration">The certificate configuration containing all certificate-related options.</param>
@@ -188,7 +187,20 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
         /// </remarks>
-        public ConfidentialClientApplicationBuilder WithCertificateConfiguration(CertificateConfiguration certificateConfiguration)
+        /// <example>
+        /// <code>
+        /// var app = ConfidentialClientApplicationBuilder
+        ///     .Create(clientId)
+        ///     .WithCertificate(new CertificateConfiguration(certificate)
+        ///     {
+        ///         SendX5C = true,
+        ///         EnableMtlsProofOfPossession = true
+        ///     })
+        ///     .WithAzureRegion("eastus")
+        ///     .Build();
+        /// </code>
+        /// </example>
+        public ConfidentialClientApplicationBuilder WithCertificate(CertificateConfiguration certificateConfiguration)
         {
             if (certificateConfiguration == null)
             {
@@ -222,12 +234,6 @@ namespace Microsoft.Identity.Client
 
             // Set X5C configuration
             Config.SendX5C = certificateConfiguration.SendX5C;
-
-            // Set certificate serial number association for token partitioning (RP scenarios)
-            if (certificateConfiguration.AssociateTokensWithCertificateSerialNumber)
-            {
-                Config.CertificateIdToAssociateWithToken = certificate.SerialNumber;
-            }
 
             // Store mTLS PoP configuration for later use at request time
             if (certificateConfiguration.EnableMtlsProofOfPossession)

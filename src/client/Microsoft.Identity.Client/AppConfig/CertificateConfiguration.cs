@@ -41,14 +41,6 @@ namespace Microsoft.Identity.Client
         public bool SendX5C { get; set; }
 
         /// <summary>
-        /// Gets or sets whether to associate tokens acquired from Azure AD with the certificate serial number.
-        /// This can be used to partition the cache by certificate. Tokens acquired with one certificate will not 
-        /// be accessible to another certificate with a different serial number.
-        /// Applicable to resource provider scenarios. Default is false.
-        /// </summary>
-        public bool AssociateTokensWithCertificateSerialNumber { get; set; }
-
-        /// <summary>
         /// Gets or sets custom claims to be signed by the certificate.
         /// When specified, these claims will be included in the client assertion.
         /// See https://aka.ms/msal-net-client-assertion for details.
