@@ -515,7 +515,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private ConfidentialClientApplication BuildCca(string tenantId, bool withRegion = false)
         {
-            // Use migrated configuration for all tests - Updated for ID4SLAB1 tenant migration
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
 
             var builder = ConfidentialClientApplicationBuilder

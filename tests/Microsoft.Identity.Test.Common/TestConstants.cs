@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string MsiResource = "scope";
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-        // TODO: Tenant Migration - Migrated to new id4slab1 tenant, legacy values: f645ad92-e38d-4d1a-b510-d1b09a74a8ca, 88f91eac-c606-4c67-a0e2-a5e8a186854f
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/10c419d4-4a50-45b2-aa4e-919fb84df24f/v2.0";
         public const string PublicCloudConfidentialClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f";
         public const string AutomationTestCertName = "LabAuth.MSIDLab.com";
