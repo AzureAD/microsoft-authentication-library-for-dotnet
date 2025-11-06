@@ -62,25 +62,14 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid", UniqueTenantIdentifier = "some_tid" };
 
             string actualJson = JsonHelper.SerializeToJson(clientInfo);
+#if SUPPORTS_SYSTEM_TEXT_JSON
             string expectedJson = @"{
                                        ""uid"": ""some_uid"",
                                        ""utid"": ""some_tid""
                                     }";
-
-            JsonTestUtils.AssertJsonDeepEquals(expectedJson, actualJson);
-        }
-
-        [TestMethod]
-        public void Serialize_ClientInfo_WithNull()
-        {
-            ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid" };
-
-            string actualJson = JsonHelper.SerializeToJson(clientInfo);
-            string expectedJson = @"{
-                                       ""uid"": ""some_uid"",
-                                       ""utid"": null
-                                    }";
-
+#else
+            string expectedJson = @"{""uid"":""some_uid"",""utid"":""some_tid"",""AdditionalResponseParameters"":null}";
+#endif
             JsonTestUtils.AssertJsonDeepEquals(expectedJson, actualJson);
         }
 

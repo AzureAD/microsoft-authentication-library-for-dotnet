@@ -89,6 +89,8 @@ namespace Microsoft.Identity.Client
         public const string UserMismatch = "User '{0}' returned by service does not match user '{1}' in the request. ";
         public const string UserCredentialAssertionTypeEmpty = "credential.AssertionType cannot be empty. ";
 
+        public const string InvalidClientAssertionEmpty = "Client‑assertion JWT cannot be null or empty. Verify the delegate supplied to WithClientAssertion returns a valid signed JWT.";
+
         public const string NoPromptFailedErrorMessage =
             "One of two conditions was encountered: "
             +
@@ -148,6 +150,8 @@ namespace Microsoft.Identity.Client
         public const string AuthorityNotSupported = "'authority' is not supported. ";
 
         public const string AuthorityValidationFailed = "Authority validation failed. ";
+
+        public const string IssuerValidationFailed = "Issuer validation failed for authority: {0} . Issuer from OIDC endpoint does not match any expected pattern: {1} . ";
 
         public const string AuthorityUriInsecure = "The authority must use HTTPS scheme. ";
 
@@ -434,11 +438,17 @@ namespace Microsoft.Identity.Client
         public const string ClaimsChallenge = "The returned error contains a claims challenge. For additional info on how to handle claims related to multifactor authentication, Conditional Access, and incremental consent, see https://aka.ms/msal-conditional-access-claims. If you are using the On-Behalf-Of flow, see https://aka.ms/msal-conditional-access-claims-obo for details.";
         public const string CryptographicError = "A cryptographic exception occurred. Possible cause: the certificate has been disposed. See inner exception for full details.";
         public const string MtlsPopWithoutRegion = "mTLS Proof of Possession requires a region to be specified. Please set AzureRegion in the configuration at the application level.";
-        public const string MtlsCertificateNotProvidedMessage = "mTLS Proof of Possession requires a certificate to be configured. Please provide a certificate at the application level using the .WithCertificate() instead of passing an assertion. See https://aka.ms/msal-net-pop for details.";
+        public const string MtlsCertificateNotProvidedMessage = "mTLS Proof‑of‑Possession requires a certificate for this request. Either configure the application with .WithCertificate(...) or pass a certificate‑bound client‑assertion and chain .WithMtlsProofOfPossession() on the request builder. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsInvalidAuthorityTypeMessage = "mTLS PoP is only supported for AAD authority type. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsNonTenantedAuthorityNotAllowedMessage = "mTLS authentication requires a tenanted authority. Using 'common', 'organizations', or similar non-tenanted authorities is not allowed. Please provide an authority with a specific tenant ID (e.g., 'https://login.microsoftonline.com/{tenantId}'). See https://aka.ms/msal-net-pop for details.";
+        public const string MtlsNotSupportedForManagedIdentityMessage = "IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform.";
+        public const string MtlsNotSupportedForNonWindowsMessage = "mTLS PoP with Managed Identity is not supported on this OS. See https://aka.ms/msal-net-pop.";
         public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. mTLS Proof-of-Possession requires a region to be specified, as there is no global endpoint for mTLS. See https://aka.ms/msal-net-pop for details.";
         public const string ForceRefreshAndTokenHasNotCompatible = "Cannot specify ForceRefresh and AccessTokenSha256ToRefresh in the same request.";
         public const string RequestTimeOut = "Request to the endpoint timed out.";
+        public const string MalformedOidcAuthorityFormat = "Possible cause: When using Entra External ID, you didn't append /v2.0, for example {0}/v2.0\"";
+        public const string InvalidCertificate = "The certificate received from the Imds server is invalid.";
+        public const string CannotSwitchBetweenImdsVersionsForPreview = "ImdsV2 is currently experimental - A Bearer token has already been received; Please restart the application to receive a mTLS PoP token.";
+        public const string MtlsPopTokenNotSupportedinImdsV1 = "A mTLS PoP token cannot be requested because the application\'s source was determined to be ImdsV1.";
     }
 }

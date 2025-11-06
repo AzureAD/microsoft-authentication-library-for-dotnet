@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -34,9 +35,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    null, 
+                    null,
                     ManagedIdentitySource.ServiceFabric,
-                    null); 
+                    null);
 
                 throw exception;
             }
@@ -74,7 +75,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             ManagedIdentityRequest request = new ManagedIdentityRequest(HttpMethod.Get, _endpoint);
 
@@ -101,7 +102,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
             }
 
-            return request;
+            return Task.FromResult(request);
         }
     }
 }

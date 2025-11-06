@@ -1,12 +1,73 @@
+4.78.0
+======
+### Changes
+* Update SDK version from 8.0.404 to 8.0.415. [#5543](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5543)
+* Hide / deprecate some obscure APIs. [#5484](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5484)
+
+### Bug Fixes
+* Support Android edge-to-edge. [#5499](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5499)
+* Android broker does not support ADFS authority. [#5522](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5522)
+
+4.77.1
+======
+
+* Adjusted issuer validation to accept differing paths https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5466
+* Added better error message for OIDC error https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5433
+* Reverted changes made for Http2 https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5462
+
+4.77.0
+======
+### Features
+* Added WinUI 3 support for Desktop Broker flows. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5411
+* Introduced extensibility API to allow users to add custom HTTP headers to token acquisition requests (under extensibility). https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5440
+
+### Changes
+* Remove passing `x-client-os` as a query parameter in the authorization URI. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5456
+* Bump `Microsoft.IdentityModel.Abstractions` to a supported version. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5452
+
+### Bug fixes
+* Remove confusing error text as it only applies to one of many possible causes. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5467
+
+4.76.0
+======
+
+### New Features
+* Removal of `ExperimentalFeatures` flag on `WithMtlsProofOfPossession` API
+* Add Service Fabric token revocation support
+* Adding WithExtraBodyParameters api
+* Enable mTLS Proof‑of‑Possession for Client‑Assertion Delegates
+
+### Bug Fixes
+* #5400 Fixing issue that leads to multiple active access tokens in the cache for non-tenanted oidc authority 
+* Update NativeInterop package version to 0.19.4 
+
+4.74.1
+======
+
+### Bug fixes
+* When you configure MSAL with WithOidcAuthority(), the library now confirms that the issuer returned by the OIDC discovery endpoint matches the expected authority (including CIAM patterns) and throws an exception if it does not. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5358 
+
+* Re-expose public AuthenticationResult constructor. A public, test-friendly constructor of AuthenticationResult was inadvertently hidden behind [Obsolete] and [EditorBrowsable(Never)]. The constructor is now publicly available again. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5392
+
+4.74.0
+======
+
+### Features
+* Deprecate ROPC flow in Public Client Applications https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5355.
+* AuthenticationResult exposes a new BindingCertificate property that returns the X.509 certificate bound to the access token in mTLS-PoP scenarios. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5370.
+
+### Bug fixes
+* MSAL now honors the DEFAULT_IDENTITY_CLIENT_ID environment variable when acquiring tokens from Azure Machine Learning managed-identity endpoint. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5350.
+
 4.73.1
 ======
 
 ### Features
-Deprecate AcquireTokenByIntegratedWindowsAuth API in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5345
+* Deprecate AcquireTokenByIntegratedWindowsAuth API in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5345
 
 ### Bug fixes
-Update native interop to 0.19.2 by @fengga in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5362 to solve broker bugs
-update the deprecated openURL(:) api to openURL(:options:completionHandler) in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5354
+* Update native interop to 0.19.2 by @fengga in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5362 to solve broker bugs
+* update the deprecated openURL(:) api to openURL(:options:completionHandler) in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5354
 
 4.73.0
 =======
@@ -26,6 +87,7 @@ update the deprecated openURL(:) api to openURL(:options:completionHandler) in h
  
 ### Bug Fixes
 - Ensure instance of IMsalHttpClientFactory passed by the user is used for managed identity flows that do not require cert validation. See [Issue #5286](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5286)
+- Fix a URL typo in the API comments. See [issue 5277](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5277)
 
 4.72.0
 =======

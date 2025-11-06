@@ -151,39 +151,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 appCacheAccess.AssertAccessCounts(1, 1);
                 userCacheAccess.AssertAccessCounts(0, 0);
             }
-        }
-
-        [TestMethod]
-        public async Task ConfidentialClientUsingSecretNoInstanceDiscoveryTestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-
-                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                              .WithRedirectUri(TestConstants.RedirectUri)
-                                                              .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
-                                                              .WithInstanceDiscovery(false)
-                                                              .BuildConcrete();
-
-                var appCacheAccess = app.AppTokenCache.RecordAccess();
-                var userCacheAccess = app.UserTokenCache.RecordAccess();
-
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                Assert.IsNotNull(result);
-                Assert.IsNotNull("header.payload.signature", result.AccessToken);
-                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
-
-                Assert.IsNotNull(app.UserTokenCache);
-                Assert.IsNotNull(app.AppTokenCache);
-
-                appCacheAccess.AssertAccessCounts(1, 1);
-                userCacheAccess.AssertAccessCounts(0, 0);
-            }
-        }
+        }        
 
         [TestMethod]
         [TestCategory(TestCategories.Regression)]
@@ -832,32 +800,26 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task ConfidentialClientUsingSignedClientAssertion_AsyncDelegate_CancellationTestAsync()
         {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithClientAssertion(
+                        async ct =>
+                        {
+                            // make sure that the cancellation token given to AcquireToken method
+                            // is propagated to here
+                            cancellationTokenSource.Cancel();
+                            ct.ThrowIfCancellationRequested();
+                            return await Task.FromResult(TestConstants.DefaultClientAssertion)
+                            .ConfigureAwait(false);
+                        });
 
-                var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithHttpManager(httpManager)
-                            .WithClientAssertion(
-                            async ct =>
-                            {
-                                // make sure that the cancellation token given to AcquireToken method
-                                // is propagated to here
-                                cancellationTokenSource.Cancel();
-                                ct.ThrowIfCancellationRequested();
-                                return await Task.FromResult(TestConstants.DefaultClientAssertion)
-                                .ConfigureAwait(false);
-                            });
+            var app = builder.BuildConcrete();
+            Assert.IsNull(app.Certificate);
 
-                var app = builder.BuildConcrete();
-                Assert.IsNull(app.Certificate);
-
-                await AssertException.TaskThrowsAsync<OperationCanceledException>(
-                    () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .ExecuteAsync(cancellationTokenSource.Token)).ConfigureAwait(false);
-            }
+            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                .ExecuteAsync(cancellationTokenSource.Token)).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -901,25 +863,56 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void Constructor_NullDelegate_ThrowsArgumentNullException()
         {
-            // Arrange
-            Func<AssertionRequestOptions, Task<string>> nullDelegate = null;
+            // Arrange 
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> nullDelegate = null;
 
-            // Act & Assert
+            // Act &  Assert
             Assert.ThrowsException<ArgumentNullException>(() =>
-                new SignedAssertionDelegateClientCredential(nullDelegate));
+                new ClientAssertionDelegateCredential(nullDelegate));
+        }
+
+        [DataTestMethod]
+        [DataRow(false)] // bearer (no cert)
+        [DataRow(true)]  // PoP (with cert)
+        public void Constructor_ValidDelegate_DoesNotThrow(bool withCert)
+        {
+            // Arrange
+            X509Certificate2 cert = withCert ? CertHelper.GetOrCreateTestCert() : null;
+
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> validDelegate =
+                (options, ct) => Task.FromResult(new ClientSignedAssertion
+                {
+                    Assertion = "fake_assertion",
+                    TokenBindingCertificate = cert
+                });
+
+            // Act
+            var credential = new ClientAssertionDelegateCredential(validDelegate);
+
+            // Assert
+            Assert.IsNotNull(credential);
         }
 
         [TestMethod]
-        public void Constructor_ValidDelegate_DoesNotThrow()
+        public async Task AcquireTokenForClient_EmptyAssertion_ThrowsArgumentExceptionAsync()
         {
-            // Arrange
-            Func<AssertionRequestOptions, Task<string>> validDelegate =
-                (options) => Task.FromResult("fake_assertion");
+            // Build a CCA whose assertion‑delegate returns NO JWT (error case)
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithClientSecret(TestConstants.ClientSecret)
+                        .WithClientAssertion(
+                            (opts, ct) => Task.FromResult(new ClientSignedAssertion
+                            {
+                                Assertion = string.Empty,          // <-- invalid: must be non‑empty
+                                TokenBindingCertificate = null     // no cert => jwt-bearer
+                            }))
+                        .BuildConcrete();
 
-            // Act & Assert
-            // Should not throw
-            var credential = new SignedAssertionDelegateClientCredential(validDelegate);
-            Assert.IsNotNull(credential);
+            // Act & Assert – the first token request will execute the delegate
+            // and should surface ArgumentException from the credential layer.
+            await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync())
+                    .ConfigureAwait(false);            
         }
 
         [TestMethod]
@@ -966,6 +959,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 AssertCcsHint(uri, "oid:oid@tid");
+                Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+                ValidateCommonQueryParams(qp);
             }
         }
 
@@ -1000,6 +995,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 AssertCcsHint(uri, $"upn:{TestConstants.DisplayableId}");
+                Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+                ValidateCommonQueryParams(qp);
             }
         }
 
@@ -1322,7 +1319,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp["prompt"]);
             Assert.AreEqual(TestCommon.CreateDefaultServiceBundle().PlatformProxy.GetProductName(), qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
-            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+            Assert.IsFalse(qp.ContainsKey("x-client-os"));
         }
 
         [TestMethod]
@@ -2288,6 +2285,69 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(cacheToken, result.AccessToken,
                     "We reuse the cache if the hash does not match the 'bad' token’s hash.");
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ConfidentialClient_acquireTokenForClient_ReturnsAuthZTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(addClientInfo: true);
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authz"));
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                Assert.AreEqual("[\"value1\",\"value2\"]", result.AdditionalResponseParameters["authz"]);
+#else
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authz"]);
+#endif
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
+
+                // call AcquireTokenForClientAsync again to get result back from the cache
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authz"));
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                Assert.AreEqual("[\"value1\",\"value2\"]", result.AdditionalResponseParameters["authz"]);
+#else
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authz"]);
+#endif
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                appCacheAccess.AssertAccessCounts(2, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
 

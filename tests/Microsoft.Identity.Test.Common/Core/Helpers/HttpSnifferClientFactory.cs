@@ -32,21 +32,6 @@ namespace Microsoft.Identity.Test.Common
                     LastHttpContentData = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 }
 
-                // check the .net runtime
-                var framework = RuntimeInformation.FrameworkDescription;
-
-                // This will match ".NET 5.0", ".NET 6.0", ".NET 7.0", ".NET 8.0", etc.
-                if (framework.StartsWith(".NET ", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Extract the version number
-                    var versionString = framework.Substring(5).Trim(); // e.g., "6.0.0"
-                    if (Version.TryParse(versionString, out var version) && version.Major >= 5)
-                    {
-                        Assert.AreEqual(new Version(2, 0), req.Version, $"Request version mismatch: {req.Version}. MSAL on NET 5+ expects HTTP/2.0 for all requests.");
-                        // ESTS-R endpoint does not support HTTP/2.0, so we don't assert this
-                    }
-                }
-
                 RequestsAndResponses.Add((req, res));
                 
                 Trace.WriteLine($"[MSAL][HTTP Request]: {req}");

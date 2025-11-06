@@ -36,14 +36,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //http proxy base URL 
         private static readonly string s_baseURL = "https://service.msidlab.com/";
 
-        //Shared User Assigned Client ID
-        private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
+        //Shared User Assigned Client ID - Consolidated UAMI for both MSI endpoints and Key Vault access
+        private const string UserAssignedClientID = "45344e7d-c562-4be6-868f-18dac789c021";
         
+        //Lab Access Client ID for certificate-based authentication to lab resources
         private const string LabAccessClientID = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
 
-        private const string LabVaultAccessUserAssignedClientID = "4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6";
-
-        private const string UserAssignedObjectID = "9fc6a41b-e161-43ba-90ba-12f172141c23";
+        private const string UserAssignedObjectID = "a38637b6-b365-4652-af1f-cf5d8cf829ad";
 
         //Non Existent User Assigned Client/Object ID 
         private const string SomeRandomGuid = "f07359bb-f4f6-4e3c-ba9f-ccdf48eb80ce";
@@ -55,7 +54,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //Resource ID of the User Assigned Identity 
         private const string UamiResourceId = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
             "resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/" +
-            "MSAL_MSI_USERID";
+            "Msal_Integration_tests";
 
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
@@ -191,8 +190,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={MsiAzureResource.WebApp}&uri=";
 
-                //Create CCA with Proxy
-                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, LabVaultAccessUserAssignedClientID, UserAssignedIdentityId.ClientId);
+                //Create CCA with Proxy - using the consolidated UAMI for both MSI and Key Vault access
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, UserAssignedClientID, UserAssignedIdentityId.ClientId);
 
                 AuthenticationResult result;
                 //Act
@@ -355,6 +354,68 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
+        [DataTestMethod]
+        [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Web_App")]
+        public async Task AcquireMSITokenWithClaimsAsync(
+        MsiAzureResource azureResource,
+        string userIdentity,
+        UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
+        {
+            using (new EnvVariableContext())
+            {
+                // ---------- Arrange ----------
+                var envVariables = await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+                SetEnvironmentVariables(envVariables);
+
+                string uri = s_baseURL + $"MSIToken?azureresource={azureResource}&uri=";
+
+                IManagedIdentityApplication mia =
+                    CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
+
+                // ---------- Act & Assert 1 ----------
+                AuthenticationResult result1 = await mia
+                                .AcquireTokenForManagedIdentity(s_msi_scopes)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false);
+
+                Assert.AreEqual("Bearer", result1.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider,
+                                result1.AuthenticationResultMetadata.TokenSource);
+                CoreAssert.IsWithinRange(
+                    DateTimeOffset.UtcNow,
+                    result1.ExpiresOn,
+                    TimeSpan.FromHours(24));
+
+                // ---------- Act & Assert 2 (cache hit) ----------
+                AuthenticationResult result2 = await mia
+                                .AcquireTokenForManagedIdentity(s_msi_scopes)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false);
+
+                Assert.IsTrue(result2.Scopes.All(s_msi_scopes.Contains));
+                Assert.AreEqual(TokenSource.Cache,
+                                result2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(result1.AccessToken, result2.AccessToken,   // sanity
+                                "Second call should come from cache");
+
+                // ---------- Act & Assert 3 (claims → bypass_cache) ----------
+                const string claimsJson = TestConstants.Claims;
+
+                AuthenticationResult result3 = await mia
+                                .AcquireTokenForManagedIdentity(s_msi_scopes)
+                                .WithClaims(claimsJson)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false);
+
+                // Token source should now be IdentityProvider again
+                Assert.AreEqual(TokenSource.IdentityProvider,
+                                result3.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
         /// <summary>
         /// Gets the environment variable
         /// </summary>
@@ -429,10 +490,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     break;
             }
 
-            // Disabling shared cache options to avoid cross test pollution.
+            
             builder.Config.AccessorOptions = null;
 
-            IManagedIdentityApplication mia = builder
+            IManagedIdentityApplication mia = builder.WithClientCapabilities(new[] { "cp1" })
                 .WithHttpManager(proxyHttpManager).Build();
 
             return mia;

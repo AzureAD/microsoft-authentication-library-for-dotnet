@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void PublicTestConstructorCoversAllProperties()
         {
+            // The first public ctor that is meant only for tests (“for-test”)
             var ctorParameters = typeof(AuthenticationResult)
                 .GetConstructors()
                 .First(ctor => ctor.GetParameters().Length > 3)
@@ -28,10 +29,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var classProperties = typeof(AuthenticationResult)
                 .GetProperties()
-                .Where(p => p.GetCustomAttribute(typeof(ObsoleteAttribute)) == null);
+                .Where(p => p.GetCustomAttribute(typeof(ObsoleteAttribute)) == null)
+                .Where(p => p.SetMethod == null || p.SetMethod.IsPublic)
+                .Where(p => p.Name != nameof(AuthenticationResult.BindingCertificate));
 
-            // +2 because of the obsolete ExtendedExpires properties
-            Assert.AreEqual(ctorParameters.Length, classProperties.Count() + 2, "The <for test> constructor should include all properties of AuthenticationObject"); ;
+            // +2 for the 2 obsolete ExtendedExpires* props that are deliberately
+            // not represented in the ctor.
+            Assert.AreEqual(
+                ctorParameters.Length,
+                classProperties.Count() + 2,
+                "The <for-test> constructor should include all public-settable or read-only properties of AuthenticationResult (except BindingCertificate and the obsolete ExtendedExpires* pair).");
         }
 
         [TestMethod]
@@ -88,8 +95,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 DateTime.UtcNow,
                 "tid",
                 new Account("aid", "user", "env"),
-                "idt", 
-                new[] { "scope" }, 
+                "idt",
+                new[] { "scope" },
                 Guid.NewGuid());
 
             Assert.IsNull(ar1.AuthenticationResultMetadata);
@@ -106,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
               new Account("aid", "user", "env"),
               "idt",
               new[] { "scope" },
-              Guid.NewGuid(), 
+              Guid.NewGuid(),
               "ProofOfBear");
 
             Assert.IsNull(ar2.AuthenticationResultMetadata);
@@ -124,7 +131,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
              "idt",
              new[] { "scope" },
              Guid.NewGuid(),
-             new AuthenticationResultMetadata(TokenSource.Broker));
+             new AuthenticationResultMetadata(TokenSource.Broker),
+             tokenType: "Bearer");
 
             Assert.AreEqual(TokenSource.Broker, ar3.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual("Bearer", ar1.TokenType);
@@ -144,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 string jsonContent = MockHelpers.CreateSuccessTokenResponseString(
                         TestConstants.Uid,
-                       TestConstants.DisplayableId, 
+                       TestConstants.DisplayableId,
                        TestConstants.s_scope.ToArray());
 
                 jsonContent = jsonContent.TrimEnd('}');
@@ -215,6 +223,53 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.AreEqual("Bearer", ar.TokenType, "Expected default token type to be 'Bearer'");
             Assert.AreEqual("Bearer some-access-token", ar.CreateAuthorizationHeader());
+        }
+
+        /// <summary>
+        /// Tests that all public properties of AuthenticationResult have a public setter.
+        /// </summary>
+        [TestMethod]
+        public void AllPublicProperties_HavePublicSetter()
+        {
+            // ---- expected public-settable properties ----
+            string[] expected =
+            [
+                // core primitives
+                nameof(AuthenticationResult.AccessToken),
+                nameof(AuthenticationResult.UniqueId),
+                nameof(AuthenticationResult.ExpiresOn),
+                nameof(AuthenticationResult.TenantId),
+                nameof(AuthenticationResult.Account),
+                nameof(AuthenticationResult.IdToken),
+                nameof(AuthenticationResult.Scopes),
+                nameof(AuthenticationResult.CorrelationId),
+                nameof(AuthenticationResult.TokenType),
+
+                // SPA / mTLS extras
+                nameof(AuthenticationResult.SpaAuthCode),
+                nameof(AuthenticationResult.BindingCertificate),
+
+                // ancillary data
+                nameof(AuthenticationResult.AdditionalResponseParameters),
+                nameof(AuthenticationResult.ClaimsPrincipal),
+                nameof(AuthenticationResult.AuthenticationResultMetadata)
+            ];
+
+            // ---- reflection gather ----
+            var propsWithPublicSetter = typeof(AuthenticationResult)
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(p => p.GetCustomAttribute<ObsoleteAttribute>() == null)     // skip obsolete
+                .Where(p => p.GetSetMethod(/*nonPublic*/ false) != null)           // has public setter
+                .Select(p => p.Name)
+                .OrderBy(n => n)
+                .ToArray();
+
+            // ---- assertion ----
+            CollectionAssert.AreEquivalent(
+                expected.OrderBy(n => n).ToArray(),
+                propsWithPublicSetter,
+                "All non-obsolete public properties should expose a public setter."
+            );
         }
     }
 }

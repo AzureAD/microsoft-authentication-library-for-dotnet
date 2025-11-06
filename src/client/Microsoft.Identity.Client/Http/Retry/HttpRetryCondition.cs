@@ -63,6 +63,21 @@ namespace Microsoft.Identity.Client.Http.Retry
         }
 
         /// <summary>
+        /// Retry policy specific to CSR Metadata Probe.
+        /// Extends Imds retry policy but excludes 404 status code.
+        /// </summary>
+        public static bool CsrMetadataProbe(HttpResponse response, Exception exception)
+        {
+            if (!Imds(response, exception))
+            {
+                return false;
+            }
+
+            // If Imds would retry but the status code is 404, don't retry
+            return (int)response.StatusCode is not 404;
+        }
+
+        /// <summary>
         /// Retry condition for /token and /authorize endpoints
         /// </summary>
         /// <param name="response"></param>

@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -73,7 +74,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             ManagedIdentityRequest request = new ManagedIdentityRequest(HttpMethod.Post, _endpoint);
 
@@ -82,7 +83,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             request.BodyParameters.Add("resource", resource);
 
-            return request;
+            return Task.FromResult(request);
         }
     }
 }

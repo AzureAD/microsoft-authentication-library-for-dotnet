@@ -62,6 +62,14 @@ namespace Microsoft.Identity.Client
         public const string UserAssertionNullError = "user_assertion_null";
 
         /// <summary>
+        /// Returned when a <c>WithClientAssertion</c> delegate provides
+        /// a <see langword="null"/> or empty JWT string.
+        /// <para><b>Mitigation</b></para>
+        /// Ensure the delegate returns a non‑empty, base‑64‑encoded JWT.
+        /// </summary>
+        public const string InvalidClientAssertion = "invalid_client_assertion";
+
+        /// <summary>
         /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when the 
         /// <see cref="PublicClientApplication.OperatingSystemAccount"/> user is passed as the <c>account</c> parameter. Only some brokers (WAM) can login the current user.
         /// <para>Mitigation</para>
@@ -1189,6 +1197,11 @@ namespace Microsoft.Identity.Client
         public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
 
         /// <summary>
+        /// <para>What happened?</para> mTLS is not supported for managed identity authentication.
+        /// </summary>
+        public const string MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity";
+
+        /// <summary>
         /// <para>What happened?</para> The operation attempted to force a token refresh while also using a token hash. 
         /// These two options are incompatible because forcing a refresh bypasses token caching, 
         /// which conflicts with token hash validation.
@@ -1198,5 +1211,21 @@ namespace Microsoft.Identity.Client
         /// - If token hashing is required, allow the cached token to be used instead of forcing a refresh.
         /// </summary>
         public const string ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible";
+
+        /// <summary>
+        /// The certificate received from the Imds server is invalid.
+        /// </summary>
+        public const string InvalidCertificate = "invalid_certificate";
+
+        /// <summary>
+        /// The system has already fallen back IMDS V1 and can only get Bearer tokens.
+        /// It needs to be restarted to get mTLS PoP tokens.
+        /// </summary>
+        public const string CannotSwitchBetweenImdsVersionsForPreview = "cannot_switch_between_imds_versions_for_preview";
+
+        /// <summary>
+        /// mTLS PoP tokens are not supported in IMDS V1.
+        /// </summary>
+        public const string MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1";
     }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
@@ -63,7 +64,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return true;
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string resource)
+        protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
 
@@ -107,7 +108,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         null); // statusCode is null in this case
             }
                 
-            return request;
+            return Task.FromResult(request);
         }
     }
 }

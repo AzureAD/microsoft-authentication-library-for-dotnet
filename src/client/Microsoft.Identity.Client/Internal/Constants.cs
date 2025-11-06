@@ -28,6 +28,9 @@ namespace Microsoft.Identity.Client.Internal
 
         public const string CcsRoutingHintHeader = "x-anchormailbox";
         public const string AadThrottledErrorCode = "AADSTS50196";
+        public const string AadAccountTypeAndResourceIncompatibleErrorCode = "AADSTS500207";
+        public const string AadMissingScopeErrorCode = "AADSTS900144";
+
         //Represents 5 minutes in Unit time stamp
         public const int DefaultJitterRangeInSeconds = 300;
         public static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
@@ -73,5 +76,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             return $"https://{host}/.well-known/webfinger?rel={DefaultRealm}&resource={resource}";
         }
+
+        public const int RsaKeySize = 2048;
     }
 }

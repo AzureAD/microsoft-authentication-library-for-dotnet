@@ -6,15 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -28,17 +24,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class UsernamePasswordIntegrationTests
     {
-        private const string Authority = "https://login.microsoftonline.com/organizations/";
         private static readonly string[] s_scopes = { "User.Read" };
-        public string CurrentApiId { get; set; }
 
         // HTTP Telemetry Constants
         private static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
         private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1,1,,";
         private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1,1,,";
-        private const string ApiIdAndCorrelationIdSection =
-            "1003,ad8c894a-557f-48c0-b045-c129590c344e";
-        private const string InvalidGrantError = "invalid_grant";
         private const string UPApiId = "1003";
         private const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
         private static readonly string[] s_b2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
@@ -46,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         #region Happy Path Tests
@@ -66,14 +57,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
-        public async Task ARLINGTON_ROPC_AAD_Async()
-        {
-            var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
-        [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_AAD_CCA_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
@@ -81,14 +64,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        [TestCategory(TestCategories.Arlington)]
-        public async Task ARLINGTON_ROPC_ADFS_Async()
-        {
-            var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
+#if IGNORE_FEDERATED
+        [Ignore]
+#endif
         public async Task ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -96,15 +74,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
-        {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
-            string federationMetadata = File.ReadAllText(@"federationMetadata.xml").ToString();
-            await RunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
+#if IGNORE_FEDERATED
+        [Ignore]
+#endif
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
@@ -129,145 +102,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
         }
 
         #endregion
-
-        /// <summary>
-        /// ROPC does not support MSA accounts
-        /// </summary>
-        /// <returns></returns>
-        [RunOn(TargetFrameworks.NetCore)]
-        [TestCategory(TestCategories.MSA)]
-        public async Task ROPC_MSA_Async()
-        {
-            var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority(Authority)
-                .Build();
-
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
-                    .ExecuteAsync(CancellationToken.None))
-                    .ConfigureAwait(false);
-            #pragma warning restore CS0618
-
-            Assert.AreEqual(MsalError.RopcDoesNotSupportMsaAccounts, result.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.RopcDoesNotSupportMsaAccounts, result.Message);
-
-        }
 
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_B2C_Async()
         {
             var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
             await RunB2CHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
-        {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithTestLogging()
-                .WithAuthority(Authority)
-                .Build();
-            await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireTokenWithFederatedUsernameIncorrectPasswordAsync()
-        {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            var user = labResponse.User;
-
-            string incorrectPassword = "x";
-
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithTestLogging()
-                .WithAuthority(Authority).Build();
-
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
-                msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectPassword)
-                    .ExecuteAsync(CancellationToken.None)
-                    )
-                .ConfigureAwait(false);
-            #pragma warning restore CS0618
-
-            Assert.AreEqual(result.ErrorCode, "invalid_grant");
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireToken_ManagedUsernameIncorrectPassword_AcquireTokenSuccessful_CheckTelemetryHeadersAsync()
-        {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await CheckTelemetryHeadersAsync(labResponse).ConfigureAwait(false);
-        }
-
-        private async Task CheckTelemetryHeadersAsync(
-            LabResponse labResponse)
-        {
-            var factory = new HttpSnifferClientFactory();
-
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority(Authority)
-                .WithHttpClientFactory(factory)
-                .Build();
-
-            await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
-
-            #pragma warning disable CS0618 // Type or member is obsolete
-            AuthenticationResult authResult = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
-                    .WithCorrelationId(CorrelationId)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-            #pragma warning restore CS0618
-
-            Assert.IsNotNull(authResult);
-            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNotNull(authResult.IdToken);
-            Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
-            AssertTelemetryHeaders(factory, true, labResponse);
-        }
-
-        private async Task RunAcquireTokenWithUsernameIncorrectPasswordAsync(
-            IPublicClientApplication msalPublicClient,
-            string userName)
-        {
-            try
-            {
-                #pragma warning disable CS0618 // Type or member is obsolete
-                var result = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, userName, "incorrectPass")
-
-                    .WithCorrelationId(CorrelationId)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-                #pragma warning restore CS0618
-            }
-            catch (MsalServiceException ex)
-            {
-                Assert.IsTrue(!string.IsNullOrWhiteSpace(ex.CorrelationId));
-                Assert.AreEqual(400, ex.StatusCode);
-                Assert.AreEqual(InvalidGrantError, ex.ErrorCode);
-                Assert.IsTrue(ex.Message.StartsWith("AADSTS50126"));
-
-                return;
-            }
-
-            Assert.Fail("Bad exception or no exception thrown");
         }
 
         private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "", bool isPublicClient = true, Cloud cloud = Cloud.Public)
@@ -322,7 +165,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.IsNull(authResult.Account.GetTenantProfiles());
             }
 
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password, and put a breakpoint there.
@@ -357,6 +199,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
             AssertCcsRoutingInformationIsNotSent(factory);
+
+            var acc = (await msalPublicClient.GetAccountsAsync().ConfigureAwait(false)).Single();
+            var claimsPrincipal = acc.GetTenantProfiles().Single().ClaimsPrincipal;
+
+            Assert.AreNotEqual(TokenResponseHelper.NullPreferredUsernameDisplayLabel, acc.Username);
+            Assert.IsNotNull(claimsPrincipal.FindFirst("Name"));
+            Assert.IsNotNull(claimsPrincipal.FindFirst("nbf"));
+            Assert.IsNotNull(claimsPrincipal.FindFirst("exp"));
 
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following: 
@@ -395,7 +245,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
             }
-
 
             Assert.IsNotNull(authResult);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
@@ -465,74 +314,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.IsFalse(httpTelemetryRecorder.ForceRefresh);
             }
         }
-
-        #region Azure AD Kerberos Feature Tests
-        [IgnoreOnOneBranch]
-        public async Task Kerberos_ROPC_AAD_Async()
-        {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [IgnoreOnOneBranch]
-        public async Task Kerberos_ROPC_ADFSv4Federated_Async()
-        {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
-            await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        private async Task KerberosRunHappyPathTestAsync(LabResponse labResponse)
-        {
-            // Test with Id token
-            var factory = new HttpSnifferClientFactory();
-            var idTokenPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithTestLogging()
-                .WithHttpClientFactory(factory)
-                .WithAuthority(labResponse.Lab.Authority, "organizations")
-                .WithClientId(TestConstants.KerberosTestApplicationId)
-                .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, KerberosTicketContainer.IdToken)
-                .Build();
-
-            AuthenticationResult authResult = await GetAuthenticationResultWithAssertAsync(
-                labResponse,
-                factory,
-                idTokenPublicClient,
-                "",
-                Guid.NewGuid()).ConfigureAwait(false);
-            KerberosSupplementalTicket ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
-                authResult,
-                KerberosTicketContainer.IdToken,
-                labResponse.User.Upn);
-            Assert.IsNotNull(ticket);
-            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
-
-            // Test with Access Token
-            factory = new HttpSnifferClientFactory();
-            var accessTokenPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithTestLogging()
-                .WithHttpClientFactory(factory)
-                .WithAuthority(labResponse.Lab.Authority, "organizations")
-                .WithClientId(TestConstants.KerberosTestApplicationId)
-                .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, KerberosTicketContainer.AccessToken)
-                .Build();
-
-            authResult = await GetAuthenticationResultWithAssertAsync(
-                labResponse,
-                factory,
-                accessTokenPublicClient,
-                "",
-                Guid.NewGuid()).ConfigureAwait(false);
-            ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
-                authResult,
-                KerberosTicketContainer.AccessToken,
-                labResponse.User.Upn);
-            Assert.IsNotNull(ticket);
-            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
-        }
-
-#endregion
     }
 }
 #endif

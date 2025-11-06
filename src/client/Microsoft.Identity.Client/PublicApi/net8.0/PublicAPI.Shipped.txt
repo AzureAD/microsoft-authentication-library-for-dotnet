@@ -1013,3 +1013,30 @@ Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.ge
 Microsoft.Identity.Client.AuthenticationResultMetadata.CachedAccessTokenCount.set -> void
 Microsoft.Identity.Client.AssertionRequestOptions.ClientAssertionFmiPath.get -> string
 Microsoft.Identity.Client.AssertionRequestOptions.ClientAssertionFmiPath.set -> void
+const Microsoft.Identity.Client.MsalError.InvalidManagedIdentityIdType = "invalid_managed_identity_id_type" -> string
+const Microsoft.Identity.Client.MsalError.MissingManagedIdentityEnvVar = "missing_managed_identity_env_var" -> string
+Microsoft.Identity.Client.AuthenticationResult.Account.set -> void
+Microsoft.Identity.Client.AuthenticationResult.AdditionalResponseParameters.set -> void
+Microsoft.Identity.Client.AuthenticationResult.AuthenticationResultMetadata.set -> void
+Microsoft.Identity.Client.AuthenticationResult.BindingCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.AuthenticationResult.BindingCertificate.set -> void
+Microsoft.Identity.Client.AuthenticationResult.ClaimsPrincipal.set -> void
+Microsoft.Identity.Client.AuthenticationResult.CorrelationId.set -> void
+Microsoft.Identity.Client.AuthenticationResult.ExpiresOn.set -> void
+Microsoft.Identity.Client.AuthenticationResult.IdToken.set -> void
+Microsoft.Identity.Client.AuthenticationResult.Scopes.set -> void
+Microsoft.Identity.Client.AuthenticationResult.SpaAuthCode.set -> void
+Microsoft.Identity.Client.AuthenticationResult.TenantId.set -> void
+Microsoft.Identity.Client.AuthenticationResult.TokenType.set -> void
+Microsoft.Identity.Client.AuthenticationResult.UniqueId.set -> void
+const Microsoft.Identity.Client.MsalError.InvalidClientAssertion = "invalid_client_assertion" -> string
+Microsoft.Identity.Client.ClientSignedAssertion
+Microsoft.Identity.Client.ClientSignedAssertion.Assertion.get -> string
+Microsoft.Identity.Client.ClientSignedAssertion.Assertion.set -> void
+Microsoft.Identity.Client.ClientSignedAssertion.ClientSignedAssertion() -> void
+Microsoft.Identity.Client.ClientSignedAssertion.TokenBindingCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.ClientSignedAssertion.TokenBindingCertificate.set -> void
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAssertion(System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.CancellationToken, System.Threading.Tasks.Task<Microsoft.Identity.Client.ClientSignedAssertion>> clientSignedAssertionProvider) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.AcquireTokenForClientBuilderExtensions.WithExtraBodyParameters(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, System.Collections.Generic.Dictionary<string, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string>>> extrabodyparams) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions
+static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithExtraHttpHeaders<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IDictionary<string, string> extraHttpHeaders) -> T

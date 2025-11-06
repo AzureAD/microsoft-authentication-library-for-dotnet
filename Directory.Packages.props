@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
-    <MSALRuntimeNativeInteropVersion>0.19.2</MSALRuntimeNativeInteropVersion>
+    <MSALRuntimeNativeInteropVersion>0.19.4</MSALRuntimeNativeInteropVersion>
     <!-- Version of MSAL if not defined by the CI-->
     <MsalInternalVersion>4.61.0</MsalInternalVersion>
   </PropertyGroup>
@@ -12,16 +12,20 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageVersion Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />
-    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="6.35.0" />
-    <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
+    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="8.14.0" />
+    <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
+    <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
     <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <!-- Should match Azure Functions runtime: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4456 -->
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" />
+    <PackageVersion Include="System.Formats.Asn1" Version="9.0.8" />
     <PackageVersion Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
     <PackageVersion Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageVersion Include="System.Security.Cryptography.Cng" Version="5.0.0" PrivateAssets="All" />
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="4.5.0" />
     <PackageVersion Include="System.Security.SecureString" Version="4.3.0" />
     <PackageVersion Include="System.ServiceModel.Http" Version="4.5.3" />
@@ -71,7 +75,6 @@
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="6.35.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
-    <PackageVersion Include="System.Security.Cryptography.Cng" Version="5.0.0" />
     <PackageVersion Include="System.Text.Json" Version="6.0.10" />
     <PackageVersion Include="System.Threading" Version="4.3.0" />
     <PackageVersion Include="System.Threading.Tasks" Version="4.3.0" />
@@ -80,6 +83,5 @@
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="System.Windows.Forms" Version="4.0.0" />
     <PackageVersion Include="CommandLineParser" Version="2.8.0" />
-    <PackageVersion Include="System.Formats.Asn1" Version="9.0.0" />
   </ItemGroup>
 </Project>

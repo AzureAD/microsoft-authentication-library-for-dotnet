@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public IDictionary<string, string> ExpectedRequestHeaders { get; set; }
         public IList<string> UnexpectedRequestHeaders { get; set; }
         public IDictionary<string, string> UnExpectedPostData { get; set; }
+        public IDictionary<string, string> NotExpectedQueryParams { get; set; }
         public HttpMethod ExpectedMethod { get; set; }
 
         public Exception ExceptionToThrow { get; set; }
@@ -36,6 +37,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpRequestMessage ActualRequestMessage { get; private set; }
         public Dictionary<string, string> ActualRequestPostData { get; private set; }
         public HttpRequestHeaders ActualRequestHeaders { get; private set; }
+        public IList<string> PresentRequestHeaders { get; set; }
+
         public X509Certificate2 ExpectedMtlsBindingCertificate { get; set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -65,7 +68,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             Assert.AreEqual(ExpectedMethod, request.Method);
 
-            ValidateQueryParams(uri);
+            ValidateExpectedQueryParams(uri);
+
+            ValidateNotExpectedQueryParams(uri);
 
             await ValidatePostDataAsync(request).ConfigureAwait(false);
 
@@ -80,18 +85,47 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return ResponseMessage;
         }
 
-        private void ValidateQueryParams(Uri uri)
+        private void ValidateExpectedQueryParams(Uri uri)
         {
             if (ExpectedQueryParams != null && ExpectedQueryParams.Any())
             {
                 Assert.IsFalse(string.IsNullOrEmpty(uri.Query), $"Provided url ({uri.AbsoluteUri}) does not contain query parameters as expected.");
-                var inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
+                Dictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
                 Assert.AreEqual(ExpectedQueryParams.Count, inputQp.Count, "Different number of query params.");
                 foreach (var key in ExpectedQueryParams.Keys)
                 {
                     Assert.IsTrue(inputQp.ContainsKey(key), $"Expected query parameter ({key}) not found in the url ({uri.AbsoluteUri}).");
                     Assert.AreEqual(ExpectedQueryParams[key], inputQp[key], $"Value mismatch for query parameter: {key}.");
                 }
+            }
+        }
+
+        private void ValidateNotExpectedQueryParams(Uri uri)
+        {
+            if (NotExpectedQueryParams != null && NotExpectedQueryParams.Any())
+            {
+                // Parse actual query params again (or reuse inputQp if you like)
+                Dictionary<string, string> actualQueryParams = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
+                List<string> unexpectedKeysFound = new List<string>();
+
+                foreach (KeyValuePair<string, string> kvp in NotExpectedQueryParams)
+                {
+                    // Check if the request's query has this key
+                    if (actualQueryParams.TryGetValue(kvp.Key, out string value))
+                    {
+                        // Optionally, also check if we care about matching the *value*:
+                        if (string.Equals(value, kvp.Value, StringComparison.OrdinalIgnoreCase))
+                        {
+                            unexpectedKeysFound.Add(kvp.Key);
+                        }
+                    }
+                }
+
+                // Fail if any "not expected" key/value pairs were found
+                Assert.IsTrue(
+                    unexpectedKeysFound.Count == 0,
+                    $"Did not expect to find these query parameter keys/values: {string.Join(", ", unexpectedKeysFound)}"
+                );
             }
         }
 
@@ -142,6 +176,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private void ValidateHeaders(HttpRequestMessage request)
         {
+            if (PresentRequestHeaders != null)
+            {
+                foreach (var headerName in PresentRequestHeaders)
+                {
+                    Assert.IsTrue(request.Headers.Contains(headerName),
+                        $"Expected request header to be present: {headerName}.");
+                }
+            }
+
             ActualRequestHeaders = request.Headers;
             if (ExpectedRequestHeaders != null)
             {

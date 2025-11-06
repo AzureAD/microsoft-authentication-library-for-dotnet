@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         // regression test based on SAL introducing a new SKU value and making ESTS not issue the refresh_in value
@@ -89,8 +89,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
+#if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
-        //[DataRow(Cloud.PPE, TargetFrameworks.NetFx)]      
+#endif
         [DataRow(Cloud.Public, TargetFrameworks.NetCore, true)]
         //[DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithCertificate_TestAsync(Cloud cloud, TargetFrameworks runOn, bool useAppIdUri = false)
@@ -101,9 +102,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
+#if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
+#endif
         [DataRow(Cloud.Arlington, TargetFrameworks.NetCore)]
-        //[DataRow(Cloud.PPE)] - secret not setup
         public async Task WithSecret_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
@@ -112,8 +114,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
+#if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
-        //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
+#endif
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -123,8 +126,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
+#if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
-        //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
+#endif
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Wilson_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -143,7 +147,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
+#if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
+#endif
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientClaims_OverrideClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -162,7 +168,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
+#if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
+#endif
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientClaims_SendX5C_OverrideClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -223,12 +231,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(labResponse.Lab.Authority, "organizations")
                 .BuildConcrete();
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(labResponse.App.AppId)
@@ -312,6 +320,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
               GetExpectedCacheKey(settings.ClientId, settings.TenantId),
               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
 
+            Assert.IsNull(authResult.BindingCertificate,
+                          "BindingCertificate should be null for bearer tokens.");
+
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
                .AcquireTokenForClient(settings.AppScopes)
@@ -330,6 +341,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(
                GetExpectedCacheKey(settings.ClientId, settings.TenantId),
                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+
+            Assert.IsNull(authResult.BindingCertificate,
+                          "BindingCertificate should be null for bearer tokens.");
         }
 
         private static IConfidentialClientApplication CreateApp(

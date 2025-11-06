@@ -15,8 +15,8 @@ using System.Text;
 using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
 using Microsoft.Identity.Client.Http.Retry;
-
-
+using System.Collections.Generic;
+using System.Linq;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -31,9 +31,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected readonly RequestContext _requestContext;
 
+        protected bool _isMtlsPopRequested;
+
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
-        
+
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
             _requestContext = requestContext;
@@ -55,7 +57,30 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
 
-            ManagedIdentityRequest request = CreateRequest(resource);
+            _isMtlsPopRequested = parameters.IsMtlsPopRequested;
+
+            ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
+
+            // When IMDSv2 mints a binding certificate during this request (via CSR),
+            // it's exposed via request.MtlsCertificate. Bubble it up so the request
+            // layer can set the mtls_pop scheme
+            if (parameters.IsMtlsPopRequested && request?.MtlsCertificate != null)
+            {
+                parameters.MtlsCertificate = request.MtlsCertificate;
+            }
+
+            // Automatically add claims / capabilities if this MI source supports them
+            if (_sourceType.SupportsClaimsAndCapabilities())
+            {
+                request.AddClaimsAndCapabilities(
+                    _requestContext.ServiceBundle.Config.ClientCapabilities,
+                    parameters,
+                    _requestContext.Logger);
+            }
+
+            request.AddExtraQueryParams(
+                _requestContext.ServiceBundle.Config.ExtraQueryParameters,
+                _requestContext.Logger);
 
             _requestContext.Logger.Info("[Managed Identity] Sending request to managed identity endpoints.");
 
@@ -73,8 +98,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             method: HttpMethod.Get,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
-                            mtlsCertificate: null,
-                            validateServerCertificate: GetValidationCallback(), 
+                            mtlsCertificate: request.MtlsCertificate,
+                            validateServerCertificate: GetValidationCallback(),
                             cancellationToken: cancellationToken,
                             retryPolicy: retryPolicy).ConfigureAwait(false);
                 }
@@ -88,8 +113,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             method: HttpMethod.Post,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
-                            mtlsCertificate: null,
-                            validateServerCertificate: GetValidationCallback(), 
+                            mtlsCertificate: request.MtlsCertificate,
+                            validateServerCertificate: GetValidationCallback(),
                             cancellationToken: cancellationToken,
                             retryPolicy: retryPolicy)
                         .ConfigureAwait(false);
@@ -140,7 +165,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             throw exception;
         }
 
-        protected abstract ManagedIdentityRequest CreateRequest(string resource);
+        protected abstract Task<ManagedIdentityRequest> CreateRequestAsync(string resource);
 
         protected ManagedIdentityResponse GetSuccessfulResponse(HttpResponse response)
         {
@@ -163,8 +188,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw exception;
             }
 
-            if (managedIdentityResponse == null || 
-                managedIdentityResponse.AccessToken.IsNullOrEmpty() || 
+            if (managedIdentityResponse == null ||
+                managedIdentityResponse.AccessToken.IsNullOrEmpty() ||
                 managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");

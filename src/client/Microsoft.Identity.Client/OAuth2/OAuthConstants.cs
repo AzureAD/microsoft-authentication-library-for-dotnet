@@ -66,6 +66,7 @@ namespace Microsoft.Identity.Client.OAuth2
     internal static class OAuth2AssertionType
     {
         public const string JwtBearer = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+        public const string JwtPop = "urn:ietf:params:oauth:client-assertion-type:jwt-pop";
     }
 
     internal static class OAuth2RequestedTokenUse
@@ -76,6 +77,7 @@ namespace Microsoft.Identity.Client.OAuth2
     internal static class OAuth2Header
     {
         public const string CorrelationId = "client-request-id";
+        public const string XMsCorrelationId = $"x-ms-{CorrelationId}";
         public const string RequestCorrelationIdInResponse = "return-client-request-id";
         public const string AppName = "x-app-name";
         public const string AppVer = "x-app-ver";

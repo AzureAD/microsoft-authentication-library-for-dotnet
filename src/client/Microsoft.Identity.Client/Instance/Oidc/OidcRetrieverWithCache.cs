@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -27,7 +28,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             }
 
             await s_lockOidcRetrieval.WaitAsync().ConfigureAwait(false);
-            
+
             Uri oidcMetadataEndpoint = null;
             try
             {
@@ -44,8 +45,12 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                 builder.Path = existingPath.TrimEnd('/') + "/" + Constants.WellKnownOpenIdConfigurationPath;
 
                 oidcMetadataEndpoint = builder.Uri;
-                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager, null);                             
+                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager, null);
                 configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext).ConfigureAwait(false);
+
+                // Validate the issuer before caching the configuration
+                requestContext.Logger.Verbose(() => $"[OIDC Discovery] Validating issuer: {configuration.Issuer} against authority: {authority}");
+                ValidateIssuer(new Uri(authority), configuration.Issuer);
 
                 s_cache[authority] = configuration;
                 requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery retrieved metadata from the network for {authority}");
@@ -68,6 +73,67 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             {
                 s_lockOidcRetrieval.Release();
             }
+        }
+
+        /// <summary>
+        /// Validates that the issuer in the OIDC metadata matches the authority.
+        /// </summary>
+        /// <param name="authority">The authority URL.</param>
+        /// <param name="issuer">The issuer from the OIDC metadata - the single source of truth.</param>
+        /// <exception cref="MsalServiceException">Thrown when issuer validation fails.</exception>
+        private static void ValidateIssuer(Uri authority, string issuer)
+        {
+            // Normalize both URLs to handle trailing slash differences
+            string normalizedAuthority = authority.AbsoluteUri.TrimEnd('/');
+            string normalizedIssuer = issuer?.TrimEnd('/');
+
+            // OIDC validation: if the issuer's scheme and host match the authority's, consider it valid
+            if (!string.IsNullOrEmpty(issuer) && Uri.TryCreate(issuer, UriKind.Absolute, out Uri issuerUri))
+            {
+                if (string.Equals(authority.Scheme, issuerUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(authority.Host, issuerUri.Host, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+            }
+
+            // CIAM-specific validation: In a CIAM scenario the issuer is expected to have "{tenant}.ciamlogin.com"
+            // as the host, even when using a custom domain.
+            string tenant = null;
+            try
+            {
+                tenant = AuthorityInfo.GetFirstPathSegment(authority);
+            }
+            catch (InvalidOperationException)
+            {
+                // If no path segments exist, try to extract from hostname (first part)
+                var hostParts = authority.Host.Split('.');
+                tenant = hostParts.Length > 0 ? hostParts[0] : null;
+            }
+
+            // If tenant extraction failed or returned empty, validation fails
+            if (!string.IsNullOrEmpty(tenant))
+            {
+                // Create a collection of valid CIAM issuer patterns for the tenant
+                string[] validCiamPatterns =
+                {
+                    $"https://{tenant}{Constants.CiamAuthorityHostSuffix}",
+                    $"https://{tenant}{Constants.CiamAuthorityHostSuffix}/{tenant}",
+                    $"https://{tenant}{Constants.CiamAuthorityHostSuffix}/{tenant}/v2.0"
+                };
+
+                // Normalize and check if the issuer matches any of the valid patterns
+                if (validCiamPatterns.Any(pattern =>
+                    string.Equals(normalizedIssuer, pattern.TrimEnd('/'), StringComparison.OrdinalIgnoreCase)))
+                {
+                    return;
+                }
+            }
+
+            // Validation failed
+            throw new MsalServiceException(
+                MsalError.AuthorityValidationFailed,
+                string.Format(MsalErrorMessage.IssuerValidationFailed, authority, issuer));
         }
 
         // For testing purposes only

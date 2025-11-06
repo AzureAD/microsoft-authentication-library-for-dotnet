@@ -17,6 +17,8 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
+using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 using Microsoft.IdentityModel.Abstractions;
@@ -81,6 +83,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Kerberos Service Ticket container to be used.
         /// </summary>
+        [Obsolete]
         public KerberosTicketContainer TicketContainer { get; set; } = KerberosTicketContainer.IdToken;
 
         [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.")]
@@ -126,6 +129,7 @@ namespace Microsoft.Identity.Client
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
         internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
+        internal ICsrFactory CsrFactory { get; set; }
 
         #region ClientCredentials
 

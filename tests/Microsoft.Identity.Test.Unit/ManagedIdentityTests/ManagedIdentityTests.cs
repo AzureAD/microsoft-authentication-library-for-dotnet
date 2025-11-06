@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -41,6 +42,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
+        private void AddImdsV2CsrMockHandlerIfNeeded(
+            ManagedIdentitySource managedIdentitySource,
+            MockHttpManager httpManager)
+        {
+            if (managedIdentitySource == ManagedIdentitySource.Imds)
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponseFailure());
+            }
+        }
+
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
@@ -50,16 +61,26 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, ManagedIdentitySource.ServiceFabric)]
         [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
-        public void GetManagedIdentityTests(
+        public async Task GetManagedIdentityTests(
             string endpoint,
             ManagedIdentitySource managedIdentitySource, 
             ManagedIdentitySource expectedManagedIdentitySource)
         {
             using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                Assert.AreEqual(expectedManagedIdentitySource, ManagedIdentityApplication.GetManagedIdentitySource());
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                
+                
+
+                ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;
+
+                Assert.AreEqual(expectedManagedIdentitySource, await mi.GetManagedIdentitySourceAsync().ConfigureAwait(false));
             }
         }
 
@@ -77,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ServiceFabricEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.ServiceFabric)]
         [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
         [DataRow(MachineLearningEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.MachineLearning)]
-        public async Task ManagedIdentityHappyPathAsync(
+        public async Task SAMIHappyPathAsync(
             string endpoint,
             string scope,
             ManagedIdentitySource managedIdentitySource)
@@ -85,21 +106,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
                 
+                var mi = miBuilder.Build();
+
                 httpManager.AddManagedIdentityMockHandler(
-                endpoint,
-                Resource,
-                MockHelpers.GetMsiSuccessfulResponse(),
-                managedIdentitySource);
+                    endpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource);
 
                 var result = await mi.AcquireTokenForManagedIdentity(scope).ExecuteAsync().ConfigureAwait(false);
 
@@ -122,12 +141,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId .ResourceId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
         [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        public async Task ManagedIdentityUserAssignedHappyPathAsync(
+        public async Task UAMIHappyPathAsync(
             string endpoint,
             ManagedIdentitySource managedIdentitySource,
             string userAssignedId,
@@ -136,13 +155,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
+                var miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
                 
                 miBuilder.WithHttpManager(httpManager);
 
-                IManagedIdentityApplication mi = miBuilder.Build();
+                var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -183,14 +203,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -243,14 +261,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -304,22 +320,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithClientCapabilities(TestConstants.ClientCapabilities)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
+                    managedIdentitySource,
+                    claimsEnabled: false,
+                    capabilityEnabled: true);
 
                 var result = await mi.AcquireTokenForManagedIdentity(scope).ExecuteAsync().ConfigureAwait(false);
 
@@ -339,9 +355,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     scope,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
+                    managedIdentitySource,
+                    claimsEnabled: true,
+                    capabilityEnabled: true);
 
-                // Acquire token with force refresh
+                // Acquire token with claims
                 result = await mi.AcquireTokenForManagedIdentity(scope).WithClaims(TestConstants.Claims)
                     .ExecuteAsync().ConfigureAwait(false);
 
@@ -366,15 +384,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures(true)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -401,11 +416,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     scope,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    managedIdentitySource);
+                    managedIdentitySource,
+                    claimsEnabled: true,
+                    capabilityEnabled: false);
 
-                // Acquire token with force refresh
-                result = await mi.AcquireTokenForManagedIdentity(scope).WithClaims(TestConstants.Claims)
-                    .ExecuteAsync().ConfigureAwait(false);
+                // Acquire token with claims
+                result = await mi.AcquireTokenForManagedIdentity(scope)
+                    .WithClaims(TestConstants.Claims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
@@ -437,14 +456,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(managedIdentitySource),
@@ -484,9 +501,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(AppServiceEndpoint, Resource, errorResponse,
@@ -545,14 +560,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
@@ -587,14 +600,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -627,14 +638,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
@@ -662,10 +671,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -695,10 +701,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId))
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -731,8 +734,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                
+                
 
                 var mi = miBuilder.BuildConcrete();
 
@@ -776,10 +779,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -811,12 +811,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -844,8 +840,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                
+                
 
                 var mi = miBuilder.BuildConcrete();
 
@@ -912,8 +908,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithLogging(LocalLogCallback)
                     .WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                
+                
 
                 var mi = miBuilder.BuildConcrete();
 
@@ -970,8 +966,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                
+                
 
                 var mi = miBuilder.BuildConcrete();
 
@@ -1040,14 +1036,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
 
@@ -1077,26 +1071,24 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityRequestTokensForDifferentScopesTestAsync(
             string initialResource, 
             string newResource, 
-            ManagedIdentitySource source, 
+            ManagedIdentitySource managedIdentitySource, 
             string endpoint)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(source, endpoint);
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder
+                var miBuilder = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                IManagedIdentityApplication mi = miBuilder.Build();
+                
+                var mi = miBuilder.Build();
 
                 // Mock handler for the initial resource request
                 httpManager.AddManagedIdentityMockHandler(endpoint, initialResource,
-                    MockHelpers.GetMsiSuccessfulResponse(), source);
+                    MockHelpers.GetMsiSuccessfulResponse(), managedIdentitySource);
 
                 // Request token for initial resource
                 AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(initialResource).ExecuteAsync().ConfigureAwait(false);
@@ -1105,7 +1097,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Mock handler for the new resource request
                 httpManager.AddManagedIdentityMockHandler(endpoint, newResource,
-                    MockHelpers.GetMsiSuccessfulResponse(), source);
+                    MockHelpers.GetMsiSuccessfulResponse(), managedIdentitySource);
 
                 // Request token for new resource
                 result = await mi.AcquireTokenForManagedIdentity(newResource).ExecuteAsync().ConfigureAwait(false);
@@ -1127,10 +1119,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow(ManagedIdentitySource.AppService)]
         [DataRow(ManagedIdentitySource.Imds)]
-        [DataRow(ManagedIdentitySource.AzureArc)]
-        [DataRow(ManagedIdentitySource.CloudShell)]
-        [DataRow(ManagedIdentitySource.ServiceFabric)]
-        [DataRow(ManagedIdentitySource.MachineLearning)]
         public async Task UnsupportedManagedIdentitySource_ThrowsExceptionDuringTokenAcquisitionAsync(
             ManagedIdentitySource managedIdentitySource)
         {
@@ -1138,22 +1126,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             using (new EnvVariableContext())
             {
-                // Set unsupported environment variable
                 SetEnvironmentVariables(managedIdentitySource, UnsupportedEndpoint);
 
                 // Create the Managed Identity Application
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
 
-                // Build the application
                 var mi = miBuilder.Build();
 
-                // Attempt to acquire a token and verify an exception is thrown
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
                         .ExecuteAsync()
                         .ConfigureAwait(false)).ConfigureAwait(false);
 
-                // Verify the exception details
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
             }
@@ -1175,7 +1159,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var userAssignedBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(UserAssignedClientId))
                     .WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
+                
                 userAssignedBuilder.Config.AccessorOptions = null;
 
                 var userAssignedMI = userAssignedBuilder.BuildConcrete();
@@ -1263,10 +1247,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
-
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
+                
                 var mi = miBuilder.Build();
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
@@ -1336,6 +1317,54 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        [DataTestMethod]
+        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
+        [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
+        [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
+        [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(MachineLearningEndpoint, Resource, ManagedIdentitySource.MachineLearning)]
+        public async Task ManagedIdentityWithCapabilitiesTestAsync(
+            string endpoint,
+            string scope,
+            ManagedIdentitySource managedIdentitySource)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                AddImdsV2CsrMockHandlerIfNeeded(managedIdentitySource, httpManager);
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithClientCapabilities(TestConstants.ClientCapabilities)
+                    .WithHttpManager(httpManager);
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource,
+                    claimsEnabled: false,
+                    capabilityEnabled: true);
+
+                var result = await mi.AcquireTokenForManagedIdentity(scope).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Acquire token from cache
+                result = await mi.AcquireTokenForManagedIdentity(scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
         [TestMethod]
         public void ValidateServerCertificate_OnlySetForServiceFabric()
         {
@@ -1345,7 +1374,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Test all managed identity sources
                 foreach (ManagedIdentitySource sourceType in Enum.GetValues(typeof(ManagedIdentitySource))
                     .Cast<ManagedIdentitySource>()
-                    .Where(s => s != ManagedIdentitySource.None && s != ManagedIdentitySource.DefaultToImds))
+                    .Where(s => s != ManagedIdentitySource.None && s != ManagedIdentitySource.DefaultToImds && s != ManagedIdentitySource.ImdsV2))
                 {
                     // Create a managed identity source for each type
                     AbstractManagedIdentity managedIdentity = CreateManagedIdentitySource(sourceType, httpManager);
@@ -1418,6 +1447,71 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             return managedIdentity;
+        }
+
+        [TestMethod]
+        public async Task ManagedIdentityWithExtraQueryParametersTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                var extraQueryParameters = new Dictionary<string, string>
+                    {
+                        { "param1", "value1" },
+                        { "param2", "value2" },
+                        { "custom_param", "custom_value" }
+                    };
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .WithExtraQueryParameters(extraQueryParameters)
+                    .WithHttpManager(httpManager);
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.AppService,
+                    extraQueryParameters: extraQueryParameters);
+
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public void WithExtraQueryParameters_MultipleCallsMergeValues()
+        {
+            var firstParams = new Dictionary<string, string>
+                {
+                    { "param1", "value1" },
+                    { "param2", "value2" }
+                };
+
+            var secondParams = new Dictionary<string, string>
+                {
+                    { "param3", "value3" },
+                    { "param4", "value4" },
+                    { "param1", "newvalue1" } // This should overwrite the first param1
+                };
+
+            var miBuilder = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(firstParams)
+                .WithExtraQueryParameters(secondParams);
+
+            // Verify that parameters are merged
+            Assert.AreEqual(4, miBuilder.Config.ExtraQueryParameters.Count);
+    
+            // Verify merged values
+            Assert.AreEqual("newvalue1", miBuilder.Config.ExtraQueryParameters["param1"]);
+            Assert.AreEqual("value2", miBuilder.Config.ExtraQueryParameters["param2"]);
+            Assert.AreEqual("value3", miBuilder.Config.ExtraQueryParameters["param3"]);
+            Assert.AreEqual("value4", miBuilder.Config.ExtraQueryParameters["param4"]);
         }
     }
 }

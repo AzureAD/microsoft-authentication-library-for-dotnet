@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -13,6 +14,8 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
@@ -24,7 +27,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenForClientParameters _clientParameters;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly ICryptographyManager _cryptoManager;
-
+        
         public ClientCredentialRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -236,7 +239,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return false;
             }
 
-            // 2) If the token’s hash matches AccessTokenHashToRefresh, ignore it
+            // 2) If an mTLS cert is supplied for THIS request, reuse cache only if
+            //    the cached token's KeyId matches the one provided in the request.
+            X509Certificate2 requestCert = AuthenticationRequestParameters.MtlsCertificate;
+            
+            if (requestCert != null)
+            {
+                string expectedKid = CoreHelpers.ComputeX5tS256KeyId(requestCert);
+
+                // If the certificate cannot produce a valid KeyId (SPKI-SHA256), expectedKid will be null or empty.
+                // In this case, the cache will be bypassed, as we cannot safely match the cached token to the certificate.
+                if (!string.Equals(cacheItem.KeyId, expectedKid, StringComparison.Ordinal))
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
+                    "[ClientCredentialRequest] Cached token KeyId does not match request certificate (SPKI-SHA256 mismatch). Bypassing cache.");
+                    return false;
+                }
+                
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
+                "[ClientCredentialRequest] Cached token KeyId matches request certificate (SPKI-SHA256). Using cached token.");
+            }
+
+            // 3) If the token’s hash matches AccessTokenHashToRefresh, ignore it
             if (!string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh) &&
                 IsMatchingTokenHash(cacheItem.Secret, _clientParameters.AccessTokenHashToRefresh))
             {
@@ -310,7 +334,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var dict = new Dictionary<string, string>
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
-                [OAuth2Parameter.Scope] = AuthenticationRequestParameters.Scope.AsSingleString()
+                [OAuth2Parameter.Scope] = AuthenticationRequestParameters.Scope.AsSingleString(),
+                [OAuth2Parameter.ClientInfo] = "2"
             };
 
             return dict;

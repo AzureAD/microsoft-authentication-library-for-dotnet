@@ -20,8 +20,8 @@ namespace Microsoft.Identity.Extensions.Mac
 
         public static IntPtr GetGlobal(IntPtr handle, string symbol)
         {
-            IntPtr ptr = dlsym(handle, symbol);            
-            var structure = Marshal.PtrToStructure(ptr, typeof(IntPtr));
+            IntPtr ptr = dlsym(handle, symbol);
+            var structure = Marshal.PtrToStructure<IntPtr>(ptr);
 
             return (IntPtr)structure;
         }

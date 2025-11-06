@@ -35,7 +35,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
             Authority initialAuthority,
-            string homeAccountId = null)
+            string homeAccountId = null,
+            SortedList<string, string> cacheKeyComponents = null)
         {
             _serviceBundle = serviceBundle;
             _commonParameters = commonParameters;
@@ -73,6 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _serviceBundle.Config.ClientCapabilities);
 
             HomeAccountId = homeAccountId;
+            CacheKeyComponents = cacheKeyComponents;
         }
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
@@ -111,6 +113,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public X509Certificate2 MtlsCertificate => _commonParameters.MtlsCertificate;
 
+        public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>
@@ -123,11 +127,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        public IAuthenticationOperation AuthenticationScheme => _commonParameters.AuthenticationOperation;
+        private IAuthenticationOperation _requestOverrideScheme;
+
+        /// <summary>
+        /// Effective authentication operation (scheme) for this request.
+        /// Defaults to the app's configured operation unless a request-scoped override is applied.
+        /// </summary>
+        public IAuthenticationOperation AuthenticationScheme
+        {
+            get => _requestOverrideScheme ?? _commonParameters.AuthenticationOperation;
+            internal set => _requestOverrideScheme = value;
+        }
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
-        public SortedList<string, string> CacheKeyComponents => _commonParameters.CacheKeyComponents;
+        public SortedList<string, string> CacheKeyComponents {get; private set; }
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
@@ -156,7 +170,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <summary>
         /// If set, MSAL should add the key / value pairs from the provider to the token endpoint instead of generating a client assertion
         /// </summary>
-        public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get => _commonParameters.OnBeforeTokenRequestHandler; }
+        public IList<Func<OnBeforeTokenRequestData, Task>> OnBeforeTokenRequestHandler { get => _commonParameters.OnBeforeTokenRequestHandler; }
 
         public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 

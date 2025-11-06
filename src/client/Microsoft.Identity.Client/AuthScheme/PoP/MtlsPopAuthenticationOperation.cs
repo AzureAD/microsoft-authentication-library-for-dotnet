@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public MtlsPopAuthenticationOperation(X509Certificate2 mtlsCert)
         {
             _mtlsCert = mtlsCert;
-            KeyId = ComputeX5tS256KeyId(_mtlsCert);
+            KeyId = CoreHelpers.ComputeX5tS256KeyId(_mtlsCert);
         }
 
         public int TelemetryTokenType => TelemetryTokenTypeConstants.MtlsPop;
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public void FormatResult(AuthenticationResult authenticationResult)
         {
-            // no-op
+            authenticationResult.BindingCertificate = _mtlsCert;
         }
     }
 }

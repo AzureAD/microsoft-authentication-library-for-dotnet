@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.OAuth2
             Uri endPoint,
             RequestContext requestContext,
             bool addCommonHeaders,
-            Func<OnBeforeTokenRequestData, Task> onBeforePostRequestHandler)
+            IList<Func<OnBeforeTokenRequestData, Task>> onBeforePostRequestHandler)
         {
             return ExecuteRequestAsync<MsalTokenResponse>(
                 endPoint,
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.OAuth2
             RequestContext requestContext,
             bool expectErrorsOn200OK = false,
             bool addCommonHeaders = true,
-            Func<OnBeforeTokenRequestData, Task> onBeforePostRequestData = null)
+            IList<Func<OnBeforeTokenRequestData, Task>> onBeforePostRequestHandlers = null)
         {
             //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
             if (addCommonHeaders)
@@ -126,11 +126,16 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     if (method == HttpMethod.Post)
                     {
-                        if (onBeforePostRequestData != null)
+                        if (onBeforePostRequestHandlers != null)
                         {
                             requestContext.Logger.Verbose(() => "[Oauth2Client] Processing onBeforePostRequestData ");
                             var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, requestContext.UserCancellationToken);
-                            await onBeforePostRequestData(requestData).ConfigureAwait(false);
+                            
+                            foreach(var handler in onBeforePostRequestHandlers)
+                            {
+                                await handler(requestData).ConfigureAwait(false);
+                            }
+
                             endpointUri = requestData.RequestUri;
                         }
 
@@ -254,7 +259,7 @@ namespace Microsoft.Identity.Client.OAuth2
             MsalServiceException exceptionToThrow;
             try
             {
-                exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError);
+                exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError, requestContext);
             }
             catch (JsonException) // in the rare case we get an error response we cannot deserialize
             {
@@ -304,7 +309,7 @@ namespace Microsoft.Identity.Client.OAuth2
             throw exceptionToThrow;
         }
 
-        private static MsalServiceException ExtractErrorsFromTheResponse(HttpResponse response, ref bool shouldLogAsError)
+        private static MsalServiceException ExtractErrorsFromTheResponse(HttpResponse response, ref bool shouldLogAsError, RequestContext context = null)
         {
             // In cases where the end-point is not found (404) response.body will be empty.
             if (string.IsNullOrWhiteSpace(response.Body))
@@ -347,7 +352,8 @@ namespace Microsoft.Identity.Client.OAuth2
             return MsalServiceExceptionFactory.FromHttpResponse(
                 msalTokenResponse.Error,
                 msalTokenResponse.ErrorDescription,
-                response);
+                response,
+                context: context);
         }
 
         private Uri AddExtraQueryParams(Uri endPoint)
