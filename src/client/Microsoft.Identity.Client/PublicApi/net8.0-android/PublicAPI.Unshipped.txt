@@ -1,4 +1,3 @@
-Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithMtlsBearerToken() -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.CertificateConfiguration.AssociateTokensWithCertificate.get -> bool
 Microsoft.Identity.Client.CertificateConfiguration.AssociateTokensWithCertificate.set -> void
 Microsoft.Identity.Client.CertificateConfiguration.CertificateConfiguration(System.Func<System.Security.Cryptography.X509Certificates.X509Certificate2> certificateProvider) -> void

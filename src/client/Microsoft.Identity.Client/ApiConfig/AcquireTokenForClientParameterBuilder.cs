@@ -120,33 +120,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Specifies that the certificate will be used for mTLS authentication with bearer tokens.
-        /// The certificate is used for mutual TLS at the transport layer, but the token returned is a standard bearer token (not bound to the certificate).
-        /// This provides transport-layer security while maintaining compatibility with systems expecting bearer tokens.
-        /// Requires an Azure region to be configured and a certificate to be set via WithCertificate.
-        /// For more information, refer to the <see href="https://aka.ms/mtls-pop">mTLS documentation</see>.
-        /// </summary>
-        /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
-        public AcquireTokenForClientParameterBuilder WithMtlsBearerToken()
-        {
-            if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certificateCredential)
-            {
-                if (certificateCredential.Certificate == null)
-                {
-                    throw new MsalClientException(
-                    MsalError.MtlsCertificateNotProvided,
-                    MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-                }
-
-                CommonParameters.AuthenticationOperation = new MtlsBearerAuthenticationOperation(certificateCredential.Certificate);
-                CommonParameters.MtlsCertificate = certificateCredential.Certificate;               
-            }
-
-            CommonParameters.IsMtlsPopRequested = true; // Still uses mTLS transport
-            return this;
-        }
-
-        /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
