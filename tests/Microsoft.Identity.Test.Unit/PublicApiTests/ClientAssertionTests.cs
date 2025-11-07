@@ -345,6 +345,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var handler = http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                       .WithExperimentalFeatures(true)
                        .WithClientSecret(TestConstants.ClientSecret)
                        .WithHttpManager(http)
                        .WithClientAssertion(BearerDelegate())
@@ -373,6 +374,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 http.AddInstanceDiscoveryMockHandler();
                 var handler = http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                           .WithExperimentalFeatures(true)
                            .WithClientSecret(TestConstants.ClientSecret)
                            .WithHttpManager(http)
                            .WithClientAssertion(PopDelegate())
@@ -399,6 +401,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 bool checkedCaps = false;
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                          .WithExperimentalFeatures(true)
                           .WithClientSecret(TestConstants.ClientSecret)
                           .WithClientCapabilities(TestConstants.ClientCapabilities)
                           .WithHttpManager(http)
@@ -427,6 +430,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task ClientAssertion_EmptyJwt_ThrowsAsync()
         {
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                      .WithExperimentalFeatures(true)
                       .WithClientSecret(TestConstants.ClientSecret)
                       .WithClientAssertion((o, c) =>
                           Task.FromResult(new ClientSignedAssertion { Assertion = string.Empty }))
@@ -443,6 +447,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using var cts = new CancellationTokenSource();
 
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                      .WithExperimentalFeatures(true)
                       .WithClientSecret(TestConstants.ClientSecret)
                       .WithClientAssertion((o, ct) =>
                       {
@@ -481,6 +486,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     var cert = CertHelper.GetOrCreateTestCert();
 
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures(true)
                         .WithClientAssertion(PopDelegate())
                         .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
@@ -559,6 +565,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // ─────────── Build the app ───────────
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                           .WithExperimentalFeatures(true)
                            .WithClientSecret(TestConstants.ClientSecret)
                            .WithClientAssertion(popDelegate)
                            .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
@@ -591,7 +598,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task WithMtlsPop_AfterBearerDelegate_Throws()
         {
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                      .WithClientSecret(TestConstants.ClientSecret)
+                       .WithExperimentalFeatures(true)
+                       .WithClientSecret(TestConstants.ClientSecret)
                       .WithClientAssertion(BearerDelegate())
                       .BuildConcrete();
 
@@ -614,6 +622,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(); // first call => network
 
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                      .WithExperimentalFeatures(true)
                       .WithClientSecret(TestConstants.ClientSecret)
                       .WithHttpManager(http)
                       .WithClientAssertion((o, c) =>
@@ -644,6 +653,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Arrange – CCA with PoP delegate (returns JWT + cert) but **no AzureRegion configured**
                 var cert = CertHelper.GetOrCreateTestCert();
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                              .WithExperimentalFeatures(true)
                               .WithClientAssertion(PopDelegate())
                               .WithHttpManager(http)
                               .BuildConcrete();
