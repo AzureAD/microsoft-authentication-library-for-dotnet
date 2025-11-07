@@ -131,6 +131,25 @@ namespace Microsoft.Identity.Client
         internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
         internal ICsrFactory CsrFactory { get; set; }
 
+        #region Extensibility Callbacks
+
+        /// <summary>
+        /// Dynamic certificate provider callback for client credential flows.
+        /// </summary>
+        public Func<IAppConfig, X509Certificate2> ClientCredentialCertificateProvider { get; set; }
+
+        /// <summary>
+        /// Retry policy callback that determines whether to retry after a token acquisition failure.
+        /// </summary>
+        public Func<IAppConfig, MsalException, bool> RetryPolicy { get; set; }
+
+        /// <summary>
+        /// Execution observer callback that receives the final result of token acquisition attempts.
+        /// </summary>
+        public Action<IAppConfig, ExecutionResult> ExecutionObserver { get; set; }
+
+        #endregion
+
         #region ClientCredentials
 
         // Indicates if claims or assertions are used within the configuration

@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Runtime.ConstrainedExecution;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +32,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             Certificate = certificate;
             _claimsToSign = claimsToSign;
             _appendDefaultClaims = appendDefaultClaims;
-            _base64EncodedThumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash());
+ 
+            // Certificate can be null when using dynamic certificate provider
+            if (certificate != null)
+            {
+                _base64EncodedThumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash());
+            }
         }
 
         public Task AddConfidentialClientParametersAsync(
@@ -54,6 +56,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 requestParameters.RequestContext.Logger.Verbose(() => "Proceeding with JWT token creation and adding client assertion.");
 
+                // Resolve the certificate - either from static config or dynamic provider
+                X509Certificate2 effectiveCertificate = ResolveCertificate(requestParameters);
+
                 bool useSha2 = requestParameters.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported;
 
                 var jwtToken = new JsonWebToken(
@@ -63,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 _claimsToSign,
                 _appendDefaultClaims);
 
-                string assertion = jwtToken.Sign(Certificate, requestParameters.SendX5C, useSha2);
+                string assertion = jwtToken.Sign(effectiveCertificate, requestParameters.SendX5C, useSha2);
 
                 oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
                 oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
@@ -75,6 +80,72 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Resolves the certificate to use for signing the client assertion.
+        /// If a dynamic certificate provider is configured, it will be invoked to get the certificate.
+        /// Otherwise, the static certificate configured at build time is used.
+        /// </summary>
+        /// <param name="requestParameters">The authentication request parameters containing app config</param>
+        /// <returns>The X509Certificate2 to use for signing</returns>
+        /// <exception cref="MsalClientException">Thrown if the certificate provider returns null or an invalid certificate</exception>
+        private X509Certificate2 ResolveCertificate(AuthenticationRequestParameters requestParameters)
+        {
+            // Check if dynamic certificate provider is configured
+            if (requestParameters.AppConfig.ClientCredentialCertificateProvider != null)
+            {
+                requestParameters.RequestContext.Logger.Verbose(
+                    () => "[CertificateAndClaimsClientCredential] Resolving certificate from dynamic provider.");
+
+                // Invoke the provider to get the certificate
+                X509Certificate2 providedCertificate = requestParameters.AppConfig.ClientCredentialCertificateProvider(
+                    requestParameters.AppConfig);
+
+                // Validate the certificate returned by the provider
+                if (providedCertificate == null)
+                {
+                    requestParameters.RequestContext.Logger.Error(
+                        "[CertificateAndClaimsClientCredential] Certificate provider returned null.");
+     
+                    throw new MsalClientException(
+                        MsalError.InvalidClientAssertion,
+                        "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
+                }
+
+                if (!providedCertificate.HasPrivateKey)
+                {
+                    requestParameters.RequestContext.Logger.Error(
+                        "[CertificateAndClaimsClientCredential] Certificate from provider does not have a private key.");
+         
+                    throw new MsalClientException(
+                        MsalError.CertWithoutPrivateKey,
+                        "The certificate returned by the provider does not have a private key. " +
+                        "Ensure the certificate has a private key for signing operations.");
+                }
+
+                requestParameters.RequestContext.Logger.Info(
+                    () => $"[CertificateAndClaimsClientCredential] Successfully resolved certificate from provider. " +
+                          $"Thumbprint: {providedCertificate.Thumbprint}");
+
+                return providedCertificate;
+            }
+
+            // Use the static certificate configured at build time
+            if (Certificate == null)
+            {
+                requestParameters.RequestContext.Logger.Error(
+                    "[CertificateAndClaimsClientCredential] No certificate configured (static or dynamic).");
+      
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    "No certificate is configured. Use WithCertificate() to provide a certificate.");
+            }
+
+            requestParameters.RequestContext.Logger.Verbose(
+                () => $"[CertificateAndClaimsClientCredential] Using static certificate. Thumbprint: {Certificate.Thumbprint}");
+
+            return Certificate;
         }
     }
 }
