@@ -41,10 +41,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var config = new CertificateConfiguration(s_testCertificate);
 
             Assert.AreEqual(s_testCertificate, config.Certificate);
+            Assert.IsNull(config.CertificateProvider);
             Assert.IsFalse(config.SendX5C);
             Assert.IsNull(config.ClaimsToSign);
             Assert.IsTrue(config.MergeWithDefaultClaims);
-            Assert.IsFalse(config.EnableMtlsProofOfPossession);
+            Assert.IsFalse(config.AssociateTokensWithCertificate);
         }
 
         [TestMethod]
@@ -56,8 +57,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 SendX5C = true,
                 ClaimsToSign = claims,
                 MergeWithDefaultClaims = false,
-                EnableMtlsProofOfPossession = true,
-                UseBearerTokenWithMtls = true,
+                AssociateTokensWithCertificate = true,
                 Claims = "{\"access_token\":{\"acrs\":{\"essential\":true}}}"
             };
 
@@ -65,9 +65,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsTrue(config.SendX5C);
             Assert.AreEqual(claims, config.ClaimsToSign);
             Assert.IsFalse(config.MergeWithDefaultClaims);
-            Assert.IsTrue(config.EnableMtlsProofOfPossession);
-            Assert.IsTrue(config.UseBearerTokenWithMtls);
+            Assert.IsTrue(config.AssociateTokensWithCertificate);
             Assert.IsNotNull(config.Claims);
+        }
+
+        [TestMethod]
+        public void CertificateConfiguration_WithProvider()
+        {
+            Func<X509Certificate2> provider = () => s_testCertificate;
+            var config = new CertificateConfiguration(provider)
+            {
+                SendX5C = true
+            };
+
+            Assert.IsNull(config.Certificate);
+            Assert.IsNotNull(config.CertificateProvider);
+            Assert.AreEqual(s_testCertificate, config.CertificateProvider());
+            Assert.IsTrue(config.SendX5C);
         }
 
         [TestMethod]
@@ -119,11 +133,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithCertificate_WithMtlsPoP()
+        public void WithCertificate_WithTokenAssociation()
         {
             var certConfig = new CertificateConfiguration(s_testCertificate)
             {
-                EnableMtlsProofOfPossession = true
+                AssociateTokensWithCertificate = true
             };
 
             var app = ConfidentialClientApplicationBuilder
@@ -131,7 +145,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithCertificate(certConfig)
                 .BuildConcrete();
 
-            Assert.IsTrue(app.AppConfig.IsMtlsPopEnabledByCertificateConfiguration);
+            Assert.IsNotNull(app.AppConfig.CertificateIdToAssociateWithToken);
+            Assert.IsTrue(app.AppConfig.CertificateIdToAssociateWithToken.Contains(s_testCertificate.Thumbprint));
         }
 
         [TestMethod]
@@ -146,11 +161,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var certConfig = new CertificateConfiguration(s_testCertificate)
             {
                 SendX5C = true,
-                AssociateTokensWithCertificateSerialNumber = true,
+                AssociateTokensWithCertificate = true,
                 ClaimsToSign = claims,
                 MergeWithDefaultClaims = true,
-                EnableMtlsProofOfPossession = true,
-                UseBearerTokenWithMtls = false,
                 Claims = "{\"access_token\":{\"acrs\":{\"essential\":true}}}"
             };
 
@@ -160,28 +173,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             Assert.IsTrue(app.AppConfig.SendX5C);
-            Assert.AreEqual(s_testCertificate.SerialNumber, app.AppConfig.CertificateIdToAssociateWithToken);
-            Assert.IsTrue(app.AppConfig.IsMtlsPopEnabledByCertificateConfiguration);
-            Assert.IsFalse(app.AppConfig.UseBearerTokenWithMtls);
+            Assert.IsNotNull(app.AppConfig.CertificateIdToAssociateWithToken);
             Assert.IsNotNull(app.AppConfig.CertificateConfigurationClaims);
-        }
-
-        [TestMethod]
-        public void WithCertificate_UseBearerTokenWithMtls()
-        {
-            var certConfig = new CertificateConfiguration(s_testCertificate)
-            {
-                EnableMtlsProofOfPossession = true,
-                UseBearerTokenWithMtls = true
-            };
-
-            var app = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithCertificate(certConfig)
-                .BuildConcrete();
-
-            Assert.IsTrue(app.AppConfig.IsMtlsPopEnabledByCertificateConfiguration);
-            Assert.IsTrue(app.AppConfig.UseBearerTokenWithMtls);
         }
 
         [TestMethod]
@@ -241,10 +234,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
                         tokenType: "mtls_pop");
 
-                    var certConfig = new CertificateConfiguration(s_testCertificate)
-                    {
-                        EnableMtlsProofOfPossession = true
-                    };
+                    var certConfig = new CertificateConfiguration(s_testCertificate);
 
                     var app = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
@@ -254,8 +244,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
-                    // Token acquisition should automatically use mTLS PoP without explicitly calling WithMtlsProofOfPossession
+                    // Token acquisition with mTLS PoP explicitly requested at request time
                     AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
                         .ExecuteAsync()
                         .ConfigureAwait(false);
 

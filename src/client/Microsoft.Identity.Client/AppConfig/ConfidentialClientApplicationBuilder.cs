@@ -176,8 +176,9 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Configures certificate-based authentication with advanced options.
-        /// This method provides a unified way to configure all certificate-related settings including
-        /// X5C, mTLS, claims, and more. For simple certificate authentication, use <see cref="WithCertificate(X509Certificate2)"/>.
+        /// This method provides a unified way to configure certificate-related settings including
+        /// X5C, custom claims, and cache association. For simple certificate authentication, use <see cref="WithCertificate(X509Certificate2)"/>.
+        /// To use mTLS with PoP or bearer tokens, call .WithMtlsProofOfPossession() or .WithMtlsBearerToken() at request time.
         /// See https://aka.ms/msal-net-certificate-configuration for details.
         /// </summary>
         /// <param name="certificateConfiguration">The certificate configuration containing all certificate-related options.</param>
@@ -186,17 +187,27 @@ namespace Microsoft.Identity.Client
         /// <exception cref="MsalClientException">Thrown when the certificate does not have a private key.</exception>
         /// <remarks>
         /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
+        /// Supports both static certificates and certificate providers for rotation scenarios.
         /// </remarks>
         /// <example>
         /// <code>
+        /// // Static certificate
         /// var app = ConfidentialClientApplicationBuilder
         ///     .Create(clientId)
         ///     .WithCertificate(new CertificateConfiguration(certificate)
         ///     {
         ///         SendX5C = true,
-        ///         EnableMtlsProofOfPossession = true
+        ///         ClaimsToSign = customClaims
         ///     })
-        ///     .WithAzureRegion("eastus")
+        ///     .Build();
+        ///     
+        /// // Certificate provider for rotation
+        /// var app = ConfidentialClientApplicationBuilder
+        ///     .Create(clientId)
+        ///     .WithCertificate(new CertificateConfiguration(() => GetCurrentCertificate())
+        ///     {
+        ///         SendX5C = true
+        ///     })
         ///     .Build();
         /// </code>
         /// </example>
@@ -207,16 +218,31 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(certificateConfiguration));
             }
 
-            var certificate = certificateConfiguration.Certificate;
+            X509Certificate2 certificate = null;
+            
+            // Handle both static certificate and certificate provider
+            if (certificateConfiguration.CertificateProvider != null)
+            {
+                // Store the provider for dynamic certificate retrieval
+                Config.CertificateProvider = certificateConfiguration.CertificateProvider;
+                certificate = certificateConfiguration.CertificateProvider();
+            }
+            else
+            {
+                certificate = certificateConfiguration.Certificate;
+            }
 
             if (certificate == null)
             {
-                throw new ArgumentNullException(nameof(certificateConfiguration.Certificate));
+                throw new ArgumentNullException(
+                    certificateConfiguration.CertificateProvider != null 
+                        ? "certificateProvider returned null" 
+                        : nameof(certificateConfiguration.Certificate));
             }
 
             if (!certificate.HasPrivateKey)
             {
-                throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificateConfiguration.Certificate)));
+                throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey("certificate"));
             }
 
             // Set up the client credential based on whether custom claims are specified
@@ -235,11 +261,12 @@ namespace Microsoft.Identity.Client
             // Set X5C configuration
             Config.SendX5C = certificateConfiguration.SendX5C;
 
-            // Store mTLS PoP configuration for later use at request time
-            if (certificateConfiguration.EnableMtlsProofOfPossession)
+            // Store token-to-certificate association setting
+            if (certificateConfiguration.AssociateTokensWithCertificate)
             {
-                Config.IsMtlsPopEnabledByCertificateConfiguration = true;
-                Config.UseBearerTokenWithMtls = certificateConfiguration.UseBearerTokenWithMtls;
+                // Generate a cache key that includes both cert and claims
+                string cacheKey = GenerateCertificateCacheKey(certificate, certificateConfiguration.ClaimsToSign);
+                Config.CertificateIdToAssociateWithToken = cacheKey;
             }
 
             // Store claims for use at request time (for claims challenge scenarios)
@@ -249,6 +276,25 @@ namespace Microsoft.Identity.Client
             }
 
             return this;
+        }
+
+        private string GenerateCertificateCacheKey(X509Certificate2 certificate, IDictionary<string, string> claimsToSign)
+        {
+            // Use thumbprint as base
+            string key = certificate.Thumbprint;
+            
+            // If there are custom claims, include their hash in the cache key
+            if (claimsToSign != null && claimsToSign.Any())
+            {
+                var claimsString = string.Join(";", claimsToSign.OrderBy(kvp => kvp.Key).Select(kvp => $"{kvp.Key}={kvp.Value}"));
+                using (var sha256 = System.Security.Cryptography.SHA256.Create())
+                {
+                    var claimsHash = Convert.ToBase64String(sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(claimsString)));
+                    key = $"{key}_{claimsHash}";
+                }
+            }
+            
+            return key;
         }
 
         /// <summary>

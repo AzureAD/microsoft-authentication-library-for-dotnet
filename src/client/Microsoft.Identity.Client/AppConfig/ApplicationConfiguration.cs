@@ -127,16 +127,10 @@ namespace Microsoft.Identity.Client
         public string CertificateIdToAssociateWithToken { get; set; }
 
         /// <summary>
-        /// Indicates whether mTLS PoP was enabled via CertificateConfiguration.
-        /// This is used to automatically apply mTLS PoP settings at request time.
+        /// Certificate provider function for dynamic certificate retrieval.
+        /// Enables certificate rotation scenarios.
         /// </summary>
-        public bool IsMtlsPopEnabledByCertificateConfiguration { get; set; } = false;
-
-        /// <summary>
-        /// When using mTLS with certificate, determines whether to request a bearer token (true) 
-        /// or a PoP token (false). Only applicable when IsMtlsPopEnabledByCertificateConfiguration is true.
-        /// </summary>
-        public bool UseBearerTokenWithMtls { get; set; } = false;
+        public Func<X509Certificate2> CertificateProvider { get; set; }
 
         /// <summary>
         /// Claims to be included in token requests, typically from claims challenge scenarios.

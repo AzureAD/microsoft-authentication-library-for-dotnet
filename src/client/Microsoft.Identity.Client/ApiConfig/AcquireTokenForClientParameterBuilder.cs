@@ -50,22 +50,6 @@ namespace Microsoft.Identity.Client
                 });
             }
 
-            // Auto-apply mTLS PoP if enabled via CertificateConfiguration
-            if (confidentialClientApplicationExecutor.ServiceBundle.Config.IsMtlsPopEnabledByCertificateConfiguration)
-            {
-                // Apply mTLS - either PoP or Bearer based on configuration
-                if (confidentialClientApplicationExecutor.ServiceBundle.Config.UseBearerTokenWithMtls)
-                {
-                    // Use bearer token over mTLS
-                    builder.ApplyMtlsBearerAuthentication();
-                }
-                else
-                {
-                    // Use PoP token with mTLS (default)
-                    builder.WithMtlsProofOfPossession();
-                }
-            }
-
             // Auto-apply claims if specified in CertificateConfiguration
             if (!string.IsNullOrWhiteSpace(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateConfigurationClaims))
             {
@@ -136,10 +120,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Internal method to apply mTLS bearer authentication (bearer token over mTLS transport).
-        /// This is called automatically when CertificateConfiguration.UseBearerTokenWithMtls is true.
+        /// Specifies that the certificate will be used for mTLS authentication with bearer tokens.
+        /// The certificate is used for mutual TLS at the transport layer, but the token returned is a standard bearer token (not bound to the certificate).
+        /// This provides transport-layer security while maintaining compatibility with systems expecting bearer tokens.
+        /// Requires an Azure region to be configured and a certificate to be set via WithCertificate.
+        /// For more information, refer to the <see href="https://aka.ms/mtls-pop">mTLS documentation</see>.
         /// </summary>
-        internal AcquireTokenForClientParameterBuilder ApplyMtlsBearerAuthentication()
+        /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
+        public AcquireTokenForClientParameterBuilder WithMtlsBearerToken()
         {
             if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certificateCredential)
             {
