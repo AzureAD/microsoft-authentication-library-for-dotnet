@@ -37,10 +37,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task ExtraQP()
         {
-            Dictionary<string, string> extraQp = new()
+            Dictionary<string, (string, bool)> extraQp = new()
               {
-                  { "key1", "1" },
-                  { "key2", "2" }
+                  { "key1", ("1", false) },
+                  { "key2", ("2", false) }
               };
 
             // Arrange

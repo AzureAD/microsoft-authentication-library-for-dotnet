@@ -295,7 +295,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParameters)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                         .BuildConcrete();
 
                 AuthenticationResult result = await app
@@ -339,7 +339,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParameters)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                         .BuildConcrete();
 
                 AuthenticationResult result = await app
@@ -392,7 +392,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParameters)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                         .BuildConcrete();
 
                 MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
