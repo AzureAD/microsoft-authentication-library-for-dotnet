@@ -22,10 +22,10 @@ namespace NetCoreTestApp
 {
     public class Program
     {
-        internal /* for test */ static Dictionary<string, string> CallerSDKDetails { get; } = new()
+        internal /* for test */ static Dictionary<string, (string, bool)> CallerSDKDetails { get; } = new()
           {
-              { "caller-sdk-id", "IdWeb_1" },
-              { "caller-sdk-ver", "123" }
+              { "caller-sdk-id", ("IdWeb_1", false) },
+              { "caller-sdk-ver", ("123", false) }
           };
 
         // This app has http://localhost redirect uri registered
@@ -387,7 +387,10 @@ namespace NetCoreTestApp
 
                             var resultX1 = await cca1.AcquireTokenForClient(GraphAppScope)
                                 .WithMtlsProofOfPossession()
-                                .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice
+                                .WithExtraQueryParameters(new Dictionary<string, (string, bool)>() {
+                                    { "dc", ("ESTSR-PUB-WUS3-AZ1-TEST1", false)},
+                                    { "slice", ("TestSlice", false)}
+                                }) //Feature in test slice
                                 .ExecuteAsync()
                                 .ConfigureAwait(false);
 

@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithLoginHint(TestConstants.DisplayableId)
-                                                         .WithExtraQueryParameters("domain_hint=mydomain.com")
+                                                         .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)> { { "domain_hint", ("mydomain.com", false) } })
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 

@@ -1,3 +1,18 @@
+4.79.0
+======
+
+### Changes
+* Managed Identity IMDSv2 and new support APIs (ResetForTest, GetSourceAsync) in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5501
+* Bearer Requests should Fallback to IMDS in Preview in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5562
+* Updating MSAL to send client info = 2 on client credential flow in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5529
+* Make `IMsalMtlsHttpClientFactory` interface public in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5559* Adjust WithExtraQueryParameters APIs and cache key behavior https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5536
+
+### Bug fixes 
+* Fix instance discovery bug in Fr cloud [#5549](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5549)
+* Mark WithClientAssertion  API as experimental [#5551](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5551)
+
+
+
 4.78.0
 ======
 ### Changes
