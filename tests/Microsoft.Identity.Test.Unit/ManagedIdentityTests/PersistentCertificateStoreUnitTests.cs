@@ -22,9 +22,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         private static ILoggerAdapter Logger => Substitute.For<ILoggerAdapter>();
 
+        private IPersistentCertificateCache _cache;
+
         [TestInitialize]
         public void ImdsV2Tests_Init()
         {
+            // Create the platform cache once per test run.
+            // It's safe to instantiate on non-Windows; methods no-op internally.
+            _cache = new WindowsPersistentCertificateCache();
+
             // Clean persisted store so prior DataRows/runs don't leak into this test
             if (ImdsV2TestStoreCleaner.IsWindows)
             {
@@ -86,31 +92,31 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 items = store.Certificates.Cast<X509Certificate2>().ToArray();
             }
 
-            foreach (var c in items)
+            foreach (var cert in items)
             {
                 try
                 {
-                    if (FriendlyNameCodec.TryDecode(c.FriendlyName, out var a, out _)
-                        && StringComparer.Ordinal.Equals(a, alias))
+                    if (MsiCertificateFriendlyNameEncoder.TryDecode(cert.FriendlyName, out var decodedAlias, out _)
+                        && StringComparer.Ordinal.Equals(decodedAlias, alias))
                     {
                         try
-                        { store.Remove(c); }
+                        { store.Remove(cert); }
                         catch { /* best-effort */ }
                     }
                 }
                 finally
                 {
-                    c.Dispose();
+                    cert.Dispose();
                 }
             }
         }
 
         // Small polling helper to absorb store-write propagation timing
-        private static bool WaitForFind(string alias, out CertificateCacheValue value, int retries = 10, int delayMs = 50)
+        private bool WaitForFind(string alias, out CertificateCacheValue value, int retries = 10, int delayMs = 50)
         {
             for (int i = 0; i < retries; i++)
             {
-                if (PersistentCertificateStore.TryFind(alias, out value, Logger))
+                if (_cache.Read(alias, out value, Logger))
                     return true;
 
                 Thread.Sleep(delayMs);
@@ -123,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         // --- tests ---
 
         [TestMethod]
-        public void TryPersist_Then_TryFind_HappyPath()
+        public void Write_Then_Read_HappyPath()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -136,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 using var cert = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromDays(3));
 
-                PersistentCertificateStore.TryPersist(alias, cert, ep, clientId: "ignored", logger: Logger);
+                _cache.Write(alias, cert, ep, Logger);
 
                 // Verify we can find it (with a small retry to avoid timing flakes)
                 Assert.IsTrue(WaitForFind(alias, out var value), "Persisted cert should be found.");
@@ -152,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryPersist_NewestWins_SkipOlder()
+        public void Write_NewestWins_SkipOlder()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -167,8 +173,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 using var newer = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromDays(3));
 
                 // Persist older first, then newer
-                PersistentCertificateStore.TryPersist(alias, older, ep, "ignored", Logger);
-                PersistentCertificateStore.TryPersist(alias, newer, ep, "ignored", Logger);
+                _cache.Write(alias, older, ep, Logger);
+                _cache.Write(alias, newer, ep, Logger);
 
                 // Selection should return the newer one (by NotAfter)
                 Assert.IsTrue(WaitForFind(alias, out var value), "Expected to find persisted cert.");
@@ -182,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryPersist_Skip_Add_When_NewerOrEqual_AlreadyPresent()
+        public void Write_Skip_Add_When_NewerOrEqual_AlreadyPresent()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -197,12 +203,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 using var older = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromDays(2));
 
                 // Add newer first
-                PersistentCertificateStore.TryPersist(alias, newer, ep, "ignored", Logger);
+                _cache.Write(alias, newer, ep, Logger);
 
                 // Attempt to add older (should be skipped)
-                PersistentCertificateStore.TryPersist(alias, older, ep, "ignored", Logger);
+                _cache.Write(alias, older, ep, Logger);
 
-                // TryFind returns the newer
+                // Read returns the newer
                 Assert.IsTrue(WaitForFind(alias, out var value), "Expected to find persisted cert.");
                 var delta = Math.Abs((value.Certificate.NotAfter - newer.NotAfter).TotalSeconds);
                 Assert.IsTrue(delta <= 2);
@@ -214,7 +220,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryFind_Rejects_NonGuid_CN()
+        public void Read_Rejects_NonGuid_CN()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -226,10 +232,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 using var cert = CreateSelfSignedWithKey("CN=Test", TimeSpan.FromDays(3));
 
-                PersistentCertificateStore.TryPersist(alias, cert, ep, "ignored", Logger);
+                _cache.Write(alias, cert, ep, Logger);
 
                 // Should not return non-GUID CN entries
-                Assert.IsFalse(PersistentCertificateStore.TryFind(alias, out _, Logger));
+                Assert.IsFalse(_cache.Read(alias, out _, Logger));
             }
             finally
             {
@@ -238,7 +244,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryFind_Rejects_Short_Lifetime_Less_Than_24h()
+        public void Read_Rejects_Short_Lifetime_Less_Than_24h()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -251,10 +257,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 using var shortLived = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromHours(23)); // < 24h
 
-                PersistentCertificateStore.TryPersist(alias, shortLived, ep, "ignored", Logger);
+                _cache.Write(alias, shortLived, ep, Logger);
 
                 // Selection policy should reject it
-                Assert.IsFalse(PersistentCertificateStore.TryFind(alias, out _, Logger));
+                Assert.IsFalse(_cache.Read(alias, out _, Logger));
             }
             finally
             {
@@ -263,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void PruneExpired_Removes_Only_Expired()
+        public void Delete_Prunes_Expired_Only()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -275,13 +281,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             try
             {
                 // Expired cert (NotAfter in the past)
-                var now = DateTimeOffset.UtcNow;
                 using var expired = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromSeconds(-30));
 
-                PersistentCertificateStore.TryPersist(alias, expired, ep, "ignored", Logger);
+                _cache.Write(alias, expired, ep, Logger);
 
                 // Ensure it is (potentially) present, then prune
-                PersistentCertificateStore.TryPruneAliasOlderThan(alias, now, Logger);
+                _cache.Delete(alias, Logger);
 
                 // Verify no entries remain for alias
                 using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
@@ -289,7 +294,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var any = store.Certificates
                     .Cast<X509Certificate2>()
-                    .Any(c => FriendlyNameCodec.TryDecode(c.FriendlyName, out var a, out _)
+                    .Any(c => MsiCertificateFriendlyNameEncoder.TryDecode(c.FriendlyName, out var a, out _)
                            && StringComparer.Ordinal.Equals(a, alias));
 
                 foreach (var c in store.Certificates)
@@ -304,7 +309,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryPersist_Skips_When_Mutex_Busy_Then_Succeeds_After_Release()
+        public void Write_Skips_When_Mutex_Busy_Then_Succeeds_After_Release()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -339,15 +344,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Wait until the lock is held
                 Assert.IsTrue(hold.Wait(2000));
 
-                // First persist should *skip* due to contention (best-effort)
-                PersistentCertificateStore.TryPersist(alias, cert, ep, "ignored", Logger);
+                // First write should *skip* due to contention (best-effort)
+                _cache.Write(alias, cert, ep, Logger);
 
                 // Verify not added yet
-                Assert.IsFalse(PersistentCertificateStore.TryFind(alias, out _, Logger));
+                Assert.IsFalse(_cache.Read(alias, out _, Logger));
 
                 // After lock released, try again => should persist
                 Assert.IsTrue(done.Wait(5000));
-                PersistentCertificateStore.TryPersist(alias, cert, ep, "ignored", Logger);
+                _cache.Write(alias, cert, ep, Logger);
 
                 Assert.IsTrue(WaitForFind(alias, out var v), "Expected to find after lock released.");
                 Assert.AreEqual(ep, v.Endpoint);
@@ -362,7 +367,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         #region Additional tests
 
         [TestMethod]
-        public void TryPersist_DoesNotPersist_When_NoPrivateKey()
+        public void Write_DoesNotPersist_When_NoPrivateKey()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -378,11 +383,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 using var pubOnly = new X509Certificate2(withKey.Export(X509ContentType.Cert)); // public-only
                 Assert.IsFalse(pubOnly.HasPrivateKey, "Test setup must produce a public-only cert.");
 
-                // Persist should no-op for no-private-key
-                PersistentCertificateStore.TryPersist(alias, pubOnly, ep, "ignored", Logger);
+                // Write should no-op from a usability standpoint (read won't return it)
+                _cache.Write(alias, pubOnly, ep, Logger);
 
-                // Should not find anything for alias
-                Assert.IsFalse(PersistentCertificateStore.TryFind(alias, out _, Logger));
+                // Should not find anything usable for alias
+                Assert.IsFalse(_cache.Read(alias, out _, Logger));
             }
             finally
             {
@@ -391,7 +396,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryFind_Boundary_Exactly24h_IsRejected()
+        public void Read_Boundary_Exactly24h_IsRejected()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -406,8 +411,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // yields NotAfter ≈ (now + 24h). That should be rejected by policy (<= 24h is insufficient).
                 using var exactly24h = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromHours(24).Add(TimeSpan.FromMinutes(2)));
 
-                PersistentCertificateStore.TryPersist(alias, exactly24h, ep, "ignored", Logger);
-                Assert.IsFalse(PersistentCertificateStore.TryFind(alias, out _, Logger),
+                _cache.Write(alias, exactly24h, ep, Logger);
+                Assert.IsFalse(_cache.Read(alias, out _, Logger),
                     "Exactly-24h remaining should be rejected by policy.");
             }
             finally
@@ -417,7 +422,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryFind_Boundary_JustOver24h_IsAccepted()
+        public void Read_Boundary_JustOver24h_IsAccepted()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -431,8 +436,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // 24h + 3m lifetime (with notBefore = now-2m) → NotAfter ≈ now + 24h + 1m → acceptable
                 using var over24h = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromHours(24).Add(TimeSpan.FromMinutes(3)));
 
-                PersistentCertificateStore.TryPersist(alias, over24h, ep, "ignored", Logger);
-                Assert.IsTrue(PersistentCertificateStore.TryFind(alias, out var v, Logger),
+                _cache.Write(alias, over24h, ep, Logger);
+                Assert.IsTrue(_cache.Read(alias, out var v, Logger),
                     "Slightly-over-24h remaining should be accepted.");
                 Assert.AreEqual(ep, v.Endpoint);
                 Assert.AreEqual(guid, v.ClientId);
@@ -444,7 +449,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryFind_Returns_Newest_Endpoint_And_ClientId()
+        public void Read_Returns_Newest_Endpoint_And_ClientId()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -460,10 +465,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 using var older = CreateSelfSignedWithKey("CN=" + guidOld, TimeSpan.FromDays(2));
                 using var newer = CreateSelfSignedWithKey("CN=" + guidNew, TimeSpan.FromDays(3));
 
-                PersistentCertificateStore.TryPersist(alias, older, epOld, "ignored", Logger);
-                PersistentCertificateStore.TryPersist(alias, newer, epNew, "ignored", Logger);
+                _cache.Write(alias, older, epOld, Logger);
+                _cache.Write(alias, newer, epNew, Logger);
 
-                Assert.IsTrue(PersistentCertificateStore.TryFind(alias, out var v, Logger), "Expected find for alias.");
+                Assert.IsTrue(_cache.Read(alias, out var v, Logger), "Expected read for alias.");
                 Assert.AreEqual(guidNew, v.ClientId, "ClientId must reflect the newest NotAfter entry.");
                 Assert.AreEqual(epNew, v.Endpoint, "Endpoint must come from the newest NotAfter entry.");
             }
@@ -474,7 +479,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryFind_Isolated_Per_Alias_No_Cross_Talk()
+        public void Read_Isolated_Per_Alias_No_Cross_Talk()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -491,14 +496,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 using var c1 = CreateSelfSignedWithKey("CN=" + guid1, TimeSpan.FromDays(3));
                 using var c2 = CreateSelfSignedWithKey("CN=" + guid2, TimeSpan.FromDays(3));
 
-                PersistentCertificateStore.TryPersist(alias1, c1, ep1, "ignored", Logger);
-                PersistentCertificateStore.TryPersist(alias2, c2, ep2, "ignored", Logger);
+                _cache.Write(alias1, c1, ep1, Logger);
+                _cache.Write(alias2, c2, ep2, Logger);
 
-                Assert.IsTrue(PersistentCertificateStore.TryFind(alias1, out var v1, Logger));
+                Assert.IsTrue(_cache.Read(alias1, out var v1, Logger));
                 Assert.AreEqual(ep1, v1.Endpoint);
                 Assert.AreEqual(guid1, v1.ClientId);
 
-                Assert.IsTrue(PersistentCertificateStore.TryFind(alias2, out var v2, Logger));
+                Assert.IsTrue(_cache.Read(alias2, out var v2, Logger));
                 Assert.AreEqual(ep2, v2.Endpoint);
                 Assert.AreEqual(guid2, v2.ClientId);
             }
@@ -510,7 +515,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryFind_Prefers_Newest_Among_Many()
+        public void Read_Prefers_Newest_Among_Many()
         {
             if (!IsWindows)
             { Assert.Inconclusive("Windows-only"); return; }
@@ -529,11 +534,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 using var c2 = CreateSelfSignedWithKey("CN=" + g2, TimeSpan.FromDays(2));
                 using var c3 = CreateSelfSignedWithKey("CN=" + g3, TimeSpan.FromDays(3)); // newest
 
-                PersistentCertificateStore.TryPersist(alias, c1, ep1, "ignored", Logger);
-                PersistentCertificateStore.TryPersist(alias, c2, ep2, "ignored", Logger);
-                PersistentCertificateStore.TryPersist(alias, c3, ep3, "ignored", Logger);
+                _cache.Write(alias, c1, ep1, Logger);
+                _cache.Write(alias, c2, ep2, Logger);
+                _cache.Write(alias, c3, ep3, Logger);
 
-                Assert.IsTrue(PersistentCertificateStore.TryFind(alias, out var v, Logger), "Expected find.");
+                Assert.IsTrue(_cache.Read(alias, out var v, Logger), "Expected read.");
                 Assert.AreEqual(g3, v.ClientId);
                 Assert.AreEqual(ep3, v.Endpoint);
             }
