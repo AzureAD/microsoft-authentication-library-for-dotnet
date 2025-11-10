@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientAssertionDelegate));
             }
 
-            return WithClientAssertion(
+            return WithClientAssertionInternal(
                 (opts, ct) =>
                     Task.FromResult(new ClientSignedAssertion
                     {
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
             }
 
-            return WithClientAssertion(
+            return WithClientAssertionInternal(
                 async (opts, ct) =>
                 {
                     string jwt = await clientAssertionAsyncDelegate(ct).ConfigureAwait(false);
@@ -273,7 +273,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
             }
 
-            return WithClientAssertion(
+            return WithClientAssertionInternal(
                 async (opts, _) =>
                 {
                     string jwt = await clientAssertionAsyncDelegate(opts).ConfigureAwait(false);
@@ -295,6 +295,18 @@ namespace Microsoft.Identity.Client
         /// <exception cref="MsalClientException">Thrown if <paramref name="clientSignedAssertionProvider"/> is <see langword="null"/>.</exception>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions,
             CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
+        {
+            ValidateUseOfExperimentalFeature();
+            return WithClientAssertionInternal(clientSignedAssertionProvider);
+        }
+
+        /// <summary>
+        /// Internal helper to set the client assertion provider.
+        /// </summary>
+        /// <param name="clientSignedAssertionProvider"></param>
+        /// <returns></returns>
+        internal ConfidentialClientApplicationBuilder WithClientAssertionInternal(
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
             Config.ClientCredential = new ClientAssertionDelegateCredential(clientSignedAssertionProvider);
             return this;
