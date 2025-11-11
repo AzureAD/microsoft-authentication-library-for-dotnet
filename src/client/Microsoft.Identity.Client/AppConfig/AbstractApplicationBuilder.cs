@@ -292,10 +292,10 @@ namespace Microsoft.Identity.Client
         /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>The builder to chain the .With methods</returns>
+        [Obsolete("This method is deprecated. Please use the WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
         public T WithExtraQueryParameters(IDictionary<string, string> extraQueryParameters)
         {
-            Config.ExtraQueryParameters = extraQueryParameters;
-            return this as T;
+            return WithExtraQueryParameters(CoreHelpers.ConvertToTupleParameters(extraQueryParameters));
         }
 
         /// <summary>
@@ -305,12 +305,51 @@ namespace Microsoft.Identity.Client
         /// The string needs to be properly URL-encoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// </param>
         /// <returns></returns>
+        [Obsolete("This method is deprecated. Please use the WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
         public T WithExtraQueryParameters(string extraQueryParameters)
         {
             if (!string.IsNullOrWhiteSpace(extraQueryParameters))
             {
                 return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
             }
+            return this as T;
+        }
+
+        /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request with control over which parameters are included in the cache key
+        /// </summary>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority, and merged with those added to the request-level WithExtraQueryParameters API.
+        /// Each dictionary entry maps a parameter name to a tuple containing:
+        /// - Value: The parameter value that will be appended to the query string
+        /// - IncludeInCacheKey: Whether this parameter should be included when computing the token's cache key.
+        /// To help ensure the correct token is returned from the cache, IncludeInCacheKey should be true if the parameter affects token content or validity (e.g., resource-specific claims or parameters).
+        /// The parameter can be null.</param>
+        /// <returns>The builder to chain .With methods.</returns>
+        public T WithExtraQueryParameters(IDictionary<string, (string Value, bool IncludeInCacheKey)> extraQueryParameters)
+        {
+            if (extraQueryParameters == null)
+            {
+                Config.ExtraQueryParameters = null;
+                return this as T;
+            }
+
+            // Add each parameter to ExtraQueryParameters and, if requested, to CacheKeyComponents
+            foreach (var kvp in extraQueryParameters)
+            {
+                Config.ExtraQueryParameters = Config.ExtraQueryParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                
+                Config.ExtraQueryParameters[kvp.Key] = kvp.Value.Value;
+
+                if (kvp.Value.IncludeInCacheKey)
+                {
+                    // Initialize the cache key components if needed
+                    Config.CacheKeyComponents = Config.CacheKeyComponents ?? new SortedList<string, string>();
+
+                    // Add to cache key components - uses a func that returns the value as a task
+                    Config.CacheKeyComponents[kvp.Key] = kvp.Value.Value;
+                }
+            }
+
             return this as T;
         }
 

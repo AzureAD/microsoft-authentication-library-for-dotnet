@@ -370,6 +370,142 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        public async Task CacheExt_WithExtraQueryParameters_NoConflictTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                              .WithClientSecret(TestConstants.ClientSecret)
+                                              .WithHttpManager(httpManager)
+                                              .BuildConcrete();
+
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // Test 1: Use WithAdditionalCacheKeyComponents only
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_additional_components");
+                var result1 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                        .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
+                                        .ExecuteAsync(CancellationToken.None)
+                                        .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_additional_components", result1.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+
+                // Test 2: Use tuple-based WithExtraQueryParameters only
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_tuple_params");
+                var result2 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                     .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                     {
+                                 { "param1", ("value1", true) },
+                                 { "param2", ("value2", true) }
+                                     })
+                                     .ExecuteAsync()
+                                     .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_tuple_params", result2.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+
+                // Test 3: Use both APIs together - should create a different cache entry
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_both_apis");
+                var result3 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                     .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
+                                     .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                     {
+                                 { "param1", ("value1", true) },
+                                 { "param2", ("value2", true) }
+                                     })
+                                     .ExecuteAsync()
+                                     .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_both_apis", result3.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result3.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+
+                // Test 4: Retrieve from cache using the same combination
+                var result4 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                     .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
+                                     .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                     {
+                                 { "param1", ("value1", true) },
+                                 { "param2", ("value2", true) }
+                                     })
+                                     .ExecuteAsync()
+                                     .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_both_apis", result4.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result4.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+
+                // Test 5: Test with non-cached parameters
+                var result5 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                     .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
+                                     .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                     {
+                                 { "param1", ("value1", true) },
+                                 { "param2", ("value2", true) },
+                                 { "non_cached_param", ("some_value", false) } // This should not affect cache key
+                                     })
+                                     .ExecuteAsync()
+                                     .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_both_apis", result5.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result5.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+
+                // Test 6: Change a parameter that is included in cache key - should get a new token
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_changed_param");
+                var result6 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                     .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync1)
+                                     .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                     {
+                                 { "param1", ("different_value", true) }, // Changed value with includeInCacheKey=true
+                                 { "param2", ("value2", true) }
+                                     })
+                                     .ExecuteAsync()
+                                     .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_changed_param", result6.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result6.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(4, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+
+                // Test 7: Now try with includeInCacheKey=false for a parameter
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_non_cached_param");
+                var result7 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                     .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync2) // Different additional components
+                                     .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                     {
+                                 { "param3", ("value3", false) } // Not included in cache key
+                                     })
+                                     .ExecuteAsync()
+                                     .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_non_cached_param", result7.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result7.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(5, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+
+                // Test 8: Repeat with same config but change the non-cached parameter value
+                var result8 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                     .WithAdditionalCacheKeyComponents(_additionalCacheKeysAsync2)
+                                     .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>
+                                     {
+                                 { "param3", ("different_value3", false) } // Changed value but not in cache key
+                                     })
+                                     .ExecuteAsync()
+                                     .ConfigureAwait(false);
+
+                Assert.AreEqual("token_with_non_cached_param", result8.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result8.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(5, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+            }
+        }
+
         private void BeforeCacheAccess(TokenCacheNotificationArgs args)
         {
             args.TokenCache.DeserializeMsalV3(_serializedCache);
