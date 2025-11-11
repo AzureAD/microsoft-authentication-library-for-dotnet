@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             {
                 pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithRedirectUri("http://localhost:52073")
                     .WithAdfsAuthority("https://fs.id4slab1.com/adfs", validateAuthority: false)
                     .WithTestLogging()
                     .Build();
@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             {
                 pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithRedirectUri("http://localhost:52073")
                     .WithAuthority(labResponse.Lab.Authority + "common")
                     .WithTestLogging(out factory)
                     .Build();
