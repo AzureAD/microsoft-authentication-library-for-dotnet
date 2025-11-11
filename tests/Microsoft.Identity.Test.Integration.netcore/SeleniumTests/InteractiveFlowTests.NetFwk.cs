@@ -42,8 +42,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetFx)]
         public async Task Interactive_AADAsync()
         {
-            // Arrange
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+            // Arrange - Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
+            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
             var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
