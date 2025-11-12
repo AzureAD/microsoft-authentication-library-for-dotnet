@@ -1,11 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Check if .NET 10 SDK is available -->
-  <PropertyGroup>
-    <DotNet10SdkAvailable Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '10.0'))">true</DotNet10SdkAvailable>
-    <DotNet10SdkAvailable Condition="'$(DotNet10SdkAvailable)' == ''">false</DotNet10SdkAvailable>
-  </PropertyGroup>
-
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
     <TargetFrameworkNetDesktop472>net472</TargetFrameworkNetDesktop472>
