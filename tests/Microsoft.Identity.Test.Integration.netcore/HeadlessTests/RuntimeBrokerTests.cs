@@ -305,7 +305,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            // Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
@@ -486,7 +487,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            // Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
             
             string popUser = "MSAL-User-POP@id4slab1.onmicrosoft.com";
 
@@ -524,7 +526,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            // Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
             string popUser = "MSAL-User-POP@id4slab1.onmicrosoft.com";
 
