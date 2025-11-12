@@ -1,11 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Check if .NET 10 SDK is available -->
+  <PropertyGroup>
+    <DotNet10SdkAvailable Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '10.0'))">true</DotNet10SdkAvailable>
+    <DotNet10SdkAvailable Condition="'$(DotNet10SdkAvailable)' == ''">false</DotNet10SdkAvailable>
+  </PropertyGroup>
+
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
     <TargetFrameworkNetDesktop472>net472</TargetFrameworkNetDesktop472>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNet8>net8.0</TargetFrameworkNet8>
-    <TargetFrameworkNet10>net10.0</TargetFrameworkNet10>
+    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
+    <!-- .NET 10 support - only included when .NET 10 SDK (10.0+) is available -->
+    <TargetFrameworkNet10 Condition="'$(DotNet10SdkAvailable)' == 'true'">net10.0</TargetFrameworkNet10>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
@@ -13,8 +20,8 @@
   <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
     <TargetFrameworkNetAndroid>net8.0-android</TargetFrameworkNetAndroid>
     <TargetFrameworkNetIos>net8.0-ios</TargetFrameworkNetIos>
-    <TargetFrameworkNet10Android>net10.0-android</TargetFrameworkNet10Android>
-    <TargetFrameworkNet10Ios>net10.0-ios</TargetFrameworkNet10Ios>
+    <TargetFrameworkNet10Android Condition="'$(DotNet10SdkAvailable)' == 'true'">net10.0-android</TargetFrameworkNet10Android>
+    <TargetFrameworkNet10Ios Condition="'$(DotNet10SdkAvailable)' == 'true'">net10.0-ios</TargetFrameworkNet10Ios>
   </PropertyGroup>
 
   <!-- mobile SDK constraints -->
@@ -24,9 +31,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet8);$(TargetFrameworkNet10Ios);$(TargetFrameworkNet10Android);$(TargetFrameworkNet10);</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet8);$(TargetFrameworkNet10Ios);$(TargetFrameworkNet10Android);$(TargetFrameworkNet10)</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet8);$(TargetFrameworkNet10)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet);$(TargetFrameworkNet10Ios);$(TargetFrameworkNet10Android);$(TargetFrameworkNet10);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet);$(TargetFrameworkNet10Ios);$(TargetFrameworkNet10Android);$(TargetFrameworkNet10)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet);$(TargetFrameworkNet10)</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -101,7 +108,7 @@
     <PackageReference Include="System.Security.Cryptography.Cng" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet8)' or '$(TargetFramework)' == '$(TargetFrameworkNet10)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)' or '$(TargetFramework)' == '$(TargetFrameworkNet10)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\net\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
