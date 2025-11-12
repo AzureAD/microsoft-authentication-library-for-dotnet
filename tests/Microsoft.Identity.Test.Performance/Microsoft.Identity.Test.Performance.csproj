@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(DotNet10SdkAvailable)' == 'true'">net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(DotNet10SdkAvailable)' != 'true'">net8.0</TargetFrameworks>
     <Configurations>Debug;Release</Configurations>
     <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
     <!-- https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype -->

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworkNetDesktop48>net48</TargetFrameworkNetDesktop48>
     <TargetFrameworkNet8>net8.0</TargetFrameworkNet8>
-    <TargetFrameworkNet10>net10.0</TargetFrameworkNet10>
+    <TargetFrameworkNet10 Condition="'$(DotNet10SdkAvailable)' == 'true'">net10.0</TargetFrameworkNet10>
 
     <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet8);$(TargetFrameworkNet10)</TargetFrameworks>
     <IsPackable>false</IsPackable>
