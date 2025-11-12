@@ -4,7 +4,8 @@
     <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
     <TargetFrameworkNetDesktop472>net472</TargetFrameworkNetDesktop472>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
+    <TargetFrameworkNet8>net8.0</TargetFrameworkNet8>
+    <TargetFrameworkNet10>net10.0</TargetFrameworkNet10>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
@@ -12,18 +13,20 @@
   <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
     <TargetFrameworkNetAndroid>net8.0-android</TargetFrameworkNetAndroid>
     <TargetFrameworkNetIos>net8.0-ios</TargetFrameworkNetIos>
+    <TargetFrameworkNet10Android>net10.0-android</TargetFrameworkNet10Android>
+    <TargetFrameworkNet10Ios>net10.0-ios</TargetFrameworkNet10Ios>
   </PropertyGroup>
 
   <!-- mobile SDK constraints -->
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)' or '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">
-    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">14.2</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">21.0</SupportedOSPlatformVersion>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)' or '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' or '$(TargetFramework)' == '$(TargetFrameworkNet10Ios)' or '$(TargetFramework)' == '$(TargetFrameworkNet10Android)'">
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)' or '$(TargetFramework)' == '$(TargetFrameworkNet10Ios)'">14.2</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' or '$(TargetFramework)' == '$(TargetFrameworkNet10Android)'">21.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet);</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet)</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet8);$(TargetFrameworkNet10Ios);$(TargetFrameworkNet10Android);$(TargetFrameworkNet10);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet8);$(TargetFrameworkNet10Ios);$(TargetFrameworkNet10Android);$(TargetFrameworkNet10)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet8);$(TargetFrameworkNet10)</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -98,7 +101,7 @@
     <PackageReference Include="System.Security.Cryptography.Cng" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet8)' or '$(TargetFramework)' == '$(TargetFrameworkNet10)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\net\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
@@ -140,13 +143,13 @@
     <PackageReference Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' or '$(TargetFramework)' == '$(TargetFrameworkNet10Android)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Update="System.Security.SecureString" />
     <PackageReference Include="Xamarin.AndroidX.Browser" PrivateAssets="All" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)' or '$(TargetFramework)' == '$(TargetFrameworkNet10Ios)'">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Update="System.Security.SecureString" />

@@ -2,9 +2,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworkNetDesktop48>net48</TargetFrameworkNetDesktop48>
-    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
+    <TargetFrameworkNet8>net8.0</TargetFrameworkNet8>
+    <TargetFrameworkNet10>net10.0</TargetFrameworkNet10>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet8);$(TargetFrameworkNet10)</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
@@ -71,7 +72,7 @@
   <ItemGroup>
     <Folder Include="CacheExtension\" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet8)' or '$(TargetFramework)' == '$(TargetFrameworkNet10)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
 

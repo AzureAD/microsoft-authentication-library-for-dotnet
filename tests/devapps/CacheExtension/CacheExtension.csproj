@@ -4,8 +4,8 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
 
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">net8;net48</TargetFrameworks>
-    <TargetFrameworks Condition="!$([MSBuild]::IsOsPlatform('Windows'))">net8</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">net8.0;net10.0;net48</TargetFrameworks>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOsPlatform('Windows'))">net8.0;net10.0</TargetFrameworks>
 
   </PropertyGroup>
 
