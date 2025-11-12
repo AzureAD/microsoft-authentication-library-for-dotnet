@@ -79,11 +79,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // Validate the cached token using the authentication operation
             if (AuthenticationRequestParameters.AuthenticationScheme != null &&
-                cachedAccessTokenItem != null)
+                cachedAccessTokenItem != null &&
+                AuthenticationRequestParameters.AuthenticationScheme is IAuthenticationOperation2 authOp2)
             {
                 var cacheValidationData = new MsalCacheValidationData();
                 cacheValidationData.PersistedCacheParameters = cachedAccessTokenItem.PersistedCacheParameters;
-                if (!AuthenticationRequestParameters.AuthenticationScheme.ValidateCachedToken(cacheValidationData))
+
+                if (!await authOp2.ValidateCachedTokenAsync(cacheValidationData).ConfigureAwait(false))
                 {
                     logger.Info("[ClientCredentialRequest] Cached token failed authentication operation validation.");
                     cachedAccessTokenItem = null;

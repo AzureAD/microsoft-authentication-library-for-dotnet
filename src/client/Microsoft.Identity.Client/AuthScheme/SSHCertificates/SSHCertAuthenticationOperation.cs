@@ -61,10 +61,10 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
             };
         }
 
-        bool ValidateCachedToken(MsalCacheValidationData cachedTokenItem)
+        public Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData)
         {
             // no-op
-            return true;
+            return Task.FromResult(true);
         }
     }
 }

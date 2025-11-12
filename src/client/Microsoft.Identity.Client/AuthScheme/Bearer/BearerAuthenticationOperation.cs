@@ -39,10 +39,10 @@ namespace Microsoft.Identity.Client.AuthScheme.Bearer
             return CollectionHelpers.GetEmptyDictionary<string, string>();
         }
 
-        bool ValidateCachedToken(MsalCacheValidationData cachedTokenItem)
+        public Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData)
         {
             // no-op
-            return true;
+            return Task.FromResult(true);
         }
     }
 }
