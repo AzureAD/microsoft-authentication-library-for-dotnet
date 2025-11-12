@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(DotNet10SdkAvailable)' == 'true'">netstandard2.0;net8.0;net10.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(DotNet10SdkAvailable)' != 'true'">netstandard2.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">

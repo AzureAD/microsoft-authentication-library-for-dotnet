@@ -1,10 +1,4 @@
 <Project>
-  <!-- Check if .NET 10 SDK is available for conditional multi-targeting -->
-  <PropertyGroup>
-    <DotNet10SdkAvailable Condition="'$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '10.0'))">true</DotNet10SdkAvailable>
-    <DotNet10SdkAvailable Condition="'$(DotNet10SdkAvailable)' == ''">false</DotNet10SdkAvailable>
-  </PropertyGroup>
-
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <!-- This is strong naming, not signing-->
