@@ -44,5 +44,11 @@ namespace Microsoft.Identity.Client.Extensibility
         {
             return CollectionHelpers.GetEmptyDictionary<string, string>();
         }
+
+        public Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData)
+        {
+            // no-op
+            return Task.FromResult(true);
+        }
     }
 }

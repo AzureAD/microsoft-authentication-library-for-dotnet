@@ -92,7 +92,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
-    
+
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="System.Formats.Asn1" />
     <PackageReference Include="System.Security.Cryptography.Cng" />
@@ -104,7 +104,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
-    
+
     <!--System.Text.Json replaces internal NewtonSoft for NET -->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
 

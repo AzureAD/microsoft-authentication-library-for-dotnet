@@ -48,5 +48,11 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             authenticationResult.BindingCertificate = _mtlsCert;
         }
+
+        public Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData)
+        {
+            // no-op
+            return Task.FromResult(true);
+        }
     }
 }

@@ -17,5 +17,12 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// Will be invoked instead of IAuthenticationOperation.FormatResult
         /// </summary>
         Task FormatResultAsync(AuthenticationResult authenticationResult, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Determines whether the cached token is still valid.
+        /// </summary>
+        /// <param name="cachedTokenData">Data used to determine if token is still valid</param>
+        /// <returns></returns>
+        Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData);
     }
 }
