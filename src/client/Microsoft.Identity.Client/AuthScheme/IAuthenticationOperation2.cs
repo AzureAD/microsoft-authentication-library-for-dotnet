@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// <summary>
         /// Determines whether the cached token is still valid.
         /// </summary>
-        /// <param name="cachedTokenData">Data used to determine if token is valid</param>
+        /// <param name="cachedTokenData">Data used to determine if token is still valid</param>
         /// <returns></returns>
         Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData);
     }
