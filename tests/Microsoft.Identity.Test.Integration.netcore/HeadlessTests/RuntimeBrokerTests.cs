@@ -486,7 +486,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-POP-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
             
             string popUser = "MSAL-User-POP@id4slab1.onmicrosoft.com";
 
@@ -524,7 +524,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-POP-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
             string popUser = "MSAL-User-POP@id4slab1.onmicrosoft.com";
 
