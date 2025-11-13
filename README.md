@@ -65,7 +65,7 @@ This library controls how users sign-in and access services. We recommend you al
 
 ## Security reporting
 
-If you find a security issue with our libraries or services please report it to [secure@microsoft.com](mailto:secure@microsoft.com) in as much detail as possible. Your submission may be eligible for a bounty through the [Microsoft Bug Bounty](https://aka.ms/bugbounty) program. Please do not post security issues to GitHub Issues or any other public site. We will contact you shortly after receiving the information. We encourage you to get notifications of when security incidents occur by visiting the [Microsoft Technical Security Notifications page](https://www.microsoft.com/msrc/technical-security-notifications?rtc=1) and subscribing to Security Advisory Alerts.
+If you find a security issue with our libraries or services please report it to https://msrc.microsoft.com/report/vulnerability in as much detail as possible. Your submission may be eligible for a bounty through the [Microsoft Bug Bounty](https://aka.ms/bugbounty) program. Please do not post security issues to GitHub Issues or any other public site. We will contact you shortly after receiving the information. We encourage you to get notifications of when security incidents occur by visiting the [Microsoft Technical Security Notifications page](https://www.microsoft.com/msrc/technical-security-notifications?rtc=1) and subscribing to Security Advisory Alerts.
 
 ## Data collection
 
