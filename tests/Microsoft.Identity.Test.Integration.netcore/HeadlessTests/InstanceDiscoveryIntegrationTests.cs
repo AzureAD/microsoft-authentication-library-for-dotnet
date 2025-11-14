@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task FailedAuthorityValidationTestAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             LabUser user = labResponse.User;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AuthorityValidationTestWithFalseValidateAuthorityAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             LabUser user = labResponse.User;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder

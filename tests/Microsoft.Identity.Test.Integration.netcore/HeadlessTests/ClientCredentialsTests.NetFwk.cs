@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .AcquireTokenForClient(settings.AppScopes)
                 .OnBeforeTokenRequest((data) =>
                 {
-                    ModifyRequest(data, settings.GetCertificate()); // Adding a certificate via handler instead of using WithCertificate
+                    ModifyRequest(data, settings.Certificate); // Adding a certificate via handler instead of using WithCertificate
                     return Task.CompletedTask;
                 })
                 .ExecuteAsync(CancellationToken.None)
@@ -360,10 +360,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             switch (credentialType)
             {
                 case CredentialType.Cert:
-                    builder.WithCertificate(settings.GetCertificate());
+                    builder.WithCertificate(settings.Certificate);
                     break;
                 case CredentialType.Secret:
-                    builder.WithClientSecret(settings.GetSecret());
+                    builder.WithClientSecret(settings.Secret);
                     break;
                 case CredentialType.ClientAssertion_Manual:
 
@@ -374,7 +374,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     builder.WithClientAssertion(() => GetSignedClientAssertionManual(
                       settings.ClientId,
                       aud, // for AAD use v2.0, but not for ADFS
-                      settings.GetCertificate(),
+                      settings.Certificate,
                       useSha2AndPssForAssertion));
                     break;
 
@@ -387,14 +387,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         () => GetSignedClientAssertionUsingWilson(
                             settings.ClientId,
                             aud2,
-                            settings.GetCertificate()));
+                            settings.Certificate));
                     break;
 
                 case CredentialType.ClientClaims_ExtraClaims:
-                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
+                    builder.WithClientClaims(settings.Certificate, GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
                     break;
                 case CredentialType.ClientClaims_MergeClaims:
-                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
+                    builder.WithClientClaims(settings.Certificate, GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
                     break;
                 default:
                     throw new NotImplementedException();

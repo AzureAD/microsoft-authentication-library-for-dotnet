@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority, true)
-                .WithCertificate(settings.GetCertificate())
+                .WithCertificate(settings.Certificate)
                 .BuildConcrete();
 
             Trace.WriteLine("Acquire a token from IDP.");

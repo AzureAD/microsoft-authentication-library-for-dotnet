@@ -305,7 +305,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
@@ -486,11 +486,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            
-            string popUser = "popUser@msidlab4.onmicrosoft.com";
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-POP-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
-            string[] scopes = { "https://msidlab4.sharepoint.com/user.read" };
+            string[] scopes = { "https://id4slab1.sharepoint.com/user.read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
 
@@ -507,14 +505,14 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // CA policy enforces token issuance to popUser only for SPO
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
             #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
 
             //Act
-            Assert.AreEqual(popUser, result.Account.Username);
+            Assert.AreEqual(labResponse.User.Upn, result.Account.Username);
         }
 
         [DoNotRunOnLinux] // POP are not supported on Linux  
@@ -524,11 +522,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-POP-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
-            string popUser = "popUser@msidlab4.onmicrosoft.com";
-
-            string[] scopes = { "user.read" };
+            string[] scopes = { "https://outlook.office365.com/Mail.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
 
@@ -542,10 +538,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Build();
 
             // Acquire token using username password with POP on a resource not in the CA policy
-            // CA policy enforces token issuance to popUser only for SPO this call will fail with UI Required Exception
+            // CA policy enforces token issuance to popUser only for Exchange Online this call will fail with UI Required Exception
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
             #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                 .ExecuteAsync()
                 .ConfigureAwait(false);

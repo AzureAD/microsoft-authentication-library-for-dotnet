@@ -30,7 +30,7 @@ namespace MauiAppWithBroker.MSALClient
         // ClientID of the application in (ms sample testing)
         private const string ClientId = "bff27aee-5b7f-4588-821a-ed4ce373d8e2"; // TODO - Replace with your client Id. And also replace in the AndroidManifest.xml
 
-        //// TenantID of the organization (msidlab4.com)
+        //// TenantID of the organization (id4slab1.com)
         //private const string TenantId = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca"; // TODO - Replace with your TenantID. And also replace in the AndroidManifest.xml
 
         public static string[] Scopes = { "User.Read" };

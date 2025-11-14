@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task LegacyPoPAsync()
         {
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            X509Certificate2 clientCredsCert = settings.GetCertificate();
+            X509Certificate2 clientCredsCert = settings.Certificate;
             RsaSecurityKey popKey = CreateRsaSecurityKey();
 
             var cca = ConfidentialClientApplicationBuilder
@@ -398,7 +398,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task LegacyPopUsingNewProtocol_CertThumbprinJWK_Async()
         {
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            X509Certificate2 clientCredsCert = settings.GetCertificate();
+            X509Certificate2 clientCredsCert = settings.Certificate;
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
@@ -442,7 +442,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task LegacyPopUsingNewProtocol_RsaKey_Async()
         {
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            X509Certificate2 clientCredsCert = settings.GetCertificate();
+            X509Certificate2 clientCredsCert = settings.Certificate;
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)

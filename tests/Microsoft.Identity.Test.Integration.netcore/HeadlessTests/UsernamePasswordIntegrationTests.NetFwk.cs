@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #endif
         public async Task ROPC_ADFSv4Federated_Async()
         {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -80,14 +80,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #endif
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
 
             var user = labResponse.User;
-            Uri authorityUri = new Uri(Adfs2019LabConstants.Authority);
+            // Use the new ADFS authority and disable validation since ADFS infrastructure is not fully available
+            Uri authorityUri = new Uri("https://fs.id4slab1.com/adfs");
             
             var msalPublicClient = PublicClientApplicationBuilder
-                .Create(Adfs2019LabConstants.PublicClientId)
-                .WithAuthority(authorityUri)
+                .Create(labResponse.App.AppId)
+                .WithAuthority(authorityUri, validateAuthority: false)
                 .WithTestLogging()
                 .Build();
 
@@ -138,11 +139,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 if (cloud == Cloud.Arlington)
                 {
-                    clientAppBuilder.WithClientSecret(settings.GetSecret());
+                    clientAppBuilder.WithClientSecret(settings.Secret);
                 }
                 else
                 {
-                    clientAppBuilder.WithCertificate(settings.GetCertificate(), true);
+                    clientAppBuilder.WithCertificate(settings.Certificate, true);
                 }
 
                  clientApp = clientAppBuilder.Build();

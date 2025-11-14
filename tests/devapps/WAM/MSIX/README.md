@@ -12,9 +12,9 @@ This app is a minimum WPF app to reproduce the error 'Unable to load DLL 'msalru
 
 Result : You should now see the Windows Web Account Manager UI showing up and prompting you to sign in to the app. You can use the MS Credentials or use the following user details to sign-in. But sign in is actually not required. The WAM (Web Account Manager) UI is from the Native dll (msalruntime.dll) packaged along with `Microsoft.Identity.Client.Broker`
 
-Identity Lab Account User Name : idlab@msidlab4.onmicrosoft.com 
+Identity Lab Account User Name : MSAL-User-Default@id4slab1.onmicrosoft.com 
 
-Identity Lab Account Password : https://msidlab.com/api/LabSecret?&Secret=msidlab4 (Please do not share this secret or add it to your response)
+Identity Lab Account Password : https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/asset/Microsoft_Azure_KeyVault/Secret/https://msidlabs.vault.azure.net/secrets/ID4SLAB1 (Please do not share this secret or add it to your response)
 
 7. Now set the `WPF.Package` as the start up project 
 8. Start the project "WPF.Package" project.

@@ -79,6 +79,18 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return _secretClient.GetSecret(secretName, secretVersion).Value;
         }
 
+        public async Task<KeyVaultSecret> GetSecretByNameAsync(string secretName)
+        {
+            var response = await _secretClient.GetSecretAsync(secretName).ConfigureAwait(false);
+            return response.Value;
+        }
+
+        public async Task<KeyVaultSecret> GetSecretByNameAsync(string secretName, string secretVersion)
+        {
+            var response = await _secretClient.GetSecretAsync(secretName, secretVersion).ConfigureAwait(false);
+            return response.Value;
+        }
+
         public async Task<X509Certificate2> GetCertificateWithPrivateMaterialAsync(string certName)
         {
             return await _certificateClient.DownloadCertificateAsync(certName).ConfigureAwait(false);

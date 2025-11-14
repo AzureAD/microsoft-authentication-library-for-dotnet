@@ -26,7 +26,6 @@ namespace WAMClassLibrary
         [DllImport("libX11")]
         private static extern IntPtr XDefaultRootWindow(IntPtr display);
 
-
         public static async Task InvokeBrokerAsync()
         {
             IntPtr _parentHandle = XRootWindow(XOpenDisplay(null), 0);;
@@ -64,7 +63,7 @@ namespace WAMClassLibrary
 
             try
             {
-                var authResult = await pca.AcquireTokenInteractive(new[] { "user.read" }).WithLoginHint("idlab@msidlab4.onmicrosoft.com")
+                var authResult = await pca.AcquireTokenInteractive(new[] { "user.read" }).WithLoginHint("MSAL-User-Default@id4slab1.onmicrosoft.com")
                                       .ExecuteAsync().ConfigureAwait(false);
 
                 Console.WriteLine(authResult.Account);

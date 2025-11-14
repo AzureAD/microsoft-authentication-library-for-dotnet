@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                               ""IdToken"": null,
                               ""TenantId"": null,
                               ""UserInfo"": {
-                                 ""DisplayableId"": ""idlab@msidlab4.onmicrosoft.com"",
+                                 ""DisplayableId"": ""MSAL-User-Default@id4slab1.onmicrosoft.com"",
                                  ""FamilyName"": null,
                                  ""GivenName"": null,
                                  ""IdentityProvider"": null,
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                         }";
 
             AdalResultWrapper result = JsonHelper.DeserializeFromJson<AdalResultWrapper>(json);
-            Assert.AreEqual("idlab@msidlab4.onmicrosoft.com", result.Result.UserInfo.DisplayableId);
+            Assert.AreEqual("MSAL-User-Default@id4slab1.onmicrosoft.com", result.Result.UserInfo.DisplayableId);
             Assert.AreEqual("rt_secret", result.RefreshToken);
         }
 

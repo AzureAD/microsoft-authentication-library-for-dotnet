@@ -23,7 +23,7 @@ internal class Program
         string[] scopes = new string[] { $"{s_appSettings.ClientId}/.default", };
         var builder = ConfidentialClientApplicationBuilder.Create(s_appSettings.ClientId)
             .WithAuthority(s_appSettings.Authority, false)
-            .WithCertificate(s_appSettings.GetCertificate())
+            .WithCertificate(s_appSettings.Certificate)
             .WithLogging(Log, LogLevel.Verbose, true);
 
         var cca = builder.Build();
