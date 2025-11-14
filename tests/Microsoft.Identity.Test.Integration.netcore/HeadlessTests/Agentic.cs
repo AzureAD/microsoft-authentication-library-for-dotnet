@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
                         .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                         .WithExperimentalFeatures(true)
-                        .WithExtraQueryParameters("slice=first")
+                        .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)> { { "slice", ("first", false) } })
                         .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
                         .Build();
 

@@ -246,6 +246,18 @@ namespace Microsoft.Identity.Test.Unit
                 };
             }
         }
+        public static IDictionary<string, (string, bool)> ExtraQueryParametersNoAffectOnCacheKeys
+        {
+            get
+            {
+                return new Dictionary<string, (string, bool)>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "extra", ("qp", false) },
+                    { "key1", ("value1%20with%20encoded%20space", false) },
+                    { "key2", ("value2", false) }
+                };
+            }
+        }
 
         public const string MsalCCAKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
 
