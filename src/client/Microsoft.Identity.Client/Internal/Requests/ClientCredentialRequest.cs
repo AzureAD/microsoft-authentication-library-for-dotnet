@@ -127,14 +127,150 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            // Get a token from AAD
-            if (ServiceBundle.Config.AppTokenProvider == null)
+            AuthenticationResult authResult = null;
+
+            // Retry loop using the retry callback if configured
+            while (true)
             {
-                MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
-                return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+                try
+                {
+                    // Get a token from AAD
+                    if (ServiceBundle.Config.AppTokenProvider == null)
+                    {
+                        logger.Verbose(() => "[ClientCredentialRequest] Sending token request to AAD.");
+                        MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(
+                            GetBodyParameters(), 
+                            cancellationToken).ConfigureAwait(false);
+                        
+                        authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse)
+                            .ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        // Get a token from the app provider delegate
+                        authResult = await GetAccessTokenFromAppProviderAsync(cancellationToken, logger)
+                            .ConfigureAwait(false);
+                    }
+
+                    // Success - invoke OnSuccess callback if configured
+                    await InvokeOnSuccessCallbackAsync(authResult, exception: null, logger).ConfigureAwait(false);
+                    
+                    return authResult;
+                }
+                catch (MsalServiceException serviceEx)
+                {
+                    // Check if OnMsalServiceFailureCallback is configured
+                    if (AuthenticationRequestParameters.AppConfig.OnMsalServiceFailureCallback != null)
+                    {
+                        logger.Info("[ClientCredentialRequest] MsalServiceException caught. Invoking OnMsalServiceFailureCallback.");
+                        
+                        bool shouldRetry = await InvokeOnMsalServiceFailureCallbackAsync(serviceEx, logger)
+                            .ConfigureAwait(false);
+                        
+                        if (shouldRetry)
+                        {
+                            logger.Info("[ClientCredentialRequest] OnMsalServiceFailureCallback returned true. Retrying token request.");
+                            continue; // Retry the loop
+                        }
+                        
+                        logger.Info("[ClientCredentialRequest] OnMsalServiceFailureCallback returned false. Propagating exception.");
+                    }
+                    
+                    // Invoke OnSuccess callback with failure result
+                    await InvokeOnSuccessCallbackAsync(authResult: null, exception: serviceEx, logger).ConfigureAwait(false);
+                    
+                    // Re-throw if no callback or callback returned false
+                    throw;
+                }
+                catch (MsalException ex)
+                {
+                    // For non-service exceptions (MsalClientException, etc.), invoke OnSuccess and re-throw
+                    await InvokeOnSuccessCallbackAsync(authResult: null, exception: ex, logger).ConfigureAwait(false);
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Invokes the OnMsalServiceFailureCallback if configured.
+        /// Returns true if the request should be retried, false otherwise.
+        /// </summary>
+        private async Task<bool> InvokeOnMsalServiceFailureCallbackAsync(
+            MsalServiceException serviceException,
+            ILoggerAdapter logger)
+        {
+            try
+            {
+                var parameters = new ClientCredentialExtensionParameters(
+                    (ApplicationConfiguration)AuthenticationRequestParameters.AppConfig);
+                
+                bool shouldRetry = await AuthenticationRequestParameters.AppConfig
+                    .OnMsalServiceFailureCallback(parameters, serviceException)
+                    .ConfigureAwait(false);
+                
+                logger.Verbose(() => $"[ClientCredentialRequest] OnMsalServiceFailureCallback returned: {shouldRetry}");
+                return shouldRetry;
+            }
+            catch (Exception ex)
+            {
+                // If the callback throws, log and don't retry
+                logger.Error($"[ClientCredentialRequest] OnMsalServiceFailureCallback threw an exception: {ex.Message}");
+                logger.ErrorPii(ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Invokes the OnSuccessCallback if configured.
+        /// Exceptions from the callback are caught and logged to prevent disrupting the authentication flow.
+        /// </summary>
+        private async Task InvokeOnSuccessCallbackAsync(
+            AuthenticationResult authResult,
+            MsalException exception,
+            ILoggerAdapter logger)
+        {
+            if (AuthenticationRequestParameters.AppConfig.OnSuccessCallback == null)
+            {
+                return;
             }
 
-            // Get a token from the app provider delegate
+            try
+            {
+                logger.Verbose(() => "[ClientCredentialRequest] Invoking OnSuccess callback.");
+                
+                var parameters = new ClientCredentialExtensionParameters(
+                    (ApplicationConfiguration)AuthenticationRequestParameters.AppConfig);
+                
+                var executionResult = new ExecutionResult
+                {
+                    Successful = authResult != null,
+                    Result = authResult,
+                    Exception = exception
+                };
+                
+                await AuthenticationRequestParameters.AppConfig
+                    .OnSuccessCallback(parameters, executionResult)
+                    .ConfigureAwait(false);
+                
+                logger.Verbose(() => "[ClientCredentialRequest] OnSuccess callback completed successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Catch and log any exceptions from the observer callback
+                // Do not propagate - observer should not disrupt authentication flow
+                logger.Error($"[ClientCredentialRequest] OnSuccess callback threw an exception: {ex.Message}");
+                logger.ErrorPii(ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets an access token from the app token provider.
+        /// Uses semaphore to prevent concurrent calls to the external provider.
+        /// </summary>
+        private async Task<AuthenticationResult> GetAccessTokenFromAppProviderAsync(
+            CancellationToken cancellationToken,
+            ILoggerAdapter logger)
+        {
             AuthenticationResult authResult;
             MsalAccessTokenCacheItem cachedAccessTokenItem;
 

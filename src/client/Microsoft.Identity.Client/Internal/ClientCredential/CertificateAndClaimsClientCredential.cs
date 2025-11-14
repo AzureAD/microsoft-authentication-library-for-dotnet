@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
         }
 
-        public Task AddConfidentialClientParametersAsync(
+        public async Task AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
             AuthenticationRequestParameters requestParameters, 
             ICryptographyManager cryptographyManager, 
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 requestParameters.RequestContext.Logger.Verbose(() => "Proceeding with JWT token creation and adding client assertion.");
 
                 // Resolve the certificate - either from static config or dynamic provider
-                X509Certificate2 effectiveCertificate = ResolveCertificate(requestParameters);
+                X509Certificate2 effectiveCertificate = await ResolveCertificateAsync(requestParameters, cancellationToken).ConfigureAwait(false);
 
                 bool useSha2 = requestParameters.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported;
 
@@ -78,8 +78,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 // Log that MTLS PoP is required and JWT token creation is skipped
                 requestParameters.RequestContext.Logger.Verbose(() => "MTLS PoP Client credential request. Skipping client assertion.");
             }
-
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -88,9 +86,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// Otherwise, the static certificate configured at build time is used.
         /// </summary>
         /// <param name="requestParameters">The authentication request parameters containing app config</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation</param>
         /// <returns>The X509Certificate2 to use for signing</returns>
         /// <exception cref="MsalClientException">Thrown if the certificate provider returns null or an invalid certificate</exception>
-        private X509Certificate2 ResolveCertificate(AuthenticationRequestParameters requestParameters)
+        private async Task<X509Certificate2> ResolveCertificateAsync(
+            AuthenticationRequestParameters requestParameters,
+            CancellationToken cancellationToken)
         {
             // Check if dynamic certificate provider is configured
             if (requestParameters.AppConfig.ClientCredentialCertificateProvider != null)
@@ -98,9 +99,14 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 requestParameters.RequestContext.Logger.Verbose(
                     () => "[CertificateAndClaimsClientCredential] Resolving certificate from dynamic provider.");
 
-                // Invoke the provider to get the certificate
-                X509Certificate2 providedCertificate = requestParameters.AppConfig.ClientCredentialCertificateProvider(
+                // Create parameters for the callback
+                var parameters = new Extensibility.ClientCredentialExtensionParameters(
                     requestParameters.AppConfig);
+
+                // Invoke the provider to get the certificate
+                X509Certificate2 providedCertificate = await requestParameters.AppConfig
+                    .ClientCredentialCertificateProvider(parameters)
+                    .ConfigureAwait(false);
 
                 // Validate the certificate returned by the provider
                 if (providedCertificate == null)

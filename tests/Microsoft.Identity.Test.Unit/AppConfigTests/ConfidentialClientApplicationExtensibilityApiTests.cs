@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]
     [TestCategory(TestCategories.BuilderTests)]
-    public class ConfidentialClientApplicationExtensibilityTests
+    public class ConfidentialClientApplicationExtensibilityApiTests
     {
         private X509Certificate2 _certificate;
 
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Arrange
             bool callbackInvoked = false;
-            Func<IAppConfig, X509Certificate2> certificateProvider = (config) =>
+            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider = async (parameters) =>
             {
                 callbackInvoked = true;
                 return GetTestCertificate();
@@ -47,9 +47,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Act
             var app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithCertificate(certificateProvider)
-                    .BuildConcrete();
+                .Create(TestConstants.ClientId)
+                .WithCertificate(certificateProvider)
+                .BuildConcrete();
 
             // Assert
             Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.ClientCredentialCertificateProvider);
@@ -61,51 +61,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Act & Assert
             var ex = Assert.ThrowsException<ArgumentNullException>(() =>
-             ConfidentialClientApplicationBuilder
-               .Create(TestConstants.ClientId)
-            .WithCertificate((Func<IAppConfig, X509Certificate2>)null)
-            .Build());
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithCertificate((Func<ClientCredentialExtensionParameters, Task<X509Certificate2>>)null)
+                    .Build());
 
             Assert.AreEqual("certificateProvider", ex.ParamName);
-        }
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\testCert.crtfile")]
-        public void WithCertificate_ThrowsWhenBothStaticAndDynamicCertificateConfigured()
-        {
-            // Arrange
-            var staticCert = GetTestCertificate();
-            Func<IAppConfig, X509Certificate2> certificateProvider = (config) => GetTestCertificate();
-
-            // Act & Assert
-            var ex = Assert.ThrowsException<MsalClientException>(() =>
-                ConfidentialClientApplicationBuilder
-                  .Create(TestConstants.ClientId)
-                     .WithCertificate(staticCert)
-                      .WithCertificate(certificateProvider)
-              .Build());
-
-            Assert.AreEqual(MsalError.InvalidClientCredentialConfiguration, ex.ErrorCode);
-            Assert.IsTrue(ex.Message.Contains("Choose one approach"));
-        }
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\testCert.crtfile")]
-        public void WithCertificate_ThrowsWhenDynamicAndThenStaticCertificateConfigured()
-        {
-            // Arrange
-            var staticCert = GetTestCertificate();
-            Func<IAppConfig, X509Certificate2> certificateProvider = (config) => GetTestCertificate();
-
-            // Act & Assert
-            var ex = Assert.ThrowsException<MsalClientException>(() =>
-                ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithCertificate(certificateProvider)
-                .WithCertificate(staticCert)
-                .Build());
-
-            Assert.AreEqual(MsalError.InvalidClientCredentialConfiguration, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -115,24 +76,24 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             int firstCallbackInvoked = 0;
             int secondCallbackInvoked = 0;
 
-            Func<IAppConfig, X509Certificate2> firstProvider = (config) =>
+            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> firstProvider = async (parameters) =>
             {
                 firstCallbackInvoked++;
                 return GetTestCertificate();
             };
 
-            Func<IAppConfig, X509Certificate2> secondProvider = (config) =>
-           {
-               secondCallbackInvoked++;
-               return GetTestCertificate();
-           };
+            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> secondProvider = async (parameters) =>
+            {
+                secondCallbackInvoked++;
+                return GetTestCertificate();
+            };
 
             // Act
             var app = ConfidentialClientApplicationBuilder
-    .Create(TestConstants.ClientId)
-        .WithCertificate(firstProvider)
-      .WithCertificate(secondProvider)
-        .BuildConcrete();
+                .Create(TestConstants.ClientId)
+                .WithCertificate(firstProvider)
+                .WithCertificate(secondProvider)
+                .BuildConcrete();
 
             // Assert - last one should be stored
             var config = app.AppConfig as ApplicationConfiguration;
@@ -142,114 +103,114 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
         #endregion
 
-        #region WithRetry Tests
+        #region OnMsalServiceFailure Tests
 
         [TestMethod]
-        public void WithRetry_CallbackIsStored()
+        public void OnMsalServiceFailure_CallbackIsStored()
         {
             // Arrange
-            Func<IAppConfig, MsalException, bool> retryPolicy = (config, ex) => false;
+            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> onMsalServiceFailureCallback = async (parameters, ex) => false;
 
             // Act
             var app = ConfidentialClientApplicationBuilder
-                 .Create(TestConstants.ClientId)
-                 .WithClientSecret(TestConstants.ClientSecret)
-                       .WithRetry(retryPolicy)
-                 .BuildConcrete();
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .OnMsalServiceFailure(onMsalServiceFailureCallback)
+                .BuildConcrete();
 
             // Assert
-            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.RetryPolicy);
+            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.OnMsalServiceFailureCallback);
         }
 
         [TestMethod]
-        public void WithRetry_ThrowsOnNullCallback()
-        {
-            // Act & Assert
-            var ex = Assert.ThrowsException<ArgumentNullException>(() =>
-              ConfidentialClientApplicationBuilder
-                 .Create(TestConstants.ClientId)
-            .WithClientSecret(TestConstants.ClientSecret)
-                  .WithRetry(null)
-                  .Build());
-
-            Assert.AreEqual("retryPolicy", ex.ParamName);
-        }
-
-        [TestMethod]
-        public void WithRetry_AllowsMultipleRegistrations_LastOneWins()
-        {
-            // Arrange
-            Func<IAppConfig, MsalException, bool> firstPolicy = (config, ex) => true;
-            Func<IAppConfig, MsalException, bool> secondPolicy = (config, ex) => false;
-
-            // Act
-            var app = ConfidentialClientApplicationBuilder
-       .Create(TestConstants.ClientId)
-                 .WithClientSecret(TestConstants.ClientSecret)
-                 .WithRetry(firstPolicy)
-                    .WithRetry(secondPolicy)
-                    .BuildConcrete();
-
-            // Assert
-            var config = app.AppConfig as ApplicationConfiguration;
-            Assert.IsNotNull(config.RetryPolicy);
-            Assert.AreSame(secondPolicy, config.RetryPolicy);
-        }
-
-        #endregion
-
-        #region WithObserver Tests
-
-        [TestMethod]
-        public void WithObserver_CallbackIsStored()
-        {
-            // Arrange
-            Action<IAppConfig, ExecutionResult> observer = (config, result) => { };
-
-            // Act
-            var app = ConfidentialClientApplicationBuilder
-                   .Create(TestConstants.ClientId)
-               .WithClientSecret(TestConstants.ClientSecret)
-                    .WithObserver(observer)
-              .BuildConcrete();
-
-            // Assert
-            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.ExecutionObserver);
-        }
-
-        [TestMethod]
-        public void WithObserver_ThrowsOnNullCallback()
+        public void OnMsalServiceFailure_ThrowsOnNullCallback()
         {
             // Act & Assert
             var ex = Assert.ThrowsException<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
-                    .WithObserver(null)
+                    .OnMsalServiceFailure(null)
                     .Build());
 
-            Assert.AreEqual("observer", ex.ParamName);
+            Assert.AreEqual("onMsalServiceFailureCallback", ex.ParamName);
         }
 
         [TestMethod]
-        public void WithObserver_AllowsMultipleRegistrations_LastOneWins()
+        public void OnMsalServiceFailure_AllowsMultipleRegistrations_LastOneWins()
         {
             // Arrange
-            Action<IAppConfig, ExecutionResult> firstObserver = (config, result) => { };
-            Action<IAppConfig, ExecutionResult> secondObserver = (config, result) => { };
+            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> firstPolicy = async (parameters, ex) => true;
+            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> secondPolicy = async (parameters, ex) => false;
 
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .WithObserver(firstObserver)
-                .WithObserver(secondObserver)
+                .OnMsalServiceFailure(firstPolicy)
+                .OnMsalServiceFailure(secondPolicy)
                 .BuildConcrete();
 
             // Assert
             var config = app.AppConfig as ApplicationConfiguration;
-            Assert.IsNotNull(config.ExecutionObserver);
-            Assert.AreSame(secondObserver, config.ExecutionObserver);
+            Assert.IsNotNull(config.OnMsalServiceFailureCallback);
+            Assert.AreSame(secondPolicy, config.OnMsalServiceFailureCallback);
+        }
+
+        #endregion
+
+        #region OnSuccess Tests
+
+        [TestMethod]
+        public void OnSuccess_CallbackIsStored()
+        {
+            // Arrange
+            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> onSuccessCallback = async (parameters, result) => { };
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .OnSuccess(onSuccessCallback)
+                .BuildConcrete();
+
+            // Assert
+            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.OnSuccessCallback);
+        }
+
+        [TestMethod]
+        public void OnSuccess_ThrowsOnNullCallback()
+        {
+            // Act & Assert
+            var ex = Assert.ThrowsException<ArgumentNullException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .OnSuccess(null)
+                    .Build());
+
+            Assert.AreEqual("onSuccessCallback", ex.ParamName);
+        }
+
+        [TestMethod]
+        public void OnSuccess_AllowsMultipleRegistrations_LastOneWins()
+        {
+            // Arrange
+            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> firstObserver = async (parameters, result) => { };
+            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> secondObserver = async (parameters, result) => { };
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .OnSuccess(firstObserver)
+                .OnSuccess(secondObserver)
+                .BuildConcrete();
+
+            // Assert
+            var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config.OnSuccessCallback);
+            Assert.AreSame(secondObserver, config.OnSuccessCallback);
         }
 
         #endregion
@@ -324,86 +285,82 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void AllThreeExtensibilityPoints_CanBeConfiguredTogether()
         {
             // Arrange
-            Func<IAppConfig, X509Certificate2> certificateProvider = (config) => GetTestCertificate();
-            Func<IAppConfig, MsalException, bool> retryPolicy = (config, ex) => false;
-            Action<IAppConfig, ExecutionResult> observer = (config, result) => { };
+            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider = async (parameters) => GetTestCertificate();
+            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> onMsalServiceFailure = async (parameters, ex) => false;
+            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> onSuccess = async (parameters, result) => { };
 
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithCertificate(certificateProvider)
-                .WithRetry(retryPolicy)
-                .WithObserver(observer)
+                .OnMsalServiceFailure(onMsalServiceFailure)
+                .OnSuccess(onSuccess)
                 .BuildConcrete();
 
             // Assert
             var config = app.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config.ClientCredentialCertificateProvider);
-            Assert.IsNotNull(config.RetryPolicy);
-            Assert.IsNotNull(config.ExecutionObserver);
+            Assert.IsNotNull(config.OnMsalServiceFailureCallback);
+            Assert.IsNotNull(config.OnSuccessCallback);
         }
 
         [TestMethod]
         public void ExtensibilityPoints_CanBeConfiguredInAnyOrder()
         {
             // Arrange
-            Func<IAppConfig, X509Certificate2> certificateProvider = (config) => GetTestCertificate();
-            Func<IAppConfig, MsalException, bool> retryPolicy = (config, ex) => false;
-            Action<IAppConfig, ExecutionResult> observer = (config, result) => { };
+            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider = async (parameters) => GetTestCertificate();
+            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> onMsalServiceFailure = async (parameters, ex) => false;
+            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> onSuccess = async (parameters, result) => { };
 
-            // Act - Order: Observer, Retry, Certificate
+            // Act - Order: OnSuccess, OnMsalServiceFailure, Certificate
             var app1 = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithObserver(observer)
-                .WithRetry(retryPolicy)
+                .OnSuccess(onSuccess)
+                .OnMsalServiceFailure(onMsalServiceFailure)
                 .WithCertificate(certificateProvider)
                 .BuildConcrete();
 
-            // Act - Order: Retry, Certificate, Observer
+            // Act - Order: OnMsalServiceFailure, Certificate, OnSuccess
             var app2 = ConfidentialClientApplicationBuilder
-            .Create(TestConstants.ClientId)
-       .WithRetry(retryPolicy)
-            .WithCertificate(certificateProvider)
-          .WithObserver(observer)
-        .BuildConcrete();
+                .Create(TestConstants.ClientId)
+                .OnMsalServiceFailure(onMsalServiceFailure)
+                .WithCertificate(certificateProvider)
+                .OnSuccess(onSuccess)
+                .BuildConcrete();
 
             // Assert
             var config1 = app1.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config1.ClientCredentialCertificateProvider);
-            Assert.IsNotNull(config1.RetryPolicy);
-            Assert.IsNotNull(config1.ExecutionObserver);
+            Assert.IsNotNull(config1.OnMsalServiceFailureCallback);
+            Assert.IsNotNull(config1.OnSuccessCallback);
 
             var config2 = app2.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config2.ClientCredentialCertificateProvider);
-            Assert.IsNotNull(config2.RetryPolicy);
-            Assert.IsNotNull(config2.ExecutionObserver);
+            Assert.IsNotNull(config2.OnMsalServiceFailureCallback);
+            Assert.IsNotNull(config2.OnSuccessCallback);
         }
 
         [TestMethod]
         public void WithCertificate_WorksWithOtherConfidentialClientOptions()
         {
             // Arrange
-            Func<IAppConfig, X509Certificate2> certificateProvider = (config) =>
-              {
-                  Assert.AreEqual(TestConstants.ClientId, config.ClientId);
-                  Assert.AreEqual(TestConstants.TenantId, config.TenantId);
-                  return GetTestCertificate();
-              };
+            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider = async (parameters) =>
+            {
+                Assert.AreEqual(TestConstants.ClientId, parameters.ClientId);
+                Assert.AreEqual(TestConstants.AadTenantId, parameters.TenantId);
+                return GetTestCertificate();
+            };
 
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
-                .WithRedirectUri("https://localhost")
-                .WithClientName("TestApp")
-                .WithClientVersion("1.0.0")
+                .WithAuthority(TestConstants.AadAuthorityWithTestTenantId)
                 .WithCertificate(certificateProvider)
                 .BuildConcrete();
 
             // Assert
             Assert.IsNotNull(app);
-            Assert.AreEqual(TestConstants.ClientId, app.AppConfig.ClientId);
-            Assert.AreEqual(TestConstants.TenantId, app.AppConfig.TenantId);
+
             Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.ClientCredentialCertificateProvider);
         }
 
@@ -418,8 +375,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             if (_certificate == null)
             {
                 _certificate = new X509Certificate2(
-              ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"),
-         TestConstants.TestCertPassword);
+                    ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"),
+                    TestConstants.TestCertPassword);
             }
             return _certificate;
         }

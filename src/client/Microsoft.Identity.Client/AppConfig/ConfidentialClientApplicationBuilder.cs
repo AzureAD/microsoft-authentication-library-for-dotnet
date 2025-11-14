@@ -407,16 +407,6 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
 
-            // Validate mutual exclusivity between static certificate and dynamic certificate provider
-            if (Config.ClientCredential is CertificateClientCredential && 
-                Config.ClientCredentialCertificateProvider != null)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidClientCredentialConfiguration,
-                   "Cannot use both WithCertificate(X509Certificate2) and WithCertificate(Func<IAppConfig, X509Certificate2>). " +
-                   "Choose one approach for providing client credentials.");
-            }
-
             ValidateAndUpdateRegion();
         }
 

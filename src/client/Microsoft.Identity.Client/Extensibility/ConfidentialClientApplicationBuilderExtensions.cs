@@ -32,100 +32,150 @@ namespace Microsoft.Identity.Client.Extensibility
         }
 
         /// <summary>
-        /// Configures a callback to provide the client credential certificate dynamically.
+        /// Configures an async callback to provide the client credential certificate dynamically.
         /// The callback is invoked before each token acquisition request to the identity provider (including retries).
         /// This enables scenarios such as certificate rotation and dynamic certificate selection based on application context.
         /// </summary>
         /// <param name="builder">The confidential client application builder.</param>
         /// <param name="certificateProvider">
-        /// A callback that provides the certificate based on the application configuration.
+        /// An async callback that provides the certificate based on the application configuration.
         /// Called before each network request to acquire a token.
         /// Must return a valid <see cref="X509Certificate2"/> with a private key.
         /// </param>
         /// <returns>The builder to chain additional configuration calls.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="certificateProvider"/> is null.</exception>
         /// <exception cref="MsalClientException">
-        /// Thrown at build time if both <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/> 
-        /// and this method are configured.
+        /// Thrown if a static certificate is already configured via <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/>.
         /// </exception>
         /// <remarks>
         /// <para>This method cannot be used together with <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/>.</para>
         /// <para>The callback is not invoked when tokens are retrieved from cache, only for network calls.</para>
         /// <para>The certificate returned by the callback will be used to sign the client assertion (JWT) for that token request.</para>
+        /// <para>The callback can perform async operations such as fetching certificates from Azure Key Vault or other secret management systems.</para>
         /// <para>See https://aka.ms/msal-net-client-credentials for more details on client credentials.</para>
         /// </remarks>
         public static ConfidentialClientApplicationBuilder WithCertificate(
             this ConfidentialClientApplicationBuilder builder,
-            Func<IAppConfig, X509Certificate2> certificateProvider)
+            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider)
         {
             if (certificateProvider == null)
             {
                 throw new ArgumentNullException(nameof(certificateProvider));
             }
-                
+
             builder.Config.ClientCredentialCertificateProvider = certificateProvider;
+            
+            // Create a CertificateAndClaimsClientCredential with null certificate
+            // The certificate will be resolved dynamically via the provider in ResolveCertificateAsync
+            builder.Config.ClientCredential = new Microsoft.Identity.Client.Internal.ClientCredential.CertificateAndClaimsClientCredential(
+                certificate: null,
+                claimsToSign: null,
+                appendDefaultClaims: true);
+            
             return builder;
         }
 
         /// <summary>
-        /// Configures a retry policy for token acquisition failures.
-        /// The policy is invoked after each failed token request to determine whether a retry should be attempted.
-        /// MSAL will respect throttling hints from the identity provider and apply appropriate delays between retries.
+        /// Configures an async callback that is invoked when MSAL receives an error response from the identity provider (Security Token Service).
+        /// The callback determines whether MSAL should retry the token request or propagate the exception.
+        /// This callback is invoked after each service failure and can be called multiple times until it returns <c>false</c> or the request succeeds.
         /// </summary>
         /// <param name="builder">The confidential client application builder.</param>
-        /// <param name="retryPolicy">
-        /// A callback that determines whether to retry after a failure.
-        /// Receives the application configuration and the exception that occurred.
-        /// Returns <c>true</c> to retry the request, or <c>false</c> to stop retrying and throw the exception.
-        /// The callback will be invoked repeatedly after each failure until it returns <c>false</c>.
+        /// <param name="onMsalServiceFailureCallback">
+        /// An async callback that determines whether to retry after a service failure.
+        /// Receives the application configuration parameters and the <see cref="MsalServiceException"/> that occurred.
+        /// Returns <c>true</c> to retry the request, or <c>false</c> to stop retrying and propagate the exception.
+        /// The callback will be invoked repeatedly after each service failure until it returns <c>false</c> or the request succeeds.
         /// </param>
         /// <returns>The builder to chain additional configuration calls.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="retryPolicy"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="onMsalServiceFailureCallback"/> is null.</exception>
         /// <remarks>
-        /// <para>The retry policy is only invoked for network failures, not for cached token retrievals.</para>
-        /// <para>When the policy returns <c>true</c>, MSAL will invoke the certificate provider callback again (if configured)
+        /// <para>This callback is ONLY triggered for <see cref="MsalServiceException"/> - errors returned by the identity provider (e.g., HTTP 500, 503, throttling).</para>
+        /// <para>This callback is NOT triggered for client-side errors (<see cref="MsalClientException"/>) or network failures handled internally by MSAL.</para>
+        /// <para>This callback is only invoked for network token acquisition attempts, not when tokens are retrieved from cache.</para>
+        /// <para>When the callback returns <c>true</c>, MSAL will invoke the certificate provider (if configured via <see cref="WithCertificate"/>)
         /// before making another token request, enabling certificate rotation scenarios.</para>
-        /// <para>MSAL's internal throttling and retry mechanisms will still apply, including respecting Retry-After headers.</para>
-        /// <para>To prevent infinite loops, ensure your retry policy has appropriate termination conditions.</para>
+        /// <para>MSAL's internal throttling and retry mechanisms will still apply, including respecting Retry-After headers from the identity provider.</para>
+        /// <para>To prevent infinite loops, ensure your callback has appropriate termination conditions (e.g., max retry count, timeout).</para>
+        /// <para>The callback can perform async operations such as logging to remote services, checking external health endpoints, or querying configuration stores.</para>
         /// </remarks>
-        public static ConfidentialClientApplicationBuilder WithRetry(
+        /// <example>
+        /// <code>
+        /// int retryCount = 0;
+        /// var app = ConfidentialClientApplicationBuilder
+        ///     .Create(clientId)
+        ///     .WithCertificate(async parameters => await GetCertificateFromKeyVaultAsync(parameters.TenantId))
+        ///     .OnMsalServiceFailure(async (parameters, serviceException) =>
+        ///     {
+        ///         retryCount++;
+        ///         await LogExceptionAsync(serviceException);
+        ///         
+        ///         // Retry up to 3 times for transient service errors (5xx)
+        ///         return serviceException.StatusCode >= 500 &amp;&amp; retryCount &lt; 3;
+        ///     })
+        ///     .Build();
+        /// </code>
+        /// </example>
+        public static ConfidentialClientApplicationBuilder OnMsalServiceFailure(
             this ConfidentialClientApplicationBuilder builder,
-            Func<IAppConfig, MsalException, bool> retryPolicy)
+            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> onMsalServiceFailureCallback)
         {
-            if (retryPolicy == null)
-                throw new ArgumentNullException(nameof(retryPolicy));
+            if (onMsalServiceFailureCallback == null)
+                throw new ArgumentNullException(nameof(onMsalServiceFailureCallback));
 
-            builder.Config.RetryPolicy = retryPolicy;
+            builder.Config.OnMsalServiceFailureCallback = onMsalServiceFailureCallback;
             return builder;
         }
 
         /// <summary>
-        /// Configures an observer callback that receives the final result of token acquisition.
-        /// The observer is invoked once at the completion of <c>ExecuteAsync</c>, with either a success or failure result.
-        /// This enables scenarios such as telemetry, logging, and custom error handling.
+        /// Configures an async callback that is invoked when a token acquisition request completes.
+        /// This callback is invoked once per <c>AcquireTokenForClient</c> call, after all retry attempts have been exhausted.
+        /// While named <c>OnSuccess</c> for the common case, this callback fires for both successful and failed acquisitions.
+        /// This enables scenarios such as telemetry, logging, and custom result handling.
         /// </summary>
         /// <param name="builder">The confidential client application builder.</param>
-        /// <param name="observer">
-        /// A callback that receives the application configuration and the execution result.
+        /// <param name="onSuccessCallback">
+        /// An async callback that receives the application configuration parameters and the execution result.
         /// The result contains either the successful <see cref="AuthenticationResult"/> or the <see cref="MsalException"/> that occurred.
-        /// This callback is invoked after all retries have been exhausted (if retry policy is configured).
+        /// This callback is invoked after all retries have been exhausted (if an <see cref="OnMsalServiceFailure"/> handler is configured).
         /// </param>
         /// <returns>The builder to chain additional configuration calls.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="observer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="onSuccessCallback"/> is null.</exception>
         /// <remarks>
-        /// <para>The observer is only invoked for network token acquisition attempts, not for cached token retrievals.</para>
-        /// <para>If multiple calls to <c>WithObserver</c> are made, only the last configured observer will be used.</para>
-        /// <para>Exceptions thrown by the observer callback will be caught and logged internally to prevent disruption of the authentication flow.</para>
-        /// <para>The observer is called on the same thread as the token acquisition request.</para>
+        /// <para>This callback is invoked for both successful and failed token acquisitions. Check <see cref="ExecutionResult.Successful"/> to determine the outcome.</para>
+        /// <para>This callback is only invoked for network token acquisition attempts, not when tokens are retrieved from cache.</para>
+        /// <para>If multiple calls to <c>OnSuccess</c> are made, only the last configured callback will be used.</para>
+        /// <para>Exceptions thrown by this callback will be caught and logged internally to prevent disruption of the authentication flow.</para>
+        /// <para>The callback is invoked on the same thread/context as the token acquisition request.</para>
+        /// <para>The callback can perform async operations such as sending telemetry to Application Insights, persisting logs to databases, or triggering webhooks.</para>
         /// </remarks>
-        public static ConfidentialClientApplicationBuilder WithObserver(
+        /// <example>
+        /// <code>
+        /// var app = ConfidentialClientApplicationBuilder
+        ///     .Create(clientId)
+        ///     .WithCertificate(certificate)
+        ///     .OnSuccess(async (parameters, result) =>
+        ///     {
+        ///         if (result.Successful)
+        ///         {
+        ///             await telemetry.TrackEventAsync("TokenAcquired", new { ClientId = parameters.ClientId });
+        ///         }
+        ///         else
+        ///         {
+        ///             await telemetry.TrackExceptionAsync(result.Exception);
+        ///         }
+        ///     })
+        ///     .Build();
+        /// </code>
+        /// </example>
+        public static ConfidentialClientApplicationBuilder OnSuccess(
             this ConfidentialClientApplicationBuilder builder,
-            Action<IAppConfig, ExecutionResult> observer)
+            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> onSuccessCallback)
         {
-            if (observer == null)
-                throw new ArgumentNullException(nameof(observer));
+            if (onSuccessCallback == null)
+                throw new ArgumentNullException(nameof(onSuccessCallback));
 
-            builder.Config.ExecutionObserver = observer;
+            builder.Config.OnSuccessCallback = onSuccessCallback;
             return builder;
         }
     }

@@ -3,6 +3,10 @@ const Microsoft.Identity.Client.MsalError.InvalidCertificate = "invalid_certific
 const Microsoft.Identity.Client.MsalError.InvalidClientCredentialConfiguration = "invalid_client_credential_configuration" -> string
 const Microsoft.Identity.Client.MsalError.MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity" -> string
 const Microsoft.Identity.Client.MsalError.MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1" -> string
+Microsoft.Identity.Client.Extensibility.ClientCredentialExtensionParameters
+Microsoft.Identity.Client.Extensibility.ClientCredentialExtensionParameters.Authority.get -> string
+Microsoft.Identity.Client.Extensibility.ClientCredentialExtensionParameters.ClientId.get -> string
+Microsoft.Identity.Client.Extensibility.ClientCredentialExtensionParameters.TenantId.get -> string
 Microsoft.Identity.Client.Extensibility.ExecutionResult
 Microsoft.Identity.Client.Extensibility.ExecutionResult.Exception.get -> Microsoft.Identity.Client.MsalException
 Microsoft.Identity.Client.Extensibility.ExecutionResult.Result.get -> Microsoft.Identity.Client.AuthenticationResult
@@ -13,6 +17,6 @@ Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsy
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ImdsV2 = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, string> extraQueryParameters) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
 static Microsoft.Identity.Client.ApplicationBase.ResetStateForTest() -> void
-static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.IAppConfig, System.Security.Cryptography.X509Certificates.X509Certificate2> certificateProvider) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
-static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithObserver(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Action<Microsoft.Identity.Client.IAppConfig, Microsoft.Identity.Client.Extensibility.ExecutionResult> observer) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
-static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithRetry(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.IAppConfig, Microsoft.Identity.Client.MsalException, bool> retryPolicy) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnMsalServiceFailure(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.Extensibility.ClientCredentialExtensionParameters, Microsoft.Identity.Client.MsalException, System.Threading.Tasks.Task<bool>> onMsalServiceFailureCallback) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnSuccess(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.Extensibility.ClientCredentialExtensionParameters, Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task> onSuccessCallback) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.Extensibility.ClientCredentialExtensionParameters, System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2>> certificateProvider) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
