@@ -44,9 +44,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </param>
         /// <returns>The builder to chain additional configuration calls.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="certificateProvider"/> is null.</exception>
-        /// <exception cref="MsalClientException">
-        /// Thrown if a static certificate is already configured via <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/>.
-        /// </exception>
+
         /// <remarks>
         /// <para>This method cannot be used together with <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/>.</para>
         /// <para>The callback is not invoked when tokens are retrieved from cache, only for network calls.</para>

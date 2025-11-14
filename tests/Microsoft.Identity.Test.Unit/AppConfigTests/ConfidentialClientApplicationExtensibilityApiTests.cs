@@ -97,6 +97,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Assert - last one should be stored
             var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config);
             Assert.IsNotNull(config.ClientCredentialCertificateProvider);
             Assert.AreNotSame(firstProvider, config.ClientCredentialCertificateProvider);
         }
@@ -153,6 +154,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Assert
             var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config, "AppConfig should be of type ApplicationConfiguration.");
             Assert.IsNotNull(config.OnMsalServiceFailureCallback);
             Assert.AreSame(secondPolicy, config.OnMsalServiceFailureCallback);
         }
@@ -209,6 +211,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Assert
             var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config, "AppConfig is not of type ApplicationConfiguration.");
             Assert.IsNotNull(config.OnSuccessCallback);
             Assert.AreSame(secondObserver, config.OnSuccessCallback);
         }
@@ -330,11 +333,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Assert
             var config1 = app1.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config1);
             Assert.IsNotNull(config1.ClientCredentialCertificateProvider);
             Assert.IsNotNull(config1.OnMsalServiceFailureCallback);
             Assert.IsNotNull(config1.OnSuccessCallback);
 
             var config2 = app2.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config2, "app2.AppConfig should be of type ApplicationConfiguration");
             Assert.IsNotNull(config2.ClientCredentialCertificateProvider);
             Assert.IsNotNull(config2.OnMsalServiceFailureCallback);
             Assert.IsNotNull(config2.OnSuccessCallback);
