@@ -59,8 +59,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
 
             public string Secret => 
-                // TODO: Tenant Migration - Migrated to new id4slab1 key vault configuration
-                // Using MSAL-APP-AzureADMultipleOrgs secret for the migrated app
                 GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-APP-AzureADMultipleOrgs").Value;
         }
 
