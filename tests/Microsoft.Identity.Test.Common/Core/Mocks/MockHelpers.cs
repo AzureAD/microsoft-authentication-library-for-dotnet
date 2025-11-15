@@ -621,7 +621,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string userAssignedId = null,
             string clientIdOverride = null,
             string tenantIdOverride = null,
-            string attestationEndpointOverride = null)
+            string attestationEndpointOverride = null,
+            string contentOverride = null)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
@@ -639,7 +640,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             expectedQueryParams.Add("cred-api-version", "2.0");
             expectedRequestHeaders.Add("Metadata", "true");
 
-            string content =
+            string content = contentOverride ??
                 "{" +
                 "\"cuId\": { \"vmId\": \"fake_vmId\" }," +
                 "\"clientId\": \"" + (clientIdOverride ?? TestConstants.ClientId) + "\"," +
@@ -666,27 +667,34 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
-        // used for unit tests in ManagedIdentityTests.cs
-        public static MockHttpMessageHandler MockCsrResponseFailure()
+        public static MockHttpMessageHandler MockCsrResponseFailure(
+            HttpStatusCode statusCode = HttpStatusCode.BadRequest,
+            string content = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
         {
             // 400 doesn't trigger the retry policy
-            return MockCsrResponse(HttpStatusCode.BadRequest);
+            return MockCsrResponse(
+                statusCode,
+                userAssignedIdentityId: userAssignedIdentityId,
+                userAssignedId: userAssignedId,
+                contentOverride: content);
         }
 
         public static MockHttpMessageHandler MockCertificateRequestResponse(
-    UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-    string userAssignedId = null,
-    string certificate = TestConstants.ValidRawCertificate,
-    string clientIdOverride = null,
-    string tenantIdOverride = null,
-    string mtlsEndpointOverride = null)
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            string certificate = TestConstants.ValidRawCertificate,
+            string clientIdOverride = null,
+            string tenantIdOverride = null,
+            string mtlsEndpointOverride = null)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
             IList<string> presentRequestHeaders = new List<string>
-    {
-        OAuth2Header.XMsCorrelationId
-    };
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
 
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {

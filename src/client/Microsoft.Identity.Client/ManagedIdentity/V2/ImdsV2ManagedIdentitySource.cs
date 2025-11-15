@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
@@ -91,15 +92,31 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 if (probeMode)
                 {
+                    if (IsUamiConfigurationError(response, requestContext.ServiceBundle.Config.ManagedIdentityId))
+                    {
+                        requestContext.Logger.Info("[Managed Identity] IMDSv2 endpoint is available but UAMI configuration error detected during probe. Returning empty CsrMetadata to indicate endpoint availability.");
+                        return new CsrMetadata();
+                    }
+
                     requestContext.Logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. Status code: {response.StatusCode}, Body: {response.Body}");
                     return null;
                 }
                 else
                 {
+                    string errorCode = MsalError.ManagedIdentityRequestFailed;
+                    string errorMessage = "ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed due to HTTP error.";
+
+                    if (IsUamiConfigurationError(response, requestContext.ServiceBundle.Config.ManagedIdentityId))
+                    {
+                        errorCode = MsalError.IdentityNotFound;
+                        errorMessage = MsalErrorMessage.IdentityNotFound;
+                    }
+
                     ThrowProbeFailedException(
-                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed due to HTTP error. Status code: {response.StatusCode} Body: {response.Body}",
+                        $"{errorMessage} Status code: {response.StatusCode} Body: {response.Body}",
                         null,
-                        (int)response.StatusCode);
+                        (int)response.StatusCode,
+                        errorCode);
                 }
             }
 
@@ -112,13 +129,31 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 #endif
         }
 
+        /// <summary>
+        /// Determines if the HTTP response indicates a User Assigned Managed Identity (UAMI) configuration error rather than an endpoint availability issue.
+        /// </summary>
+        /// <param name="response">The HTTP response from IMDS</param>
+        /// <param name="managedIdentityId">The managed identity configuration</param>
+        /// <returns>True if this is a UAMI configuration error, false otherwise</returns>
+        private static bool IsUamiConfigurationError(HttpResponse response, ManagedIdentityId managedIdentityId)
+        {
+            if (managedIdentityId.IdType == ManagedIdentityIdType.SystemAssigned)
+            {
+                return false;
+            }
+
+            return (response.StatusCode == HttpStatusCode.BadRequest) &&
+                (response.Body?.Contains(MsalError.IdentityNotFound) == true);
+        }
+
         private static void ThrowProbeFailedException(
-            String errorMessage,
+            string errorMessage,
             Exception ex = null,
-            int? statusCode = null)
+            int? statusCode = null,
+            string errorCode = MsalError.ManagedIdentityRequestFailed)
         {
             throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                MsalError.ManagedIdentityRequestFailed,
+                errorCode,
                 $"[ImdsV2] {errorMessage}",
                 ex,
                 ManagedIdentitySource.ImdsV2,

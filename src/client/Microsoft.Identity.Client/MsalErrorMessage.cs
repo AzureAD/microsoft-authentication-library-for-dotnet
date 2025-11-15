@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Drawing;
 using System.Globalization;
 
 namespace Microsoft.Identity.Client
@@ -450,5 +451,7 @@ namespace Microsoft.Identity.Client
         public const string InvalidCertificate = "The certificate received from the Imds server is invalid.";
         public const string CannotSwitchBetweenImdsVersionsForPreview = "ImdsV2 is currently experimental - A Bearer token has already been received; Please restart the application to receive a mTLS PoP token.";
         public const string MtlsPopTokenNotSupportedinImdsV1 = "A mTLS PoP token cannot be requested because the application\'s source was determined to be ImdsV1.";
+        public const string IdentityNotFound = "Managed Identity not found. To request credentials for this identity, please assign it first. Please see aka.ms/ManagedIdentityNotFound for more details";
+    
     }
 }

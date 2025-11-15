@@ -55,6 +55,14 @@ namespace Microsoft.Identity.Client
                 resource);
         }
 
+        // do probe for imdsv1
+
+        // currently sends without metadata header, if available will respond with 400
+
+        // figure out if there's a scenario where v1 should be chosen over v2. ask raghavendra
+
+        // make probe configurable for v1 and v2
+
         /// <inheritdoc/>
         public async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync()
         {

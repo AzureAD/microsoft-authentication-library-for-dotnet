@@ -562,6 +562,36 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)]
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]
+        public async Task ImdsV2IsDetectedEvenWhenUamiNotFound(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                string errorContent = $"{{\"error\":\"{MsalError.IdentityNotFound}\",\"error_description\":\"{MsalErrorMessage.IdentityNotFound}\"}}";
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponseFailure(HttpStatusCode.BadRequest, errorContent, userAssignedIdentityId, userAssignedId));
+                
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, addProbeMock: false).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponseFailure(HttpStatusCode.BadRequest, errorContent, userAssignedIdentityId, userAssignedId));
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.IdentityNotFound, ex.ErrorCode);
+            }
+        }
+
         #region Cuid Tests
         [TestMethod]
         public void TestCsrGeneration_OnlyVmId()

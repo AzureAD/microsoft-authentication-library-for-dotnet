@@ -1227,5 +1227,10 @@ namespace Microsoft.Identity.Client
         /// mTLS PoP tokens are not supported in IMDS V1.
         /// </summary>
         public const string MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1";
+
+        /// <summary>
+        /// The provided user-assigned managed identity was not found on the VM.
+        /// </summary>
+        public const string IdentityNotFound = "identity_not_found";
     }
 }
