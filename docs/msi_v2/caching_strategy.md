@@ -1,66 +1,44 @@
 # Managed Identity v2 (Attested TB) — Resilience & Caching Plan
 
 ## TL;DR
-We reduce cold-start latency and dependency risk for MSI v2 by caching safe, long-lived artifacts, coordinating renewal across processes, and keeping the hot path in memory. **MAA is used only to (re)issue the binding certificate**; bound AT acquisition relies on that cert. Result: fewer failures, less churn, smoother CX.
+
+We reduce cold-start latency and dependency risk for MSI v2 by caching safe, long-lived artifacts, coordinating renewal across processes, and keeping the hot path in memory. **MAA is used only to (re)issue the binding certificate**; bound access tokens (ATs) are obtained using that certificate. If the binding cert or its cache is lost or invalid, we recover by re-attesting and re-issuing. No expirations are hardcoded; we always use the values returned by services.
 
 ---
 
 ## Problem
+
 - Cold starts/reboots trigger extra external calls (MAA → IMDS → eSTS).
-- OS certificate store I/O can contend under load.
+- Accessing persisted certificates can contend under load.
 - Multiple processes may race to re-issue binding certificates.
-- We want resilience to **MAA** issues and predictable **cert renewal**.
+- We want resilience to **MAA** issues and predictable **cert renewal** while:
+  - avoiding thundering herds, and
+  - not hardcoding any lifetimes.
 
 ---
 
 ## Solution (What’s Changing)
-1. **Probe once** (link-local) to detect **MSI v2** → cache result **in-proc**.
-2. Treat the **binding certificate** (from IMDS `/issuecredential`) as the **primary anchor** (~7-day validity); use it to get ATs.
-3. **Proactive renewal at half-life (+ small jitter)** to rotate well before expiry.
-4. **Single-writer coordination** so only one process issues/renews; others reuse the same cert.
-5. **MAA token** is used **only** for issuance/renewal; short-lived cache to prevent attestations calls.
+
+1. **Probe IMDS once per process** to detect **MSI v2** and cache that result in memory for the life of the process.
+2. Use the **binding certificate** returned by IMDS `/issuecredential` as the long‑lived credential for bound AT requests:
+   - its lifetime comes from the cert / metadata returned by IMDS (no hardcoded duration).
+3. **Proactively renew** the binding cert and the MAA token when roughly **half** of their lifetime has elapsed, with a **small random offset** per process, and always **well before** their actual expiry.
+4. Use **single‑writer coordination per managed identity (per user context)** on each machine so that only one process issues/renews the binding cert and MAA token; other processes reuse the same artifacts.
+5. Use the **MAA token only** for issuing/renewing the binding certificate:
+   - cache it for up to its JWT `exp`,
+   - refresh it at half‑life + jitter,
+   - and evict it on attestation/policy failures.
 
 ---
 
 ## Call Sequence (cold start)
-```
-Call 0 (local): Probe IMDS v2 → cache MSI source (V2/V1)
-1       (local): Create KeyGuard key (per reboot)
-2       (external): Get MAA token  // only for (re)issuing cert
-3       (local): IMDS /issuecredential → binding cert + metadata
-4       (external): eSTS-R → bound AT (mtls_pop/bearer) using client mTLS
-5       (external): Call resource with bound AT + client mTLS
-```
----
 
-## Cache & Renewal Matrix
+Cold start / first bound call for a given managed identity + user context:
 
-| Item | Scope | Where | TTL | Notes |
-|---|---|---|---|---|
-| **MSI v2 probe result** | Per process | In-proc static | Process lifetime | NO changes needed here |
-| **MAA token** | Per **keyHandle** | small file cache | ≤ JWT `exp` (~8h) | Only for cert issuance; evict on reboot/policy change/attest fail; refresh half-life + jitter |
-| **Binding cert + `/issuecredential` metadata** | Per **Managed Identity per user context** | Persisted (Win: `CurrentUser\My`; Linux: protected file/PEM) | ~7 days | Renew at **half-life + jitter**; Serialize issuance |
-| **Access tokens (`bearer` or `mtls_pop`)** | Per audience | In memory | Service-configured | Reacquire after reboot (new key) |
-
----
-
-## Invalidation Rules
-- **Reboot** → Use **persisted binding cert** to fetch new ATs; re-attest on first demand on service failure.
-- **Cert expiry** → re-issue.
-- **MAA token expired** → re-attest and re-issue.
-
----
-
-## Security
-- Keys are **non-exportable** in **KeyGuard**; MSAL stores **handles**, not private keys.
-- Persisted items are **user-scoped** and protected (DPAPI on Windows; restricted file perms/OS keyring on Linux).
-
----
-
-  ## Why This Improves CX
-- **MAA is out of the hot path**—steady-state calls rely on a **multi-day binding cert**.
-- Different identities on the same VM, uses **cached MAA token**
-- **No thundering herd**—single process renews certificate; others reuse.
-- **Predictable renewals**—half-life + jitter prevents synchronized spikes.
-
----
+```text
+0: Probe IMDS to detect MSI v2 vs v1 and cache the result in the process.
+1: Ensure a KeyGuard key / handle exists for this reboot.
+2: Call MAA to obtain an attestation token (using KeyGuard evidence).
+3: Call IMDS `/issuecredential` with the MAA token → returns binding certificate + metadata.
+4: Call eSTS to request a bound AT (mtls_pop or bearer) using client mTLS with the binding certificate.
+5: Call the resource using the bound AT and client mTLS.
