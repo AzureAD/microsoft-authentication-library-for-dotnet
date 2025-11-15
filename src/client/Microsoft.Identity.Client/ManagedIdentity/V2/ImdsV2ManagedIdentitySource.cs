@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 {
                     if (IsUamiConfigurationError(response, requestContext.ServiceBundle.Config.ManagedIdentityId))
                     {
-                        requestContext.Logger.Info("[Managed Identity] IMDSv2 endpoint is available but UAMI configuration error detected during probe. Returning empty CsrMetadata to indicate endpoint availability.");
+                        requestContext.Logger.Info("[Managed Identity] IMDSv2 endpoint is available but there is a UAMI configuration error. Returning empty CsrMetadata to indicate endpoint availability.");
                         return new CsrMetadata();
                     }
 
