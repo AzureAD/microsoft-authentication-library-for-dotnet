@@ -10,10 +10,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     {
         public static IPersistentCertificateCache Create(ILoggerAdapter logger)
         {
-            // We persist only on Windows because FriendlyName tagging is required.
-            return DesktopOsHelper.IsWindows()
-                ? new WindowsPersistentCertificateCache()
-                : new NoOpPersistentCertificateCache();
+            if (DesktopOsHelper.IsWindows())
+            {
+                logger?.Info(() =>
+                    "[PersistentCert] Windows detected; enabling persistent mTLS binding certificate cache (CurrentUser/My).");
+                return new WindowsPersistentCertificateCache();
+            }
+
+            logger?.Info(() =>
+                "[PersistentCert] Persistent mTLS binding certificate cache disabled on this platform; using in-memory cache only.");
+            return new NoOpPersistentCertificateCache();
         }
     }
 }

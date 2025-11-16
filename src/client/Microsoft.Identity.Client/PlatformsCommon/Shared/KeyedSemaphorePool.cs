@@ -10,6 +10,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// <summary>
     /// Provides per-key async gates using <see cref="SemaphoreSlim"/>.
     /// Call <see cref="EnterAsync"/> and ensure <see cref="Release"/> is called in a finally block.
+    /// Semaphores are kept for the lifetime of the pool; we do not remove or dispose them
+    /// per key to avoid races with concurrent callers.
     /// </summary>
     internal sealed class KeyedSemaphorePool
     {
@@ -26,7 +28,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// <summary>
         /// Releases the gate for <paramref name="key"/>. Safe to call even if the key
-        /// was removed/replaced; a missing key is a no-op.
+        /// is missing; a missing key is a no-op.
         /// </summary>
         public void Release(string key)
         {

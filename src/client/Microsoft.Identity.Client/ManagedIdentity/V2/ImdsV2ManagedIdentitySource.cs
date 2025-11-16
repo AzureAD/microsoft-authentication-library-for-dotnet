@@ -191,13 +191,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return new ImdsV2ManagedIdentitySource(requestContext);
         }
 
-        internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
-            base(requestContext, ManagedIdentitySource.ImdsV2)
+        internal ImdsV2ManagedIdentitySource(RequestContext requestContext) 
+            : this(requestContext,  
+                  new MtlsBindingCache(s_mtlsCertificateCache, PersistentCertificateCacheFactory
+                      .Create(requestContext.Logger)))
         {
-            IPersistentCertificateCache persisted = 
-                PersistentCertificateCacheFactory.Create(requestContext.Logger);
+        }
 
-            _mtlsCache = new MtlsBindingCache(s_mtlsCertificateCache, persisted);
+        internal ImdsV2ManagedIdentitySource(
+            RequestContext requestContext,
+            IMtlsBindingCache mtlsCache)
+            : base(requestContext, ManagedIdentitySource.ImdsV2)
+        {
+            _mtlsCache = mtlsCache ?? throw new ArgumentNullException(nameof(mtlsCache));
         }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
@@ -294,11 +300,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
+            CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
 
             string certCacheKey = _requestContext.ServiceBundle.Config.ClientId;
 
-            var certEndpointAndClientId = await GetOrCreateMtlsBindingAsync(
+            MtlsBindingInfo mtlsBinding = await GetOrCreateMtlsBindingAsync(
                 cacheKey: certCacheKey,
                 async () =>
                 {
@@ -336,15 +342,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     // Canonical GUID to use as client_id in the token call
                     string clientIdGuid = certificateRequestResponse.ClientId;
 
-                    return Tuple.Create(mtlsCertificate, endpointBase, clientIdGuid);
+                    return new MtlsBindingInfo(mtlsCertificate, endpointBase, clientIdGuid);
+
                 },
-                _requestContext.UserCancellationToken, 
+                _requestContext.UserCancellationToken,
                 _requestContext.Logger)
                 .ConfigureAwait(false);
 
-            X509Certificate2 bindingCertificate = certEndpointAndClientId.Item1;
-            string endpointBaseForToken = certEndpointAndClientId.Item2;
-            string clientIdForToken = certEndpointAndClientId.Item3;
+            X509Certificate2 bindingCertificate = mtlsBinding.Certificate;
+            string endpointBaseForToken = mtlsBinding.Endpoint;
+            string clientIdForToken = mtlsBinding.ClientId;
 
             ManagedIdentityRequest request = new ManagedIdentityRequest(
                 HttpMethod.Post,
@@ -443,9 +450,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return response.AttestationToken;
         }
 
-        private Task<Tuple<X509Certificate2, string, string>> GetOrCreateMtlsBindingAsync(
+        private Task<MtlsBindingInfo> GetOrCreateMtlsBindingAsync(
             string cacheKey,
-            Func<Task<Tuple<X509Certificate2, string, string>>> factory,
+            Func<Task<MtlsBindingInfo>> factory,
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {

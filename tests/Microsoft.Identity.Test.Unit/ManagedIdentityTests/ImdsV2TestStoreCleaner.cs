@@ -52,17 +52,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var nowUtc = DateTime.UtcNow;
 
-                // Snapshot (safe for .NET Framework when removing)
-                X509Certificate2[] items;
-                try
-                {
-                    items = new X509Certificate2[store.Certificates.Count];
-                    store.Certificates.CopyTo(items, 0);
-                }
-                catch
-                {
-                    items = store.Certificates.Cast<X509Certificate2>().ToArray();
-                }
+                // Snapshot once to safely enumerate while removing
+                X509Certificate2[] items = SnapshotCertificates(store);
 
                 foreach (var c in items)
                 {
@@ -130,16 +121,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 store.Open(OpenFlags.ReadWrite);
 
                 // Snapshot for safe removal
-                X509Certificate2[] items;
-                try
-                {
-                    items = new X509Certificate2[store.Certificates.Count];
-                    store.Certificates.CopyTo(items, 0);
-                }
-                catch
-                {
-                    items = store.Certificates.Cast<X509Certificate2>().ToArray();
-                }
+                X509Certificate2[] items = SnapshotCertificates(store);
 
                 foreach (var c in items)
                 {
@@ -168,6 +150,29 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         // ---------------- helpers ----------------
 
+        /// <summary>
+        /// Takes a safe snapshot of the certificates in the given store so we can
+        /// enumerate and remove without running into "collection modified" issues.
+        /// </summary>
+        private static X509Certificate2[] SnapshotCertificates(X509Store store)
+        {
+            try
+            {
+                var items = new X509Certificate2[store.Certificates.Count];
+                store.Certificates.CopyTo(items, 0);
+                return items;
+            }
+            catch
+            {
+                // Fallback for providers that don't like CopyTo while removing.
+                return store.Certificates.Cast<X509Certificate2>().ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the given subject CN/DC pair should be treated as a test
+        /// artifact and removed from the store.
+        /// </summary>
         private static bool MatchesSubjectTrash(string cn, string dc)
         {
             if (string.IsNullOrEmpty(cn))
@@ -194,6 +199,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             return false;
         }
 
+        /// <summary>
+        /// Extracts the subject common name (CN) from the certificate, using
+        /// <see cref="X509Certificate2.GetNameInfo"/> when possible and falling back
+        /// to manual DN parsing.
+        /// </summary>
         private static string GetCn(X509Certificate2 cert)
         {
             try
@@ -210,11 +220,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             return ReadRdn(cert, "CN");
         }
 
+        /// <summary>
+        /// Extracts the subject DC (domain component) from the certificate, if present.
+        /// </summary>
         private static string GetDc(X509Certificate2 cert)
         {
             return ReadRdn(cert, "DC");
         }
 
+        /// <summary>
+        /// Parses a specific RDN (e.g. "CN", "DC") out of the certificate subject.
+        /// Returns <c>null</c> if the RDN is not present.
+        /// </summary>
         private static string ReadRdn(X509Certificate2 cert, string rdn)
         {
             var dn = cert?.SubjectName?.Name ?? cert?.Subject ?? string.Empty;

@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Security.Cryptography;
-using System.Text;
+using System.Diagnostics;
 using System.Threading;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
@@ -26,7 +25,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     ///   behavior remains correct but dedupe scope is platform-defined.
     /// - Abandoned mutexes are treated as acquired to avoid blocking after a crash.
     /// </summary>
-
     internal static class InterprocessLock
     {
         // Prefer Global\ for cross-session dedupe; fall back to Local\
@@ -44,24 +42,33 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 try
                 {
-                    // Create or open existing
+                    // Create or open existing. If this throws (e.g. ACL issues),
+                    // the outer catch below logs and returns false (best-effort).
                     using var m = new Mutex(initiallyOwned: false, name);
 
-                    // Wait to acquire
                     bool entered;
+                    var sw = Stopwatch.StartNew();
 
                     try
                     {
                         entered = m.WaitOne(timeout);
                     }
-                    catch (AbandonedMutexException)
+                    catch (AbandonedMutexException ex)
                     {
-                        entered = true; // prior holder crashed
+                        // Prior holder crashed; we still own the mutex now.
+                        entered = true;
+                        logVerbose?.Invoke(
+                            $"[PersistentCert] Abandoned mutex '{name}', treating as acquired. {ex.Message}");
+                    }
+                    finally
+                    {
+                        sw.Stop();
                     }
 
                     if (!entered)
                     {
-                        logVerbose?.Invoke($"[PersistentCert] Skip persist (lock busy '{name}').");
+                        logVerbose?.Invoke(
+                            $"[PersistentCert] Skip persist (lock busy '{name}', waited {sw.Elapsed.TotalMilliseconds:F0} ms).");
                         return false;
                     }
 
@@ -72,12 +79,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     finally
                     {
                         try
-                        { 
-                            m.ReleaseMutex(); 
+                        {
+                            m.ReleaseMutex();
                         }
-                        catch 
-                        { 
-                            /* best-effort */ 
+                        catch
+                        {
+                            // best-effort; do not propagate
                         }
                     }
 
@@ -104,7 +111,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return (preferGlobal ? @"Global\" : @"Local\") + "MSAL_MI_P_" + suffix;
         }
 
-        private static string Canonicalize(string alias) => (alias ?? string.Empty).Trim().ToUpperInvariant();
+        private static string Canonicalize(string alias) =>
+            (alias ?? string.Empty).Trim().ToUpperInvariant();
 
         private static string HashAlias(string s)
         {
@@ -112,7 +120,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 var hex = new CommonCryptographyManager().CreateSha256HashHex(s);
                 // Truncate to 32 chars to fit mutex name length limits
-                return string.IsNullOrEmpty(hex) ? "0" : (hex.Length > 32 ? hex.Substring(0, 32) : hex);
+                return string.IsNullOrEmpty(hex)
+                    ? "0"
+                    : (hex.Length > 32 ? hex.Substring(0, 32) : hex);
             }
             catch
             {

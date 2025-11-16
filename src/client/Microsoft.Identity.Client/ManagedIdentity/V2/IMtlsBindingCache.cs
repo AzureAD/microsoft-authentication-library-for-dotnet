@@ -9,11 +9,18 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
+    /// <summary>
+    /// Abstraction over the in-memory + persisted cache for IMDSv2 mTLS binding certificates.
+    /// </summary>
     internal interface IMtlsBindingCache
     {
-        Task<Tuple<X509Certificate2, string /*endpoint*/, string /*clientId*/>> GetOrCreateAsync(
+        /// <summary>
+        /// Returns a cached binding certificate for the given <paramref name="cacheKey"/>,
+        /// or uses <paramref name="factory"/> to create, persist and return one when needed.
+        /// </summary>
+        Task<MtlsBindingInfo> GetOrCreateAsync(
             string cacheKey,
-            Func<Task<Tuple<X509Certificate2, string, string>>> factory,
+            Func<Task<MtlsBindingInfo>> factory,
             CancellationToken cancellationToken,
             ILoggerAdapter logger);
     }

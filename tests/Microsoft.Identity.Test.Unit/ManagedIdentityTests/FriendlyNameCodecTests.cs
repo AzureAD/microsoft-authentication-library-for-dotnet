@@ -24,20 +24,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual(ep, ep2);
         }
 
-        [TestMethod]
-        public void TryEncode_Rejects_IllegalChars()
+        [DataTestMethod]
+        [DataRow("foo|bar", "https://x")]
+        [DataRow("foo\nbar", "https://x")]
+        [DataRow("foo", "https://x|y")]
+        [DataRow("foo", "https://x\ny")]
+        [DataRow(null, "https://x")]
+        [DataRow("   ", "https://x")]
+        [DataRow("foo", null)]
+        [DataRow("foo", "  ")]
+        [DataRow("bad|alias", "https://ok")]
+        [DataRow("ok", "https://bad|ep")]
+        public void TryEncode_Rejects_IllegalInputs(string alias, string endpointBase)
         {
-            // '|' and newline are disallowed
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode("foo|bar", "https://x", out _));
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode("foo\nbar", "https://x", out _));
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode("foo", "https://x|y", out _));
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode("foo", "https://x\ny", out _));
-
-            // Null/whitespace rejected
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode(null, "https://x", out _));
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode("   ", "https://x", out _));
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode("foo", null, out _));
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode("foo", "  ", out _));
+            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode(alias, endpointBase, out _));
         }
 
         [TestMethod]
@@ -53,25 +53,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void EncodeDecode_Roundtrip()
-        {
-            string alias = "my-alias-123";
-            string ep = "https://ep/base";
-            Assert.IsTrue(MsiCertificateFriendlyNameEncoder.TryEncode(alias, ep, out var fn));
-            Assert.IsTrue(MsiCertificateFriendlyNameEncoder.TryDecode(fn, out var a2, out var e2));
-            Assert.AreEqual(alias, a2);
-            Assert.AreEqual(ep, e2);
-        }
-
-        [TestMethod]
-        public void Encode_Rejects_Illegal()
-        {
-            // '|' is illegal by design
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode("bad|alias", "https://ok", out _));
-            Assert.IsFalse(MsiCertificateFriendlyNameEncoder.TryEncode("ok", "https://bad|ep", out _));
-        }
-
-        [TestMethod]
         public void Decode_Ignores_Unknown_Tags_LastWins()
         {
             var fn = MsiCertificateFriendlyNameEncoder.Prefix +
@@ -81,6 +62,50 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsTrue(MsiCertificateFriendlyNameEncoder.TryDecode(fn, out var a, out var e));
             Assert.AreEqual("a", a);
             Assert.AreEqual("E", e);
+        }
+
+        [TestMethod]
+        public void EncodeDecode_VeryLongAliasAndEndpoint_Succeeds()
+        {
+            var alias = new string('a', 2048);
+            var ep = "https://example.test/" + new string('b', 2048);
+
+            Assert.IsTrue(MsiCertificateFriendlyNameEncoder.TryEncode(alias, ep, out var fn));
+            Assert.IsNotNull(fn);
+
+            Assert.IsTrue(MsiCertificateFriendlyNameEncoder.TryDecode(fn, out var a2, out var ep2));
+            Assert.AreEqual(alias, a2);
+            Assert.AreEqual(ep, ep2);
+        }
+
+        [TestMethod]
+        public void EncodeDecode_UnicodeAliasAndEndpoint_Succeeds()
+        {
+            var alias = "uami-ümläüt-用户-🔐";
+            var ep = "https://例え.テスト/路径/ресурс";
+
+            Assert.IsTrue(MsiCertificateFriendlyNameEncoder.TryEncode(alias, ep, out var fn));
+            Assert.IsTrue(MsiCertificateFriendlyNameEncoder.TryDecode(fn, out var a2, out var ep2));
+
+            Assert.AreEqual(alias, a2);
+            Assert.AreEqual(ep, ep2);
+        }
+
+        [TestMethod]
+        public void TryDecode_DoublePrefixedString_IsResilient()
+        {
+            // First, build a normal friendly name.
+            var alias = "alias-double";
+            var ep = "https://ep/base";
+            Assert.IsTrue(MsiCertificateFriendlyNameEncoder.TryEncode(alias, ep, out var inner));
+
+            // Now create a "double-prefixed" string: "MSAL|MSAL|alias=...|ep=..."
+            var doublePrefixed = MsiCertificateFriendlyNameEncoder.Prefix + inner;
+
+            // Decoder should not throw and should still recover alias/endpoint.
+            Assert.IsTrue(MsiCertificateFriendlyNameEncoder.TryDecode(doublePrefixed, out var a2, out var ep2));
+            Assert.AreEqual(alias, a2);
+            Assert.AreEqual(ep, ep2);
         }
     }
 }

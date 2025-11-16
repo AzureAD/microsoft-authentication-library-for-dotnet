@@ -33,21 +33,42 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             _persisted = persisted ?? throw new ArgumentNullException(nameof(persisted));
         }
 
-        public async Task<Tuple<X509Certificate2, string, string>> GetOrCreateAsync(
+        /// <summary>
+        /// Get or create mTLS binding info
+        /// </summary>
+        /// <param name="cacheKey"></param>
+        /// <param name="factory"></param>
+        /// <param name="cancellationToken"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<MtlsBindingInfo> GetOrCreateAsync(
             string cacheKey,
-            Func<Task<Tuple<X509Certificate2, string, string>>> factory,
+            Func<Task<MtlsBindingInfo>> factory,
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
             if (string.IsNullOrWhiteSpace(cacheKey))
+            {
                 throw new ArgumentException("cacheKey must be non-empty.", nameof(cacheKey));
+            }
+
             if (factory is null)
+            {
                 throw new ArgumentNullException(nameof(factory));
+            }
 
             // 1) In-memory cache first
-            if (_memory.TryGet(cacheKey, out var cached, logger))
+            if (_memory.TryGet(cacheKey, out var cachedEntry, logger))
             {
-                return Tuple.Create(cached.Certificate, cached.Endpoint, cached.ClientId);
+                logger?.Verbose(() =>
+                    $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
+
+                return new MtlsBindingInfo(
+                    cachedEntry.Certificate,
+                    cachedEntry.Endpoint,
+                    cachedEntry.ClientId);
             }
 
             // 2) Per-key gate (dedupe concurrent mint)
@@ -56,35 +77,66 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             try
             {
                 // Re-check after acquiring the gate
-                if (_memory.TryGet(cacheKey, out cached, logger))
+                if (_memory.TryGet(cacheKey, out cachedEntry, logger))
                 {
-                    return Tuple.Create(cached.Certificate, cached.Endpoint, cached.ClientId);
+                    logger?.Verbose(() =>
+                        $"[PersistentCert] mTLS binding cache HIT (memory-after-gate) for '{cacheKey}'.");
+
+                    return new MtlsBindingInfo(
+                        cachedEntry.Certificate,
+                        cachedEntry.Endpoint,
+                        cachedEntry.ClientId);
                 }
 
                 // 3) Persistent cache (best-effort)
-                if (_persisted.Read(cacheKey, out var persisted, logger))
+                if (_persisted.Read(cacheKey, out var persistedEntry, logger))
                 {
-                    if (persisted.Certificate.HasPrivateKey)
+                    logger?.Verbose(() =>
+                        $"[PersistentCert] mTLS binding cache HIT (persistent) for '{cacheKey}'.");
+
+                    if (persistedEntry.Certificate.HasPrivateKey)
                     {
-                        var v = new CertificateCacheValue(persisted.Certificate, persisted.Endpoint, persisted.ClientId);
-                        _memory.Set(cacheKey, in v, logger);
-                        return Tuple.Create(v.Certificate, v.Endpoint, v.ClientId);
+                        var memoryEntry = new CertificateCacheValue(
+                            persistedEntry.Certificate,
+                            persistedEntry.Endpoint,
+                            persistedEntry.ClientId);
+
+                        _memory.Set(cacheKey, in memoryEntry, logger);
+
+                        return new MtlsBindingInfo(
+                            memoryEntry.Certificate,
+                            memoryEntry.Endpoint,
+                            memoryEntry.ClientId);
                     }
 
                     // Defensive: persisted entry is unusable; dispose and mint new
-                    persisted.Certificate.Dispose();
-                    logger?.Verbose(() => "[PersistentCert] Skipping persisted cert without private key; minting new.");
+                    persistedEntry.Certificate.Dispose();
+                    logger?.Verbose(() =>
+                        "[PersistentCert] Skipping persisted cert without private key; minting new.");
                 }
 
                 // 4) Mint + back-fill mem + best-effort persist + prune
-                var created = await factory().ConfigureAwait(false);
-                var createdValue = new CertificateCacheValue(created.Item1, created.Item2, created.Item3);
+                var mintedBinding = await factory().ConfigureAwait(false);
 
-                _memory.Set(cacheKey, in createdValue, logger);
-                _persisted.Write(cacheKey, created.Item1, created.Item2, logger);
+                logger?.Verbose(() =>
+                    $"[PersistentCert] mTLS binding cache MISS -> minted new binding for '{cacheKey}'.");
+
+                var createdEntry = new CertificateCacheValue(
+                    mintedBinding.Certificate,
+                    mintedBinding.Endpoint,
+                    mintedBinding.ClientId);
+
+                _memory.Set(cacheKey, in createdEntry, logger);
+
+                // Persist newest binding for this alias (best-effort; failures are logged by the implementation).
+                _persisted.Write(cacheKey, mintedBinding.Certificate, mintedBinding.Endpoint, logger);
+
+                // Then prune older/expired entries for this alias to keep the store bounded.
+                // This is also best-effort and must not throw.
                 _persisted.Delete(cacheKey, logger);
 
-                return created;
+                // Pass through the factory result (already an MtlsBindingInfo)
+                return mintedBinding;
             }
             finally
             {

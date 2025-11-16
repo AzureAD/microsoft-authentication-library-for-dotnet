@@ -39,6 +39,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        private static void WindowsOnly()
+        {
+            if (!IsWindows)
+            {
+                Assert.Inconclusive("Windows-only");
+            }
+        }
+
+        private static void NonWindowsOnly()
+        {
+            if (IsWindows)
+            {
+                Assert.Inconclusive("Non-Windows-only");
+            }
+        }
+
         // --- helpers ---
 
         private static X509Certificate2 CreateSelfSignedWithKey(string subject, TimeSpan lifetime)
@@ -131,8 +147,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Write_Then_Read_HappyPath()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-happy-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenantX";
@@ -160,8 +175,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Write_NewestWins_SkipOlder()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-newest-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenantY";
@@ -190,8 +204,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Write_Skip_Add_When_NewerOrEqual_AlreadyPresent()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-skip-old-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenantZ";
@@ -222,8 +235,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Read_Rejects_NonGuid_CN()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-nonguid-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenant1";
@@ -246,8 +258,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Read_Rejects_Short_Lifetime_Less_Than_24h()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-short-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenant2";
@@ -271,8 +282,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Delete_Prunes_Expired_Only()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-prune-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenant3";
@@ -311,8 +321,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Write_Skips_When_Mutex_Busy_Then_Succeeds_After_Release()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-mutex-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenant4";
@@ -369,8 +378,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Write_DoesNotPersist_When_NoPrivateKey()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-nokey-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenantX";
@@ -398,8 +406,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Read_Boundary_Exactly24h_IsRejected()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-24h-exact-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenantY";
@@ -424,8 +431,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Read_Boundary_JustOver24h_IsAccepted()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-24h-plus-" + Guid.NewGuid().ToString("N");
             var ep = "https://fake_mtls/tenantY";
@@ -451,8 +457,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Read_Returns_Newest_Endpoint_And_ClientId()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-newest-ep-" + Guid.NewGuid().ToString("N");
             var epOld = "https://fake_mtls/tenant/OLD";
@@ -481,8 +486,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Read_Isolated_Per_Alias_No_Cross_Talk()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias1 = "alias-a-" + Guid.NewGuid().ToString("N");
             var alias2 = "alias-b-" + Guid.NewGuid().ToString("N");
@@ -517,8 +521,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void Read_Prefers_Newest_Among_Many()
         {
-            if (!IsWindows)
-            { Assert.Inconclusive("Windows-only"); return; }
+            WindowsOnly();
 
             var alias = "alias-many-" + Guid.NewGuid().ToString("N");
             var ep1 = "https://fake_mtls/ep1";
@@ -545,6 +548,74 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             finally
             {
                 RemoveAliasFromStore(alias);
+            }
+        }
+
+        [TestMethod]
+        public void NonWindows_WindowsPersistentCertificateCache_IsNoOp()
+        {
+            NonWindowsOnly();
+
+            var alias = "alias-nonwindows-" + Guid.NewGuid().ToString("N");
+            var ep = "https://fake_mtls/nonwindows";
+            var guid = Guid.NewGuid().ToString("D");
+
+            using var cert = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromDays(2));
+
+            // On non-Windows, WindowsPersistentCertificateCache should behave as a no-op:
+            // Write() and Read() return without touching any real store.
+            _cache.Write(alias, cert, ep, Logger);
+
+            Assert.IsFalse(_cache.Read(alias, out _, Logger),
+                "On non-Windows the persistent cache should effectively be disabled.");
+        }
+
+        [TestMethod]
+        public void Write_And_Read_Handle_Alias_EdgeCases()
+        {
+            WindowsOnly();
+
+            var ep = "https://fake_mtls/alias-edge";
+            using var cert = CreateSelfSignedWithKey("CN=" + Guid.NewGuid().ToString("D"),
+                TimeSpan.FromDays(3));
+
+            // Aliases that should be valid and round-trip through persistence
+            string[] goodAliases =
+            {
+                new string('a', 2048),          // very long alias
+                "alias-ümläüt-用户-🔐"         // unicode + special characters (no illegal delimiters)
+            };
+
+            foreach (var alias in goodAliases)
+            {
+                try
+                {
+                    _cache.Write(alias, cert, ep, Logger);
+
+                    Assert.IsTrue(WaitForFind(alias, out var value),
+                        $"Expected alias '{alias}' to be persisted.");
+                    Assert.AreEqual(ep, value.Endpoint);
+                }
+                finally
+                {
+                    RemoveAliasFromStore(alias);
+                }
+            }
+
+            // Aliases that should be rejected by the FriendlyName encoder and not persisted
+            string[] badAliases =
+            {
+                null,
+                string.Empty,
+                "   ",
+                "bad|alias"   // '|' is illegal for our FriendlyName grammar
+            };
+
+            foreach (var alias in badAliases)
+            {
+                _cache.Write(alias, cert, ep, Logger);
+                Assert.IsFalse(_cache.Read(alias, out _, Logger),
+                    $"Alias '{alias ?? "<null>"}' should not be persisted.");
             }
         }
 

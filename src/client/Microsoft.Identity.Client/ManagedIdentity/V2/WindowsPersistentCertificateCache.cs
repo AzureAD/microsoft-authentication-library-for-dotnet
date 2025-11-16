@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     }
 
                     value = new CertificateCacheValue(best, bestEndpoint, clientIdGuid.ToString("D"));
-                    logger?.Verbose(() => "[PersistentCert] Reused certificate from CurrentUser/My.");
+                    logger?.Info(() => "[PersistentCert] Reused certificate from CurrentUser/My.");
                     return true;
                 }
             }
@@ -165,7 +165,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 return;
             }
 
-            // Best-effort: short lock, skip if busy
+            // Best-effort: short, non-configurable timeout. We intentionally do not retry here:
+            // if the lock is busy we skip persistence and fall back to in-memory cache only,
+            // so token acquisition is never blocked on certificate store operations.
             InterprocessLock.TryWithAliasLock(
                 alias,
                 timeout: TimeSpan.FromMilliseconds(300),
@@ -242,7 +244,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                             // Add the original instance (carries private key if present)
                             store.Add(cert);
-                            logger?.Verbose(() => "[PersistentCert] Persisted certificate to CurrentUser/My.");
+                            logger?.Info(() => "[PersistentCert] Persisted certificate to CurrentUser/My.");
 
                             // Conservative cleanup: remove expired entries for this alias only
                             PruneExpiredForAlias(store, alias, nowUtc, logger);
@@ -265,6 +267,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (!PlatformSupportsPersistentFriendlyName(logger))
                 return;
 
+            // Best-effort: short, non-configurable timeout. We intentionally do not retry here:
+            // if the lock is busy we skip persistence and fall back to in-memory cache only,
+            // so token acquisition is never blocked on certificate store operations.
             InterprocessLock.TryWithAliasLock(
                 alias,
                 timeout: TimeSpan.FromMilliseconds(300),
