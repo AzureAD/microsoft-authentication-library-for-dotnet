@@ -30,9 +30,15 @@ If a cached artifact is missing, invalid, or corrupted, we treat it as a **cache
 For any artifact whose expiry comes from the service (MAA, IMDS, eSTS), we:
 
 - treat the time between “when we obtained it” and “when it expires” as its **lifetime**;
-- plan to renew it **around halfway through that lifetime** (half‑life);
-- add a small, per‑process **random jitter** around that halfway point so different processes don’t all renew at the same time; and
-- always enforce a small safety buffer so renewal completes **before** expiry (for example, at least a few minutes before in the worst case).
+- schedule renewal at **half‑life** (the midpoint of that lifetime); and
+- add a small **random jitter** so different processes don’t all renew at the same instant.
+
+Concretely:
+
+- For each artifact, **each process** picks a random offset in the range **–5 minutes to +5 minutes** around the half‑life point.
+- We always clamp the final renewal time so that it is **at least 5 minutes before expiry**.
+- For the **binding certificate**, we also guarantee that renewal happens **no later than 24 hours before the cert expires**; if half‑life + jitter would land later than that, we move renewal earlier to stay ≥ 24 hours before expiry.
+- Renewal is triggered on the **front‑end**: the first caller that sees “now ≥ scheduled renewal time” does the refresh; other callers keep using the last valid value until the update completes.
 
 **Binding certificate vs. others**
 
@@ -60,7 +66,7 @@ For any artifact whose expiry comes from the service (MAA, IMDS, eSTS), we:
    | Item | Scope | Stored as | TTL source | Behavior |
    |---|---|---|---|---|
    | **MSI v2 probe result** | Per process | In-memory | Process lifetime | First MSI call in a process probes IMDS and caches v2/v1/none. If the probe fails, that process falls back to MSI v1 behavior. New processes probe again. |
-   | **MAA token** | Per key / identity context | Per-user file cache (shared across processes) | JWT `exp` from MAA | Used **only** for `/issuecredential`. Stored in a small per-user file cache so all MSAL processes for that user on the same machine can reuse it. When it needs to be refreshed, processes coordinate so that only one process updates the file; others read the latest complete value. Renewed at half-life with per-process jitter (always before `exp`). If missing, expired, invalid, or attestation/policy/key errors occur, we discard and get a new token next time. |
+   | **MAA token (Windows only)** | Per key / identity context | Per-user file cache (shared across processes) | JWT `exp` from MAA | Used **only** for `/issuecredential`. Stored in a small per-user file so all MSAL processes for that user on the same machine can reuse it. When it needs to be refreshed, processes coordinate so that **only one process at a time** updates the file; others read the latest complete value. File updates are **atomic from the reader’s point of view**: a reader sees either the old token or the new token, never a partially written one. If a write fails and the file cannot be parsed or validated, we treat it as a cache miss and reacquire a fresh token. Renewed at half-life with per-process jitter (always before `exp`). If missing, expired, invalid, or attestation/policy/key errors occur, we discard and get a new token next time. |
    | **Binding cert + `/issuecredential` metadata** | Per managed identity per user | User certificate store (plus metadata) | Cert / metadata from IMDS | Long-lived credential for bound ATs. Persisted in the user’s certificate store so all processes for that user can read the same cert. The cert is renewed at roughly half-life with per-process jitter, but in all cases rotation completes **at least 24 hours before the certificate’s expiry** (where lifetime allows). When renewal happens, only one process at a time updates the stored certificate and metadata; others continue to read the existing entry. If the cert or metadata is missing, invalid, or rejected by IMDS/eSTS (expired, not yet valid, binding mismatch, etc.), we discard it and re-issue via MAA → `/issuecredential`. |
    | **Access tokens (bearer / mtls_pop)** | Per (audience, managed identity, binding-cert thumbprint) | In-memory per process | `exp` from eSTS | Regular MSAL token cache, unchanged by this design. Tokens are cached per process in memory. Never reused past `exp`. On 401/403 or invalid token errors, we drop the token and reacquire with the **current** binding cert. Rotating the binding cert changes the thumbprint, so tokens for the old thumbprint are naturally not reused. |
 
@@ -76,6 +82,9 @@ For any artifact whose expiry comes from the service (MAA, IMDS, eSTS), we:
    - **Reboot**:  
      - we try the persisted binding cert first; if it is valid and accepted by eSTS, we reuse it and reacquire ATs;  
      - if it fails locally or at eSTS, we treat it as invalid and re-run MAA → `/issuecredential` to get a new cert.
+   - **Linux binding-cert files (corruption / deletion / access)**  
+     - On Linux, the binding certificate and its metadata are stored as files in a per-user directory with restricted permissions (for example, only that user can read/write). We rely on the OS to prevent other users on the machine from accessing or tampering with these files.  
+     - If the file is deleted, truncated, or corrupted outside of MSAL, the next read will fail parsing or validation. We treat that as a cache miss: we discard any unusable data and recover by re-issuing the binding certificate via the normal IMDS flow.  
 
 7. **Retries**
 
