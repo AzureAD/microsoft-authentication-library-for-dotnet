@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>
@@ -81,6 +82,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>
@@ -120,6 +122,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
@@ -166,6 +169,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
@@ -179,7 +183,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddFailureTokenEndpointResponse("request_failed");
 
                 // Act & Assert
-                var exception = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                         .ExecuteAsync()
@@ -203,6 +207,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>
                     {
@@ -247,6 +252,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
@@ -294,6 +300,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
@@ -344,6 +351,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
@@ -387,6 +395,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>
@@ -441,6 +450,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>

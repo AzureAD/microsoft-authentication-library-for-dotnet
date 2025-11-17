@@ -39,15 +39,16 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Arrange
             bool callbackInvoked = false;
-            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider = async (parameters) =>
+            async Task<X509Certificate2> certificateProvider(ClientCredentialExtensionParameters parameters)
             {
                 callbackInvoked = true;
                 return GetTestCertificate();
-            };
+            }
 
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider)
                 .BuildConcrete();
 
@@ -63,6 +64,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var ex = Assert.ThrowsException<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithCertificate((Func<ClientCredentialExtensionParameters, Task<X509Certificate2>>)null)
                     .Build());
 
@@ -76,21 +78,22 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             int firstCallbackInvoked = 0;
             int secondCallbackInvoked = 0;
 
-            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> firstProvider = async (parameters) =>
+            async Task<X509Certificate2> firstProvider(ClientCredentialExtensionParameters parameters)
             {
                 firstCallbackInvoked++;
                 return GetTestCertificate();
-            };
+            }
 
-            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> secondProvider = async (parameters) =>
+            async Task<X509Certificate2> secondProvider(ClientCredentialExtensionParameters parameters)
             {
                 secondCallbackInvoked++;
                 return GetTestCertificate();
-            };
+            }
 
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
                 .WithCertificate(firstProvider)
                 .WithCertificate(secondProvider)
                 .BuildConcrete();
@@ -110,11 +113,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void OnMsalServiceFailure_CallbackIsStored()
         {
             // Arrange
-            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> onMsalServiceFailureCallback = async (parameters, ex) => false;
+            async Task<bool> onMsalServiceFailureCallback(ClientCredentialExtensionParameters parameters, MsalException ex) => false;
 
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
                 .WithClientSecret(TestConstants.ClientSecret)
                 .OnMsalServiceFailure(onMsalServiceFailureCallback)
                 .BuildConcrete();
@@ -130,33 +134,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var ex = Assert.ThrowsException<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithClientSecret(TestConstants.ClientSecret)
                     .OnMsalServiceFailure(null)
                     .Build());
 
             Assert.AreEqual("onMsalServiceFailureCallback", ex.ParamName);
-        }
-
-        [TestMethod]
-        public void OnMsalServiceFailure_AllowsMultipleRegistrations_LastOneWins()
-        {
-            // Arrange
-            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> firstPolicy = async (parameters, ex) => true;
-            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> secondPolicy = async (parameters, ex) => false;
-
-            // Act
-            var app = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .OnMsalServiceFailure(firstPolicy)
-                .OnMsalServiceFailure(secondPolicy)
-                .BuildConcrete();
-
-            // Assert
-            var config = app.AppConfig as ApplicationConfiguration;
-            Assert.IsNotNull(config, "AppConfig should be of type ApplicationConfiguration.");
-            Assert.IsNotNull(config.OnMsalServiceFailureCallback);
-            Assert.AreSame(secondPolicy, config.OnMsalServiceFailureCallback);
         }
 
         #endregion
@@ -167,11 +150,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void OnSuccess_CallbackIsStored()
         {
             // Arrange
-            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> onSuccessCallback = async (parameters, result) => { };
+            async Task onSuccessCallback(ClientCredentialExtensionParameters parameters, ExecutionResult result)
+            { }
 
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
                 .WithClientSecret(TestConstants.ClientSecret)
                 .OnSuccess(onSuccessCallback)
                 .BuildConcrete();
@@ -187,33 +172,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var ex = Assert.ThrowsException<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
                     .WithClientSecret(TestConstants.ClientSecret)
                     .OnSuccess(null)
                     .Build());
 
             Assert.AreEqual("onSuccessCallback", ex.ParamName);
-        }
-
-        [TestMethod]
-        public void OnSuccess_AllowsMultipleRegistrations_LastOneWins()
-        {
-            // Arrange
-            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> firstObserver = async (parameters, result) => { };
-            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> secondObserver = async (parameters, result) => { };
-
-            // Act
-            var app = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .OnSuccess(firstObserver)
-                .OnSuccess(secondObserver)
-                .BuildConcrete();
-
-            // Assert
-            var config = app.AppConfig as ApplicationConfiguration;
-            Assert.IsNotNull(config, "AppConfig is not of type ApplicationConfiguration.");
-            Assert.IsNotNull(config.OnSuccessCallback);
-            Assert.AreSame(secondObserver, config.OnSuccessCallback);
         }
 
         #endregion
@@ -288,13 +252,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void AllThreeExtensibilityPoints_CanBeConfiguredTogether()
         {
             // Arrange
-            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider = async (parameters) => GetTestCertificate();
-            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> onMsalServiceFailure = async (parameters, ex) => false;
-            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> onSuccess = async (parameters, result) => { };
+            async Task<X509Certificate2> certificateProvider(ClientCredentialExtensionParameters parameters) => GetTestCertificate();
+            async Task<bool> onMsalServiceFailure(ClientCredentialExtensionParameters parameters, MsalException ex) => false;
+            async Task onSuccess(ClientCredentialExtensionParameters parameters, ExecutionResult result) { }
 
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider)
                 .OnMsalServiceFailure(onMsalServiceFailure)
                 .OnSuccess(onSuccess)
@@ -311,13 +276,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void ExtensibilityPoints_CanBeConfiguredInAnyOrder()
         {
             // Arrange
-            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider = async (parameters) => GetTestCertificate();
-            Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> onMsalServiceFailure = async (parameters, ex) => false;
-            Func<ClientCredentialExtensionParameters, ExecutionResult, Task> onSuccess = async (parameters, result) => { };
+            async Task<X509Certificate2> certificateProvider(ClientCredentialExtensionParameters parameters) => GetTestCertificate();
+            async Task<bool> onMsalServiceFailure(ClientCredentialExtensionParameters parameters, MsalException ex) => false;
+            async Task onSuccess(ClientCredentialExtensionParameters parameters, ExecutionResult result) { }
 
             // Act - Order: OnSuccess, OnMsalServiceFailure, Certificate
             var app1 = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
                 .OnSuccess(onSuccess)
                 .OnMsalServiceFailure(onMsalServiceFailure)
                 .WithCertificate(certificateProvider)
@@ -326,6 +292,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act - Order: OnMsalServiceFailure, Certificate, OnSuccess
             var app2 = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
                 .OnMsalServiceFailure(onMsalServiceFailure)
                 .WithCertificate(certificateProvider)
                 .OnSuccess(onSuccess)
@@ -349,16 +316,17 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void WithCertificate_WorksWithOtherConfidentialClientOptions()
         {
             // Arrange
-            Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider = async (parameters) =>
+            async Task<X509Certificate2> certificateProvider(ClientCredentialExtensionParameters parameters)
             {
                 Assert.AreEqual(TestConstants.ClientId, parameters.ClientId);
                 Assert.AreEqual(TestConstants.AadTenantId, parameters.TenantId);
                 return GetTestCertificate();
-            };
+            }
 
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
                 .WithAuthority(TestConstants.AadAuthorityWithTestTenantId)
                 .WithCertificate(certificateProvider)
                 .BuildConcrete();

@@ -4,6 +4,7 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -44,18 +45,18 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </param>
         /// <returns>The builder to chain additional configuration calls.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="certificateProvider"/> is null.</exception>
-
         /// <remarks>
-        /// <para>This method cannot be used together with <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/>.</para>
         /// <para>The callback is not invoked when tokens are retrieved from cache, only for network calls.</para>
         /// <para>The certificate returned by the callback will be used to sign the client assertion (JWT) for that token request.</para>
         /// <para>The callback can perform async operations such as fetching certificates from Azure Key Vault or other secret management systems.</para>
+        /// <para> This callback is used together with <see cref="OnMsalServiceFailure"/> and <see cref="OnSuccess"/></para>
         /// <para>See https://aka.ms/msal-net-client-credentials for more details on client credentials.</para>
         /// </remarks>
         public static ConfidentialClientApplicationBuilder WithCertificate(
             this ConfidentialClientApplicationBuilder builder,
             Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> certificateProvider)
         {
+            builder.ValidateUseOfExperimentalFeature();
             if (certificateProvider == null)
             {
                 throw new ArgumentNullException(nameof(certificateProvider));
@@ -65,7 +66,7 @@ namespace Microsoft.Identity.Client.Extensibility
             
             // Create a CertificateAndClaimsClientCredential with null certificate
             // The certificate will be resolved dynamically via the provider in ResolveCertificateAsync
-            builder.Config.ClientCredential = new Microsoft.Identity.Client.Internal.ClientCredential.CertificateAndClaimsClientCredential(
+            builder.Config.ClientCredential = new CertificateAndClaimsClientCredential(
                 certificate: null,
                 claimsToSign: null,
                 appendDefaultClaims: true);
@@ -74,7 +75,7 @@ namespace Microsoft.Identity.Client.Extensibility
         }
 
         /// <summary>
-        /// Configures an async callback that is invoked when MSAL receives an error response from the identity provider (Security Token Service).
+        /// Configures an async callback that is invoked when MSAL receives an error response from the identity provider.
         /// The callback determines whether MSAL should retry the token request or propagate the exception.
         /// This callback is invoked after each service failure and can be called multiple times until it returns <c>false</c> or the request succeeds.
         /// </summary>
@@ -88,7 +89,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <returns>The builder to chain additional configuration calls.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="onMsalServiceFailureCallback"/> is null.</exception>
         /// <remarks>
-        /// <para>This callback is ONLY triggered for <see cref="MsalServiceException"/> - errors returned by the identity provider (e.g., HTTP 500, 503, throttling).</para>
+        /// <para>This callback is ONLY triggered for <see cref="MsalServiceException"/> - errors returned by STS.</para>
         /// <para>This callback is NOT triggered for client-side errors (<see cref="MsalClientException"/>) or network failures handled internally by MSAL.</para>
         /// <para>This callback is only invoked for network token acquisition attempts, not when tokens are retrieved from cache.</para>
         /// <para>When the callback returns <c>true</c>, MSAL will invoke the certificate provider (if configured via <see cref="WithCertificate"/>)
@@ -96,6 +97,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <para>MSAL's internal throttling and retry mechanisms will still apply, including respecting Retry-After headers from the identity provider.</para>
         /// <para>To prevent infinite loops, ensure your callback has appropriate termination conditions (e.g., max retry count, timeout).</para>
         /// <para>The callback can perform async operations such as logging to remote services, checking external health endpoints, or querying configuration stores.</para>
+        /// <para> This callback is used together with <see cref="WithCertificate"/> callback.</para>
         /// </remarks>
         /// <example>
         /// <code>
@@ -108,8 +110,8 @@ namespace Microsoft.Identity.Client.Extensibility
         ///         retryCount++;
         ///         await LogExceptionAsync(serviceException);
         ///         
-        ///         // Retry up to 3 times for transient service errors (5xx)
-        ///         return serviceException.StatusCode >= 500 &amp;&amp; retryCount &lt; 3;
+        ///         // Retry up to 3 times for errors received from STS
+        ///         return serviceException.ErrorCode == "SpecificErrorCodeToRetry"; retryCount &lt; 3;
         ///     })
         ///     .Build();
         /// </code>
@@ -118,8 +120,12 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> onMsalServiceFailureCallback)
         {
+            builder.ValidateUseOfExperimentalFeature();
+
             if (onMsalServiceFailureCallback == null)
+            {
                 throw new ArgumentNullException(nameof(onMsalServiceFailureCallback));
+            }
 
             builder.Config.OnMsalServiceFailureCallback = onMsalServiceFailureCallback;
             return builder;
@@ -170,8 +176,12 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<ClientCredentialExtensionParameters, ExecutionResult, Task> onSuccessCallback)
         {
+            builder.ValidateUseOfExperimentalFeature();
+
             if (onSuccessCallback == null)
+            {
                 throw new ArgumentNullException(nameof(onSuccessCallback));
+            }
 
             builder.Config.OnSuccessCallback = onSuccessCallback;
             return builder;
