@@ -32,8 +32,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string MsiResource = "scope";
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-        public const string ClientCredentialAudience = "https://login.microsoftonline.com/10c419d4-4a50-45b2-aa4e-919fb84df24f/v2.0";
-        public const string PublicCloudConfidentialClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f";
+        public const string ClientCredentialAudience = "https://login.microsoftonline.com/10c419d4-4a50-45b2-aa4e-919fb84df24f/v2.0"; // ID4SLAB1 tenant
+        public const string PublicCloudConfidentialClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f"; // MSAL-APP-AzureADMultipleOrgs in ID4SLAB1 tenant
         public const string AutomationTestCertName = "LabAuth.MSIDLab.com";
         public static Dictionary<string, string> AdditionalAssertionClaims =>
             new Dictionary<string, string>() { { "Key1", "Val1" }, { "Key2", "Val2" }, { "customClaims", "{\"xms_az_claim\": [\"GUID\", \"GUID2\", \"GUID3\"]}" } };
