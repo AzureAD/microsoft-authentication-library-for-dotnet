@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
 using NetCoreTestApp.Experimental;
 
 namespace NetCoreTestApp
@@ -28,8 +29,8 @@ namespace NetCoreTestApp
               { "caller-sdk-ver", ("123", false) }
           };
 
-        // This app has http://localhost redirect uri registered
-        private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
+        // This app will be dynamically set to the multi-tenant app from lab
+        private static readonly string s_clientIdForPublicApp = LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().Result.App.AppId;
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
 
@@ -68,7 +69,7 @@ namespace NetCoreTestApp
             var ccaSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             s_clientIdForConfidentialApp = ccaSettings.ClientId;
             s_ccaAuthority = ccaSettings.Authority;
-            s_confidentialClientCertificate = ccaSettings.GetCertificate();
+            s_confidentialClientCertificate = ccaSettings.Certificate;
 
             var pca = CreatePca();
             RunConsoleAppLogicAsync(pca).Wait();

@@ -42,8 +42,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetFx)]
         public async Task Interactive_AADAsync()
         {
-            // Arrange
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            // Arrange - Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
+            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
             var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -67,19 +67,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
-        public async Task Interactive_AdfsV4_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
         public async Task InteractiveConsentPromptAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, true).ConfigureAwait(false);
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
@@ -89,9 +79,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #if IGNORE_FEDERATED
         [Ignore]
 #endif
-        public async Task Interactive_AdfsV2019_FederatedAsync()
+        public async Task Interactive_Adfs_FederatedAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -164,21 +154,21 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #if IGNORE_FEDERATED
         [Ignore]
 #endif
-        public async Task Interactive_AdfsV2019_DirectAsync()
+        public async Task Interactive_Adfs_DirectAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
         }      
 
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithDefaultRedirectUri()
-               .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+               .WithRedirectUri("http://localhost:52073")
                .WithTestLogging(out HttpSnifferClientFactory factory)
                .Build();
 
@@ -235,9 +225,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             if (directToAdfs)
             {
                 pca = PublicClientApplicationBuilder
-                    .Create(Adfs2019LabConstants.PublicClientId)
-                    .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
-                    .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                    .Create(labResponse.App.AppId)
+                    .WithRedirectUri("http://localhost:52073")
+                    .WithAdfsAuthority("https://fs.id4slab1.com/adfs", validateAuthority: false)
                     .WithTestLogging()
                     .Build();
             }
@@ -245,7 +235,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             {
                 pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithRedirectUri("http://localhost:52073")
                     .WithAuthority(labResponse.Lab.Authority + "common")
                     .WithTestLogging(out factory)
                     .Build();
