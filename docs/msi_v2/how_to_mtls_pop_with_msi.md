@@ -7,7 +7,7 @@ ms.topic: conceptual
 ms.date: 11/17/2025
 ---
 
-# Use managed identities with mTLS proof-of-possession (internal microsoft only - preview)
+# Use managed identities with mTLS proof-of-possession (internal Microsoft only - preview)
 
 > [!IMPORTANT]
 > mTLS proof-of-possession (mTLS PoP) for managed identities is currently in internal preview.
