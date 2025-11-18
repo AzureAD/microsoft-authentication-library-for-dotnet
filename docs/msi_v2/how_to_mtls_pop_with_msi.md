@@ -145,29 +145,74 @@ Once you have an `AuthenticationResult` from `WithMtlsProofOfPossession()`:
 - `result.TokenType` will be `"mtls_pop"`.
 - `result.BindingCertificate` is the certificate that the token is bound to.
 
-Use that certificate for the mTLS handshake, and send the token in the `Authorization` header:
+In production, you should reuse `HttpClient` instances rather than creating a new one per request. The example below caches `HttpClient` instances **per binding certificate**:
 
 ```csharp
-// Use the certificate returned by MSAL for the mTLS handshake
-using var handler = new HttpClientHandler();
-handler.ClientCertificates.Add(result.BindingCertificate);
+using System;
+using System.Collections.Concurrent;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 
-// Create an HttpClient that uses mTLS
-// Note: In production, cache HttpClient instances per certificate to avoid socket exhaustion
-using var httpClient = new HttpClient(handler);
+// Cache HttpClient instances per binding certificate (thumbprint)
+public static class MtlsHttpClientFactory
+{
+    private static readonly ConcurrentDictionary<string, HttpClient> s_httpClients =
+        new ConcurrentDictionary<string, HttpClient>(StringComparer.OrdinalIgnoreCase);
 
-// Example: call Microsoft Graph
-var request = new HttpRequestMessage(
-    HttpMethod.Get,
-    "https://graph.microsoft.com/v1.0/me");
+    public static HttpClient GetClient(X509Certificate2 bindingCertificate)
+    {
+        if (bindingCertificate is null)
+        {
+            throw new ArgumentNullException(nameof(bindingCertificate));
+        }
 
-// Use the token type and token from MSAL
-request.Headers.Authorization =
-    new AuthenticationHeaderValue(result.TokenType, result.AccessToken);
-// result.TokenType == "mtls_pop"
+        return s_httpClients.GetOrAdd(bindingCertificate.Thumbprint, _ =>
+        {
+            var handler = new HttpClientHandler();
 
-HttpResponseMessage response = await httpClient.SendAsync(request);
-response.EnsureSuccessStatusCode();
-```
+            // Attach the binding certificate so the connection uses mTLS
+            handler.ClientCertificates.Add(bindingCertificate);
 
-> In production, you should cache `HttpClient` instances per certificate to avoid socket exhaustion.
+            // HttpClient is intentionally not disposed here; it is reused for this certificate.
+            var client = new HttpClient(handler, disposeHandler: true);
+            // Optionally configure defaults such as Timeout, BaseAddress, etc.
+            return client;
+        });
+    }
+}
+
+public static class GraphCaller
+{
+    public static async Task CallGraphWithMtlsPopAsync(
+        AuthenticationResult result,
+        CancellationToken cancellationToken = default)
+    {
+        if (result is null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        // Get or create an HttpClient that uses the binding certificate for mTLS
+        HttpClient httpClient = MtlsHttpClientFactory.GetClient(result.BindingCertificate);
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            "https://graph.microsoft.com/v1.0/me");
+
+        // Use the token type and token from MSAL (TokenType will be "mtls_pop")
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue(result.TokenType, result.AccessToken);
+
+        HttpResponseMessage response = await httpClient
+            .SendAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+
+        response.EnsureSuccessStatusCode();
+        // Handle the response body as needed
+    }
+}
+
