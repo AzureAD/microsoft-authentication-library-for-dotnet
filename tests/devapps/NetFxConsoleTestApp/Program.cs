@@ -378,10 +378,10 @@ namespace NetFx
                             CancellationTokenSource cts = new CancellationTokenSource();
                             result = await pca.AcquireTokenInteractive(s_scopes)
                                 .WithUseEmbeddedWebView(false)
-                                .WithExtraQueryParameters(new Dictionary<string, string>() {
-                                    { "dc", "prod-wst-test1"},
-                                    { "slice", "test"},
-                                    { "sshcrt", "true" }
+                                .WithExtraQueryParameters(new Dictionary<string, (string, bool)>() {
+                                    { "dc", ("prod-wst-test1", false)},
+                                    { "slice", ("test", false)},
+                                    { "sshcrt", ("true", false) }
                                 })
                                 .WithSSHCertificateAuthenticationScheme(jwk, "1")
                                 .WithSystemWebViewOptions(new SystemWebViewOptions()
@@ -676,11 +676,11 @@ namespace NetFx
             return pwd;
         }
 
-        private static Dictionary<string, string> GetTestSliceParams()
+        private static Dictionary<string, (string, bool)> GetTestSliceParams()
         {
-            return new Dictionary<string, string>()
+            return new Dictionary<string, (string, bool)>()
             {
-                { "dc", "prod-wst-test1" },
+                { "dc", ("prod-wst-test1", false) },
             };
         }
     }

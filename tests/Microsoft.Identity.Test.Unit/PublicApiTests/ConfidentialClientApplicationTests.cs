@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExtraQueryParameters("parameter=x")
+                                                              .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                               .BuildConcrete();
                 var appCacheAccess = cca.AppTokenCache.RecordAccess();
                 var userCacheAccess = cca.UserTokenCache.RecordAccess();
@@ -432,7 +432,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithAuthority(new Uri(TestConstants.OnPremiseAuthority), false)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExtraQueryParameters("parameter=x")
+                                                              .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                               .BuildConcrete();
                 var appCacheAccess = cca.AppTokenCache.RecordAccess();
                 var userCacheAccess = cca.UserTokenCache.RecordAccess();
@@ -898,6 +898,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             // Build a CCA whose assertion‑delegate returns NO JWT (error case)
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures(true)
                         .WithClientSecret(TestConstants.ClientSecret)
                         .WithClientAssertion(
                             (opts, ct) => Task.FromResult(new ClientSignedAssertion
@@ -1239,7 +1240,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     var uri = await app
                         .GetAuthorizationRequestUrl(TestConstants.s_scope)
                         .WithLoginHint(TestConstants.DisplayableId)
-                        .WithExtraQueryParameters("login_hint=some@value.com")
+                        .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)> { { "login_hint", ("some@value.com", false) } })
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
 
@@ -2285,6 +2286,69 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(cacheToken, result.AccessToken,
                     "We reuse the cache if the hash does not match the 'bad' token’s hash.");
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ConfidentialClient_acquireTokenForClient_ReturnsAuthZTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(addClientInfo: true);
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authz"));
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                Assert.AreEqual("[\"value1\",\"value2\"]", result.AdditionalResponseParameters["authz"]);
+#else
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authz"]);
+#endif
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
+
+                // call AcquireTokenForClientAsync again to get result back from the cache
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.AreEqual("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.IsTrue(result.AdditionalResponseParameters.ContainsKey("authz"));
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                Assert.AreEqual("[\"value1\",\"value2\"]", result.AdditionalResponseParameters["authz"]);
+#else
+                Assert.AreEqual("[\r\n  \"value1\",\r\n  \"value2\"\r\n]", result.AdditionalResponseParameters["authz"]);
+#endif
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+
+                appCacheAccess.AssertAccessCounts(2, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
 

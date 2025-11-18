@@ -174,7 +174,7 @@ namespace TestApp
 
             var builder = ConfidentialClientApplicationBuilder.Create(s_appSettings.ClientId)
                 .WithAuthority(s_appSettings.Authority, false)
-                .WithCertificate(s_appSettings.GetCertificate())
+                .WithCertificate(s_appSettings.Certificate)
                 .WithLogging(Log, LogLevel.Verbose, true);
 
             // Regional if region specified, global otherwise

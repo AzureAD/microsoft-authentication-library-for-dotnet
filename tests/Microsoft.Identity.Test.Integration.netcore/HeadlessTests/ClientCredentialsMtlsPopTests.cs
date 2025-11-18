@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
 
             // Retrieve the certificate from settings
-            X509Certificate2 cert = settings.GetCertificate();
+            X509Certificate2 cert = settings.Certificate;
 
             // Build Confidential Client Application with SNI certificate at App level
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)

@@ -517,6 +517,62 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        public async Task ProbeDoesNotFireWhenMtlsPopNotRequested(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder = null;
+
+                var uami = userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null;
+                if (uami)
+                {
+                    miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
+                }
+                else
+                {
+                    miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+                }
+
+                miBuilder
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
+
+                var managedIdentityApp = miBuilder.Build();
+
+                // mock probe to show ImdsV2 is available
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(userAssignedIdentityId: userAssignedIdentityId, userAssignedId: userAssignedId));
+                
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                // this indicates ImdsV2 is available
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
+                
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.ImdsEndpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.Imds,
+                    userAssignedId: userAssignedId,
+                    userAssignedIdentityId: userAssignedIdentityId);
+
+                // ImdsV1 flow will be used since .WithMtlsProofOfPossession() is not used here
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
         #region Cuid Tests
         [TestMethod]
         public void TestCsrGeneration_OnlyVmId()
@@ -695,7 +751,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
         #endregion
 
-        #region cached certificate tests
+        #region Cached certificate tests
         [TestMethod]
         public async Task mTLSPop_ForceRefresh_UsesCachedCert_NoIssueCredential_PostsCanonicalClientId_AndSkipsAttestation()
         {
