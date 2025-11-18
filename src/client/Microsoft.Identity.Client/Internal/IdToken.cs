@@ -80,7 +80,6 @@ namespace Microsoft.Identity.Client.Internal
 
         public ClaimsPrincipal ClaimsPrincipal { get; private set; }
 
-
         private static IdToken ClaimsToToken(List<Claim> claims)
         {
             var principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
