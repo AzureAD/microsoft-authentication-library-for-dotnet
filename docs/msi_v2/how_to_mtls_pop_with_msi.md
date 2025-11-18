@@ -12,7 +12,7 @@ ms.date: 11/17/2025
 > [!IMPORTANT]
 > mTLS proof-of-possession (mTLS PoP) for managed identities is currently in internal preview.
 >
-> To use `WithMtlsProofOfPosession`, you must add the package
+> To use `WithMtlsProofOfPossession`, you must add the package
 > [`Microsoft.Identity.Client.MtlsPop`](https://www.nuget.org/packages/Microsoft.Identity.Client.MtlsPop) (for example, version `4.79.1-preview`).
 >
 > The resource (API) must be configured to accept mTLS PoP tokens and validate the certificate bound to the token.
@@ -26,7 +26,7 @@ The only changes are:
 
 - Build Managed Identity app [using MSAL](https://learn.microsoft.com/en-us/entra/msal/dotnet/advanced/managed-identity). 
 - Add the MtlsPoP package.
-- Add `.WithMtlsProofOfPosession()` when acquiring the token.
+- Add `.WithMtlsProofOfPossession()` when acquiring the token.
 - Use the returned binding certificate when calling the API over mTLS.
 
 Below we show the current (Bearer) code first, then the new (mTLS PoP) version, using Microsoft Graph as the example API.
@@ -41,7 +41,7 @@ dotnet add package Microsoft.Identity.Client.MtlsPop --version 4.79.1-preview
 
 This package:
 
-- exposes the `WithMtlsProofOfPosession()` extension, and
+- exposes the `WithMtlsProofOfPossession()` extension, and
 - brings in a native dependency used to attest managed identity keys (for example KeyGuard keys) via Microsoft Azure Attestation (MAA).
 
 ---
@@ -65,8 +65,7 @@ AuthenticationResult result = await mi
     .ExecuteAsync()
     .ConfigureAwait(false);
 
-// result.AccessToken is a Bearer token
-// result.TokenType == "Bearer"
+// result.AccessToken is a Bearer token (result.TokenType == "Bearer")
 ```
 
 ### New experience – mTLS PoP (Graph)
@@ -83,7 +82,7 @@ const string graphScope = "https://graph.microsoft.com/";
 
 AuthenticationResult result = await mi
     .AcquireTokenForManagedIdentity(graphScope)
-    .WithMtlsProofOfPosession()   // <-- new API
+    .WithMtlsProofOfPossession()   // <-- new API
     .ExecuteAsync()
     .ConfigureAwait(false);
 
@@ -129,18 +128,19 @@ const string graphScope = "https://graph.microsoft.com/";
 
 AuthenticationResult result = await mi
     .AcquireTokenForManagedIdentity(graphScope)
-    .WithMtlsProofOfPosession()   // <-- new API
+    .WithMtlsProofOfPossession()   // <-- new API
     .ExecuteAsync()
     .ConfigureAwait(false);
 
 // result.TokenType == "mtls_pop"
+// result.BindingCertificate is the certificate that the token is bound to.
 ```
 
 ---
 
 ## 4. Call Microsoft Graph with an mTLS PoP token
 
-Once you have an `AuthenticationResult` from `WithMtlsProofOfPosession()`:
+Once you have an `AuthenticationResult` from `WithMtlsProofOfPossession()`:
 
 - `result.TokenType` will be `"mtls_pop"`.
 - `result.BindingCertificate` is the certificate that the token is bound to.
@@ -153,6 +153,7 @@ using var handler = new HttpClientHandler();
 handler.ClientCertificates.Add(result.BindingCertificate);
 
 // Create an HttpClient that uses mTLS
+// Note: In production, cache HttpClient instances per certificate to avoid socket exhaustion
 using var httpClient = new HttpClient(handler);
 
 // Example: call Microsoft Graph
