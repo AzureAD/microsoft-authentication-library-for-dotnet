@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
 
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            var cert = settings.GetCertificate();
+            var cert = settings.Certificate;
 
             IReadOnlyList<string> middleTierApiScopes = new List<string>() { OBOServicePpeClientID + "/.default" };
             IReadOnlyList<string> downstreamApiScopes = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
 
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            var cert = settings.GetCertificate();
+            var cert = settings.Certificate;
 
             IReadOnlyList<string> middleTierApiScopes = new List<string>() { OBOServicePpeClientID + "/.default" };
             IReadOnlyList<string> downstreamApiScopes = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
