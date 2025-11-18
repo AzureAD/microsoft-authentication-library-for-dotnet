@@ -959,9 +959,9 @@
    </wsp:Policy>
    <wsdl:types>
       <xsd:schema targetNamespace="http://schemas.microsoft.com/ws/2008/06/identity/securitytokenservice/Imports">
-         <xsd:import schemaLocation="https://fs.msidlab4.com/adfs/services/trust/mex?xsd=xsd0" namespace="http://schemas.microsoft.com/Message" />
-         <xsd:import schemaLocation="https://fs.msidlab4.com/adfs/services/trust/mex?xsd=xsd1" namespace="http://schemas.xmlsoap.org/ws/2005/02/trust" />
-         <xsd:import schemaLocation="https://fs.msidlab4.com/adfs/services/trust/mex?xsd=xsd2" namespace="http://docs.oasis-open.org/ws-sx/ws-trust/200512" />
+         <xsd:import schemaLocation="https://fs.id4slab1.com/adfs/services/trust/mex?xsd=xsd0" namespace="http://schemas.microsoft.com/Message" />
+         <xsd:import schemaLocation="https://fs.id4slab1.com/adfs/services/trust/mex?xsd=xsd1" namespace="http://schemas.xmlsoap.org/ws/2005/02/trust" />
+         <xsd:import schemaLocation="https://fs.id4slab1.com/adfs/services/trust/mex?xsd=xsd2" namespace="http://docs.oasis-open.org/ws-sx/ws-trust/200512" />
       </xsd:schema>
    </wsdl:types>
    <wsdl:message name="IWSTrustFeb2005Async_TrustFeb2005IssueAsync_InputMessage">
@@ -1219,39 +1219,39 @@
    </wsdl:binding>
    <wsdl:service name="SecurityTokenService">
       <wsdl:port name="WindowsWSTrustBinding_IWSTrustFeb2005Async" binding="tns:WindowsWSTrustBinding_IWSTrustFeb2005Async">
-         <soap12:address location="http://fs.msidlab4.com/adfs/services/trust/2005/windows" />
+         <soap12:address location="http://fs.id4slab1.com/adfs/services/trust/2005/windows" />
          <wsa10:EndpointReference>
-            <wsa10:Address>http://fs.msidlab4.com/adfs/services/trust/2005/windows</wsa10:Address>
+            <wsa10:Address>http://fs.id4slab1.com/adfs/services/trust/2005/windows</wsa10:Address>
             <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-               <Spn>host/fs.MSIDLAB4.com</Spn>
+               <Spn>host/fs.ID4SLAB1.com</Spn>
             </Identity>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="CustomBinding_IWSTrustFeb2005Async" binding="tns:CustomBinding_IWSTrustFeb2005Async">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/2005/windowstransport" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/2005/windowstransport" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/2005/windowstransport</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/2005/windowstransport</wsa10:Address>
             <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-               <Spn>host/fs.MSIDLAB4.com</Spn>
+               <Spn>host/fs.ID4SLAB1.com</Spn>
             </Identity>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="CertificateWSTrustBinding_IWSTrustFeb2005Async" binding="tns:CertificateWSTrustBinding_IWSTrustFeb2005Async">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/2005/certificatemixed" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/2005/certificatemixed" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/2005/certificatemixed</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/2005/certificatemixed</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="CertificateWSTrustBinding_IWSTrustFeb2005Async1" binding="tns:CertificateWSTrustBinding_IWSTrustFeb2005Async1">
-         <soap12:address location="https://certauth.fs.msidlab4.com/adfs/services/trust/2005/certificatetransport" />
+         <soap12:address location="https://certauth.fs.id4slab1.com/adfs/services/trust/2005/certificatetransport" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://certauth.fs.msidlab4.com/adfs/services/trust/2005/certificatetransport</wsa10:Address>
+            <wsa10:Address>https://certauth.fs.id4slab1.com/adfs/services/trust/2005/certificatetransport</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="UserNameWSTrustBinding_IWSTrustFeb2005Async" binding="tns:UserNameWSTrustBinding_IWSTrustFeb2005Async">
-         <soap12:address location="http://fs.msidlab4.com/adfs/services/trust/2005/username" />
+         <soap12:address location="http://fs.id4slab1.com/adfs/services/trust/2005/username" />
          <wsa10:EndpointReference>
-            <wsa10:Address>http://fs.msidlab4.com/adfs/services/trust/2005/username</wsa10:Address>
+            <wsa10:Address>http://fs.id4slab1.com/adfs/services/trust/2005/username</wsa10:Address>
             <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
                <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
                   <X509Data>
@@ -1262,39 +1262,39 @@
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="UserNameWSTrustBinding_IWSTrustFeb2005Async1" binding="tns:UserNameWSTrustBinding_IWSTrustFeb2005Async1">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/2005/usernamebasictransport" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/2005/usernamebasictransport" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/2005/usernamebasictransport</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/2005/usernamebasictransport</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="UserNameWSTrustBinding_IWSTrustFeb2005Async2" binding="tns:UserNameWSTrustBinding_IWSTrustFeb2005Async2">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/2005/usernamemixed" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/2005/usernamemixed" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/2005/usernamemixed</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/2005/usernamemixed</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="IssuedTokenWSTrustBinding_IWSTrustFeb2005Async" binding="tns:IssuedTokenWSTrustBinding_IWSTrustFeb2005Async">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/2005/issuedtokenmixedasymmetricbasic256" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/2005/issuedtokenmixedasymmetricbasic256" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/2005/issuedtokenmixedasymmetricbasic256</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/2005/issuedtokenmixedasymmetricbasic256</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="IssuedTokenWSTrustBinding_IWSTrustFeb2005Async1" binding="tns:IssuedTokenWSTrustBinding_IWSTrustFeb2005Async1">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/2005/issuedtokenmixedsymmetricbasic256" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/2005/issuedtokenmixedsymmetricbasic256" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/2005/issuedtokenmixedsymmetricbasic256</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/2005/issuedtokenmixedsymmetricbasic256</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="CertificateWSTrustBinding_IWSTrust13Async" binding="tns:CertificateWSTrustBinding_IWSTrust13Async">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/13/certificatemixed" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/13/certificatemixed" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/13/certificatemixed</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/13/certificatemixed</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="UserNameWSTrustBinding_IWSTrust13Async" binding="tns:UserNameWSTrustBinding_IWSTrust13Async">
-         <soap12:address location="http://fs.msidlab4.com/adfs/services/trust/13/username" />
+         <soap12:address location="http://fs.id4slab1.com/adfs/services/trust/13/username" />
          <wsa10:EndpointReference>
-            <wsa10:Address>http://fs.msidlab4.com/adfs/services/trust/13/username</wsa10:Address>
+            <wsa10:Address>http://fs.id4slab1.com/adfs/services/trust/13/username</wsa10:Address>
             <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
                <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
                   <X509Data>
@@ -1305,44 +1305,44 @@
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="UserNameWSTrustBinding_IWSTrust13Async1" binding="tns:UserNameWSTrustBinding_IWSTrust13Async1">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/13/usernamebasictransport" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/13/usernamebasictransport" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/13/usernamebasictransport</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/13/usernamebasictransport</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="UserNameWSTrustBinding_IWSTrust13Async2" binding="tns:UserNameWSTrustBinding_IWSTrust13Async2">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/13/usernamemixed" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/13/usernamemixed" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/13/usernamemixed</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/13/usernamemixed</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="IssuedTokenWSTrustBinding_IWSTrust13Async" binding="tns:IssuedTokenWSTrustBinding_IWSTrust13Async">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/13/issuedtokenmixedasymmetricbasic256" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/13/issuedtokenmixedasymmetricbasic256" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/13/issuedtokenmixedasymmetricbasic256</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/13/issuedtokenmixedasymmetricbasic256</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="IssuedTokenWSTrustBinding_IWSTrust13Async1" binding="tns:IssuedTokenWSTrustBinding_IWSTrust13Async1">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/13/issuedtokenmixedsymmetricbasic256" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/13/issuedtokenmixedsymmetricbasic256" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/13/issuedtokenmixedsymmetricbasic256</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/13/issuedtokenmixedsymmetricbasic256</wsa10:Address>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="WindowsWSTrustBinding_IWSTrust13Async" binding="tns:WindowsWSTrustBinding_IWSTrust13Async">
-         <soap12:address location="http://fs.msidlab4.com/adfs/services/trust/13/windows" />
+         <soap12:address location="http://fs.id4slab1.com/adfs/services/trust/13/windows" />
          <wsa10:EndpointReference>
-            <wsa10:Address>http://fs.msidlab4.com/adfs/services/trust/13/windows</wsa10:Address>
+            <wsa10:Address>http://fs.id4slab1.com/adfs/services/trust/13/windows</wsa10:Address>
             <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-               <Spn>host/fs.MSIDLAB4.com</Spn>
+               <Spn>host/fs.id4slab1.com</Spn>
             </Identity>
          </wsa10:EndpointReference>
       </wsdl:port>
       <wsdl:port name="CustomBinding_IWSTrust13Async" binding="tns:CustomBinding_IWSTrust13Async">
-         <soap12:address location="https://fs.msidlab4.com/adfs/services/trust/13/windowstransport" />
+         <soap12:address location="https://fs.id4slab1.com/adfs/services/trust/13/windowstransport" />
          <wsa10:EndpointReference>
-            <wsa10:Address>https://fs.msidlab4.com/adfs/services/trust/13/windowstransport</wsa10:Address>
+            <wsa10:Address>https://fs.id4slab1.com/adfs/services/trust/13/windowstransport</wsa10:Address>
             <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-               <Spn>host/fs.MSIDLAB4.com</Spn>
+               <Spn>host/fs.id4slab1.com</Spn>
             </Identity>
          </wsa10:EndpointReference>
       </wsdl:port>
