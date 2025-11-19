@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>
+                    .WithCertificate((ClientCredentialExtensionParameters parameters) =>
                     {
                         providerInvoked = true;
                         capturedParameters = parameters;
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.AreEqual(TestConstants.ClientId, parameters.ClientId);
                         Assert.IsNotNull(parameters.Authority);
                         
-                        return certificate;
+                        return Task.FromResult(certificate);
                     })
                     .Build();
 
@@ -85,9 +85,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>
+                    .WithCertificate((ClientCredentialExtensionParameters parameters) =>
                     {
-                        return null; // Provider returns null
+                        return Task.FromResult<System.Security.Cryptography.X509Certificates.X509Certificate2>(null); // Provider returns null
                     })
                     .Build();
 
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .OnMsalServiceFailure(async (ClientCredentialExtensionParameters parameters, MsalException ex) =>
+                    .OnMsalServiceFailure((ClientCredentialExtensionParameters parameters, MsalException ex) =>
                     {
                         failureCallbackCount++;
                         capturedException = ex as MsalServiceException;
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.AreEqual(TestConstants.ClientId, parameters.ClientId);
                         
                         // Retry on 503
-                        return capturedException.StatusCode == 400 && failureCallbackCount < 3;
+                        return Task.FromResult(capturedException.StatusCode == 400 && failureCallbackCount < 3);
                     })
                     .Build();
 
@@ -173,10 +173,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .OnMsalServiceFailure(async (ClientCredentialExtensionParameters parameters, MsalException ex) =>
+                    .OnMsalServiceFailure((ClientCredentialExtensionParameters parameters, MsalException ex) =>
                     {
                         callbackInvoked = true;
-                        return false; // Don't retry
+                        return Task.FromResult(false); // Don't retry
                     })
                     .Build();
 
@@ -209,14 +209,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
-                    .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>
+                    .WithCertificate((ClientCredentialExtensionParameters parameters) =>
                     {
-                        return null; // Will cause MsalClientException
+                        return Task.FromResult<System.Security.Cryptography.X509Certificates.X509Certificate2>(null); // Will cause MsalClientException
                     })
-                    .OnMsalServiceFailure(async (ClientCredentialExtensionParameters parameters, MsalException ex) =>
+                    .OnMsalServiceFailure((ClientCredentialExtensionParameters parameters, MsalException ex) =>
                     {
                         callbackInvoked = true;
-                        return false;
+                        return Task.FromResult(false);
                     })
                     .Build();
 
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .OnSuccess(async (ClientCredentialExtensionParameters parameters, ExecutionResult result) =>
+                    .OnSuccess((ClientCredentialExtensionParameters parameters, ExecutionResult result) =>
                     {
                         observerInvoked = true;
                         capturedResult = result;
@@ -266,6 +266,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNotNull(result.Result);
                         Assert.IsNull(result.Exception);
                         Assert.AreEqual(TestConstants.ClientId, parameters.ClientId);
+                        
+                        return Task.CompletedTask;
                     })
                     .Build();
 
@@ -304,12 +306,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .OnMsalServiceFailure(async (ClientCredentialExtensionParameters parameters, MsalException ex) =>
+                    .OnMsalServiceFailure((ClientCredentialExtensionParameters parameters, MsalException ex) =>
                     {
                         retryCount++;
-                        return retryCount < 2; // Retry once, then give up
+                        return Task.FromResult(retryCount < 2); // Retry once, then give up
                     })
-                    .OnSuccess(async (ClientCredentialExtensionParameters parameters, ExecutionResult result) =>
+                    .OnSuccess((ClientCredentialExtensionParameters parameters, ExecutionResult result) =>
                     {
                         observerInvoked = true;
                         capturedResult = result;
@@ -318,6 +320,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNull(result.Result);
                         Assert.IsNotNull(result.Exception);
                         Assert.IsInstanceOfType(result.Exception, typeof(MsalServiceException));
+                        
+                        return Task.CompletedTask;
                     })
                     .Build();
 
@@ -355,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .OnSuccess(async (ClientCredentialExtensionParameters parameters, ExecutionResult result) =>
+                    .OnSuccess((ClientCredentialExtensionParameters parameters, ExecutionResult result) =>
                     {
                         throw new InvalidOperationException("Observer threw exception");
                     })
@@ -398,23 +402,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>
+                    .WithCertificate((ClientCredentialExtensionParameters parameters) =>
                     {
                         certProviderCount++;
                         Assert.AreEqual(TestConstants.ClientId, parameters.ClientId);
-                        return certificate;
+                        return Task.FromResult(certificate);
                     })
-                    .OnMsalServiceFailure(async (ClientCredentialExtensionParameters parameters, MsalException ex) =>
+                    .OnMsalServiceFailure((ClientCredentialExtensionParameters parameters, MsalException ex) =>
                     {
                         retryCallbackCount++;
                         Assert.IsInstanceOfType(ex, typeof(MsalServiceException));
-                        return retryCallbackCount < 2; // Retry once
+                        return Task.FromResult(retryCallbackCount < 2); // Retry once
                     })
-                    .OnSuccess(async (ClientCredentialExtensionParameters parameters, ExecutionResult result) =>
+                    .OnSuccess((ClientCredentialExtensionParameters parameters, ExecutionResult result) =>
                     {
                         observerInvoked = true;
                         Assert.IsTrue(result.Successful);
                         Assert.IsNotNull(result.Result);
+                        return Task.CompletedTask;
                     })
                     .Build();
 
@@ -453,15 +458,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(async (ClientCredentialExtensionParameters parameters) =>
+                    .WithCertificate((ClientCredentialExtensionParameters parameters) =>
                     {
                         certProviderCount++;
                         // Return different cert on retry
-                        return certProviderCount == 1 ? cert1 : cert2;
+                        return Task.FromResult(certProviderCount == 1 ? cert1 : cert2);
                     })
-                    .OnMsalServiceFailure(async (ClientCredentialExtensionParameters parameters, MsalException ex) =>
+                    .OnMsalServiceFailure((ClientCredentialExtensionParameters parameters, MsalException ex) =>
                     {
-                        return true; // Always retry once
+                        return Task.FromResult(true); // Always retry once
                     })
                     .Build();
 
