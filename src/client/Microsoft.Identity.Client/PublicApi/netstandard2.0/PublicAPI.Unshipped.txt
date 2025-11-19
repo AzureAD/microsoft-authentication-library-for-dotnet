@@ -1,3 +1,4 @@
+const Microsoft.Identity.Client.MsalError.IdentityNotFound = "identity_not_found" -> string
 Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, (string Value, bool IncludeInCacheKey)> extraQueryParameters) -> T
 Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, (string Value, bool IncludeInCacheKey)> extraQueryParameters) -> T
 const Microsoft.Identity.Client.MsalError.CannotSwitchBetweenImdsVersionsForPreview = "cannot_switch_between_imds_versions_for_preview" -> string
