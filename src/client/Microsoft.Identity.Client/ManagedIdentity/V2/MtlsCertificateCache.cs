@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     ///   4) factory mint + back-fill
     /// Persistence is best-effort and non-throwing.
     /// </summary>
-    internal sealed class MtlsBindingCache : IMtlsBindingCache
+    internal sealed class MtlsBindingCache : IMtlsCertificateCache
     {
         private readonly KeyedSemaphorePool _gates = new();
         private readonly ICertificateCache _memory;
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             // 1) In-memory cache first
             if (_memory.TryGet(cacheKey, out var cachedEntry, logger))
             {
-                logger?.Verbose(() =>
+                logger.Verbose(() =>
                     $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
 
                 return new MtlsBindingInfo(
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // Re-check after acquiring the gate
                 if (_memory.TryGet(cacheKey, out cachedEntry, logger))
                 {
-                    logger?.Verbose(() =>
+                    logger.Verbose(() =>
                         $"[PersistentCert] mTLS binding cache HIT (memory-after-gate) for '{cacheKey}'.");
 
                     return new MtlsBindingInfo(
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // 3) Persistent cache (best-effort)
                 if (_persisted.Read(cacheKey, out var persistedEntry, logger))
                 {
-                    logger?.Verbose(() =>
+                    logger.Verbose(() =>
                         $"[PersistentCert] mTLS binding cache HIT (persistent) for '{cacheKey}'.");
 
                     if (persistedEntry.Certificate.HasPrivateKey)
@@ -111,14 +111,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                     // Defensive: persisted entry is unusable; dispose and mint new
                     persistedEntry.Certificate.Dispose();
-                    logger?.Verbose(() =>
+                    logger.Verbose(() =>
                         "[PersistentCert] Skipping persisted cert without private key; minting new.");
                 }
 
                 // 4) Mint + back-fill mem + best-effort persist + prune
                 var mintedBinding = await factory().ConfigureAwait(false);
 
-                logger?.Verbose(() =>
+                logger.Verbose(() =>
                     $"[PersistentCert] mTLS binding cache MISS -> minted new binding for '{cacheKey}'.");
 
                 var createdEntry = new CertificateCacheValue(

@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         // Central, process-local cache for mTLS binding (cert + endpoint + canonical client_id).
         internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
 
-        private readonly IMtlsBindingCache _mtlsCache;
+        private readonly IMtlsCertificateCache _mtlsCache;
 
         // used in unit tests
         public const string ImdsV2ApiVersion = "2.0";
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         internal ImdsV2ManagedIdentitySource(
             RequestContext requestContext,
-            IMtlsBindingCache mtlsCache)
+            IMtlsCertificateCache mtlsCache)
             : base(requestContext, ManagedIdentitySource.ImdsV2)
         {
             _mtlsCache = mtlsCache ?? throw new ArgumentNullException(nameof(mtlsCache));

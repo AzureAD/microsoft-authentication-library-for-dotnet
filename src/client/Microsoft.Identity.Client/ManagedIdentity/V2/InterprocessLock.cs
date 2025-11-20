@@ -35,40 +35,36 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             Action action,
             Action<string> logVerbose = null)
         {
-            var nameGlobal = GetMutexNameForAlias(alias, preferGlobal: true);
-            var nameLocal = GetMutexNameForAlias(alias, preferGlobal: false);
+            var globalName = GetMutexNameForAlias(alias, preferGlobal: true);
+            var localName = GetMutexNameForAlias(alias, preferGlobal: false);
 
-            foreach (var name in new[] { nameGlobal, nameLocal })
+            bool TryScope(string name, out bool unauthorized)
             {
+                unauthorized = false;
                 try
                 {
-                    // Create or open existing. If this throws (e.g. ACL issues),
-                    // the outer catch below logs and returns false (best-effort).
-                    using var m = new Mutex(initiallyOwned: false, name);
+                    using var mutex = new Mutex(initiallyOwned: false, name);
 
                     bool entered;
-                    var sw = Stopwatch.StartNew();
-
+                    var waitTimer = Stopwatch.StartNew();
                     try
                     {
-                        entered = m.WaitOne(timeout);
+                        entered = mutex.WaitOne(timeout);
                     }
                     catch (AbandonedMutexException ex)
                     {
-                        // Prior holder crashed; we still own the mutex now.
                         entered = true;
-                        logVerbose?.Invoke(
-                            $"[PersistentCert] Abandoned mutex '{name}', treating as acquired. {ex.Message}");
+                        logVerbose?.Invoke($"[PersistentCert] Abandoned mutex '{name}', treating as acquired. {ex.Message}");
                     }
                     finally
                     {
-                        sw.Stop();
+                        waitTimer.Stop();
                     }
 
                     if (!entered)
                     {
                         logVerbose?.Invoke(
-                            $"[PersistentCert] Skip persist (lock busy '{name}', waited {sw.Elapsed.TotalMilliseconds:F0} ms).");
+                            $"[PersistentCert] Skip persist (lock busy '{name}', waited {waitTimer.Elapsed.TotalMilliseconds:F0} ms).");
                         return false;
                     }
 
@@ -76,16 +72,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     {
                         action();
                     }
+                    catch (Exception ex)
+                    {
+                        logVerbose?.Invoke($"[PersistentCert] Action failed under '{name}': {ex.Message}");
+                        return false;
+                    }
                     finally
                     {
                         try
-                        {
-                            m.ReleaseMutex();
-                        }
-                        catch
-                        {
-                            // best-effort; do not propagate
-                        }
+                        { mutex.ReleaseMutex(); }
+                        catch { /* best-effort */ }
                     }
 
                     return true;
@@ -93,12 +89,26 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 catch (UnauthorizedAccessException)
                 {
                     logVerbose?.Invoke($"[PersistentCert] No access to mutex scope '{name}', trying next.");
-                    continue; // try Local if Global blocked
+                    unauthorized = true;
+                    return false;
                 }
                 catch (Exception ex)
                 {
                     logVerbose?.Invoke($"[PersistentCert] Lock failure '{name}': {ex.Message}");
                     return false;
+                }
+            }
+
+            if (TryScope(globalName, out var unauthorizedGlobal))
+            {
+                return true;
+            }
+
+            if (unauthorizedGlobal)
+            {
+                if (TryScope(localName, out _))
+                {
+                    return true;
                 }
             }
 

@@ -31,25 +31,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// </remarks>
     internal sealed class WindowsPersistentCertificateCache : IPersistentCertificateCache
     {
-        private static bool PlatformSupportsPersistentFriendlyName(ILoggerAdapter logger)
-        {
-            if (DesktopOsHelper.IsWindows())
-            {
-                return true;
-            }
-
-            logger?.Verbose(() => "[PersistentCert] Skipping persistent cache: FriendlyName is not supported on this platform.");
-            return false;
-        }
-
         public bool Read(string alias, out CertificateCacheValue value, ILoggerAdapter logger = null)
         {
             value = default;
-
-            if (!PlatformSupportsPersistentFriendlyName(logger))
-            {
-                return false;
-            }
 
             try
             {
@@ -149,7 +133,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         public void Write(string alias, X509Certificate2 cert, string endpointBase, ILoggerAdapter logger = null)
         {
-            if (!PlatformSupportsPersistentFriendlyName(logger) || cert == null)
+            if (cert == null)
                 return;
 
             // IMDSv2 attaches the private key earlier (will throw if it cannot).
@@ -264,9 +248,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         public void Delete(string alias, ILoggerAdapter logger = null)
         {
-            if (!PlatformSupportsPersistentFriendlyName(logger))
-                return;
-
             // Best-effort: short, non-configurable timeout. We intentionally do not retry here:
             // if the lock is busy we skip persistence and fall back to in-memory cache only,
             // so token acquisition is never blocked on certificate store operations.

@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// <summary>
     /// Abstraction over the in-memory + persisted cache for IMDSv2 mTLS binding certificates.
     /// </summary>
-    internal interface IMtlsBindingCache
+    internal interface IMtlsCertificateCache
     {
         /// <summary>
         /// Returns a cached binding certificate for the given <paramref name="cacheKey"/>,
