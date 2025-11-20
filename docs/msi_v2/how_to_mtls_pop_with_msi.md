@@ -45,7 +45,7 @@ The only changes are:
 
 - Add the MtlsPoP package (managed identity only).
 - Add `.WithMtlsProofOfPossession()` when acquiring the token.
-- Use the returned binding certificate when calling the API over mTLS.
+- Use the binding certificate in `AuthenticationResult` when calling the API over mTLS.
 
 ### 1.1 Add the MtlsPoP package (managed identity only)
 
