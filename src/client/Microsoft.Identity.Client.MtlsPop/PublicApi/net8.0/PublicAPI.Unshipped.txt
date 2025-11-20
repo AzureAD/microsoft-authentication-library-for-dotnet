@@ -1,2 +1,1 @@
-Microsoft.Identity.Client.MtlsPop.ManagedIdentityPopExtensions
-static Microsoft.Identity.Client.MtlsPop.ManagedIdentityPopExtensions.WithMtlsProofOfPossession(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+﻿
