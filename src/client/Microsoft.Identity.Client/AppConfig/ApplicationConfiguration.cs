@@ -131,6 +131,26 @@ namespace Microsoft.Identity.Client
         internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
         internal ICsrFactory CsrFactory { get; set; }
 
+        #region Extensibility Callbacks
+
+        /// <summary>
+        /// Dynamic certificate provider callback for client credential flows.
+        /// </summary>
+        public Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> ClientCredentialCertificateProvider { get; set; }
+
+        /// <summary>
+        /// MSAL service failure callback that determines whether to retry after a token acquisition failure from the identity provider.
+        /// Only invoked for MsalServiceException (errors from the Security Token Service).
+        /// </summary>
+        public Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> OnMsalServiceFailureCallback { get; set; }
+
+        /// <summary>
+        /// Success callback that receives the result of token acquisition attempts (typically successful, but can include failures after retries are exhausted).
+        /// </summary>
+        public Func<ClientCredentialExtensionParameters, ExecutionResult, Task> OnSuccessCallback { get; set; }
+
+        #endregion
+
         #region ClientCredentials
 
         // Indicates if claims or assertions are used within the configuration

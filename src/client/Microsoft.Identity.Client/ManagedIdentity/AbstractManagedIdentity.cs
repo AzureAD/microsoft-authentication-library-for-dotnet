@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Error($"[Managed Identity] Format Exception: {errorMessage}");
                 CreateAndThrowException(MsalError.InvalidManagedIdentityEndpoint, errorMessage, formatException, source);
             }
-            else if (ex is not MsalServiceException or TaskCanceledException)
+            else if (ex is not MsalServiceException)
             {
                 _requestContext.Logger.Error($"[Managed Identity] Exception: {ex.Message}");
                 CreateAndThrowException(MsalError.ManagedIdentityRequestFailed, ex.Message, ex, source);
