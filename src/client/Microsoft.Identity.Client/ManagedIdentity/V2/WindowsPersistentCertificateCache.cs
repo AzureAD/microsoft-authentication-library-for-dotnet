@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                             // Add the original instance (carries private key if present)
                             store.Add(cert);
-                            logger?.Info(() => "[PersistentCert] Persisted certificate to CurrentUser/My.");
+                            logger.Info(() => "[PersistentCert] Persisted certificate to CurrentUser/My.");
 
                             // Conservative cleanup: remove expired entries for this alias only
                             PruneExpiredForAlias(store, alias, nowUtc, logger);
