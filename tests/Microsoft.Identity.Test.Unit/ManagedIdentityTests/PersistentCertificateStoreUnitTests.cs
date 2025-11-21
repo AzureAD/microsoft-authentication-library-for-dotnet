@@ -344,7 +344,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         {
                             hold.Set();          // signal that lock is held
                             Thread.Sleep(400);   // hold lock for a bit
-                        });
+                        },
+                        logVerbose: _ => { });
                     done.Set();
                 });
                 t.IsBackground = true;

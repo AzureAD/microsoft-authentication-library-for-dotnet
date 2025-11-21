@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// </remarks>
     internal sealed class WindowsPersistentCertificateCache : IPersistentCertificateCache
     {
-        public bool Read(string alias, out CertificateCacheValue value, ILoggerAdapter logger = null)
+        public bool Read(string alias, out CertificateCacheValue value, ILoggerAdapter logger)
         {
             value = default;
 
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
                 catch (Exception ex)
                 {
-                    logger?.Verbose(() => "[PersistentCert] Store snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
+                    logger.Verbose(() => "[PersistentCert] Store snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
                     items = store.Certificates.Cast<X509Certificate2>().ToArray();
                 }
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         // Defensive read-time check: only usable entries
                         if (!candidate.HasPrivateKey)
                         {
-                            logger?.Verbose(() => "[PersistentCert] Candidate skipped at read: no private key.");
+                            logger.Verbose(() => "[PersistentCert] Candidate skipped at read: no private key.");
                             continue;
                         }
 
@@ -108,30 +108,30 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     }
                     catch (Exception ex)
                     {
-                        logger?.Verbose(() => "[PersistentCert] Failed to read CN from selected certificate: " + ex.Message);
+                        logger.Verbose(() => "[PersistentCert] Failed to read CN from selected certificate: " + ex.Message);
                     }
 
                     if (!Guid.TryParse(cn, out var clientIdGuid))
                     {
                         best.Dispose();
-                        logger?.Verbose(() => "[PersistentCert] Selected entry CN is not a GUID; skipping.");
+                        logger.Verbose(() => "[PersistentCert] Selected entry CN is not a GUID; skipping.");
                         return false;
                     }
 
                     value = new CertificateCacheValue(best, bestEndpoint, clientIdGuid.ToString("D"));
-                    logger?.Info(() => "[PersistentCert] Reused certificate from CurrentUser/My.");
+                    logger.Info(() => "[PersistentCert] Reused certificate from CurrentUser/My.");
                     return true;
                 }
             }
             catch (Exception ex)
             {
-                logger?.Verbose(() => "[PersistentCert] Store lookup failed: " + ex.Message);
+                logger.Verbose(() => "[PersistentCert] Store lookup failed: " + ex.Message);
             }
 
             return false;
         }
 
-        public void Write(string alias, X509Certificate2 cert, string endpointBase, ILoggerAdapter logger = null)
+        public void Write(string alias, X509Certificate2 cert, string endpointBase, ILoggerAdapter logger)
         {
             if (cert == null)
                 return;
@@ -140,12 +140,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             // We do not block here; log defensively if we see a public-only cert.
             if (!cert.HasPrivateKey)
             {
-                logger?.Verbose(() => "[PersistentCert] Unexpected: Write() received a cert without a private key. Continuing best-effort.");
+                logger.Verbose(() => "[PersistentCert] Unexpected: Write() received a cert without a private key. Continuing best-effort.");
             }
 
             if (!MsiCertificateFriendlyNameEncoder.TryEncode(alias, endpointBase, out var friendlyName))
             {
-                logger?.Verbose(() => "[PersistentCert] FriendlyName encode failed; skipping persist.");
+                logger.Verbose(() => "[PersistentCert] FriendlyName encode failed; skipping persist.");
                 return;
             }
 
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         }
                         catch (Exception ex)
                         {
-                            logger?.Verbose(() => "[PersistentCert] Store snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
+                            logger.Verbose(() => "[PersistentCert] Store snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
                             present = store.Certificates.Cast<X509Certificate2>().ToArray();
                         }
 
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                             newestForAliasUtc >= newNotAfterUtc &&
                             newestForAliasUtc > nowUtc)
                         {
-                            logger?.Verbose(() => "[PersistentCert] Newer/equal cert already present; skipping add.");
+                            logger.Verbose(() => "[PersistentCert] Newer/equal cert already present; skipping add.");
                             return;
                         }
 
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                             }
                             catch (Exception exSet)
                             {
-                                logger?.Verbose(() => "[PersistentCert] Could not set FriendlyName; skipping persist. " + exSet.Message);
+                                logger.Verbose(() => "[PersistentCert] Could not set FriendlyName; skipping persist. " + exSet.Message);
                                 return;
                             }
 
@@ -235,18 +235,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         }
                         catch (Exception exAdd)
                         {
-                            logger?.Verbose(() => "[PersistentCert] Persist failed: " + exAdd.Message);
+                            logger.Verbose(() => "[PersistentCert] Persist failed: " + exAdd.Message);
                         }
                     }
                     catch (Exception exOuter)
                     {
-                        logger?.Verbose(() => "[PersistentCert] Persist failed: " + exOuter.Message);
+                        logger.Verbose(() => "[PersistentCert] Persist failed: " + exOuter.Message);
                     }
                 },
-                logVerbose: s => logger?.Verbose(() => s));
+                logVerbose: s => logger.Verbose(() => s));
         }
 
-        public void Delete(string alias, ILoggerAdapter logger = null)
+        public void Delete(string alias, ILoggerAdapter logger)
         {
             // Best-effort: short, non-configurable timeout. We intentionally do not retry here:
             // if the lock is busy we skip persistence and fall back to in-memory cache only,
@@ -264,10 +264,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     }
                     catch (Exception ex)
                     {
-                        logger?.Verbose(() => "[PersistentCert] Delete (prune) failed: " + ex.Message);
+                        logger.Verbose(() => "[PersistentCert] Delete (prune) failed: " + ex.Message);
                     }
                 },
-                logVerbose: s => logger?.Verbose(() => s));
+                logVerbose: s => logger.Verbose(() => s));
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
             catch (Exception ex)
             {
-                logger?.Verbose(() => "[PersistentCert] Prune snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
+                logger.Verbose(() => "[PersistentCert] Prune snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
                 items = store.Certificates.Cast<X509Certificate2>().ToArray();
             }
 
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
             }
 
-            logger?.Verbose(() => "[PersistentCert] PruneExpired completed for alias '" + aliasCacheKey + "'. Removed=" + removed + ".");
+            logger.Verbose(() => "[PersistentCert] PruneExpired completed for alias '" + aliasCacheKey + "'. Removed=" + removed + ".");
         }
     }
 }

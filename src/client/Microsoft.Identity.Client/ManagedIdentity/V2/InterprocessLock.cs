@@ -33,11 +33,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             string alias,
             TimeSpan timeout,
             Action action,
-            Action<string> logVerbose = null)
+            Action<string> logVerbose)
         {
             var globalName = GetMutexNameForAlias(alias, preferGlobal: true);
             var localName = GetMutexNameForAlias(alias, preferGlobal: false);
 
+            // Try to acquire and run under the named mutex scope.
+            // Returns true if action ran, false if lock busy or failure.
+            // first try Global\, then Local\ if Global\ unauthorized.
             bool TryScope(string name, out bool unauthorized)
             {
                 unauthorized = false;
@@ -54,7 +57,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     catch (AbandonedMutexException ex)
                     {
                         entered = true;
-                        logVerbose?.Invoke($"[PersistentCert] Abandoned mutex '{name}', treating as acquired. {ex.Message}");
+                        logVerbose.Invoke($"[PersistentCert] Abandoned mutex '{name}', treating as acquired. {ex.Message}");
                     }
                     finally
                     {
@@ -63,7 +66,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                     if (!entered)
                     {
-                        logVerbose?.Invoke(
+                        logVerbose.Invoke(
                             $"[PersistentCert] Skip persist (lock busy '{name}', waited {waitTimer.Elapsed.TotalMilliseconds:F0} ms).");
                         return false;
                     }
@@ -74,7 +77,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     }
                     catch (Exception ex)
                     {
-                        logVerbose?.Invoke($"[PersistentCert] Action failed under '{name}': {ex.Message}");
+                        logVerbose.Invoke($"[PersistentCert] Action failed under '{name}': {ex.Message}");
                         return false;
                     }
                     finally
@@ -88,22 +91,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    logVerbose?.Invoke($"[PersistentCert] No access to mutex scope '{name}', trying next.");
+                    logVerbose.Invoke($"[PersistentCert] No access to mutex scope '{name}', trying next.");
                     unauthorized = true;
                     return false;
                 }
                 catch (Exception ex)
                 {
-                    logVerbose?.Invoke($"[PersistentCert] Lock failure '{name}': {ex.Message}");
+                    logVerbose.Invoke($"[PersistentCert] Lock failure '{name}': {ex.Message}");
                     return false;
                 }
             }
 
+            // Try Global\ first; only fallback to Local\ if Global\ is unauthorized
             if (TryScope(globalName, out var unauthorizedGlobal))
             {
                 return true;
             }
 
+            // Fallback is only appropriate when Global\ is disallowed by ACLs.
+            // If Global\ was just busy or the action failed, do not try Local
             if (unauthorizedGlobal)
             {
                 if (TryScope(localName, out _))

@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 (disable.Equals("1", StringComparison.OrdinalIgnoreCase) ||
                  disable.Equals("true", StringComparison.OrdinalIgnoreCase)))
             {
-                logger?.Info(() => "[PersistentCert] No-op persistent cache enabled via " + DisableEnvVar + ".");
+                logger.Info(() => "[PersistentCert] No-op persistent cache enabled via " + DisableEnvVar + ".");
                 return new NoOpPersistentCertificateCache();
             }
 

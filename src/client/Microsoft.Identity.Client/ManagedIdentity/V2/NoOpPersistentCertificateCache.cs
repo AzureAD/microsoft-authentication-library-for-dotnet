@@ -11,18 +11,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// </summary>
     internal sealed class NoOpPersistentCertificateCache : IPersistentCertificateCache
     {
-        public bool Read(string alias, out CertificateCacheValue value, ILoggerAdapter logger = null)
+        public bool Read(string alias, out CertificateCacheValue value, ILoggerAdapter logger)
         {
             value = default;
             return false;
         }
 
-        public void Write(string alias, X509Certificate2 cert, string endpointBase, ILoggerAdapter logger = null)
+        public void Write(string alias, X509Certificate2 cert, string endpointBase, ILoggerAdapter logger)
         {
             // no-op
         }
 
-        public void Delete(string alias, ILoggerAdapter logger = null)
+        public void Delete(string alias, ILoggerAdapter logger)
         {
             // no-op
         }

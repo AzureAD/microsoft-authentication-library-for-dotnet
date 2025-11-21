@@ -53,7 +53,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var ok = InterprocessLock.TryWithAliasLock(
                 alias,
                 timeout: TimeSpan.FromMilliseconds(250),
-                action: () => Interlocked.Increment(ref called));
+                action: () => Interlocked.Increment(ref called),
+                logVerbose: _ => { });
 
             Assert.IsTrue(ok);
             Assert.AreEqual(1, called);
@@ -78,7 +79,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     {
                         gate.Set();              // signal ready
                         Thread.Sleep(500);       // hold the lock
-                    });
+                    },
+                    logVerbose: _ => { });
             });
             t.IsBackground = true;
             t.Start();
@@ -90,7 +92,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var got = InterprocessLock.TryWithAliasLock(
                 alias,
                 timeout: TimeSpan.FromMilliseconds(50),
-                action: () => Assert.Fail("Should not enter under contention"));
+                action: () => Assert.Fail("Should not enter under contention"),
+                logVerbose: _ => { });
 
             Assert.IsFalse(got);
 
@@ -105,14 +108,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             bool nullResult = InterprocessLock.TryWithAliasLock(
                 null,
                 TimeSpan.FromSeconds(2),
-                () => Interlocked.Increment(ref nullCalls));
+                () => Interlocked.Increment(ref nullCalls),
+                logVerbose: _ => { });
 
             // empty/whitespace alias
             int emptyCalls = 0;
             bool emptyResult = InterprocessLock.TryWithAliasLock(
                 "   ",
                 TimeSpan.FromSeconds(2),
-                () => Interlocked.Increment(ref emptyCalls));
+                () => Interlocked.Increment(ref emptyCalls),
+                logVerbose: _ => { });
 
             Assert.IsTrue(nullResult, "Null alias should still execute the action.");
             Assert.AreEqual(1, nullCalls);
@@ -130,7 +135,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             bool result = InterprocessLock.TryWithAliasLock(
                 veryLongAlias,
                 TimeSpan.FromSeconds(2),
-                () => Interlocked.Increment(ref calls));
+                () => Interlocked.Increment(ref calls),
+                logVerbose: _ => { });
 
             Assert.IsTrue(result);
             Assert.AreEqual(1, calls);
@@ -163,7 +169,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                             Interlocked.Decrement(ref inCritical);
                             Interlocked.Increment(ref executed);
-                        });
+                        },
+                        logVerbose: _ => { });
 
                     Assert.IsTrue(acquired, "Each caller should acquire the alias lock within timeout.");
                 }));
@@ -192,7 +199,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 {
                     Interlocked.Increment(ref attempts);
                     throw new InvalidOperationException("boom");
-                });
+                },
+                logVerbose: _ => { });
 
             Assert.IsFalse(firstResult, "TryWithAliasLock should return false when the action delegate throws.");
             Assert.AreEqual(1, attempts, "Action should have executed exactly once.");
@@ -202,7 +210,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             bool secondResult = InterprocessLock.TryWithAliasLock(
                 alias,
                 TimeSpan.FromSeconds(2),
-                () => Interlocked.Increment(ref secondAttempts));
+                () => Interlocked.Increment(ref secondAttempts),
+                logVerbose: _ => { });
 
             Assert.IsTrue(secondResult, "Lock should be usable again after an exception in the action.");
             Assert.AreEqual(1, secondAttempts, "Second call should execute exactly once.");
