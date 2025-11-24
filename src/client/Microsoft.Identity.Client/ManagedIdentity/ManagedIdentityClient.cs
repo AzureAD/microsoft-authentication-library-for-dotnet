@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -66,20 +65,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     source = s_sourceName;
                 }
 
-                // If the source has already been set to ImdsV2 (via this method,
-                // or GetManagedIdentitySourceAsync in ManagedIdentityApplication.cs) and mTLS PoP was NOT requested
-                // In this case, we need to fall back to ImdsV1, because ImdsV2 currently only supports mTLS PoP requests
+                // If the source has already been set to ImdsV2 (via this method, or GetManagedIdentitySourceAsync in ManagedIdentityApplication.cs)
+                // and mTLS PoP was NOT requested: fall back to ImdsV1, because ImdsV2 currently only supports mTLS PoP requests
                 if (source == ManagedIdentitySource.ImdsV2 && !isMtlsPopRequested)
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but mTLS PoP was not requested. Falling back to ImdsV1 for this request only. Please use the \"WithMtlsProofOfPossession\" API to request a token via ImdsV2.");
                     // Do NOT modify s_sourceName; keep cached ImdsV2 so future PoP
                     // requests can leverage it.
-                    source = ManagedIdentitySource.DefaultToImds;
+                    source = ManagedIdentitySource.Imds;
                 }
 
                 // If the source is determined to be ImdsV1 and mTLS PoP was requested,
                 // throw an exception since ImdsV1 does not support mTLS PoP
-                if (source == ManagedIdentitySource.DefaultToImds && isMtlsPopRequested)
+                if (source == ManagedIdentitySource.Imds && isMtlsPopRequested)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopTokenNotSupportedinImdsV1,
@@ -94,7 +92,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.ImdsV2 => ImdsV2ManagedIdentitySource.Create(requestContext),
-                    _ => new ImdsManagedIdentitySource(requestContext)
+                    ManagedIdentitySource.Imds => ImdsManagedIdentitySource.Create(requestContext),
+                    _ => throw new MsalServiceException(MsalError.ManagedIdentityAllSourcesUnavailable, MsalErrorMessage.ManagedIdentityAllSourcesUnavailable)
                 };
             }
         }
@@ -103,32 +102,45 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method is perf sensitive any changes should be benchmarked.
         internal async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(
             RequestContext requestContext,
-            bool isMtlsPopRequested)
+            bool isMtlsPopRequested,
+            bool noImdsV2 = false)
         {
             // First check env vars to avoid the probe if possible
             ManagedIdentitySource source = GetManagedIdentitySourceNoImdsV2(requestContext.Logger);
-
-            // If a source is detected via env vars, or
-            // a source wasn't detected (it defaulted to ImdsV1) and MtlsPop was NOT requested,
-            // use the source.
-            // (don't trigger the ImdsV2 probe endpoint if MtlsPop was NOT requested)
-            if (source != ManagedIdentitySource.DefaultToImds || !isMtlsPopRequested)
+#pragma warning disable CS0618 // Type or member is obsolete
+            if (source != ManagedIdentitySource.DefaultToImds)
+#pragma warning restore CS0618 // Type or member is obsolete
             {
                 s_sourceName = source;
                 return source;
             }
 
-            // Otherwise, probe IMDSv2
-            var response = await ImdsV2ManagedIdentitySource.GetCsrMetadataAsync(requestContext, probeMode: true).ConfigureAwait(false);
-            if (response != null)
+            // skip the ImdsV2 probe if MtlsPop was NOT requested
+            if (isMtlsPopRequested)
             {
-                requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
-                s_sourceName = ManagedIdentitySource.ImdsV2;
+                var imdsV2Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, imdsV2: true).ConfigureAwait(false);
+                if (imdsV2Response)
+                {
+                    requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
+                    s_sourceName = ManagedIdentitySource.ImdsV2;
+                    return s_sourceName;
+                }
+            }
+            else
+            {
+                requestContext.Logger.Info("[Managed Identity] Mtls Pop was not requested; skipping ImdsV2 probe.");
+            }
+
+            var imdsV1Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, imdsV2: false).ConfigureAwait(false);
+            if (imdsV1Response)
+            {
+                requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
+                s_sourceName = ManagedIdentitySource.Imds;
                 return s_sourceName;
             }
 
-            requestContext.Logger.Info("[Managed Identity] IMDSv2 probe failed. Defaulting to IMDSv1.");
-            s_sourceName = ManagedIdentitySource.DefaultToImds;
+            requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");
+            s_sourceName = ManagedIdentitySource.None;
             return s_sourceName;
         }
 
@@ -177,7 +189,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             else
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 return ManagedIdentitySource.DefaultToImds;
+#pragma warning restore CS0618 // Type or member is obsolete
             }
         }
 

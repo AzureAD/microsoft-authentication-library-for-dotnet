@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// Indicates that the source is defaulted to IMDS since no environment variables are set.
         /// This is used to detect the managed identity source.
         /// </summary>
+        [Obsolete("Use Imds instead. We are no longer defaulting to IMDS. An error will be thrown instead if no managed identity sources are available.")]
         DefaultToImds,
 
         /// <summary>

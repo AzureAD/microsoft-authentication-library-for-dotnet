@@ -1,1 +1,1 @@
-﻿
+﻿const Microsoft.Identity.Client.MsalError.ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable" -> string
