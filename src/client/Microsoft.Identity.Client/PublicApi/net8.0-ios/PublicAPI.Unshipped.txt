@@ -1,1 +1,1 @@
-﻿
+﻿const Microsoft.Identity.Client.MsalError.InvalidClientCredentialConfiguration = "invalid_client_credential_configuration" -> string
