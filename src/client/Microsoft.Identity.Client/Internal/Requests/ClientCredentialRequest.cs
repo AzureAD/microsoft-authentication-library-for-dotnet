@@ -196,11 +196,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             try
             {
-                var parameters = new ClientCredentialExtensionParameters(
-                    (ApplicationConfiguration)AuthenticationRequestParameters.AppConfig);
+                var options = new AssertionRequestOptions(AuthenticationRequestParameters.AppConfig);
                 
                 bool shouldRetry = await AuthenticationRequestParameters.AppConfig
-                    .OnMsalServiceFailureCallback(parameters, serviceException)
+                    .OnMsalServiceFailureCallback(options, serviceException)
                     .ConfigureAwait(false);
                 
                 logger.Verbose(() => $"[ClientCredentialRequest] OnMsalServiceFailureCallback returned: {shouldRetry}");
@@ -233,8 +232,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 logger.Verbose(() => "[ClientCredentialRequest] Invoking OnSuccess callback.");
                 
-                var parameters = new ClientCredentialExtensionParameters(
-                    (ApplicationConfiguration)AuthenticationRequestParameters.AppConfig);
+                var options = new AssertionRequestOptions(AuthenticationRequestParameters.AppConfig);
                 
                 var executionResult = new ExecutionResult
                 {
@@ -244,7 +242,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 };
                 
                 await AuthenticationRequestParameters.AppConfig
-                    .OnSuccessCallback(parameters, executionResult)
+                    .OnSuccessCallback(options, executionResult)
                     .ConfigureAwait(false);
                 
                 logger.Verbose(() => "[ClientCredentialRequest] OnSuccess callback completed successfully.");
@@ -432,15 +430,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
             AuthenticationResult authResult = new AuthenticationResult(
-                                                            cachedAccessTokenItem,
-                                                            null,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account: null,
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null);
+                cachedAccessTokenItem,
+                null,
+                AuthenticationRequestParameters.AuthenticationScheme,
+                AuthenticationRequestParameters.RequestContext.CorrelationId,
+                TokenSource.Cache,
+                AuthenticationRequestParameters.RequestContext.ApiEvent,
+                account: null,
+                spaAuthCode: null,
+                additionalResponseParameters: null);
             return authResult;
         }
 

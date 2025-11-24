@@ -99,13 +99,15 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 requestParameters.RequestContext.Logger.Verbose(
                     () => "[CertificateAndClaimsClientCredential] Resolving certificate from dynamic provider.");
 
-                // Create parameters for the callback
-                var parameters = new Extensibility.ClientCredentialExtensionParameters(
-                    requestParameters.AppConfig);
+                // Create AssertionRequestOptions for the callback
+                var options = new AssertionRequestOptions((ApplicationConfiguration)requestParameters.AppConfig)
+                {
+                    CancellationToken = cancellationToken
+                };
 
                 // Invoke the provider to get the certificate
                 X509Certificate2 providedCertificate = await requestParameters.AppConfig
-                    .ClientCredentialCertificateProvider(parameters)
+                    .ClientCredentialCertificateProvider(options)
                     .ConfigureAwait(false);
 
                 // Validate the certificate returned by the provider

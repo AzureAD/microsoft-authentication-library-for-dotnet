@@ -3,13 +3,10 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
@@ -39,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Arrange
             bool callbackInvoked = false;
-            Task<X509Certificate2> certificateProvider(ClientCredentialExtensionParameters parameters)
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options)
             {
                 callbackInvoked = true;
                 return Task.FromResult(GetTestCertificate());
@@ -65,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
-                    .WithCertificate((Func<ClientCredentialExtensionParameters, Task<X509Certificate2>>)null)
+                    .WithCertificate((Func<AssertionRequestOptions, Task<X509Certificate2>>)null)
                     .Build());
 
             Assert.AreEqual("certificateProvider", ex.ParamName);
@@ -78,13 +75,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             int firstCallbackInvoked = 0;
             int secondCallbackInvoked = 0;
 
-            Task<X509Certificate2> firstProvider(ClientCredentialExtensionParameters parameters)
+            Task<X509Certificate2> firstProvider(AssertionRequestOptions options)
             {
                 firstCallbackInvoked++;
                 return Task.FromResult(GetTestCertificate());
             }
 
-            Task<X509Certificate2> secondProvider(ClientCredentialExtensionParameters parameters)
+            Task<X509Certificate2> secondProvider(AssertionRequestOptions options)
             {
                 secondCallbackInvoked++;
                 return Task.FromResult(GetTestCertificate());
@@ -113,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void OnMsalServiceFailure_CallbackIsStored()
         {
             // Arrange
-            Task<bool> onMsalServiceFailureCallback(ClientCredentialExtensionParameters parameters, MsalException ex) => Task.FromResult(false);
+            Task<bool> onMsalServiceFailureCallback(AssertionRequestOptions options, MsalException ex) => Task.FromResult(false);
 
             // Act
             var app = ConfidentialClientApplicationBuilder
@@ -150,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void OnSuccess_CallbackIsStored()
         {
             // Arrange
-            Task onSuccessCallback(ClientCredentialExtensionParameters parameters, ExecutionResult result) => Task.CompletedTask;
+            Task onSuccessCallback(AssertionRequestOptions options, ExecutionResult result) => Task.CompletedTask;
 
             // Act
             var app = ConfidentialClientApplicationBuilder
@@ -251,9 +248,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void AllThreeExtensibilityPoints_CanBeConfiguredTogether()
         {
             // Arrange
-            Task<X509Certificate2> certificateProvider(ClientCredentialExtensionParameters parameters) => Task.FromResult(GetTestCertificate());
-            Task<bool> onMsalServiceFailure(ClientCredentialExtensionParameters parameters, MsalException ex) => Task.FromResult(false);
-            Task onSuccess(ClientCredentialExtensionParameters parameters, ExecutionResult result) => Task.CompletedTask;
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
+            Task<bool> onMsalServiceFailure(AssertionRequestOptions options, MsalException ex) => Task.FromResult(false);
+            Task onSuccess(AssertionRequestOptions options, ExecutionResult result) => Task.CompletedTask;
 
             // Act
             var app = ConfidentialClientApplicationBuilder
@@ -275,9 +272,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void ExtensibilityPoints_CanBeConfiguredInAnyOrder()
         {
             // Arrange
-            Task<X509Certificate2> certificateProvider(ClientCredentialExtensionParameters parameters) => Task.FromResult(GetTestCertificate());
-            Task<bool> onMsalServiceFailure(ClientCredentialExtensionParameters parameters, MsalException ex) => Task.FromResult(false);
-            Task onSuccess(ClientCredentialExtensionParameters parameters, ExecutionResult result) => Task.CompletedTask;
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
+            Task<bool> onMsalServiceFailure(AssertionRequestOptions options, MsalException ex) => Task.FromResult(false);
+            Task onSuccess(AssertionRequestOptions options, ExecutionResult result) => Task.CompletedTask;
 
             // Act - Order: OnSuccess, OnMsalServiceFailure, Certificate
             var app1 = ConfidentialClientApplicationBuilder
@@ -315,10 +312,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void WithCertificate_WorksWithOtherConfidentialClientOptions()
         {
             // Arrange
-            Task<X509Certificate2> certificateProvider(ClientCredentialExtensionParameters parameters)
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options)
             {
-                Assert.AreEqual(TestConstants.ClientId, parameters.ClientId);
-                Assert.AreEqual(TestConstants.AadTenantId, parameters.TenantId);
+                Assert.AreEqual(TestConstants.ClientId, options.ClientID);
                 return Task.FromResult(GetTestCertificate());
             }
 

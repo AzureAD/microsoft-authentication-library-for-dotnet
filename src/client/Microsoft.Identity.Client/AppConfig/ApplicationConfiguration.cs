@@ -136,18 +136,18 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Dynamic certificate provider callback for client credential flows.
         /// </summary>
-        public Func<ClientCredentialExtensionParameters, Task<X509Certificate2>> ClientCredentialCertificateProvider { get; set; }
+        public Func<AssertionRequestOptions, Task<X509Certificate2>> ClientCredentialCertificateProvider { get; set; }
 
         /// <summary>
         /// MSAL service failure callback that determines whether to retry after a token acquisition failure from the identity provider.
         /// Only invoked for MsalServiceException (errors from the Security Token Service).
         /// </summary>
-        public Func<ClientCredentialExtensionParameters, MsalException, Task<bool>> OnMsalServiceFailureCallback { get; set; }
+        public Func<AssertionRequestOptions, MsalException, Task<bool>> OnMsalServiceFailureCallback { get; set; }
 
         /// <summary>
         /// Success callback that receives the result of token acquisition attempts (typically successful, but can include failures after retries are exhausted).
         /// </summary>
-        public Func<ClientCredentialExtensionParameters, ExecutionResult, Task> OnSuccessCallback { get; set; }
+        public Func<AssertionRequestOptions, ExecutionResult, Task> OnSuccessCallback { get; set; }
 
         #endregion
 
