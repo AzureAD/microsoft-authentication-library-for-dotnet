@@ -26,9 +26,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         // Central, process-local cache for mTLS binding (cert + endpoint + canonical client_id).
         internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
 
-        // Per-key async de-duplication so concurrent callers don’t double-mint.
-        internal static readonly ConcurrentDictionary<string, SemaphoreSlim> s_perKeyGates =
-            new ConcurrentDictionary<string, SemaphoreSlim>(StringComparer.Ordinal);
+        private readonly IMtlsCertificateCache _mtlsCache;
 
         // used in unit tests
         public const string ImdsV2ApiVersion = "2.0";
@@ -193,9 +191,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return new ImdsV2ManagedIdentitySource(requestContext);
         }
 
-        internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
-            base(requestContext, ManagedIdentitySource.ImdsV2)
-        { }
+        internal ImdsV2ManagedIdentitySource(RequestContext requestContext) 
+            : this(requestContext,  
+                  new MtlsBindingCache(s_mtlsCertificateCache, PersistentCertificateCacheFactory
+                      .Create(requestContext.Logger)))
+        {
+        }
+
+        internal ImdsV2ManagedIdentitySource(
+            RequestContext requestContext,
+            IMtlsCertificateCache mtlsCache)
+            : base(requestContext, ManagedIdentitySource.ImdsV2)
+        {
+            _mtlsCache = mtlsCache ?? throw new ArgumentNullException(nameof(mtlsCache));
+        }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
             string clientId,
@@ -291,11 +300,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
+            CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
 
             string certCacheKey = _requestContext.ServiceBundle.Config.ClientId;
 
-            var certEndpointAndClientId = await GetOrCreateMtlsBindingAsync(
+            MtlsBindingInfo mtlsBinding = await GetOrCreateMtlsBindingAsync(
                 cacheKey: certCacheKey,
                 async () =>
                 {
@@ -333,15 +342,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     // Canonical GUID to use as client_id in the token call
                     string clientIdGuid = certificateRequestResponse.ClientId;
 
-                    return Tuple.Create(mtlsCertificate, endpointBase, clientIdGuid);
+                    return new MtlsBindingInfo(mtlsCertificate, endpointBase, clientIdGuid);
+
                 },
-                _requestContext.UserCancellationToken, 
+                _requestContext.UserCancellationToken,
                 _requestContext.Logger)
                 .ConfigureAwait(false);
 
-            X509Certificate2 bindingCertificate = certEndpointAndClientId.Item1;
-            string endpointBaseForToken = certEndpointAndClientId.Item2;
-            string clientIdForToken = certEndpointAndClientId.Item3;
+            X509Certificate2 bindingCertificate = mtlsBinding.Certificate;
+            string endpointBaseForToken = mtlsBinding.Endpoint;
+            string clientIdForToken = mtlsBinding.ClientId;
 
             ManagedIdentityRequest request = new ManagedIdentityRequest(
                 HttpMethod.Post,
@@ -440,65 +450,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return response.AttestationToken;
         }
 
-        // ...unchanged usings and class header...
-
-        /// <summary>
-        /// Read-through cache: try cache; if missing, run async factory once (per key),
-        /// store the result, and return it. Thread-safe for the given cacheKey.
-        /// </summary>
-        private static async Task<Tuple<X509Certificate2, string, string>> GetOrCreateMtlsBindingAsync(
+        private Task<MtlsBindingInfo> GetOrCreateMtlsBindingAsync(
             string cacheKey,
-            Func<Task<Tuple<X509Certificate2, string, string>>> factory,
+            Func<Task<MtlsBindingInfo>> factory,
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
-            if (string.IsNullOrWhiteSpace(cacheKey))
-                throw new ArgumentException("cacheKey must be non-empty.", nameof(cacheKey));
-            if (factory is null)
-                throw new ArgumentNullException(nameof(factory));
-
-            X509Certificate2 cachedCertificate;
-            string cachedEndpointBase;
-            string cachedClientId;
-
-            // 1) Only lookup by cacheKey
-            if (s_mtlsCertificateCache.TryGet(cacheKey, out var cached, logger))
-            {
-                cachedCertificate = cached.Certificate;
-                cachedEndpointBase = cached.Endpoint;
-                cachedClientId = cached.ClientId;
-
-                return Tuple.Create(cachedCertificate, cachedEndpointBase, cachedClientId);
-            }
-
-            // 2) Gate per cacheKey
-            var gate = s_perKeyGates.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
-            await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
-
-            try
-            {
-                // Re-check after acquiring the gate
-                if (s_mtlsCertificateCache.TryGet(cacheKey, out cached, logger))
-                {
-                    cachedCertificate = cached.Certificate;
-                    cachedEndpointBase = cached.Endpoint;
-                    cachedClientId = cached.ClientId;
-                    return Tuple.Create(cachedCertificate, cachedEndpointBase, cachedClientId);
-                }
-
-                // 3) Mint + cache under the provided cacheKey
-                var created = await factory().ConfigureAwait(false);
-
-                s_mtlsCertificateCache.Set(cacheKey,
-                    new CertificateCacheValue(created.Item1, created.Item2, created.Item3),
-                    logger);
-
-                return created;
-            }
-            finally
-            {
-                gate.Release();
-            }
+            return _mtlsCache.GetOrCreateAsync(cacheKey, factory, cancellationToken, logger);
         }
 
         internal static void ResetCertCacheForTest()
@@ -508,14 +466,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 s_mtlsCertificateCache.Clear();
             }
-
-            foreach (var gate in s_perKeyGates.Values)
-            {
-                try
-                { gate.Dispose(); }
-                catch { }
-            }
-            s_perKeyGates.Clear();
         }
     }
 }
