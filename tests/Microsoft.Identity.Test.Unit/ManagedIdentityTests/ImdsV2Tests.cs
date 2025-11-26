@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             bool addProbeMock = true,
             bool addSourceCheck = true,
             ManagedIdentityKeyType managedIdentityKeyType = ManagedIdentityKeyType.InMemory,
-            bool imdsV2 = true) // false indicates imdsV1
+            ImdsVersion imdsVersion = ImdsVersion.V2)
         {
             ManagedIdentityApplicationBuilder miBuilder = null;
 
@@ -108,14 +108,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 .WithHttpManager(httpManager)
                 .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
-            if (imdsV2)
+            if (imdsVersion == ImdsVersion.V2)
             {
                 miBuilder.WithCsrFactory(_testCsrFactory);
             }
 
             var managedIdentityApp = miBuilder.Build();
 
-            if (!imdsV2)
+            if (imdsVersion == ImdsVersion.V1)
             {
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, userAssignedIdentityId, userAssignedId));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, imdsV2: false).ConfigureAwait(false);
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, imdsVersion: ImdsVersion.V1).ConfigureAwait(false);
 
                 var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)

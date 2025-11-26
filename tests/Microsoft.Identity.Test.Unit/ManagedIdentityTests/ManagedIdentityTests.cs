@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         // MtlsPop is disabled for all these tests, so no need to mock IMDSv2 probe here
-        private void MockImdsV1Probe(
+        internal static void MockImdsV1Probe(
             MockHttpManager httpManager,
             ManagedIdentitySource managedIdentitySource,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
