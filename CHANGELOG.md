@@ -1,8 +1,7 @@
-4.79.1
+4.79.2
 ======
 
 ### Bug fixes
-
 * Bump winsdk dependency  [#5575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5575)
 * ImdsV2 probe does not fire when .WithMtlsProofOfPossesstion is not used [#5579](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5579)
 * Downgrade System.Formats.Asn1 to match ID web [#5583](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5583)
