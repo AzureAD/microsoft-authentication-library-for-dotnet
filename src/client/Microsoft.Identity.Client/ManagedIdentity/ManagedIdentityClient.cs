@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // skip the ImdsV2 probe if MtlsPop was NOT requested
             if (isMtlsPopRequested)
             {
-                var imdsV2Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, imdsV2: true).ConfigureAwait(false);
+                var imdsV2Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2).ConfigureAwait(false);
                 if (imdsV2Response)
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 requestContext.Logger.Info("[Managed Identity] Mtls Pop was not requested; skipping ImdsV2 probe.");
             }
 
-            var imdsV1Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, imdsV2: false).ConfigureAwait(false);
+            var imdsV1Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1).ConfigureAwait(false);
             if (imdsV1Response)
             {
                 requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");

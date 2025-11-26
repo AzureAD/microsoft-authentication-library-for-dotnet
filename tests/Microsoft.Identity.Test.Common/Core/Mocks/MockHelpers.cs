@@ -614,6 +614,84 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
         }
 
+        public static MockHttpMessageHandler MockImdsProbe(
+            ImdsVersion imdsVersion,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            bool success = true)
+        {
+            string apiVersionQueryParam;
+            string imdsApiVersion;
+            string imdsEndpoint;
+
+            switch (imdsVersion)
+            {
+                case ImdsVersion.V2:
+                    apiVersionQueryParam = ImdsV2ManagedIdentitySource.ApiVersionQueryParam;
+                    imdsApiVersion = ImdsV2ManagedIdentitySource.ImdsV2ApiVersion;
+                    imdsEndpoint = ImdsV2ManagedIdentitySource.CsrMetadataPath;
+                    break;
+
+                case ImdsVersion.V1:
+                    apiVersionQueryParam = ImdsManagedIdentitySource.ApiVersionQueryParam;
+                    imdsApiVersion = ImdsManagedIdentitySource.ImdsApiVersion;
+                    imdsEndpoint = ImdsManagedIdentitySource.ImdsTokenPath;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(imdsVersion), imdsVersion, null);
+            }
+
+            HttpStatusCode statusCode;
+
+            if (success)
+            {
+                statusCode = HttpStatusCode.BadRequest; // IMDS probe success returns 400 Bad Request
+            }
+            else
+            {
+                statusCode = HttpStatusCode.NotFound;
+            }
+
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
+
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                    (ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
+                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
+            }
+            expectedQueryParams.Add(apiVersionQueryParam, imdsApiVersion);
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{imdsEndpoint}",
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(statusCode)
+                {
+                    Content = new StringContent(""),
+                }
+            };
+            
+            return handler;
+        }
+
+        public static MockHttpMessageHandler MockImdsProbeFailure(
+            ImdsVersion imdsVersion,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            return MockImdsProbe(imdsVersion, userAssignedIdentityId, userAssignedId, success: false);
+        }
+
         public static MockHttpMessageHandler MockCsrResponse(
             HttpStatusCode statusCode = HttpStatusCode.OK,
             string responseServerHeader = "IMDS/150.870.65.1854",
@@ -626,9 +704,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
             IList<string> presentRequestHeaders = new List<string>
-    {
-        OAuth2Header.XMsCorrelationId
-    };
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
 
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
@@ -666,7 +744,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
-        // used for unit tests in ManagedIdentityTests.cs
         public static MockHttpMessageHandler MockCsrResponseFailure()
         {
             // 400 doesn't trigger the retry policy
@@ -674,19 +751,19 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static MockHttpMessageHandler MockCertificateRequestResponse(
-    UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-    string userAssignedId = null,
-    string certificate = TestConstants.ValidRawCertificate,
-    string clientIdOverride = null,
-    string tenantIdOverride = null,
-    string mtlsEndpointOverride = null)
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            string certificate = TestConstants.ValidRawCertificate,
+            string clientIdOverride = null,
+            string tenantIdOverride = null,
+            string mtlsEndpointOverride = null)
         {
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
             IList<string> presentRequestHeaders = new List<string>
-    {
-        OAuth2Header.XMsCorrelationId
-    };
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
 
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {

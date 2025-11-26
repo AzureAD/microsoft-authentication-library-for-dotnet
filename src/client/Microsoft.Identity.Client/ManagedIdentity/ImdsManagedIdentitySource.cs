@@ -22,11 +22,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         // IMDS constants. Docs for IMDS are available here https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
         // used in unit tests as well
+        public const string ApiVersionQueryParam = "api-version";
         public const string DefaultImdsBaseEndpoint= "http://169.254.169.254";
         public const string ImdsApiVersion = "2018-02-01";
-        private const string ImdsTokenPath = "/metadata/identity/oauth2/token";
-
-        private const string ApiVersionQueryParam = "api-version";
+        public const string ImdsTokenPath = "/metadata/identity/oauth2/token";
 
         private const string DefaultMessage = "[Managed Identity] Service request failed.";
 
@@ -244,35 +243,37 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public static async Task<bool> ProbeImdsEndpointAsync(
             RequestContext requestContext,
-            bool imdsV2)
+            ImdsVersion imdsVersion)
         {
-#if NET462
-            if (imdsV2) {
-                requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
-                return false;
-            }
-#endif
-
             string apiVersionQueryParam;
             string imdsApiVersion;
             string imdsEndpoint;
             string imdsStringHelper;
-            
-            if (imdsV2)
+
+            switch (imdsVersion)
             {
-                apiVersionQueryParam = ApiVersionQueryParam;
-                imdsApiVersion = ImdsApiVersion;
-                imdsEndpoint = ImdsTokenPath;
-                imdsStringHelper = "IMDSv1";
+                case ImdsVersion.V2:
+#if NET462
+                requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
+                return false;
+#else
+                    apiVersionQueryParam = ImdsV2ManagedIdentitySource.ApiVersionQueryParam;
+                    imdsApiVersion = ImdsV2ManagedIdentitySource.ImdsV2ApiVersion;
+                    imdsEndpoint = ImdsV2ManagedIdentitySource.CsrMetadataPath;
+                    imdsStringHelper = "IMDSv2";
+                    break;
+#endif
+                case ImdsVersion.V1:
+                    apiVersionQueryParam = ApiVersionQueryParam;
+                    imdsApiVersion = ImdsApiVersion;
+                    imdsEndpoint = ImdsTokenPath;
+                    imdsStringHelper = "IMDSv1";
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(imdsVersion), imdsVersion, null);
             }
-            else
-            {
-                apiVersionQueryParam = ImdsV2ManagedIdentitySource.ApiVersionQueryParam;
-                imdsApiVersion = ImdsV2ManagedIdentitySource.ImdsV2ApiVersion;
-                imdsEndpoint = ImdsV2ManagedIdentitySource.CsrMetadataPath;
-                imdsStringHelper = "IMDSv2";
-            }
-            
+
             var queryParams = ImdsQueryParamsHelper(requestContext, apiVersionQueryParam, imdsApiVersion);
 
             var headers = new Dictionary<string, string>

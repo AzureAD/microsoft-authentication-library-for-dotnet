@@ -458,7 +458,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSource);
             }
         }
 
@@ -475,7 +475,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSource);
             }
         }
 
@@ -487,7 +487,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
 
-                const int Num500Errors = 1 + TestCsrMetadataProbeRetryPolicy.ExponentialStrategyNumRetries;
+                const int Num500Errors = 1 + TestImdsProbeRetryPolicy.ExponentialStrategyNumRetries;
                 for (int i = 0; i < Num500Errors; i++)
                 {
                     httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.InternalServerError));
@@ -496,7 +496,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSource);
             }
         }
 
@@ -513,7 +513,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.DefaultToImds, miSource);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSource);
             }
         }
 
