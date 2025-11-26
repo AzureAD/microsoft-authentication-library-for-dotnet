@@ -618,7 +618,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ImdsVersion imdsVersion,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
-            bool success = true)
+            bool success = true,
+            bool retry = false)
         {
             string apiVersionQueryParam;
             string imdsApiVersion;
@@ -650,7 +651,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
             else
             {
-                statusCode = HttpStatusCode.NotFound;
+                if (retry)
+                {
+                    statusCode = HttpStatusCode.InternalServerError;
+                }
+                else
+                {
+                    statusCode = HttpStatusCode.NotFound;
+                }
             }
 
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
@@ -687,9 +695,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static MockHttpMessageHandler MockImdsProbeFailure(
             ImdsVersion imdsVersion,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-            string userAssignedId = null)
+            string userAssignedId = null,
+            bool retry = false)
         {
-            return MockImdsProbe(imdsVersion, userAssignedIdentityId, userAssignedId, success: false);
+            return MockImdsProbe(imdsVersion, userAssignedIdentityId, userAssignedId, success: false, retry: retry);
         }
 
         public static MockHttpMessageHandler MockCsrResponse(
