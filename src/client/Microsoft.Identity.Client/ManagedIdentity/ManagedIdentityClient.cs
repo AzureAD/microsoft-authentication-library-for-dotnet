@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 if (s_sourceName == ManagedIdentitySource.None)
                 {
                     // First invocation: detect and cache
-                    source = await GetManagedIdentitySourceAsync(requestContext).ConfigureAwait(false);
+                    source = await GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested).ConfigureAwait(false);
                 }
                 else
                 {
@@ -101,13 +101,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         // Detect managed identity source based on the availability of environment variables and csr metadata probe request.
         // This method is perf sensitive any changes should be benchmarked.
-        internal async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(RequestContext requestContext)
+        internal async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(
+            RequestContext requestContext,
+            bool isMtlsPopRequested)
         {
             // First check env vars to avoid the probe if possible
             ManagedIdentitySource source = GetManagedIdentitySourceNoImdsV2(requestContext.Logger);
 
-            // If a source is detected via env vars, use it
-            if (source != ManagedIdentitySource.DefaultToImds)
+            // If a source is detected via env vars, or
+            // a source wasn't detected (it defaulted to ImdsV1) and MtlsPop was NOT requested,
+            // use the source.
+            // (don't trigger the ImdsV2 probe endpoint if MtlsPop was NOT requested)
+            if (source != ManagedIdentitySource.DefaultToImds || !isMtlsPopRequested)
             {
                 s_sourceName = source;
                 return source;

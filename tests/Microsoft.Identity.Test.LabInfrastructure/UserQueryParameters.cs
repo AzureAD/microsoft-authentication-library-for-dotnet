@@ -27,17 +27,17 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static UserQuery PublicAadUserQuery => new UserQuery()
         {
-            Upn = "idlab1@msidlab4.onmicrosoft.com"            
+            Upn = "MSAL-User-Default@id4slab1.onmicrosoft.com"            
         };
 
         public static UserQuery PublicAadUser2Query => new UserQuery()
         {
-            Upn = "idlab@msidlab4.onmicrosoft.com"
+            Upn = "MSAL-User-Default2@id4slab1.onmicrosoft.com"
         };
 
         public static UserQuery PublicAadUser3Query => new UserQuery()
         {
-            Upn = "idlabxcg@msidlab4.onmicrosoft.com"
+            Upn = "MSAL-User-XCG@id4slab1.onmicrosoft.com"
         };
 
         public static UserQuery MsaUserQuery => new UserQuery

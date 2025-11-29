@@ -186,7 +186,7 @@ Build the current project (The MSI Helper Service - MSIHelperService.csproj) and
 
 ## User Assigned Identity
 
-This helper service also exposes the [User Identity](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSAL_MSI_USERID/overview) for testing. 
+This helper service also exposes the [User Identity](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/Msal_Integration_tests/overview) for testing. 
 
 <br>
 <img src="images/uid.PNG" alt="uid" width="800"/>
@@ -197,13 +197,13 @@ Following are some useful information to test the User Identity.
 
 | Syntax      | Description |
 | ----------- | ----------- |
-| Resource ID      | /subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSAL_MSI_USERID       |
-| Name   | MSAL_MSI_USERID        |
+| Resource ID      | /subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/Msal_Integration_tests       |
+| Name   | Msal_Integration_tests        |
 | Type      | Microsoft.ManagedIdentity/userAssignedIdentities       |
-| Location   | eastus2        |
+| Location   | eastus        |
 | Tenant Id      | 72f988bf-86f1-41af-91ab-2d7cd011db47       |
-| Principal Id   | 3b57c42c-3201-4295-ae27-d6baec5b7027        |
-| Client Id      | 3b57c42c-3201-4295-ae27-d6baec5b7027       |
+| Principal Id   | a38637b6-b365-4652-af1f-cf5d8cf829ad        |
+| Client Id      | 45344e7d-c562-4be6-868f-18dac789c021       |
 
 # Troubleshooting the test service
 

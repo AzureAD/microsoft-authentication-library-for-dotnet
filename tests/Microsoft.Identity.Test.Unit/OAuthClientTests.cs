@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -197,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 AuthenticationResult result = await pca
                      .AcquireTokenInteractive(TestConstants.s_scope)
-                     .WithExtraQueryParameters("qp1=v1")
+                     .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)>{{ "qp1", ("v1", false) }})
                      .ExecuteAsync()
                      .ConfigureAwait(false);
                 // Assert that the endpoint sent to the device auth manager doesnt not have query params

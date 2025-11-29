@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Collections.Generic;
 
 namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 {
@@ -26,8 +27,9 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
     {
         private byte[] _serializedCache;
         private const string Testslice = "dc=ESTSR-PUB-WUS-LZ1-TEST"; //Updated slice for regional tests
+        private Dictionary<string, (string, bool)> TestsliceQueryParam = new Dictionary<string, (string value, bool includeInCacheKey)> { { "dc", ("ESTSR-PUB-WUS-LZ1-TEST", false) } };
         private const string AzureRegion = "westus3";
-        private const string TenantId = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca"; //Tenant Id for the test app
+        private const string TenantId = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca"; // MSIDLAB4 tenant (legacy)
      
         [TestMethod]
         //RMA getting FMI cred for a leaf entity or sub-RMA
@@ -45,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
-                        .WithExtraQueryParameters(Testslice) //Enables MSAL to target ESTS Test slice
+                        .WithExtraQueryParameters(TestsliceQueryParam) //Enables MSAL to target ESTS Test slice
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
@@ -90,7 +92,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
-                        .WithExtraQueryParameters(Testslice)
+                        .WithExtraQueryParameters(TestsliceQueryParam)
                         .WithCertificate(cert, sendX5C: true)
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
@@ -130,7 +132,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
-                        .WithExtraQueryParameters(Testslice)
+                        .WithExtraQueryParameters(TestsliceQueryParam)
                         .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice))
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
@@ -171,7 +173,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
-                        .WithExtraQueryParameters(Testslice)
+                        .WithExtraQueryParameters(TestsliceQueryParam)
                         .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice))
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
@@ -211,7 +213,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
-                        .WithExtraQueryParameters(Testslice)
+                        .WithExtraQueryParameters(TestsliceQueryParam)
                         .WithClientAssertion((options) => GetFmiCredentialFromRma(options, Testslice))
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
@@ -246,6 +248,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             //Create application
             var confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientId)
@@ -254,6 +257,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             //Acquire Token
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
