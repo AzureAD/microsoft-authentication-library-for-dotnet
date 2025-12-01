@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public); // Use legacy config for regional tests
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy); // Use legacy config for regional tests
             
             settings.InstanceDiscoveryEndpoint = instanceDiscoveryEnabled;
             _confidentialClientApplication = BuildCCA(settings, factory);
