@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <param subjectName="location"><see cref="StoreLocation"/> in which to search for a matching certificate</param>
         /// <param subjectName="name"><see cref="StoreName"/> in which to search for a matching certificate</param>
         /// <returns><see cref="X509Certificate2"/> with <paramref subjectName="certName"/>, or null if no matching certificate was found</returns>
-        public static X509Certificate2 FindCertificateByName(string certName, StoreLocation location, StoreName name)
+        private static X509Certificate2 FindCertificateByName(string certName, StoreLocation location, StoreName name)
         {
             // Unix LocalMachine X509Store is limited to the Root and CertificateAuthority stores
             if (SharedUtilities.IsLinuxPlatform())
