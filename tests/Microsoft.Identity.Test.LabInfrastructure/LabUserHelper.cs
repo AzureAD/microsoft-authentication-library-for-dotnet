@@ -183,16 +183,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetArlingtonUserAsync()
         {
-            var response = GetLabUserDataAsync(UserQuery.ArlingtonUserQuery);
+            var response = MergeKVLabDataAsync("ARL-User-IDLab-JSON", "ARLMSIDLAB1", "ARL-App-IDLABSAPP-JSON");
             response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
             return response;
         }
 
         public static Task<LabResponse> GetArlingtonADFSUserAsync()
         {
-            var query = UserQuery.ArlingtonUserQuery;
-            query.UserType = UserType.Federated;
-            var response = GetLabUserDataAsync(query);
+            var response = MergeKVLabDataAsync("ARL-User-fIDLAB-JSON", "ARLMSIDLAB1", "ARL-App-IDLABSAPP-JSON");
             response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
             return response;
         }
