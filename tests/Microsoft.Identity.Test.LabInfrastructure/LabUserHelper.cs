@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetB2CLocalAccountAsync()
         {
-            return GetLabUserDataAsync(UserQuery.B2CLocalAccountUserQuery);
+            return MergeKVLabDataAsync("B2C-User-IDLab-JSON", "MSIDLABB2C", "B2C-App-IDLABSAPPB2C-JSON");
         }
 
         public static Task<LabResponse> GetArlingtonUserAsync()
