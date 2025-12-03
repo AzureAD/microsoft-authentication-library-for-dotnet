@@ -166,11 +166,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return MergeKVLabDataAsync("MSAL-USER-FedDefault-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
         }
 
-        public static Task<LabResponse> GetMsaUserAsync()
-        {
-            return GetLabUserDataAsync(UserQuery.MsaUserQuery);
-        }
-
         public static Task<LabResponse> GetHybridSpaAccontAsync()
         {
             return MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
@@ -194,7 +189,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
             return response;
         }
-
+        public static Task<LabResponse> GetCIAMUserAsync()
+        {
+            return MergeKVLabDataAsync("MSAL-User-CIAM-JSON", "MSIDLABCIAM6", "MSAL-App-CIAM-JSON");
+        }
+ 
         public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
         {
             var query = new UserQuery()
