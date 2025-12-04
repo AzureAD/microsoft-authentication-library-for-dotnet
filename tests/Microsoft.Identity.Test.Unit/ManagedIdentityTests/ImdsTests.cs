@@ -4,6 +4,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -449,19 +450,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var managedIdentityApp = miBuilder.Build();
 
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
 
-                var imdsV1Handler = new MockHttpMessageHandler
-                {
-                    HandlerFunc = async (request, cancellationToken) =>
-                    {
-                        // IMDS (V1 and V2) probe has a timeout after 1 second
-                        await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken).ConfigureAwait(false);
-                        return new HttpResponseMessage(HttpStatusCode.OK);
-                    }
-                };
-                httpManager.AddMockHandler(imdsV1Handler);
-
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                var imdsProbesCancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(0)).Token; // timeout immediately
+                
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.None, miSource); // Probe timed out, no source available
 
                 var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>

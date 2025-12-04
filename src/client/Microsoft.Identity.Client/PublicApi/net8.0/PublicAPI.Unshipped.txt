@@ -1,1 +1,2 @@
 ﻿const Microsoft.Identity.Client.MsalError.ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable" -> string
+Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>

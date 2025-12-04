@@ -41,15 +41,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public X509Certificate2 ExpectedMtlsBindingCertificate { get; set; }
 
-        public Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> HandlerFunc { get; set; }
-
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (HandlerFunc != null)
-            {
-                return await HandlerFunc(request, cancellationToken).ConfigureAwait(false);
-            }
-
             ActualRequestMessage = request;
 
             if (ExceptionToThrow != null)

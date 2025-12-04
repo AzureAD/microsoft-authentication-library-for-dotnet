@@ -40,12 +40,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
-            AbstractManagedIdentity msi = await GetOrSelectManagedIdentitySourceAsync(requestContext, parameters.IsMtlsPopRequested).ConfigureAwait(false);
+            AbstractManagedIdentity msi = await GetOrSelectManagedIdentitySourceAsync(requestContext, parameters.IsMtlsPopRequested, cancellationToken).ConfigureAwait(false);
             return await msi.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
-        private async Task<AbstractManagedIdentity> GetOrSelectManagedIdentitySourceAsync(RequestContext requestContext, bool isMtlsPopRequested)
+        private async Task<AbstractManagedIdentity> GetOrSelectManagedIdentitySourceAsync(
+            RequestContext requestContext,
+            bool isMtlsPopRequested,
+            CancellationToken cancellationToken)
         {
             using (requestContext.Logger.LogMethodDuration())
             {
@@ -57,7 +60,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 if (s_sourceName == ManagedIdentitySource.None)
                 {
                     // First invocation: detect and cache
-                    source = await GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested).ConfigureAwait(false);
+                    source = await GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -102,7 +105,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method is perf sensitive any changes should be benchmarked.
         internal async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(
             RequestContext requestContext,
-            bool isMtlsPopRequested)
+            bool isMtlsPopRequested,
+            CancellationToken cancellationToken)
         {
             // First check env vars to avoid the probe if possible
             ManagedIdentitySource source = GetManagedIdentitySourceNoImds(requestContext.Logger);
@@ -115,7 +119,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // skip the ImdsV2 probe if MtlsPop was NOT requested
             if (isMtlsPopRequested)
             {
-                var imdsV2Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2).ConfigureAwait(false);
+                var imdsV2Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
                 if (imdsV2Response)
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
@@ -128,7 +132,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 requestContext.Logger.Info("[Managed Identity] Mtls Pop was not requested; skipping ImdsV2 probe.");
             }
 
-            var imdsV1Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1).ConfigureAwait(false);
+            var imdsV1Response = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
             if (imdsV1Response)
             {
                 requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");

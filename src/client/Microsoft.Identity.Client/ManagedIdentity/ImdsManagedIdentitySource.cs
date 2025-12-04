@@ -243,7 +243,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public static async Task<bool> ProbeImdsEndpointAsync(
             RequestContext requestContext,
-            ImdsVersion imdsVersion)
+            ImdsVersion imdsVersion,
+            CancellationToken cancellationToken)
         {
             string apiVersionQueryParam;
             string imdsApiVersion;
@@ -289,21 +290,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             try
             {
-                using (var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(1)))
-                {
-                    response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
-                        GetValidatedEndpoint(requestContext.Logger, imdsEndpoint, queryParams),
-                        headers,
-                        body: null,
-                        method: HttpMethod.Get,
-                        logger: requestContext.Logger,
-                        doNotThrow: false,
-                        mtlsCertificate: null,
-                        validateServerCertificate: null,
-                        cancellationToken: timeoutCts.Token,
-                        retryPolicy: retryPolicy)
-                    .ConfigureAwait(false);
-                }
+                response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                    GetValidatedEndpoint(requestContext.Logger, imdsEndpoint, queryParams),
+                    headers,
+                    body: null,
+                    method: HttpMethod.Get,
+                    logger: requestContext.Logger,
+                    doNotThrow: false,
+                    mtlsCertificate: null,
+                    validateServerCertificate: null,
+                    cancellationToken: cancellationToken,
+                    retryPolicy: retryPolicy)
+                .ConfigureAwait(false);
             }
             catch (Exception ex)
             {

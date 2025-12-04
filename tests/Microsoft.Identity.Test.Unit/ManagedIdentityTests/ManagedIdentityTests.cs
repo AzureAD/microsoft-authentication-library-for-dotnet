@@ -40,6 +40,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string ExpectedErrorCode = "ErrorCode";
         internal const string ExpectedCorrelationId = "Some GUID";
 
+        internal static CancellationToken ImdsProbesCancellationToken = new CancellationTokenSource(TimeSpan.FromMinutes(5)).Token; // never timeout for the unit tests
+
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         // MtlsPop is disabled for all these tests, so no need to mock IMDSv2 probe here
@@ -90,7 +92,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
                 }
 
-                Assert.AreEqual(managedIdentitySource, await mi.GetManagedIdentitySourceAsync().ConfigureAwait(false));
+                Assert.AreEqual(managedIdentitySource, await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false));
             }
         }
 

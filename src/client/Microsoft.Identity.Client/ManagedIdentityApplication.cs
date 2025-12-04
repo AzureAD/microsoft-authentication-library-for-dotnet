@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
-        public async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync()
+        public async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
         {
             if (ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None)
             {
@@ -64,10 +64,10 @@ namespace Microsoft.Identity.Client
             }
 
             // Create a temporary RequestContext for the logger and the IMDS probe request.
-            var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, CancellationToken.None);
+            var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
 
             // GetManagedIdentitySourceAsync might return ImdsV2 = true, but it still requires .WithMtlsProofOfPossesion on the Managed Identity Application object to hit the ImdsV2 flow
-            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested: true).ConfigureAwait(false);
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested: true, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
