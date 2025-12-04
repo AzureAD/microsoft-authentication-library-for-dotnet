@@ -106,10 +106,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             bool noImdsV2 = false)
         {
             // First check env vars to avoid the probe if possible
-            ManagedIdentitySource source = GetManagedIdentitySourceNoImdsV2(requestContext.Logger);
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (source != ManagedIdentitySource.DefaultToImds)
-#pragma warning restore CS0618 // Type or member is obsolete
+            ManagedIdentitySource source = GetManagedIdentitySourceNoImds(requestContext.Logger);
+            if (source != ManagedIdentitySource.None)
             {
                 s_sourceName = source;
                 return source;
@@ -144,10 +142,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return s_sourceName;
         }
 
-        // Detect managed identity source based on the availability of environment variables.
-        // The result of this method is not cached because reading environment variables is cheap. 
-        // This method is perf sensitive any changes should be benchmarked.
-        internal static ManagedIdentitySource GetManagedIdentitySourceNoImdsV2(ILoggerAdapter logger = null)
+        /// <summary>
+        /// Detects the managed identity source based on the availability of environment variables.
+        /// It does not probe IMDS, but it checks for all other sources.
+        /// This method does not cache its result, as reading environment variables is inexpensive.
+        /// It is performance sensitive; any changes should be benchmarked.
+        /// </summary>
+        /// <param name="logger">Optional logger for diagnostic output.</param>
+        /// <returns>
+        /// The detected <see cref="ManagedIdentitySource"/> based on environment variables.
+        /// Returns <c>ManagedIdentitySource.None</c> if no environment-based source is detected.
+        /// </returns>
+        internal static ManagedIdentitySource GetManagedIdentitySourceNoImds(ILoggerAdapter logger = null)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
@@ -189,9 +195,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             else
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                return ManagedIdentitySource.DefaultToImds;
-#pragma warning restore CS0618 // Type or member is obsolete
+                return ManagedIdentitySource.None;
             }
         }
 

@@ -3,10 +3,12 @@
 
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
@@ -429,6 +431,45 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // 3 retries (requestsMade would be 9 if retry policy was NOT per request)
                 requestsMade = Num504Errors - httpManager.QueueSize;
                 Assert.AreEqual(Num504Errors, requestsMade);
+            }
+        }
+
+        [TestMethod]
+        public async Task ProbeImdsEndpointAsync_TimesOutAfterOneSecond()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+
+                miBuilder
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
+
+                var managedIdentityApp = miBuilder.Build();
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+
+                var imdsV1Handler = new MockHttpMessageHandler
+                {
+                    HandlerFunc = async (request, cancellationToken) =>
+                    {
+                        // IMDS (V1 and V2) probe has a timeout after 1 second
+                        await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken).ConfigureAwait(false);
+                        return new HttpResponseMessage(HttpStatusCode.OK);
+                    }
+                };
+                httpManager.AddMockHandler(imdsV1Handler);
+
+                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.None, miSource); // Probe timed out, no source available
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
             }
         }
     }
