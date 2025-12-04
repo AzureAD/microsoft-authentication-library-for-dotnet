@@ -136,13 +136,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             
             return primaryJson.ToObject<LabResponse>();
         }
-
-        [Obsolete("Use GetSpecificUserAsync instead", true)]
-        public static Task<LabResponse> GetLabUserDataForSpecificUserAsync(string upn)
-        {
-            throw new NotSupportedException();
-        }
-
+     
         public static async Task<string> GetMSIEnvironmentVariablesAsync(string uri)
         {
             string result = await s_labService.GetLabResponseAsync(uri).ConfigureAwait(false);
@@ -185,33 +179,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static Task<LabResponse> GetB2CLocalAccountAsync()
         {
             return GetLabUserDataAsync(UserQuery.B2CLocalAccountUserQuery);
-        }
-
-        public static Task<LabResponse> GetB2CFacebookAccountAsync()
-        {
-            return GetLabUserDataAsync(UserQuery.B2CFacebookUserQuery);
-        }
-
-        public static Task<LabResponse> GetB2CGoogleAccountAsync()
-        {
-            return GetLabUserDataAsync(UserQuery.B2CGoogleUserQuery);
-        }
-
-        public static async Task<LabResponse> GetB2CMSAAccountAsync()
-        {
-            var response = await GetLabUserDataAsync(UserQuery.B2CMSAUserQuery).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(response.User.HomeUPN) ||
-                string.Equals("None", response.User.HomeUPN, StringComparison.OrdinalIgnoreCase))
-            {
-                Debug.WriteLine($"B2C MSA HomeUPN set to UPN: {response.User.Upn}");
-                response.User.HomeUPN = response.User.Upn;
-            }
-            return response;
-        }
-
-        public static Task<LabResponse> GetSpecificUserAsync(string upn)
-        {
-            return GetLabUserDataAsync(new UserQuery() { Upn = upn });
         }
 
         public static Task<LabResponse> GetArlingtonUserAsync()
