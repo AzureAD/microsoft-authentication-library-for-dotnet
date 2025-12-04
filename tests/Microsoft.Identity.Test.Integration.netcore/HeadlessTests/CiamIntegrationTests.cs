@@ -32,11 +32,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             string authority;
             //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
-            {
-                FederationProvider = FederationProvider.CIAMCUD,
-                SignInAudience = SignInAudience.AzureAdMyOrg
-            }).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetCIAMUserAsync().ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/
             authority = string.Format("https://{0}.ciamlogin.com/", labResponse.User.LabName);
@@ -89,11 +85,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             string authority;
             //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
-            {
-                FederationProvider = FederationProvider.CIAMCUD,
-                SignInAudience = SignInAudience.AzureAdMyOrg
-            }).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetCIAMUserAsync().ConfigureAwait(false);
 
 
             //https://tenantName.ciamlogin.com/
@@ -158,11 +150,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string ciamWebApi = "634de702-3173-4a71-b336-a4fab786a479";
 
             //Get lab details
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
-            {
-                FederationProvider = FederationProvider.CIAMCUD,
-                SignInAudience = SignInAudience.AzureAdMyOrg
-            }).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetCIAMUserAsync().ConfigureAwait(false);
 
             //Acquire tokens
             var msalPublicClient = PublicClientApplicationBuilder
@@ -220,11 +208,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task WithOidcAuthority_ValidatesIssuerSuccessfully()
         {
             //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
-            {
-                FederationProvider = FederationProvider.CIAMCUD,
-                SignInAudience = SignInAudience.AzureAdMyOrg
-            }).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetCIAMUserAsync().ConfigureAwait(false);
 
             //Test with standard and CUD CIAM authorities
             string[] authorities =
