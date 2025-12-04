@@ -1162,7 +1162,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
                         .ExecuteAsync()
                         .ConfigureAwait(false)).ConfigureAwait(false);

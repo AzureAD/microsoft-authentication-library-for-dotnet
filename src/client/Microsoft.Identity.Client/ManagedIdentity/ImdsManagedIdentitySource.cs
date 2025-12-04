@@ -276,6 +276,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             var queryParams = ImdsQueryParamsHelper(requestContext, apiVersionQueryParam, imdsApiVersion);
 
+            // probe omits the "Metadata: true" header and then treats 400 Bad Request as success
             var headers = new Dictionary<string, string>
             {
                 { OAuth2Header.XMsCorrelationId, requestContext.CorrelationId.ToString() }
@@ -310,6 +311,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return false;
             }
 
+            // probe omits the "Metadata: true" header and then treats 400 Bad Request as success
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 requestContext.Logger.Info(() => $"[Managed Identity] {imdsStringHelper} managed identity is available.");

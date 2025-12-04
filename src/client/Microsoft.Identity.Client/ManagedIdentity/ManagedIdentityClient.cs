@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.ImdsV2 => ImdsV2ManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.Imds => ImdsManagedIdentitySource.Create(requestContext),
-                    _ => throw new MsalServiceException(MsalError.ManagedIdentityAllSourcesUnavailable, MsalErrorMessage.ManagedIdentityAllSourcesUnavailable)
+                    _ => throw new MsalClientException(MsalError.ManagedIdentityAllSourcesUnavailable, MsalErrorMessage.ManagedIdentityAllSourcesUnavailable)
                 };
             }
         }
@@ -102,8 +102,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method is perf sensitive any changes should be benchmarked.
         internal async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(
             RequestContext requestContext,
-            bool isMtlsPopRequested,
-            bool noImdsV2 = false)
+            bool isMtlsPopRequested)
         {
             // First check env vars to avoid the probe if possible
             ManagedIdentitySource source = GetManagedIdentitySourceNoImds(requestContext.Logger);

@@ -464,7 +464,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.None, miSource); // Probe timed out, no source available
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)
                 ).ConfigureAwait(false);

@@ -63,11 +63,11 @@ namespace Microsoft.Identity.Client
                 return ManagedIdentityClient.s_sourceName;
             }
 
-            // Create a temporary RequestContext for the CSR metadata probe request.
-            var csrMetadataProbeRequestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, CancellationToken.None);
+            // Create a temporary RequestContext for the logger and the IMDS probe request.
+            var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, CancellationToken.None);
 
             // GetManagedIdentitySourceAsync might return ImdsV2 = true, but it still requires .WithMtlsProofOfPossesion on the Managed Identity Application object to hit the ImdsV2 flow
-            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(csrMetadataProbeRequestContext, isMtlsPopRequested: true).ConfigureAwait(false);
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested: true).ConfigureAwait(false);
         }
 
         /// <summary>
