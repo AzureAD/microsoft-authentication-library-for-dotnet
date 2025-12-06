@@ -6,15 +6,34 @@ using System.Threading;
 
 namespace Microsoft.Identity.Client
 {
-        /// <summary>
-        /// Information about the client assertion that need to be generated See https://aka.ms/msal-net-client-assertion
-        /// </summary>
-        /// <remarks> Use the provided information to generate the client assertion payload </remarks>
+    /// <summary>
+    /// Information about the client assertion that need to be generated See https://aka.ms/msal-net-client-assertion
+    /// </summary>
+    /// <remarks> Use the provided information to generate the client assertion payload </remarks>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
     public class AssertionRequestOptions {
         /// <summary>
+        /// Default constructor for AssertionRequestOptions
+        /// </summary>
+        public AssertionRequestOptions()
+        {
+        }
+
+        /// <summary>
+        /// Internal constructor that creates AssertionRequestOptions from ApplicationConfiguration
+        /// </summary>
+        /// <param name="appConfig">The application configuration</param>
+        internal AssertionRequestOptions(ApplicationConfiguration appConfig)
+        {
+            ClientID = appConfig.ClientId;
+            TenantId = appConfig.Authority?.TenantId;
+            Authority = appConfig.Authority?.AuthorityInfo?.CanonicalAuthority?.ToString();
+        }
+
+        /// <summary>
+        /// Cancellation token to cancel the operation
         /// </summary>
         public CancellationToken CancellationToken { get; set; }
         
@@ -22,6 +41,16 @@ namespace Microsoft.Identity.Client
         /// Client ID for which a signed assertion is requested
         /// </summary>
         public string ClientID { get; set; }
+
+        /// <summary>
+        /// Tenant ID for the authentication request
+        /// </summary>
+        public string TenantId { get; set; }
+
+        /// <summary>
+        /// The authority URL (e.g., https://login.microsoftonline.com/{tenantId})
+        /// </summary>
+        public string Authority { get; set; }
 
         /// <summary>
         /// The intended token endpoint
