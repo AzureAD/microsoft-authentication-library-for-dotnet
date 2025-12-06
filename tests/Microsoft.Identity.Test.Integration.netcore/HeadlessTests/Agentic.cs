@@ -16,10 +16,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class Agentic
     {
-        const string ClientId = "d15884b6-a447-4dd5-a5a5-a668c49f6300"; // agent app
+        const string ClientId = "d05619c9-dbf2-4e60-95fd-cc75dd0db451"; // agent app
         const string TenantId = "31a58c3b-ae9c-4448-9e8f-e9e143e800df";
-        const string AgentIdentity = "d84da24a-2ea2-42b8-b5ab-8637ec208024";
-        const string UserUpn = "aui1@msidlabtoint.onmicrosoft.com";
+        const string AgentIdentity = "edbfbbe7-d240-40dd-aee2-435201dbaa9c";
+        const string UserUpn = "agentuser1@msidlabtoint.onmicrosoft.com";
         private const string TokenExchangeUrl = "api://AzureADTokenExchange/.default";
         private const string Scope = "https://graph.microsoft.com/.default";
 
