@@ -40,9 +40,9 @@ namespace Microsoft.Identity.Test.Unit.Helpers
         }
     }
 
-    internal class TestImdsProbeRetryPolicy : ImdsProbeRetryPolicy
+    internal class TestCsrMetadataProbeRetryPolicy : CsrMetadataProbeRetryPolicy
     {
-        public TestImdsProbeRetryPolicy() : base() { }
+        public TestCsrMetadataProbeRetryPolicy() : base() { }
 
         internal override Task DelayAsync(int milliseconds)
         {
