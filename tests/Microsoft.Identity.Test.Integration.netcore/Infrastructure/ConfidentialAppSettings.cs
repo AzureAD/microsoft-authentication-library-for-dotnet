@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         {
             // TODO: Tenant Migration - Migrated to new id4slab1 tenant for non-regional tests
             // Regional tests still use legacy configuration due to AADSTS100007 restrictions
-            public string ClientId => UseAppIdUri? "api://54a2d933-8bf8-483b-a8f8-0a31924f3c1f" : "3bf56293-fbb5-42bd-a407-248ba7431a8c"; // MSAL-APP-AzureADMultipleOrgs in ID4SLAB1 tenant
+            public string ClientId => UseAppIdUri? "api://54a2d933-8bf8-483b-a8f8-0a31924f3c1f" : "54a2d933-8bf8-483b-a8f8-0a31924f3c1f"; // MSAL-APP-AzureADMultipleOrgs in ID4SLAB1 tenant
 
             public string TenantId => ID4SLab1TenantId; 
 
