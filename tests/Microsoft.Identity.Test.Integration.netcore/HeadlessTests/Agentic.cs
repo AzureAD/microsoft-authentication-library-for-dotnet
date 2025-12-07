@@ -24,12 +24,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string Scope = "https://graph.microsoft.com/.default";
 
         [TestMethod]
+        [Ignore] // ignored due to tenant deauth. See https://github.com/AzureAD/microsoft-identity-web/blob/master/tests/E2E%20Tests/AgentApplications/GetFicAsyncTests.cs#L14
         public async Task AgentUserIdentityGetsTokenForGraphTest()
         {
             await AgentUserIdentityGetsTokenForGraphAsync().ConfigureAwait(false);
         }
 
         [TestMethod]
+        [Ignore] // ignored due to tenant deauth. See https://github.com/AzureAD/microsoft-identity-web/blob/master/tests/E2E%20Tests/AgentApplications/GetFicAsyncTests.cs#L14
         public async Task AgentGetsAppTokenForGraphTest()
         {
             await AgentGetsAppTokenForGraph().ConfigureAwait(false);
@@ -63,11 +65,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
                         .Build();
 
+            string userFicAssertion = await GetUserFic().ConfigureAwait(false);
+
             var result = await (cca as IByUsernameAndPassword).AcquireTokenByUsernamePassword([Scope], UserUpn, "no_password")
                 .OnBeforeTokenRequest(
                 async (request) =>
                 {
-                    string userFicAssertion = await GetUserFic().ConfigureAwait(false);
                     request.BodyParameters["user_federated_identity_credential"] = userFicAssertion;
                     request.BodyParameters["grant_type"] = "user_fic";
 
