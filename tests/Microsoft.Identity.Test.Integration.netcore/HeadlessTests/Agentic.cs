@@ -65,12 +65,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
                         .Build();
 
-            string userFicAssertion = await GetUserFic().ConfigureAwait(false);
-
             var result = await (cca as IByUsernameAndPassword).AcquireTokenByUsernamePassword([Scope], UserUpn, "no_password")
                 .OnBeforeTokenRequest(
                 async (request) =>
                 {
+                    string userFicAssertion = await GetUserFic().ConfigureAwait(false);
+
                     request.BodyParameters["user_federated_identity_credential"] = userFicAssertion;
                     request.BodyParameters["grant_type"] = "user_fic";
 
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             return result.AccessToken;
         }
 
-        private  static async Task<string> GetUserFic()
+        private static async Task<string> GetUserFic()
         {
             var cca1 = ConfidentialClientApplicationBuilder
                      .Create(AgentIdentity)
