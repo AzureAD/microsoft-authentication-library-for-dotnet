@@ -5,11 +5,11 @@ using System;
 
 namespace Microsoft.Identity.Client.Http.Retry
 {
-    internal class CsrMetadataProbeRetryPolicy : ImdsRetryPolicy
+    internal class ImdsProbeRetryPolicy : ImdsRetryPolicy
     {
         protected override bool ShouldRetry(HttpResponse response, Exception exception)
         {
-            return HttpRetryConditions.CsrMetadataProbe(response, exception);
+            return HttpRetryConditions.ImdsProbe(response, exception);
         }
     }
 }
