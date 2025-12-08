@@ -11,7 +11,10 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -19,9 +22,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         // IMDS constants. Docs for IMDS are available here https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
         // used in unit tests as well
+        public const string ApiVersionQueryParam = "api-version";
         public const string DefaultImdsBaseEndpoint= "http://169.254.169.254";
-        private const string ImdsTokenPath = "/metadata/identity/oauth2/token";
         public const string ImdsApiVersion = "2018-02-01";
+        public const string ImdsTokenPath = "/metadata/identity/oauth2/token";
 
         private const string DefaultMessage = "[Managed Identity] Service request failed.";
 
@@ -35,6 +39,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly Uri _imdsEndpoint;
 
         private static string s_cachedBaseEndpoint = null;
+
+        public static AbstractManagedIdentity Create(RequestContext requestContext)
+        {
+            return new ImdsManagedIdentitySource(requestContext);
+        }
 
         internal ImdsManagedIdentitySource(RequestContext requestContext) : 
             base(requestContext, ManagedIdentitySource.Imds)
@@ -51,7 +60,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             ManagedIdentityRequest request = new(HttpMethod.Get, _imdsEndpoint);
 
             request.Headers.Add("Metadata", "true");
-            request.QueryParameters["api-version"] = ImdsApiVersion;
+            request.QueryParameters[ApiVersionQueryParam] = ImdsApiVersion;
             request.QueryParameters["resource"] = resource;
 
             switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
@@ -210,6 +219,107 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             return builder.Uri;
+        }
+
+        public static string ImdsQueryParamsHelper(
+            RequestContext requestContext,
+            string apiVersionQueryParam,
+            string imdsApiVersion)
+        {
+            var queryParams = $"{apiVersionQueryParam}={imdsApiVersion}";
+
+            var userAssignedIdQueryParam = GetUserAssignedIdQueryParam(
+                requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
+                requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
+                requestContext.Logger);
+
+            if (userAssignedIdQueryParam != null)
+            {
+                queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
+            }
+
+            return queryParams;
+        }
+
+        public static async Task<bool> ProbeImdsEndpointAsync(
+            RequestContext requestContext,
+            ImdsVersion imdsVersion,
+            CancellationToken cancellationToken)
+        {
+            string apiVersionQueryParam;
+            string imdsApiVersion;
+            string imdsEndpoint;
+            string imdsStringHelper;
+
+            switch (imdsVersion)
+            {
+                case ImdsVersion.V2:
+#if NET462
+                requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
+                return false;
+#else
+                    apiVersionQueryParam = ImdsV2ManagedIdentitySource.ApiVersionQueryParam;
+                    imdsApiVersion = ImdsV2ManagedIdentitySource.ImdsV2ApiVersion;
+                    imdsEndpoint = ImdsV2ManagedIdentitySource.CsrMetadataPath;
+                    imdsStringHelper = "IMDSv2";
+                    break;
+#endif
+                case ImdsVersion.V1:
+                    apiVersionQueryParam = ApiVersionQueryParam;
+                    imdsApiVersion = ImdsApiVersion;
+                    imdsEndpoint = ImdsTokenPath;
+                    imdsStringHelper = "IMDSv1";
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(imdsVersion), imdsVersion, null);
+            }
+
+            var queryParams = ImdsQueryParamsHelper(requestContext, apiVersionQueryParam, imdsApiVersion);
+
+            // probe omits the "Metadata: true" header and then treats 400 Bad Request as success
+            var headers = new Dictionary<string, string>
+            {
+                { OAuth2Header.XMsCorrelationId, requestContext.CorrelationId.ToString() }
+            };
+
+            IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.ImdsProbe);
+
+            HttpResponse response = null;
+
+            try
+            {
+                response = await requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                    GetValidatedEndpoint(requestContext.Logger, imdsEndpoint, queryParams),
+                    headers,
+                    body: null,
+                    method: HttpMethod.Get,
+                    logger: requestContext.Logger,
+                    doNotThrow: false,
+                    mtlsCertificate: null,
+                    validateServerCertificate: null,
+                    cancellationToken: cancellationToken,
+                    retryPolicy: retryPolicy)
+                .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                requestContext.Logger.Info($"[Managed Identity] {imdsStringHelper} probe endpoint failure. Exception occurred while sending request to probe endpoint: {ex}");
+                return false;
+            }
+
+            // probe omits the "Metadata: true" header and then treats 400 Bad Request as success
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                requestContext.Logger.Info(() => $"[Managed Identity] {imdsStringHelper} managed identity is available.");
+                return true;
+            }
+            else
+            {
+                requestContext.Logger.Info(() => $"[Managed Identity] {imdsStringHelper} managed identity is not available. Status code: {response.StatusCode}, Body: {response.Body}");
+                return false;
+            }
         }
     }
 }
