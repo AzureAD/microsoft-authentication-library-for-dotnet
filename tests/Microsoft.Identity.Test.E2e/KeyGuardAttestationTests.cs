@@ -28,13 +28,11 @@ If any prerequisite is missing (e.g., VBS off, endpoint unset, native DLL absent
 the test exits early with Assert.Inconclusive instead of failing the overall build.
 */
 
+using Microsoft.Identity.Client.MtlsPop;
 using Microsoft.Identity.Client.MtlsPop.Attestation;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Microsoft.Identity.Client.MtlsPop;
 using System.Threading.Tasks;
 using System.Threading;
 

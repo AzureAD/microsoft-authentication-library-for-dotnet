@@ -222,14 +222,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 { OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString() }
             };
 
-            if (managedIdentityKeyInfo.Type != ManagedIdentityKeyType.KeyGuard)
-            {
-                throw new MsalClientException(
-                    "mtls_pop_requires_keyguard",
-                    "[ImdsV2] mTLS Proof-of-Possession requires a KeyGuard-backed key. Enable KeyGuard or use a KeyGuard-supported environment.");
-            }
-
-            // Ask helper for JWT only for KeyGuard keys
+            // Attempt attestation only for KeyGuard keys when provider is available
+            // For non-KeyGuard keys (Hardware, InMemory), proceed with non-attested flow
             string attestationJwt = string.Empty;
             var attestationUri = new Uri(attestationEndpoint);
 
@@ -240,6 +234,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     attestationUri,
                     managedIdentityKeyInfo,
                     _requestContext.UserCancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                _requestContext.Logger.Info($"[ImdsV2] Using {managedIdentityKeyInfo.Type} key. Proceeding with non-attested mTLS PoP flow.");
             }
 
             var certificateRequestBody = new CertificateRequestBody()
@@ -301,6 +299,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
+
+            // Validate that mTLS PoP requires KeyGuard - fail fast before network calls
+            if (_isMtlsPopRequested)
+            {
+                IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
+                ManagedIdentityKeyInfo keyInfo = await keyProvider
+                    .GetOrCreateKeyAsync(_requestContext.Logger, _requestContext.UserCancellationToken)
+                    .ConfigureAwait(false);
+
+                if (keyInfo.Type != ManagedIdentityKeyType.KeyGuard)
+                {
+                    throw new MsalClientException(
+                        "mtls_pop_requires_keyguard",
+                        $"[ImdsV2] mTLS Proof-of-Possession requires KeyGuard keys. Current key type: {keyInfo.Type}");
+                }
+            }
 
             string certCacheKey = _requestContext.ServiceBundle.Config.ClientId;
 
@@ -415,8 +429,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             ManagedIdentityKeyInfo keyInfo, 
             CancellationToken cancellationToken)
         {
-            // Provider is a local dependency; missing provider is a client error
+            // Get the attestation provider if available
             var provider = _requestContext.AttestationTokenProvider;
+
+            // If no provider is configured:
+            // - For KeyGuard keys: proceed with ephemeral keys (non-attested flow)
+            // - For non-KeyGuard keys: proceed with non-attested flow
+            // This allows mTLS PoP to work without the attestation package
+            if (provider == null)
+            {
+                _requestContext.Logger.Info("[ImdsV2] No attestation provider configured. Proceeding with non-attested flow.");
+                return string.Empty; // Empty attestation token indicates non-attested flow
+            }
 
             // KeyGuard requires RSACng on Windows
             if (keyInfo.Type == ManagedIdentityKeyType.KeyGuard &&
