@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCacheDictionary =
                     AdalCacheOperations.Deserialize(app.ServiceBundle.ApplicationLogger, app.UserTokenCacheInternal.LegacyPersistence.LoadCache());
 
-                Assert.IsTrue(adalCacheDictionary.Count == 1);
+                Assert.HasCount(1, adalCacheDictionary);
 
                 var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid(), null);
 
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Assert.IsNotNull(result);
 
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
+                Assert.HasCount(1, app.UserTokenCacheInternal.Accessor.GetAllAccounts());
                 Assert.AreEqual(1, app.GetAccountsAsync().Result.Count());
 
                 // login to app1 with same credentials
@@ -178,10 +178,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // make sure that only one account cache entity was created
                 Assert.AreEqual(1, app1.GetAccountsAsync().Result.Count());
 
-                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
-                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
-                Assert.AreEqual(1, app1.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
+                Assert.HasCount(2, app1.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(2, app1.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
+                Assert.HasCount(2, app1.UserTokenCacheInternal.Accessor.GetAllIdTokens());
+                Assert.HasCount(1, app1.UserTokenCacheInternal.Accessor.GetAllAccounts());
 
                 // remove account from app
                 app.RemoveAsync(app.GetAccountsAsync().Result.First()).Wait();

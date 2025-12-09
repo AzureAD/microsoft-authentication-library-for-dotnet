@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
         internal const string Resource = "https://management.azure.com";
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task MachineLearningUserAssignedHappyPathAndHasCorrectClientIdQueryParameterAsync(
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         [DataRow(TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
         public async Task MachineLearningUserAssignedNonClientIdThrowsAsync(
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 

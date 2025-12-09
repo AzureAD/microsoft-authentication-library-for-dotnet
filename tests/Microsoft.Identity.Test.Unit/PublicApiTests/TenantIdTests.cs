@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class TenantIdTests : TestBase
     {
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.Common, DisplayName = "Common endpoint")]
         [DataRow(TestConstants.AuthorityNotKnownCommon, TestConstants.Common, DisplayName = "Common endpoint")]
         [DataRow(TestConstants.AuthorityHomeTenant, "home", DisplayName = "Home endpoint")]
@@ -41,14 +41,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(expectedTenantId, tenantId);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
         public void ParseTestDynamic_Success(Uri authorityUrl, string expectedTenantId)
         {
             ParseTest_Success(authorityUrl.ToString(), expectedTenantId);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.ADFSAuthority, DisplayName = "ADFS Authority")]
         [DataRow(TestConstants.ADFSAuthority2, DisplayName = "ADFS Authority")]
         public void ParseTest_NoTenantId(string authorityUrl)

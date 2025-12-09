@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenByIntegratedWindowsAuthTest_ManagedUser_DiscoveryFailed_ThrowsExceptionAsync()
+        public async Task AcquireTokenByIntegratedWindowsAuthTest_ManagedUser_DiscoveryFailed_ThrowsAsync()
         {
             // Arrange
             using (var httpManager = new MockHttpManager())
@@ -790,7 +790,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
 #pragma warning disable CS0618 // Type or member is obsolete
-                MsalUiRequiredException result = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+                MsalUiRequiredException result = await Assert.ThrowsAsync<MsalUiRequiredException>(
                     () => app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,
@@ -843,7 +843,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
 #pragma warning disable CS0618 // Type or member is obsolete
-                MsalServiceException result = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                MsalServiceException result = await Assert.ThrowsAsync<MsalServiceException>(
                     () => app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,

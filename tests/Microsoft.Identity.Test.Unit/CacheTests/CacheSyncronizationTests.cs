@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 var blockingTask = RunAsync(inMemoryTokenCache, app, true);
                 var nonBlockingTask1 = RunAsync(inMemoryTokenCache, app, false);
@@ -67,8 +67,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     Assert.IsTrue(nonBlockingTask1.IsCompleted);
                     Assert.IsTrue(nonBlockingTask2.IsCompleted);
                     Assert.IsFalse(blockingTask.IsCompleted, "The blocking task should still be blocked");
-                    Assert.IsTrue(nonBlockingTask1.Result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
-                    Assert.IsTrue(nonBlockingTask2.Result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+                    Assert.AreEqual(TokenSource.Cache, nonBlockingTask1.Result.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(TokenSource.Cache, nonBlockingTask2.Result.AuthenticationResultMetadata.TokenSource);
                 }
             }
         }

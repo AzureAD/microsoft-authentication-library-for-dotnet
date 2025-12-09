@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 if (expectedCacheKeyHash != null)
                 {
-                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedCacheKeyHash));
+                    Assert.Contains(expectedCacheKeyHash, args.SuggestedCacheKey);
                 }
             });
 
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual("header.payload.signature", result.AccessToken);
-            Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+            Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First(), _additionalCacheKeys3, expectedCacheKey1);
 
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual("header.payload.signature", result.AccessToken);
-            Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+            Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.CacheKey.Contains("bns2ytmx5hxkh4fnfixridmezpbbayhnmuh6t4bbghi")).FirstOrDefault(), _additionalCacheKeys1, expectedCacheKey1);
             ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.CacheKey.Contains("3-rg6_wyjx5bcy0c3cqq7gajtzgsqy3oxqpwj4y8k4u")).FirstOrDefault(), _additionalCacheKeys2, expectedCacheKey2);
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 //Ensure that default tokens are retrivable
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
@@ -395,7 +395,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_additional_components", result1.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Test 2: Use tuple-based WithExtraQueryParameters only
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_tuple_params");
@@ -410,7 +410,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_tuple_params", result2.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Test 3: Use both APIs together - should create a different cache entry
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_both_apis");
@@ -426,7 +426,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_both_apis", result3.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result3.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Test 4: Retrieve from cache using the same combination
                 var result4 = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -441,7 +441,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_both_apis", result4.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result4.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Test 5: Test with non-cached parameters
                 var result5 = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -457,7 +457,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_both_apis", result5.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result5.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Test 6: Change a parameter that is included in cache key - should get a new token
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_changed_param");
@@ -473,7 +473,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_changed_param", result6.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result6.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(4, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(4, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Test 7: Now try with includeInCacheKey=false for a parameter
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_non_cached_param");
@@ -488,7 +488,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_non_cached_param", result7.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result7.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(5, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(5, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Test 8: Repeat with same config but change the non-cached parameter value
                 var result8 = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -502,7 +502,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_non_cached_param", result8.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result8.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(5, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(5, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             }
         }
 

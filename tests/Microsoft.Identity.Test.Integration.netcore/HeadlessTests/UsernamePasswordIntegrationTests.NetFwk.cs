@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private void AssertTenantProfiles(IEnumerable<TenantProfile> tenantProfiles, string tenantId)
         {
             Assert.IsNotNull(tenantProfiles);
-            Assert.IsTrue(tenantProfiles.Count() > 0);
+            Assert.IsGreaterThan(0, tenantProfiles.Count());
 
             TenantProfile tenantProfile = tenantProfiles.Single(tp => tp.TenantId == tenantId);
             Assert.IsNotNull(tenantProfile);

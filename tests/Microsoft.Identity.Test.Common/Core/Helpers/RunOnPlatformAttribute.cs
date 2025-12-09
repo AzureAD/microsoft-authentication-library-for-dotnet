@@ -2,35 +2,37 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public class RunOnOSXAttribute : RunOnPlatformAttribute
     {
-        public RunOnOSXAttribute() : base(OSPlatform.OSX)
+        public RunOnOSXAttribute([CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1) : base(OSPlatform.OSX, callerFilePath, callerLineNumber)
         {
         }
     }
 
     public class RunOnWindowsAttribute : RunOnPlatformAttribute
     {
-        public RunOnWindowsAttribute() : base(OSPlatform.Windows)
+        public RunOnWindowsAttribute([CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1) : base(OSPlatform.Windows, callerFilePath, callerLineNumber)
         {
         }
     }
 
     public class RunOnLinuxAttribute : RunOnPlatformAttribute
     {
-        public RunOnLinuxAttribute() : base(OSPlatform.Linux)
+        public RunOnLinuxAttribute([CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1) : base(OSPlatform.Linux, callerFilePath, callerLineNumber)
         {
         }
     }
 
     public class DoNotRunOnWindowsAttribute : DoNotRunOnPlatformAttribute
     {
-        public DoNotRunOnWindowsAttribute(): base(OSPlatform.Windows)
+        public DoNotRunOnWindowsAttribute([CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1) : base(OSPlatform.Windows, callerFilePath, callerLineNumber)
         {
 
         }
@@ -38,7 +40,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
     public class DoNotRunOnLinuxAttribute : DoNotRunOnPlatformAttribute
     {
-        public DoNotRunOnLinuxAttribute() : base(OSPlatform.Linux)
+        public DoNotRunOnLinuxAttribute([CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1) : base(OSPlatform.Linux, callerFilePath, callerLineNumber)
         {
         }
     }
@@ -47,28 +49,31 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     {
         private readonly OSPlatform _platform;
 
-        protected RunOnPlatformAttribute(OSPlatform platform)
+        protected RunOnPlatformAttribute(
+            OSPlatform platform, [CallerFilePath] string callerFilePath = "", 
+            [CallerLineNumber] int callerLineNumber = -1) : base(callerFilePath, callerLineNumber)
         {
             _platform = platform;
         }
 
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public override Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
             if ((OsHelper.IsLinuxPlatform() && _platform != OSPlatform.Linux) ||
-                (OsHelper.IsMacPlatform() && _platform != OSPlatform.OSX) ||
-                (OsHelper.IsWindowsPlatform() && _platform != OSPlatform.Windows))
+                 (OsHelper.IsMacPlatform() && _platform != OSPlatform.OSX) ||
+                 (OsHelper.IsWindowsPlatform() && _platform != OSPlatform.Windows))
             {
-                return new[]
-                {
+                TestResult[] tr =
+                [
                     new TestResult
                     {
                         Outcome = UnitTestOutcome.Inconclusive,
                         TestFailureException = new AssertInconclusiveException("Skipped on platform")
                     }
-                };
+                ];
+                return Task.FromResult(tr);
             }
 
-            return base.Execute(testMethod);
+            return base.ExecuteAsync(testMethod);
         }
     }
 
@@ -76,18 +81,18 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     {
         private readonly OSPlatform _platform;
 
-        protected DoNotRunOnPlatformAttribute(OSPlatform platform)
+        protected DoNotRunOnPlatformAttribute(OSPlatform platform, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1) : base(callerFilePath, callerLineNumber)
         {
             _platform = platform;
         }
 
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public override Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
             if ((OsHelper.IsLinuxPlatform() && _platform == OSPlatform.Linux) ||
                 (OsHelper.IsMacPlatform() && _platform == OSPlatform.OSX) ||
                 (OsHelper.IsWindowsPlatform() && _platform == OSPlatform.Windows))
             {
-                return new[]
+                var tr = new[]
                 {
                     new TestResult
                     {
@@ -95,21 +100,26 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                         TestFailureException = new AssertInconclusiveException("Skipped on platform")
                     }
                 };
+                return Task.FromResult(tr);
             }
 
-            return base.Execute(testMethod);
+            return base.ExecuteAsync(testMethod);
         }
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
     public sealed class RunOnAzureDevOpsAttribute : TestMethodAttribute
     {
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public RunOnAzureDevOpsAttribute([CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1) : base(callerFilePath, callerLineNumber)
+        {
+        }
+
+        public override Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
             // TF_BUILD is true for all Azure DevOps agents
             if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TF_BUILD")))
             {
-                return new[]
+                var tr = new[]
                 {
                     new TestResult
                     {
@@ -117,9 +127,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                         TestFailureException = new AssertInconclusiveException("Skipped outside Azure DevOps")
                     }
                 };
+                return Task.FromResult(tr);
+
             }
 
-            return base.Execute(testMethod);
+            return base.ExecuteAsync(testMethod);
         }
     }
 }

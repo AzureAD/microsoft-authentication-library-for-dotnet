@@ -27,17 +27,17 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             long currentUnixTimestamp = DateTimeHelpers.CurrDateTimeInUnixTimestamp(); // e.g., 1697490590
             string unixTimestampString = currentUnixTimestamp.ToString(CultureInfo.InvariantCulture);
             long result = DateTimeHelpers.GetDurationFromNowInSeconds(unixTimestampString);
-            Assert.IsTrue(result >= 0, "Valid Unix timestamp (seconds) failed");
+            Assert.IsGreaterThanOrEqualTo(0, result, "Valid Unix timestamp (seconds) failed");
 
             // Example 2: Unix timestamp in the future
             string futureUnixTimestamp = (currentUnixTimestamp + 3600).ToString(); // 1 hour from now
             result = DateTimeHelpers.GetDurationFromNowInSeconds(futureUnixTimestamp);
-            Assert.IsTrue(result > 0, "Future Unix timestamp failed");
+            Assert.IsGreaterThan(0, result, "Future Unix timestamp failed");
 
             // Example 3: Unix timestamp in the past
             string pastUnixTimestamp = (currentUnixTimestamp - 3600).ToString(); // 1 hour ago
             result = DateTimeHelpers.GetDurationFromNowInSeconds(pastUnixTimestamp);
-            Assert.IsTrue(result < 0, "Past Unix timestamp failed");
+            Assert.IsLessThan(0, result, "Past Unix timestamp failed");
 
             // Example 4: Empty string (should return 0)
             string emptyString = string.Empty;
@@ -54,26 +54,26 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             // Example 1: Unix timestamp (seconds since epoch)
             string unixTimestampInSeconds = DateTimeHelpers.DateTimeToUnixTimestamp(currentTime); // e.g., 1697490590
             long result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(unixTimestampInSeconds);
-            Assert.IsTrue(result >= 0, "Unix timestamp (seconds) failed");
+            Assert.IsGreaterThanOrEqualTo(0, result, "Unix timestamp (seconds) failed");
 
             // Example 2: ISO 8601 format
             string iso8601 = currentTime.ToString("o", CultureInfo.InvariantCulture); // e.g., 2024-10-18T19:51:37.0000000+00:00
             result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(iso8601);
-            Assert.IsTrue(result >= 0, "ISO 8601 failed");
+            Assert.IsGreaterThanOrEqualTo(0, result, "ISO 8601 failed");
 
             // Example 3: Common format (MM/dd/yyyy HH:mm:ss)
             string commonFormat1 = currentTime.ToString("MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture); // e.g., 10/18/2024 19:51:37
             result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(commonFormat1);
-            Assert.IsTrue(result >= 0, "Common Format 1 failed");
+            Assert.IsGreaterThanOrEqualTo(0, result, "Common Format 1 failed");
 
             // Example 4: Common format (yyyy-MM-dd HH:mm:ss)
             string commonFormat2 = currentTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture); // e.g., 2024-10-18 19:51:37
             result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(commonFormat2);
-            Assert.IsTrue(result >= 0, "Common Format 2 failed");
+            Assert.IsGreaterThanOrEqualTo(0, result, "Common Format 2 failed");
 
             // Example 5: Invalid format (should throw an MsalClientException)
             string invalidFormat = "invalid-date-format";
-            Assert.ThrowsException<MsalClientException>(() =>
+            Assert.Throws<MsalClientException>(() =>
             {
                 DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(invalidFormat);
             }, "Invalid format did not throw an exception as expected.");

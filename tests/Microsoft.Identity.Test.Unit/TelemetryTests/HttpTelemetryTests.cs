@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task LegacyCacheEnabledTelemetryTestAsync(bool isLegacyCacheEnabled)
@@ -738,10 +738,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             string[] telemetryCategories = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single().Split('|');
 
-            Assert.AreEqual(3, telemetryCategories.Length);
-            Assert.AreEqual(1, telemetryCategories[0].Split(',').Length); // version
-            Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.AreEqual(5, telemetryCategories[2].Split(',').Length); // platform_fields
+            Assert.HasCount(3, telemetryCategories);
+            Assert.HasCount(1, telemetryCategories[0].Split(',')); // version
+            Assert.HasCount(5, telemetryCategories[1].Split(',')); // api_id, cache_info, region_used, region_source, region_outcome
+            Assert.HasCount(5, telemetryCategories[2].Split(',')); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 

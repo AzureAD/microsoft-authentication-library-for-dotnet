@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 string remainingMocks = string.Join(" ",
                     _httpMessageHandlerQueue.Select(m => GetExpectedUrlFromHandler(m)));
-                Assert.AreEqual(0, _httpMessageHandlerQueue.Count,
+                Assert.IsEmpty(_httpMessageHandlerQueue,
                     "All mocks should have been consumed. Remaining mocks are for: " + remainingMocks);
             }
         }

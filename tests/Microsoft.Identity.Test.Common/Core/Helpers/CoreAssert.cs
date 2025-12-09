@@ -20,10 +20,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var actualScopes = ScopeHelper.ConvertStringToScopeSet(scopesActual);
 
             // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
+            Assert.HasCount(expectedScopes.Count, actualScopes);
             foreach (string expectedScope in expectedScopes)
             {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
+                Assert.Contains(expectedScope, actualScopes);
             }
         }
 

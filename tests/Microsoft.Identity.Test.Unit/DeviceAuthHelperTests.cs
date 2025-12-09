@@ -36,10 +36,10 @@ namespace Microsoft.Identity.Test.Unit
             var result = DeviceAuthHelper.ParseChallengeData(s_httpResponse.Headers);
 
             //Assert
-            Assert.AreEqual(result["Version"], "1.0");
-            Assert.AreEqual(result["CertThumbprint"], "thumbprint");
-            Assert.AreEqual(result["Context"], "context");
-            Assert.AreEqual(result["Nonce"], "nonce");
+            Assert.AreEqual("1.0", result["Version"]);
+            Assert.AreEqual("thumbprint", result["CertThumbprint"]);
+            Assert.AreEqual("context", result["Context"]);
+            Assert.AreEqual("nonce", result["Nonce"]);
         }
 
         [TestMethod]
@@ -67,8 +67,8 @@ namespace Microsoft.Identity.Test.Unit
             var result2 = DeviceAuthHelper.GetBypassChallengeResponse(pKeyAuthHeaders);
 
             //Assert
-            Assert.AreEqual(result1, TestConstants.PKeyAuthResponse);
-            Assert.AreEqual(result2, TestConstants.PKeyAuthResponse);
+            Assert.AreEqual(TestConstants.PKeyAuthResponse, result1);
+            Assert.AreEqual(TestConstants.PKeyAuthResponse, result2);
         }
 
         [TestMethod]

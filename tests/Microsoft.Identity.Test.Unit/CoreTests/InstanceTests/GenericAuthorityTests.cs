@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class GenericAuthorityTests : TestBase
     {
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         /// AAD doesn't returns the "scope" in the response
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 var account1 = accounts.First();
                 Assert.AreEqual("sub", account1.HomeAccountId.Identifier);
-                Assert.AreEqual(null, account1.HomeAccountId.TenantId);
+                Assert.IsNull(account1.HomeAccountId.TenantId);
 
                 // This is because of how we've done it in ADFS. Probably doesn't matter what value is used here, as it is not defined for non-Microsoft.
                 Assert.AreEqual("sub", account1.HomeAccountId.ObjectId);
@@ -258,20 +258,20 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://demo.duend esoftware.com")]
-        [ExpectedException(typeof(ArgumentException))]
         public void MalformedAuthority_ThrowsException(string malformedAuthority)
         {
             // Tenant and authority modifiers
+            Assert.Throws<ArgumentException>(() =>
             ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithOidcAuthority(malformedAuthority)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .Build();
+                .Build());
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("oidc_response_not_json")]
         [DataRow("oidc_response_http_error")]
         public async Task BadOidcResponse_ThrowsException_Async(string badOidcResponseType)
@@ -364,11 +364,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                              .ExecuteAsync())
                              .ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains(
-                                string.Format(
-                                    CultureInfo.InvariantCulture, 
-                                    MsalErrorMessage.MalformedOidcAuthorityFormat, 
-                                    TestConstants.CiamCUDAuthorityMalformed)));
+                Assert.Contains(string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    MsalErrorMessage.MalformedOidcAuthorityFormat,
+                                    TestConstants.CiamCUDAuthorityMalformed), ex.Message);
 
                 httpManager.AddFailureTokenEndpointResponse(
                 error: "error",
@@ -380,11 +379,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                              .ExecuteAsync())
                              .ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains(
-                                string.Format(
+                Assert.Contains(string.Format(
                                     CultureInfo.InvariantCulture,
                                     MsalErrorMessage.MalformedOidcAuthorityFormat,
-                                    TestConstants.CiamCUDAuthorityMalformed)));
+                                    TestConstants.CiamCUDAuthorityMalformed), ex.Message);
             }
         }
 

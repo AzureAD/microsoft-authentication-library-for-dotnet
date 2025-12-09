@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(result);
             var account = result.Account as Account;
-            Assert.IsTrue(account.AccountSource == "device_code_flow");
+            Assert.AreEqual("device_code_flow", account.AccountSource);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
 
             var silentTokenResult = await pca.AcquireTokenSilent(s_scopes, result.Account).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);

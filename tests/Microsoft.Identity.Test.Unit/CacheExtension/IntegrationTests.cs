@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             string dataString = "Hello World";
             byte[] dataBytes = Encoding.UTF8.GetBytes(dataString);
             var result = _cacheHelper.LoadUnencryptedTokenCache();
-            Assert.AreEqual(0, result.Length);
+            Assert.IsEmpty(result);
 
             _cacheHelper.SaveUnencryptedTokenCache(dataBytes);
             byte[] actualData = _cacheHelper.LoadUnencryptedTokenCache();

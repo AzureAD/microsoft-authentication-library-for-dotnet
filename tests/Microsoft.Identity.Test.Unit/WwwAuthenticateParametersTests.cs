@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit
 
             // Assert
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
-            Assert.AreEqual(3, authParams.RawParameters.Count);
+            Assert.HasCount(3, authParams.RawParameters);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
         }
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit
 
             if (scheme == "AuthScheme1")
             {
-                Assert.AreEqual(0, authParams.RawParameters.Count);
+                Assert.IsEmpty(authParams.RawParameters);
             }
             else if (scheme == "AuthScheme2")
             {
@@ -149,14 +149,14 @@ namespace Microsoft.Identity.Test.Unit
             }
             else if (scheme == "WLID1.0")
             {
-                Assert.AreEqual(3, authParams.RawParameters.Count);
+                Assert.HasCount(3, authParams.RawParameters);
                 Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
                 Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
                 Assert.AreEqual("ssl.live-tst.net", authParams.RawParameters["siteId"]);
             }
             else
             {
-                Assert.AreEqual(3, authParams.RawParameters.Count);
+                Assert.HasCount(3, authParams.RawParameters);
                 Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
                 Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
                 Assert.AreEqual("ssl.live-tst.net - ssl2.live-tst2.net", authParams.RawParameters["siteId"]);
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit
             httpResponse.Headers.Add(AuthenticationInfoName, $"{paramName}={value}");
 
             // Act
-            var ex = Assert.ThrowsException<MsalClientException>(() =>
+            var ex = Assert.Throws<MsalClientException>(() =>
                                     AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponse.Headers));
 
             //Assert
@@ -220,9 +220,9 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsTrue(authParams.RawParameters.ContainsKey(Realm));
             Assert.AreEqual(string.Empty, authParams[Realm]);
             Assert.AreEqual(GraphGuid, authParams[resourceHeaderKey]);
-            Assert.ThrowsException<KeyNotFoundException>(
+            Assert.Throws<KeyNotFoundException>(
                 () => authParams[ErrorKey]);
-            Assert.ThrowsException<KeyNotFoundException>(
+            Assert.Throws<KeyNotFoundException>(
                 () => authParams[ClaimsKey]);
         }
 
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit
 
             // Assert
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
-            Assert.AreEqual(3, authParams.RawParameters.Count);
+            Assert.HasCount(3, authParams.RawParameters);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
         }
@@ -321,15 +321,15 @@ namespace Microsoft.Identity.Test.Unit
             var httpClient = new HttpClient(handler);
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            Assert.AreEqual(authParams.GetTenantId(), tenantId);
+            Assert.AreEqual(tenantId, authParams.GetTenantId());
 
             authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient, default).ConfigureAwait(false);
 
-            Assert.AreEqual(authParams.GetTenantId(), tenantId);
+            Assert.AreEqual(tenantId, authParams.GetTenantId());
 
             var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, httpClient, default).ConfigureAwait(false);
 
-            Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
+            Assert.AreEqual(tenantId, authParamList.FirstOrDefault().GetTenantId());
         }
 
         [TestMethod]
@@ -368,15 +368,15 @@ namespace Microsoft.Identity.Test.Unit
 
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(null, resourceUri);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(action).ConfigureAwait(false);
 
             action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", null, default);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(action).ConfigureAwait(false);
 
             action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, client, default);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -386,7 +386,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -577,7 +577,7 @@ namespace Microsoft.Identity.Test.Unit
             // Assert
             Assert.IsNotNull(headers.AuthenticationInfoParameters);
             Assert.AreEqual(TestConstants.Nonce, headers.AuthenticationInfoParameters.NextNonce);
-            Assert.AreEqual(0, headers.WwwAuthenticateParameters.Count);
+            Assert.IsEmpty(headers.WwwAuthenticateParameters);
         }
 
         [TestMethod]

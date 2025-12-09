@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Assert
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
                 //Ensure the extra body parameters are present in the cache key
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Assert
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
 
                 //Ensure the same extra body parameters are needed get the cache key
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Assert
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
                 //Ensure the first token can still be retrieved from the cache
                 _expectedParameterHash = "8cY9AFTXo3uSqueI1A_HPiX0j66dJXB-3c3BTDcJVxE";
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Assert
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Assert
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
                 //Ensure the extra body parameters are present in the cache key
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Assert
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
 
                 //Ensure the same extra body parameters are needed get the cache key
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Assert
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
                     expectedPostData: new Dictionary<string, string>
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Assert
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
                     .WithExtraBodyParameters(null)
@@ -274,7 +274,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
 
                 //Ensure that the token can still be retrieved from the cache when the input is an empty dictionary
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             }
         }
 

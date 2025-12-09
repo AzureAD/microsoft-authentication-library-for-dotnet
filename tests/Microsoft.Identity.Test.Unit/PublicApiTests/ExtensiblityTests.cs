@@ -109,9 +109,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 IReadOnlyList<Client.Cache.Items.MsalAccessTokenCacheItem> ats = (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens();
-                Assert.AreEqual(2, ats.Count);
-                Assert.IsTrue(ats.Single(at => at.KeyId == "key1") != null);
-                Assert.IsTrue(ats.Single(at => at.KeyId == null) != null);
+                Assert.HasCount(2, ats);
+                Assert.IsNotNull(ats.Single(at => at.KeyId == "key1"));
+                Assert.IsNotNull(ats.Single(at => at.KeyId == null));
             }
         }
 
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var tokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
 
-                Assert.AreEqual(1, tokens.Count);
+                Assert.HasCount(1, tokens);
 
                 var token = tokens.FirstOrDefault();
                 Assert.IsNotNull(token);
@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TestConstants.DefaultAccessToken + differentScopesForAt, result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, 2);
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
                 Assert.AreEqual(3, callbackInvoked);
 
                 // Acquire token from app provider with claims. Should not use cache
@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 var parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
-                Assert.IsTrue(parameters.Count == 5);
+                Assert.HasCount(5, parameters);
 
                 parameters.TryGetValue("additional_param1", out string additionalParam1);
                 parameters.TryGetValue("additional_param2", out string additionalParam2);
@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
-                Assert.IsTrue(parameters.Count == 5);
+                Assert.HasCount(5, parameters);
 
                 parameters.TryGetValue("additional_param1", out additionalParam1);
                 parameters.TryGetValue("additional_param2", out additionalParam2);
@@ -294,7 +294,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
-                Assert.IsTrue(parameters.Count == 5);
+                Assert.HasCount(5, parameters);
 
                 parameters.TryGetValue("additional_param1", out additionalParam1);
                 parameters.TryGetValue("additional_param2", out additionalParam2);
@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
-                Assert.IsTrue(parameters.Count == 5);
+                Assert.HasCount(5, parameters);
 
                 parameters.TryGetValue("additional_param1", out additionalParam1);
                 parameters.TryGetValue("additional_param2", out additionalParam2);
@@ -353,7 +353,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
-                Assert.IsTrue(parameters.Count == 2);
+                Assert.HasCount(2, parameters);
 
                 parameters.TryGetValue("additional_param1", out additionalParam1);
                 parameters.TryGetValue("additional_param3", out additionalParam3);
@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
-                Assert.IsTrue(parameters == null);
+                Assert.IsNull(parameters);
 
                 //Ensure missing cache parameters are not added
                 app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -392,7 +392,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
                 parameters.TryGetValue("additional_param1", out string additionalParam);
                 Assert.IsNull(additionalParam);
-                Assert.IsTrue(result.AdditionalResponseParameters.Count == 5);
+                Assert.HasCount(5, result.AdditionalResponseParameters);
             }
         }
 

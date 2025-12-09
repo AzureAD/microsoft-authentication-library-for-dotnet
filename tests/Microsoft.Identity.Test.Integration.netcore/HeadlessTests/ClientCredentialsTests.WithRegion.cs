@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task AcquireTokenToRegionalEndpointAsync(bool instanceDiscoveryEnabled)
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-            var ex = await Assert.ThrowsExceptionAsync<HttpRequestException>(
+            var ex = await Assert.ThrowsAsync<HttpRequestException>(
                 async () => await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.IsTrue(ex is HttpRequestException);

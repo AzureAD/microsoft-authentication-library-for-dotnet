@@ -290,17 +290,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
 
                 // Ensure we got logs so the log callback is working.
-                Assert.IsTrue(logCallbacks.Count > 0, "There should be data in logCallbacks");
+                Assert.IsNotEmpty(logCallbacks, "There should be data in logCallbacks");
 
                 // Ensure we have authorization_pending data in the logs
                 List<_LogData> authPendingLogs =
                     logCallbacks.Where(x => x.Message.Contains(OAuth2Error.AuthorizationPending)).ToList();
-                Assert.AreEqual(2, authPendingLogs.Count, "authorization_pending logs should exist");
+                Assert.HasCount(2, authPendingLogs, "authorization_pending logs should exist");
 
                 // Ensure the authorization_pending logs are Info level and not Error
-                Assert.AreEqual(
+                Assert.HasCount(
                     2,
-                    authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList().Count,
+                    authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList(),
                     "authorization_pending logs should be INFO");
 
                 // Ensure we don't have Error level logs in this scenario.

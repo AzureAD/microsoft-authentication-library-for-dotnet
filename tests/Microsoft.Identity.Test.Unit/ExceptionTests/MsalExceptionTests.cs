@@ -66,11 +66,11 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(MsalClientException).Name),
-                "The pii message should contain the exception type");
-            Assert.IsTrue(piiMessage.Contains(ExCode));
-            Assert.IsFalse(piiMessage.Contains(ExMessage));
+            Assert.Contains(
+typeof(MsalClientException).Name,
+                piiMessage, "The pii message should contain the exception type");
+            Assert.Contains(ExCode, piiMessage);
+            Assert.DoesNotContain(ExMessage, piiMessage);
         }
 
         [TestMethod]        
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse);
 
             Assert.AreEqual(ExCode, msalException.ErrorCode);
-            Assert.IsTrue(msalException.Message.Contains(ExMessage));
+            Assert.Contains(ExMessage, msalException.Message);
             Assert.AreEqual("some_claims", msalException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalException.CorrelationId);
             Assert.AreEqual(suberror ?? "", msalException.SubError);
@@ -173,8 +173,8 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             string msalProductName = PlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
             string msalVersion = MsalIdHelper.GetMsalVersion();
 
-            Assert.IsTrue(exceptionString.Contains(msalProductName), "Exception should contain the msalProductName");
-            Assert.IsTrue(exceptionString.Contains(msalVersion), "Exception should contain the msalVersion");
+            Assert.Contains(msalProductName, exceptionString, "Exception should contain the msalProductName");
+            Assert.Contains(msalVersion, exceptionString, "Exception should contain the msalVersion");
         }
 
         [TestMethod]
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             // Assert
             var msalServiceException = msalException;
             Assert.AreEqual(MsalError.InvalidClient, msalServiceException.ErrorCode);
-            Assert.IsTrue(msalServiceException.Message.Contains(MsalErrorMessage.InvalidClient));
+            Assert.Contains(MsalErrorMessage.InvalidClient, msalServiceException.Message);
             ValidateExceptionProductInformation(msalException);
         }
 
@@ -275,17 +275,17 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(MsalClaimsChallengeException).Name),
-                "The pii message should contain the exception type");
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(NotImplementedException).Name),
-                "The pii message should have the inner exception type");
-            Assert.IsTrue(piiMessage.Contains(ExCode));
-            Assert.IsTrue(piiMessage.Contains("6347d33d-941a-4c35-9912-a9cf54fb1b3e")); // Correlation Id
+            Assert.Contains(
+typeof(MsalClaimsChallengeException).Name,
+                piiMessage, "The pii message should contain the exception type");
+            Assert.Contains(
+typeof(NotImplementedException).Name,
+                piiMessage, "The pii message should have the inner exception type");
+            Assert.Contains(ExCode, piiMessage);
+            Assert.Contains("6347d33d-941a-4c35-9912-a9cf54fb1b3e", piiMessage); // Correlation Id
 
-            Assert.IsFalse(piiMessage.Contains(ExMessage));
-            Assert.IsFalse(piiMessage.Contains(innerExMsg));
+            Assert.DoesNotContain(ExMessage, piiMessage);
+            Assert.DoesNotContain(innerExMsg, piiMessage);
         }
 
         [TestMethod]
@@ -317,15 +317,15 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(MsalUiRequiredException).Name),
-                "The pii message should contain the exception type");
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(NotImplementedException).Name),
-                "The pii message should have the inner exception type");
-            Assert.IsTrue(piiMessage.Contains(ExCode));
-            Assert.IsFalse(piiMessage.Contains(ExMessage));
-            Assert.IsFalse(piiMessage.Contains(innerExMsg));
+            Assert.Contains(
+typeof(MsalUiRequiredException).Name,
+                piiMessage, "The pii message should contain the exception type");
+            Assert.Contains(
+typeof(NotImplementedException).Name,
+                piiMessage, "The pii message should have the inner exception type");
+            Assert.Contains(ExCode, piiMessage);
+            Assert.DoesNotContain(ExMessage, piiMessage);
+            Assert.DoesNotContain(innerExMsg, piiMessage);
         }
 
         [TestMethod]
@@ -386,9 +386,9 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var innerException = new InvalidOperationException("innerMsg");
             MsalException ex = new MsalException("errCode", "errMessage", innerException);
 
-            Assert.IsTrue(ex.ToString().Contains("errCode"));
-            Assert.IsTrue(ex.ToString().Contains("errMessage"));
-            Assert.IsTrue(ex.ToString().Contains("innerMsg"));
+            Assert.Contains("errCode", ex.ToString());
+            Assert.Contains("errMessage", ex.ToString());
+            Assert.Contains("innerMsg", ex.ToString());
 
             ValidateExceptionProductInformation(ex);
         }
@@ -417,13 +417,13 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 "errMessage", httpResponse, innerException);
 
             // Assert
-            Assert.IsTrue(ex.ToString().Contains("errCode"));
-            Assert.IsTrue(ex.ToString().Contains("errMessage"));
-            Assert.IsTrue(ex.ToString().Contains("innerExMsg"));
-            Assert.IsTrue(ex.ToString().Contains("invalid_tenant"));
-            Assert.IsTrue(ex.ToString().Contains("MySuberror"));
-            Assert.IsTrue(ex.ToString().Contains("some_claims"));
-            Assert.IsTrue(ex.ToString().Contains("AADSTS90002"));
+            Assert.Contains("errCode", ex.ToString());
+            Assert.Contains("errMessage", ex.ToString());
+            Assert.Contains("innerExMsg", ex.ToString());
+            Assert.Contains("invalid_tenant", ex.ToString());
+            Assert.Contains("MySuberror", ex.ToString());
+            Assert.Contains("some_claims", ex.ToString());
+            Assert.Contains("AADSTS90002", ex.ToString());
             Assert.IsFalse(ex is MsalUiRequiredException);
 
             ValidateExceptionProductInformation(ex);
@@ -484,7 +484,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                         .BuildConcrete();
                 }
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
@@ -529,15 +529,15 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                     .WithCertificate(certificate)
                     .BuildConcrete();
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
                              .ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains("Authority used: https://login.microsoftonline.com/common/"));
-                Assert.IsTrue(ex.Message.Contains("Token Endpoint: https://login.microsoftonline.com/common/oauth2/v2.0/token"));
+                Assert.Contains("Authority used: https://login.microsoftonline.com/common/", ex.Message);
+                Assert.Contains("Token Endpoint: https://login.microsoftonline.com/common/oauth2/v2.0/token", ex.Message);
 
                 //Validate that the authority is not appended with extra query parameters
                 //Validate that the region is also captured
@@ -562,9 +562,9 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                                                  .ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains("Authority used: https://sts.access.edu/my-utid/"));
-                Assert.IsTrue(ex.Message.Contains("Token Endpoint: https://centralus.sts.access.edu/my-utid/oauth2/v2.0/token"));
-                Assert.IsTrue(ex.Message.Contains($"Region Used: {TestConstants.Region}"));
+                Assert.Contains("Authority used: https://sts.access.edu/my-utid/", ex.Message);
+                Assert.Contains("Token Endpoint: https://centralus.sts.access.edu/my-utid/oauth2/v2.0/token", ex.Message);
+                Assert.Contains($"Region Used: {TestConstants.Region}", ex.Message);
 
                 //harness.HttpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant + TestConstants.DiscoveryEndPoint));
                 harness.HttpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
@@ -579,9 +579,9 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                                                  .ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.IsFalse(ex.Message.Contains("Authority used:"));
-                Assert.IsFalse(ex.Message.Contains("Token Endpoint:"));
-                Assert.IsFalse(ex.Message.Contains($"Region Used:"));
+                Assert.DoesNotContain("Authority used:", ex.Message);
+                Assert.DoesNotContain("Token Endpoint:", ex.Message);
+                Assert.DoesNotContain($"Region Used:", ex.Message);
             }
         }
 

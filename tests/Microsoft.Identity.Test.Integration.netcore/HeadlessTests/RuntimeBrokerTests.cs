@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             return jwk;
         }
-        
+
         // This test should fail locally but succeed in a CI build.
         [IgnoreOnOneBranch]
         [TestMethod]
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode));
             }
             catch (Exception ex)
             {
@@ -114,22 +114,22 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Uri requestUri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             var result = await pca
                 .AcquireTokenByUsernamePassword(
                     scopes,
                     labResponse.User.Upn,
                     labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession(
-                    parsedHeaders.PopNonce, 
+                    parsedHeaders.PopNonce,
                     HttpMethod.Get,
                     requestUri)
                 .ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
 
             MsalAssert.AssertAuthResult(
-                result, 
-                TokenSource.Broker, 
+                result,
+                TokenSource.Broker,
                 labResponse.Lab.TenantId,
                 scopes, true);
 
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 HttpMethod.Get,
                 result);
         }
-    
+
         [DoNotRunOnLinux] // Linux broker return different error code
         [IgnoreOnOneBranch]
         [TestMethod]
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(_brokerOptions)
                .Build();
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
                 pca.AcquireTokenByUsernamePassword(
                     scopes,
@@ -164,14 +164,14 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     "badPassword")
                 .ExecuteAsync())
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
 
             Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
             Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
             Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
             Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
             Assert.IsNotNull(ex.AdditionalExceptionData[MsalException.BrokerTelemetry]);
-            
+
         }
 
         [IgnoreOnOneBranch]
@@ -199,8 +199,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(ex.Message.Contains("You are trying to acquire a token silently using a login hint. " +
-                    "No account was found in the token cache having this login hint"));
+                Assert.Contains("You are trying to acquire a token silently using a login hint. " +
+                    "No account was found in the token cache having this login hint", ex.Message);
             }
         }
 
@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordRequestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            string[] scopes = { "User.Read" };            
+            string[] scopes = { "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
 
@@ -227,9 +227,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
             // Acquire token using username password
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
@@ -278,12 +278,12 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             string jwk = CreateJwk();
             //Do a login with username password
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult result = await pca
             .AcquireTokenByUsernamePassword(_SSH_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
             .ExecuteAsync()
             .ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
 
             //Assert successful login
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -320,14 +320,14 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Build();
 
             // Acquire token using username password
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             var result = await pca.AcquireTokenByUsernamePassword(
-                scopes, 
-                labResponse.User.Upn, 
+                scopes,
+                labResponse.User.Upn,
                 labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
 
             string ropcToken = result.AccessToken;
 
@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
-            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);            
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             var account = accounts.FirstOrDefault();
             Assert.IsNotNull(account);
 
@@ -355,7 +355,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [IgnoreOnOneBranch]
         [TestMethod]
-        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -376,9 +375,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Build();
 
             // Acquire token using username password
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
@@ -405,7 +404,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsNotNull(accounts);
 
             // this should throw MsalUiRequiredException
-            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+            await Assert.ThrowsAsync<MsalUiRequiredException>(async () =>
+                {
+                    await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+                }).ConfigureAwait(false);
         }
 
         [DoNotRunOnLinux] // List Windows Work and School accounts is not supported on Linux
@@ -431,9 +433,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Build();
 
             // Acquire token using username password
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
@@ -449,9 +451,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [DataTestMethod]
-        [DataRow(null)]
         [TestMethod]
+        [DataRow(null)]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
         {
             IntPtr intPtr = TestUtils.GetWindowHandle();
@@ -465,18 +466,21 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(_brokerOptions)
                .Build();
             // Act
-            if (SharedUtilities.IsLinuxPlatform()) {
+            if (SharedUtilities.IsLinuxPlatform())
+            {
                 var exLinux = await AssertException.TaskThrowsAsync<MsalServiceException>(
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);
                 StringAssert.Contains(exLinux.AdditionalExceptionData[MsalException.BrokerErrorContext], "requestedScopes is NULL or EMPTY");
-            } else {
+            }
+            else
+            {
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);
-                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode));
             }
         }
 
@@ -504,12 +508,12 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token using username password with POP on a valid resource
             // CA policy enforces token issuance to popUser only for SPO
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                 .ExecuteAsync()
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
 
             //Act
             Assert.AreEqual(labResponse.User.Upn, result.Account.Username);
@@ -518,7 +522,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [DoNotRunOnLinux] // POP are not supported on Linux  
         [IgnoreOnOneBranch]
         [TestMethod]
-        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
@@ -540,12 +543,13 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token using username password with POP on a resource not in the CA policy
             // CA policy enforces token issuance to popUser only for Exchange Online this call will fail with UI Required Exception
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+#pragma warning disable CS0618 // Type or member is obsolete
+            await Assert.ThrowsAsync<MsalUiRequiredException>(async () =>
+                await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
-                .ExecuteAsync()
+                .ExecuteAsync().ConfigureAwait(false))
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning restore CS0618
         }
     }
 }

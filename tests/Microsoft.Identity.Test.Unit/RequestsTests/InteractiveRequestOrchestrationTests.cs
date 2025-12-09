@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(1, cache.Accessor.GetAllAccessTokens());
 
                 // Assert - orchestration
                 Received.InOrder(() =>
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - common stuff
                 Assert.IsNotNull(result);
                 Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(1, cache.Accessor.GetAllAccessTokens());
 
                 // Assert - orchestration
 
@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - common stuff
                 Assert.IsNotNull(result);
                 Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(1, cache.Accessor.GetAllAccessTokens());
 
                 // Assert - orchestration
                 Received.InOrder(() =>

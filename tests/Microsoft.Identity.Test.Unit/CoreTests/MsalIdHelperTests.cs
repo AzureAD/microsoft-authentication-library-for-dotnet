@@ -32,14 +32,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // This matches the ESTS code https://msazure.visualstudio.com/One/_git/ESTS-Main?path=/src/Product/Microsoft.AzureAD.ESTS/Sts/ClientInfo.cs&version=GBmaster&_a=contents
-                Assert.IsTrue(os.Contains("Windows"));
+                Assert.Contains("Windows", os);
                 Regex AdalOsVersionRegex = new Regex(@"[\d]+[.\d]*", RegexOptions.Compiled);
                 Match match = AdalOsVersionRegex.Match(os);
                 Assert.IsTrue(match.Success);
                 
                 NuGetVersion.TryParse(match.Value, out var semanticVersion);
 
-                Assert.IsTrue(semanticVersion.Major >= 10);
+                Assert.IsGreaterThanOrEqualTo(10, semanticVersion.Major);
 
                 
             }

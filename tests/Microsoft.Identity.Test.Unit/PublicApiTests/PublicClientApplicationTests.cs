@@ -356,7 +356,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #if NETFRAMEWORK
             Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
 #else
-            Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
+            Assert.AreEqual("http://localhost", app.AppConfig.RedirectUri);
 #endif
 
         }
@@ -492,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 //Silent flow should fail when different account is returned.
-                var exception = Assert.ThrowsException<AggregateException>(() =>
+                var exception = Assert.Throws<AggregateException>(() =>
                     result = app
                     .AcquireTokenSilent(TestConstants.s_scope, result.Account)
                     .WithForceRefresh(true)
@@ -506,7 +506,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
             }
         }
 
@@ -566,7 +566,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
             }
         }
 
@@ -915,7 +915,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             else
             {
                 Assert.IsNotNull(account.WamAccountIds);
-                Assert.AreEqual(1, account.WamAccountIds.Count);
+                Assert.HasCount(1, account.WamAccountIds);
                 Assert.AreEqual(wamId, account.WamAccountIds["1d18b3b0-251b-4714-a02a-9956cec86c2d"]);
             }
         }
@@ -934,10 +934,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsFalse(tenantProfile2.IsHomeTenant);
 
             Assert.IsNotNull(tenantProfile1.ClaimsPrincipal);
-            Assert.IsTrue(tenantProfile1.ClaimsPrincipal.Claims.Count() > 0);
+            Assert.IsGreaterThan(0, tenantProfile1.ClaimsPrincipal.Claims.Count());
 
             Assert.IsNotNull(tenantProfile2.ClaimsPrincipal);
-            Assert.IsTrue(tenantProfile2.ClaimsPrincipal.Claims.Count() > 0);
+            Assert.IsGreaterThan(0, tenantProfile2.ClaimsPrincipal.Claims.Count());
         }
 
         /// <summary>
@@ -1134,7 +1134,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.OnPremiseUniqueId, result2.UniqueId);
                 Assert.AreEqual(new AccountId(TestConstants.OnPremiseUniqueId), result2.Account.HomeAccountId);
                 Assert.AreEqual(TestConstants.OnPremiseDisplayableId, result2.Account.Username);
-                Assert.AreEqual(app.UserTokenCacheInternal.Semaphore.CurrentCount, 1);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Semaphore.CurrentCount);
             }
         }
 

@@ -303,13 +303,13 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Assert
             if (expectedMessage != null)
             {
-                Assert.AreEqual(messageAndCode.HttpCode, HttpStatusCode.OK);
+                Assert.AreEqual(HttpStatusCode.OK, messageAndCode.HttpCode);
                 Assert.IsTrue(messageAndCode.Message.Equals(expectedMessage, StringComparison.OrdinalIgnoreCase));
             }
 
             if (expectedRedirect != null)
             {
-                Assert.AreEqual(messageAndCode.HttpCode, HttpStatusCode.Found);
+                Assert.AreEqual(HttpStatusCode.Found, messageAndCode.HttpCode);
                 Assert.IsTrue(messageAndCode.Message.Equals(expectedRedirect, StringComparison.OrdinalIgnoreCase));
             }
         }

@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var tokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
 
-                Assert.AreEqual(1, tokens.Count);
+                Assert.HasCount(1, tokens);
 
                 var token = tokens.FirstOrDefault();
                 Assert.IsNotNull(token);
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TestConstants.DefaultAccessToken + differentScopesForAt, result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, 2);
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
                 Assert.AreEqual(3, callbackInvoked);
 
                 // Acquire token from app provider with claims. Should not use cache
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(3600, 0, 0)]
         [DataRow(3600, 500, 500)]
         [DataRow(7200, 0, 3600)]
@@ -203,7 +203,7 @@ namespace Microsoft.Identity.Test.Unit
                         {
                             // Increment identity hits count
                             Interlocked.Increment(ref identityProviderHits);
-                            Assert.IsTrue(identityProviderHits == 1);
+                            Assert.AreEqual(1, identityProviderHits);
                         }
                         else
                         {
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
                 Debug.WriteLine($"Total Cache Hits: {cacheHits}");
-                Assert.IsTrue(cacheHits == 9);
+                Assert.AreEqual(9, cacheHits);
 
                 harness.HttpManager.ClearQueue();
 

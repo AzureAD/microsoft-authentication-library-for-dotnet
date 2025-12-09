@@ -555,7 +555,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     if (clientId.Equals(TestConstants.FmiNodeClientId))
                     {
                         // string should not be null or empty
-                        Assert.IsTrue(!string.IsNullOrEmpty(args.NoDistributedCacheUseReason));
+                        Assert.IsFalse(string.IsNullOrEmpty(args.NoDistributedCacheUseReason));
                     }
                     else
                     {

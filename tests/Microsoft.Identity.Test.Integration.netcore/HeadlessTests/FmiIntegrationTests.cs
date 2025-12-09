@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 audience = audience.Substring(0, audience.Length - "/.default".Length);
             }
             Assert.AreEqual(expectedAudience, audience);
-            Assert.IsTrue(subject.Contains(expectedFmiPath));
+            Assert.Contains(expectedFmiPath, subject);
             Assert.AreEqual(expectedInternalCacheKey, token.CacheKey);
         }
     }

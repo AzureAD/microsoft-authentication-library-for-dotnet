@@ -143,10 +143,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNull(
                 userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
                 "The cache expiry is not set because there is an RT in the cache");
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts());
 
             Trace.WriteLine("3. Later, mid-tier needs the token again, and one is in the cache");
             authenticationResult = await middletierServiceApp
@@ -172,10 +172,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNull(
                 userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
                 "The cache expiry is not set because there is an RT in the cache");
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts());
 
             Trace.WriteLine("5. Subsequent acquire token calls should return cached token.");
             authenticationResult = await middletierServiceApp
