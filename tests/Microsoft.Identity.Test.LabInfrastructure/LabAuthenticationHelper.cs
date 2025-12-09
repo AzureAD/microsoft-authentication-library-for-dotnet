@@ -70,10 +70,4 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         }
     }
 
-    public enum LabAccessAuthenticationType
-    {
-        ClientCertificate,
-        ClientSecret,
-        UserCredential
-    }
 }

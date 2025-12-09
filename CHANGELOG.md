@@ -1,3 +1,11 @@
+4.79.2
+======
+
+### Bug fixes
+* Bump winsdk dependency  [#5575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5575)
+* ImdsV2 probe does not fire when .WithMtlsProofOfPossesstion is not used [#5579](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5579)
+* Downgrade System.Formats.Asn1 to match ID web [#5583](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5583)
+
 4.79.0
 ======
 
@@ -6,10 +14,12 @@
 * Bearer Requests should Fallback to IMDS in Preview in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5562
 * Updating MSAL to send client info = 2 on client credential flow in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5529
 * Make `IMsalMtlsHttpClientFactory` interface public in https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5559* Adjust WithExtraQueryParameters APIs and cache key behavior https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5536
+* Adjust WithExtraQueryParameters APIs and cache key behavior [#5536](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5536)
 
 ### Bug fixes 
 * Fix instance discovery bug in Fr cloud [#5549](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5549)
 * Mark WithClientAssertion  API as experimental [#5551](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5551)
+
 
 
 
