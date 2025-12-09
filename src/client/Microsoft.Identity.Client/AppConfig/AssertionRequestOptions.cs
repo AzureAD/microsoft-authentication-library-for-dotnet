@@ -25,11 +25,14 @@ namespace Microsoft.Identity.Client
         /// Internal constructor that creates AssertionRequestOptions from ApplicationConfiguration
         /// </summary>
         /// <param name="appConfig">The application configuration</param>
-        internal AssertionRequestOptions(ApplicationConfiguration appConfig)
+        /// <param name="tokenEndpoint">The token endpoint used to acquire the token</param>
+        /// <param name="tenantId">The tenant ID from the runtime authority</param>
+        internal AssertionRequestOptions(ApplicationConfiguration appConfig, string tokenEndpoint, string tenantId)
         {
             ClientID = appConfig.ClientId;
-            TenantId = appConfig.Authority?.TenantId;
+            TokenEndpoint = tokenEndpoint;
             Authority = appConfig.Authority?.AuthorityInfo?.CanonicalAuthority?.ToString();
+            TenantId = tenantId;
         }
 
         /// <summary>

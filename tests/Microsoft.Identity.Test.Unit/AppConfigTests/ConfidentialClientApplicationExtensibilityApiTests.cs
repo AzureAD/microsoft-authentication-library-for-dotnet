@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -50,7 +51,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .BuildConcrete();
 
             // Assert
-            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.ClientCredentialCertificateProvider);
+            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.ClientCredential);
+            Assert.IsInstanceOfType((app.AppConfig as ApplicationConfiguration)?.ClientCredential, typeof(DynamicCertificateClientCredential));
             Assert.IsFalse(callbackInvoked, "Certificate provider callback is not yet invoked.");
         }
 
@@ -98,8 +100,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Assert - last one should be stored
             var config = app.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config);
-            Assert.IsNotNull(config.ClientCredentialCertificateProvider);
-            Assert.AreNotSame(firstProvider, config.ClientCredentialCertificateProvider);
+            Assert.IsNotNull(config.ClientCredential);
+            Assert.IsInstanceOfType(config.ClientCredential, typeof(DynamicCertificateClientCredential));
         }
 
         #endregion
@@ -121,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .BuildConcrete();
 
             // Assert
-            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.OnMsalServiceFailureCallback);
+            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.OnMsalServiceFailure);
         }
 
         [TestMethod]
@@ -154,11 +156,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .Create(TestConstants.ClientId)
                 .WithExperimentalFeatures()
                 .WithClientSecret(TestConstants.ClientSecret)
-                .OnSuccess(onSuccessCallback)
+                .OnCompletion(onSuccessCallback)
                 .BuildConcrete();
 
             // Assert
-            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.OnSuccessCallback);
+            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.OnCompletion);
         }
 
         [TestMethod]
@@ -170,10 +172,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
                     .WithClientSecret(TestConstants.ClientSecret)
-                    .OnSuccess(null)
+                    .OnCompletion(null)
                     .Build());
 
-            Assert.AreEqual("onSuccessCallback", ex.ParamName);
+            Assert.AreEqual("onCompletion", ex.ParamName);
         }
 
         #endregion
@@ -258,14 +260,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider)
                 .OnMsalServiceFailure(onMsalServiceFailure)
-                .OnSuccess(onSuccess)
+                .OnCompletion(onSuccess)
                 .BuildConcrete();
 
             // Assert
             var config = app.AppConfig as ApplicationConfiguration;
-            Assert.IsNotNull(config.ClientCredentialCertificateProvider);
-            Assert.IsNotNull(config.OnMsalServiceFailureCallback);
-            Assert.IsNotNull(config.OnSuccessCallback);
+            Assert.IsNotNull(config.ClientCredential);
+            Assert.IsNotNull(config.OnMsalServiceFailure);
+            Assert.IsNotNull(config.OnCompletion);
         }
 
         [TestMethod]
@@ -276,36 +278,36 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Task<bool> onMsalServiceFailure(AssertionRequestOptions options, MsalException ex) => Task.FromResult(false);
             Task onSuccess(AssertionRequestOptions options, ExecutionResult result) => Task.CompletedTask;
 
-            // Act - Order: OnSuccess, OnMsalServiceFailure, Certificate
+            // Act - Order: OnCompletion, OnMsalServiceFailure, Certificate
             var app1 = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithExperimentalFeatures()
-                .OnSuccess(onSuccess)
+                .OnCompletion(onSuccess)
                 .OnMsalServiceFailure(onMsalServiceFailure)
                 .WithCertificate(certificateProvider)
                 .BuildConcrete();
 
-            // Act - Order: OnMsalServiceFailure, Certificate, OnSuccess
+            // Act - Order: OnMsalServiceFailure, Certificate, OnCompletion
             var app2 = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithExperimentalFeatures()
                 .OnMsalServiceFailure(onMsalServiceFailure)
                 .WithCertificate(certificateProvider)
-                .OnSuccess(onSuccess)
+                .OnCompletion(onSuccess)
                 .BuildConcrete();
 
             // Assert
             var config1 = app1.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config1);
-            Assert.IsNotNull(config1.ClientCredentialCertificateProvider);
-            Assert.IsNotNull(config1.OnMsalServiceFailureCallback);
-            Assert.IsNotNull(config1.OnSuccessCallback);
+            Assert.IsNotNull(config1.ClientCredential);
+            Assert.IsNotNull(config1.OnMsalServiceFailure);
+            Assert.IsNotNull(config1.OnCompletion);
 
             var config2 = app2.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config2, "app2.AppConfig should be of type ApplicationConfiguration");
-            Assert.IsNotNull(config2.ClientCredentialCertificateProvider);
-            Assert.IsNotNull(config2.OnMsalServiceFailureCallback);
-            Assert.IsNotNull(config2.OnSuccessCallback);
+            Assert.IsNotNull(config2.ClientCredential);
+            Assert.IsNotNull(config2.OnMsalServiceFailure);
+            Assert.IsNotNull(config2.OnCompletion);
         }
 
         [TestMethod]
@@ -328,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Assert
             Assert.IsNotNull(app);
-            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.ClientCredentialCertificateProvider);
+            Assert.IsNotNull((app.AppConfig as ApplicationConfiguration)?.ClientCredential);
         }
 
         #endregion

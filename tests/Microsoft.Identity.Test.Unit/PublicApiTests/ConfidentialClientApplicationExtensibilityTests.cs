@@ -3,6 +3,7 @@
 
 #if !ANDROID && !iOS
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
@@ -133,6 +134,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         
                         Assert.IsNotNull(capturedException, "Exception should be MsalServiceException");
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
+                        Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in failure callback");
                         
                         // Retry on 503
                         return Task.FromResult(capturedException.StatusCode == 400 && failureCallbackCount < 3);
@@ -238,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         #region OnSuccess Integration Tests
 
         [TestMethod]
-        [Description("OnSuccess is invoked with successful result")]
+        [Description("OnCompletion is invoked with successful result")]
         public async Task OnSuccess_InvokedWithSuccessfulResultAsync()
         {
             // Arrange
@@ -256,7 +258,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .OnSuccess((AssertionRequestOptions options, ExecutionResult result) =>
+                    .OnCompletion((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         observerInvoked = true;
                         capturedResult = result;
@@ -266,6 +268,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNotNull(result.Result);
                         Assert.IsNull(result.Exception);
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
+                        Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in success callback");
                         
                         return Task.CompletedTask;
                     })
@@ -288,11 +291,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [Description("OnSuccess is invoked with failure result after retries exhausted")]
+        [Description("OnCompletion is invoked with failure result after retries exhausted")]
         public async Task OnSuccess_InvokedWithFailureResult_AfterRetriesExhaustedAsync()
         {
             // Arrange
-            using (var harness = CreateTestHarness())
+            var logMessages = new System.Collections.Generic.List<string>();
+            LogCallback logCallback = (level, message, pii) => logMessages.Add(message);
+            
+            using (var harness = CreateTestHarness(logCallback: logCallback))
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -306,12 +312,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
+                    .WithLogging(logCallback, LogLevel.Info, enablePiiLogging: true, enableDefaultPlatformLogging: false)
                     .OnMsalServiceFailure((AssertionRequestOptions options, MsalException ex) =>
                     {
                         retryCount++;
                         return Task.FromResult(retryCount < 2); // Retry once, then give up
                     })
-                    .OnSuccess((AssertionRequestOptions options, ExecutionResult result) =>
+                    .OnCompletion((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         observerInvoked = true;
                         capturedResult = result;
@@ -320,6 +327,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNull(result.Result);
                         Assert.IsNotNull(result.Exception);
                         Assert.IsInstanceOfType(result.Exception, typeof(MsalServiceException));
+                        Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available even on failure");
                         
                         return Task.CompletedTask;
                     })
@@ -341,11 +349,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(capturedResult);
                 Assert.IsFalse(capturedResult.Successful);
                 Assert.AreEqual(exception, capturedResult.Exception);
+                
+                // Verify retry logging
+                Assert.IsTrue(logMessages.Any(m => m.Contains("[ClientCredentialRequest] OnMsalServiceFailure returned true. Retrying token request (Retry #1).")), 
+                    "Should log retry #1");
             }
         }
 
         [TestMethod]
-        [Description("OnSuccess exception is caught and logged, doesn't disrupt flow")]
+        [Description("OnCompletion exception is caught and logged, doesn't disrupt flow")]
         public async Task OnSuccess_ExceptionIsCaught_DoesNotDisruptFlowAsync()
         {
             // Arrange
@@ -359,7 +371,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .OnSuccess((AssertionRequestOptions options, ExecutionResult result) =>
+                    .OnCompletion((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         throw new InvalidOperationException("Observer threw exception");
                     })
@@ -387,7 +399,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task AllThreeExtensibilityPoints_WorkTogetherAsync()
         {
             // Arrange
-            using (var harness = CreateTestHarness())
+            var logMessages = new System.Collections.Generic.List<string>();
+            LogCallback logCallback = (level, message, pii) => logMessages.Add(message);
+            
+            using (var harness = CreateTestHarness(logCallback: logCallback))
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -402,23 +417,27 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
+                    .WithLogging(logCallback, LogLevel.Info, enablePiiLogging: true, enableDefaultPlatformLogging: false)
                     .WithCertificate((AssertionRequestOptions options) =>
                     {
                         certProviderCount++;
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
+                        Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in cert provider");
                         return Task.FromResult(certificate);
                     })
                     .OnMsalServiceFailure((AssertionRequestOptions options, MsalException ex) =>
                     {
                         retryCallbackCount++;
                         Assert.IsInstanceOfType(ex, typeof(MsalServiceException));
+                        Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in retry callback");
                         return Task.FromResult(retryCallbackCount < 2); // Retry once
                     })
-                    .OnSuccess((AssertionRequestOptions options, ExecutionResult result) =>
+                    .OnCompletion((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         observerInvoked = true;
                         Assert.IsTrue(result.Successful);
                         Assert.IsNotNull(result.Result);
+                        Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in success callback");
                         return Task.CompletedTask;
                     })
                     .Build();
@@ -437,6 +456,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, retryCallbackCount, "Retry callback invoked once");
                 Assert.IsTrue(observerInvoked, "Observer invoked once at completion");
                 Assert.IsNotNull(result.AccessToken);
+                
+                // Verify retry logging
+                Assert.IsTrue(logMessages.Any(m => m.Contains("[ClientCredentialRequest] OnMsalServiceFailure returned true. Retrying token request (Retry #1).")), 
+                    "Should log retry #1");
             }
         }
 

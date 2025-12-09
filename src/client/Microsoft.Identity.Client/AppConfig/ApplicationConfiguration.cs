@@ -134,20 +134,15 @@ namespace Microsoft.Identity.Client
         #region Extensibility Callbacks
 
         /// <summary>
-        /// Dynamic certificate provider callback for client credential flows.
-        /// </summary>
-        public Func<AssertionRequestOptions, Task<X509Certificate2>> ClientCredentialCertificateProvider { get; set; }
-
-        /// <summary>
         /// MSAL service failure callback that determines whether to retry after a token acquisition failure from the identity provider.
         /// Only invoked for MsalServiceException (errors from the Security Token Service).
         /// </summary>
-        public Func<AssertionRequestOptions, MsalException, Task<bool>> OnMsalServiceFailureCallback { get; set; }
+        public Func<AssertionRequestOptions, MsalException, Task<bool>> OnMsalServiceFailure { get; set; }
 
         /// <summary>
         /// Success callback that receives the result of token acquisition attempts (typically successful, but can include failures after retries are exhausted).
         /// </summary>
-        public Func<AssertionRequestOptions, ExecutionResult, Task> OnSuccessCallback { get; set; }
+        public Func<AssertionRequestOptions, ExecutionResult, Task> OnCompletion { get; set; }
 
         #endregion
 
@@ -174,14 +169,16 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// This is here just to support the public IAppConfig. Should not be used internally, instead use the <see cref="ClientCredential" /> abstraction.
+        /// Note: This returns null when using dynamic certificate providers since the certificate is resolved at runtime.
         /// </summary>
         public X509Certificate2 ClientCredentialCertificate
         {
             get
             {
-                if (ClientCredential is CertificateAndClaimsClientCredential cred)
+                // Return the certificate if using static certificate (CertificateClientCredential)
+                if (ClientCredential is CertificateClientCredential certCred)
                 {
-                    return cred.Certificate;
+                    return certCred.Certificate;
                 }
                
                 return null;

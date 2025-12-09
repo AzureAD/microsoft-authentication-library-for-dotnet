@@ -64,15 +64,11 @@ namespace Microsoft.Identity.Client.Extensibility
             {
                 throw new ArgumentNullException(nameof(certificateProvider));
             }
-                
-            builder.Config.ClientCredentialCertificateProvider = certificateProvider;
             
-            // Create a CertificateAndClaimsClientCredential with null certificate
+            // Create a DynamicCertificateClientCredential with the certificate provider
             // The certificate will be resolved dynamically via the provider in ResolveCertificateAsync
-            builder.Config.ClientCredential = new Microsoft.Identity.Client.Internal.ClientCredential.CertificateAndClaimsClientCredential(
-                certificate: null,
-                claimsToSign: null,
-                appendDefaultClaims: true);
+            builder.Config.ClientCredential = new DynamicCertificateClientCredential(
+                certificateProvider: certificateProvider);
             
             return builder;
         }
@@ -83,14 +79,14 @@ namespace Microsoft.Identity.Client.Extensibility
         /// This callback is invoked after each service failure and can be called multiple times until it returns <c>false</c> or the request succeeds.
         /// </summary>
         /// <param name="builder">The confidential client application builder.</param>
-        /// <param name="onMsalServiceFailureCallback">
+        /// <param name="onMsalServiceFailure">
         /// An async callback that determines whether to retry after a service failure.
         /// Receives the assertion request options and the <see cref="MsalServiceException"/> that occurred.
         /// Returns <c>true</c> to retry the request, or <c>false</c> to stop retrying and propagate the exception.
         /// The callback will be invoked repeatedly after each service failure until it returns <c>false</c> or the request succeeds.
         /// </param>
         /// <returns>The builder to chain additional configuration calls.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="onMsalServiceFailureCallback"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="onMsalServiceFailure"/> is null.</exception>
         /// <remarks>
         /// <para>This callback is ONLY triggered for <see cref="MsalServiceException"/> - errors returned by the identity provider (e.g., HTTP 500, 503, throttling).</para>
         /// <para>This callback is NOT triggered for client-side errors (<see cref="MsalClientException"/>) or network failures handled internally by MSAL.</para>
@@ -120,33 +116,33 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </example>
         public static ConfidentialClientApplicationBuilder OnMsalServiceFailure(
             this ConfidentialClientApplicationBuilder builder,
-            Func<AssertionRequestOptions, MsalException, Task<bool>> onMsalServiceFailureCallback)
+            Func<AssertionRequestOptions, MsalException, Task<bool>> onMsalServiceFailure)
         {
-            if (onMsalServiceFailureCallback == null)
-                throw new ArgumentNullException(nameof(onMsalServiceFailureCallback));
+            if (onMsalServiceFailure == null)
+                throw new ArgumentNullException(nameof(onMsalServiceFailure));
 
-            builder.Config.OnMsalServiceFailureCallback = onMsalServiceFailureCallback;
+            builder.Config.OnMsalServiceFailure = onMsalServiceFailure;
             return builder;
         }
 
         /// <summary>
         /// Configures an async callback that is invoked when a token acquisition request completes.
         /// This callback is invoked once per <c>AcquireTokenForClient</c> call, after all retry attempts have been exhausted.
-        /// While named <c>OnSuccess</c> for the common case, this callback fires for both successful and failed acquisitions.
+        /// While named <c>OnCompletion</c> for the common case, this callback fires for both successful and failed acquisitions.
         /// This enables scenarios such as telemetry, logging, and custom result handling.
         /// </summary>
         /// <param name="builder">The confidential client application builder.</param>
-        /// <param name="onSuccessCallback">
+        /// <param name="onCompletion">
         /// An async callback that receives the assertion request options and the execution result.
         /// The result contains either the successful <see cref="AuthenticationResult"/> or the <see cref="MsalException"/> that occurred.
         /// This callback is invoked after all retries have been exhausted (if an <see cref="OnMsalServiceFailure"/> handler is configured).
         /// </param>
         /// <returns>The builder to chain additional configuration calls.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="onSuccessCallback"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="onCompletion"/> is null.</exception>
         /// <remarks>
         /// <para>This callback is invoked for both successful and failed token acquisitions. Check <see cref="ExecutionResult.Successful"/> to determine the outcome.</para>
         /// <para>This callback is only invoked for network token acquisition attempts, not when tokens are retrieved from cache.</para>
-        /// <para>If multiple calls to <c>OnSuccess</c> are made, only the last configured callback will be used.</para>
+        /// <para>If multiple calls to <c>OnCompletion</c> are made, only the last configured callback will be used.</para>
         /// <para>Exceptions thrown by this callback will be caught and logged internally to prevent disruption of the authentication flow.</para>
         /// <para>The callback is invoked on the same thread/context as the token acquisition request.</para>
         /// <para>The callback can perform async operations such as sending telemetry to Application Insights, persisting logs to databases, or triggering webhooks.</para>
@@ -156,7 +152,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// var app = ConfidentialClientApplicationBuilder
         ///     .Create(clientId)
         ///     .WithCertificate(certificate)
-        ///     .OnSuccess(async (options, result) =>
+        ///     .OnCompletion(async (options, result) =>
         ///     {
         ///         if (result.Successful)
         ///         {
@@ -170,18 +166,18 @@ namespace Microsoft.Identity.Client.Extensibility
         ///     .Build();
         /// </code>
         /// </example>
-        public static ConfidentialClientApplicationBuilder OnSuccess(
+        public static ConfidentialClientApplicationBuilder OnCompletion(
             this ConfidentialClientApplicationBuilder builder,
-            Func<AssertionRequestOptions, ExecutionResult, Task> onSuccessCallback)
+            Func<AssertionRequestOptions, ExecutionResult, Task> onCompletion)
         {
             builder.ValidateUseOfExperimentalFeature();
 
-            if (onSuccessCallback == null)
+            if (onCompletion == null)
             {
-                throw new ArgumentNullException(nameof(onSuccessCallback));
+                throw new ArgumentNullException(nameof(onCompletion));
             }
 
-            builder.Config.OnSuccessCallback = onSuccessCallback;
+            builder.Config.OnCompletion = onCompletion;
             return builder;
         }
     }
