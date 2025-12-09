@@ -456,6 +456,36 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(ManagedIdentitySource.Imds, miSource);
             }
         }
+
+        [TestMethod]
+        public async Task ProbeImdsV2EndpointAsync_TimesOutAfterOneSecond()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+
+                miBuilder
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
+
+                var managedIdentityApp = miBuilder.Build();
+
+                // ImdsV2 mock is not needed, as the request will not be sent due to cancellation token being cancelled
+
+                var cts = new CancellationTokenSource();
+                cts.Cancel();
+                var imdsProbesCancellationToken = cts.Token;
+
+                var ex =
+                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                        await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken)
+                        .ConfigureAwait(false))
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ImdsServiceError, ex.ErrorCode);
+            }
+        }
         #endregion Probe Tests
 
         #region Fallback Behavior Tests

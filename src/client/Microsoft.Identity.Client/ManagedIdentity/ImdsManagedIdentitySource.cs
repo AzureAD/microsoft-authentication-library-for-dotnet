@@ -305,8 +305,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (Exception ex)
             {
-                requestContext.Logger.Info($"[Managed Identity] {imdsStringHelper} probe endpoint failure. Exception occurred while sending request to probe endpoint: {ex}");
-                return false;
+                throw new MsalServiceException(
+                    MsalError.ImdsServiceError,
+                    $"[Managed Identity] {imdsStringHelper} probe endpoint failure. Exception occurred while sending request to probe endpoint: {ex}");
             }
 
             // probe omits the "Metadata: true" header and then treats 400 Bad Request as success

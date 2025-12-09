@@ -3,7 +3,6 @@
 
 using System;
 using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -436,7 +435,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task ProbeImdsEndpointAsync_TimesOutAfterOneSecond()
+        public async Task ProbeImdsV1EndpointAsync_TimesOutAfterOneSecond()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -450,19 +449,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var managedIdentityApp = miBuilder.Build();
 
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                // ImdsV1 mock is not needed, as the request will not be sent due to cancellation token being cancelled
 
-                var imdsProbesCancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(0)).Token; // timeout immediately
-                
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.None, miSource); // Probe timed out, no source available
+                var cts = new CancellationTokenSource();
+                cts.Cancel();
+                var imdsProbesCancellationToken = cts.Token;
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
+                var ex =
+                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                        await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken)
+                        .ConfigureAwait(false))
+                    .ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
+                Assert.AreEqual(MsalError.ImdsServiceError, ex.ErrorCode);
             }
         }
     }
