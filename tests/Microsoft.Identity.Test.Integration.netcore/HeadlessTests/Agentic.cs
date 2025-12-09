@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         const string ClientId = "aab5089d-e764-47e3-9f28-cc11c2513821"; // agent app
         const string TenantId = "10c419d4-4a50-45b2-aa4e-919fb84df24f";
-        const string AgentIdentity = "aab5089d-e764-47e3-9f28-cc11c2513821";
+        const string AgentIdentity = "aab5089d-e764-47e3-9f28-cc11c2513821"; // In the new tenant, agent identity uses the same ID as the client app
         const string UserUpn = "agentuser1@id4slab1.onmicrosoft.com";
         private const string TokenExchangeUrl = "api://AzureADTokenExchange/.default";
         private const string Scope = "https://graph.microsoft.com/.default";
