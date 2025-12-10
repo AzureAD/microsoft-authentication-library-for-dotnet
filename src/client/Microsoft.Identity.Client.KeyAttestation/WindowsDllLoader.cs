@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client;
 
-namespace Msal.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     /// <summary>
     /// Windows‑only helper that loads a native DLL from an absolute path.

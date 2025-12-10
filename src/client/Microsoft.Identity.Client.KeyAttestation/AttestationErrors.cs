@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Msal.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     internal static class AttestationErrors
     {

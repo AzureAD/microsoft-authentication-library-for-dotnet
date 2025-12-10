@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
-namespace Msal.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     /// <summary>
     /// Static facade for attesting a KeyGuard/CNG key and getting a JWT back.

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Msal.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     /// <summary>
     /// AttestationResult is the result of an attestation operation.

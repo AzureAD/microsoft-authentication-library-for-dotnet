@@ -1,0 +1,20 @@
+Microsoft.Identity.Client.KeyAttestation.AttestationResult
+Microsoft.Identity.Client.KeyAttestation.AttestationResult.AttestationResult(Microsoft.Identity.Client.KeyAttestation.AttestationStatus Status, string! Jwt, int NativeErrorCode, string! ErrorMessage) -> void
+Microsoft.Identity.Client.KeyAttestation.AttestationResult.ErrorMessage.get -> string!
+Microsoft.Identity.Client.KeyAttestation.AttestationResult.ErrorMessage.init -> void
+Microsoft.Identity.Client.KeyAttestation.AttestationResult.Jwt.get -> string!
+Microsoft.Identity.Client.KeyAttestation.AttestationResult.Jwt.init -> void
+Microsoft.Identity.Client.KeyAttestation.AttestationResult.NativeErrorCode.get -> int
+Microsoft.Identity.Client.KeyAttestation.AttestationResult.NativeErrorCode.init -> void
+Microsoft.Identity.Client.KeyAttestation.AttestationResult.Status.get -> Microsoft.Identity.Client.KeyAttestation.AttestationStatus
+Microsoft.Identity.Client.KeyAttestation.AttestationResult.Status.init -> void
+Microsoft.Identity.Client.KeyAttestation.AttestationStatus
+Microsoft.Identity.Client.KeyAttestation.AttestationStatus.Exception = 4 -> Microsoft.Identity.Client.KeyAttestation.AttestationStatus
+Microsoft.Identity.Client.KeyAttestation.AttestationStatus.NativeError = 1 -> Microsoft.Identity.Client.KeyAttestation.AttestationStatus
+Microsoft.Identity.Client.KeyAttestation.AttestationStatus.NotInitialized = 3 -> Microsoft.Identity.Client.KeyAttestation.AttestationStatus
+Microsoft.Identity.Client.KeyAttestation.AttestationStatus.Success = 0 -> Microsoft.Identity.Client.KeyAttestation.AttestationStatus
+Microsoft.Identity.Client.KeyAttestation.AttestationStatus.TokenEmpty = 2 -> Microsoft.Identity.Client.KeyAttestation.AttestationStatus
+Microsoft.Identity.Client.KeyAttestation.ManagedIdentityAttestationExtensions
+Microsoft.Identity.Client.KeyAttestation.PopKeyAttestor
+static Microsoft.Identity.Client.KeyAttestation.ManagedIdentityAttestationExtensions.WithAttestationSupport(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder! builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder!
+static Microsoft.Identity.Client.KeyAttestation.PopKeyAttestor.AttestKeyGuardAsync(string! endpoint, System.Runtime.InteropServices.SafeHandle! keyHandle, string! clientId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.KeyAttestation.AttestationResult!>!

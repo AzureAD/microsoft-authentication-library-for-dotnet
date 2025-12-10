@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ManagedIdentity;
 
-namespace Msal.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     /// <summary>
     /// Extension methods for enabling KeyGuard attestation support in managed identity mTLS PoP flows.
