@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
     /// Managed façade for <c>AttestationClientLib.dll</c>. Holds initialization state,
     /// does ref-count hygiene on <see cref="SafeNCryptKeyHandle"/>, and returns a JWT.
     /// </summary>
-    internal sealed class AttestationClient : IDisposable
+    public sealed class AttestationClient : IDisposable
     {
         private bool _initialized;
 

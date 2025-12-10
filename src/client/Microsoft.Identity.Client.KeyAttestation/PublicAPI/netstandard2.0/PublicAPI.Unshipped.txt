@@ -1,3 +1,7 @@
+Microsoft.Identity.Client.KeyAttestation.AttestationClient
+Microsoft.Identity.Client.KeyAttestation.AttestationClient.AttestationClient() -> void
+Microsoft.Identity.Client.KeyAttestation.AttestationClient.Attest(string! endpoint, Microsoft.Win32.SafeHandles.SafeNCryptKeyHandle! keyHandle, string! clientId) -> Microsoft.Identity.Client.KeyAttestation.AttestationResult!
+Microsoft.Identity.Client.KeyAttestation.AttestationClient.Dispose() -> void
 Microsoft.Identity.Client.KeyAttestation.AttestationResult
 Microsoft.Identity.Client.KeyAttestation.AttestationResult.AttestationResult(Microsoft.Identity.Client.KeyAttestation.AttestationStatus Status, string! Jwt, int NativeErrorCode, string! ErrorMessage) -> void
 Microsoft.Identity.Client.KeyAttestation.AttestationResult.ErrorMessage.get -> string!
