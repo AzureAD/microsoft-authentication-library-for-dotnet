@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Client.MtlsPop;
 
 internal class Program
 {
