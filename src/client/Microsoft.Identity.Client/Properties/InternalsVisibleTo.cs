@@ -7,7 +7,6 @@ using Microsoft.Identity.Client;
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.Desktop" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.Desktop.WinUI3" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.Broker" + KeyTokens.MSAL)]
-[assembly: InternalsVisibleTo("Microsoft.Identity.Client.MtlsPop" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.KeyAttestation" + KeyTokens.MSAL)]
 
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.Unit" + KeyTokens.MSAL)]
