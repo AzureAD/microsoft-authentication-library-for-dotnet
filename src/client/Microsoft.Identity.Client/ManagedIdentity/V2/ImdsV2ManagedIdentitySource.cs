@@ -381,7 +381,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (provider == null)
             {
                 _requestContext.Logger.Info("[ImdsV2] No attestation provider configured. Proceeding with non-attested flow.");
-                return string.Empty; // Empty attestation token indicates non-attested flow
+                return null; // Null attestation token indicates non-attested flow (field will be omitted from JSON)
             }
 
             // KeyGuard requires RSACng on Windows
