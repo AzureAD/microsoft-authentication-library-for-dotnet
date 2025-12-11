@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.Win32.SafeHandles;
@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Identity.Client.MtlsPop.Attestation
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     internal static class AttestationClientLib
     {

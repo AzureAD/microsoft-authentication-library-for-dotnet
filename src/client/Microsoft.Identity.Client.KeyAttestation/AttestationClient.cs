@@ -1,17 +1,17 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client.MtlsPop.Attestation
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     /// <summary>
     /// Managed façade for <c>AttestationClientLib.dll</c>. Holds initialization state,
     /// does ref-count hygiene on <see cref="SafeNCryptKeyHandle"/>, and returns a JWT.
     /// </summary>
-    internal sealed class AttestationClient : IDisposable
+    public sealed class AttestationClient : IDisposable
     {
         private bool _initialized;
 

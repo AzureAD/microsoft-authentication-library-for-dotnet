@@ -1,7 +1,7 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Microsoft.Identity.Client.MtlsPop.Attestation
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     /// <summary>
     /// AttestationResult is the result of an attestation operation.
@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
     /// expression, e.g.: var updated = result with { Jwt = newJwt };
     /// The netstandard2.0 target relies on the IsExternalInit shim (see IsExternalInit.cs) to enable 'init'.
     /// </remarks>
-    internal sealed record AttestationResult(
+    public sealed record AttestationResult(
         AttestationStatus Status,
         string Jwt,
         int NativeErrorCode,

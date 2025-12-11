@@ -1,20 +1,19 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.MtlsPop.Attestation;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client.MtlsPop
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     /// <summary>
     /// Static facade for attesting a KeyGuard/CNG key and getting a JWT back.
     /// Key discovery / rotation is the caller's responsibility.
     /// </summary>
-    internal static class PopKeyAttestor
+    public static class PopKeyAttestor
     {
         /// <summary>
         /// Asynchronously attests a KeyGuard/CNG key with the remote attestation service and returns a JWT.

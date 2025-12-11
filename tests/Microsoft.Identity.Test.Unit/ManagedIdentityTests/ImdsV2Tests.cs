@@ -15,7 +15,6 @@ using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
-using Microsoft.Identity.Client.MtlsPop;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -642,7 +641,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region Attestation Tests
         [TestMethod]
-        public async Task MtlsPop_AttestationProviderMissing_ThrowsClientException()
+        public async Task MtlsPop_NoAttestationProvider_UsesNonAttestedFlow()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -651,17 +650,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
-                // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                // Add mocks for successful non-attested flow (CSR + issuecredential + token)
+                // Note: No attestation token in the certificate request
+                AddMocksToGetEntraToken(httpManager);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession()
-                        // Intentionally DO NOT call .WithAttestationProviderForTests(...)
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    // Intentionally DO NOT call .WithAttestationProviderForTests(...)
+                    .ExecuteAsync().ConfigureAwait(false);
 
-                Assert.AreEqual("attestation_failure", ex.ErrorCode);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(MTLSPoP, result.TokenType, "Should get mTLS PoP token without attestation provider");
+                Assert.IsNotNull(result.BindingCertificate, "Should have binding certificate even without attestation");
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
