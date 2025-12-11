@@ -1232,5 +1232,10 @@ namespace Microsoft.Identity.Client
         /// All managed identity sources are unavailable.
         /// </summary>
         public const string ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable";
+
+        /// <summary>
+        /// Represents the error code returned when an IMDS operation fails.
+        /// </summary>
+        public const string ImdsServiceError = "imds_service_error";
     }
 }
