@@ -18,18 +18,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("upn")]
         public string Upn { get; set; }
 
-        [JsonProperty("displayname")]
-        public string DisplayName { get; set; }
-
-        [JsonProperty("mfa")]
-        public MFA Mfa { get; set; }
-
-        [JsonProperty("protectionpolicy")]
-        public ProtectionPolicy ProtectionPolicy { get; set; }
-
-        [JsonProperty("homedomain")]
-        public HomeDomain HomeDomain { get; set; }
-
         [JsonProperty("homeupn")]
         public string HomeUPN { get; set; }
 
@@ -40,8 +28,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public string LabName { get; set; }
 
         public FederationProvider FederationProvider { get; set; }
-
-        public string Credential { get; set; }
 
         public string TenantId { get; set; }
 

@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         PingFederateV83,
         Shibboleth,
         ADFSv2019,
+        ADFSv2022,
         B2C,
         Ping,
         CIAM,

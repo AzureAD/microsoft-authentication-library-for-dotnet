@@ -5,14 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Kerberos;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -38,7 +34,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         #endregion MSTest Hooks
@@ -46,8 +42,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetFx)]
         public async Task Interactive_AADAsync()
         {
-            // Arrange
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            // Arrange - Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
+            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
             var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -71,19 +67,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
-        public async Task Interactive_AdfsV4_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
         public async Task InteractiveConsentPromptAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, true).ConfigureAwait(false);
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
@@ -93,9 +79,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #if IGNORE_FEDERATED
         [Ignore]
 #endif
-        public async Task Interactive_AdfsV2019_FederatedAsync()
+        public async Task Interactive_Adfs_FederatedAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -168,21 +154,21 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #if IGNORE_FEDERATED
         [Ignore]
 #endif
-        public async Task Interactive_AdfsV2019_DirectAsync()
+        public async Task Interactive_Adfs_DirectAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
         }      
 
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithDefaultRedirectUri()
-               .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+               .WithRedirectUri("http://localhost:52073")
                .WithTestLogging(out HttpSnifferClientFactory factory)
                .Build();
 
@@ -239,9 +225,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             if (directToAdfs)
             {
                 pca = PublicClientApplicationBuilder
-                    .Create(Adfs2019LabConstants.PublicClientId)
-                    .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
-                    .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                    .Create(labResponse.App.AppId)
+                    .WithRedirectUri("http://localhost:52073")
+                    .WithAdfsAuthority("https://fs.id4slab1.com/adfs", validateAuthority: false)
                     .WithTestLogging()
                     .Build();
             }
@@ -249,7 +235,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             {
                 pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithRedirectUri("http://localhost:52073")
                     .WithAuthority(labResponse.Lab.Authority + "common")
                     .WithTestLogging(out factory)
                     .Build();
@@ -266,7 +252,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs > 0);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
             userCacheAccess.AssertAccessCounts(0, 1);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
@@ -296,7 +281,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(2, 3);
             AssertCcsRoutingInformationIsSent(factory, labResponse);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
             account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(3, 3);
@@ -313,8 +297,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
             
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
-
             Trace.WriteLine("Part 5 - Acquire a token silently with force refresh");
             result = await pca
                 .AcquireTokenSilent(s_scopes, account)
@@ -325,7 +307,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
             AssertCcsRoutingInformationIsSent(factory, labResponse);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
             return result;
         }
@@ -384,7 +365,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                .ConfigureAwait(false);
 
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
         }
 
         private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
@@ -409,122 +389,5 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 loginBtn?.Click();
             }, TestContext);
         }
-
-        #region Azure AD Kerberos Feature Tests
-        [Ignore]
-        public async Task Kerberos_Interactive_AADAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.IdToken).ConfigureAwait(false);
-            await KerberosRunTestForUserAsync(labResponse, KerberosTicketContainer.AccessToken).ConfigureAwait(false);
-        }
-
-        private async Task<AuthenticationResult> KerberosRunTestForUserAsync(
-            LabResponse labResponse,
-            KerberosTicketContainer ticketContainer)
-        {
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-                    .Create(labResponse.App.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                    .WithAuthority(labResponse.Lab.Authority + "common")
-                    .WithTestLogging(out HttpSnifferClientFactory factory)
-                    .WithTenantId(labResponse.Lab.TenantId)
-                    .WithClientId(TestConstants.KerberosTestApplicationId)
-                    .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer)
-                    .Build();
-
-            var userCacheAccess = pca.UserTokenCache.RecordAccess();
-
-            Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
-            AuthenticationResult result = await pca
-                .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false, false))
-                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
-                .ConfigureAwait(false);
-
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs > 0);
-
-            KerberosSupplementalTicket ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
-                result,
-                ticketContainer,
-                labResponse.User.Upn);
-            Assert.IsNotNull(ticket);
-
-            userCacheAccess.AssertAccessCounts(0, 1);
-            IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-            userCacheAccess.AssertAccessCounts(1, 1); // the assert calls GetAccounts
-            Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-
-            Trace.WriteLine("Part 2 - Clear the cache");
-            await pca.RemoveAsync(account).ConfigureAwait(false);
-            userCacheAccess.AssertAccessCounts(1, 2);
-            Assert.IsFalse((await pca.GetAccountsAsync().ConfigureAwait(false)).Any());
-            userCacheAccess.AssertAccessCounts(2, 2);
-            Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-
-            if (factory?.RequestsAndResponses != null)
-            {
-                factory.RequestsAndResponses.Clear();
-            }
-
-            Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
-            result = await pca
-                .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin, true, false))
-                .WithPrompt(Prompt.ForceLogin)
-                .WithLoginHint(labResponse.User.Upn)
-                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
-                .ConfigureAwait(false);
-            userCacheAccess.AssertAccessCounts(2, 3);
-            AssertCcsRoutingInformationIsSent(factory, labResponse);
-            ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
-                result,
-                ticketContainer,
-                labResponse.User.Upn);
-            Assert.IsNotNull(ticket);
-
-            account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-            userCacheAccess.AssertAccessCounts(3, 3);
-            Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-
-            if (factory?.RequestsAndResponses != null)
-            {
-                factory.RequestsAndResponses.Clear();
-            }
-
-            Trace.WriteLine("Part 4 - Acquire a token silently");
-            result = await pca
-                .AcquireTokenSilent(s_scopes, account)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-            ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
-                result,
-                ticketContainer,
-                labResponse.User.Upn);
-            Assert.IsNotNull(ticket);
-
-            Trace.WriteLine("Part 5 - Acquire a token silently with force refresh");
-            result = await pca
-                .AcquireTokenSilent(s_scopes, account)
-                .WithForceRefresh(true)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-
-            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-            Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-            AssertCcsRoutingInformationIsSent(factory, labResponse);
-
-            ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
-                result,
-                ticketContainer,
-                labResponse.User.Upn);
-            Assert.IsNotNull(ticket);
-            TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
-
-            return result;
-        }
-
-        #endregion
     }
 }

@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
@@ -13,6 +11,7 @@ using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
@@ -24,7 +23,6 @@ namespace Microsoft.Identity.Client.Platforms.net
     /// See <see href="https://learn.microsoft.com/dotnet/standard/serialization/system-text-json/source-generation-modes?pivots=dotnet-6-0">Source-generation modes in System.Text.Json</see>.
     /// and <see href="https://learn.microsoft.com/dotnet/standard/serialization/system-text-json/source-generation?pivots=dotnet-6-0">How to use source generation in System.Text.Json</see> for official docs.
     /// </summary>
-    [JsonSerializable(typeof(KerberosSupplementalTicket))]
     [JsonSerializable(typeof(InstanceDiscoveryResponse))]
     [JsonSerializable(typeof(LocalImdsErrorResponse))]
     [JsonSerializable(typeof(AdalResultWrapper))]
@@ -40,6 +38,11 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(ManagedIdentityResponse))]
     [JsonSerializable(typeof(ManagedIdentityErrorResponse))]
     [JsonSerializable(typeof(OidcMetadata))]
+    [JsonSerializable(typeof(CsrMetadata))]
+    [JsonSerializable(typeof(CuidInfo))]
+    [JsonSerializable(typeof(CertificateRequestBody))]
+    [JsonSerializable(typeof(CertificateRequestResponse))]
+    [JsonSerializable(typeof(Dictionary<string, object>))]
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {
@@ -54,6 +57,7 @@ namespace Microsoft.Identity.Client.Platforms.net
                     {
                         NumberHandling = JsonNumberHandling.AllowReadingFromString,
                         AllowTrailingCommas = true,
+                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                         Converters =
                         {
                             new JsonStringConverter(),

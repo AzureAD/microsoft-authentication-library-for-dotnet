@@ -5,13 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
-using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.Utils;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
@@ -41,7 +39,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task DeviceCodeFlowTestAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
@@ -49,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task SilentTokenAfterDeviceCodeFlowWithBrokerTestAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             await AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
@@ -83,7 +81,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
         }
 
         private async Task AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(LabResponse labResponse, string userType)
@@ -119,7 +116,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var account = result.Account as Account;
             Assert.IsTrue(account.AccountSource == "device_code_flow");
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
             var silentTokenResult = await pca.AcquireTokenSilent(s_scopes, result.Account).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(silentTokenResult);

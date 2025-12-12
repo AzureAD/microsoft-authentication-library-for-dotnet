@@ -1197,6 +1197,11 @@ namespace Microsoft.Identity.Client
         public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
 
         /// <summary>
+        /// <para>What happened?</para> mTLS is not supported for managed identity authentication.
+        /// </summary>
+        public const string MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity";
+
+        /// <summary>
         /// <para>What happened?</para> The operation attempted to force a token refresh while also using a token hash. 
         /// These two options are incompatible because forcing a refresh bypasses token caching, 
         /// which conflicts with token hash validation.
@@ -1206,5 +1211,26 @@ namespace Microsoft.Identity.Client
         /// - If token hashing is required, allow the cached token to be used instead of forcing a refresh.
         /// </summary>
         public const string ForceRefreshNotCompatibleWithTokenHash = "force_refresh_and_token_hash_not_compatible";
+
+        /// <summary>
+        /// The certificate received from the Imds server is invalid.
+        /// </summary>
+        public const string InvalidCertificate = "invalid_certificate";
+
+        /// <summary>
+        /// The system has already fallen back IMDS V1 and can only get Bearer tokens.
+        /// It needs to be restarted to get mTLS PoP tokens.
+        /// </summary>
+        public const string CannotSwitchBetweenImdsVersionsForPreview = "cannot_switch_between_imds_versions_for_preview";
+
+        /// <summary>
+        /// mTLS PoP tokens are not supported in IMDS V1.
+        /// </summary>
+        public const string MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1";
+
+        /// <summary>
+        /// All managed identity sources are unavailable.
+        /// </summary>
+        public const string ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable";
     }
 }

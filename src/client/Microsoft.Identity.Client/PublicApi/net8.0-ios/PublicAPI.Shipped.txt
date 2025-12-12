@@ -1046,3 +1046,15 @@ Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAsserti
 static Microsoft.Identity.Client.Extensibility.AcquireTokenForClientBuilderExtensions.WithExtraBodyParameters(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, System.Collections.Generic.Dictionary<string, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string>>> extrabodyparams) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithExtraHttpHeaders<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IDictionary<string, string> extraHttpHeaders) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, (string Value, bool IncludeInCacheKey)> extraQueryParameters) -> T
+Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, (string Value, bool IncludeInCacheKey)> extraQueryParameters) -> T
+const Microsoft.Identity.Client.MsalError.CannotSwitchBetweenImdsVersionsForPreview = "cannot_switch_between_imds_versions_for_preview" -> string
+const Microsoft.Identity.Client.MsalError.InvalidCertificate = "invalid_certificate" -> string
+const Microsoft.Identity.Client.MsalError.MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity" -> string
+const Microsoft.Identity.Client.MsalError.MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1" -> string
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ImdsV2 = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, string> extraQueryParameters) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+static Microsoft.Identity.Client.ApplicationBase.ResetStateForTest() -> void
+

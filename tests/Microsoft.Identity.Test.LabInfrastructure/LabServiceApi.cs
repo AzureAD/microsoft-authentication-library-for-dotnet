@@ -75,35 +75,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             if (string.IsNullOrEmpty(query.Upn))
             {
                 //Building user query
-                //Required parameters will be set to default if not supplied by the test code
-
-                queryDict.Add(
-                    LabApiConstants.MultiFactorAuthentication, 
-                    query.MFA != null ? 
-                        query.MFA.ToString() : 
-                        MFA.None.ToString());
-
-                queryDict.Add(
-                    LabApiConstants.ProtectionPolicy, 
-                    query.ProtectionPolicy != null ? 
-                        query.ProtectionPolicy.ToString() : 
-                        ProtectionPolicy.None.ToString());
-
+                //Required parameters will be set to default if not supplied by the test code               
+               
                 if (query.UserType != null)
                 {
                     queryDict.Add(LabApiConstants.UserType, query.UserType.ToString());
                 }
-
-                if (query.HomeDomain != null)
-                {
-                    queryDict.Add(LabApiConstants.HomeDomain, query.HomeDomain.ToString());
-                }
-
-                if (query.HomeUPN != null)
-                {
-                    queryDict.Add(LabApiConstants.HomeUPN, query.HomeUPN.ToString());
-                }
-
+             
                 if (query.B2CIdentityProvider != null)
                 {
                     queryDict.Add(LabApiConstants.B2CProvider, query.B2CIdentityProvider.ToString());
@@ -166,17 +144,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", _labApiAccessToken.Value.Token));
                 return await httpClient.GetStringAsync(address).ConfigureAwait(false);
             }
-        }
-
-        public async Task<string> GetUserSecretAsync(string lab)
-        {
-            Dictionary<string, string> queryDict = new Dictionary<string, string>
-            {
-                { "secret", lab }
-            };
-
-            string result = await SendLabRequestAsync(LabApiConstants.LabUserCredentialEndpoint, queryDict).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<LabCredentialResponse>(result).Secret;
         }
 
         public async Task<string> GetMSIHelperServiceTokenAsync()

@@ -1,11 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.ComponentModel;
+
 namespace Microsoft.Identity.Client.Kerberos
 {
     /// <summary>
     /// Declares the type of container to use for Kerberos Ticket Claim.
     /// </summary>
+    [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public enum KerberosTicketContainer
     {
         /// <summary>

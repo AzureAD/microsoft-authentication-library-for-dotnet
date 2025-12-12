@@ -6,8 +6,17 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.OAuth2.Throttling;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client
 {
@@ -73,6 +82,25 @@ namespace Microsoft.Identity.Client
                 "Confidential client and managed identity flows are not available on mobile platforms and on Mac." +
                 "See https://aka.ms/msal-net-confidential-availability and https://aka.ms/msal-net-managed-identity for details.");
 #endif
+        }
+
+        /// <summary>
+        /// Resets the SDKs internal state, such as static caches, to facilitate testing. 
+        /// This API is meant to be used by other SDKs that build on top of MSAL, and only by test code.
+        /// </summary>
+        public static void ResetStateForTest()
+        {
+            NetworkCacheMetadataProvider.ResetStaticCacheForTest();
+            RegionManager.ResetStaticCacheForTest();
+            OidcRetrieverWithCache.ResetCacheForTest();
+            AuthorityManager.ClearValidationCache();
+            SingletonThrottlingManager.GetInstance().ResetCache();
+            ManagedIdentityClient.ResetSourceForTest();
+            AuthorityManager.ClearValidationCache();
+            PoPCryptoProviderFactory.Reset();
+
+            InMemoryPartitionedAppTokenCacheAccessor.ClearStaticCacheForTest();
+            InMemoryPartitionedUserTokenCacheAccessor.ClearStaticCacheForTest();
         }
     }
 }

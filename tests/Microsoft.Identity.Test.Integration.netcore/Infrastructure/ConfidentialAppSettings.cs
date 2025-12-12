@@ -13,7 +13,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         Public,
         Adfs,
         PPE,
-        Arlington
+        Arlington,
+        PublicLegacy  // For regional tests that need original MSIDLAB4 configuration
     }
 
     public interface IConfidentialAppSettings
@@ -22,8 +23,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         string TenantId { get; }
         string Environment { get; }
         string[] AppScopes { get; }
-        X509Certificate2 GetCertificate();
-        string GetSecret();
+        X509Certificate2 Certificate { get; }
+        string Secret { get; }
 
         string Authority { get; }
 
@@ -35,11 +36,15 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
     public class ConfidentialAppSettings
     {
+        public const string ID4SLab1TenantId = "10c419d4-4a50-45b2-aa4e-919fb84df24f";
+
         private class PublicCloudConfidentialAppSettings : IConfidentialAppSettings
         {
-            public string ClientId => UseAppIdUri? "api://88f91eac-c606-4c67-a0e2-a5e8a186854f" : "88f91eac-c606-4c67-a0e2-a5e8a186854f";
+            // TODO: Tenant Migration - Migrated to new id4slab1 tenant for non-regional tests
+            // Regional tests still use legacy configuration due to AADSTS100007 restrictions
+            public string ClientId => UseAppIdUri? "api://54a2d933-8bf8-483b-a8f8-0a31924f3c1f" : "54a2d933-8bf8-483b-a8f8-0a31924f3c1f"; // MSAL-APP-AzureADMultipleOrgs in ID4SLAB1 tenant
 
-            public string TenantId => "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
+            public string TenantId => ID4SLab1TenantId; 
 
             public string Environment => "login.microsoftonline.com";
 
@@ -53,33 +58,29 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public bool InstanceDiscoveryEndpoint { get; set; } = true;
 
-            public X509Certificate2 GetCertificate()
-            {
-                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
-            }
+            public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
 
-            public string GetSecret()
-            {
-                return GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalCCAKeyVaultSecretName).Value;
-            }
+            public string Secret => 
+                GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-APP-AzureADMultipleOrgs").Value;
         }
 
         private class AdfsConfidentialAppSettings : IConfidentialAppSettings
         {
             private const string AdfsCertName = "IDLABS-APP-Confidential-Client-Cert-OnPrem";
+            private static readonly Lazy<LabResponse> s_adfsLabResponse = new Lazy<LabResponse>(() =>
+            {
+                return LabUserHelper.GetDefaultAdfsUserAsync().GetAwaiter().GetResult();
+            });
 
-            public string ClientId => Adfs2019LabConstants.ConfidentialClientId;
+            public string ClientId => s_adfsLabResponse.Value.App.AppId;
 
             public string TenantId => "";
 
-            public string Environment => "fs.msidlab8.com/adfs";
+            public string Environment => "fs.id4slab1.com/adfs";
 
             public string[] AppScopes => new[] { "openid", "profile" };
 
-            public X509Certificate2 GetCertificate()
-            {
-                return s_certLazy.Value;
-            }
+            public X509Certificate2 Certificate => s_certLazy.Value;
 
             private static Lazy<X509Certificate2> s_certLazy => new Lazy<X509Certificate2>(() =>
             {
@@ -87,10 +88,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
                 return kv.GetCertificateWithPrivateMaterialAsync(AdfsCertName).GetAwaiter().GetResult();
             });
 
-            public string GetSecret()
-            {                
-                return GetSecretLazy(KeyVaultInstance.MsalTeam, Adfs2019LabConstants.ADFS2019ClientSecretName).Value;
-            }
+            public string Secret =>
+                // Use the default app secret from the lab response
+                GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-App-Default").Value;
 
             public string Authority => $@"https://{Environment}";
 
@@ -111,15 +111,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string[] AppScopes => new[] { $"{ClientId}/.default" };
 
-            public X509Certificate2 GetCertificate()
-            {
-                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
-            }
+            public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
 
-            public string GetSecret()
-            {
-                throw new NotImplementedException();
-            }
+            public string Secret => throw new NotImplementedException();
             public string Authority => $@"https://{Environment}/{TenantId}";
 
             public Cloud Cloud => Cloud.PPE;
@@ -139,15 +133,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public string[] AppScopes => new[] { "https://graph.microsoft.com/.default" };
 
-            public X509Certificate2 GetCertificate()
-            {
-                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
-            }
+            public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
 
-            public string GetSecret()
-            {
-                return GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalArlingtonCCAKeyVaultSecretName).Value;
-            }
+            public string Secret => GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalArlingtonCCAKeyVaultSecretName).Value;
 
             public string Authority => $@"https://{Environment}/{TenantId}";
 
@@ -158,8 +146,36 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public bool InstanceDiscoveryEndpoint { get; set; } = true;
         }   
 
+        private class PublicLegacyCloudConfidentialAppSettings : IConfidentialAppSettings
+        {
+            // Legacy MSIDLAB4 configuration for regional tests only
+            // Regional endpoints require original tenant due to AADSTS100007 restrictions
+            public string ClientId => UseAppIdUri? "api://88f91eac-c606-4c67-a0e2-a5e8a186854f" : "88f91eac-c606-4c67-a0e2-a5e8a186854f"; // Legacy MSAL app in MSIDLAB4 tenant
+
+            public string TenantId => "f645ad92-e38d-4d1a-b510-d1b09a74a8ca"; // MSIDLAB4 tenant (legacy)
+
+            public string Environment => "login.microsoftonline.com";
+
+            public string[] AppScopes => new[] { "https://vault.azure.net/.default" };
+
+            public string Authority => $@"https://{Environment}/{TenantId}";
+
+            public Cloud Cloud => Cloud.PublicLegacy;
+
+            public bool UseAppIdUri { get; set; }
+
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
+
+            public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
+
+            public string Secret => GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalCCAKeyVaultSecretName).Value;
+        }
+
         private static Lazy<IConfidentialAppSettings> s_publicCloudSettings =
             new Lazy<IConfidentialAppSettings>(() => new PublicCloudConfidentialAppSettings());
+        
+        private static Lazy<IConfidentialAppSettings> s_publicLegacyCloudSettings =
+            new Lazy<IConfidentialAppSettings>(() => new PublicLegacyCloudConfidentialAppSettings());
         
         private static Lazy<IConfidentialAppSettings> s_ppeCloudSettings =
             new Lazy<IConfidentialAppSettings>(() => new PpeConfidentialAppSettings());
@@ -176,6 +192,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             {
                 case Cloud.Public:
                     return s_publicCloudSettings.Value;
+                case Cloud.PublicLegacy:
+                    return s_publicLegacyCloudSettings.Value;
                 case Cloud.PPE:
                     return s_ppeCloudSettings.Value;
                 case Cloud.Arlington:

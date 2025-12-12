@@ -1,11 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.ComponentModel;
+
 namespace Microsoft.Identity.Client.Kerberos
 {
     /// <summary>
     /// The Kerberos key types used in this assembly.
     /// </summary>
+    [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public enum KerberosKeyTypes
     {
         /// <summary>

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.Identity.Client.Kerberos;
@@ -102,11 +101,15 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Service principal name for Kerberos Service Ticket.
         /// </summary>
+        [Obsolete]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public string KerberosServicePrincipalName { get; set; } = string.Empty;
 
         /// <summary>
         /// Kerberos Service Ticket container to be used.
         /// </summary>
+        [Obsolete]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public KerberosTicketContainer TicketContainer { get; set; } = KerberosTicketContainer.IdToken;
     }
 }

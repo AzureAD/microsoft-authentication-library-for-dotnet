@@ -10,19 +10,18 @@ using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.RP;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static Microsoft.Identity.Client.Internal.JsonWebToken;
-using Microsoft.Identity.Client.RP;
-using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -647,7 +646,6 @@ namespace Microsoft.Identity.Test.Unit
                     "MIIDQjCCAiqgAwIBAgIQTuexEO9cdYhC0jy1nmS6jTANBgkqhkiG9w0BAQsFADAiMSAwHgYDVQQDDBd0cndhbGtlLm9ubWljcm9zb2Z0LmNvbTAeFw0xNzA4MTExODEzMTBaFw0xODA4MTExODMzMTBaMCIxIDAeBgNVBAMMF3Ryd2Fsa2Uub25taWNyb3NvZnQuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5Qe3Ah/E97K0o288gYUNa0H8FO/w8pb1dvls/boQDoZxUD11TpAQrKZwstS6+ulGF6cHmj44AH8MNBKNUbW2L1NTjFG9bltaSXpJXzbIH/cUppF9rxngZ0CM7cHtuoccBPBVEuQiJ86pD7qlqE2EA2BdBmfz3Hd41rybdaWkHMxMcBC7nh6w87/KoyikKXCMLUUyRTJLSivo+gfKJsiYGAjqZ54aJraP5LMiPG2qYTOZR6wMme93mYRp85sqGTvgzRCq37STH2HmcYilUQ9kZFe5SR+1vOki97XLg+H7FuFtkSMM7dEnTWkDv+BJ1ZQvCEj623cJxXlq0fd7hVUxIQIDAQABo3QwcjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMCIGA1UdEQQbMBmCF3Ryd2Fsa2Uub25taWNyb3NvZnQuY29tMB0GA1UdDgQWBBSauRo9cNk8J6RTLWMQSyUQnxjQzDANBgkqhkiG9w0BAQsFAAOCAQEAhYl1I8qETtvVt6m/YrGknA90R/FtIePt/ViBae3mxPJWlVoq5fTTriQcuPHXfI5kbjTQJIwCVTT/CRSlKkzRcrSsQUxxHNE7IdpvvDbkf6AMPxQhNACHQd0cIWmsmf+ItKsC70LKQ+93+VgmBsv2j8XwF0JTqwuKoqXnDjCzHvmU67xhPY6CSPA/0XOiVTx1BDWd5cPdsH2bZnAeApsvrzU8W7iPgV/oN9MMfogocvDUXd6T+QGLMAYoInHXsqG6+SEarqRDUPQZOHo5Ax4Mvhsnd2b4u5d5Y/R0z0wUwtOiF0Tu+w79JIqDRYaaJLTKxZ+2DyYOu54u0LGsGhki1g==",
                     decodedToken.Header["x5c"]);
             }
-
         }
 
         private static void AssertClientAssertionHeader(
@@ -1016,6 +1014,101 @@ namespace Microsoft.Identity.Test.Unit
                 });
 
                 Assert.IsTrue(exception.Message.Contains("Value cannot be null"));
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_ShouldSendClientInfoParameter_WithValueTwo_Async()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // Set up the expected POST data to include client_info = "2"
+                var expectedPostData = new Dictionary<string, string>
+                {
+                    [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
+                    [OAuth2Parameter.Scope] = TestConstants.s_scope.AsSingleString(),
+                    [OAuth2Parameter.ClientInfo] = "2"
+                };
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    expectedPostData: expectedPostData);
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertionWithComplexClaims()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
+
+                // Test complex nested claims as described in the issue
+                IDictionary<string, string> extraAssertionContent = new Dictionary<string, string>
+                {
+                    { "foo", "bar" },
+                    { "custom_claims", "{\"xms_foo\":[\"abc\",\"def\"],\"xms_az_foo\":\"bar\"}" }
+                };
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/tid")
+                    .WithHttpManager(harness.HttpManager)
+                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: true)
+                    .Build();
+
+                var handler = harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
+                JwtSecurityToken assertion = null;
+                handler.AdditionalRequestValidation = (r) =>
+                {
+                    var requestContent = r.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
+
+                    // Check presence of client_assertion in request
+                    Assert.IsTrue(formsData.TryGetValue("client_assertion", out string encodedJwt), "Missing client_assertion from request");
+
+                    // Decode and validate the JWT
+                    var jwtHandler = new JwtSecurityTokenHandler();
+                    assertion = jwtHandler.ReadJwtToken(encodedJwt);
+
+                    // Validate that custom_claims is a nested object, not an escaped string
+                    var customClaimsClaim = assertion.Claims.FirstOrDefault(c => c.Type == "custom_claims");
+                    Assert.IsNotNull(customClaimsClaim, "custom_claims should be present");
+
+                    // Validate the type of claim value is a string
+                    Assert.IsTrue(typeof(string).IsAssignableFrom(customClaimsClaim.Value.GetType()), "custom_claims claim value should be a string");
+
+                    // The value should be a JSON object, not an escaped string
+                    string customClaimsValue = customClaimsClaim.Value;
+                    var jsonElement = JsonSerializer.Deserialize<JsonElement>(customClaimsValue); // This will throw if not valid JSON object
+                    Assert.AreEqual(JsonValueKind.Object, jsonElement.ValueKind, "custom_claims claim value should be a JSON object");
+                };
+
+                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
             }
         }
 

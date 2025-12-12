@@ -26,16 +26,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("redirecturi")]
         public string RedirectUri { get; set; }
 
-        [JsonProperty("signinaudience")]
-        public string Audience { get; set; }
-
         // TODO: this is a list, but lab sends a string. Not used today, discuss with lab to return a list
         [JsonProperty("authority")]
         public string Authority { get; set; }
 
         [JsonProperty("defaultscopes")]
         public string DefaultScopes { get; set; }
-
     }
 
     public class Lab
@@ -46,16 +42,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("federationprovider")]
         public FederationProvider FederationProvider { get; set; }
 
-        [JsonProperty("credentialvaultkeyname")]
-        public string CredentialVaultkeyName { get; set; }
-
         [JsonProperty("authority")]
         public string Authority { get; set; }
-    }
-
-    public class LabCredentialResponse
-    {
-        [JsonProperty("Value")]
-        public string Secret { get; set; }
     }
 }

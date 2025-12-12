@@ -39,4 +39,15 @@ namespace Microsoft.Identity.Test.Unit.Helpers
             return Task.CompletedTask;
         }
     }
+
+    internal class TestImdsProbeRetryPolicy : ImdsProbeRetryPolicy
+    {
+        public TestImdsProbeRetryPolicy() : base() { }
+
+        internal override Task DelayAsync(int milliseconds)
+        {
+            // No delay for tests
+            return Task.CompletedTask;
+        }
+    }
 }

@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();           
+            ApplicationBase.ResetStateForTest();
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .WithAuthority(settings.Authority).Build();
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = ConfidentialClientApplicationBuilder.Create(settings.ClientId)
                 .WithTestLogging()
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
             ConfigureInMemoryCache(cca);
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                 .Build();
@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -300,12 +300,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ROPC_PopTestWithRSAAsync()
         {
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
 
+            // Use the lab response app and tenant for consistency instead of mixing configurations
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .Create(labResponse.App.AppId)
+                .WithAuthority($"https://login.microsoftonline.com/{labResponse.User.TenantId}")
+                .WithClientSecret(settings.Secret) // Still use the certificate/secret from settings
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -321,7 +322,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                settings.ClientId,
+                labResponse.App.AppId, // Use consistent app ID from lab response
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
@@ -337,7 +338,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -404,7 +405,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -458,7 +459,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .Build();
 
             // 3. When acquiring a token, use WithPopKeyId and OnBeforeTokenRequest extensiblity methods
@@ -538,7 +539,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -591,7 +592,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -680,7 +681,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 

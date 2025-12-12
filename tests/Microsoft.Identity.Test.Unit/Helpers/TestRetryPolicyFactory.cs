@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Test.Unit.Helpers
                 case RequestType.STS:
                 case RequestType.ManagedIdentityDefault:
                     return new TestDefaultRetryPolicy(requestType);
+                case RequestType.ImdsProbe:
+                    return new TestImdsProbeRetryPolicy();
                 case RequestType.Imds:
                     return new TestImdsRetryPolicy();
                 case RequestType.RegionDiscovery:

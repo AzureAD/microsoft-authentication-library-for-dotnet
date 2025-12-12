@@ -16,6 +16,8 @@ The primary objective is to enable seamless token acquisition in MSI V2 for VM/V
 
 In **MSI V1**, IMDS or any other Managed Identity Resource Provider (MIRP) directly returns an **access token**. However, in **MSI V2**, the process involves few more steps:
 
+Conceptual diagram 
+
 ```mermaid
 sequenceDiagram
     participant App as Application
@@ -24,10 +26,31 @@ sequenceDiagram
     participant MAA as Azure MAA
     participant ESTS as Entra STS (mTLS)
 
-    App  ->> MSAL: AcquireTokenForManagedIdentity()
+    App  ->> MSAL: AcquireToken
+    MSAL -> MSAL: Detect that MSIv2 is available, otherwise bail
+    MSAL -> MSAL: Create the strongest key possible, e.g. in the TPM
+    MSAL ->> MAA: Acquire an attestation token, which proves the key strength
+    MSAL ->> IMDS: Certificate Signing Request with (key, attestation token)
+    IMDS -->> MSAL: Certificate associated with key
+    MSAL ->> ESTS: Open mTLS connection to ESTS with this certificate and acquire token
+    ESTS -->> MSAL: token with special claim xms_tb
+    MSAL -->> App: token and certificate    
+```
+
+Technical diagram 
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant MSAL
+    participant IMDS
+    participant MAA as Azure MAA
+    participant ESTS as Entra STS (mTLS)
+
+    App  ->> MSAL: AcquireToken
     MSAL ->> IMDS: GET /metadata/identity/getPlatformMetadata
     IMDS -->> MSAL: client_id, tenant_id, cuid, maa_endpoint
-
+    
     alt Attestable CU
         MSAL ->> MAA: POST /attest/keyguard (attestation info)
         MAA  -->> MSAL: attestation_token

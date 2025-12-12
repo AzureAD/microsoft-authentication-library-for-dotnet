@@ -1,14 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Globalization;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -34,8 +31,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                
+                
 
                 var mi = miBuilder.Build();
 
@@ -55,16 +52,25 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
         [DataRow(MachineLearningEndpoint, ManagedIdentitySource.MachineLearning, ManagedIdentitySource.MachineLearning)]
-        public void TestAppServiceUpgradeScenario(
+        public async Task TestAppServiceUpgradeScenario(
             string endpoint,
             ManagedIdentitySource managedIdentitySource,
             ManagedIdentitySource expectedManagedIdentitySource)
         {
             using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
             {
                 SetUpgradeScenarioEnvironmentVariables(managedIdentitySource, endpoint);
 
-                Assert.AreEqual(expectedManagedIdentitySource, ManagedIdentityApplication.GetManagedIdentitySource());
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                
+                
+
+                ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;
+
+                Assert.AreEqual(expectedManagedIdentitySource, await mi.GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false));
             }
         }
     }

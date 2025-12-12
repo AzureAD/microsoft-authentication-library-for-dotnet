@@ -375,9 +375,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 var cca = CreateConfidentialClientApp();
 
                 await cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> {
-                        { "caller-sdk-id", "testApiId" },
-                        { "caller-sdk-ver", "testSdkVersion"} })
+                    .WithExtraQueryParameters(new Dictionary<string, (string, bool)> {
+                        { "caller-sdk-id", ("testApiId", false) },
+                        { "caller-sdk-ver", ("testSdkVersion", false)} })
                     .ExecuteAsync().ConfigureAwait(false);
 
                 AssertCurrentTelemetry(
@@ -403,9 +403,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 var cca = CreateConfidentialClientApp();
 
                 await cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> {
-                        { "caller-sdk-id", callerSdkId },
-                        { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(new Dictionary<string, (string, bool)> {
+                        { "caller-sdk-id", (callerSdkId, false) },
+                        { "caller-sdk-ver", (callerSdkVersion, false) } })
                     .ExecuteAsync().ConfigureAwait(false);
 
                 AssertCurrentTelemetry(

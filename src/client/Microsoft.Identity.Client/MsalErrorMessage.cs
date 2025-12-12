@@ -441,9 +441,15 @@ namespace Microsoft.Identity.Client
         public const string MtlsCertificateNotProvidedMessage = "mTLS Proof‑of‑Possession requires a certificate for this request. Either configure the application with .WithCertificate(...) or pass a certificate‑bound client‑assertion and chain .WithMtlsProofOfPossession() on the request builder. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsInvalidAuthorityTypeMessage = "mTLS PoP is only supported for AAD authority type. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsNonTenantedAuthorityNotAllowedMessage = "mTLS authentication requires a tenanted authority. Using 'common', 'organizations', or similar non-tenanted authorities is not allowed. Please provide an authority with a specific tenant ID (e.g., 'https://login.microsoftonline.com/{tenantId}'). See https://aka.ms/msal-net-pop for details.";
+        public const string MtlsNotSupportedForManagedIdentityMessage = "IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform.";
+        public const string MtlsNotSupportedForNonWindowsMessage = "mTLS PoP with Managed Identity is not supported on this OS. See https://aka.ms/msal-net-pop.";
         public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. mTLS Proof-of-Possession requires a region to be specified, as there is no global endpoint for mTLS. See https://aka.ms/msal-net-pop for details.";
         public const string ForceRefreshAndTokenHasNotCompatible = "Cannot specify ForceRefresh and AccessTokenSha256ToRefresh in the same request.";
         public const string RequestTimeOut = "Request to the endpoint timed out.";
         public const string MalformedOidcAuthorityFormat = "Possible cause: When using Entra External ID, you didn't append /v2.0, for example {0}/v2.0\"";
+        public const string InvalidCertificate = "The certificate received from the Imds server is invalid.";
+        public const string CannotSwitchBetweenImdsVersionsForPreview = "ImdsV2 is currently experimental - A Bearer token has already been received; Please restart the application to receive a mTLS PoP token.";
+        public const string MtlsPopTokenNotSupportedinImdsV1 = "A mTLS PoP token cannot be requested because the application\'s source was determined to be ImdsV1.";
+        public const string ManagedIdentityAllSourcesUnavailable = "All Managed Identity sources are unavailable.";
     }
 }
