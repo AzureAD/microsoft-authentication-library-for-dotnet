@@ -74,10 +74,8 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
-        // TODO: Tenant Migration - Regional endpoint may need update after migration
-        // Current: centralus (old tenant), New: eastus2 (id4slab1 tenant)
-        // Note: Regional endpoints may not work with new tenant due to AADSTS100007 restrictions
-        public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
+        // Updated for ID4SLAB1 tenant - using eastus2 regional endpoint
+        public const string ProductionPrefRegionalEnvironment = "eastus2.login.microsoft.com";
         public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
         public const string SovereignNetworkEnvironmentDE = "login.microsoftonline.de";
@@ -207,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string PKeyAuthResponse = "PKeyAuth Context=\"context\",Version=\"1.0\"";
 
         public const string RegionName = "REGION_NAME";
-        public const string Region = "centralus"; // TODO: Tenant Migration - Update for new tenant (id4slab1) is in eastus2
+        public const string Region = "eastus2"; // Updated for ID4SLAB1 tenant
         public const string InvalidRegion = "invalidregion";
         public const int TimeoutInMs = 2000;
         public const string ImdsHost = "169.254.169.254";
