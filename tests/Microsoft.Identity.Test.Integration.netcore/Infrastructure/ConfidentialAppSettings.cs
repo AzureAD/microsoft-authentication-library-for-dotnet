@@ -40,8 +40,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
         private class PublicCloudConfidentialAppSettings : IConfidentialAppSettings
         {
-            // TODO: Tenant Migration - Migrated to new id4slab1 tenant for non-regional tests
-            // Regional tests still use legacy configuration due to AADSTS100007 restrictions
+            // Migrated to new ID4SLAB1 tenant for both regional and non-regional tests
             public string ClientId => UseAppIdUri? "api://54a2d933-8bf8-483b-a8f8-0a31924f3c1f" : "54a2d933-8bf8-483b-a8f8-0a31924f3c1f"; // MSAL-APP-AzureADMultipleOrgs in ID4SLAB1 tenant
 
             public string TenantId => ID4SLab1TenantId; 
@@ -148,11 +147,10 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
         private class PublicLegacyCloudConfidentialAppSettings : IConfidentialAppSettings
         {
-            // Legacy MSIDLAB4 configuration for regional tests only
-            // Regional endpoints require original tenant due to AADSTS100007 restrictions
-            public string ClientId => UseAppIdUri? "api://88f91eac-c606-4c67-a0e2-a5e8a186854f" : "88f91eac-c606-4c67-a0e2-a5e8a186854f"; // Legacy MSAL app in MSIDLAB4 tenant
+            // Updated to use MSAL-APP-AzureADMultipleOrgs in ID4SLAB1 tenant for regional tests
+            public string ClientId => UseAppIdUri? "api://54a2d933-8bf8-483b-a8f8-0a31924f3c1f" : "54a2d933-8bf8-483b-a8f8-0a31924f3c1f"; // MSAL-APP-AzureADMultipleOrgs in ID4SLAB1 tenant
 
-            public string TenantId => "f645ad92-e38d-4d1a-b510-d1b09a74a8ca"; // MSIDLAB4 tenant (legacy)
+            public string TenantId => "10c419d4-4a50-45b2-aa4e-919fb84df24f"; // ID4SLAB1 tenant
 
             public string Environment => "login.microsoftonline.com";
 
@@ -168,7 +166,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public X509Certificate2 Certificate => GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
 
-            public string Secret => GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalCCAKeyVaultSecretName).Value;
+            public string Secret => GetSecretLazy(KeyVaultInstance.MsalTeam, "MSAL-APP-AzureADMultipleOrgs").Value;
         }
 
         private static Lazy<IConfidentialAppSettings> s_publicCloudSettings =

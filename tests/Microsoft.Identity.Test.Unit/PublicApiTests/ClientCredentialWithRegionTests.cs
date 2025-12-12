@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test for regional auth with successful instance discovery.")]
         public async Task FetchRegionFromLocalImdsCallAsync()
         {
-            const string region = "centralus";
+            string region = TestConstants.Region;
 
             using (new EnvVariableContext())
             using (var harness = base.CreateTestHarness())
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
                 Assert.AreEqual(
-                    "https://centralus.login.microsoft.com/common/oauth2/v2.0/token",
+                    $"https://{TestConstants.Region}.login.microsoft.com/common/oauth2/v2.0/token",
                     result.AuthenticationResultMetadata.TokenEndpoint);
                 Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
