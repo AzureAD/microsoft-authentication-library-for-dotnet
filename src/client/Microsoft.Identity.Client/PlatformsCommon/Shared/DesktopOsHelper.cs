@@ -52,8 +52,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #elif NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.MacOSX;
 #elif NET8_0_OR_GREATER
-            string OSDescription = RuntimeInformation.OSDescription;
-            return OSDescription.Contains("Darwin", StringComparison.OrdinalIgnoreCase);
+            return OperatingSystem.IsMacOS();
 #else
             return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 #endif

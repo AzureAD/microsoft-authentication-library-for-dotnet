@@ -36,12 +36,14 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
     public class ConfidentialAppSettings
     {
+        public const string ID4SLab1TenantId = "10c419d4-4a50-45b2-aa4e-919fb84df24f";
+
         private class PublicCloudConfidentialAppSettings : IConfidentialAppSettings
         {
             // Migrated to new ID4SLAB1 tenant for both regional and non-regional tests
             public string ClientId => UseAppIdUri? "api://54a2d933-8bf8-483b-a8f8-0a31924f3c1f" : "54a2d933-8bf8-483b-a8f8-0a31924f3c1f"; // MSAL-APP-AzureADMultipleOrgs in ID4SLAB1 tenant
 
-            public string TenantId => "10c419d4-4a50-45b2-aa4e-919fb84df24f"; // ID4SLAB1 tenant
+            public string TenantId => ID4SLab1TenantId; 
 
             public string Environment => "login.microsoftonline.com";
 
