@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         
         private KeyVaultSecretsProvider _keyVault;
 
-        private const string RegionalHost = "centralus.login.microsoft.com";
+        private readonly string RegionalHost = $"{TestConstants.Region}.login.microsoft.com";
         private const string GlobalHost = "login.microsoftonline.com";
         private IConfidentialClientApplication _confidentialClientApplication;
 
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheRefreshReason.NoCachedAccessToken:D},centralus,3,4|0,1,1,,");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheRefreshReason.NoCachedAccessToken:D},{TestConstants.Region},3,4|0,1,1,,");
             Assert.AreEqual(
                 $"https://{RegionalHost}/{settings.TenantId}/oauth2/v2.0/token",
                 result.AuthenticationResultMetadata.TokenEndpoint);

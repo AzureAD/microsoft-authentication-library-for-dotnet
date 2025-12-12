@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"centralus.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual($"{TestConstants.Region}.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
 
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"centralus.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual($"{TestConstants.Region}.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.UserProvidedValid, _testRequestContext.ApiEvent.RegionOutcome);
@@ -298,7 +298,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             // Assert
             Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual("centralus.login.someenv.com", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual($"{TestConstants.Region}.login.someenv.com", regionalMetadata.PreferredNetwork);
         }
 
         [TestMethod]
@@ -516,7 +516,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
         }
 
-        private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = "centralus")
+        private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = TestConstants.Region)
         {
             InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
             {

@@ -563,7 +563,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 }).ConfigureAwait(false);
 
                 Assert.IsTrue(ex.Message.Contains("Authority used: https://sts.access.edu/my-utid/"));
-                Assert.IsTrue(ex.Message.Contains("Token Endpoint: https://centralus.sts.access.edu/my-utid/oauth2/v2.0/token"));
+                Assert.IsTrue(ex.Message.Contains($"Token Endpoint: https://{TestConstants.Region}.sts.access.edu/my-utid/oauth2/v2.0/token"));
                 Assert.IsTrue(ex.Message.Contains($"Region Used: {TestConstants.Region}"));
 
                 //harness.HttpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant + TestConstants.DiscoveryEndPoint));

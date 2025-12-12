@@ -399,7 +399,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public async Task MtlsPop_KnownRegionAsync()
         {
-            const string region = "centralus";
+            string region = TestConstants.Region;
             string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
             string globalEndpoint = "mtlsauth.microsoft.com";
             string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
@@ -431,7 +431,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public async Task MtlsPop_RegionalTokenCacheInterchangeabilityAsync()
         {
-            const string region = "centralus";
+            string region = TestConstants.Region;
             string authority = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
             string globalEndpoint = "mtlsauth.microsoft.com";
             string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
