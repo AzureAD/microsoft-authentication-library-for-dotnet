@@ -1,3 +1,10 @@
 ﻿const Microsoft.Identity.Client.MsalError.ImdsServiceError = "imds_service_error" -> string
 const Microsoft.Identity.Client.MsalError.ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable" -> string
-Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ManagedIdentitySourceResult(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> void
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.Source.get -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult>
