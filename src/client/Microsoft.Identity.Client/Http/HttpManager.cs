@@ -140,22 +140,17 @@ namespace Microsoft.Identity.Client.Http
 
                 if (headers != null && headers.Count > 0)
                 {
-                    string correlationIdMsg = string.Empty;
-                    string correlationId = null;
-
-                    if (headers.ContainsKey(OAuth2Header.CorrelationId))
-                    {
-                        correlationId = headers[OAuth2Header.CorrelationId];
-                        correlationIdMsg = $" CorrelationId: {correlationId}";
-                    }
-
                     var ex = new MsalServiceException(
                                 MsalError.RequestTimeout,
-                                msg + correlationIdMsg,
+                                msg,
                                 timeoutException);
 
-                    if (correlationId != null)
+                    if (headers.TryGetValue(OAuth2Header.CorrelationId, out var correlationId))
                     {
+                        ex = new MsalServiceException(
+                                    MsalError.RequestTimeout,
+                                    msg + $" CorrelationId: {correlationId}",
+                                    timeoutException);
                         ex.CorrelationId = correlationId;
                     }
 
