@@ -138,21 +138,16 @@ namespace Microsoft.Identity.Client.Http
                 //If the correlation id is available, include it in the exception message
                 string msg = MsalErrorMessage.RequestTimeOut;
 
-                if (headers != null && headers.Count > 0)
+                if (headers != null && headers.Count > 0 && 
+                    headers.TryGetValue(OAuth2Header.CorrelationId, out var correlationId))
                 {
                     var ex = new MsalServiceException(
                                 MsalError.RequestTimeout,
-                                msg,
-                                timeoutException);
-
-                    if (headers.TryGetValue(OAuth2Header.CorrelationId, out var correlationId))
+                                msg + $" CorrelationId: {correlationId}",
+                                timeoutException)
                     {
-                        ex = new MsalServiceException(
-                                    MsalError.RequestTimeout,
-                                    msg + $" CorrelationId: {correlationId}",
-                                    timeoutException);
-                        ex.CorrelationId = correlationId;
-                    }
+                        CorrelationId = correlationId
+                    };
 
                     throw ex;
                 }
