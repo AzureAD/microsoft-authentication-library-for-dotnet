@@ -173,7 +173,8 @@ namespace Microsoft.Identity.Client
             Config.ClientCredential = new CertificateAndClaimsClientCredential(
                 certificateProvider: _ => Task.FromResult(certificate),
                 claimsToSign: claimsToSign,
-                appendDefaultClaims: mergeWithDefaultClaims);
+                appendDefaultClaims: mergeWithDefaultClaims,
+                certificate: certificate);
             Config.SendX5C = sendX5C;
             return this;
         }

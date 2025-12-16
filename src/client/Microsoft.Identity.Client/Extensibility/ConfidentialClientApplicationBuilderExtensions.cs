@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </example>
         public static ConfidentialClientApplicationBuilder OnMsalServiceFailure(
             this ConfidentialClientApplicationBuilder builder,
-            Func<AssertionRequestOptions, MsalException, Task<bool>> onMsalServiceFailure)
+            Func<AssertionRequestOptions, ExecutionResult, Task<bool>> onMsalServiceFailure)
         {
             if (onMsalServiceFailure == null)
                 throw new ArgumentNullException(nameof(onMsalServiceFailure));

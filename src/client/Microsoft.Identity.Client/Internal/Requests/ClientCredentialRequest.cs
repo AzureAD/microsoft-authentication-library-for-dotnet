@@ -204,8 +204,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     tokenEndpoint,
                     AuthenticationRequestParameters.AuthorityManager.Authority.TenantId);
                 
+                var executionResult = new ExecutionResult
+                {
+                    Successful = false,
+                    Result = null,
+                    Exception = serviceException,
+                    Certificate = AuthenticationRequestParameters.ResolvedCertificate
+                };
+                
                 bool shouldRetry = await AuthenticationRequestParameters.AppConfig
-                    .OnMsalServiceFailure(options, serviceException)
+                    .OnMsalServiceFailure(options, executionResult)
                     .ConfigureAwait(false);
                 
                 logger.Verbose(() => $"[ClientCredentialRequest] OnMsalServiceFailure returned: {shouldRetry}");

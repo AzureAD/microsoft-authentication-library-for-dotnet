@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void OnMsalServiceFailure_CallbackIsStored()
         {
             // Arrange
-            Task<bool> onMsalServiceFailureCallback(AssertionRequestOptions options, MsalException ex) => Task.FromResult(false);
+            Task<bool> onMsalServiceFailureCallback(AssertionRequestOptions options, ExecutionResult result) => Task.FromResult(false);
 
             // Act
             var app = ConfidentialClientApplicationBuilder
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                     .OnMsalServiceFailure(null)
                     .Build());
 
-            Assert.AreEqual("onMsalServiceFailureCallback", ex.ParamName);
+            Assert.AreEqual("onMsalServiceFailure", ex.ParamName);
         }
 
         #endregion
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Arrange
             Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
-            Task<bool> onMsalServiceFailure(AssertionRequestOptions options, MsalException ex) => Task.FromResult(false);
+            Task<bool> onMsalServiceFailure(AssertionRequestOptions options, ExecutionResult result) => Task.FromResult(false);
             Task onSuccess(AssertionRequestOptions options, ExecutionResult result) => Task.CompletedTask;
 
             // Act
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Arrange
             Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
-            Task<bool> onMsalServiceFailure(AssertionRequestOptions options, MsalException ex) => Task.FromResult(false);
+            Task<bool> onMsalServiceFailure(AssertionRequestOptions options, ExecutionResult result) => Task.FromResult(false);
             Task onSuccess(AssertionRequestOptions options, ExecutionResult result) => Task.CompletedTask;
 
             // Act - Order: OnCompletion, OnMsalServiceFailure, Certificate

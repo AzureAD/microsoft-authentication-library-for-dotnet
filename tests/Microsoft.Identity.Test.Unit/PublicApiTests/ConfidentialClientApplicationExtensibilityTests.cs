@@ -120,18 +120,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 int failureCallbackCount = 0;
                 MsalServiceException capturedException = null;
+                var cert = CertHelper.GetOrCreateTestCert();
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
-                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithCertificate(cert)
                     .WithHttpManager(harness.HttpManager)
-                    .OnMsalServiceFailure((AssertionRequestOptions options, MsalException ex) =>
+                    .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         failureCallbackCount++;
-                        capturedException = ex as MsalServiceException;
+                        capturedException = result.Exception as MsalServiceException;
                         
+                        // Validate ExecutionResult contains exception and certificate
+                        Assert.IsFalse(result.Successful, "Result should indicate failure");
+                        Assert.IsNull(result.Result, "Result should be null on failure");
+                        Assert.IsNotNull(result.Exception, "Exception should be present");
+                        Assert.IsNotNull(result.Certificate, "Certificate should be present");
                         Assert.IsNotNull(capturedException, "Exception should be MsalServiceException");
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in failure callback");
@@ -175,9 +181,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .OnMsalServiceFailure((AssertionRequestOptions options, MsalException ex) =>
+                    .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         callbackInvoked = true;
+                        // Validate ExecutionResult
+                        Assert.IsFalse(result.Successful);
+                        Assert.IsNotNull(result.Exception);
+                        Assert.IsNotNull(result.Certificate);
                         return Task.FromResult(false); // Don't retry
                     })
                     .Build();
@@ -215,7 +225,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     {
                         return Task.FromResult<System.Security.Cryptography.X509Certificates.X509Certificate2>(null); // Will cause MsalClientException
                     })
-                    .OnMsalServiceFailure((AssertionRequestOptions options, MsalException ex) =>
+                    .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         callbackInvoked = true;
                         return Task.FromResult(false);
@@ -266,6 +276,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         
                         Assert.IsTrue(result.Successful);
                         Assert.IsNotNull(result.Result);
+                        Assert.IsNotNull(result.Certificate);
                         Assert.IsNull(result.Exception);
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in success callback");
@@ -306,16 +317,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 bool observerInvoked = false;
                 ExecutionResult capturedResult = null;
 
+                var certificate = CertHelper.GetOrCreateTestCert();
+
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
-                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithCertificate(certificate)
                     .WithHttpManager(harness.HttpManager)
                     .WithLogging(logCallback, LogLevel.Info, enablePiiLogging: true, enableDefaultPlatformLogging: false)
-                    .OnMsalServiceFailure((AssertionRequestOptions options, MsalException ex) =>
+                    .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         retryCount++;
+                        // Validate ExecutionResult
+                        Assert.IsFalse(result.Successful);
+                        Assert.IsNotNull(result.Exception);
+                        Assert.IsNotNull(result.Certificate);
                         return Task.FromResult(retryCount < 2); // Retry once, then give up
                     })
                     .OnCompletion((AssertionRequestOptions options, ExecutionResult result) =>
@@ -326,6 +343,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsFalse(result.Successful);
                         Assert.IsNull(result.Result);
                         Assert.IsNotNull(result.Exception);
+                        Assert.IsNotNull(result.Certificate);
                         Assert.IsInstanceOfType(result.Exception, typeof(MsalServiceException));
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available even on failure");
                         
@@ -425,10 +443,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in cert provider");
                         return Task.FromResult(certificate);
                     })
-                    .OnMsalServiceFailure((AssertionRequestOptions options, MsalException ex) =>
+                    .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         retryCallbackCount++;
-                        Assert.IsInstanceOfType(ex, typeof(MsalServiceException));
+                        // Validate ExecutionResult contains exception and certificate
+                        Assert.IsFalse(result.Successful, "Result should indicate failure");
+                        Assert.IsNotNull(result.Exception, "Exception should be present");
+                        Assert.IsNotNull(result.Certificate, "Certificate should be present from cert provider");
+                        Assert.IsInstanceOfType(result.Exception, typeof(MsalServiceException));
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in retry callback");
                         return Task.FromResult(retryCallbackCount < 2); // Retry once
                     })
@@ -487,8 +509,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         // Return different cert on retry
                         return Task.FromResult(certProviderCount == 1 ? cert1 : cert2);
                     })
-                    .OnMsalServiceFailure((AssertionRequestOptions options, MsalException ex) =>
+                    .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
                     {
+                        // Validate ExecutionResult
+                        Assert.IsFalse(result.Successful);
+                        Assert.IsNotNull(result.Exception);
+                        Assert.IsNotNull(result.Certificate, "Certificate should be present (cert1 in this case)");
                         return Task.FromResult(true); // Always retry once
                     })
                     .Build();

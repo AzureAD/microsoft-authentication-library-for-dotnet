@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client
         /// MSAL service failure callback that determines whether to retry after a token acquisition failure from the identity provider.
         /// Only invoked for MsalServiceException (errors from the Security Token Service).
         /// </summary>
-        public Func<AssertionRequestOptions, MsalException, Task<bool>> OnMsalServiceFailure { get; set; }
+        public Func<AssertionRequestOptions, ExecutionResult, Task<bool>> OnMsalServiceFailure { get; set; }
 
         /// <summary>
         /// Success callback that receives the result of token acquisition attempts (typically successful, but can include failures after retries are exhausted).
@@ -179,6 +179,12 @@ namespace Microsoft.Identity.Client
                 if (ClientCredential is CertificateClientCredential certCred)
                 {
                     return certCred.Certificate;
+                }
+                
+                // Return the certificate if using CertificateAndClaimsClientCredential with a static certificate
+                if (ClientCredential is CertificateAndClaimsClientCredential certAndClaimsCred)
+                {
+                    return certAndClaimsCred.Certificate;
                 }
                
                 return null;

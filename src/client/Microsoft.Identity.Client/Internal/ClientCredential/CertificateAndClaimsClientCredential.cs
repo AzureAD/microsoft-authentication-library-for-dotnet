@@ -23,20 +23,29 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public AssertionType AssertionType => AssertionType.CertificateWithoutSni;
 
         /// <summary>
+        /// The static certificate if one was provided directly; otherwise null.
+        /// This is used for backward compatibility with the Certificate property on ConfidentialClientApplication.
+        /// </summary>
+        public X509Certificate2 Certificate { get; }
+
+        /// <summary>
         /// Constructor that accepts a certificate provider delegate.
         /// This allows both static certificates (via a simple delegate) and dynamic certificate resolution.
         /// </summary>
         /// <param name="certificateProvider">Async delegate that provides the certificate</param>
         /// <param name="claimsToSign">Additional claims to include in the client assertion</param>
         /// <param name="appendDefaultClaims">Whether to append default claims</param>
+        /// <param name="certificate">Optional static certificate for backward compatibility</param>
         public CertificateAndClaimsClientCredential(
             Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider,
             IDictionary<string, string> claimsToSign, 
-            bool appendDefaultClaims)
+            bool appendDefaultClaims,
+            X509Certificate2 certificate = null)
         {
             _certificateProvider = certificateProvider;
             _claimsToSign = claimsToSign;
             _appendDefaultClaims = appendDefaultClaims;
+            Certificate = certificate;
         }
 
         public async Task AddConfidentialClientParametersAsync(
