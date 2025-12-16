@@ -303,22 +303,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     retryPolicy: retryPolicy)
                 .ConfigureAwait(false);
             }
-            // only throw on cancellation exceptions
-            catch (OperationCanceledException ex)
-            {
-                string failureMessage = $"{imdsStringHelper} probe timed out or was cancelled.";
-                requestContext.Logger.Error($"[Managed Identity] {failureMessage}");
-
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.ImdsServiceError,
-                    $"[Managed Identity] {failureMessage} The {imdsStringHelper} probe endpoint did not respond within the expected time.",
-                    ex,
-                    imdsVersion == ImdsVersion.V2 ? ManagedIdentitySource.ImdsV2 : ManagedIdentitySource.Imds,
-                    null);
-
-                throw exception;
-            }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 string failureMessage = $"{imdsStringHelper} probe failed. Exception: {ex.Message}";
                 requestContext.Logger.Info(() => $"[Managed Identity] {failureMessage}");

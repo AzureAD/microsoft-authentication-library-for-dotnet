@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 if (!string.IsNullOrEmpty(sourceResult.ImdsV1FailureReason) || !string.IsNullOrEmpty(sourceResult.ImdsV2FailureReason))
                 {
-                    errorMessage += " IMDS probe failures:";
+                    errorMessage += " MSAL was not able to detect the Azure Instance Metadata Service (IMDS) that runs on VMs:";
                     if (!string.IsNullOrEmpty(sourceResult.ImdsV2FailureReason))
                     {
                         errorMessage += $" IMDSv2: {sourceResult.ImdsV2FailureReason}.";
