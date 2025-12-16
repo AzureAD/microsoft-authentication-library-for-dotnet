@@ -40,7 +40,7 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.MtlsPop;
+using Microsoft.Identity.Client.KeyAttestation;
 using Microsoft.IdentityModel.Abstractions;
 using System.Net.Http;
 using System.Net.Http.Headers;
