@@ -1,3 +1,10 @@
+const Microsoft.Identity.Client.MsalError.ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable" -> string
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.FormatResultAsync(Microsoft.Identity.Client.AuthenticationResult authenticationResult, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.ValidateCachedTokenAsync(Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData cachedTokenData) -> System.Threading.Tasks.Task<bool>
+Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData
+Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.MsalCacheValidationData() -> void
+Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.PersistedCacheParameters.get -> System.Collections.Generic.IDictionary<string, string>
 Microsoft.Identity.Client.AssertionRequestOptions.Authority.get -> string
 Microsoft.Identity.Client.AssertionRequestOptions.Authority.set -> void
 Microsoft.Identity.Client.AssertionRequestOptions.TenantId.get -> string
@@ -12,4 +19,3 @@ Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsy
 static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnCompletion(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task> onCompletion) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnMsalServiceFailure(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task<bool>> onMsalServiceFailure) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2>> certificateProvider) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
-?const Microsoft.Identity.Client.MsalError.ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable" -> string

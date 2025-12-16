@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
@@ -9,7 +11,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
-    internal class ExternalBoundTokenScheme : IAuthenticationOperation
+    internal class ExternalBoundTokenScheme : IAuthenticationOperation2
     {
         private readonly string _keyId;
         private readonly string _tokenType;
@@ -28,6 +30,11 @@ namespace Microsoft.Identity.Client.Extensibility
 
         public string AccessTokenType => _tokenType;
 
+        public Task FormatResultAsync(AuthenticationResult authenticationResult, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+
         public void FormatResult(AuthenticationResult authenticationResult)
         {
             // no-op
@@ -36,6 +43,12 @@ namespace Microsoft.Identity.Client.Extensibility
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             return CollectionHelpers.GetEmptyDictionary<string, string>();
+        }
+
+        public Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData)
+        {
+            // no-op
+            return Task.FromResult(true);
         }
     }
 }

@@ -196,6 +196,28 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(Constants.MtlsPoPTokenType, scheme.AccessTokenType);
         }
 
+        [TestMethod]
+        public void SchemeSetsCert()
+        {
+            var scheme = new MtlsPopAuthenticationOperation(s_testCertificate);
+            AuthenticationResult ar = new AuthenticationResult();
+
+            scheme.FormatResult(ar);
+
+            Assert.AreSame(s_testCertificate, ar.BindingCertificate);
+        }
+
+        [TestMethod]
+        public async Task SchemeSetsCertAsync()
+        {
+            var scheme = new MtlsPopAuthenticationOperation(s_testCertificate);
+            AuthenticationResult ar = new AuthenticationResult();
+
+            await scheme.FormatResultAsync(ar).ConfigureAwait(false);
+
+            Assert.AreSame(s_testCertificate, ar.BindingCertificate);
+        }
+
         private static string ComputeExpectedKeyId(X509Certificate2 certificate)
         {
             // Get the raw public key bytes
