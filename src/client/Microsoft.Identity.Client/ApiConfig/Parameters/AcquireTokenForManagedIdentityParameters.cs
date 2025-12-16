@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public bool IsMtlsPopRequested { get; set; }
 
-        internal Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> AttestationTokenProvider { get; set; }
+        public bool IsAttestationRequested { get; set; }
 
         internal X509Certificate2 MtlsCertificate { get; set; }
 

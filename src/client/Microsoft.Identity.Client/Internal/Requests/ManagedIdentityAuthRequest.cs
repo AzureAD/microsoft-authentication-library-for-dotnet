@@ -216,9 +216,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
 
-            // Ensure the attestation provider reaches RequestContext for IMDSv2
-            AuthenticationRequestParameters.RequestContext.AttestationTokenProvider ??=
-                _managedIdentityParameters.AttestationTokenProvider;
+            // Pass the attestation flag to the request context
+            AuthenticationRequestParameters.RequestContext.IsAttestationRequested =
+                _managedIdentityParameters.IsAttestationRequested;
 
             ManagedIdentityResponse managedIdentityResponse =
                 await _managedIdentityClient

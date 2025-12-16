@@ -96,28 +96,12 @@ namespace Microsoft.Identity.Client
             return ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity;
         }
 
-        /// <summary>
-        /// TEST HOOK ONLY: Allows unit tests to inject a fake attestation-token provider
-        /// so we don't hit the real attestation service. Not part of the public API.
-        /// </summary>
-        internal AcquireTokenForManagedIdentityParameterBuilder WithAttestationProviderForTests(
-            Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> provider)
-        {
-            if (provider is null)
-            {
-                throw new ArgumentNullException(nameof(provider));
-            }
-
-            CommonParameters.AttestationTokenProvider = provider;
-            return this;
-        }
-
         private static void ApplyMtlsPopAndAttestation(
             AcquireTokenCommonParameters acquireTokenCommonParameters,
             AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
         {
             acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
-            acquireTokenForManagedIdentityParameters.AttestationTokenProvider ??= acquireTokenCommonParameters.AttestationTokenProvider;
+            acquireTokenForManagedIdentityParameters.IsAttestationRequested = acquireTokenCommonParameters.IsAttestationRequested;
         }
     }
 }

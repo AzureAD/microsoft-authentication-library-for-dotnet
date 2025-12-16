@@ -26,40 +26,12 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            // Register the attestation token provider
-            return builder.WithAttestationProviderForTests(async (req, ct) =>
-            {
-                // Get the caller-provided KeyGuard/CNG handle
-                var keyHandle = req.KeyHandle;
+            // Ensure the provider is registered (triggers static constructor on older frameworks)
+            Attestation.AttestationProviderInitializer.Initialize();
 
-                if (keyHandle == null)
-                {
-                    throw new MsalClientException(
-                        "attestation_key_handle_missing",
-                        "KeyHandle is required for attestation but was not provided.");
-                }
-
-                // Call the native interop via PopKeyAttestor
-                AttestationResult attestationResult = await PopKeyAttestor.AttestKeyGuardAsync(
-                    req.AttestationEndpoint.AbsoluteUri,
-                    keyHandle,
-                    req.ClientId ?? string.Empty,
-                    ct).ConfigureAwait(false);
-
-                // Map to MSAL's internal response
-                if (attestationResult != null &&
-                    attestationResult.Status == AttestationStatus.Success &&
-                    !string.IsNullOrWhiteSpace(attestationResult.Jwt))
-                {
-                    return new AttestationTokenResponse { AttestationToken = attestationResult.Jwt };
-                }
-
-                throw new MsalClientException(
-                    "attestation_failure",
-                    $"Key Attestation failed " +
-                    $"(status={attestationResult?.Status}, " +
-                    $"code={attestationResult?.NativeErrorCode}). {attestationResult?.ErrorMessage}");
-            });
+            // Set the flag to enable attestation
+            builder.CommonParameters.IsAttestationRequested = true;
+            return builder;
         }
     }
 }
