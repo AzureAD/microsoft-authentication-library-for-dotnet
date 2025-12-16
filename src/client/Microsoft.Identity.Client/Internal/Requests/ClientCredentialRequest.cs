@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     Successful = false,
                     Result = null,
                     Exception = serviceException,
-                    Certificate = AuthenticationRequestParameters.ResolvedCertificate
+                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
                 };
                 
                 bool shouldRetry = await AuthenticationRequestParameters.AppConfig
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     Successful = authResult != null,
                     Result = authResult,
                     Exception = exception,
-                    Certificate = AuthenticationRequestParameters.ResolvedCertificate
+                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
                 };
                 
                 await AuthenticationRequestParameters.AppConfig

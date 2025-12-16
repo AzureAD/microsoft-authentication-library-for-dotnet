@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert
-                Assert.IsTrue(providerInvoked, "Certificate provider should have been invoked");
+                Assert.IsTrue(providerInvoked, "ClientCertificate provider should have been invoked");
                 Assert.IsNotNull(capturedOptions);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsFalse(result.Successful, "Result should indicate failure");
                         Assert.IsNull(result.Result, "Result should be null on failure");
                         Assert.IsNotNull(result.Exception, "Exception should be present");
-                        Assert.IsNotNull(result.Certificate, "Certificate should be present");
+                        Assert.IsNotNull(result.ClientCertificate, "ClientCertificate should be present");
                         Assert.IsNotNull(capturedException, "Exception should be MsalServiceException");
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in failure callback");
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         // Validate ExecutionResult
                         Assert.IsFalse(result.Successful);
                         Assert.IsNotNull(result.Exception);
-                        Assert.IsNotNull(result.Certificate);
+                        Assert.IsNotNull(result.ClientCertificate);
                         return Task.FromResult(false); // Don't retry
                     })
                     .Build();
@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         
                         Assert.IsTrue(result.Successful);
                         Assert.IsNotNull(result.Result);
-                        Assert.IsNotNull(result.Certificate);
+                        Assert.IsNotNull(result.ClientCertificate);
                         Assert.IsNull(result.Exception);
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in success callback");
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         // Validate ExecutionResult
                         Assert.IsFalse(result.Successful);
                         Assert.IsNotNull(result.Exception);
-                        Assert.IsNotNull(result.Certificate);
+                        Assert.IsNotNull(result.ClientCertificate);
                         return Task.FromResult(retryCount < 2); // Retry once, then give up
                     })
                     .OnCompletion((AssertionRequestOptions options, ExecutionResult result) =>
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsFalse(result.Successful);
                         Assert.IsNull(result.Result);
                         Assert.IsNotNull(result.Exception);
-                        Assert.IsNotNull(result.Certificate);
+                        Assert.IsNotNull(result.ClientCertificate);
                         Assert.IsInstanceOfType(result.Exception, typeof(MsalServiceException));
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available even on failure");
                         
@@ -449,7 +449,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         // Validate ExecutionResult contains exception and certificate
                         Assert.IsFalse(result.Successful, "Result should indicate failure");
                         Assert.IsNotNull(result.Exception, "Exception should be present");
-                        Assert.IsNotNull(result.Certificate, "Certificate should be present from cert provider");
+                        Assert.IsNotNull(result.ClientCertificate, "ClientCertificate should be present from cert provider");
                         Assert.IsInstanceOfType(result.Exception, typeof(MsalServiceException));
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in retry callback");
                         return Task.FromResult(retryCallbackCount < 2); // Retry once
@@ -486,7 +486,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [Description("Certificate rotation scenario: different cert returned on retry")]
+        [Description("ClientCertificate rotation scenario: different cert returned on retry")]
         public async Task CertificateRotation_DifferentCertOnRetryAsync()
         {
             // Arrange
@@ -514,7 +514,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         // Validate ExecutionResult
                         Assert.IsFalse(result.Successful);
                         Assert.IsNotNull(result.Exception);
-                        Assert.IsNotNull(result.Certificate, "Certificate should be present (cert1 in this case)");
+                        Assert.IsNotNull(result.ClientCertificate, "ClientCertificate should be present (cert1 in this case)");
                         return Task.FromResult(true); // Always retry once
                     })
                     .Build();

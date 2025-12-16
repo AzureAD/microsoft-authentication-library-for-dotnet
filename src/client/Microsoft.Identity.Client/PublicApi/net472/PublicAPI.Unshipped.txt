@@ -5,7 +5,7 @@ Microsoft.Identity.Client.AssertionRequestOptions.TenantId.get -> string
 Microsoft.Identity.Client.AssertionRequestOptions.TenantId.set -> void
 const Microsoft.Identity.Client.MsalError.InvalidClientCredentialConfiguration = "invalid_client_credential_configuration" -> string
 Microsoft.Identity.Client.Extensibility.ExecutionResult
-Microsoft.Identity.Client.Extensibility.ExecutionResult.Certificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.Extensibility.ExecutionResult.ClientCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
 Microsoft.Identity.Client.Extensibility.ExecutionResult.Exception.get -> Microsoft.Identity.Client.MsalException
 Microsoft.Identity.Client.Extensibility.ExecutionResult.Result.get -> Microsoft.Identity.Client.AuthenticationResult
 Microsoft.Identity.Client.Extensibility.ExecutionResult.Successful.get -> bool

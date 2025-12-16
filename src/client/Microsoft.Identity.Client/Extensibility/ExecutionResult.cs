@@ -53,10 +53,8 @@ namespace Microsoft.Identity.Client.Extensibility
         /// otherwise, <c>null</c> if certificate authentication was not used or if the certificate is not available.
         /// </value>
         /// <remarks>
-        /// This property provides access to the certificate for logging and auditing purposes.
-        /// The certificate may be disposed after the token acquisition completes, so accessing its properties
-        /// may throw exceptions if the certificate has been disposed.
+        /// This property provides access to the certificate used during the token acquisition for this request.
         /// </remarks>
-        public X509Certificate2 Certificate { get; internal set; }
+        public X509Certificate2 ClientCertificate { get; internal set; }
     }
 }
