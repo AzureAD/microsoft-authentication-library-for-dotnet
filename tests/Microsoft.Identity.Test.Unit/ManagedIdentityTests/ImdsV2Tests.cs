@@ -893,7 +893,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var first = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(first);
@@ -906,7 +905,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var second = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(second);
@@ -1122,7 +1120,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var first = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(MTLSPoP, first.TokenType, $"[{label}]");
@@ -1130,7 +1127,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var second = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource, $"[{label}] cache");
