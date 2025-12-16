@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -15,10 +16,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class Agentic
     {
-        const string ClientId = "d15884b6-a447-4dd5-a5a5-a668c49f6300"; // agent app
-        const string TenantId = "31a58c3b-ae9c-4448-9e8f-e9e143e800df";
-        const string AgentIdentity = "d84da24a-2ea2-42b8-b5ab-8637ec208024";
-        const string UserUpn = "aui1@msidlabtoint.onmicrosoft.com";
+        const string ClientId = "aab5089d-e764-47e3-9f28-cc11c2513821"; // agent app
+        const string TenantId = "10c419d4-4a50-45b2-aa4e-919fb84df24f";
+        const string AgentIdentity = "ab18ca07-d139-4840-8b3b-4be9610c6ed5";
+        const string UserUpn = "agentuser1@id4slab1.onmicrosoft.com";
         private const string TokenExchangeUrl = "api://AzureADTokenExchange/.default";
         private const string Scope = "https://graph.microsoft.com/.default";
 
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
                         .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                         .WithExperimentalFeatures(true)
-                        .WithExtraQueryParameters("slice=first")
+                        .WithExtraQueryParameters(new Dictionary<string, (string value, bool includeInCacheKey)> { { "slice", ("first", false) } })
                         .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
                         .Build();
 

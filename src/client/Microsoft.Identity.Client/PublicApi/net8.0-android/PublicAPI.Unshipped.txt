@@ -1,4 +1,4 @@
-const Microsoft.Identity.Client.MsalError.CannotSwitchBetweenImdsVersionsForPreview = "cannot_switch_between_imds_versions_for_preview" -> string
+﻿const Microsoft.Identity.Client.MsalError.CannotSwitchBetweenImdsVersionsForPreview = "cannot_switch_between_imds_versions_for_preview" -> string
 const Microsoft.Identity.Client.MsalError.InvalidCertificate = "invalid_certificate" -> string
 const Microsoft.Identity.Client.MsalError.MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity" -> string
 const Microsoft.Identity.Client.MsalError.MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1" -> string
@@ -14,3 +14,5 @@ Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithExtraQueryParame
 static Microsoft.Identity.Client.ApplicationBase.ResetStateForTest() -> void
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.FormatResultAsync(Microsoft.Identity.Client.AuthenticationResult authenticationResult, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
+const Microsoft.Identity.Client.MsalError.ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable" -> string
+Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>

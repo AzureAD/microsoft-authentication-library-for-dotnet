@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -26,25 +25,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         // Central, process-local cache for mTLS binding (cert + endpoint + canonical client_id).
         internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
 
-        // Per-key async de-duplication so concurrent callers don’t double-mint.
-        internal static readonly ConcurrentDictionary<string, SemaphoreSlim> s_perKeyGates =
-            new ConcurrentDictionary<string, SemaphoreSlim>(StringComparer.Ordinal);
+        private readonly IMtlsCertificateCache _mtlsCache;
 
         // used in unit tests
+        public const string ApiVersionQueryParam = "cred-api-version";
         public const string ImdsV2ApiVersion = "2.0";
         public const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
         public const string CertificateRequestPath = "/metadata/identity/issuecredential";
         public const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
 
-        public static async Task<CsrMetadata> GetCsrMetadataAsync(
-            RequestContext requestContext,
-            bool probeMode)
+        public static async Task<CsrMetadata> GetCsrMetadataAsync(RequestContext requestContext)
         {
-#if NET462
-            requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
-            return await Task.FromResult<CsrMetadata>(null).ConfigureAwait(false);
-#else
-            var queryParams = ImdsV2QueryParamsHelper(requestContext);
+            var queryParams = ImdsManagedIdentitySource.ImdsQueryParamsHelper(requestContext, ApiVersionQueryParam, ImdsV2ApiVersion);
 
             var headers = new Dictionary<string, string>
             {
@@ -53,7 +45,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             };
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
-            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.CsrMetadataProbe);
+            IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.Imds);
 
             HttpResponse response = null;
 
@@ -74,45 +66,28 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
             catch (Exception ex)
             {
-                if (probeMode)
-                {
-                    requestContext.Logger.Info($"[Managed Identity] IMDSv2 CSR endpoint failure. Exception occurred while sending request to CSR metadata endpoint: {ex}");
-                    return null;
-                }
-                else
-                {
-                    ThrowProbeFailedException(
-                        "ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed.",
-                        ex);
-                }
+                ThrowCsrMetadataRequestException(
+                    "ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed.",
+                    ex);
             }
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                if (probeMode)
-                {
-                    requestContext.Logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. Status code: {response.StatusCode}, Body: {response.Body}");
-                    return null;
-                }
-                else
-                {
-                    ThrowProbeFailedException(
-                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed due to HTTP error. Status code: {response.StatusCode} Body: {response.Body}",
-                        null,
-                        (int)response.StatusCode);
-                }
+                ThrowCsrMetadataRequestException(
+                    $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed due to HTTP error. Status code: {response.StatusCode} Body: {response.Body}",
+                    null,
+                    (int)response.StatusCode);
             }
 
-            if (!ValidateCsrMetadataResponse(response, requestContext.Logger, probeMode))
+            if (!ValidateCsrMetadataResponse(response, requestContext.Logger))
             {
                 return null;
             }
 
-            return TryCreateCsrMetadata(response, requestContext.Logger, probeMode);
-#endif
+            return TryCreateCsrMetadata(response, requestContext.Logger);
         }
 
-        private static void ThrowProbeFailedException(
+        private static void ThrowCsrMetadataRequestException(
             String errorMessage,
             Exception ex = null,
             int? statusCode = null)
@@ -127,8 +102,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         private static bool ValidateCsrMetadataResponse(
             HttpResponse response,
-            ILoggerAdapter logger,
-            bool probeMode)
+            ILoggerAdapter logger)
         {
             string serverHeader = response.HeadersAsDictionary
                 .FirstOrDefault((kvp) => {
@@ -137,34 +111,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             if (serverHeader == null)
             {
-                if (probeMode)
-                {
-                    logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. 'server' header is missing from the CSR metadata response. Body: {response.Body}");
-                    return false;
-                }
-                else
-                {
-                    ThrowProbeFailedException(
-                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because response doesn't have server header. Status code: {response.StatusCode} Body: {response.Body}",
-                        null,
-                        (int)response.StatusCode);
-                }
+                ThrowCsrMetadataRequestException(
+                    $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because response doesn't have server header. Status code: {response.StatusCode} Body: {response.Body}",
+                    null,
+                    (int)response.StatusCode);
             }
 
             if (!serverHeader.Contains("IMDS", StringComparison.OrdinalIgnoreCase))
             {
-                if (probeMode)
-                {
-                    logger.Info(() => $"[Managed Identity] IMDSv2 managed identity is not available. The 'server' header format is invalid. Extracted server header: {serverHeader}");
-                    return false;
-                }
-                else
-                {
-                    ThrowProbeFailedException(
-                        $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the 'server' header format is invalid. Extracted server header: {serverHeader}. Status code: {response.StatusCode} Body: {response.Body}",
-                        null,
-                        (int)response.StatusCode);
-                }
+                ThrowCsrMetadataRequestException(
+                    $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the 'server' header format is invalid. Extracted server header: {serverHeader}. Status code: {response.StatusCode} Body: {response.Body}",
+                    null,
+                    (int)response.StatusCode);
             }
 
             return true;
@@ -172,13 +130,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         private static CsrMetadata TryCreateCsrMetadata(
             HttpResponse response,
-            ILoggerAdapter logger,
-            bool probeMode)
+            ILoggerAdapter logger)
         {
             CsrMetadata csrMetadata = JsonHelper.DeserializeFromJson<CsrMetadata>(response.Body);
             if (!CsrMetadata.ValidateCsrMetadata(csrMetadata))
             {
-                ThrowProbeFailedException(
+                ThrowCsrMetadataRequestException(
                     $"ImdsV2ManagedIdentitySource.GetCsrMetadataAsync failed because the CsrMetadata response is invalid. Status code: {response.StatusCode} Body: {response.Body}",
                     null,
                     (int)response.StatusCode);
@@ -193,9 +150,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return new ImdsV2ManagedIdentitySource(requestContext);
         }
 
-        internal ImdsV2ManagedIdentitySource(RequestContext requestContext) :
-            base(requestContext, ManagedIdentitySource.ImdsV2)
-        { }
+        internal ImdsV2ManagedIdentitySource(RequestContext requestContext) 
+            : this(requestContext,  
+                  new MtlsBindingCache(s_mtlsCertificateCache, PersistentCertificateCacheFactory
+                      .Create(requestContext.Logger)))
+        {
+        }
+
+        internal ImdsV2ManagedIdentitySource(
+            RequestContext requestContext,
+            IMtlsCertificateCache mtlsCache)
+            : base(requestContext, ManagedIdentitySource.ImdsV2)
+        {
+            _mtlsCache = mtlsCache ?? throw new ArgumentNullException(nameof(mtlsCache));
+        }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
             string clientId,
@@ -203,7 +171,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             string csr,
             ManagedIdentityKeyInfo managedIdentityKeyInfo)
         {
-            var queryParams = ImdsV2QueryParamsHelper(_requestContext);
+            var queryParams = ImdsManagedIdentitySource.ImdsQueryParamsHelper(_requestContext, ApiVersionQueryParam, ImdsV2ApiVersion);
 
             // TODO: add bypass_cache query param in case of token revocation. Boolean: true/false
 
@@ -291,11 +259,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            var csrMetadata = await GetCsrMetadataAsync(_requestContext, false).ConfigureAwait(false);
+            CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext).ConfigureAwait(false);
 
             string certCacheKey = _requestContext.ServiceBundle.Config.ClientId;
 
-            var certEndpointAndClientId = await GetOrCreateMtlsBindingAsync(
+            MtlsBindingInfo mtlsBinding = await GetOrCreateMtlsBindingAsync(
                 cacheKey: certCacheKey,
                 async () =>
                 {
@@ -333,15 +301,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     // Canonical GUID to use as client_id in the token call
                     string clientIdGuid = certificateRequestResponse.ClientId;
 
-                    return Tuple.Create(mtlsCertificate, endpointBase, clientIdGuid);
+                    return new MtlsBindingInfo(mtlsCertificate, endpointBase, clientIdGuid);
+
                 },
-                _requestContext.UserCancellationToken, 
+                _requestContext.UserCancellationToken,
                 _requestContext.Logger)
                 .ConfigureAwait(false);
 
-            X509Certificate2 bindingCertificate = certEndpointAndClientId.Item1;
-            string endpointBaseForToken = certEndpointAndClientId.Item2;
-            string clientIdForToken = certEndpointAndClientId.Item3;
+            X509Certificate2 bindingCertificate = mtlsBinding.Certificate;
+            string endpointBaseForToken = mtlsBinding.Endpoint;
+            string clientIdForToken = mtlsBinding.ClientId;
 
             ManagedIdentityRequest request = new ManagedIdentityRequest(
                 HttpMethod.Post,
@@ -369,23 +338,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             request.MtlsCertificate = bindingCertificate;
 
             return request;
-        }
-
-        private static string ImdsV2QueryParamsHelper(RequestContext requestContext)
-        {
-            var queryParams = $"cred-api-version={ImdsV2ApiVersion}";
-
-            var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
-                requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
-                requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
-                requestContext.Logger);
-            
-            if (userAssignedIdQueryParam != null)
-            {
-                queryParams += $"&{userAssignedIdQueryParam.Value.Key}={userAssignedIdQueryParam.Value.Value}";
-            }
-
-            return queryParams;
         }
 
         /// <summary>
@@ -440,65 +392,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return response.AttestationToken;
         }
 
-        // ...unchanged usings and class header...
-
-        /// <summary>
-        /// Read-through cache: try cache; if missing, run async factory once (per key),
-        /// store the result, and return it. Thread-safe for the given cacheKey.
-        /// </summary>
-        private static async Task<Tuple<X509Certificate2, string, string>> GetOrCreateMtlsBindingAsync(
+        private Task<MtlsBindingInfo> GetOrCreateMtlsBindingAsync(
             string cacheKey,
-            Func<Task<Tuple<X509Certificate2, string, string>>> factory,
+            Func<Task<MtlsBindingInfo>> factory,
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
-            if (string.IsNullOrWhiteSpace(cacheKey))
-                throw new ArgumentException("cacheKey must be non-empty.", nameof(cacheKey));
-            if (factory is null)
-                throw new ArgumentNullException(nameof(factory));
-
-            X509Certificate2 cachedCertificate;
-            string cachedEndpointBase;
-            string cachedClientId;
-
-            // 1) Only lookup by cacheKey
-            if (s_mtlsCertificateCache.TryGet(cacheKey, out var cached, logger))
-            {
-                cachedCertificate = cached.Certificate;
-                cachedEndpointBase = cached.Endpoint;
-                cachedClientId = cached.ClientId;
-
-                return Tuple.Create(cachedCertificate, cachedEndpointBase, cachedClientId);
-            }
-
-            // 2) Gate per cacheKey
-            var gate = s_perKeyGates.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
-            await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
-
-            try
-            {
-                // Re-check after acquiring the gate
-                if (s_mtlsCertificateCache.TryGet(cacheKey, out cached, logger))
-                {
-                    cachedCertificate = cached.Certificate;
-                    cachedEndpointBase = cached.Endpoint;
-                    cachedClientId = cached.ClientId;
-                    return Tuple.Create(cachedCertificate, cachedEndpointBase, cachedClientId);
-                }
-
-                // 3) Mint + cache under the provided cacheKey
-                var created = await factory().ConfigureAwait(false);
-
-                s_mtlsCertificateCache.Set(cacheKey,
-                    new CertificateCacheValue(created.Item1, created.Item2, created.Item3),
-                    logger);
-
-                return created;
-            }
-            finally
-            {
-                gate.Release();
-            }
+            return _mtlsCache.GetOrCreateAsync(cacheKey, factory, cancellationToken, logger);
         }
 
         internal static void ResetCertCacheForTest()
@@ -508,14 +408,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 s_mtlsCertificateCache.Clear();
             }
-
-            foreach (var gate in s_perKeyGates.Values)
-            {
-                try
-                { gate.Dispose(); }
-                catch { }
-            }
-            s_perKeyGates.Clear();
         }
     }
 }

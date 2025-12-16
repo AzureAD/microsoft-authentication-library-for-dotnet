@@ -13,6 +13,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,7 +25,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string PublicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
         const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();
@@ -58,14 +58,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task OboAndSilent_ReturnsCorrectTokens_TestAsync(bool serializeCache, bool usePartitionedSerializationCache)
         {
             // Setup: Get lab users, create PCA and get user tokens
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
-            var user2 = (await LabUserHelper.GetSpecificUserAsync("idlab@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false)).User;
+            var user2 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
+            var labResponse1 = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
             var partitionedInMemoryTokenCache = new InMemoryPartitionedTokenCache();
             var nonPartitionedInMemoryTokenCache = new InMemoryTokenCache();
             var oboTokens = new HashSet<string>();
 
             var pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(labResponse1.App.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -177,10 +178,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task OboAndClientCredentials_WithRegional_ReturnsCorrectTokens_TestAsync()
         {
             // Setup: Get lab user, create PCA and get user tokens
-            var user = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
 
+            // Use the correct public client ID from KeyVault for all tests
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var publicClientId = labResponse.App.AppId;
             var pca = PublicClientApplicationBuilder
-                    .Create(PublicClientID)
+                    .Create(publicClientId)
                     .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                     .Build();
 
@@ -295,11 +299,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task WithCache_TestAsync()
         {
-            LabUser user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+            LabUser user = labResponse.User;
 
             var factory = new HttpSnifferClientFactory();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(PublicClientID)
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId)
                                                                  .WithAuthority(TestConstants.AuthorityOrganizationsTenant)
                                                                  .WithRedirectUri(TestConstants.RedirectUri)
                                                                  .WithTestLogging()
@@ -416,12 +421,20 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task<IConfidentialClientApplication> RunOnBehalfOfTestAsync(
             LabUser user,
             bool silentCallShouldSucceed,
-            bool forceRefresh = false)
+            bool forceRefresh = false,
+            string multiTenantAppId = null)
         {
             AuthenticationResult authResult;
 
+            // Get multiTenantAppId if not provided
+            if (string.IsNullOrEmpty(multiTenantAppId))
+            {
+                var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+                multiTenantAppId = labResponse.App.AppId;
+            }
+
             var pca = PublicClientApplicationBuilder
-                .Create(PublicClientID)
+                .Create(multiTenantAppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .WithTestLogging()
                 .Build();
@@ -502,10 +515,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private ConfidentialClientApplication BuildCca(string tenantId, bool withRegion = false)
         {
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
             var builder = ConfidentialClientApplicationBuilder
-             .Create(OboConfidentialClientID)
+             .Create(withRegion ? OboConfidentialClientID : settings.ClientId)
              .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), true)
-             .WithClientSecret(_confidentialClientSecret)
+             .WithClientSecret(withRegion ? _confidentialClientSecret : settings.Secret)
              .WithLegacyCacheCompatibility(false);
 
             if (withRegion)

@@ -56,17 +56,18 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
-        public async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync()
+        public async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
         {
             if (ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None)
             {
                 return ManagedIdentityClient.s_sourceName;
             }
 
-            // Create a temporary RequestContext for the CSR metadata probe request.
-            var csrMetadataProbeRequestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, CancellationToken.None);
+            // Create a temporary RequestContext for the logger and the IMDS probe request.
+            var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
 
-            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(csrMetadataProbeRequestContext).ConfigureAwait(false);
+            // GetManagedIdentitySourceAsync might return ImdsV2 = true, but it still requires .WithMtlsProofOfPossesion on the Managed Identity Application object to hit the ImdsV2 flow
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested: true, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -76,7 +77,16 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use GetManagedIdentitySourceAsync() instead. \"ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;\"")]
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
-            return ManagedIdentityClient.GetManagedIdentitySourceNoImdsV2();
+            var source = ManagedIdentityClient.GetManagedIdentitySourceNoImds();
+            
+            return source == ManagedIdentitySource.None
+#pragma warning disable CS0618
+                // ManagedIdentitySource.DefaultToImds is marked obsolete, but is intentionally used here as a sentinel value to support legacy detection logic.
+                // This value signals that none of the environment-based managed identity sources were detected.
+                ? ManagedIdentitySource.DefaultToImds
+#pragma warning restore CS0618
+                : source;
+
         }
     }
 }
