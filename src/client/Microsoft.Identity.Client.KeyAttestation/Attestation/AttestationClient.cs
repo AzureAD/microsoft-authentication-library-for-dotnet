@@ -5,13 +5,13 @@ using System;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 {
     /// <summary>
     /// Managed façade for <c>AttestationClientLib.dll</c>. Holds initialization state,
     /// does ref-count hygiene on <see cref="SafeNCryptKeyHandle"/>, and returns a JWT.
     /// </summary>
-    public sealed class AttestationClient : IDisposable
+    internal sealed class AttestationClient : IDisposable
     {
         private bool _initialized;
 

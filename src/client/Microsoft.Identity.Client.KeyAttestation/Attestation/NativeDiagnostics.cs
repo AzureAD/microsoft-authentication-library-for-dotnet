@@ -5,7 +5,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 
-namespace Microsoft.Identity.Client.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 {
     internal static class NativeDiagnostics
     {

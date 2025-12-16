@@ -4,9 +4,8 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Client.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 {
     /// <summary>
     /// Windows‑only helper that loads a native DLL from an absolute path.

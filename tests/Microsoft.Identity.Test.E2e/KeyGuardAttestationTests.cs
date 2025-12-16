@@ -29,6 +29,7 @@ the test exits early with Assert.Inconclusive instead of failing the overall bui
 */
 
 using Microsoft.Identity.Client.KeyAttestation;
+using Microsoft.Identity.Client.KeyAttestation.Attestation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Security.Cryptography;
@@ -131,7 +132,7 @@ namespace Microsoft.Identity.Test.E2E
                     Assert.Inconclusive("Key was created but not KeyGuard-protected. Is KeyGuard/VBS enabled on this machine?");
                 }
 
-                // Use the new public AttestationClient from the MtlsPop package. :contentReference[oaicite:2]{index=2}
+                // Use the new public AttestationClient from the KeyAttestation package. :contentReference[oaicite:2]{index=2}
                 using var client = new AttestationClient();
                 var result = client.Attest(endpoint, key.Handle, clientId);
 

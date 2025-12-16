@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Microsoft.Identity.Client.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 {
     internal static class AttestationErrors
     {

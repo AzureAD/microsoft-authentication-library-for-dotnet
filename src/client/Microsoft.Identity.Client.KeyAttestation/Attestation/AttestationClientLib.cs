@@ -3,10 +3,9 @@
 
 using Microsoft.Win32.SafeHandles;
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Identity.Client.KeyAttestation
+namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 {
     internal static class AttestationClientLib
     {

@@ -27,6 +27,11 @@
     <Product>Microsoft Authentication Library</Product>
   </PropertyGroup>
 
+  <!-- ─── File inclusions ───────────────────────────────────────────────── -->
+  <ItemGroup>
+    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
+  </ItemGroup>
+
   <!-- ─── References ────────────────────────────────────────────────────── -->
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
@@ -35,11 +40,6 @@
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <PackageReference Include="System.Security.Cryptography.Cng" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <!-- Temporarily disable PublicAPI analyzer to generate correct signatures -->
-    <NoWarn>$(NoWarn);RS0016;RS0017;RS0036;RS0041</NoWarn>
-  </PropertyGroup>
 
   <ItemGroup Label="For public api analyzer support">
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Shipped.txt" />

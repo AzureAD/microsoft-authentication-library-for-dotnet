@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.KeyAttestation.Attestation;
 using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client.KeyAttestation
