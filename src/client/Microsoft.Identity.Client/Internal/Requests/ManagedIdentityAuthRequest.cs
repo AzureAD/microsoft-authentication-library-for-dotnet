@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // 3. If we have no ForceRefresh and no claims, we can use the cache
             if (cachedAccessTokenItem != null)
             {
-                authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+                authResult = await CreateAuthenticationResultFromCacheAsync(cachedAccessTokenItem, cancellationToken).ConfigureAwait(false);
 
                 logger.Info("[ManagedIdentityRequest] Access token retrieved from cache.");
 
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 catch (MsalServiceException e)
                 {
                     // If background refresh fails, we handle the exception
-                    return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem).ConfigureAwait(false);
+                    return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem, cancellationToken).ConfigureAwait(false);
                 }
             }
             else
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     // Check the cache again after acquiring the semaphore in case the previous request cached a new token.
                     if (cachedAccessTokenItem != null)
                     {
-                        authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+                        authResult = await CreateAuthenticationResultFromCacheAsync(cachedAccessTokenItem, cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
 
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
@@ -266,19 +266,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return null;
         }
 
-        private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        private Task<AuthenticationResult> CreateAuthenticationResultFromCacheAsync(
+            MsalAccessTokenCacheItem cachedAccessTokenItem, CancellationToken cancellationToken)
         {
-            AuthenticationResult authResult = new AuthenticationResult(
-                                                            cachedAccessTokenItem,
-                                                            null,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account: null,
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null);
-            return authResult;
+            return AuthenticationResult.CreateAsync(
+                msalAccessTokenCacheItem: cachedAccessTokenItem,
+                msalIdTokenCacheItem: null, authenticationScheme: AuthenticationRequestParameters.AuthenticationScheme,
+                correlationId: AuthenticationRequestParameters.RequestContext.CorrelationId,
+                tokenSource: TokenSource.Cache,
+                apiEvent: AuthenticationRequestParameters.RequestContext.ApiEvent,
+                account: null,
+                spaAuthCode: null,
+                additionalResponseParameters: null,
+                cancellationToken: cancellationToken);
         }
 
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)

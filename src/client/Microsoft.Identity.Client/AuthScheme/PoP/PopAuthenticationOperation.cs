@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
@@ -21,7 +23,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-    internal class PopAuthenticationOperation : IAuthenticationOperation
+    internal class PopAuthenticationOperation : IAuthenticationOperation2
     {
         private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
         private readonly IPoPCryptoProvider _popCryptoProvider;
@@ -84,6 +86,14 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
             string popToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
             authenticationResult.AccessToken = popToken;
+        }
+
+        public Task FormatResultAsync(AuthenticationResult authenticationResult, CancellationToken cancellationToken = default)
+        {
+            // For now, PoP token creation is synchronous, so we wrap the sync method
+            // Future enhancement could make crypto operations truly async
+            FormatResult(authenticationResult);
+            return Task.CompletedTask;
         }
 
         private JObject CreateBody(string accessToken)
@@ -161,6 +171,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             sb.Append(Base64UrlHelpers.Encode(_popCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
 
             return sb.ToString();
+        }
+
+        public Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData)
+        {
+            // no-op
+            return Task.FromResult(true);
         }
     }
 }

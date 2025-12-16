@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
                     Metrics.IncrementTotalAccessTokensFromCache();
-                    authResult = new AuthenticationResult(
+                    authResult = await AuthenticationResult.CreateAsync(
                                                             cachedAccessToken,
                                                             cachedIdToken,
                                                             AuthenticationRequestParameters.AuthenticationScheme,
@@ -91,7 +91,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent,
                                                             account, 
                                                             spaAuthCode: null,
-                                                            additionalResponseParameters: null);
+                                                            additionalResponseParameters: null,
+                                                            cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -145,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (MsalServiceException e)
             {
-                return await HandleTokenRefreshErrorAsync(e, cachedAccessToken).ConfigureAwait(false);
+                return await HandleTokenRefreshErrorAsync(e, cachedAccessToken, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -180,7 +181,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     var msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(cachedRefreshToken, this, AuthenticationRequestParameters, cancellationToken)
                     .ConfigureAwait(false);
 
-                    return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+                    return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenInLongRunningObo)
@@ -216,7 +217,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Info("[OBO request] This is an on behalf of request for a service principal as no client info returned in the token response.");
             }
 
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
         }
 
         private Dictionary<string, string> GetBodyParameters()
