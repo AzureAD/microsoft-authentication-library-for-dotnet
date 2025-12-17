@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task InteractiveConsentPromptAsync()
         {
-            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
 
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, true).ConfigureAwait(false);
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
-            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
