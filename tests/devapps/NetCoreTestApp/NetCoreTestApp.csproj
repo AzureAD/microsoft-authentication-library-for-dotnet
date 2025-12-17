@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
+    <NoWarn>$(NoWarn);MSTest0001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

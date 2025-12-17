@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task ValidateOperationCancelledAsync(string redirectUri, CancellationTokenSource cts, System.Runtime.CompilerServices.ConfiguredTaskAwaitable<AuthenticationResult> tokenTask)
         {
             // Assert
-            var ex = await AssertException.TaskThrowsAsync<OperationCanceledException>(async () =>
+            var ex = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
             {
                 await tokenTask;
                 return;
@@ -110,4 +110,3 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
     }
 }
-

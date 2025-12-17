@@ -40,18 +40,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     }
                 });
 
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     () => cca.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(cacheReadException);
                 Assert.AreEqual(ex, cacheReadException);
 
-                Assert.IsTrue(ex.Message.Contains("Lorem"));
-                Assert.IsFalse(ex.Message.Contains("LoremIpsum"));
+                Assert.Contains("Lorem", ex.Message);
+                Assert.DoesNotContain("LoremIpsum", ex.Message);
             }
         }
 
     }
 }
+
 

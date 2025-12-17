@@ -17,23 +17,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void NotEnoughPathSegments_ThrowsException_Test()
         {
-            var ex = Assert.ThrowsException<ArgumentException>(() =>
+            var ex = Assert.Throws<ArgumentException>(() =>
                 Authority.CreateAuthority("https://login.microsoftonline.in/tfp/"));
 
             Assert.AreEqual(MsalErrorMessage.B2cAuthorityUriInvalidPath, ex.Message);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://sometenantid.b2clogin.com/tfp/sometenantid/policy/", "sometenantid")]
         [DataRow("https://catsareamazing.com/tfp/catsareamazing/policy/", "catsareamazing")]
         [DataRow("https://sometenantid.b2clogin.de/tfp/tid/policy/", "tid")]
         public void AuthorityDoesNotUpdateTenant(string authorityUri, string actualTenant)
         {
             Authority authority = Authority.CreateAuthority(authorityUri);
-            Assert.AreEqual(actualTenant, authority.TenantId);
+            Assert.AreEqual(authority.TenantId, actualTenant);
 
             string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id", false);
-            Assert.AreEqual(actualTenant, authority.TenantId);
+            Assert.AreEqual(authority.TenantId, actualTenant);
             Assert.AreEqual(updatedAuthority, authorityUri);
 
             authority = Authority.CreateAuthorityWithTenant(authority.AuthorityInfo, "other_tenant_id_2");
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 null);
 
             Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
+            Assert.AreEqual(AuthorityType.B2C, instance.AuthorityInfo.AuthorityType);
             Assert.AreEqual(
                 "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/authorize",
                 instance.GetAuthorizationEndpointAsync(_testRequestContext).Result);
@@ -87,12 +87,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(new Uri(UriVanityPort), authority.AuthorityInfo.CanonicalAuthority);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://login.microsoftonline.in/tfp/te nant/b2c_1_susi/")]
         [DataRow("http://login.microsoftonline.in/tfp/tenant/b2c_1_susi/")]
         public void MalformedAuthority_ThrowsException(string malformedAuthority)
         {
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithB2CAuthority(malformedAuthority)
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 .WithClientSecret(TestConstants.ClientSecret)
                 .Build();
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                    .WithB2CAuthority(malformedAuthority));
         }

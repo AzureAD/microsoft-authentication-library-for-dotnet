@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         // regression test based on SAL introducing a new SKU value and making ESTS not issue the refresh_in value
         // This needs to run on .NET and .NET FWK to protect against MSAL SKU value changes
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task RefreshOnIsEnabled(bool useRegional)
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.Cert, useAppIdUri).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.Secret).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Manual).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Wilson).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientClaims_ExtraClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientClaims_SendX5C_ExtraClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims, sendX5C: true).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims, sendX5C: true).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         public async Task WithOnBeforeTokenRequest_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -314,8 +314,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             CollectionAssert.AreEquivalent(settings.AppScopes.ToArray(), appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
             Assert.AreEqual(settings.TenantId, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestTenantId ?? "");
             Assert.AreEqual(settings.TenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
+            Assert.IsGreaterThan(0, authResult.AuthenticationResultMetadata.DurationTotalInMs);
+            Assert.IsGreaterThan(0, authResult.AuthenticationResultMetadata.DurationInHttpInMs);
             Assert.AreEqual(
               GetExpectedCacheKey(settings.ClientId, settings.TenantId),
               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
@@ -330,7 +330,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs == 0);
+            Assert.AreEqual(0, authResult.AuthenticationResultMetadata.DurationInHttpInMs);
 
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);

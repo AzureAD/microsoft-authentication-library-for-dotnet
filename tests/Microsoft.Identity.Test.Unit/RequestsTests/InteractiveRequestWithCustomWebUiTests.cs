@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                          // Capture the state from the authorizationUri and add it to the result uri
                          var authorizationUri = x[0] as Uri;
                          var state = CoreHelpers.ParseKeyValueList(authorizationUri.Query, '&', true, false, null)["state"];
-                         Assert.IsTrue(!string.IsNullOrEmpty(state));
+                         Assert.IsFalse(string.IsNullOrEmpty(state));
 
                          return Task.FromResult(new Uri(ExpectedRedirectUri + "?code=some-code&state=" + state));
                      });
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ReturnsForAnyArgs(Task.FromResult(new Uri("http://blech"))),
                         async request =>
                         {
-                            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                                 () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
                             Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
                         }).ConfigureAwait(false);
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ReturnsForAnyArgs<Uri>(_ => { throw new InvalidOperationException(); }),
                 async request =>
                 {
-                    await AssertException.TaskThrowsAsync<InvalidOperationException>(
+                    await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                         () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
                 }).ConfigureAwait(false);
         }
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ReturnsForAnyArgs(Task.FromResult(new Uri(ExpectedRedirectUri))),
                 async request =>
                 {
-                    var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                         () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
                     Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
                 }).ConfigureAwait(false);
@@ -161,10 +161,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 },
                 async request =>
                 {
-                    var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                       () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
                     Assert.AreEqual(MsalError.StateMismatchError, ex.ErrorCode);
                 }).ConfigureAwait(false);
         }
     }
 }
+

@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion
 
         // This test checks that MSAL.netcore / MSAL.netfx / MSAL.netstandard DLLs are actually used
-        [DataTestMethod()]
+        [TestMethod()]
         [DataRow(TargetFrameworks.NetCore)]
         [DataRow(TargetFrameworks.NetFx)]
         public void AssertTfm(TargetFrameworks targetFwk)
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             // The exception propagated to the test should be Selenium exception,
             // the test should not wait for the TCP listener to time out
-            await AssertException.TaskThrowsAsync<NoSuchElementException>(() => pca
+            await Assert.ThrowsExactlyAsync<NoSuchElementException>(() => pca
                  .AcquireTokenInteractive(s_scopes)
                  .WithCustomWebUi(seleniumLogic)
                  .ExecuteAsync(CancellationToken.None))
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             // The exception propagated to the test should be Selenium exception,
             // the test should not wait for the TCP listener to time out
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() => pca
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() => pca
                  .AcquireTokenInteractive(s_scopes)
                  .WithCustomWebUi(seleniumLogic)
                  .ExecuteAsync(new CancellationTokenSource(TimeSpan.FromSeconds(2)).Token))
@@ -120,3 +120,4 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
     }
 }
+

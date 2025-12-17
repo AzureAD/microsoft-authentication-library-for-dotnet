@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await AssertAccountsAsync().ConfigureAwait(false);
 
                 // Make sure smth reloads the cache before using the Accessor from the other app (GetAccounts will)
-                Assert.AreEqual(2, _appA.UserTokenCacheInternal.Accessor.GetAllAppMetadata().Count);
+                Assert.HasCount(2, _appA.UserTokenCacheInternal.Accessor.GetAllAppMetadata());
                 Assert.IsTrue(_appA.UserTokenCacheInternal.Accessor.GetAllAppMetadata().All(am => am.FamilyId == "1"));
                 Assert.AreEqual("1", _appA.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single().FamilyId);
             }
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNull(appCAccount);
 
                 // Act
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                     () => appC.AcquireTokenSilent(TestConstants.s_scope, appAAccount).ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B cannot acquire a token interactively, but will try to use FRT
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                     () => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
 
@@ -147,11 +147,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B cannot acquire a token interactively, but will try to use FRT
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                     () => SilentAsync(_appB, ServerTokenResponse.OtherError)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.InvalidGrantError, ex.ErrorCode);
-                Assert.IsTrue(!String.IsNullOrEmpty(ex.CorrelationId));
+                Assert.IsFalse(string.IsNullOrEmpty(ex.CorrelationId));
 
                 // B performs interactive auth and everything goes back to normal - both A and B can silently sing in
                 await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await SilentAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B leaves the family -> STS will not refresh its token based on the FRT
-                await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
+                await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
 
                 // B can resume acquiring tokens silently via the normal RT, after an interactive flow
                 await InteractiveAsync(_appB, ServerTokenResponse.NonFociToken).ConfigureAwait(false);
@@ -253,8 +253,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var tokens = _appA.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
 
-                Assert.IsTrue(
-                    !string.IsNullOrEmpty(tokens.Single().FamilyId),
+                Assert.IsFalse(
+                    string.IsNullOrEmpty(tokens.Single().FamilyId),
                     "The FRT should not be deleted when FOCI is disabled");
 
                 Assert.IsFalse(
@@ -447,3 +447,4 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
     }
 }
+

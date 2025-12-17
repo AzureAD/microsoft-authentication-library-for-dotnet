@@ -41,9 +41,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                 };
 
-                AssertException.Throws<ArgumentNullException>(() =>
+                Assert.ThrowsExactly<ArgumentNullException>(() =>
                     new InteractiveRequest(null, interactiveParameters));
-                AssertException.Throws<ArgumentNullException>(() =>
+                Assert.ThrowsExactly<ArgumentNullException>(() =>
                     new InteractiveRequest(requestParams, null));
             }
         }
@@ -107,9 +107,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationResult result = await request.RunAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count);
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(result.AccessToken, "some-access-token");
+                Assert.HasCount(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens());
+                Assert.HasCount(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens());
+                Assert.AreEqual("some-access-token", result.AccessToken);
             }
         }
 
@@ -170,9 +170,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 AuthenticationResult result = await request.RunAsync().ConfigureAwait(false);
 
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count);
-                Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(result.AccessToken, "some-access-token");
+                Assert.HasCount(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens());
+                Assert.HasCount(2, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens());
+                Assert.AreEqual("some-access-token", result.AccessToken);
             }
         }
 
@@ -202,10 +202,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var request = new InteractiveRequest(
                     parameters,
                     interactiveParameters);
-                var ex = await AssertException.TaskThrowsAsync<ArgumentException>
+                var ex = await Assert.ThrowsExactlyAsync<ArgumentException>
                     (() => request.RunAsync()).ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.RedirectUriContainsFragment));
+                Assert.Contains(MsalErrorMessage.RedirectUriContainsFragment, ex.Message);
             }
         }
 
@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     interactiveParameters);
 
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                     () => request.RunAsync())
                     .ConfigureAwait(false);
 
@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     interactiveParameters);
 
-                var ex2 = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                var ex2 = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                      () => request.RunAsync())
                      .ConfigureAwait(false);
 
@@ -295,7 +295,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     new AcquireTokenInteractiveParameters());
 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                     () => request.RunAsync(CancellationToken.None))
                     .ConfigureAwait(false);
 
@@ -344,7 +344,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task WithMultiCloudSupportEnabledAsync(bool multiCloudSupportEnabled)
@@ -414,9 +414,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual("https://login.microsoftonline.us/home/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
                 else
                     Assert.AreEqual("https://login.microsoftonline.com/home/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count);
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(result.AccessToken, "some-access-token");
+                Assert.HasCount(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens());
+                Assert.HasCount(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens());
+                Assert.AreEqual("some-access-token", result.AccessToken);
             }
         }
 
@@ -427,3 +427,4 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
     }
 }
+

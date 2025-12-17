@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task LegacyCacheEnabledTelemetryTestAsync(bool isLegacyCacheEnabled)
@@ -577,7 +577,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                         Task.FromException<AuthorizationResult>(new MsalClientException("user_cancelled")));
                     _app.ServiceBundle.ConfigureMockWebUI(ui);
 
-                    var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                    var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
@@ -607,7 +607,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     _harness.HttpManager.AddMockHandler(tokenRequestHandler2);
                     _harness.HttpManager.AddMockHandler(tokenRequestHandler);
 
-                    var serviceEx = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    var serviceEx = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
@@ -623,12 +623,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     cts.Cancel(true);
                     CancellationToken token = cts.Token;
 
-                    var operationCanceledException = await AssertException.TaskThrowsAsync<OperationCanceledException>(() =>
+                    var operationCanceledException = await Assert.ThrowsExactlyAsync<OperationCanceledException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
-                        .ExecuteAsync(token), 
-                        allowDerived: true) // do not catch TaskCanceledException
+                        .ExecuteAsync(token)) // do not catch TaskCanceledException
 
                         .ConfigureAwait(false);
 
@@ -713,9 +712,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 TestConstants.AuthorityUtidTenant,
                 correlationId.ToString());
 
-            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                () => request.WithCorrelationId(correlationId).ExecuteAsync(),
-                allowDerived: true)
+            var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(
+                () => request.WithCorrelationId(correlationId).ExecuteAsync())
                 .ConfigureAwait(false);
 
             Assert.AreEqual(
@@ -738,10 +736,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             string[] telemetryCategories = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single().Split('|');
 
-            Assert.AreEqual(3, telemetryCategories.Length);
-            Assert.AreEqual(1, telemetryCategories[0].Split(',').Length); // version
-            Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.AreEqual(5, telemetryCategories[2].Split(',').Length); // platform_fields
+            Assert.HasCount(3, telemetryCategories);
+            Assert.HasCount(1, telemetryCategories[0].Split(',')); // version
+            Assert.HasCount(5, telemetryCategories[1].Split(',')); // api_id, cache_info, region_used, region_source, region_outcome
+            Assert.HasCount(5, telemetryCategories[2].Split(',')); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 
@@ -763,3 +761,4 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
     }
 }
+

@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                });
 
             // Act
-            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+            await Assert.ThrowsExactlyAsync<OperationCanceledException>(
                 () => webUI.AcquireAuthorizationAsync(
                     new Uri(TestAuthorizationRequestUri),
                     new Uri(TestRedirectUri),
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
             string differentPortRedirectUri = TestAuthorizationResponseUri.Replace(TestRedirectUri, "http://localhost:1111");
 
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => AcquireAuthCodeAsync(CreateTestWebUI(), responseUriString: differentPortRedirectUri))
                 .ConfigureAwait(false);
 
@@ -303,20 +303,20 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Assert
             if (expectedMessage != null)
             {
-                Assert.AreEqual(messageAndCode.HttpCode, HttpStatusCode.OK);
+                Assert.AreEqual(HttpStatusCode.OK, messageAndCode.HttpCode);
                 Assert.IsTrue(messageAndCode.Message.Equals(expectedMessage, StringComparison.OrdinalIgnoreCase));
             }
 
             if (expectedRedirect != null)
             {
-                Assert.AreEqual(messageAndCode.HttpCode, HttpStatusCode.Found);
+                Assert.AreEqual(HttpStatusCode.Found, messageAndCode.HttpCode);
                 Assert.IsTrue(messageAndCode.Message.Equals(expectedRedirect, StringComparison.OrdinalIgnoreCase));
             }
         }
 
         private static void AssertInvalidRedirectUri(IWebUI webUI, string uri)
         {
-            var ex = AssertException.Throws<MsalClientException>(() => webUI.UpdateRedirectUri(new Uri(uri)));
+            var ex = Assert.ThrowsExactly<MsalClientException>(() => webUI.UpdateRedirectUri(new Uri(uri)));
             Assert.AreEqual(MsalError.LoopbackRedirectUri, ex.ErrorCode);
         }
 
@@ -347,3 +347,4 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
     }
 }
+

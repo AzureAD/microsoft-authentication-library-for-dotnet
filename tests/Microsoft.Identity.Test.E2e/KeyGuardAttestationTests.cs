@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.E2E
                 Assert.IsFalse(string.IsNullOrEmpty(result.Jwt), "Expected a non-empty attestation JWT.");
 
                 var parts = result.Jwt.Split('.');
-                Assert.AreEqual(3, parts.Length, "Expected a JWT (3 parts).");
+                Assert.HasCount(3, parts, "Expected a JWT (3 parts).");
             }
             catch (CryptographicException ex)
             {
@@ -203,7 +203,7 @@ namespace Microsoft.Identity.Test.E2E
                 Assert.IsFalse(string.IsNullOrEmpty(result.Jwt), "Expected a non-empty attestation JWT from async path.");
 
                 var parts = result.Jwt.Split('.');
-                Assert.AreEqual(3, parts.Length, "Expected a JWT (3 parts) from async path.");
+                Assert.HasCount(3, parts, "Expected a JWT (3 parts) from async path.");
             }
             catch (CryptographicException ex)
             {

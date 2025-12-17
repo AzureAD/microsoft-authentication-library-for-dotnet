@@ -43,13 +43,14 @@ namespace Microsoft.Identity.Test.Unit
 
             var crypto = serviceBundle.PlatformProxy.CryptographyManager;
 
-            MsalClientException ex = AssertException.Throws<MsalClientException>(() =>
+            MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(() =>
             {
                 crypto.SignWithCertificate("TEST", cert, RSASignaturePadding.Pkcs1);
             });
 
-            Assert.AreEqual(ex.ErrorCode, MsalError.CertificateNotRsa);
+            Assert.AreEqual(MsalError.CertificateNotRsa, ex.ErrorCode);
             Assert.AreEqual(ex.Message, MsalErrorMessage.CertMustBeRsa(cert.PublicKey.Oid.FriendlyName));
         }
     }
 }
+

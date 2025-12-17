@@ -34,7 +34,7 @@ namespace CommonCache.Test.Unit
             s_labUsers.Add(GetPublicAadUserDataAsync().GetAwaiter().GetResult());
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "MsalV3->MsalV3 msal v2 cache")]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalV3 msal v3 cache")]
         public async Task TestMsalV3CacheCompatibilityAsync(
@@ -46,7 +46,7 @@ namespace CommonCache.Test.Unit
             await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);
         }
       
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalJava msal v3 cache")]
         [DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalV3 msal v3 cache")]
         public async Task TestMsalJavaCacheCompatibilityAsync(

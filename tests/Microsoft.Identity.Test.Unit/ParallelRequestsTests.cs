@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             AuthenticationResult[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
             // Assert
-            Assert.AreEqual(NumberOfRequests, results.Length);
+            Assert.HasCount(NumberOfRequests, results);
         }
 
         [TestMethod]
@@ -109,9 +109,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         string.IsNullOrEmpty(res.AuthenticationResultMetadata.TokenEndpoint),
                         "TokenEndpoint is null/empty!"
                     );
-                    Assert.IsTrue(
-                        res.AuthenticationResultMetadata.TokenEndpoint.Contains(tid),
-                        "TokenEndpoint should contain the tenant ID."
+                    Assert.Contains(
+tid,
+                        res.AuthenticationResultMetadata.TokenEndpoint, "TokenEndpoint should contain the tenant ID."
                     );
                     Assert.AreEqual($"token_{tid}", res.AccessToken, "Access token did not match the expected value.");
 
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             AuthenticationResult[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
             // Assert the total tasks
-            Assert.AreEqual(NumberOfRequests, results.Length, "Number of AuthenticationResult objects does not match the number of requests.");
+            Assert.HasCount(NumberOfRequests, results, "Number of AuthenticationResult objects does not match the number of requests.");
         }
 
         [TestMethod]
@@ -161,9 +161,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         $"token_{tid}",
                         result.AccessToken,
                         $"First-pass AccessToken mismatch for TID '{tid}'.");
-                    Assert.IsTrue(
-                        result.AuthenticationResultMetadata.TokenEndpoint.Contains(tid),
-                        $"First-pass TokenEndpoint '{result.AuthenticationResultMetadata.TokenEndpoint}' does not contain TID '{tid}'.");
+                    Assert.Contains(
+tid,
+                        result.AuthenticationResultMetadata.TokenEndpoint, $"First-pass TokenEndpoint '{result.AuthenticationResultMetadata.TokenEndpoint}' does not contain TID '{tid}'.");
 
                     return result;
                 }));

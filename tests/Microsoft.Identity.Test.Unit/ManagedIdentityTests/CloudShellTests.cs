@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string CloudShell = "Cloud Shell";
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
         [DataRow(TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 

@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             pca.UserTokenCache.SetAfterAccess(_ => { afterAccessCalled = true; });
 
-            await AssertException.TaskThrowsAsync<InvalidOperationException>(
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                 operationThatTouchesCache).ConfigureAwait(false);
 
             Assert.IsTrue(beforeAccessCalled);
@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     throw new OperationCanceledException();
                 });
 
-                await AssertException.TaskThrowsAsync<OperationCanceledException>(() => app.GetAccountsAsync()).ConfigureAwait(false);
+                await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => app.GetAccountsAsync()).ConfigureAwait(false);
             }
         }
 
@@ -555,7 +555,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     if (clientId.Equals(TestConstants.FmiNodeClientId))
                     {
                         // string should not be null or empty
-                        Assert.IsTrue(!string.IsNullOrEmpty(args.NoDistributedCacheUseReason));
+                        Assert.IsFalse(string.IsNullOrEmpty(args.NoDistributedCacheUseReason));
                     }
                     else
                     {
@@ -579,3 +579,4 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
     }
 }
+

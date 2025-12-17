@@ -381,7 +381,7 @@ namespace Microsoft.Identity.Test.Unit
             _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
 
             //Test for MsalServiceException
-            MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+            MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                 () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
                 .WithExtraQueryParameters(extraQueryParams)
                 .WithTenantId(TestConstants.Utid)
@@ -394,7 +394,7 @@ namespace Microsoft.Identity.Test.Unit
         private async Task AcquireTokenMsalClientExceptionAsync()
         {
             //Test for MsalClientException
-            MsalClientException exClient = await AssertException.TaskThrowsAsync<MsalClientException>(
+            MsalClientException exClient = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => _cca.AcquireTokenForClient(null) // null scope -> client exception
                 .WithExtraQueryParameters(extraQueryParams)
                 .WithTenantId(TestConstants.Utid)
@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Test.Unit
         private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics, 
             long expectedSuccessfulRequests, long expectedFailedRequests)
         {
-            Assert.AreEqual(expectedMetricCount, exportedMetrics.Count, "Count of metrics recorded is not as expected.");
+            Assert.HasCount(expectedMetricCount, exportedMetrics, "Count of metrics recorded is not as expected.");
 
             foreach (Metric exportedItem in exportedMetrics)
             {
@@ -607,3 +607,4 @@ namespace Microsoft.Identity.Test.Unit
         }
     }
 }
+

@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                             .WithClientCapabilities(TestConstants.ClientCapabilities)
                             .BuildConcrete();
 
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .WithClaims("claims_that_are_not_json")
@@ -242,8 +242,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
         }
 
-        [DataTestMethod]
-        [DynamicData(nameof(TestData.GetClaimsAndCapabilities), typeof(TestData), DynamicDataSourceType.Method)]
+        [TestMethod]
+        [DynamicData(nameof(TestData.GetClaimsAndCapabilities), typeof(TestData))]
         public void ClaimsMerge_Test(string claims, string[] capabilities, string expectedMergedJson)
         {
             var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(claims, capabilities);
@@ -251,3 +251,4 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         }
     }
 }
+

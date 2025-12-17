@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("3. Second call - request is throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                        .ConfigureAwait(false);
                 AssertInvalidClientEx(ex);
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("3. Second call - request is throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                        .ConfigureAwait(false);
                 Assert.AreEqual(httpStatusCode, ex.StatusCode);
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("A similar request, e.g. with a claims challenge, will be throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account)
                         .WithClaims(TestConstants.Claims) // claims are not part of the strict thumbprint
                         .ExecuteAsync())
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var (retryAfterProvider, _, _) = throttlingManager.GetTypedThrottlingProviders();
                 var singleEntry = retryAfterProvider.ThrottlingCache.CacheForTest.Single().Value;
                 TimeSpan actualExpiration = singleEntry.ExpirationTime - singleEntry.CreationTime;
-                Assert.AreEqual(actualExpiration, RetryAfterProvider.MaxRetryAfter);
+                Assert.AreEqual(RetryAfterProvider.MaxRetryAfter, actualExpiration);
             }
         }
 
@@ -185,14 +185,14 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 const int RetryAfterInSeconds = 10;
                 UpdateStatusCodeAndHeaders(tokenResponse.ResponseMessage, 429, RetryAfterInSeconds);
 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>( 
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>( 
                     () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(429, ex.StatusCode);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
-                var ex2 = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                var ex2 = await Assert.ThrowsExactlyAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                    .ConfigureAwait(false);
                 Assert.AreEqual(429, ex2.StatusCode);
@@ -218,14 +218,14 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 httpManager.AddInstanceDiscoveryMockHandler();
                 var tokenResponse = httpManager.AddMockHandlerForThrottledResponseMessage();
 
-                var serverEx = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                var serverEx = await Assert.ThrowsExactlyAsync<MsalThrottledServiceException>(
                     () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(serverEx.StatusCode, 429);
-                Assert.AreEqual(serverEx.ErrorCode, MsalError.RequestThrottled);
-                Assert.AreEqual(serverEx.Message, MsalErrorMessage.AadThrottledError);
-                Assert.AreEqual(serverEx.ResponseBody, MockHelpers.TooManyRequestsContent);
+                Assert.AreEqual(429, serverEx.StatusCode);
+                Assert.AreEqual(MsalError.RequestThrottled, serverEx.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.AadThrottledError, serverEx.Message);
+                Assert.AreEqual(MockHelpers.TooManyRequestsContent, serverEx.ResponseBody);
             }
         }
         #endregion
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
 
                 Trace.WriteLine("3. Second call - request is throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                        .ConfigureAwait(false);
                 Assert.AreEqual(httpStatusCode, ex.StatusCode);
@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
 
                 Trace.WriteLine("A similar request, e.g. with a claims challenge, will be throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account)
                         .WithClaims(TestConstants.Claims) // claims are not part of the strict thumbprint
                         .ExecuteAsync())
@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                     pca2.UserTokenCacheInternal.Accessor,
                     expiredAccessTokens: true);
 
-                await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                await Assert.ThrowsExactlyAsync<MsalThrottledServiceException>(
                  () => pca2.AcquireTokenSilent(TestConstants.s_scope, account)
                       .ExecuteAsync())
                      .ConfigureAwait(false);
@@ -342,7 +342,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, uiRequiredEntryCount: 1);
 
                 Trace.WriteLine("A similar request will be throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalThrottledUiRequiredException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalThrottledUiRequiredException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account)
                         .ExecuteAsync())
                        .ConfigureAwait(false);
@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
 
                 Trace.WriteLine("And again...");
 
-                ex = await AssertException.TaskThrowsAsync<MsalThrottledUiRequiredException>(
+                ex = await Assert.ThrowsExactlyAsync<MsalThrottledUiRequiredException>(
                   () => app.AcquireTokenSilent(TestConstants.s_scope, account)
                        .ExecuteAsync())
                       .ConfigureAwait(false);
@@ -395,7 +395,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, uiRequiredEntryCount: 1);
 
                 Trace.WriteLine("A similar request will be throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalThrottledUiRequiredException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalThrottledUiRequiredException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account)
                         .ExecuteAsync())
                        .ConfigureAwait(false);
@@ -417,7 +417,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         [TestMethod]
         public async Task UiRequired_MultipleEntries_Async()
         {
-            Assert.AreEqual(2, TestConstants.s_scope.Count, "test error - expecting at least 2 scopes");
+            Assert.HasCount(2, TestConstants.s_scope, "test error - expecting at least 2 scopes");
 
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
@@ -438,7 +438,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 Trace.WriteLine("Make another failing request, but with fewer scopes - should not be throttled.");
                 var singleScope = TestConstants.s_scope.Take(1);
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                   () => app.AcquireTokenSilent(singleScope, account).ExecuteAsync())
                       .ConfigureAwait(false);
 
@@ -492,9 +492,8 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
 
             Trace.WriteLine("2. First failing call ");
-            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync(),
-                     allowDerived: true)
+            var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(
+                () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                     .ConfigureAwait(false);
 
             Assert.AreEqual(0, httpManager.QueueSize, "No more requests expected");
@@ -526,9 +525,9 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             var (retryAfterProvider, httpStatusProvider, uiRequiredProvider) =
                 throttlingManager.GetTypedThrottlingProviders();
 
-            Assert.AreEqual(retryAfterEntryCount, retryAfterProvider.ThrottlingCache.CacheForTest.Count);
-            Assert.AreEqual(httpStatusEntryCount, httpStatusProvider.ThrottlingCache.CacheForTest.Count);
-            Assert.AreEqual(uiRequiredEntryCount, uiRequiredProvider.ThrottlingCache.CacheForTest.Count);
+            Assert.HasCount(retryAfterEntryCount, retryAfterProvider.ThrottlingCache.CacheForTest);
+            Assert.HasCount(httpStatusEntryCount, httpStatusProvider.ThrottlingCache.CacheForTest);
+            Assert.HasCount(uiRequiredEntryCount, uiRequiredProvider.ThrottlingCache.CacheForTest);
         }
 
         private static void AssertInvalidClientEx(MsalServiceException ex)
@@ -539,3 +538,4 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         }
     }
 }
+

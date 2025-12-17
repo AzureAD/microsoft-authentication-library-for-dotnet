@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .BuildConcrete();
 
                 // Act
-                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                MsalClientException exception = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     async () => await app
                         .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
                         .WithUsername(TestConstants.s_user.Username)
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenByIntegratedWindowsAuthTest_ManagedUser_DiscoveryFailed_ThrowsExceptionAsync()
+        public async Task AcquireTokenByIntegratedWindowsAuthTest_ManagedUser_DiscoveryFailed_ThrowsAsync()
         {
             // Arrange
             using (var httpManager = new MockHttpManager())
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .BuildConcrete();
 
                 // Act
-                MsalServiceException exception = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                MsalServiceException exception = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                     async () => await app
                         .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
                         .WithUsername(TestConstants.s_user.Username)
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .BuildConcrete();
 
                 // Act
-                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                MsalClientException exception = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     async () => await app
                         .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
                         .WithUsername(TestConstants.s_user.Username)
@@ -310,12 +310,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
-                    "Client info header should contain " + TestConstants.XClientSku,
-                    StringComparison.OrdinalIgnoreCase);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
-                    "Client info header should contain " + TestConstants.XClientVer,
-                    StringComparison.OrdinalIgnoreCase);
+                StringAssert.Contains(
+                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
+                    TestConstants.XClientSku,
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientSku);
+                StringAssert.Contains(
+                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
+                    TestConstants.XClientVer,
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientVer);
             }
         }
 
@@ -353,12 +357,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
-                    "Client info header should contain " + TestConstants.XClientSku,
-                    StringComparison.OrdinalIgnoreCase);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
-                    "Client info header should contain " + TestConstants.XClientVer,
-                    StringComparison.OrdinalIgnoreCase);
+                StringAssert.Contains(
+                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
+                    TestConstants.XClientSku,
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientSku);
+                StringAssert.Contains(
+                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
+                    TestConstants.XClientVer,
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientVer);
 
                 // Assert telemetry ApiId
                 Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenByIntegratedWindowsAuth.ToString("D"), mockTokenRequestHttpHandler.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single().Split('|')[1].Split(',')[0]);
@@ -395,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                         .BuildConcrete();
 
-                MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                MsalServiceException result = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                     async () => await app.AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
                                                         .WithClaims(TestConstants.Claims)
                                                         .WithUsername(TestConstants.s_user.Username)
@@ -434,12 +442,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(TestConstants.s_user.Username, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
-                    "Client info header should contain " + TestConstants.XClientSku,
-                    StringComparison.OrdinalIgnoreCase);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
-                    "Client info header should contain " + TestConstants.XClientVer,
-                    StringComparison.OrdinalIgnoreCase);
+                StringAssert.Contains(
+                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
+                    TestConstants.XClientSku,
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientSku);
+                StringAssert.Contains(
+                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
+                    TestConstants.XClientVer,
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientVer);
             }
         }
 
@@ -473,7 +485,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token, Mex parser fails
 #pragma warning disable CS0618 // Type or member is obsolete
-                MsalClientException result = await AssertException.TaskThrowsAsync<MsalClientException>(
+                MsalClientException result = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     async () => await app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,
@@ -508,7 +520,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .BuildConcrete();
 
                 // Call acquire token, endpoint not found
-                MsalClientException result = await AssertException.TaskThrowsAsync<MsalClientException>(
+                MsalClientException result = await Assert.ThrowsExactlyAsync<MsalClientException>(
 #pragma warning disable CS0618 // Type or member is obsolete
                     async () => await app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
@@ -541,7 +553,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .BuildConcrete();
 
                 // Call acquire token
-                MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                MsalServiceException result = await Assert.ThrowsExactlyAsync<MsalServiceException>(
 #pragma warning disable CS0618 // Type or member is obsolete
                     async () => await app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
@@ -581,7 +593,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .BuildConcrete();
 
                 // Call acquire token
-                MsalClientException result = await AssertException.TaskThrowsAsync<MsalClientException>(
+                MsalClientException result = await Assert.ThrowsExactlyAsync<MsalClientException>(
 #pragma warning disable CS0618 // Type or member is obsolete
                     async () => await app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
@@ -624,7 +636,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .BuildConcrete();
 
                 // Call acquire token
-                MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                MsalServiceException result = await Assert.ThrowsExactlyAsync<MsalServiceException>(
 #pragma warning disable CS0618 // Type or member is obsolete
                     async () => await app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
@@ -675,7 +687,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .BuildConcrete();
 
                 // Call acquire token
-                MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                MsalServiceException result = await Assert.ThrowsExactlyAsync<MsalServiceException>(
 #pragma warning disable CS0618 // Type or member is obsolete
                     async () => await app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
@@ -746,7 +758,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
 #pragma warning disable CS0618 // Type or member is obsolete
-                MsalClientException result = await AssertException.TaskThrowsAsync<MsalClientException>(
+                MsalClientException result = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     async () => await app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,
@@ -790,7 +802,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
 #pragma warning disable CS0618 // Type or member is obsolete
-                MsalUiRequiredException result = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+                MsalUiRequiredException result = await Assert.ThrowsAsync<MsalUiRequiredException>(
                     () => app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,
@@ -843,7 +855,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
 #pragma warning disable CS0618 // Type or member is obsolete
-                MsalServiceException result = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                MsalServiceException result = await Assert.ThrowsAsync<MsalServiceException>(
                     () => app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,
@@ -858,3 +870,4 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
     }
 }
+

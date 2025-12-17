@@ -54,11 +54,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithClientSecret("bad_secret")
                 .Build();
 
-            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+            var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                 app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()).ConfigureAwait(false);
 
-            Assert.AreEqual(ex.ErrorCode, "invalid_client");
-            Assert.AreEqual(ex.StatusCode, (int)HttpStatusCode.BadRequest);
+            Assert.AreEqual("invalid_client", ex.ErrorCode);
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ex.StatusCode);
         }
 
         /// Based on the publicly available https://demo.duendesoftware.com/
@@ -112,3 +112,4 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
     }
 }
+

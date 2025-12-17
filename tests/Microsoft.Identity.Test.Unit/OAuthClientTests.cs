@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Test.Unit
                     var authHeader = request.Headers.Authorization?.ToString();
 
                     // Check value of pkeyAuth header.
-                    Assert.AreEqual(authHeader, TestConstants.PKeyAuthResponse);
+                    Assert.AreEqual(TestConstants.PKeyAuthResponse, authHeader);
                 }
             };
         }
@@ -247,12 +247,11 @@ namespace Microsoft.Identity.Test.Unit
                     harness.HttpManager,
                     null);
 
-                Exception ex = await AssertException.TaskThrowsAsync<Exception>(
+                Exception ex = await Assert.ThrowsAsync<Exception>(
                     () => client.ExecuteRequestAsync<OAuth2ResponseBase>(
                         requestUri,
                         HttpMethod.Post,
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null)),
-                    allowDerived: true)
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null))                    )
                     .ConfigureAwait(false);
 
                 validationHandler(ex);
@@ -261,3 +260,4 @@ namespace Microsoft.Identity.Test.Unit
 
     }
 }
+

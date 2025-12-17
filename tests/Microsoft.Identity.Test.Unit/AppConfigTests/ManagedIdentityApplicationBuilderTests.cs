@@ -49,8 +49,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, mi.ServiceBundle.Config.LogLevel);
-            Assert.AreEqual(false, mi.ServiceBundle.Config.EnablePiiLogging);
-            Assert.AreEqual(false, mi.ServiceBundle.Config.IsDefaultPlatformLoggingEnabled);
+            Assert.IsFalse(mi.ServiceBundle.Config.EnablePiiLogging);
+            Assert.IsFalse(mi.ServiceBundle.Config.IsDefaultPlatformLoggingEnabled);
         }
 
         [TestMethod]
@@ -76,11 +76,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, mi.ServiceBundle.Config.LogLevel);
-            Assert.AreEqual(false, mi.ServiceBundle.Config.EnablePiiLogging);
-            Assert.AreEqual(false, mi.ServiceBundle.Config.IsDefaultPlatformLoggingEnabled);
+            Assert.IsFalse(mi.ServiceBundle.Config.EnablePiiLogging);
+            Assert.IsFalse(mi.ServiceBundle.Config.IsDefaultPlatformLoggingEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
         [DataRow("resourceId/subscription", UserAssignedIdentityId.ResourceId)]

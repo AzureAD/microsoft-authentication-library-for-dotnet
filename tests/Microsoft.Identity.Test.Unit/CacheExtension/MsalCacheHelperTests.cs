@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             cacheAccessor.Read().Throws(ex);
 
             // Act
-            var actualEx = AssertException.Throws<InvalidCastException>(
+            var actualEx = Assert.ThrowsExactly<InvalidCastException>(
                 () => helper.LoadUnencryptedTokenCache());
 
             // Assert
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             cacheAccessor.WhenForAnyArgs(c => c.Write(default)).Throw(ex);
 
             // Act
-            actualEx = AssertException.Throws<InvalidCastException>(
+            actualEx = Assert.ThrowsExactly<InvalidCastException>(
                 () => helper.SaveUnencryptedTokenCache(new byte[0]));
 
             // Assert
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             // Wait for the seconf thread to finish
             resetEvent1.Wait();
 
-            Assert.IsTrue(getTime.ElapsedMilliseconds > 2000);
+            Assert.IsGreaterThan(2000, getTime.ElapsedMilliseconds);
         }
 
         [RunOnWindows]
@@ -353,12 +353,12 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             helper.RegisterCache(pca.UserTokenCache);
 
             // Act
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => pca.GetAccountsAsync())
                 .ConfigureAwait(false);
 
             // Assert
-            Assert.AreEqual(ex.ErrorCode, "json_parse_failed");
+            Assert.AreEqual("json_parse_failed", ex.ErrorCode);
             byte[] data = storage.ReadData();
             Assert.IsFalse(data.Any(), "Cache is corrupt, so it should have been deleted");
         }
@@ -540,7 +540,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             var helper = await MsalCacheHelper.CreateAsync(properties).ConfigureAwait(true);
 
             // event is fired asynchronously, test has to wait for it for a while
-            AssertException.Throws<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => helper.CacheChanged += (_, _) =>
             {
                 Assert.Fail("Should not fire");
@@ -548,3 +548,4 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         }
     }
 }
+

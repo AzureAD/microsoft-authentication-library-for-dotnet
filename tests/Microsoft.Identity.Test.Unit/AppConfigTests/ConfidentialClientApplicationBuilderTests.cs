@@ -43,12 +43,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(TestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNull(cca.AppConfig.ClientName);
             Assert.IsNull(cca.AppConfig.ClientVersion);
-            Assert.AreEqual(false, cca.AppConfig.EnablePiiLogging);
+            Assert.IsFalse(cca.AppConfig.EnablePiiLogging);
             Assert.IsNull(cca.AppConfig.HttpClientFactory);
-            Assert.AreEqual(false, cca.AppConfig.IsDefaultPlatformLoggingEnabled);
+            Assert.IsFalse(cca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(cca.AppConfig.LoggingCallback);
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
-            Assert.AreEqual(null, cca.AppConfig.TenantId);
+            Assert.IsNull(cca.AppConfig.TenantId);
         }
 
         private ConfidentialClientApplicationOptions CreateConfidentialClientApplicationOptions()
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsTrue((cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public void CacheSynchronization_WithOptions(bool enableCacheSynchronization)
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(enableCacheSynchronization, (cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false, false, false)]
         [DataRow(true, true, true)]
         [DataRow(true, false, false)]
@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithInvalidRedirectUri()
         {
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
                 ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithClientSecret("cats")
                                                     .WithRedirectUri("this is not a valid uri")
@@ -391,7 +391,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                    .Build();
 
             var instanceDiscoveryMetadata = (cca.AppConfig as ApplicationConfiguration).CustomInstanceDiscoveryMetadata;
-            Assert.AreEqual(2, instanceDiscoveryMetadata.Metadata.Length);
+            Assert.HasCount(2, instanceDiscoveryMetadata.Metadata);
         }
 
         [TestMethod]
@@ -399,26 +399,26 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_InstanceMetadata_ValidateAuthority_MutuallyExclusive()
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
-            var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+            var ex = Assert.ThrowsExactly<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                   .WithClientSecret("cats")
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
-            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+            Assert.AreEqual(MsalError.ValidateAuthorityOrCustomMetadata, ex.ErrorCode);
         }
 
         [TestMethod]
         public void TestConstructor_BadInstanceMetadata()
         {
-            var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+            var ex = Assert.ThrowsExactly<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDiscoveryMetadata("{bad_json_metadata")
                                                   .WithClientSecret("cats")
                                                   .Build());
 
-            Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
+            Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)] // Not specified, default is true
@@ -442,7 +442,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(isLegacyCacheCompatibilityEnabled, cca.AppConfig.LegacyCacheCompatibilityEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)] // Not specified, default is true
@@ -501,7 +501,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                             .WithClientCapabilities(TestConstants.ClientCapabilities)
                             .BuildConcrete();
 
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .WithClaims("claims_that_are_not_json")
@@ -512,3 +512,4 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
     }
 }
+

@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 // Act
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() => app
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() => app
                      .AcquireTokenInteractive(TestConstants.s_scope)
                      .WithAuthenticationOperation(authScheme)
                      .ExecuteAsync()).ConfigureAwait(false);
@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthenticationOperation(new TestOperation())
                     .ExecuteAsync().ConfigureAwait(false);
 
-                Assert.IsTrue(result.AccessToken.StartsWith("IAuthenticationOperation2"));
+                StringAssert.StartsWith("IAuthenticationOperation2", result.AccessToken);
                 Assert.AreEqual($"TestToken {result.AccessToken}", result.CreateAuthorizationHeader() );
                 
             }
@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddResponseMockHandlerForPost(MockHelpers.CreateSuccessResponseMessage(JsonHelper.SerializeToJson(fakeResponse)));
                 await requestParams.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+                var ex = await Assert.ThrowsAsync<MsalClientException>(
                     () => tokenClient.SendTokenRequestAsync(new Dictionary<string, string>())).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.AccessTokenTypeMissing, ex.ErrorCode);
             }
@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result1);
-                Assert.IsTrue(result1.AccessToken.StartsWith("validated_"));
+                StringAssert.StartsWith("validated_", result1.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
 
                 // Second request - validation should fail, so new token should be acquired
@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result1);
-                Assert.IsTrue(result1.AccessToken.StartsWith("validated_"));
+                StringAssert.StartsWith("validated_", result1.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
 
                 // Second request - validation should succeed, so cached token should be returned
@@ -467,3 +467,4 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
     }
 }
+

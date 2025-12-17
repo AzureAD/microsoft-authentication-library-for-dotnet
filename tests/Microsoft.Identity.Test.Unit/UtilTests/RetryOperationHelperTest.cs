@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             var result = RetryOperationHelper.ExecuteWithRetryAsync(func, numberOfRetriesToAttempt).Result;
 
             //Assert 
-            Assert.AreEqual(result, true);
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
@@ -43,10 +43,10 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Func<Task<bool>> func = () => operationSimulator.SimulateOperationWithFailuresAsync();
 
             //Act
-            Exception ex = AssertException.Throws<AggregateException>(
+            Exception ex = Assert.ThrowsExactly<AggregateException>(
                 () => RetryOperationHelper.ExecuteWithRetryAsync(func, numberOfRetriesToAttempt).Wait());
 
-            Assert.AreEqual(ex.InnerException.Message, "OperationSimulator: Simulating Operation Failure");
+            Assert.AreEqual("OperationSimulator: Simulating Operation Failure", ex.InnerException.Message);
         }
 
         [TestMethod]
@@ -63,9 +63,9 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
 
             //Act
 
-            Exception ex = AssertException.Throws<AggregateException>(
+            Exception ex = Assert.ThrowsExactly<AggregateException>(
                 () => RetryOperationHelper.ExecuteWithRetryAsync(func, numberOfRetriesToAttempt, retryTimeSpan, actionUponFailure).Wait());
-            Assert.AreEqual(ex.InnerException.Message, "OperationSimulator: ThrowException: Exception thrown to identify method");
+            Assert.AreEqual("OperationSimulator: ThrowException: Exception thrown to identify method", ex.InnerException.Message);
         }
     }
 
@@ -101,3 +101,4 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         }
     }
 }
+

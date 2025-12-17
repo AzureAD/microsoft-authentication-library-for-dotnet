@@ -420,10 +420,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             item.WamAccountIds = new Dictionary<string, string>() { { "client_id_1", "wam_id_1" }, { "client_id_2", "wam_id_2" } };
             string asJson = item.ToJsonString();
 
-            Assert.IsTrue(asJson.Contains(@" ""wam_account_ids"": {
+            Assert.Contains(@" ""wam_account_ids"": {
     ""client_id_1"": ""wam_id_1"",
     ""client_id_2"": ""wam_id_2""
-  }"));
+  }", asJson);
 
             var item2 = MsalAccountCacheItem.FromJsonString(asJson);
             AssertAccountCacheItemsAreEqual(item, item2);
@@ -615,8 +615,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string json = CoreHelpers.ByteArrayToString(bytes);
 
-            Assert.IsTrue(json.Contains(prefix));
-            Assert.IsFalse(json.ToLowerInvariant().Contains("null"));
+            Assert.Contains(prefix, json);
+            Assert.DoesNotContain("null", json.ToLowerInvariant());
         }
 
         [TestMethod]
@@ -709,11 +709,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = File.ReadAllBytes(binFilePath);
             s.Deserialize(bytes, false);
 
-            Assert.AreEqual(1, accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(1, accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(1, accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(1, accessor.GetAllAccounts().Count);
-            Assert.AreEqual(0, accessor.GetAllAppMetadata().Count);
+            Assert.HasCount(1, accessor.GetAllAccessTokens());
+            Assert.HasCount(1, accessor.GetAllRefreshTokens());
+            Assert.HasCount(1, accessor.GetAllIdTokens());
+            Assert.HasCount(1, accessor.GetAllAccounts());
+            Assert.IsEmpty(accessor.GetAllAppMetadata());
 
             MsalAccessTokenCacheItem expectedAccessTokenItem = new MsalAccessTokenCacheItem(
                "login.windows.net",
@@ -769,10 +769,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void AssertAccessorsAreEqual(ITokenCacheAccessor expected, ITokenCacheAccessor actual)
         {
-            Assert.AreEqual(expected.GetAllAccessTokens().Count, actual.GetAllAccessTokens().Count);
-            Assert.AreEqual(expected.GetAllRefreshTokens().Count, actual.GetAllRefreshTokens().Count);
-            Assert.AreEqual(expected.GetAllIdTokens().Count, actual.GetAllIdTokens().Count);
-            Assert.AreEqual(expected.GetAllAccounts().Count, actual.GetAllAccounts().Count);
+            Assert.HasCount(expected.GetAllAccessTokens().Count, actual.GetAllAccessTokens());
+            Assert.HasCount(expected.GetAllRefreshTokens().Count, actual.GetAllRefreshTokens());
+            Assert.HasCount(expected.GetAllIdTokens().Count, actual.GetAllIdTokens());
+            Assert.HasCount(expected.GetAllAccounts().Count, actual.GetAllAccounts());
         }
 
         private void AssertContainsKey(JObject j, string key)

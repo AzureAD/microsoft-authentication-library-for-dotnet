@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
             {
                 if (expected[i] != actual[i])
                 {
-                    Assert.IsFalse(true);
+                    Assert.Fail($"Strings differ at index {i}.");
                 }
             }
         }

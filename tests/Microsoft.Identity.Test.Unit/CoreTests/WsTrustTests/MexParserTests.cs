@@ -35,14 +35,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
             Assert.AreEqual(
                 "https://sts.usystech.net/adfs/services/trust/2005/windowstransport",
                 wsTrustEndpoint.Uri.AbsoluteUri);
-            Assert.AreEqual(wsTrustEndpoint.Version, WsTrustVersion.WsTrust2005);
+            Assert.AreEqual(WsTrustVersion.WsTrust2005, wsTrustEndpoint.Version);
 
             // Act
             wsTrustEndpoint = mexDocument.GetWsTrustUsernamePasswordEndpoint();
 
             // Assert
             Assert.AreEqual("https://sts.usystech.net/adfs/services/trust/2005/usernamemixed", wsTrustEndpoint.Uri.AbsoluteUri);
-            Assert.AreEqual(wsTrustEndpoint.Version, WsTrustVersion.WsTrust2005);
+            Assert.AreEqual(WsTrustVersion.WsTrust2005, wsTrustEndpoint.Version);
         }
 
         [TestMethod]
@@ -70,10 +70,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
         [TestMethod]
         [Description("Mex endpoint fails to parse")]
-        [ExpectedException(typeof(XmlException))]
         public void MexEndpointFailsToParseTest()
         {
-            var mexDocument = new MexDocument("malformed, non-xml content");
+            Assert.Throws<XmlException>(
+                () => 
+            new MexDocument("malformed, non-xml content"));
         }
     }
 }

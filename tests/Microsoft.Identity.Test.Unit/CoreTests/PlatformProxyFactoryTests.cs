@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             var proxy2 = PlatformProxyFactory.CreatePlatformProxy(null);
 
             // Assert
-            Assert.IsFalse(proxy1 == proxy2);
+            Assert.AreNotEqual(proxy2, proxy1);
         }
 
         [TestMethod]

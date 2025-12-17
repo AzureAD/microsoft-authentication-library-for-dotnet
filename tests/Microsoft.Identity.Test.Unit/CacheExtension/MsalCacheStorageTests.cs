@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             var storage = new Storage(s_storageCreationProperties, cacheAccessor, actualLogger);
 
             // Assert
-            AssertException.Throws<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => storage.ReadData());
         }
 
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             var storage = new Storage(s_storageCreationProperties, cacheAccessor, actualLogger);
 
             // Assert
-            AssertException.Throws<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => storage.WriteData(new byte[0]));
         }
 
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             storage.Clear(ignoreExceptions: true);
 
             // Assert
-            AssertException.Throws<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => storage.Clear(ignoreExceptions: false));
         }
 
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             byte[] result = storage.ReadData();
 
             // Assert
-            Assert.AreEqual(0, result.Length);
+            Assert.IsEmpty(result);
         }
 
       
@@ -132,9 +132,9 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             }
 
             // Assert            
-            Assert.IsTrue(stringListener.CurrentLog.Contains("TestSource Error"));
-            Assert.IsTrue(stringListener.CurrentLog.Contains("InvalidOperationException"));
-            Assert.IsTrue(stringListener.CurrentLog.Contains("some error"));
+            Assert.Contains("TestSource Error", stringListener.CurrentLog);
+            Assert.Contains("InvalidOperationException", stringListener.CurrentLog);
+            Assert.Contains("some error", stringListener.CurrentLog);
         }
 
         [TestMethod]
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             cacheAccessor.Read().Throws(exception);
 
             // Act
-            var ex = AssertException.Throws<MsalCachePersistenceException>(
+            var ex = Assert.ThrowsExactly<MsalCachePersistenceException>(
                 () => storage.VerifyPersistence());
 
             // Assert
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             var storage = new Storage(s_storageCreationProperties, cacheAccessor, actualLogger);
 
             // Act
-            var ex = AssertException.Throws<MsalCachePersistenceException>(
+            var ex = Assert.ThrowsExactly<MsalCachePersistenceException>(
                 () => storage.VerifyPersistence());
 
             // Assert
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             cacheAccessor.Read().Returns(Encoding.UTF8.GetBytes("other_dummy_data"));
 
             // Act
-            var ex = AssertException.Throws<MsalCachePersistenceException>(
+            var ex = Assert.ThrowsExactly<MsalCachePersistenceException>(
                 () => storage.VerifyPersistence());
 
             // Assert
@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             builder = builder.WithMacKeyChain(serviceName: "Microsoft.Developer.IdentityService", accountName: "MSALCache");
             builder.WithUnprotectedFile();
 
-            AssertException.Throws<ArgumentException>(() => builder.Build());
+            Assert.ThrowsExactly<ArgumentException>(() => builder.Build());
 
             builder = new StorageCreationPropertiesBuilder(
                Path.GetFileName(CacheFilePath),
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
                 attribute1: new KeyValuePair<string, string>("MsalClientID", "Microsoft.Developer.IdentityService"),
                 attribute2: new KeyValuePair<string, string>("MsalClientVersion", "1.0.0.0"));
             builder.WithUnprotectedFile();
-            AssertException.Throws<ArgumentException>(() => builder.Build());
+            Assert.ThrowsExactly<ArgumentException>(() => builder.Build());
 
             builder = new StorageCreationPropertiesBuilder(
               Path.GetFileName(CacheFilePath),
@@ -245,8 +245,9 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             builder.WithLinuxUnprotectedFile();
             builder.WithUnprotectedFile();
             
-            AssertException.Throws<ArgumentException>(() => builder.Build());
+            Assert.ThrowsExactly<ArgumentException>(() => builder.Build());
 
         }
     }
 }
+

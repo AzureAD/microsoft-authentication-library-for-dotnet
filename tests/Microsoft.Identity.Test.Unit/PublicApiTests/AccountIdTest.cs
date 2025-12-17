@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
            new AccountId("adfs");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("uid", "uid", null, DisplayName = "Parse from string with no dot")]
         [DataRow("uid.utid", "uid", "utid", DisplayName = "Parse from string with one dot")]
         [DataRow("uid.1.utid", "uid.1", "utid", DisplayName = "Parse from string with 2 dots")]

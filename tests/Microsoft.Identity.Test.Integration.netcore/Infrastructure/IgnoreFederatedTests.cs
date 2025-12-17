@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,10 +16,14 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
     /// </summary>
     internal class IgnoreFederatedTestsAttribute : TestMethodAttribute
     {
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public IgnoreFederatedTestsAttribute([CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1) : base(callerFilePath, callerLineNumber)
+        {
+        }
+
+        public override Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
 #if IGNORE_FEDERATED
-            return new[]
+            return Task.FromResult(new[]
             {
                     new TestResult
                     {
@@ -26,9 +31,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         TestFailureException = new AssertInconclusiveException(
                             $"Skipped on OneBranch pipeline")
                     }
-                };
+                });
 #else
-            return base.Execute(testMethod);
+            return base.ExecuteAsync(testMethod);
 #endif
         }
     }
