@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task LegacyCacheEnabledTelemetryTestAsync(bool isLegacyCacheEnabled)

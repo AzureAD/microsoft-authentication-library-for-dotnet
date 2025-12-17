@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion
 
         // This test checks that MSAL.netcore / MSAL.netfx / MSAL.netstandard DLLs are actually used
-        [DataTestMethod()]
+        [TestMethod()]
         [DataRow(TargetFrameworks.NetCore)]
         [DataRow(TargetFrameworks.NetFx)]
         public void AssertTfm(TargetFrameworks targetFwk)

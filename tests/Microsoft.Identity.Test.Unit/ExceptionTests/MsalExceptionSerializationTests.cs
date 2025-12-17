@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         private const string BrokerErrorCode = "broker error code";
         private const string BrokerTelemetry = "{\"error-property1\": \"0\",\"error-property2\": \"abc\"}";
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public void MsalException_CanSerializeAndDeserializeRoundTrip(bool includeAdditionalExceptionData)

@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class GenericAuthorityTests : TestBase
     {
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         /// AAD doesn't returns the "scope" in the response
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://demo.duend esoftware.com")]
         public void MalformedAuthority_ThrowsException(string malformedAuthority)
         {
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .Build());
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("oidc_response_not_json")]
         [DataRow("oidc_response_http_error")]
         public async Task BadOidcResponse_ThrowsException_Async(string badOidcResponseType)

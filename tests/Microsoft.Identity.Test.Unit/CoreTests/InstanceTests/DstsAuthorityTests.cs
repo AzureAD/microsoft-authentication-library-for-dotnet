@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             };
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityTenanted)]
         public async Task DstsClientCredentialSuccessfulTestAsync(string authority)
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(TestConstants.TenantId2, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityTenanted)]
         public void DstsEndpointsTest(string authority)

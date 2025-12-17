@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public async Task MtlsPop_WithoutRegion_ThrowsException(bool setAzureRegion)
@@ -539,7 +539,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DataTestMethod]
         [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(MsalServiceException))]
         [DataRow("https://contoso.adfs.contoso.com/adfs", "ADFS Authority", typeof(HttpRequestException))]
         public async Task MtlsPop_NonAadAuthorityAsync(string authorityUrl, string authorityType, Type expectedException)
@@ -565,7 +564,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://login.microsoftonline.com", TestConstants.Common, "Public Cloud")]
         [DataRow("https://login.microsoftonline.com", TestConstants.Organizations, "Public Cloud")]
         [DataRow("https://login.microsoftonline.us", TestConstants.Common, "Azure Government")]
@@ -658,7 +657,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("login.microsoftonline.com", "mtlsauth.microsoft.com")]
         [DataRow("login.microsoftonline.us", "mtlsauth.microsoftonline.us")]
         [DataRow("login.usgovcloudapi.net", "mtlsauth.microsoftonline.us")]
@@ -825,7 +824,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityOrganizations)]
         public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsyncForDsts_ThrowsException(string authorityUrl)

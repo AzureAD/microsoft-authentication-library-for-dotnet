@@ -569,7 +569,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, true)]
         [DataRow(true, false)]
         [DataRow(false, true)]
@@ -675,7 +675,7 @@ namespace Microsoft.Identity.Test.Unit
 
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("login.partner.microsoftonline.cn", "login.partner.microsoftonline.cn")]
         [DataRow("login.chinacloudapi.cn", "login.partner.microsoftonline.cn")]
         [DataRow("login.microsoftonline.us", "login.microsoftonline.us")]

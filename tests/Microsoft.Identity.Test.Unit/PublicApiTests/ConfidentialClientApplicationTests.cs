@@ -871,7 +871,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 new ClientAssertionDelegateCredential(nullDelegate));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)] // bearer (no cert)
         [DataRow(true)]  // PoP (with cert)
         public void Constructor_ValidDelegate_DoesNotThrow(bool withCert)
@@ -1193,7 +1193,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task AcquireTokenByAuthorizationCode_IgnoresRegion_Async(bool autodetectRegion)

@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         #region Acceptance Tests
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, $"{TestConstants.ClientId}-2")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, $"{TestConstants.MiResourceId}-2")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, $"{TestConstants.ObjectId}-2")]
@@ -282,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
@@ -331,7 +331,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         #endregion Acceptance Tests
 
         #region Failure Tests
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
@@ -460,7 +460,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region Fallback Behavior Tests
         // Verifies non-mTLS request after IMDSv2 detection falls back per-request to IMDSv1 (Bearer),
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
         public async Task NonMtlsRequest_FallsBackToImdsV1(
@@ -597,7 +597,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             CsrValidator.ValidateCsrContent(csr, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Invalid@#$%Certificate!")]
         [DataRow("")]
         [DataRow(null)]
@@ -619,7 +619,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Invalid@#$%Certificate!")]
         [DataRow("")]
         [DataRow(null)]
@@ -802,7 +802,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, TestConstants.ClientId + "-2")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, TestConstants.MiResourceId + "-2")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, TestConstants.ObjectId + "-2")]
@@ -861,7 +861,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region Cert cache tests
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null,                    /*isUami*/ false)] // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId,  /*isUami*/ true)]  // UAMI by client_id
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, /*isUami*/ true)] // UAMI by resource_id
@@ -931,7 +931,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         ///   - One for UAMI (CN=UAMI-20Y)
         /// Then run mint + cached flows and assert thumbprints.
         /// </summary>
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null,                      /*aliasLabel*/ "SAMI")] // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId,    /*aliasLabel*/ "UAMI-ClientId")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId,/*aliasLabel*/ "UAMI-ResourceId")]
@@ -1093,7 +1093,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// - UAMI (client_id|object_id|resource_id) → CN = TestConstants.ClientId (canonical)
         /// Both assert DC = TestConstants.TenantId and cert cache reuse.
         /// </summary>
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null,                    /*label*/ "SAMI", /*isUami*/ false)]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId,  /*label*/ "UAMI-ClientId", /*isUami*/ true)]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId,  /*label*/ "UAMI-ObjectId", /*isUami*/ true)]
@@ -1210,7 +1210,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, "object_id")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, "resource_id")]
         public async Task mTLSPoP_Uami_ClientIdThenAlias_MintsThenCaches_SubjectCNIsClientId(
@@ -1286,7 +1286,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, "UAMI-ClientId")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, "UAMI-ObjectId")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, "UAMI-ResourceId")]
@@ -1340,7 +1340,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, "UAMI-ClientId")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, "UAMI-ObjectId")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, "UAMI-ResourceId")]

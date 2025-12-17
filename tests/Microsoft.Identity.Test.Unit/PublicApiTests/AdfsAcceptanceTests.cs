@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private const string AdfsScope = "https://arm.asz/.default";
 
         // Possible authorities copied from: https://msazure.visualstudio.com/One/_search?action=contents&text=CanAcquireToken_UsingRefreshToken&type=code&lp=code-Project&filters=ProjectFilters%7BOne%7DRepositoryFilters%7BAzureStack-Services-Graph%7D&pageSize=25&result=DefaultCollection/One/AzureStack-Services-Graph/GBmain//src/Identity.Web.Tests/MsalTests.cs
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://localhost:3001/adfs")]
         [DataRow("https://localhost:3001/460afc9d-718d-40c8-8d03-954")]
         [DataRow("https://localhost:3001/contoso.int.test")]
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             await RunAuthCodeFlowAsync(authority, useWithAdfsAuthority: true).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://localhost:3001/adfs")]
         [DataRow("https://localhost:3001/460afc9d-718d-40c8-8d03-954")]
         [DataRow("https://localhost:3001/contoso.int.test")]

@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             ValidateInstanceMetadata(regionalMetadata);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(HttpStatusCode.NotFound, 0, TestConstants.RegionAutoDetectNotFoundFailureMessage)]  // No retries for 404 errors
         [DataRow(HttpStatusCode.InternalServerError, TestRegionDiscoveryRetryPolicy.NumRetries, TestConstants.RegionAutoDetectInternalServerErrorFailureMessage)]
         public async Task SuccessfulResponseFromUserProvidedRegionAsync(
@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             ValidateInstanceMetadata(regionalMetadata);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Region with spaces")]
         [DataRow("invalid`region")]
         public async Task InvalidImdsAsync(string region)
@@ -319,7 +319,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionAutoDetectOkFailureMessage));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(HttpStatusCode.NotFound, 0, TestConstants.RegionAutoDetectNotFoundFailureMessage)]  // No retries for 404 errors
         [DataRow(HttpStatusCode.InternalServerError, TestRegionDiscoveryRetryPolicy.NumRetries, TestConstants.RegionAutoDetectInternalServerErrorFailureMessage)]
         public async Task ErrorResponseFromLocalImdsAsync(
@@ -456,7 +456,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(NumRequests, requestsMade);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(HttpStatusCode.NotFound)]
         [DataRow(HttpStatusCode.RequestTimeout)]
         public async Task RegionDiscoveryDoesNotRetryOnNonRetryableStatusCodesAsync(HttpStatusCode statusCode)

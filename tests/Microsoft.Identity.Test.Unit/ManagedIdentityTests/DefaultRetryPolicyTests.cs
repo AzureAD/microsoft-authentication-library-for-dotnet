@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
-        [DataTestMethod] // see test class header: all sources that allow UAMI
+        [TestMethod] // see test class header: all sources that allow UAMI
         [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
         [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint)]
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod] // see test class header: all sources that allow UAMI
+        [TestMethod] // see test class header: all sources that allow UAMI
         [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
         [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint)]
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint, null)]
         [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint, null)]
         [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint, null)]
@@ -203,7 +203,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod] // see test class header: all sources allow SAMI
+        [TestMethod] // see test class header: all sources allow SAMI
         [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint)]
         [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint)]
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod] // see test class header: all sources allow SAMI
+        [TestMethod] // see test class header: all sources allow SAMI
         [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint)]
         [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint)]
@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod] // see test class header: all sources allow SAMI
+        [TestMethod] // see test class header: all sources allow SAMI
         [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.AzureArc, TestConstants.AzureArcEndpoint)]
         [DataRow(ManagedIdentitySource.CloudShell, TestConstants.CloudShellEndpoint)]

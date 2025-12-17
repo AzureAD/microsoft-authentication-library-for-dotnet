@@ -445,7 +445,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Assert.AreEqual(null, token.Upn);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(typeof(NullBroker))]
         [DataRow(typeof(IosBrokerMock))]
         [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
@@ -473,7 +473,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(typeof(NullBroker))]
         [DataRow(typeof(IosBrokerMock))]
         [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706

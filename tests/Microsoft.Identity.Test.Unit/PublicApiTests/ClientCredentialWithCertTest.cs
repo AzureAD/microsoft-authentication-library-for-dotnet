@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Unit
             httpManager.AddInstanceDiscoveryMockHandler();
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, null, true)]
         [DataRow(false, null, false)]
         [DataRow(null, null, false)] // the default is false
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, null, true)]
         [DataRow(false, null, false)]
         [DataRow(null, null, false)] // the default is false
@@ -552,7 +552,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, true, true, true)]
         [DataRow(true, true, true, false)]
         [DataRow(true, true, false, true)]
@@ -786,7 +786,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         // regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4913
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task RopcCcaSendsX5CAsync(bool sendX5C)

@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string AzureArc = "Azure Arc";
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
         [DataRow(TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("somefile=filename", MsalErrorMessage.ManagedIdentityInvalidChallenge)]
         [DataRow("C:\\ProgramData\\AzureConnectedMachineAgent\\Tokens\\filename.txt", MsalErrorMessage.ManagedIdentityInvalidFile)]
         [DataRow("C:\\ProgramData\\AzureConnectedMachineAgent\\Tokens\\...\\etc\\filename.key", MsalErrorMessage.ManagedIdentityInvalidFile)]

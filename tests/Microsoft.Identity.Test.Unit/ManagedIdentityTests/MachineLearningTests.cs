@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string MachineLearningEndpoint = "http://localhost:7071/msi/token";
         internal const string Resource = "https://management.azure.com";
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task MachineLearningUserAssignedHappyPathAndHasCorrectClientIdQueryParameterAsync(
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         [DataRow(TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
         public async Task MachineLearningUserAssignedNonClientIdThrowsAsync(

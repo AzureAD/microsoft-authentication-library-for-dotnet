@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task AcquireTokenToRegionalEndpointAsync(bool instanceDiscoveryEnabled)

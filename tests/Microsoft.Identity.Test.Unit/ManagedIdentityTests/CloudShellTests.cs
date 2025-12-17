@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string CloudShell = "Cloud Shell";
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
         [DataRow(TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]

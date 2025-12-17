@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class AdfsAuthorityTests
     {
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://someAdfs.com/a dfs/")]
         [DataRow("http://someAdfs.com/adfs/")]
         public void MalformedAuthority_ThrowsException(string malformedAuthority)

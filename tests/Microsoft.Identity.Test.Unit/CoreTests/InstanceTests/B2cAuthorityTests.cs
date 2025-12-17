@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(MsalErrorMessage.B2cAuthorityUriInvalidPath, ex.Message);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://sometenantid.b2clogin.com/tfp/sometenantid/policy/", "sometenantid")]
         [DataRow("https://catsareamazing.com/tfp/catsareamazing/policy/", "catsareamazing")]
         [DataRow("https://sometenantid.b2clogin.de/tfp/tid/policy/", "tid")]
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(new Uri(UriVanityPort), authority.AuthorityInfo.CanonicalAuthority);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://login.microsoftonline.in/tfp/te nant/b2c_1_susi/")]
         [DataRow("http://login.microsoftonline.in/tfp/tenant/b2c_1_susi/")]
         public void MalformedAuthority_ThrowsException(string malformedAuthority)

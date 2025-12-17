@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     public class InMemoryPartitionedTokenCacheAccessorTests
     {
         #region Access token tests
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public void SaveAccessToken_Test(bool isAppCache)
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey2][at3.CacheKey]);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public void DeleteAccessToken_Test(bool isAppCache)
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(2, accessor.GetAllAccessTokens().Count);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public void GetAllAccessTokens_Test(bool isAppCache)
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         #endregion
 
         #region App metadata tests
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
 
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(2, GetAppMetadataCache(accessor, isAppCache).Count);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
 
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(appMetadataItem.CacheKey, accessor.GetAppMetadata(appMetadataItem).CacheKey);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
 

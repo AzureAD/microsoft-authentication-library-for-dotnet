@@ -449,7 +449,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null)]
         [TestMethod]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)

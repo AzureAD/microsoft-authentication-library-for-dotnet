@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string DisableEnvVar = "MSAL_MI_DISABLE_PERSISTENT_CERT_CACHE";
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("true")]
         [DataRow("TRUE")]
         [DataRow("1")]

@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds)]
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", Resource, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.AppService)]
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(AppServiceEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.Imds)]
         [DataRow(AzureArcEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.AzureArc)]
@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
@@ -386,7 +386,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
@@ -450,7 +450,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("user.read", ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow("s", ManagedIdentitySource.AppService, AppServiceEndpoint)]
@@ -499,7 +499,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
         [DataRow("{\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
         [DataRow("{\"error\":\"errorCode\",\"error_description\":\"Error message\"}", new string[] { "errorCode", "Error message" })]
@@ -548,7 +548,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("", ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow(null, ManagedIdentitySource.AppService, AppServiceEndpoint)]
         public async Task ManagedIdentityTestNullOrEmptyScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
@@ -567,7 +567,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
@@ -608,7 +608,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
@@ -647,7 +647,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
@@ -782,7 +782,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(1, false, false)] // Unix timestamp
         [DataRow(2, false, false)] // Unix timestamp
         [DataRow(3, true, false)]  // Unix timestamp
@@ -1030,7 +1030,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .ExecuteAsync(tokenSource.Token)).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
@@ -1067,7 +1067,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.Imds, ImdsEndpoint)]
         [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
@@ -1252,7 +1252,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, 429)] // not defined in HttpStatusCode enum
@@ -1346,7 +1346,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
@@ -1395,7 +1395,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(ManagedIdentitySource.AppService)]
         [DataRow(ManagedIdentitySource.AzureArc)]
         [DataRow(ManagedIdentitySource.CloudShell)]

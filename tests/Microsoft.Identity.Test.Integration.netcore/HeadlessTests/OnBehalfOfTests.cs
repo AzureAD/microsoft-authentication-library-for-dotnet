@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Tests the behavior when calling OBO and silent in different orders with multiple users.
         /// OBO calls should return tokens for correct users, silent calls should throw.
         /// </summary>
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false, false)]
         [DataRow(true, false)]
         [DataRow(true, true)]

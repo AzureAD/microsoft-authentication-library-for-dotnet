@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsTrue((cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public void CacheSynchronization_WithOptions(bool enableCacheSynchronization)
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(enableCacheSynchronization, (cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false, false, false)]
         [DataRow(true, true, true)]
         [DataRow(true, false, false)]
@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)] // Not specified, default is true
@@ -442,7 +442,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(isLegacyCacheCompatibilityEnabled, cca.AppConfig.LegacyCacheCompatibilityEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)] // Not specified, default is true

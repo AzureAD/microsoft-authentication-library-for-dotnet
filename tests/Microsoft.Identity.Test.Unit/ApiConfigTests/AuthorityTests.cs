@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 "The tenant id should have been changed");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityTenanted)]
         [DataRow(TestConstants.CiamAuthorityMainFormat)]
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 "The tenant id should have been changed");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant, true)]
         [DataRow(TestConstants.AuthorityCommonPpeAuthority, true)]
         [DataRow(TestConstants.DstsAuthorityCommon, false)]
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.IsFalse(ai.IsSha2CredentialSupported);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant)]
         [DataRow(TestConstants.AuthorityCommonPpeAuthority)]
         [DataRow(TestConstants.AuthorityConsumersTenant)]
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 "The tenant id should have NOT changed");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
         public void AADWithTenantId_Success(Uri authorityValue, string tenantId)
         {
@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(tenantId, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
         public void AADWithTenantIdFromAuthority_Success(Uri authorityValue, string expectedTenantId)
         {
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(expectedTenantId, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("malformed tenant")]
         public void WithTenantId_AppLevel_MalformedTenant_ThrowsException(string tenantId)
         {
@@ -267,7 +267,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                     .Build());
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("malformed tenant")]
         public void WithTenantId_RequestLevel_MalformedTenant_ThrowsException(string tenantId)
         {
@@ -282,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                    .WithTenantId(tenantId));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null)]
         public void WithTenantIdFromAuthority_NullUriAuthority_ThrowsException(Uri authorityValue)
         {
@@ -435,7 +435,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.IsFalse(s_b2cAuthority.AuthorityInfo.IsDefaultAuthority);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant, typeof(AadAuthority), "Aad")]
         [DataRow(TestConstants.AuthorityCommonPpeAuthority, typeof(AadAuthority), "Aad")]
         [DataRow(TestConstants.AuthorityConsumersTenant, typeof(AadAuthority), "Aad")]

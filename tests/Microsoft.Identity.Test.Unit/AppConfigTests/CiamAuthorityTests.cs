@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(ciamTransformedAuthority, transformedAuthority.AbsoluteUri);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://idgciamdemo.ciamlogin.com/", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
         [DataRow("https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d", "https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d/")]
         [DataRow("https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(expectedAuthority, effectiveAuthority);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://app.ciamlogin.com/")]
         //[DataRow("https://app.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d")]
         //[DataRow("https://app.ciamlogin.com/aDomain")]
@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://app.ciamlogin.com/")]
         [DataRow("https://app.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d")]
         [DataRow("https://app.ciamlogin.com/aDomain")]
