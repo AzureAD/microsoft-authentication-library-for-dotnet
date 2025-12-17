@@ -867,7 +867,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> nullDelegate = null;
 
             // Act &  Assert
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 new ClientAssertionDelegateCredential(nullDelegate));
         }
 
@@ -1990,7 +1990,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void ConfidentialClient_WithEmptyClientSecret_ThrowsException()
         {
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithClientSecret(string.Empty) // or null
@@ -2092,7 +2092,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void ConfidentialClient_WithInvalidAuthority_ThrowsArgumentException()
         {
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)

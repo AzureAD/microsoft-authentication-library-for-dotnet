@@ -347,7 +347,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, imdsVersion: ImdsVersion.V1).ConfigureAwait(false);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .ExecuteAsync().ConfigureAwait(false)
@@ -396,7 +396,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
 
                 // none of the mocks from AddMocksToGetEntraToken are needed since checking the cache occurs before the network requests
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession() // this will cause an error to be thrown since the app already fell back to ImdsV1
                     .ExecuteAsync().ConfigureAwait(false)
@@ -536,7 +536,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: null));
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .ExecuteAsync().ConfigureAwait(false)
@@ -558,7 +558,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "I_MDS/150.870.65.1854"));
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .ExecuteAsync().ConfigureAwait(false)
@@ -603,7 +603,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(null)]
         public void TestCsrGeneration_BadCert_ThrowsMsalServiceException(string badCert)
         {
-            Assert.ThrowsException<MsalServiceException>(() =>
+            Assert.ThrowsExactly<MsalServiceException>(() =>
                 CsrValidator.ParseRawCsr(badCert));
         }
         #endregion CSR Generation Tests
@@ -627,7 +627,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<MsalServiceException>(() =>
+                Assert.ThrowsExactly<MsalServiceException>(() =>
                     CommonCryptographyManager.AttachPrivateKeyToCert(badCert, rsa));
             }
         }
@@ -635,7 +635,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void AttachPrivateKeyToCert_NullPrivateKey_ThrowsArgumentNullException()
         {
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidRawCertificate, null));
         }
         #endregion
@@ -654,7 +654,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .WithMtlsProofOfPossession()
                         // Intentionally DO NOT call .WithAttestationProviderForTests(...)
@@ -681,7 +681,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var nullProvider = new Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>>(
                     (input, ct) => Task.FromResult<AttestationTokenResponse>(null));
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .WithMtlsProofOfPossession()
                         .WithAttestationProviderForTests(nullProvider)
@@ -708,7 +708,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var emptyProvider = new Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>>(
                     (input, ct) => Task.FromResult(new AttestationTokenResponse { AttestationToken = "   " }));
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .WithMtlsProofOfPossession()
                         .WithAttestationProviderForTests(emptyProvider)
@@ -736,7 +736,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .WithMtlsProofOfPossession() // request PoP on a non-KeyGuard env
                         .ExecuteAsync().ConfigureAwait(false)

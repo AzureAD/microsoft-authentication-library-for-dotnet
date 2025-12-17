@@ -550,35 +550,35 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), null);
 
-            var ex = Assert.ThrowsException<MsalClientException>(() => accessor.SaveRefreshToken(TokenCacheHelper.CreateRefreshTokenItem()));
+            var ex = Assert.ThrowsExactly<MsalClientException>(() => accessor.SaveRefreshToken(TokenCacheHelper.CreateRefreshTokenItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.SaveIdToken(TokenCacheHelper.CreateIdTokenCacheItem()));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => accessor.SaveIdToken(TokenCacheHelper.CreateIdTokenCacheItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.SaveAccount(TokenCacheHelper.CreateAccountItem()));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => accessor.SaveAccount(TokenCacheHelper.CreateAccountItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.GetIdToken(TokenCacheHelper.CreateAccessTokenItem()));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => accessor.GetIdToken(TokenCacheHelper.CreateAccessTokenItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.GetAccount(TokenCacheHelper.CreateAccountItem()));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => accessor.GetAccount(TokenCacheHelper.CreateAccountItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.DeleteRefreshToken(TokenCacheHelper.CreateRefreshTokenItem()));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => accessor.DeleteRefreshToken(TokenCacheHelper.CreateRefreshTokenItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.DeleteIdToken(TokenCacheHelper.CreateIdTokenCacheItem()));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => accessor.DeleteIdToken(TokenCacheHelper.CreateIdTokenCacheItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.DeleteAccount(TokenCacheHelper.CreateAccountItem()));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => accessor.DeleteAccount(TokenCacheHelper.CreateAccountItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 

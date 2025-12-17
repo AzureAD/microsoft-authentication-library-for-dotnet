@@ -140,18 +140,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using var cert = CreateSelfSignedCert(TimeSpan.FromDays(2));
 
             // TryGet
-            Assert.ThrowsException<ArgumentException>(() => cache.TryGet("  ", out _));
-            Assert.ThrowsException<ArgumentException>(() => cache.TryGet(null, out _));
+            Assert.ThrowsExactly<ArgumentException>(() => cache.TryGet("  ", out _));
+            Assert.ThrowsExactly<ArgumentException>(() => cache.TryGet(null, out _));
 
             // Set
-            Assert.ThrowsException<ArgumentException>(() => cache.Set(" ", new CertificateCacheValue(cert, "ep", "cid")));
-            Assert.ThrowsException<ArgumentNullException>(() => cache.Set("k", new CertificateCacheValue(null, "ep", "cid"))); // This will throw as expected in the test
-            Assert.ThrowsException<ArgumentException>(() => cache.Set("k", new CertificateCacheValue(cert, " ", "cid")));
-            Assert.ThrowsException<ArgumentException>(() => cache.Set("k", new CertificateCacheValue(cert, "ep", " ")));
+            Assert.ThrowsExactly<ArgumentException>(() => cache.Set(" ", new CertificateCacheValue(cert, "ep", "cid")));
+            Assert.ThrowsExactly<ArgumentNullException>(() => cache.Set("k", new CertificateCacheValue(null, "ep", "cid"))); // This will throw as expected in the test
+            Assert.ThrowsExactly<ArgumentException>(() => cache.Set("k", new CertificateCacheValue(cert, " ", "cid")));
+            Assert.ThrowsExactly<ArgumentException>(() => cache.Set("k", new CertificateCacheValue(cert, "ep", " ")));
 
             // Remove
-            Assert.ThrowsException<ArgumentException>(() => cache.Remove(""));
-            Assert.ThrowsException<ArgumentException>(() => cache.Remove(null));
+            Assert.ThrowsExactly<ArgumentException>(() => cache.Remove(""));
+            Assert.ThrowsExactly<ArgumentException>(() => cache.Remove(null));
         }
 
         [TestMethod]
@@ -160,11 +160,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var cache = new InMemoryCertificateCache();
             cache.Dispose();
 
-            Assert.ThrowsException<ObjectDisposedException>(() => cache.TryGet("k", out _));
+            Assert.ThrowsExactly<ObjectDisposedException>(() => cache.TryGet("k", out _));
             using var cert = CreateSelfSignedCert(TimeSpan.FromDays(2));
-            Assert.ThrowsException<ObjectDisposedException>(() => cache.Set("k", new CertificateCacheValue(cert, "ep", "cid")));
-            Assert.ThrowsException<ObjectDisposedException>(() => cache.Remove("k"));
-            Assert.ThrowsException<ObjectDisposedException>(() => cache.Clear());
+            Assert.ThrowsExactly<ObjectDisposedException>(() => cache.Set("k", new CertificateCacheValue(cert, "ep", "cid")));
+            Assert.ThrowsExactly<ObjectDisposedException>(() => cache.Remove("k"));
+            Assert.ThrowsExactly<ObjectDisposedException>(() => cache.Clear());
         }
 
         [TestMethod]
@@ -299,17 +299,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void Ctor_Throws_On_Nulls()
         {
             // certificate null
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 new CertificateCacheValue(null, "ep", "cid"));
 
             using var cert = MakeCert();
 
             // endpoint null
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 new CertificateCacheValue(cert, null, "cid"));
 
             // clientId null
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 new CertificateCacheValue(cert, "ep", null));
         }
 

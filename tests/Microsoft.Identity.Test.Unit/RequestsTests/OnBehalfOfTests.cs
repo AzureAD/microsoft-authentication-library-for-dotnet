@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
                 //Throw exception with claims for OBO:
-                var ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClaimsChallengeException>(async () =>
                 {
                     await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 //Throw exception with claims without OBO:
-                ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
+                ex = await Assert.ThrowsExactlyAsync<MsalClaimsChallengeException>(async () =>
                 {
                     await cca.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);

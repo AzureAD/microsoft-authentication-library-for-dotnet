@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
 
             // Example 5: Invalid format (should throw an MsalClientException)
             string invalidFormat = "invalid-date-format";
-            Assert.ThrowsException<MsalClientException>(() =>
+            Assert.ThrowsExactly<MsalClientException>(() =>
             {
                 DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(invalidFormat);
             }, "Invalid format did not throw an exception as expected.");

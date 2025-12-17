@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public void WithTenantId_AppLevel_MalformedTenant_ThrowsException(string tenantId)
         {
             // Tenant and authority modifiers
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithTenantId(tenantId)
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                     .Build());
 
             // Tenant only modifier
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithTenantId(tenantId)
@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                     .Build();
 
             // Tenant and authority modifiers
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                    .WithTenantId(tenantId));
         }
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .WithClientSecret("secret")
                 .Build();
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                    .WithTenantIdFromAuthority(authorityValue));
         }
@@ -305,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .WithClientSecret("secret")
                 .Build();
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                    .WithTenantIdFromAuthority(invalidAuthorityUri));
         }
@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public async Task DefaultAuthorityDifferentTypeTestAsync()
         {
             _testRequestContext.ServiceBundle.Config.Authority = s_commonAuthority;
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority.AuthorityInfo, null)).ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex.ErrorCode);
@@ -384,18 +384,18 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
             _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
             _testRequestContext.ServiceBundle.Config.Authority = s_commonAuthority;
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeOrgAuthority.AuthorityInfo, null)).ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.ErrorCode);
 
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
             _testRequestContext.ServiceBundle.Config.Authority = s_ppeOrgAuthority;
-            var ex2 = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var ex2 = await Assert.ThrowsExactlyAsync<MsalClientException>(
               () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority.AuthorityInfo, null)).ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex2.ErrorCode);
 
             _testRequestContext.ServiceBundle.Config.Authority = Authority.CreateAuthority(TestConstants.ADFSAuthority, true);
-            var ex3 = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var ex3 = await Assert.ThrowsExactlyAsync<MsalClientException>(
              () => Authority.CreateAuthorityForRequestAsync(
                  _testRequestContext,
                  AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority2, true),
@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex3.ErrorCode);
 
             _testRequestContext.ServiceBundle.Config.Authority = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
-            var ex4 = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var ex4 = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => Authority.CreateAuthorityForRequestAsync(
                    _testRequestContext,
                    AuthorityInfo.FromAuthorityUri(TestConstants.B2CCustomDomain, true),

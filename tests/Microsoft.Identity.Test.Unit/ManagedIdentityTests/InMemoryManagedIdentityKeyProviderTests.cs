@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 cts.Cancel(); // Pre-cancel so WaitAsync throws TaskCanceledException.
 
-                await Assert.ThrowsExceptionAsync<TaskCanceledException>(
+                await Assert.ThrowsExactlyAsync<TaskCanceledException>(
                     () => keyProvider.GetOrCreateKeyAsync(logger, cts.Token)).ConfigureAwait(false);
             }
 

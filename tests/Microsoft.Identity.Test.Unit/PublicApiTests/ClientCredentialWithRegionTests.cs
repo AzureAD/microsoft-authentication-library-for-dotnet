@@ -820,7 +820,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                var ex = Assert.ThrowsExactly<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
                     hasCustomInstanceMetadata: true));
@@ -838,7 +838,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                var ex = Assert.ThrowsExactly<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
                     hasCustomInstanceMetadataUri: true));
@@ -933,7 +933,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                var ex = Assert.ThrowsExactly<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
                     hasCustomInstanceMetadata: true));

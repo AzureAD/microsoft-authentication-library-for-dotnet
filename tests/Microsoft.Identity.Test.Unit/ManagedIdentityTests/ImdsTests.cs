@@ -381,7 +381,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
 
                 MsalServiceException ex =
-                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .ExecuteAsync()
                         .ConfigureAwait(false))
@@ -401,7 +401,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: HttpStatusCode.GatewayTimeout);
                 }
 
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                 .ExecuteAsync()
                                 .ConfigureAwait(false))
@@ -422,7 +422,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: HttpStatusCode.GatewayTimeout);
                 }
 
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                 .ExecuteAsync()
                                 .ConfigureAwait(false))
@@ -457,7 +457,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.None, miSource); // Probe timed out, no source available
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)
                 ).ConfigureAwait(false);

@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithInvalidRedirectUri()
         {
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
                 ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithClientSecret("cats")
                                                     .WithRedirectUri("this is not a valid uri")

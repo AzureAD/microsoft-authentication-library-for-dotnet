@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddResponseMockHandlerForPost(MockHelpers.CreateSuccessResponseMessage(JsonHelper.SerializeToJson(fakeResponse)));
                 await requestParams.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     () => tokenClient.SendTokenRequestAsync(new Dictionary<string, string>())).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.AccessTokenTypeMissing, ex.ErrorCode);
             }

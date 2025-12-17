@@ -488,7 +488,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(managedIdentitySource),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -532,7 +532,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(AppServiceEndpoint, Resource, errorResponse,
                     ManagedIdentitySource.AppService, statusCode: HttpStatusCode.InternalServerError);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -561,7 +561,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager).Build();
 
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
+                await Assert.ThrowsExactlyAsync<ArgumentNullException>(() =>
                     mi.AcquireTokenForManagedIdentity(resource)
                         .ExecuteAsync()).ConfigureAwait(false);
             }
@@ -597,7 +597,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -636,7 +636,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentitySource,
                     statusCode: HttpStatusCode.OK);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -671,7 +671,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
                     new SocketException(10051)));
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -840,7 +840,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
 
-                await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+                await Assert.ThrowsExactlyAsync<MsalClientException>(() =>
                     builder.ExecuteAsync()).ConfigureAwait(false);
             }
         }
@@ -1057,7 +1057,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                      MockHelpers.GetMsiErrorBadJson(),
                      managedIdentitySource);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -1138,7 +1138,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
                         .ExecuteAsync()
                         .ConfigureAwait(false)).ConfigureAwait(false);
@@ -1164,7 +1164,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
                         .ExecuteAsync()
                         .ConfigureAwait(false)).ConfigureAwait(false);
@@ -1292,7 +1292,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
                 
                 MsalServiceException ex =
-                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(Resource)
                         .ExecuteAsync()
                         .ConfigureAwait(false))
@@ -1312,7 +1312,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: statusCode);
                 }
 
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(Resource)
                                 .ExecuteAsync()
                                 .ConfigureAwait(false))
@@ -1333,7 +1333,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: statusCode);
                 }
 
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(Resource)
                                 .ExecuteAsync()
                                 .ConfigureAwait(false))

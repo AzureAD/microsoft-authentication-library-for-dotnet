@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public void MsalWriteEmptyData()
         {
             var store = Storage.Create(s_storageCreationProperties, logger: _logger);
-            Assert.ThrowsException<ArgumentNullException>(() => store.WriteData(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => store.WriteData(null));
 
             store.WriteData(new byte[0]);
 
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public void MsalWriteGoodData()
         {
             var store = Storage.Create(s_storageCreationProperties, logger: _logger);
-            Assert.ThrowsException<ArgumentNullException>(() => store.WriteData(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => store.WriteData(null));
 
             byte[] data = { 2, 2, 3 };
             byte[] data2 = { 2, 2, 3, 4, 4 };

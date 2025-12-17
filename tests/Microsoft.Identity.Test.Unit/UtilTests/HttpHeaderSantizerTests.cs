@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             HttpRequestMessage httpRequest = new HttpRequestMessage();
 
             // newline chars must be followed by spaces
-            Assert.ThrowsException<FormatException>(() => httpRequest.Headers.Add("x-client-last-telemetry", strangeErrorCode));
+            Assert.ThrowsExactly<FormatException>(() => httpRequest.Headers.Add("x-client-last-telemetry", strangeErrorCode));
 
             string santized = HttpHeaderSanitizer.SanitizeHeader(strangeErrorCode);
             httpRequest.Headers.Add("x-client-last-telemetry", santized);

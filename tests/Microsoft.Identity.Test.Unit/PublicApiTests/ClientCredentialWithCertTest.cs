@@ -751,7 +751,7 @@ namespace Microsoft.Identity.Test.Unit
                 }
 
                 //Testing client credential flow
-                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var exception = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
@@ -762,7 +762,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
 
                 //Testing auth code flow
-                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                exception = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
                              .ExecuteAsync(CancellationToken.None)
@@ -773,7 +773,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
 
                 //Testing OBO flow
-                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                exception = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion))
                              .ExecuteAsync(CancellationToken.None)
@@ -1002,7 +1002,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var certificate = CertHelper.GetOrCreateTestCert();
 
-                var exception = Assert.ThrowsException<ArgumentNullException>(() =>
+                var exception = Assert.ThrowsExactly<ArgumentNullException>(() =>
                 {
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)

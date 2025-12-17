@@ -492,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 //Silent flow should fail when different account is returned.
-                var exception = Assert.ThrowsException<AggregateException>(() =>
+                var exception = Assert.ThrowsExactly<AggregateException>(() =>
                     result = app
                     .AcquireTokenSilent(TestConstants.s_scope, result.Account)
                     .WithForceRefresh(true)

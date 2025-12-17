@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit
             httpResponse.Headers.Add(AuthenticationInfoName, $"{paramName}={value}");
 
             // Act
-            var ex = Assert.ThrowsException<MsalClientException>(() =>
+            var ex = Assert.ThrowsExactly<MsalClientException>(() =>
                                     AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponse.Headers));
 
             //Assert
@@ -220,9 +220,9 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsTrue(authParams.RawParameters.ContainsKey(Realm));
             Assert.AreEqual(string.Empty, authParams[Realm]);
             Assert.AreEqual(GraphGuid, authParams[resourceHeaderKey]);
-            Assert.ThrowsException<KeyNotFoundException>(
+            Assert.ThrowsExactly<KeyNotFoundException>(
                 () => authParams[ErrorKey]);
-            Assert.ThrowsException<KeyNotFoundException>(
+            Assert.ThrowsExactly<KeyNotFoundException>(
                 () => authParams[ClaimsKey]);
         }
 
@@ -368,15 +368,15 @@ namespace Microsoft.Identity.Test.Unit
 
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(null, resourceUri);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(action).ConfigureAwait(false);
 
             action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", null, default);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(action).ConfigureAwait(false);
 
             action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, client, default);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -386,7 +386,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
 
         [TestMethod]

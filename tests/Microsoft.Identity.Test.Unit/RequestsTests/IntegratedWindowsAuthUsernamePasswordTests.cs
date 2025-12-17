@@ -311,11 +311,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
                 StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
-                    "Client info header should contain " + TestConstants.XClientSku,
-                    StringComparison.OrdinalIgnoreCase);
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientSku);
                 StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
-                    "Client info header should contain " + TestConstants.XClientVer,
-                    StringComparison.OrdinalIgnoreCase);
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientVer);
             }
         }
 
@@ -354,11 +354,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
                 StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
-                    "Client info header should contain " + TestConstants.XClientSku,
-                    StringComparison.OrdinalIgnoreCase);
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientSku);
                 StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
-                    "Client info header should contain " + TestConstants.XClientVer,
-                    StringComparison.OrdinalIgnoreCase);
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientVer);
 
                 // Assert telemetry ApiId
                 Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenByIntegratedWindowsAuth.ToString("D"), mockTokenRequestHttpHandler.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single().Split('|')[1].Split(',')[0]);
@@ -435,11 +435,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(TestConstants.s_user.Username, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
                 StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
-                    "Client info header should contain " + TestConstants.XClientSku,
-                    StringComparison.OrdinalIgnoreCase);
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientSku);
                 StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
-                    "Client info header should contain " + TestConstants.XClientVer,
-                    StringComparison.OrdinalIgnoreCase);
+                    StringComparison.OrdinalIgnoreCase,
+                    "Client info header should contain " + TestConstants.XClientVer);
             }
         }
 
@@ -790,7 +790,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
 #pragma warning disable CS0618 // Type or member is obsolete
-                MsalUiRequiredException result = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+                MsalUiRequiredException result = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                     () => app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,
@@ -843,7 +843,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
 #pragma warning disable CS0618 // Type or member is obsolete
-                MsalServiceException result = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                MsalServiceException result = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                     () => app.AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.s_user.Username,

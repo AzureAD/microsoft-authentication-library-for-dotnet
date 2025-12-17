@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         [Description("Mex endpoint fails to parse")]
         public void MexEndpointFailsToParseTest()
         {
-            Assert.ThrowsException<XmlException>(() =>
+            Assert.ThrowsExactly<XmlException>(() =>
                 new MexDocument("malformed, non-xml content"));
         }
     }

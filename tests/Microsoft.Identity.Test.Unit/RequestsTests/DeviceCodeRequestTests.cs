@@ -260,9 +260,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 if (level == LogLevel.Error)
                 {
                     Assert.Fail(
-                        "Received an error message {0} and the stack trace is {1}",
-                        message,
-                        new StackTrace(true));
+                        $"Received an error message {message} and the stack trace is {new StackTrace(true)}");
                 }
 
                 logCallbacks.Add(

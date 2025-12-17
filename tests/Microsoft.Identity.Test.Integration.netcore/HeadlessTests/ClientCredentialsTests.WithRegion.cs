@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-            var ex = await Assert.ThrowsExceptionAsync<HttpRequestException>(
+            var ex = await Assert.ThrowsExactlyAsync<HttpRequestException>(
                 async () => await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.IsTrue(ex is HttpRequestException);

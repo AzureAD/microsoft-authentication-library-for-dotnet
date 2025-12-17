@@ -864,7 +864,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual("login.microsoftonline.us", account.Environment);
                 Assert.AreEqual(TestConstants.Utid, result.TenantId);
 
-                await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+                await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                     async () => await globalPca.AcquireTokenSilent(TestConstants.s_graphScopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
             }
         }

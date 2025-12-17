@@ -186,21 +186,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [DataRow("https://login.microsoftonline.com/", "ten ant")]
         public void MalformedAuthority_ThrowsException(string malformedCloudInstanceUri, string malformedTenant)
         {
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority($"{malformedCloudInstanceUri}{malformedTenant}")
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build());
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(malformedCloudInstanceUri, malformedTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build());
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(AzureCloudInstance.AzurePublic, malformedTenant)

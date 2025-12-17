@@ -396,7 +396,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = appBuilder.Build();
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClaimsChallengeException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);

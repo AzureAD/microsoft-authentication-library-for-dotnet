@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.E2E
         {
             var mi = BuildMi(id, idType);
 
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                 await mi.AcquireTokenForManagedIdentity(ArmScope)
                 .WithMtlsProofOfPossession()
                 .ExecuteAsync().ConfigureAwait(false)

@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsNotNull(accounts);
 
             // this should throw MsalUiRequiredException
-            await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() =>
+            await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() =>
                 pca.AcquireTokenSilent(scopes, account).ExecuteAsync()).ConfigureAwait(false);
         }
 
@@ -540,7 +540,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // CA policy enforces token issuance to popUser only for Exchange Online this call will fail with UI Required Exception
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
             #pragma warning disable CS0618 // Type or member is obsolete
-            await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() =>
+            await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() =>
                 pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                     .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                     .ExecuteAsync()).ConfigureAwait(false);

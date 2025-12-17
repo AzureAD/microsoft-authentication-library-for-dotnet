@@ -263,7 +263,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void MalformedAuthority_ThrowsException(string malformedAuthority)
         {
             // Tenant and authority modifiers
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithOidcAuthority(malformedAuthority)

@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Expecting an exception because MTLS PoP requires a certificate to sign the claims
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
                    .ExecuteAsync())
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Expecting an exception because MTLS PoP requires a certificate to sign the claims
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
                    .ExecuteAsync())
@@ -525,7 +525,7 @@ namespace Microsoft.Identity.Test.Unit
                         .BuildConcrete();
 
                     // Expect an MsalServiceException due to missing region for MTLS POP
-                    MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                         await app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
                             .ExecuteAsync()
@@ -589,7 +589,7 @@ namespace Microsoft.Identity.Test.Unit
                         .BuildConcrete();
 
                     // Expect an exception due to using /common or /organizations with MTLS PoP
-                    MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                         await app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
                             .ExecuteAsync()
