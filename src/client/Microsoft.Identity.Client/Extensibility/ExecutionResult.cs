@@ -5,13 +5,13 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
-#if !SUPPORTS_CONFIDENTIAL_CLIENT
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
-#endif
     /// <summary>
     /// Represents the result of a token acquisition attempt.
     /// Used by the execution observer configured via <see cref="ConfidentialClientApplicationBuilderExtensions.OnCompletion"/>.
     /// </summary>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
+#endif
     public class ExecutionResult
     {
         /// <summary>
