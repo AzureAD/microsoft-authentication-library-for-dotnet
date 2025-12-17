@@ -362,7 +362,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public async Task AuthorityMismatchTestAsync()
         {
             _testRequestContext.ServiceBundle.Config.Authority = s_utidAuthority;
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority.AuthorityInfo, null))
                 .ConfigureAwait(false);
 

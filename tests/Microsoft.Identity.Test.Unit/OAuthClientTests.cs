@@ -247,12 +247,11 @@ namespace Microsoft.Identity.Test.Unit
                     harness.HttpManager,
                     null);
 
-                Exception ex = await Assert.ThrowsExceptionAsync<Exception>(
+                Exception ex = await Assert.ThrowsAsync<Exception>(
                     () => client.ExecuteRequestAsync<OAuth2ResponseBase>(
                         requestUri,
                         HttpMethod.Post,
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null)),
-                    allowDerived: true)
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null))                    )
                     .ConfigureAwait(false);
 
                 validationHandler(ex);

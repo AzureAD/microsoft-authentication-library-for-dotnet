@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 // Act
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() => app
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() => app
                      .AcquireTokenInteractive(TestConstants.s_scope)
                      .WithAuthenticationOperation(authScheme)
                      .ExecuteAsync()).ConfigureAwait(false);

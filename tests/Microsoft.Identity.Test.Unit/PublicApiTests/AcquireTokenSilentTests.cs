@@ -27,10 +27,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(TestConstants.ClientId)
                 .Build();
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(
              () => app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), (string)null).ExecuteAsync()).ConfigureAwait(false);
 
-            var ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+            var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
               () => app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), (IAccount)null).ExecuteAsync()).ConfigureAwait(false);
             Assert.AreEqual(MsalError.UserNullError, ex.ErrorCode);
             Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification);
@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
-                var exception = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
+                var exception = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
                     "other_login_hint@contoso.com")
                     .ExecuteAsync()).ConfigureAwait(false);
@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid1", "utid");
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid2", "utid");
 
-                var exception = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(async () => await app.AcquireTokenSilent(
+                var exception = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(async () => await app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
                     TestConstants.DisplayableId)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
@@ -302,7 +302,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
-                var exception = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
+                var exception = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     TestConstants.s_scope.ToArray(),
                     new Account(null, null, null))
                     .ExecuteAsync()).ConfigureAwait(false);

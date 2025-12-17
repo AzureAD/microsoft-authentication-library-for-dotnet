@@ -39,13 +39,13 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         [TestMethod]
         public void ParamValidation()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new MsalClientException(null, ExMessage));
-            Assert.ThrowsException<ArgumentNullException>(() => new MsalClientException(string.Empty, ExMessage));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new MsalClientException(null, ExMessage));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new MsalClientException(string.Empty, ExMessage));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new MsalServiceException(ExCode, string.Empty));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new MsalServiceException(ExCode, null));
         }
 
@@ -444,7 +444,7 @@ typeof(NotImplementedException).Name,
                         .Create(TestConstants.ClientId)
                         .WithDefaultRedirectUri()
                         .Build();
-            var ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(async () =>
+            var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(async () =>
                 {
                     await app.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.s_user).ExecuteAsync().ConfigureAwait(false);
                 }
@@ -454,7 +454,7 @@ typeof(NotImplementedException).Name,
             Assert.IsFalse(string.IsNullOrEmpty(((MsalException)ex).CorrelationId));
 
             Guid guid = Guid.NewGuid();
-            ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(async () =>
+            ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(async () =>
                 {
                     await app.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.s_user).WithCorrelationId(guid).ExecuteAsync().ConfigureAwait(false);
                 }
@@ -495,7 +495,7 @@ typeof(NotImplementedException).Name,
                 Assert.IsFalse(string.IsNullOrEmpty(((MsalException)ex).CorrelationId));
 
                 Guid guid = Guid.NewGuid();
-                ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                                                  .WithCorrelationId(guid)
@@ -555,7 +555,7 @@ typeof(NotImplementedException).Name,
                     .WithCertificate(certificate)
                     .BuildConcrete();
 
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                                                  .ExecuteAsync(CancellationToken.None)
@@ -571,7 +571,7 @@ typeof(NotImplementedException).Name,
                 harness.HttpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
 
                 //Ensure non 404 error codes do not trigger message
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                                                  .WithForceRefresh(true)

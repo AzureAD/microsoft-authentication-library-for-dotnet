@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit
 
             var crypto = serviceBundle.PlatformProxy.CryptographyManager;
 
-            MsalClientException ex = Assert.ThrowsException<MsalClientException>(() =>
+            MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(() =>
             {
                 crypto.SignWithCertificate("TEST", cert, RSASignaturePadding.Pkcs1);
             });

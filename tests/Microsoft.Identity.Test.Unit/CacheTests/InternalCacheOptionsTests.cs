@@ -43,25 +43,25 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                                                .Build();
             app3.UserTokenCache.SetAfterAccess((_) => { });
             app3.AppTokenCache.SetBeforeAccess((_) => { });
-            var ex = Assert.ThrowsException<MsalClientException>(() => app3.UserTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions));
+            var ex = Assert.ThrowsExactly<MsalClientException>(() => app3.UserTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions));
             Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
-            ex = Assert.ThrowsException<MsalClientException>(() => app3.AppTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => app3.AppTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions));
             Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
 
             void AssertExclusivity(ITokenCache tokenCache)
             {
-                var ex = Assert.ThrowsException<MsalClientException>(() => tokenCache.SetAfterAccess((_) => { }));
+                var ex = Assert.ThrowsExactly<MsalClientException>(() => tokenCache.SetAfterAccess((_) => { }));
                 Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
-                ex = Assert.ThrowsException<MsalClientException>(() => tokenCache.SetBeforeAccess((_) => { }));
+                ex = Assert.ThrowsExactly<MsalClientException>(() => tokenCache.SetBeforeAccess((_) => { }));
                 Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
-                ex = Assert.ThrowsException<MsalClientException>(() => tokenCache.SetBeforeWrite((_) => { }));
+                ex = Assert.ThrowsExactly<MsalClientException>(() => tokenCache.SetBeforeWrite((_) => { }));
                 Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
 
-                ex = Assert.ThrowsException<MsalClientException>(() => tokenCache.SetBeforeAccessAsync((_) => Task.CompletedTask));
+                ex = Assert.ThrowsExactly<MsalClientException>(() => tokenCache.SetBeforeAccessAsync((_) => Task.CompletedTask));
                 Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
-                ex = Assert.ThrowsException<MsalClientException>(() => tokenCache.SetAfterAccessAsync((_) => Task.CompletedTask));
+                ex = Assert.ThrowsExactly<MsalClientException>(() => tokenCache.SetAfterAccessAsync((_) => Task.CompletedTask));
                 Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
-                ex = Assert.ThrowsException<MsalClientException>(() => tokenCache.SetBeforeWriteAsync((_) => Task.CompletedTask));
+                ex = Assert.ThrowsExactly<MsalClientException>(() => tokenCache.SetBeforeWriteAsync((_) => Task.CompletedTask));
                 Assert.AreEqual(MsalError.StaticCacheWithExternalSerialization, ex.ErrorCode);
 
             }

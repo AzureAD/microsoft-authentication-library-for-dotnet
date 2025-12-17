@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                             .WithClientCapabilities(TestConstants.ClientCapabilities)
                             .BuildConcrete();
 
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .WithClaims("claims_that_are_not_json")

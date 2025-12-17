@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             var host = string.Concat("test", TestConstants.ProductionPrefNetworkEnvironment, "/");
             var fullAuthority = string.Concat(host, TestConstants.TenantId);
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                              .WithAuthority(fullAuthority)

@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             pca.UserTokenCache.SetAfterAccess(_ => { afterAccessCalled = true; });
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                 operationThatTouchesCache).ConfigureAwait(false);
 
             Assert.IsTrue(beforeAccessCalled);
@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     throw new OperationCanceledException();
                 });
 
-                await Assert.ThrowsExceptionAsync<OperationCanceledException>(() => app.GetAccountsAsync()).ConfigureAwait(false);
+                await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => app.GetAccountsAsync()).ConfigureAwait(false);
             }
         }
 

@@ -413,7 +413,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.InternalServerError, retryAfter: 0);
 
                 // Acquire Token
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                     () => cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync())
                     .ConfigureAwait(false);
 
@@ -440,7 +440,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.InternalServerError, retryAfter: 0);
 
                 // Acquire Token
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                     () => cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync())
                     .ConfigureAwait(false);
 
@@ -590,14 +590,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Build();
 
                 // OBO
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     () => cca.AcquireTokenOnBehalfOf(null, new UserAssertion("assertion", "assertiontype")).ExecuteAsync())
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ScopesRequired, ex.ErrorCode);
 
                 // Client Creds
-                ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+                ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     () => cca.AcquireTokenForClient(null).ExecuteAsync())
                     .ConfigureAwait(false);
 
@@ -817,7 +817,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var app = builder.BuildConcrete();
             Assert.IsNull(app.Certificate);
 
-            await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+            await Assert.ThrowsExactlyAsync<OperationCanceledException>(
                 () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                 .ExecuteAsync(cancellationTokenSource.Token)).ConfigureAwait(false);
         }
@@ -910,7 +910,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // Act & Assert – the first token request will execute the delegate
             // and should surface ArgumentException from the credential layer.
-            await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+            await Assert.ThrowsExactlyAsync<MsalClientException>(() =>
                 cca.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync())
                     .ConfigureAwait(false);            
@@ -1441,7 +1441,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // add mock response bigger than 1MB for HTTP Client
                 httpManager.AddFailingRequest(new InvalidOperationException());
 
-                await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                     () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
             }
         }
@@ -2079,11 +2079,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .BuildConcrete();
 
                 // Act & Assert
-                await Assert.ThrowsExceptionAsync<ArgumentException>(
+                await Assert.ThrowsExactlyAsync<ArgumentException>(
                     () => app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, null).ExecuteAsync()
                 ).ConfigureAwait(false);
 
-                await Assert.ThrowsExceptionAsync<ArgumentException>(
+                await Assert.ThrowsExactlyAsync<ArgumentException>(
                     () => app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, string.Empty).ExecuteAsync()
                 ).ConfigureAwait(false);
             }
@@ -2197,7 +2197,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                 .WithAccessTokenSha256ToRefresh("dummyHash");
 
             // Act & Assert
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() =>
                 builder.ExecuteAsync()
             ).ConfigureAwait(false);
 

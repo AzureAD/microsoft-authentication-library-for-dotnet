@@ -381,7 +381,7 @@ namespace Microsoft.Identity.Test.Unit
             _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
 
             //Test for MsalServiceException
-            MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+            MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                 () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
                 .WithExtraQueryParameters(extraQueryParams)
                 .WithTenantId(TestConstants.Utid)
@@ -394,7 +394,7 @@ namespace Microsoft.Identity.Test.Unit
         private async Task AcquireTokenMsalClientExceptionAsync()
         {
             //Test for MsalClientException
-            MsalClientException exClient = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            MsalClientException exClient = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => _cca.AcquireTokenForClient(null) // null scope -> client exception
                 .WithExtraQueryParameters(extraQueryParams)
                 .WithTenantId(TestConstants.Utid)

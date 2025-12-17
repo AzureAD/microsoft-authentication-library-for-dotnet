@@ -41,9 +41,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                 };
 
-                Assert.ThrowsException<ArgumentNullException>(() =>
+                Assert.ThrowsExactly<ArgumentNullException>(() =>
                     new InteractiveRequest(null, interactiveParameters));
-                Assert.ThrowsException<ArgumentNullException>(() =>
+                Assert.ThrowsExactly<ArgumentNullException>(() =>
                     new InteractiveRequest(requestParams, null));
             }
         }
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var request = new InteractiveRequest(
                     parameters,
                     interactiveParameters);
-                var ex = await Assert.ThrowsExceptionAsync<ArgumentException>
+                var ex = await Assert.ThrowsExactlyAsync<ArgumentException>
                     (() => request.RunAsync()).ConfigureAwait(false);
 
                 Assert.Contains(MsalErrorMessage.RedirectUriContainsFragment, ex.Message);
@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     interactiveParameters);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                     () => request.RunAsync())
                     .ConfigureAwait(false);
 
@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     interactiveParameters);
 
-                var ex2 = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                var ex2 = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                      () => request.RunAsync())
                      .ConfigureAwait(false);
 
@@ -295,7 +295,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     new AcquireTokenInteractiveParameters());
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                     () => request.RunAsync(CancellationToken.None))
                     .ConfigureAwait(false);
 

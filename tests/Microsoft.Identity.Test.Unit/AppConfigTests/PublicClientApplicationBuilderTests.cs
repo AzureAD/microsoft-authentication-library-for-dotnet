@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_InstanceMetadata_ValidateAuthority_MutuallyExclusive()
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
-            var ex = Assert.ThrowsException<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+            var ex = Assert.ThrowsExactly<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_InstanceMetadataUri_ValidateAuthority_MutuallyExclusive()
         {
-            var ex = Assert.ThrowsException<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+            var ex = Assert.ThrowsExactly<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDiscoveryMetadata(new Uri("https://some_uri.com"))
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithInstanceDiscoveryMetadata_OnlyOneOverload()
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
-            var ex = Assert.ThrowsException<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+            var ex = Assert.ThrowsExactly<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                   .WithInstanceDiscoveryMetadata(new Uri("https://some_uri.com"))
                                                   .WithAuthority("https://some.authority/bogus/", true)
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_BadInstanceMetadata()
         {
-            var ex = Assert.ThrowsException<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+            var ex = Assert.ThrowsExactly<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDiscoveryMetadata("{bad_json_metadata")
                                                   .Build());
 
@@ -451,39 +451,39 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void AuthorityNullArgs()
         {
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                               .WithAuthority((Uri)null));
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                   .WithAuthority((string)null));
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                   .WithAuthority("  "));
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                  .WithAuthority(null, "tid"));
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
              PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                .WithAuthority("", "tid"));
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithAuthority("", Guid.NewGuid()));
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithAuthority("https://login.microsoftonline.com/", null));
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithAuthority("https://login.microsoftonline.com/", " "));
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithAuthority(AzureCloudInstance.AzureChina, ""));
         }

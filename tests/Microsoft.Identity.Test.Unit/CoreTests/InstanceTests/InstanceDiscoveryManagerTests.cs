@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 .Do(_ => throw validationException);
 
             // Act
-            var actualException = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+            var actualException = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
             _discoveryManager.GetMetadataEntryAsync(
                 AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
                 _testRequestContext))

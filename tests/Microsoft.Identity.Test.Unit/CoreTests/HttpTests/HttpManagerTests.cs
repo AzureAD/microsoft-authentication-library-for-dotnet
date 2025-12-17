@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromSeconds(1)) :
                     new System.Net.Http.Headers.RetryConditionHeaderValue(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(2));
 
-                var exc = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+                var exc = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: null,
@@ -443,7 +443,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
                 }
 
-                var exc = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+                var exc = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: null,
@@ -475,7 +475,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Get);
                 }
 
-                var exc = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+                var exc = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: null,
@@ -508,7 +508,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
                 }
 
-                var exc = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+                var exc = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: new Dictionary<string, string>(),
@@ -551,7 +551,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     headers.Add(OAuth2Header.CorrelationId, correlationId.ToString());
                 }
 
-                var exc = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+                var exc = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: headers,
@@ -599,7 +599,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     ["some-other-header"] = "some-value"
                 };
 
-                var exc = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+                var exc = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: headers,
@@ -646,7 +646,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
                 // Act
-                var exc = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+                var exc = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                                     app.AcquireTokenForClient(TestConstants.s_scope)
                                     .WithCorrelationId(correlationId)
                                     .ExecuteAsync())
