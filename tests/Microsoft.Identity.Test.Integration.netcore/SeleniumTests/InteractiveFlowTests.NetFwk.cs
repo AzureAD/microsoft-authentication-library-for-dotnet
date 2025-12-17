@@ -56,16 +56,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
         }
 
-        //[RunOn(TargetFrameworks.NetCore)]
-        //[TestCategory(TestCategories.MSA)]
-        // Disabled as this test is flaky. This will be reenabled as part of https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5240
-        public async Task Interactive_MsaUser_Async()
-        {
-            // Arrange
-            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
         [RunOn(TargetFrameworks.NetCore)]
         public async Task InteractiveConsentPromptAsync()
         {
