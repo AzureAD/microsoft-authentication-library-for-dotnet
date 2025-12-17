@@ -6,7 +6,6 @@ Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.ValidateCachedTok
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.MsalCacheValidationData() -> void
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.PersistedCacheParameters.get -> System.Collections.Generic.IDictionary<string, string>
-Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.get -> string
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.set -> void
