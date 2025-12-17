@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             // The exception propagated to the test should be Selenium exception,
             // the test should not wait for the TCP listener to time out
-            await Assert.ThrowsExceptionAsync<NoSuchElementException>(() => pca
+            await Assert.ThrowsExactlyAsync<NoSuchElementException>(() => pca
                  .AcquireTokenInteractive(s_scopes)
                  .WithCustomWebUi(seleniumLogic)
                  .ExecuteAsync(CancellationToken.None))
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             // The exception propagated to the test should be Selenium exception,
             // the test should not wait for the TCP listener to time out
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() => pca
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() => pca
                  .AcquireTokenInteractive(s_scopes)
                  .WithCustomWebUi(seleniumLogic)
                  .ExecuteAsync(new CancellationTokenSource(TimeSpan.FromSeconds(2)).Token))

@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 userCacheAccess3.AssertAccessCounts(0, 0);
 
                 Trace.WriteLine("Apps that are not part of the family cannot get tokens this way.");
-                await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() => pca_nonFam
+                await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() => pca_nonFam
                         .AcquireTokenSilent(s_scopes, user.Upn)
                         .ExecuteAsync())
                     .ConfigureAwait(false);

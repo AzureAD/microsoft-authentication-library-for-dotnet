@@ -3,7 +3,7 @@
     <!-- Disable central package management for dev apps -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-
+    <NoWarn>$(NoWarn);MSTest0001</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.*" PrivateAssets="All" />

@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Build();
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+            MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                 pca.AcquireTokenByUsernamePassword(
                     scopes,
                     "noUser",
@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Assert.IsNotNull(accounts);
 
-            await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+            await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                () => pca.AcquireTokenSilent(scopes, account).ExecuteAsync())
                 .ConfigureAwait(false);
         }
@@ -468,7 +468,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Act
             if (SharedUtilities.IsLinuxPlatform())
             {
-                var exLinux = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                var exLinux = await Assert.ThrowsExactlyAsync<MsalServiceException>(
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);
@@ -476,7 +476,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             else
             {
-                var ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);

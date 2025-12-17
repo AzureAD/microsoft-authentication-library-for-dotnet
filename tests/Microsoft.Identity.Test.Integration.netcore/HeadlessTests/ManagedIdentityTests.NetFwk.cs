@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
                 //Act
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_msi_scopes)
@@ -341,7 +341,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
                 //Act
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_wrong_msi_scopes)

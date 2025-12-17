@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithClientSecret("bad_secret")
                 .Build();
 
-            var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+            var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                 app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()).ConfigureAwait(false);
 
             Assert.AreEqual("invalid_client", ex.ErrorCode);

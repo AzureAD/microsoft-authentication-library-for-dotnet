@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);
 
             // AcquireLR - throws because no RT
-            var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var exception = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => cca.AcquireTokenInLongRunningProcess(s_scopes.ToArray(), oboCacheKey)
                 .ExecuteAsync())
                 .ConfigureAwait(false);
@@ -421,7 +421,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             string oboCacheKey = "obo-cache-key";
 
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                       await cca.AcquireTokenInLongRunningProcess(s_scopes, oboCacheKey).ExecuteAsync().ConfigureAwait(false)
                       ).ConfigureAwait(false);
 

@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             store.ReadData();
 
             var store2 = Storage.Create(s_storageCreationProperties, logger: _logger);
-            Assert.ThrowsException<ArgumentNullException>(() => store.WriteData(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => store.WriteData(null));
 
             byte[] data = { 2, 2, 3 };
             store.WriteData(data);
