@@ -260,15 +260,15 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [DataTestMethod]
         [DataRow("https://demo.duend esoftware.com")]
-        [ExpectedException(typeof(ArgumentException))]
         public void MalformedAuthority_ThrowsException(string malformedAuthority)
         {
             // Tenant and authority modifiers
-            ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithOidcAuthority(malformedAuthority)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .Build();
+            Assert.ThrowsException<ArgumentException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithOidcAuthority(malformedAuthority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build());
         }
 
         [DataTestMethod]

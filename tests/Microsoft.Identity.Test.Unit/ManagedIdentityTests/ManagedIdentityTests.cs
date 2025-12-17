@@ -551,7 +551,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow("", ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow(null, ManagedIdentitySource.AppService, AppServiceEndpoint)]
-        [ExpectedException(typeof(ArgumentNullException))]
         public async Task ManagedIdentityTestNullOrEmptyScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -562,8 +561,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager).Build();
 
-                await mi.AcquireTokenForManagedIdentity(resource)
-                    .ExecuteAsync().ConfigureAwait(false);
+                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
+                    mi.AcquireTokenForManagedIdentity(resource)
+                        .ExecuteAsync()).ConfigureAwait(false);
             }
         }
 
@@ -820,7 +820,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(MsalClientException))]
         public async Task ManagedIdentityInvalidRefreshOnThrowsAsync()
         {
             using (new EnvVariableContext())
@@ -841,7 +840,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
 
-                AuthenticationResult result = await builder.ExecuteAsync().ConfigureAwait(false);
+                await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+                    builder.ExecuteAsync()).ConfigureAwait(false);
             }
         }
 

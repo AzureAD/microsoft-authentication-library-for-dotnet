@@ -355,7 +355,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [IgnoreOnOneBranch]
         [TestMethod]
-        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -405,7 +404,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsNotNull(accounts);
 
             // this should throw MsalUiRequiredException
-            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+            await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() =>
+                pca.AcquireTokenSilent(scopes, account).ExecuteAsync()).ConfigureAwait(false);
         }
 
         [DoNotRunOnLinux] // List Windows Work and School accounts is not supported on Linux
@@ -518,7 +518,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [DoNotRunOnLinux] // POP are not supported on Linux  
         [IgnoreOnOneBranch]
         [TestMethod]
-        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
@@ -541,10 +540,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // CA policy enforces token issuance to popUser only for Exchange Online this call will fail with UI Required Exception
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
             #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
-                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
-                .ExecuteAsync()
-                .ConfigureAwait(false);
+            await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() =>
+                pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                    .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
+                    .ExecuteAsync()).ConfigureAwait(false);
             #pragma warning restore CS0618
         }
     }
