@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Arrange
 
             // Act
-           var ex = AssertException.Throws<MsalClientException>(
+           var ex = Assert.ThrowsException<MsalClientException>(
                ()=> _webUIFactory.CreateAuthenticationDialog(
                     _parent, 
                     WebViewPreference.Embedded, 
@@ -74,3 +74,4 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
     }
 }
 #endif
+

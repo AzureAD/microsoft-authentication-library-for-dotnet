@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     }
                 });
 
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
                     () => cca.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                     .ConfigureAwait(false);
 
@@ -54,4 +54,5 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
     }
 }
+
 

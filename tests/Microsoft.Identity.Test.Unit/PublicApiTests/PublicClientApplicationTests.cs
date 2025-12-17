@@ -588,7 +588,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // add mock response bigger than 1MB for Http Client
                 httpManager.AddFailingRequest(new InvalidOperationException());
 
-                await AssertException.TaskThrowsAsync<InvalidOperationException>(
+                await Assert.ThrowsExceptionAsync<InvalidOperationException>(
                     () => app
                         .AcquireTokenInteractive(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None))
                     .ConfigureAwait(false);
@@ -687,7 +687,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var accounts = app.GetAccountsAsync(TestConstants.B2CSignUpSignIn).Result;
             Assert.AreEqual(0, accounts.Count());
 
-            await AssertException.TaskThrowsAsync<ArgumentException>(() =>
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() =>
               app.GetAccountsAsync(string.Empty)).ConfigureAwait(false);
 
             accounts = PopulateB2CTokenCacheAsync(TestConstants.B2CSignUpSignIn, app).Result;
@@ -845,7 +845,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(TestConstants.ClientId)
                 .Build();
 
-            await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
                app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), string.Empty).ExecuteAsync())
                 .ConfigureAwait(false);
         }
@@ -1258,3 +1258,4 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
     }
 }
+

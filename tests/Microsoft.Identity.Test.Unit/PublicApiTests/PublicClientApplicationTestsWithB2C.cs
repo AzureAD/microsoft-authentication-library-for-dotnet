@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AssertNoAccessToken(result);
                 Assert.AreEqual(0, httpManager.QueueSize);
 
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+                var ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() =>
                   app.AcquireTokenSilent(null, result.Account).ExecuteAsync()
               ).ConfigureAwait(false);
 
@@ -328,7 +328,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Act 
 #pragma warning disable CS0618 // Type or member is obsolete 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => 
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() => 
                     app.AcquireTokenByUsernamePassword(new[] { "user.read" }, "username", "password" ) // no scopes -> no Access Token!
                     .ExecuteAsync())
                     .ConfigureAwait(false);
@@ -375,3 +375,4 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
     }
 }
+

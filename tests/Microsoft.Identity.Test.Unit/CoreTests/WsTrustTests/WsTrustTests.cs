@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
                 var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
 
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
                     harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext)).ConfigureAwait(false);
                 
                 Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, ex.ErrorCode);
@@ -167,3 +167,4 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         }
     }
 }
+

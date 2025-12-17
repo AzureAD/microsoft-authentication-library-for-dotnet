@@ -326,7 +326,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     _harness.HttpManager.AddMockHandler(tokenRequestHandler2);
                     _harness.HttpManager.AddMockHandler(tokenRequestHandler);
 
-                    var serviceEx = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    var serviceEx = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
                         app5
                         .AcquireTokenForClient(TestConstants.s_scope)
                         .WithForceRefresh(true)
@@ -380,3 +380,4 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
     }
 }
+

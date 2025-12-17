@@ -381,7 +381,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
 
                 MsalServiceException ex =
-                    await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .ExecuteAsync()
                         .ConfigureAwait(false))
@@ -401,7 +401,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: HttpStatusCode.GatewayTimeout);
                 }
 
-                ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                 .ExecuteAsync()
                                 .ConfigureAwait(false))
@@ -467,3 +467,4 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
     }
 }
+

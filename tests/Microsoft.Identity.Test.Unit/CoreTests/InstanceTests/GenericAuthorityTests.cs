@@ -314,7 +314,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var confidentailClientApp = (ConfidentialClientApplication)app;
                 Assert.AreEqual(AuthorityType.Generic, confidentailClientApp.AuthorityInfo.AuthorityType);
 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
                          app.AcquireTokenForClient(new[] { "api" })
                              .ExecuteAsync())
                              .ConfigureAwait(false);
@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var confidentailClientApp = (ConfidentialClientApplication)app;
                 Assert.AreEqual(AuthorityType.Generic, confidentailClientApp.AuthorityInfo.AuthorityType);
 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
                          app.AcquireTokenForClient(new[] { "api" })
                              .ExecuteAsync())
                              .ConfigureAwait(false);
@@ -374,7 +374,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 AadErrorCode: Constants.AadMissingScopeErrorCode,
                 expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
 
-                ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
                          app.AcquireTokenForClient(new[] { "api" })
                              .ExecuteAsync())
                              .ConfigureAwait(false);
@@ -463,7 +463,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     ResponseMessage = MockHelpers.CreateSuccessResponseMessage(validOidcDocumentWithWrongIssuer)
                 });
 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
                     app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()
                 ).ConfigureAwait(false);
 
@@ -543,3 +543,4 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
     }
 }
+

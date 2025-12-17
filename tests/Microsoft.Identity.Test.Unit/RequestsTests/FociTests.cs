@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNull(appCAccount);
 
                 // Act
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
                     () => appC.AcquireTokenSilent(TestConstants.s_scope, appAAccount).ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B cannot acquire a token interactively, but will try to use FRT
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
                     () => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
 
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B cannot acquire a token interactively, but will try to use FRT
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                var ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
                     () => SilentAsync(_appB, ServerTokenResponse.OtherError)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.InvalidGrantError, ex.ErrorCode);
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await SilentAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B leaves the family -> STS will not refresh its token based on the FRT
-                await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
+                await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
 
                 // B can resume acquiring tokens silently via the normal RT, after an interactive flow
                 await InteractiveAsync(_appB, ServerTokenResponse.NonFociToken).ConfigureAwait(false);
@@ -447,3 +447,4 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
     }
 }
+

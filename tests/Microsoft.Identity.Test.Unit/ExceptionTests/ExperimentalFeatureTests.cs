@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 .Create(Guid.NewGuid().ToString())
                 .WithCertificate(CertHelper.GetOrCreateTestCert()).Build();
 
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
                 () => cca.AcquireTokenForClient(s_scopes)
                 .WithSignedHttpRequestProofOfPossession(popConfig).ExecuteAsync())
                 .ConfigureAwait(false);
@@ -41,3 +41,4 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 #endif
     }
 }
+

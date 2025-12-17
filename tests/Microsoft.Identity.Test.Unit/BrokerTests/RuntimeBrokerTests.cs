@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var pca = pcaBuilder.Build();
 
                 // no window handle - throw
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
                     () => pca.AcquireTokenInteractive(new[] { "" }).ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual("window_handle_required", ex.ErrorCode);
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestMethod]
         public void HandleInstallUrl_Throws()
         {
-            AssertException.Throws<NotImplementedException>(() => _wamBroker.HandleInstallUrl("http://app"));
+            Assert.ThrowsException<NotImplementedException>(() => _wamBroker.HandleInstallUrl("http://app"));
         }
 
         [TestMethod]
@@ -204,3 +204,4 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     }
 }
 #endif
+

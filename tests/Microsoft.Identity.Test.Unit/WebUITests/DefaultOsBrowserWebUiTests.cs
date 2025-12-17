@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                });
 
             // Act
-            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(
                 () => webUI.AcquireAuthorizationAsync(
                     new Uri(TestAuthorizationRequestUri),
                     new Uri(TestRedirectUri),
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
             string differentPortRedirectUri = TestAuthorizationResponseUri.Replace(TestRedirectUri, "http://localhost:1111");
 
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
                 () => AcquireAuthCodeAsync(CreateTestWebUI(), responseUriString: differentPortRedirectUri))
                 .ConfigureAwait(false);
 
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
         private static void AssertInvalidRedirectUri(IWebUI webUI, string uri)
         {
-            var ex = AssertException.Throws<MsalClientException>(() => webUI.UpdateRedirectUri(new Uri(uri)));
+            var ex = Assert.ThrowsException<MsalClientException>(() => webUI.UpdateRedirectUri(new Uri(uri)));
             Assert.AreEqual(MsalError.LoopbackRedirectUri, ex.ErrorCode);
         }
 
@@ -347,3 +347,4 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
     }
 }
+

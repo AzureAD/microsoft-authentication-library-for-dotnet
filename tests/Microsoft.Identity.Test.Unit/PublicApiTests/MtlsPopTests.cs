@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit
                             .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
                             .Build();
 
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
                    .ExecuteAsync())
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request without a certificate
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
                    .ExecuteAsync())
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit
                 }
 
                 // Set WithMtlsProofOfPossession on the request
-                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
                         app.AcquireTokenForClient(TestConstants.s_scope)
                            .WithMtlsProofOfPossession() // Enables MTLS PoP
                            .ExecuteAsync())
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request without specifying an authority
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession()
                    .ExecuteAsync())
@@ -836,7 +836,7 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Set WithMtlsProofOfPossession on the request specifying an authority
-            HttpRequestException ex = await AssertException.TaskThrowsAsync<HttpRequestException>(() =>
+            HttpRequestException ex = await Assert.ThrowsExceptionAsync<HttpRequestException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession()
                    .ExecuteAsync())
@@ -888,3 +888,4 @@ namespace Microsoft.Identity.Test.Unit
         }
     }
 }
+

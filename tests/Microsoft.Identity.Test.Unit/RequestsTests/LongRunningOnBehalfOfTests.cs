@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 string oboCacheKey = "obo-cache-key";
 
                 // If token with OBO cache key provided does not exist in the cache throw error
-                var exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(
                     () => cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope.ToArray(), oboCacheKey)
                     .ExecuteAsync())
                     .ConfigureAwait(false);
@@ -375,7 +375,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(new UserAssertion(TestConstants.DefaultAccessToken).AssertionHash, cacheKey);
 
                 // Cache key is required in this method
-                await AssertException.TaskThrowsAsync<ArgumentNullException>(
+                await Assert.ThrowsExceptionAsync<ArgumentNullException>(
                     () => cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, null)
                         .ExecuteAsync())
                     .ConfigureAwait(false);
@@ -638,7 +638,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);
 
                 // AcquireLR - throws because no RT
-                var exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(
                     () => cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope.ToArray(), oboCacheKey)
                     .ExecuteAsync())
                     .ConfigureAwait(false);
@@ -961,3 +961,4 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
     }
 }
+

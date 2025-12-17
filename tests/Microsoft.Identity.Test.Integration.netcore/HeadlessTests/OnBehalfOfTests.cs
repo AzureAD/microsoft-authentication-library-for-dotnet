@@ -90,12 +90,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Asserts
             // Silent calls should throw
-            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+            await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() =>
                 cca.AcquireTokenSilent(s_scopes, user1AuthResult.Account)
                     .ExecuteAsync(CancellationToken.None)
             ).ConfigureAwait(false);
 
-            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+            await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() =>
                 cca.AcquireTokenSilent(s_scopes, user2AuthResult.Account)
                     .ExecuteAsync(CancellationToken.None)
             ).ConfigureAwait(false);
@@ -135,12 +135,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.HasCount(2, oboTokens);
 
             // Silent calls should throw
-            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+            await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() =>
                 cca.AcquireTokenSilent(s_scopes, user1AuthResult.Account)
                     .ExecuteAsync(CancellationToken.None)
             ).ConfigureAwait(false);
 
-            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+            await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(() =>
                 cca.AcquireTokenSilent(s_scopes, user2AuthResult.Account)
                     .ExecuteAsync(CancellationToken.None)
             ).ConfigureAwait(false);
@@ -533,3 +533,4 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
     }
 }
+

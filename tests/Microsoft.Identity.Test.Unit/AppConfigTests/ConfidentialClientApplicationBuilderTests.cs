@@ -399,7 +399,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_InstanceMetadata_ValidateAuthority_MutuallyExclusive()
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
-            var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+            var ex = Assert.ThrowsException<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                   .WithClientSecret("cats")
                                                   .WithAuthority("https://some.authority/bogus/", true)
@@ -410,7 +410,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_BadInstanceMetadata()
         {
-            var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+            var ex = Assert.ThrowsException<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDiscoveryMetadata("{bad_json_metadata")
                                                   .WithClientSecret("cats")
                                                   .Build());
@@ -501,7 +501,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                             .WithClientCapabilities(TestConstants.ClientCapabilities)
                             .BuildConcrete();
 
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
                 () => app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .WithClaims("claims_that_are_not_json")
@@ -512,3 +512,4 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
     }
 }
+

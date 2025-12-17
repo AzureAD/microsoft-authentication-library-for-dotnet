@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
-                AssertException.Throws<ArgumentNullException>(() => harness.CreateRequestParams(
+                Assert.ThrowsException<ArgumentNullException>(() => harness.CreateRequestParams(
                    null,
                    TestConstants.s_scope,
                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false)));
@@ -297,3 +297,4 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
     }
 }
+

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Func<Task<bool>> func = () => operationSimulator.SimulateOperationWithFailuresAsync();
 
             //Act
-            Exception ex = AssertException.Throws<AggregateException>(
+            Exception ex = Assert.ThrowsException<AggregateException>(
                 () => RetryOperationHelper.ExecuteWithRetryAsync(func, numberOfRetriesToAttempt).Wait());
 
             Assert.AreEqual("OperationSimulator: Simulating Operation Failure", ex.InnerException.Message);
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
 
             //Act
 
-            Exception ex = AssertException.Throws<AggregateException>(
+            Exception ex = Assert.ThrowsException<AggregateException>(
                 () => RetryOperationHelper.ExecuteWithRetryAsync(func, numberOfRetriesToAttempt, retryTimeSpan, actionUponFailure).Wait());
             Assert.AreEqual("OperationSimulator: ThrowException: Exception thrown to identify method", ex.InnerException.Message);
         }
@@ -101,3 +101,4 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         }
     }
 }
+

@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
                     () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
             }
         }
@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // We setup the cancel before calling the RunAsync operation since we don't check the cancel
                 // until later and the mock network calls run insanely fast for us to timeout for them.
                 cancellationSource.Cancel();
-                await AssertException.TaskThrowsAsync<OperationCanceledException>(() => request.RunAsync(cancellationSource.Token)).ConfigureAwait(false);
+                await Assert.ThrowsExceptionAsync<OperationCanceledException>(() => request.RunAsync(cancellationSource.Token)).ConfigureAwait(false);
             }
         }
 
@@ -401,3 +401,4 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
     }
 }
+

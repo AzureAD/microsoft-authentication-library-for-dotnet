@@ -436,7 +436,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                           Task.FromResult(new ClientSignedAssertion { Assertion = string.Empty }))
                       .BuildConcrete();
 
-            await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+            await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
                 cca.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                 .ConfigureAwait(false);
         }
@@ -458,7 +458,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                       })
                       .BuildConcrete();
 
-            await AssertException.TaskThrowsAsync<OperationCanceledException>(() =>
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(() =>
                 cca.AcquireTokenForClient(TestConstants.s_scope)
                    .ExecuteAsync(cts.Token))
                 .ConfigureAwait(false);
@@ -603,7 +603,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                       .WithClientAssertion(BearerDelegate())
                       .BuildConcrete();
 
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
                 cca.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession()
                    .ExecuteAsync())
@@ -659,7 +659,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                               .BuildConcrete();
 
                 // Act & Assert – should fail because region is missing
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await cca.AcquireTokenForClient(TestConstants.s_scope)
                              .WithMtlsProofOfPossession()
                              .ExecuteAsync()
@@ -695,3 +695,4 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #endregion
     }
 }
+

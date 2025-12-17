@@ -37,14 +37,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
                 PoPAuthenticationConfiguration config = null;
 
-                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationOperation(config, harness.ServiceBundle));
+                Assert.ThrowsException<ArgumentNullException>(() => new PopAuthenticationOperation(config, harness.ServiceBundle));
 
                 config = new PoPAuthenticationConfiguration(uri);
                 config.PopCryptoProvider = new InMemoryCryptoProvider();
 
-                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationOperation(config, null));
-                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration((HttpRequestMessage)null));
-                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration((Uri)null));
+                Assert.ThrowsException<ArgumentNullException>(() => new PopAuthenticationOperation(config, null));
+                Assert.ThrowsException<ArgumentNullException>(() => new PoPAuthenticationConfiguration((HttpRequestMessage)null));
+                Assert.ThrowsException<ArgumentNullException>(() => new PoPAuthenticationConfiguration((Uri)null));
             }
         }
 
@@ -203,3 +203,4 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
     }
 }
+

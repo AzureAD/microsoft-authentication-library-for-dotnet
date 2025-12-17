@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             int port = FindFreeLocalhostPort();
 
             // Start the listener in the background
-            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(
                 () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                     port,
                     string.Empty,
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             listenerInterceptor.TestBeforeStart = (_) => cts.Cancel();
 
             // Start the listener in the background
-            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(
                 () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                     port,
                     string.Empty,
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             listenerInterceptor.TestBeforeGetContext = () => cts.Cancel();
 
             // Start the listener in the background
-            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(
                 () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                     port,
                     string.Empty,
@@ -194,3 +194,4 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
     }
 }
+

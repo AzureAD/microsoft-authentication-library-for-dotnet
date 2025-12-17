@@ -169,14 +169,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
 
-                await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
+                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
                                     app.AcquireTokenInteractive(TestConstants.s_scope.ToArray())
                                     .WithTenantId(TestConstants.Utid)
                                     .WithProofOfPossession(null, HttpMethod.Get, new Uri(app.Authority))
                                     .ExecuteAsync())
                                     .ConfigureAwait(false);
 
-                await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
+                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
                                     app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), "loginHint")
                                     .WithTenantId(TestConstants.Utid)
                                     .WithProofOfPossession(null, HttpMethod.Get, new Uri(app.Authority))
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 pca.ServiceBundle.ConfigureMockWebUI();
 
                 // Act
-                var exception = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                 {
                     await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
                              .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
             // Act
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
                         .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
                         .ExecuteAsync()
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 // Act
-                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                 await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.DisplayableId)
                     .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
                     .ExecuteAsync()
@@ -498,7 +498,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
             // Act
 
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.LocalAccountId)
                         .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
                         .ExecuteAsync()
@@ -697,3 +697,4 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
     }
 }
+

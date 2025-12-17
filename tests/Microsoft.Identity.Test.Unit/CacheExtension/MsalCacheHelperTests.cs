@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             cacheAccessor.Read().Throws(ex);
 
             // Act
-            var actualEx = AssertException.Throws<InvalidCastException>(
+            var actualEx = Assert.ThrowsException<InvalidCastException>(
                 () => helper.LoadUnencryptedTokenCache());
 
             // Assert
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             cacheAccessor.WhenForAnyArgs(c => c.Write(default)).Throw(ex);
 
             // Act
-            actualEx = AssertException.Throws<InvalidCastException>(
+            actualEx = Assert.ThrowsException<InvalidCastException>(
                 () => helper.SaveUnencryptedTokenCache(new byte[0]));
 
             // Assert
@@ -353,7 +353,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             helper.RegisterCache(pca.UserTokenCache);
 
             // Act
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
                 () => pca.GetAccountsAsync())
                 .ConfigureAwait(false);
 
@@ -540,7 +540,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             var helper = await MsalCacheHelper.CreateAsync(properties).ConfigureAwait(true);
 
             // event is fired asynchronously, test has to wait for it for a while
-            AssertException.Throws<InvalidOperationException>(
+            Assert.ThrowsException<InvalidOperationException>(
                 () => helper.CacheChanged += (_, _) =>
             {
                 Assert.Fail("Should not fire");
@@ -548,3 +548,4 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         }
     }
 }
+

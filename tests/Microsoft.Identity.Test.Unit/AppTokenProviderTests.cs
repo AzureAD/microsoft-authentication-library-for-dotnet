@@ -240,10 +240,11 @@ namespace Microsoft.Identity.Test.Unit
             var tokenSource = new CancellationTokenSource();
             tokenSource.Cancel();
 
-            await AssertException.TaskThrowsAsync<TaskCanceledException>(
+            await Assert.ThrowsExceptionAsync<TaskCanceledException>(
                 () => app.AcquireTokenForClient(TestConstants.s_scope)
                         .WithForceRefresh(true)
                         .ExecuteAsync(tokenSource.Token)).ConfigureAwait(false);
         }
     }
 }
+

@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public async Task TestAcquireTokenInteractive_EmbeddedAndSystemOptions_Async()
         {
             var options = new SystemWebViewOptions();
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
 
                  AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithSystemWebViewOptions(options)
@@ -213,3 +213,4 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
     }
 }
+

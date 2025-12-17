@@ -18,17 +18,17 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void NullArgs()
         {
-            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationOperation(null, "jwk"));
-            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationOperation("", "jwk"));
-            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationOperation("kid", ""));
-            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationOperation("kid", null));
+            Assert.ThrowsException<ArgumentNullException>(() => new SSHCertAuthenticationOperation(null, "jwk"));
+            Assert.ThrowsException<ArgumentNullException>(() => new SSHCertAuthenticationOperation("", "jwk"));
+            Assert.ThrowsException<ArgumentNullException>(() => new SSHCertAuthenticationOperation("kid", ""));
+            Assert.ThrowsException<ArgumentNullException>(() => new SSHCertAuthenticationOperation("kid", null));
         }
 
         [TestMethod]
         public void NoAuthPrefix()
         {
             var scheme = new SSHCertAuthenticationOperation("kid", "jwk");
-            MsalClientException ex = AssertException.Throws<MsalClientException>(() => scheme.AuthorizationHeaderPrefix);
+            MsalClientException ex = Assert.ThrowsException<MsalClientException>(() => scheme.AuthorizationHeaderPrefix);
             Assert.AreEqual(MsalError.SSHCertUsedAsHttpHeader, ex.ErrorCode);
         }
 
@@ -46,3 +46,4 @@ namespace Microsoft.Identity.Test.Unit
         }
     }
 }
+

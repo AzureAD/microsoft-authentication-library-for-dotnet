@@ -577,7 +577,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                         Task.FromException<AuthorizationResult>(new MsalClientException("user_cancelled")));
                     _app.ServiceBundle.ConfigureMockWebUI(ui);
 
-                    var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                    var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
@@ -607,7 +607,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     _harness.HttpManager.AddMockHandler(tokenRequestHandler2);
                     _harness.HttpManager.AddMockHandler(tokenRequestHandler);
 
-                    var serviceEx = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    var serviceEx = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
@@ -623,7 +623,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     cts.Cancel(true);
                     CancellationToken token = cts.Token;
 
-                    var operationCanceledException = await AssertException.TaskThrowsAsync<OperationCanceledException>(() =>
+                    var operationCanceledException = await Assert.ThrowsExceptionAsync<OperationCanceledException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
@@ -713,7 +713,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 TestConstants.AuthorityUtidTenant,
                 correlationId.ToString());
 
-            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+            var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
                 () => request.WithCorrelationId(correlationId).ExecuteAsync(),
                 allowDerived: true)
                 .ConfigureAwait(false);
@@ -763,3 +763,4 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
     }
 }
+

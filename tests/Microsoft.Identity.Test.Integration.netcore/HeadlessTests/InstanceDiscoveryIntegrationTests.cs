@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Acquire a token using a not so common authority alias");
 
             #pragma warning disable CS0618 // Type or member is obsolete
-            MsalServiceException exception = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+            MsalServiceException exception = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
                  pca.AcquireTokenByUsernamePassword(
                     s_scopes,
                      user.Upn,
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Acquire a token using a not so common authority alias");
 
             #pragma warning disable CS0618 // Type or member is obsolete
-            _ = await AssertException.TaskThrowsAsync<HttpRequestException>(() =>
+            _ = await Assert.ThrowsExceptionAsync<HttpRequestException>(() =>
                  pca.AcquireTokenByUsernamePassword(
                     s_scopes,
                      user.Upn,
@@ -182,3 +182,4 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
     }
 }
+

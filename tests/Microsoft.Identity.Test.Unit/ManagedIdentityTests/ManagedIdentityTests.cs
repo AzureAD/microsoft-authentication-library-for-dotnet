@@ -1024,7 +1024,7 @@ ex.Message, $"Expected to contain string {expectedErrorSubString}. Actual error 
             var tokenSource = new CancellationTokenSource();
             tokenSource.Cancel();
 
-            await AssertException.TaskThrowsAsync<TaskCanceledException>(
+            await Assert.ThrowsExceptionAsync<TaskCanceledException>(
                 () => app.AcquireTokenForManagedIdentity(Resource)
                         .WithForceRefresh(true)
                         .ExecuteAsync(tokenSource.Token)).ConfigureAwait(false);
@@ -1552,3 +1552,4 @@ ex.Message, $"Expected to contain string {expectedErrorSubString}. Actual error 
         }
     }
 }
+

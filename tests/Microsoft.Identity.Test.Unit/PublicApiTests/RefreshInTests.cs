@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
 
                 // Act
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() => app
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         account)
@@ -492,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
 
                 // Act
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() => app
                    .AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync())
                     .ConfigureAwait(false);
@@ -539,3 +539,4 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         #endregion
     }
 }
+

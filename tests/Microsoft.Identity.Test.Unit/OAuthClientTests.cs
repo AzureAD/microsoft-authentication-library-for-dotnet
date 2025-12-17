@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit
                     harness.HttpManager,
                     null);
 
-                Exception ex = await AssertException.TaskThrowsAsync<Exception>(
+                Exception ex = await Assert.ThrowsExceptionAsync<Exception>(
                     () => client.ExecuteRequestAsync<OAuth2ResponseBase>(
                         requestUri,
                         HttpMethod.Post,
@@ -261,3 +261,4 @@ namespace Microsoft.Identity.Test.Unit
 
     }
 }
+

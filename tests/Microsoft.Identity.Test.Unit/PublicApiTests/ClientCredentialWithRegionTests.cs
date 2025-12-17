@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit
                                  .Build();
 
 #pragma warning disable CS0618 // Type or member is obsolete
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
                     app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .WithAuthority("https://login.microsoft.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
@@ -483,14 +483,14 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void WithAzureRegionThrowsOnNullArg()
         {
-            AssertException.Throws<ArgumentNullException>(
+            Assert.ThrowsException<ArgumentNullException>(
                 () => ConfidentialClientApplicationBuilder
                              .Create(TestConstants.ClientId)
                              .WithAzureRegion(null)
                              .WithClientSecret(TestConstants.ClientSecret)
                              .Build());
 
-            AssertException.Throws<ArgumentNullException>(
+            Assert.ThrowsException<ArgumentNullException>(
                () => ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
                             .WithAzureRegion(string.Empty)
@@ -630,7 +630,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 if (!authorityIsValid && validateAuthority)
                 {
-                    var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
+                    var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() => app
                        .AcquireTokenForClient(TestConstants.s_scope)
                        .WithTenantId("17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                        .ExecuteAsync()).ConfigureAwait(false);
@@ -800,7 +800,7 @@ namespace Microsoft.Identity.Test.Unit
                                  .Build();
 
                 // Act
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() => app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync())
                     .ConfigureAwait(false);
@@ -945,3 +945,4 @@ namespace Microsoft.Identity.Test.Unit
 
     }
 }
+
