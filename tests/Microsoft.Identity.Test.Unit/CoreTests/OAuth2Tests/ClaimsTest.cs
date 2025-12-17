@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         }
 
         [TestMethod]
-        [DynamicData(nameof(TestData.GetClaimsAndCapabilities), typeof(TestData), DynamicDataSourceType.Method)]
+        [DynamicData(nameof(TestData.GetClaimsAndCapabilities), typeof(TestData))]
         public void ClaimsMerge_Test(string claims, string[] capabilities, string expectedMergedJson)
         {
             var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(claims, capabilities);

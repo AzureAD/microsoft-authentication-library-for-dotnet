@@ -192,8 +192,8 @@ namespace Microsoft.Identity.Test.Unit
                                     AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponse.Headers));
 
             //Assert
-            Assert.AreEqual(ex.ErrorCode, MsalError.UnableToParseAuthenticationHeader);
-            Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader + $"Response Headers: {httpResponse.Headers.ToString()} See inner exception for details.");
+            Assert.AreEqual(MsalError.UnableToParseAuthenticationHeader, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.UnableToParseAuthenticationHeader + $"Response Headers: {httpResponse.Headers.ToString()} See inner exception for details.", ex.Message);
         }
 
         [TestMethod]

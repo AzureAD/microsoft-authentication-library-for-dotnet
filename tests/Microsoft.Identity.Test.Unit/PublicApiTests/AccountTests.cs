@@ -424,7 +424,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.AreEqual("login.microsoftonline.com", accountsGlobal.Single().Environment);
-                Assert.IsTrue(!accountsDe.Any());
+                Assert.IsFalse(accountsDe.Any());
                 Assert.AreEqual("login.chinacloudapi.cn", accountsCn.Single().Environment);
             }
         }

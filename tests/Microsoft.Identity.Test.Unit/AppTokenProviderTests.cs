@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit
                                                                   Assert.IsNotNull(parameters.Scopes);
                                                                   Assert.IsNotNull(parameters.CorrelationId);
                                                                   Assert.IsNotNull(parameters.TenantId);
-                                                                  Assert.IsNotNull(parameters.CancellationToken);
+                                                                  Assert.AreEqual(CancellationToken.None, parameters.CancellationToken);
 
                                                                   if (usingClaims)
                                                                   {

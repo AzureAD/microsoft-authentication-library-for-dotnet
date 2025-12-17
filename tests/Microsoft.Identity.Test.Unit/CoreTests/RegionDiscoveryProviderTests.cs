@@ -99,6 +99,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             // if the http mock is called more than once, it will fail in dispose as queue will be non-empty
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
             int threadCount = MaxThreadCount;
+            Exception caughtException = null;
 #pragma warning disable VSTHRD101 // Avoid unsupported async delegates - acceptable risk (crash the test proj)
             var result = Parallel.For(0, MaxThreadCount, async (i) =>
             {
@@ -114,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 }
                 catch (Exception ex)
                 {
-                    Assert.Fail(ex.Message);
+                    Interlocked.CompareExchange(ref caughtException, ex, null);
                 }
                 finally
                 {
@@ -129,6 +130,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 Thread.Yield();
             }
             Assert.IsTrue(result.IsCompleted);
+
+            if (caughtException is not null)
+            {
+                Assert.Fail(caughtException.Message);
+            }
         }
 
         [TestMethod]

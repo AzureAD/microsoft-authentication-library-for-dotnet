@@ -644,7 +644,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             var accounts = app.GetAccountsAsync().Result;
-            Assert.IsTrue(!accounts.Any());
+            Assert.IsFalse(accounts.Any());
 
             var acc = app.GetAccountAsync(null).Result;
             Assert.IsNull(acc);
@@ -1210,7 +1210,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
-                Assert.IsNotNull(result.CorrelationId);
                 Assert.AreEqual(correlationId.ToString(), result.CorrelationId.ToString());
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);

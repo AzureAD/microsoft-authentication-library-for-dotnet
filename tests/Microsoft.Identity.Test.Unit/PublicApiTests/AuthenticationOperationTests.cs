@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthenticationOperation(new TestOperation())
                     .ExecuteAsync().ConfigureAwait(false);
 
-                Assert.IsTrue(result.AccessToken.StartsWith("IAuthenticationOperation2"));
+                StringAssert.StartsWith("IAuthenticationOperation2", result.AccessToken);
                 Assert.AreEqual($"TestToken {result.AccessToken}", result.CreateAuthorizationHeader() );
                 
             }
@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result1);
-                Assert.IsTrue(result1.AccessToken.StartsWith("validated_"));
+                StringAssert.StartsWith("validated_", result1.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
 
                 // Second request - validation should fail, so new token should be acquired
@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result1);
-                Assert.IsTrue(result1.AccessToken.StartsWith("validated_"));
+                StringAssert.StartsWith("validated_", result1.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
 
                 // Second request - validation should succeed, so cached token should be returned

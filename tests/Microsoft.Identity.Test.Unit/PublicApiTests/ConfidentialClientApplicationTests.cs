@@ -621,7 +621,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                Assert.IsNotNull(setup);
+                Assert.IsNotNull(app);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
                 appCacheAccess.AssertAccessCounts(1, 1);
@@ -1082,7 +1082,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             else
             {
-                Assert.IsTrue(!qp.ContainsKey(Constants.CcsRoutingHintHeader));
+                Assert.IsFalse(qp.ContainsKey(Constants.CcsRoutingHintHeader));
             }
         }
 

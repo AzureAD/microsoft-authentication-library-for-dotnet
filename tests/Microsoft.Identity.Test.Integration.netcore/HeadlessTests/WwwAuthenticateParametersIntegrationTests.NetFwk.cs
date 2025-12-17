@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Assert
             Assert.IsTrue(parameterList.Any(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix));
             Assert.IsNotNull(parameterList.Single(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix).Nonce);
-            Assert.IsTrue(!popNonce.IsNullOrEmpty());
+            Assert.IsFalse(popNonce.IsNullOrEmpty());
             await PoPValidator.VerifyPopNonceAsync(popNonce).ConfigureAwait(false);
         }
 

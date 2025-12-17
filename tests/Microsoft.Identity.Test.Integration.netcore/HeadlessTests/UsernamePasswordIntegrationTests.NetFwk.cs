@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
                 x.Item2.StatusCode == HttpStatusCode.OK);
 
-            Assert.IsTrue(!req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader));
+            Assert.IsFalse(req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader));
         }
 
         private void AssertTenantProfiles(IEnumerable<TenantProfile> tenantProfiles, string tenantId)

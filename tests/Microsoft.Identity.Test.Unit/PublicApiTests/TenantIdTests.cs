@@ -27,7 +27,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(TestConstants.B2CCustomDomain, TestConstants.CatsAreAwesome, DisplayName = "B2C Custom Domain Tenant Id")]
         [DataRow(TestConstants.B2CLoginAuthority, TestConstants.SomeTenantId, DisplayName = "B2C Tenant Id")]
         [DataRow(TestConstants.B2CLoginAuthorityUsGov, TestConstants.SomeTenantId, DisplayName = "B2C US GOV Tenant Id")]
-        [DataRow(TestConstants.B2CCustomDomain, TestConstants.CatsAreAwesome, DisplayName = "B2C Custom Domain Tenant Id")]
         [DataRow(TestConstants.B2CLoginAuthorityBlackforest, TestConstants.SomeTenantId, DisplayName = "B2C Blackforest Tenant Id")]
         [DataRow(TestConstants.B2CLoginAuthorityMoonCake, TestConstants.SomeTenantId, DisplayName = "B2C MoonCake Tenant Id")]
         [DataRow(TestConstants.AuthoritySovereignCNTenant, TestConstants.TenantId, DisplayName = "Sovereign Tenant Id")]
@@ -42,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
+        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData))]
         public void ParseTestDynamic_Success(Uri authorityUrl, string expectedTenantId)
         {
             ParseTest_Success(authorityUrl.ToString(), expectedTenantId);
