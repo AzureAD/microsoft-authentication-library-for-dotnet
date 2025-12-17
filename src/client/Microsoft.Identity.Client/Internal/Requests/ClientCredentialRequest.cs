@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     {
                         logger.Verbose(() => "[ClientCredentialRequest] Sending token request to AAD.");
                         MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
-                        return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
+                        authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
