@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,7 +13,12 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     internal class IgnoreOnOneBranchAttribute : TestMethodAttribute
     {
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public IgnoreOnOneBranchAttribute([CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            : base(filePath, lineNumber)
+        {
+        }
+
+        public override async Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
 #if ONEBRANCH_BUILD
             return new[]
@@ -25,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     }
                 };
 #else
-            return base.Execute(testMethod);
+            return await base.ExecuteAsync(testMethod).ConfigureAwait(false);
 #endif
         }
     }

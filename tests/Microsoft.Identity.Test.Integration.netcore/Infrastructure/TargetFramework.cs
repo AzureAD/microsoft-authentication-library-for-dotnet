@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
@@ -13,12 +15,13 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     {
         private readonly TargetFrameworks _tfms;
 
-        public RunOnAttribute(TargetFrameworks tfms)
+        public RunOnAttribute(TargetFrameworks tfms, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            : base(filePath, lineNumber)
         {
             _tfms = tfms;
         }
 
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public override async Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
             if (RunOnHelper.IsNetFwk() && (_tfms & TargetFrameworks.NetFx) != TargetFrameworks.NetFx ||
                 RunOnHelper.IsNetCore() && (_tfms & TargetFrameworks.NetCore) != TargetFrameworks.NetCore)
@@ -34,7 +37,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 };
             }
 
-            return base.Execute(testMethod);
+            return await base.ExecuteAsync(testMethod).ConfigureAwait(false);
         }
     }
 
