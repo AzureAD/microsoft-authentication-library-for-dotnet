@@ -1,3 +1,28 @@
+4.80.0
+======
+
+### Features
+* Add extensibility APIs for dynamic cert, retry and observer [#5573](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5573)
+* Add FormatResultAsync to IAuthenticationOperation2 interface [#5376](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5376)
+* Enable IAuthenticationOperation2 to reject MSAL cached tokens and fetch new ones from ESTS [#5567](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5567)
+
+### Changes
+* Migrate test infrastructure to Key Vault/Region test migration [#5606](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5606)
+* IMDS Source Detection Logic Improvement [#5602](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5602)
+* Update Agentic test configuration for new tenant [#5616](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5616)
+* Refactor FMI tests to use new tenant [#5605](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5605)
+* Update windowsappsdk and add sample to project [#5607](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5607)
+* Update DesktopOsHelper.IsMac to work properly on .NET 10 + macOS 26 [#5541](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5541)
+* Remove Kerberos dev app [#5596](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5596)
+* Revise certificate handling documentation for MSI v2 [#5515](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5515)
+* Update security reporting contact link in README [#5572](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5572)
+
+### Bug Fixes
+* Fix KeyNotFoundException during retry when headers lack correlation ID [#5617](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5617)
+* Implement Service Exception for IMDS Probe [#5615](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5615)
+* Add back CHANGELOG.md reference to solution file [#5599](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5599)
+* Add unit test to validate that the custom claim is string containing json [#5597](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5597)
+
 4.79.2
 ======
 
