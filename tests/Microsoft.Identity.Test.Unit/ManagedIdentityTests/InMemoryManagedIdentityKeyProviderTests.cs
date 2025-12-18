@@ -64,8 +64,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var managedIdentityApp = await keyProvider.GetOrCreateKeyAsync(logger, CancellationToken.None).ConfigureAwait(false);
 
             byte[] data = Encoding.UTF8.GetBytes("ping");
-            byte[] signature = managedIdentityApp.Key.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-            bool isSignatureValid = managedIdentityApp.Key.VerifyData(data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            byte[] signature = managedIdentityApp.Key.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
+            bool isSignatureValid = managedIdentityApp.Key.VerifyData(data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
 
             Assert.IsTrue(isSignatureValid);
         }
