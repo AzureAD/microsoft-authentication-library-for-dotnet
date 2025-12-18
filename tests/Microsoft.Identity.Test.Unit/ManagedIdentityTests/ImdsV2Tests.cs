@@ -477,13 +477,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 cts.Cancel();
                 var imdsProbesCancellationToken = cts.Token;
 
-                var ex =
-                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                        await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken)
-                        .ConfigureAwait(false))
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.ImdsServiceError, ex.ErrorCode);
+                await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
+                    await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken)
+                    .ConfigureAwait(false))
+                .ConfigureAwait(false);
             }
         }
         #endregion Probe Tests
