@@ -6,6 +6,19 @@ Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.ValidateCachedTok
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.MsalCacheValidationData() -> void
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.PersistedCacheParameters.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.AssertionRequestOptions.Authority.get -> string
+Microsoft.Identity.Client.AssertionRequestOptions.Authority.set -> void
+Microsoft.Identity.Client.AssertionRequestOptions.TenantId.get -> string
+Microsoft.Identity.Client.AssertionRequestOptions.TenantId.set -> void
+const Microsoft.Identity.Client.MsalError.InvalidClientCredentialConfiguration = "invalid_client_credential_configuration" -> string
+Microsoft.Identity.Client.Extensibility.ExecutionResult
+Microsoft.Identity.Client.Extensibility.ExecutionResult.ClientCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.Extensibility.ExecutionResult.Exception.get -> Microsoft.Identity.Client.MsalException
+Microsoft.Identity.Client.Extensibility.ExecutionResult.Result.get -> Microsoft.Identity.Client.AuthenticationResult
+Microsoft.Identity.Client.Extensibility.ExecutionResult.Successful.get -> bool
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnCompletion(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task> onCompletion) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnMsalServiceFailure(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task<bool>> onMsalServiceFailure) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2>> certificateProvider) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.get -> string
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.set -> void
