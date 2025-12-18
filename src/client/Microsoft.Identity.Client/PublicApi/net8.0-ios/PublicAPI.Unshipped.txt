@@ -7,4 +7,4 @@ Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.MsalCacheValidation
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.PersistedCacheParameters.get -> System.Collections.Generic.IDictionary<string, string>
 Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource>
 Microsoft.Identity.Client.ManagedIdentityPopExtensions
-static Microsoft.Identity.Client.ManagedIdentityPopExtensions.WithMtlsProofOfPossession(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder! builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder!
+static Microsoft.Identity.Client.ManagedIdentityPopExtensions.WithMtlsProofOfPossession(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
