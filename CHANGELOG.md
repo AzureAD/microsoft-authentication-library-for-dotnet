@@ -2,7 +2,7 @@
 ======
 
 ### Features
-* Add extensibility APIs for dynamic cert, retry and observer [#5573](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5573)
+* Added extensibility APIs—WithCertificate, OnMsalServiceFailure, and OnCompletion—to enable callback handling for certificate injection, retry on MSAL service failure events, and completion notifications [#5573](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5573)
 * Extend IAuthenticationOperation interface with Async methods in IAuthenticationOperation2 [#5376](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5376)
 * Enable IAuthenticationOperation2 to reject MSAL cached tokens and fetch new ones from ESTS [#5567](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5567)
 
