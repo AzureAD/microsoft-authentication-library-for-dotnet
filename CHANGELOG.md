@@ -8,14 +8,11 @@
 
 ### Changes
 * IMDS Source Detection Logic Improvement [#5602](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5602)
-
 * Update DesktopOsHelper.IsMac to work properly on .NET 10 + macOS 26 [#5541](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5541)
-
 
 ### Bug Fixes
 * Fix KeyNotFoundException during retry when headers lack correlation ID [#5617](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5617)
 * Implement Service Exception for IMDS Probe [#5615](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5615)
-
 
 4.79.2
 ======
