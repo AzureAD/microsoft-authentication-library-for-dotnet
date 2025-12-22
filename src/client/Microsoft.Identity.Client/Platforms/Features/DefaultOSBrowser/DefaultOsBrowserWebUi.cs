@@ -63,7 +63,6 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         {
             try
             {
-                // Add response_mode=form_post for security (prevents auth code from appearing in browser history/logs)
                 var authUriBuilder = new UriBuilder(authorizationUri);
                 authUriBuilder.AppendOrReplaceQueryParameter(OAuth2Parameter.ResponseMode, "form_post");
                 authorizationUri = authUriBuilder.Uri;
@@ -87,9 +86,6 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                             authResponse.RequestUri.AbsolutePath,
                             redirectUri.AbsolutePath));
                 }
-
-                // Use FromPostData for form_post responses (more secure - never constructs URI with auth code)
-                // Use FromUri for legacy GET responses (query string)
                 if (authResponse.IsFormPost)
                 {
                     _logger.Info(() => "[DefaultOsBrowser] Processing form_post response securely from POST data");
@@ -97,8 +93,9 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 }
                 else
                 {
-                    _logger.Info(() => "[DefaultOsBrowser] Processing legacy GET response from query string");
-                    return AuthorizationResult.FromUri(authResponse.RequestUri.OriginalString);
+                    throw new MsalClientException(
+                        MsalError.AuthenticationFailed,
+                        "The authorization server did not honor response_mode=form_post");
                 }
             }
             catch (System.Net.HttpListenerException) // sometimes this exception sneaks out (see issue 1773)
