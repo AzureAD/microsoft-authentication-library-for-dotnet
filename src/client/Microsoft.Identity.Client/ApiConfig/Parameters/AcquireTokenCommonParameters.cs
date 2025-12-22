@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,7 +41,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
-        internal Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> AttestationTokenProvider { get; set; }
+        
+        /// <summary>
+        /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
+        /// Set by the KeyAttestation package via .WithAttestationSupport().
+        /// Returns null for non-attested flows.
+        /// </summary>
+        public Func<string, SafeHandle, string, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
 
         internal async Task InitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {

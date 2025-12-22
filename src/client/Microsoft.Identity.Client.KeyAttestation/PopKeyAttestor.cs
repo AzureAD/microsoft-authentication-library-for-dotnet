@@ -1,23 +1,23 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.MtlsPop.Attestation;
+using Microsoft.Identity.Client.KeyAttestation.Attestation;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client.MtlsPop
+namespace Microsoft.Identity.Client.KeyAttestation
 {
     /// <summary>
-    /// Static facade for attesting a KeyGuard/CNG key and getting a JWT back.
+    /// Static facade for attesting a Credential Guard/CNG key and getting a JWT back.
     /// Key discovery / rotation is the caller's responsibility.
     /// </summary>
     internal static class PopKeyAttestor
     {
         /// <summary>
-        /// Asynchronously attests a KeyGuard/CNG key with the remote attestation service and returns a JWT.
+        /// Asynchronously attests a Credential Guard/CNG key with the remote attestation service and returns a JWT.
         /// Wraps the synchronous <see cref="AttestationClient.Attest"/> in a Task.Run so callers can
         /// avoid blocking. Cancellation only applies before the native call starts.
         /// </summary>
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.MtlsPop
         /// <param name="keyHandle">Valid SafeNCryptKeyHandle (must remain valid for duration of call).</param>
         /// <param name="clientId">Optional client identifier (may be null/empty).</param>
         /// <param name="cancellationToken">Cancellation token (cooperative before scheduling / start).</param>
-        public static Task<AttestationResult> AttestKeyGuardAsync(
+        public static Task<AttestationResult> AttestCredentialGuardAsync(
             string endpoint,
             SafeHandle keyHandle,
             string clientId,
