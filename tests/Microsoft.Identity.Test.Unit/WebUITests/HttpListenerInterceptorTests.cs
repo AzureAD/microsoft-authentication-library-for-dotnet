@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
@@ -19,30 +20,34 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
     public class HttpListenerInterceptorTests
     {
         [TestMethod]
-        public async Task HttpListenerCompletesAsync()
+        public async Task HttpListenerRejectsGetRequestAsync()
         {
-
             HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
                 Substitute.For<ILoggerAdapter>());
 
             int port = FindFreeLocalhostPort();
 
             // Start the listener in the background
-            Task<Uri> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
+            Task<AuthorizationResponse> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                 port,
                 string.Empty,
                 (_) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
                 CancellationToken.None);
 
-            // Issue an HTTP request on the main thread
+            // Issue an HTTP GET request (should be rejected for security)
             await SendMessageToPortAsync(port, string.Empty).ConfigureAwait(false);
 
-            // Wait for the listener to do its stuff
-            listenTask.Wait(2000 /* 2s timeout */);
+            // Wait for the listener to complete
+            bool completed = listenTask.Wait(2000 /* 2s timeout */);
 
-            // Assert
-            Assert.IsTrue(listenTask.IsCompleted);
-            Assert.AreEqual(GetLocalhostUriWithParams(port, string.Empty), listenTask.Result.ToString());
+            // Assert - should throw security exception
+            Assert.IsTrue(completed);
+            Assert.IsTrue(listenTask.IsFaulted, "GET request should cause the task to fault");
+            Assert.IsInstanceOfType(listenTask.Exception.InnerException, typeof(MsalClientException));
+            
+            var msalEx = (MsalClientException)listenTask.Exception.InnerException;
+            Assert.AreEqual(MsalError.AuthenticationFailed, msalEx.ErrorCode);
+            Assert.IsTrue(msalEx.Message.Contains("Expected POST request"), "Error message should explain POST is required");
         }
 
         [TestMethod]
@@ -96,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             listenerInterceptor.TestBeforeStart = (url) => Assert.AreEqual($"http://localhost:{port}/TestPath/", url);
 
             // Start listener in the background
-            Task<Uri> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
+            Task<AuthorizationResponse> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                 port,
                 "/TestPath/",
                 (_) => new MessageAndHttpCode(HttpStatusCode.OK, "OK"),
@@ -160,11 +165,62 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 .ConfigureAwait(false);
         }
 
+        [TestMethod]
+        public async Task HttpListenerHandlesPostDataAsync()
+        {
+            HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
+                Substitute.For<ILoggerAdapter>());
+
+            int port = FindFreeLocalhostPort();
+
+            // Start the listener in the background
+            Task<AuthorizationResponse> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
+                port,
+                string.Empty,
+                (_) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
+                CancellationToken.None);
+
+            // Issue an HTTP POST request with form data (simulating form_post response mode)
+            await SendPostMessageToPortAsync(port, string.Empty, "code=auth_code_value&state=state_value").ConfigureAwait(false);
+
+            // Wait for the listener to complete
+            listenTask.Wait(2000 /* 2s timeout */);
+
+            // Assert
+            Assert.IsTrue(listenTask.IsCompleted);
+            Assert.IsNotNull(listenTask.Result);
+            Assert.IsTrue(listenTask.Result.IsFormPost, "Response should be identified as form_post");
+            Assert.IsNotNull(listenTask.Result.PostData, "POST data should be captured");
+            
+            // Verify the POST data contains the expected values
+            string postDataString = System.Text.Encoding.UTF8.GetString(listenTask.Result.PostData);
+            Assert.IsTrue(postDataString.Contains("code=auth_code_value"));
+            Assert.IsTrue(postDataString.Contains("state=state_value"));
+            
+            // Verify the request URI is clean (no query params)
+            Assert.AreEqual("/", listenTask.Result.RequestUri.AbsolutePath);
+            Assert.IsTrue(string.IsNullOrEmpty(listenTask.Result.RequestUri.Query) || 
+                         listenTask.Result.RequestUri.Query == "?", 
+                         "Request URI should not contain query parameters when using form_post");
+        }
+
         private async Task SendMessageToPortAsync(int port, string path)
         {
             using (HttpClient httpClient = new HttpClient())
             {
                 await httpClient.GetAsync(GetLocalhostUriWithParams(port, path)).ConfigureAwait(false);
+            }
+        }
+
+        private async Task SendPostMessageToPortAsync(int port, string path, string postData)
+        {
+            using (HttpClient httpClient = new HttpClient())
+            {
+                var content = new StringContent(postData, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+                string uri = string.IsNullOrEmpty(path) 
+                    ? $"http://localhost:{port}/" 
+                    : $"http://localhost:{port}/{path}/";
+                await httpClient.PostAsync(uri, content).ConfigureAwait(false);
             }
         }
 
