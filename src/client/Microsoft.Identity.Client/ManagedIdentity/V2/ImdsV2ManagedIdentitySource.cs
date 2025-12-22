@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
 
         private readonly IMtlsCertificateCache _mtlsCache;
-        private bool _isAttestationRequested;
+        private Func<string, SafeHandle, string, CancellationToken, Task<string>> _attestationTokenProvider;
 
         // used in unit tests
         public const string ApiVersionQueryParam = "cred-api-version";
@@ -170,8 +171,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             ApiConfig.Parameters.AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
-            // Capture the attestation flag before calling base
-            _isAttestationRequested = parameters.IsAttestationRequested;
+            // Capture the attestation token provider delegate before calling base
+            _attestationTokenProvider = parameters.AttestationTokenProvider;
             return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -365,67 +366,59 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         /// <summary>
-        /// Obtains an attestation JWT for the KeyGuard/CSR payload using the configured
-        /// attestation provider and normalized endpoint.
+        /// Obtains an attestation JWT for the Credential Guard/CSR payload using the configured
+        /// attestation token provider delegate.
         /// </summary>
         /// <param name="clientId">Client ID to be sent to the attestation provider.</param>
         /// <param name="attestationEndpoint">The attestation endpoint.</param>
         /// <param name="keyInfo">The key information.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>JWT string suitable for the IMDSv2 attested POP flow.</returns>
-        /// <exception cref="MsalClientException">Wraps client/network failures.</exception>
-
+        /// <returns>JWT string suitable for the IMDSv2 attested PoP flow, or null for non-attested flow.</returns>
         private async Task<string> GetAttestationJwtAsync(
             string clientId, 
             Uri attestationEndpoint, 
             ManagedIdentityKeyInfo keyInfo, 
             CancellationToken cancellationToken)
         {
-            // Check if attestation was requested via WithAttestationSupport()
-            if (!_isAttestationRequested)
+            // Check if attestation token provider has been configured
+            if (_attestationTokenProvider == null)
             {
-                _requestContext.Logger.Info("[ImdsV2] Attestation not requested. Proceeding with non-attested flow.");
+                _requestContext.Logger.Info("[ImdsV2] Attestation token provider not configured. Proceeding with non-attested flow.");
                 return null; // Null attestation token indicates non-attested flow
             }
 
-            // Check if an attestation provider has been registered
-            var attestationProvider = AttestationProviderRegistry.Provider;
-            if (attestationProvider == null)
-            {
-                throw new MsalClientException(
-                    "attestation_not_configured",
-                    "[ImdsV2] Attestation was requested but no attestation provider is registered. " +
-                    "Ensure you reference the Microsoft.Identity.Client.KeyAttestation package.");
-            }
-
-            // KeyGuard requires RSACng on Windows
+            // Credential Guard requires RSACng on Windows
             if (keyInfo.Key is not System.Security.Cryptography.RSACng rsaCng)
             {
                 throw new MsalClientException(
-                    "keyguard_requires_cng",
-                    "[ImdsV2] KeyGuard attestation currently supports only RSA CNG keys on Windows.");
+                    "credential_guard_requires_cng",
+                    "[ImdsV2] Credential Guard attestation currently supports only RSA CNG keys on Windows.");
             }
 
-            // Call attestation via the registered provider
-            AttestationResult attestationResult = await attestationProvider.AttestKeyGuardAsync(
-                attestationEndpoint.AbsoluteUri,
-                rsaCng.Key.Handle,
-                clientId,
-                cancellationToken).ConfigureAwait(false);
-
-            // Validate and return the attestation JWT
-            if (attestationResult != null &&
-                attestationResult.Status == AttestationStatus.Success &&
-                !string.IsNullOrWhiteSpace(attestationResult.Jwt))
+            try
             {
-                return attestationResult.Jwt;
-            }
+                // Call the attestation token provider delegate
+                string attestationJwt = await _attestationTokenProvider(
+                    attestationEndpoint.AbsoluteUri,
+                    rsaCng.Key.Handle,
+                    clientId,
+                    cancellationToken).ConfigureAwait(false);
 
-            throw new MsalClientException(
-                "attestation_failed",
-                $"[ImdsV2] Key Attestation failed " +
-                $"(status={attestationResult?.Status}, " +
-                $"code={attestationResult?.NativeErrorCode}). {attestationResult?.ErrorMessage}");
+                if (string.IsNullOrWhiteSpace(attestationJwt))
+                {
+                    _requestContext.Logger.Info("[ImdsV2] Attestation provider returned null/empty JWT. Proceeding with non-attested flow.");
+                    return null;
+                }
+
+                return attestationJwt;
+            }
+            catch (Exception ex)
+            {
+                throw new MsalClientException(
+                    "attestation_failed",
+                    $"[ImdsV2] Attestation token provider failed: {ex.Message}",
+                    ex);
+            }
         }
 
         private Task<MtlsBindingInfo> GetOrCreateMtlsBindingAsync(

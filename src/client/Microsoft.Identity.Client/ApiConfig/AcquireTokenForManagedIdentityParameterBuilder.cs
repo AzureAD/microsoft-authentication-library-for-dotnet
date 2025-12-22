@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client
             AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
         {
             acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
-            acquireTokenForManagedIdentityParameters.IsAttestationRequested = acquireTokenCommonParameters.IsAttestationRequested;
+            acquireTokenForManagedIdentityParameters.AttestationTokenProvider = acquireTokenCommonParameters.AttestationTokenProvider;
         }
     }
 }

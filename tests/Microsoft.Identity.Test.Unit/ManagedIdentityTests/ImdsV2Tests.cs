@@ -52,16 +52,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // A broad sweep is simplest and safe for our fake endpoints/certs
                 ImdsV2TestStoreCleaner.RemoveAllTestArtifacts();
             }
-
-            // Register fake attestation provider for tests
-            AttestationProviderRegistry.RegisterProvider(TestAttestationProviders.CreateFakeProvider());
         }
 
         [TestCleanup]
         public void ImdsV2Tests_Cleanup()
         {
-            // Clear provider after each test
-            AttestationProviderRegistry.ClearProvider();
+            // Cleanup handled automatically with delegate-based approach
         }
 
         private void AddMocksToGetEntraToken(
@@ -669,7 +665,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task MtlsPop_AttestationProviderReturnsNull_ThrowsClientException()
+        public async Task MtlsPop_AttestationProviderReturnsNull_UsesNonAttestedFlow()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -678,25 +674,23 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
-                // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                // Add mocks for successful non-attested flow
+                AddMocksToGetEntraToken(httpManager);
 
-                // Register null provider for this test
-                AttestationProviderRegistry.RegisterProvider(TestAttestationProviders.CreateNullProvider());
+                // Test with null-returning attestation provider - should gracefully use non-attested flow
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(TestAttestationProviders.CreateNullProvider())
+                    .ExecuteAsync().ConfigureAwait(false);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession()
-                        .WithAttestationSupport()
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(MTLSPoP, result.TokenType, "Should get mTLS PoP token even with null attestation provider");
+                Assert.IsNotNull(result.BindingCertificate);
             }
         }
 
         [TestMethod]
-        public async Task MtlsPop_AttestationProviderReturnsEmptyToken_ThrowsClientException()
+        public async Task MtlsPop_AttestationProviderReturnsEmptyToken_UsesNonAttestedFlow()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -705,20 +699,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
-                // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                // Add mocks for successful non-attested flow
+                AddMocksToGetEntraToken(httpManager);
 
-                // Register empty provider for this test
-                AttestationProviderRegistry.RegisterProvider(TestAttestationProviders.CreateEmptyProvider());
+                // Test with empty-string-returning attestation provider - should gracefully use non-attested flow
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationProviderForTests(TestAttestationProviders.CreateEmptyProvider())
+                    .ExecuteAsync().ConfigureAwait(false);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession()
-                        .WithAttestationSupport()
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(MTLSPoP, result.TokenType, "Should get mTLS PoP token even with empty attestation provider");
+                Assert.IsNotNull(result.BindingCertificate);
             }
         }
 
@@ -765,13 +757,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // First acquire: full flow (CSR + issuecredential + token)
                 AddMocksToGetEntraToken(httpManager);
 
-                // Register counting provider for this test
+                // Use counting provider for this test
                 var countingProvider = TestAttestationProviders.CreateCountingProvider();
-                AttestationProviderRegistry.RegisterProvider(countingProvider);
 
                 var result1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
+                    .WithAttestationProviderForTests(countingProvider.GetDelegate())
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(ImdsV2Tests.MTLSPoP, result1.TokenType);
@@ -791,7 +782,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var result2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithForceRefresh(true)                // if your API is parameterless, use .WithForceRefresh()
                     .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
+                    .WithAttestationProviderForTests(countingProvider.GetDelegate())
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(ImdsV2Tests.MTLSPoP, result2.TokenType);

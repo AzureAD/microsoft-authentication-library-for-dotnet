@@ -2,18 +2,17 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Client.KeyAttestation.Attestation;
-using Microsoft.Identity.Client.ManagedIdentity;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.KeyAttestation
 {
     /// <summary>
-    /// Extension methods for enabling KeyGuard attestation support in managed identity mTLS PoP flows.
+    /// Extension methods for enabling Credential Guard attestation support in managed identity mTLS PoP flows.
     /// </summary>
     public static class ManagedIdentityAttestationExtensions
     {
         /// <summary>
-        /// Enables KeyGuard attestation support for managed identity mTLS Proof-of-Possession flows.
+        /// Enables Credential Guard attestation support for managed identity mTLS Proof-of-Possession flows.
         /// This method should be called after <see cref="ManagedIdentityPopExtensions.WithMtlsProofOfPossession"/>.
         /// </summary>
         /// <param name="builder">The AcquireTokenForManagedIdentityParameterBuilder instance.</param>
@@ -26,11 +25,19 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            // Ensure the provider is registered (triggers static constructor on older frameworks)
-            Attestation.AttestationProviderInitializer.Initialize();
+            // Set the attestation provider delegate
+            builder.CommonParameters.AttestationTokenProvider = async (endpoint, keyHandle, clientId, ct) =>
+            {
+                var result = await PopKeyAttestor.AttestCredentialGuardAsync(
+                    endpoint,
+                    keyHandle,
+                    clientId,
+                    ct).ConfigureAwait(false);
 
-            // Set the flag to enable attestation
-            builder.CommonParameters.IsAttestationRequested = true;
+                // Return JWT on success, null for non-attested flow on failure
+                return result.Status == Attestation.AttestationStatus.Success ? result.Jwt : null;
+            };
+
             return builder;
         }
     }

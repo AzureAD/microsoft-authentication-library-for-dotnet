@@ -5,115 +5,83 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     /// <summary>
-    /// Test attestation providers for unit testing.
+    /// Test attestation provider delegates for unit testing.
     /// </summary>
     internal static class TestAttestationProviders
     {
         /// <summary>
-        /// Fake attestation provider that returns a mock JWT.
+        /// Creates a fake attestation provider delegate that returns a mock JWT.
         /// </summary>
-        public static IAttestationProvider CreateFakeProvider()
+        public static Func<string, SafeHandle, string, CancellationToken, Task<string>> CreateFakeProvider()
         {
-            return new FakeAttestationProvider();
+            return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
+            {
+                return Task.FromResult("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.attestation.sig");
+            };
         }
 
         /// <summary>
-        /// Attestation provider that returns null (for error testing).
+        /// Creates an attestation provider delegate that returns null (for non-attested flow testing).
         /// </summary>
-        public static IAttestationProvider CreateNullProvider()
+        public static Func<string, SafeHandle, string, CancellationToken, Task<string>> CreateNullProvider()
         {
-            return new NullAttestationProvider();
+            return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
+            {
+                return Task.FromResult<string>(null);
+            };
         }
 
         /// <summary>
-        /// Attestation provider that returns empty/whitespace token (for error testing).
+        /// Creates an attestation provider delegate that returns empty/whitespace token (for error testing).
         /// </summary>
-        public static IAttestationProvider CreateEmptyProvider()
+        public static Func<string, SafeHandle, string, CancellationToken, Task<string>> CreateEmptyProvider()
         {
-            return new EmptyAttestationProvider();
+            return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
+            {
+                return Task.FromResult("   ");
+            };
         }
 
         /// <summary>
-        /// Attestation provider that counts calls.
+        /// Creates an attestation provider delegate that throws an exception.
+        /// </summary>
+        public static Func<string, SafeHandle, string, CancellationToken, Task<string>> CreateFailingProvider(string errorMessage = "Attestation failed")
+        {
+            return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
+            {
+                throw new InvalidOperationException(errorMessage);
+            };
+        }
+
+        /// <summary>
+        /// Creates a counting attestation provider that tracks how many times it's called.
         /// </summary>
         public static CountingAttestationProvider CreateCountingProvider()
         {
             return new CountingAttestationProvider();
         }
 
-        private class FakeAttestationProvider : IAttestationProvider
-        {
-            public Task<AttestationResult> AttestKeyGuardAsync(
-                string attestationEndpoint,
-                SafeHandle keyHandle,
-                string clientId,
-                CancellationToken cancellationToken)
-            {
-                return Task.FromResult(new AttestationResult
-                {
-                    Status = AttestationStatus.Success,
-                    Jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.attestation.sig",
-                    ErrorMessage = null,
-                    NativeErrorCode = 0
-                });
-            }
-        }
-
-        private class NullAttestationProvider : IAttestationProvider
-        {
-            public Task<AttestationResult> AttestKeyGuardAsync(
-                string attestationEndpoint,
-                SafeHandle keyHandle,
-                string clientId,
-                CancellationToken cancellationToken)
-            {
-                return Task.FromResult<AttestationResult>(null);
-            }
-        }
-
-        private class EmptyAttestationProvider : IAttestationProvider
-        {
-            public Task<AttestationResult> AttestKeyGuardAsync(
-                string attestationEndpoint,
-                SafeHandle keyHandle,
-                string clientId,
-                CancellationToken cancellationToken)
-            {
-                return Task.FromResult(new AttestationResult
-                {
-                    Status = AttestationStatus.Success,
-                    Jwt = "   ",
-                    ErrorMessage = null,
-                    NativeErrorCode = 0
-                });
-            }
-        }
-
-        public class CountingAttestationProvider : IAttestationProvider
+        /// <summary>
+        /// Attestation provider delegate wrapper that counts calls.
+        /// </summary>
+        public class CountingAttestationProvider
         {
             private int _callCount;
 
             public int CallCount => _callCount;
 
-            public Task<AttestationResult> AttestKeyGuardAsync(
-                string attestationEndpoint,
-                SafeHandle keyHandle,
-                string clientId,
-                CancellationToken cancellationToken)
+            public Func<string, SafeHandle, string, CancellationToken, Task<string>> GetDelegate()
             {
-                Interlocked.Increment(ref _callCount);
-                return Task.FromResult(new AttestationResult
+                return async (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
                 {
-                    Status = AttestationStatus.Success,
-                    Jwt = "header.payload.sig",
-                    ErrorMessage = null,
-                    NativeErrorCode = 0
-                });
+                    Interlocked.Increment(ref _callCount);
+                    await Task.Yield();
+                    return "header.payload.sig";
+                };
             }
         }
     }

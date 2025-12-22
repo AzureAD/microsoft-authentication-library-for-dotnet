@@ -216,10 +216,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
 
-            // Pass the attestation flag to the request context
-            AuthenticationRequestParameters.RequestContext.IsAttestationRequested =
-                _managedIdentityParameters.IsAttestationRequested;
-
             ManagedIdentityResponse managedIdentityResponse =
                 await _managedIdentityClient
                 .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
