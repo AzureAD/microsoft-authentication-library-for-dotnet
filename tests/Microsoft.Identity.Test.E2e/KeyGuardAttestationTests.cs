@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.E2E
                 }
 
                 // Exercise the async facade (PopKeyAttestor) which wraps the synchronous native call in Task.Run.
-                var result = await PopKeyAttestor.AttestKeyGuardAsync(
+                var result = await PopKeyAttestor.AttestCredentialGuardAsync(
                     endpoint,
                     key.Handle,
                     clientId: clientId,
