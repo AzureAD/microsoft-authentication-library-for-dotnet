@@ -126,8 +126,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             if (addSourceCheck)
             {
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
+                var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
             }
 
             // Choose deterministic key source for tests.
@@ -389,8 +389,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 // even though the app fell back to ImdsV1, the source should still be ImdsV2
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
+                var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
 
                 // none of the mocks from AddMocksToGetEntraToken are needed since checking the cache occurs before the network requests
                 var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
@@ -449,8 +449,35 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.Imds, miSource);
+                var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
+            }
+        }
+
+        [TestMethod]
+        public async Task ImdsProbeEndpointAsync_TimeOutThrowsOperationCanceledException()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+
+                miBuilder
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
+
+                var managedIdentityApp = miBuilder.Build();
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+
+                var cts = new CancellationTokenSource();
+                cts.Cancel();
+                var imdsProbesCancellationToken = cts.Token;
+
+                await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
+                    await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken)
+                    .ConfigureAwait(false))
+                .ConfigureAwait(false);
             }
         }
         #endregion Probe Tests
@@ -490,8 +517,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 // indicates ImdsV2 is still available
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSource);
+                var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
             }
         }
 
@@ -514,8 +541,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.Imds, miSource);
+                var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
             }
         }
         #endregion

@@ -702,6 +702,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ClientCredentialAuthenticationTypeMustBeDefined = "Client_Credentials_Required_In_Confidential_Client_Application";
 
+        /// <summary>
+        /// <para>What happens?</para>You configured both a static certificate (WithCertificate(X509Certificate2)) and a dynamic certificate provider (WithCertificate(Func)).
+        /// <para>Mitigation</para>Choose one approach for providing the client certificate.
+        /// </summary>
+        public const string InvalidClientCredentialConfiguration = "invalid_client_credential_configuration";
+
         #region InvalidGrant suberrors
         /// <summary>
         /// Issue can be resolved by user interaction during the interactive authentication flow.
@@ -1232,5 +1238,10 @@ namespace Microsoft.Identity.Client
         /// All managed identity sources are unavailable.
         /// </summary>
         public const string ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable";
+
+        /// <summary>
+        /// Represents the error code returned when an IMDS operation fails.
+        /// </summary>
+        public const string ImdsServiceError = "imds_service_error";
     }
 }

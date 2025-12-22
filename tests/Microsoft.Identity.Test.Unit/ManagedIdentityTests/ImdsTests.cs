@@ -3,7 +3,6 @@
 
 using System;
 using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -432,37 +431,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // 3 retries (requestsMade would be 9 if retry policy was NOT per request)
                 requestsMade = Num504Errors - httpManager.QueueSize;
                 Assert.AreEqual(Num504Errors, requestsMade);
-            }
-        }
-
-        [TestMethod]
-        public async Task ProbeImdsEndpointAsync_TimesOutAfterOneSecond()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
-
-                miBuilder
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory);
-
-                var managedIdentityApp = miBuilder.Build();
-
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
-
-                var imdsProbesCancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(0)).Token; // timeout immediately
-                
-                var miSource = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.None, miSource); // Probe timed out, no source available
-
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
             }
         }
     }
