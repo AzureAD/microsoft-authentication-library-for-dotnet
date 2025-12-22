@@ -11,9 +11,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
@@ -61,24 +63,43 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         {
             try
             {
-                var authCodeUri = await InterceptAuthorizationUriAsync(
+                // Add response_mode=form_post for security (prevents auth code from appearing in browser history/logs)
+                var authUriBuilder = new UriBuilder(authorizationUri);
+                authUriBuilder.AppendOrReplaceQueryParameter(OAuth2Parameter.ResponseMode, "form_post");
+                authorizationUri = authUriBuilder.Uri;
+
+                _logger.Info(() => $"[DefaultOsBrowser] Authorization URI with form_post: {authorizationUri.AbsoluteUri}");
+                _logger.Verbose(() => $"[DefaultOsBrowser] Query string contains response_mode: {authorizationUri.Query.Contains("response_mode=form_post")}");
+
+                var authResponse = await InterceptAuthorizationUriAsync(
                     authorizationUri,
                     redirectUri,
                     requestContext.ServiceBundle.Config.IsBrokerEnabled,
                     cancellationToken)
                     .ConfigureAwait(true);
 
-                if (!authCodeUri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) ||
-                   !authCodeUri.AbsolutePath.Equals(redirectUri.AbsolutePath))
+                if (!authResponse.RequestUri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) ||
+                   !authResponse.RequestUri.AbsolutePath.Equals(redirectUri.AbsolutePath))
                 {
                     throw new MsalClientException(
                         MsalError.LoopbackResponseUriMismatch,
                         MsalErrorMessage.RedirectUriMismatch(
-                            authCodeUri.AbsolutePath,
+                            authResponse.RequestUri.AbsolutePath,
                             redirectUri.AbsolutePath));
                 }
 
-                return AuthorizationResult.FromUri(authCodeUri.OriginalString);
+                // Use FromPostData for form_post responses (more secure - never constructs URI with auth code)
+                // Use FromUri for legacy GET responses (query string)
+                if (authResponse.IsFormPost)
+                {
+                    _logger.Info(() => "[DefaultOsBrowser] Processing form_post response securely from POST data");
+                    return AuthorizationResult.FromPostData(authResponse.PostData);
+                }
+                else
+                {
+                    _logger.Info(() => "[DefaultOsBrowser] Processing legacy GET response from query string");
+                    return AuthorizationResult.FromUri(authResponse.RequestUri.OriginalString);
+                }
             }
             catch (System.Net.HttpListenerException) // sometimes this exception sneaks out (see issue 1773)
             {
@@ -127,7 +148,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             }
         }
 
-        private async Task<Uri> InterceptAuthorizationUriAsync(
+        private async Task<AuthorizationResponse> InterceptAuthorizationUriAsync(
             Uri authorizationUri,
             Uri redirectUri,
             bool isBrokerConfigured,
@@ -148,10 +169,21 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             .ConfigureAwait(false);
         }
 
-        internal /* internal for testing only */ MessageAndHttpCode GetResponseMessage(Uri authCodeUri)
+        internal /* internal for testing only */ MessageAndHttpCode GetResponseMessage(AuthorizationResponse authResponse)
         {
-            // Parse the uri to understand if an error was returned. This is done just to show the user a nice error message in the browser.
-            var authorizationResult = AuthorizationResult.FromUri(authCodeUri.OriginalString);
+            // Parse the response to understand if an error was returned. This is done just to show the user a nice error message in the browser.
+            AuthorizationResult authorizationResult;
+            
+            if (authResponse.IsFormPost)
+            {
+                // For form_post, parse from POST data
+                authorizationResult = AuthorizationResult.FromPostData(authResponse.PostData);
+            }
+            else
+            {
+                // For GET/query string responses, parse from URI
+                authorizationResult = AuthorizationResult.FromUri(authResponse.RequestUri.OriginalString);
+            }
 
             if (!string.IsNullOrEmpty(authorizationResult.Error))
             {

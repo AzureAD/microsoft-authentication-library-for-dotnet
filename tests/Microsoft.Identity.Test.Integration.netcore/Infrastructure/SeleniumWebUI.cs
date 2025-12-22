@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     innerSource.Token, 
                     externalCancellationToken);
 
-                Task<Uri> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
+                Task<AuthorizationResponse> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
                     redirectUri.Port,
                     redirectUri.AbsolutePath,
                     (uri) =>
