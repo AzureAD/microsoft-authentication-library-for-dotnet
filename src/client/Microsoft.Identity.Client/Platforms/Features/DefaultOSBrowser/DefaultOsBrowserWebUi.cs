@@ -24,16 +24,20 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         internal const string DefaultSuccessHtml = @"<html>
   <head><title>Authentication Complete</title></head>
   <body>
-    Authentication complete. You can return to the application. Feel free to close this browser tab.
+    <h3>Authentication complete.</h3>
+    <p>You can return to the application. Please close this browser tab.</p>
+    <p><strong>For your security:</strong> Do not share the contents of this page, the address bar, or take screenshots.</p>
   </body>
 </html>";
 
         internal const string DefaultFailureHtml = @"<html>
   <head><title>Authentication Failed</title></head>
   <body>
-    Authentication failed. You can return to the application. Feel free to close this browser tab.
-</br></br></br></br>
-    Error details: error {0} error_description: {1}
+    <h3>Authentication failed.</h3>
+    <p>You can return to the application. Please close this browser tab.</p>
+    <p><strong>For your security:</strong> Do not share the contents of this page, the address bar, or take screenshots.</p>
+    </br>
+    <p>Error details: error {0} error_description: {1}</p>
   </body>
 </html>";
 
