@@ -270,7 +270,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext).ConfigureAwait(false);
 
-            // Validate that mTLS PoP requires KeyGuard - fail fast before network calls
+            // Early validation: Fail-fast if mTLS PoP was requested but KeyGuard is unavailable.
+            // This check happens before any network calls to avoid wasted round-trips.
+            // Note: This creates/retrieves the key, but on cache hit scenarios (below),
+            // this may be the only key access needed.
             if (_isMtlsPopRequested)
             {
                 IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
@@ -288,12 +291,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             string certCacheKey = _requestContext.ServiceBundle.Config.ClientId;
 
+            // Get or create mTLS binding (cert + endpoint + client_id) from cache.
+            // The factory delegate only executes on cache miss.
             MtlsBindingInfo mtlsBinding = await GetOrCreateMtlsBindingAsync(
                 cacheKey: certCacheKey,
-                async () =>
+                async () =>  // Factory: only invoked if cert is not in cache
                 {
                     IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
 
+                    // Second GetOrCreateKeyAsync call: Required for CSR generation on cache miss.
+                    // If the cert is cached, this entire factory delegate is skipped.
+                    // If validation above succeeded, this call returns the same cached key immediately.
                     ManagedIdentityKeyInfo keyInfo = await keyProvider
                         .GetOrCreateKeyAsync(_requestContext.Logger, _requestContext.UserCancellationToken)
                         .ConfigureAwait(false);
