@@ -9,8 +9,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private static readonly HashSet<ManagedIdentitySource> s_supportsClaimsAndCaps =
         [
-        // add other sources here as they light up
-        ManagedIdentitySource.ServiceFabric,
+            // add other sources here as they light up
+            ManagedIdentitySource.ServiceFabric,
+            ManagedIdentitySource.AppService
         ];
 
         internal static bool SupportsClaimsAndCapabilities(
