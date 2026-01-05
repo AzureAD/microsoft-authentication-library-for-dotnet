@@ -13,13 +13,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     public class KeyVaultInstance
     {
         /// <summary>
-        /// The KeyVault maintained by the MSID. It is recommended for use. 
+        /// This Key Vault is generally used for frequently rotated credentials and other sensitive configuration.
         /// </summary>
         public const string MSIDLab = "https://msidlabs.vault.azure.net";
 
         /// <summary>
-        /// The KeyVault maintained by the MSAL.NET team and have full control over. 
-        /// Should be used temporarily - secrets should be stored and managed by MSID Lab.
+        /// This KeyVault is generally used for static user/app/etc. info and other low-risk configuration.
         /// </summary>
         public const string MsalTeam = "https://id4skeyvault.vault.azure.net/";
     }

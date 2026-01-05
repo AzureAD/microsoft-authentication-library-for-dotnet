@@ -722,8 +722,8 @@ namespace DesktopTestApp
             {
                 return;
             }
-            LabResponse labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
-            _b2CClientId = labResponse.App.AppId;
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.B2CAppIdLabsAppB2C).ConfigureAwait(false);
+            _b2CClientId = app.AppId;
         }
 
         private void ciamCheckBox_CheckedChanged(object sender, EventArgs e)

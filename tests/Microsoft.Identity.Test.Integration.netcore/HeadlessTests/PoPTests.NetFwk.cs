@@ -66,7 +66,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task PoP_BearerAndPoP_CanCoexist_Async()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await BearerAndPoP_CanCoexist_Async().ConfigureAwait(false);
         }
 
@@ -300,12 +299,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ROPC_PopTestWithRSAAsync()
         {
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
 
             // Use the lab response app and tenant for consistency instead of mixing configurations
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority($"https://login.microsoftonline.com/{labResponse.User.TenantId}")
+                .Create(app.AppId)
+                .WithAuthority($"https://login.microsoftonline.com/{user.TenantId}")
                 .WithClientSecret(settings.Secret) // Still use the certificate/secret from settings
                 .WithExperimentalFeatures(true)
                 .Build();
@@ -315,14 +315,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
             popConfig.HttpMethod = HttpMethod.Get;
 
-            var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+            var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, user.Upn, user.GetOrFetchPassword())
                 .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                labResponse.App.AppId, // Use consistent app ID from lab response
+                app.AppId, // Use consistent app ID from lab response
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
@@ -715,14 +715,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [IgnoreOnOneBranch]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             WamLoggerValidator wastestLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .Create(app.AppId)
+               .WithAuthority(lab.Authority, "organizations")
                .WithLogging(wastestLogger)
                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                .Build();
@@ -733,18 +735,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var result = await pca
                 .AcquireTokenByUsernamePassword(
                     scopes,
-                    labResponse.User.Upn,
-                    labResponse.User.GetOrFetchPassword())
+                    user.Upn,
+                    user.GetOrFetchPassword())
                 .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
                 .ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes, true);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, lab.TenantId, scopes, true);
 
             Assert.IsTrue(wastestLogger.HasLogged);
 
             PoPValidator.VerifyPoPToken(
-                labResponse.App.AppId,
+                app.AppId,
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);

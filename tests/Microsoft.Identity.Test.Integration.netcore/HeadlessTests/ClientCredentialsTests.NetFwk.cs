@@ -223,24 +223,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ByRefreshTokenTestAsync()
         {
             // Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
 
             var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithTestLogging()
-                .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .WithAuthority(lab.Authority, "organizations")
                 .BuildConcrete();
 
 #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 #pragma warning restore CS0618
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority(labResponse.Lab.Authority, labResponse.User.TenantId)
+                .Create(app.AppId)
+                .WithAuthority(lab.Authority, user.TenantId)
                 .WithTestLogging()
                 .BuildConcrete();
 
@@ -262,12 +264,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Assert
             Assert.IsNotNull(authResult);
-            Assert.AreEqual(labResponse.User.Upn, authResult.Account.Username);
-            Assert.AreEqual(labResponse.User.ObjectId.ToString(), authResult.Account.HomeAccountId.ObjectId);
-            Assert.AreEqual(labResponse.User.TenantId, authResult.Account.HomeAccountId.TenantId);
-            Assert.AreEqual(labResponse.User.Upn, account2.Username);
-            Assert.AreEqual(labResponse.User.ObjectId.ToString(), account2.HomeAccountId.ObjectId);
-            Assert.AreEqual(labResponse.User.TenantId, account2.HomeAccountId.TenantId);
+            Assert.AreEqual(user.Upn, authResult.Account.Username);
+            Assert.AreEqual(user.ObjectId.ToString(), authResult.Account.HomeAccountId.ObjectId);
+            Assert.AreEqual(user.TenantId, authResult.Account.HomeAccountId.TenantId);
+            Assert.AreEqual(user.Upn, account2.Username);
+            Assert.AreEqual(user.ObjectId.ToString(), account2.HomeAccountId.ObjectId);
+            Assert.AreEqual(user.TenantId, account2.HomeAccountId.TenantId);
         }
 
         private static void ModifyRequest(OnBeforeTokenRequestData data, X509Certificate2 certificate)

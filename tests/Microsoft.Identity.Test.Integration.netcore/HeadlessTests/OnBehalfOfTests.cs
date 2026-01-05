@@ -58,15 +58,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task OboAndSilent_ReturnsCorrectTokens_TestAsync(bool serializeCache, bool usePartitionedSerializationCache)
         {
             // Setup: Get lab users, create PCA and get user tokens
-            var user1 = (await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false)).User;
-            var user2 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
-            var labResponse1 = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+            var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var user2 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud2).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
             var partitionedInMemoryTokenCache = new InMemoryPartitionedTokenCache();
             var nonPartitionedInMemoryTokenCache = new InMemoryTokenCache();
             var oboTokens = new HashSet<string>();
 
             var pca = PublicClientApplicationBuilder
-                .Create(labResponse1.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -178,11 +178,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task OboAndClientCredentials_WithRegional_ReturnsCorrectTokens_TestAsync()
         {
             // Setup: Get lab user, create PCA and get user tokens
-            var user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
 
             // Use the correct public client ID from KeyVault for all tests
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            var publicClientId = labResponse.App.AppId;
+            var publicClientId = app.AppId;
             var pca = PublicClientApplicationBuilder
                     .Create(publicClientId)
                     .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -232,9 +232,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task WithMultipleUsers_TestAsync()
         {
-            var aadUser1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
-            var aadUser2 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
-            var aadUser3 = (await LabUserHelper.GetDefaultUser3Async().ConfigureAwait(false)).User;
+            var aadUser1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var aadUser2 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud2).ConfigureAwait(false);
+            var aadUser3 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserXcg).ConfigureAwait(false);
 
             await RunOnBehalfOfTestAsync(aadUser3, false).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(aadUser1, false).ConfigureAwait(false);
@@ -249,7 +249,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonWebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
-            var arligntonUser = (await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false)).User;
+            var arligntonUser = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserArlington).ConfigureAwait(false);
+            arligntonUser.AzureEnvironment = LabConstants.AzureEnvironmentUsGovernment;
 
             var msalPublicClient = PublicClientApplicationBuilder.Create("cb7faed4-b8c0-49ee-b421-f5ed16894c83")
                                                                  .WithAuthority("https://login.microsoftonline.us/organizations")
@@ -299,12 +300,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task WithCache_TestAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            LabUser user = labResponse.User;
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
 
             var factory = new HttpSnifferClientFactory();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId)
+            var msalPublicClient = PublicClientApplicationBuilder.Create(app.AppId)
                                                                  .WithAuthority(TestConstants.AuthorityOrganizationsTenant)
                                                                  .WithRedirectUri(TestConstants.RedirectUri)
                                                                  .WithTestLogging()
@@ -419,7 +420,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         private async Task<IConfidentialClientApplication> RunOnBehalfOfTestAsync(
-            LabUser user,
+            UserConfig user,
             bool silentCallShouldSucceed,
             bool forceRefresh = false,
             string multiTenantAppId = null)
@@ -429,8 +430,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Get multiTenantAppId if not provided
             if (string.IsNullOrEmpty(multiTenantAppId))
             {
-                var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-                multiTenantAppId = labResponse.App.AppId;
+                var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+                multiTenantAppId = app.AppId;
             }
 
             var pca = PublicClientApplicationBuilder
