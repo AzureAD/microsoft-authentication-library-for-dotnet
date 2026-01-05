@@ -133,6 +133,33 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Specifies an identity attribute to include in the token request.
+        /// The attribute is sent as "attributes" in the request body and returned as "xmc_attr"
+        /// in the access token claims. This is typically used with FMI (Federated Managed Identity) scenarios.
+        /// </summary>
+        /// <param name="attributeValue">The attribute value to include in the request</param>
+        /// <returns>The builder to chain method calls</returns>
+        /// <remarks>
+        /// The attribute value is included in the cache key, so different attribute values will result in different cache entries.
+        /// This ensures that tokens with different attributes are not confused with each other.
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithAttributes(string attributeValue)
+        {
+            if (string.IsNullOrWhiteSpace(attributeValue))
+            {
+                throw new ArgumentNullException(nameof(attributeValue));
+            }
+
+            var extraBodyParams = new Dictionary<string, (string Value, bool IncludeInCacheKey)>
+            {
+                { OAuth2Parameter.Attributes, (attributeValue, true)}
+            };
+            WithExtraQueryParameters(extraBodyParams);
+
+            return this;
+        }
+
         /// <summary> 
         /// Adds an fmi_path parameter to the request. It modifies the subject of the token. 
         /// </summary>

@@ -27,3 +27,4 @@ Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2Fail
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ManagedIdentitySourceResult(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> void
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.Source.get -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult>
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAttributes(string attributeValue) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder

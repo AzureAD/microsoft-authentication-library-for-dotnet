@@ -1,5 +1,6 @@
 ﻿const Microsoft.Identity.Client.MsalError.ImdsServiceError = "imds_service_error" -> string
 const Microsoft.Identity.Client.MsalError.ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable" -> string
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAttributes(string attributeValue) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.FormatResultAsync(Microsoft.Identity.Client.AuthenticationResult authenticationResult, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.ValidateCachedTokenAsync(Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData cachedTokenData) -> System.Threading.Tasks.Task<bool>
