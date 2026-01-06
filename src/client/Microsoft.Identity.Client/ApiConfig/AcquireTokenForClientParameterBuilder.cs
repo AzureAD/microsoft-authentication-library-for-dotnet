@@ -135,27 +135,28 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies an identity attribute to include in the token request.
-        /// The attribute is sent as "attributes" in the request body and returned as "xmc_attr"
+        /// The attribute is sent as "attributes" in the request body and returned as "xms_attr"
         /// in the access token claims. This is typically used with FMI (Federated Managed Identity) scenarios.
+        /// Example attribute json: "{\"sg1\":\"0000-00000-0001\",\"sg2\":[\"0000-00000-0002\",\"0000-00000-0003\",\"0000-00000-0004\"]}"
         /// </summary>
-        /// <param name="attributeValue">The attribute value to include in the request</param>
+        /// <param name="attributeJson">The attribute value to include in the request</param>
         /// <returns>The builder to chain method calls</returns>
         /// <remarks>
         /// The attribute value is included in the cache key, so different attribute values will result in different cache entries.
         /// This ensures that tokens with different attributes are not confused with each other.
         /// </remarks>
-        public AcquireTokenForClientParameterBuilder WithAttributes(string attributeValue)
+        public AcquireTokenForClientParameterBuilder WithAttributes(string attributeJson)
         {
-            if (string.IsNullOrWhiteSpace(attributeValue))
+            if (string.IsNullOrWhiteSpace(attributeJson))
             {
-                throw new ArgumentNullException(nameof(attributeValue));
+                throw new ArgumentNullException(nameof(attributeJson));
             }
-
-            var extraBodyParams = new Dictionary<string, (string Value, bool IncludeInCacheKey)>
+            var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
             {
-                { OAuth2Parameter.Attributes, (attributeValue, true)}
+                { OAuth2Parameter.Attributes, (CancellationToken ct) => Task.FromResult(attributeJson) }
             };
-            WithExtraQueryParameters(extraBodyParams);
+
+            this.WithExtraBodyParameters(extraBodyParams);
 
             return this;
         }

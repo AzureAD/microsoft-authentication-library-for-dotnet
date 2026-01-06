@@ -38,8 +38,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
                     token: "token_with_attribute");
 
-                // Add expected query parameter
-                handler.ExpectedQueryParams = new Dictionary<string, string>
+                // Add expected body parameter
+                handler.ExpectedPostData = new Dictionary<string, string>
                 {
                     { OAuth2Parameter.Attributes, "test_attribute_value" }
                 };
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     token: "token_with_attribute1");
 
                 // Add expected query parameter - FIXED to match what we're sending
-                handler.ExpectedQueryParams = new Dictionary<string, string>
+                handler.ExpectedPostData = new Dictionary<string, string>
                 {
                     { OAuth2Parameter.Attributes, "attribute1" }  
                 };
@@ -106,9 +106,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     token: "token_with_attribute2");
 
                 // Add expected query parameter
-                handlerSecond.ExpectedQueryParams = new Dictionary<string, string>
+                handlerSecond.ExpectedPostData = new Dictionary<string, string>
                 {
-                    { OAuth2Parameter.Attributes, "%7Battribute2:%20%7B%22key%22:%20%22value2%22%7D%7D" }
+                    { OAuth2Parameter.Attributes, "{attribute2: {\"key\": \"value2\"}}" }
                 };
 
                 // Act - Third request with different attribute2 (should NOT hit cache)
@@ -188,12 +188,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     token: "token_with_attribute_and_fmi",
                     expectedPostData: new Dictionary<string, string>
                     {
-                        { OAuth2Parameter.FmiPath, "SomeFmiPath" }
+                        { OAuth2Parameter.FmiPath, "SomeFmiPath" },
+                        { OAuth2Parameter.Attributes, "test_attribute" }
                     });
-                handler.ExpectedQueryParams = new Dictionary<string, string>
-                {
-                    { OAuth2Parameter.Attributes, "test_attribute" }
-                };
 
                 // Act - Combine WithAttributes and WithFmiPath
                 var result = await app.AcquireTokenForClient(_scope)
