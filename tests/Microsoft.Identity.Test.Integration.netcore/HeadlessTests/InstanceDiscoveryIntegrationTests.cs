@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task FailedAuthorityValidationTestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AuthorityValidationTestWithFalseValidateAuthorityAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
