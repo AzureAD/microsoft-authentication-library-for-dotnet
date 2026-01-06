@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies an identity attribute to include in the token request.
-        /// The attribute is sent as "attributes" in the request body and returned as "xms_attr"
+        /// The attribute values will be returned as a claim in the token called "xms_attr"
         /// in the access token claims. This is typically used with FMI (Federated Managed Identity) scenarios.
         /// Example attribute json: "{\"sg1\":\"0000-00000-0001\",\"sg2\":[\"0000-00000-0002\",\"0000-00000-0003\",\"0000-00000-0004\"]}"
         /// </summary>
