@@ -819,6 +819,40 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task RopcCcaSendsX5CUsingRequestLevelAPIAsync(bool sendX5C)
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .Build();
+
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                harness.HttpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandlerWithX5CValidation(
+                        clientCredentialFlow: false,
+                        expectedX5C: sendX5C ? exportedCertificate : null));
+
+                var result = await (app as IByUsernameAndPassword)
+                    .AcquireTokenByUsernamePassword(
+                        TestConstants.s_scope,
+                        TestConstants.Username,
+                        TestConstants.DefaultPassword)
+                    .WithSendX5C(sendX5C)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+            }
+        }
+
         [TestMethod]
         public async Task EnsureCertificateSerialNumberIsAddedToCacheKeyTestAsync()
         {
