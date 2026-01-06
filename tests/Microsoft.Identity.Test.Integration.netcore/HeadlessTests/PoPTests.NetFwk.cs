@@ -294,13 +294,47 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
+        //[DoNotRunOnLinux] // POP is not supported on Linux
+        //[RunOn(TargetFrameworks.NetCore)]
+        //public async Task ROPC_PopTestWithRSAAsync()
+        //{
+        //    var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+        //    var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
+
+        //    // Use the lab response app and tenant for consistency instead of mixing configurations
+        //    var confidentialApp = ConfidentialClientApplicationBuilder
+        //        .Create(labResponse.App.AppId)
+        //        .WithAuthority($"https://login.microsoftonline.com/{labResponse.User.TenantId}")
+        //        .WithClientSecret(settings.Secret) // Still use the certificate/secret from settings
+        //        .WithExperimentalFeatures(true)
+        //        .Build();
+
+        //    //RSA provider
+        //    var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
+        //    popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
+        //    popConfig.HttpMethod = HttpMethod.Get;
+
+        //    var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+        //        .WithSignedHttpRequestProofOfPossession(popConfig)
+        //        .ExecuteAsync(CancellationToken.None)
+        //        .ConfigureAwait(false);
+
+        //    Assert.AreEqual("pop", result.TokenType);
+        //    PoPValidator.VerifyPoPToken(
+        //        labResponse.App.AppId, // Use consistent app ID from lab response
+        //        ProtectedUrl,
+        //        HttpMethod.Get,
+        //        result);
+
+        //}
+
         [DoNotRunOnLinux] // POP is not supported on Linux
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_PopTestWithRSAAsync()
         {
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
 
             // Use the lab response app and tenant for consistency instead of mixing configurations
             var confidentialApp = ConfidentialClientApplicationBuilder
