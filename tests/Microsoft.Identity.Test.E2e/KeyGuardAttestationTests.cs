@@ -28,13 +28,11 @@ If any prerequisite is missing (e.g., VBS off, endpoint unset, native DLL absent
 the test exits early with Assert.Inconclusive instead of failing the overall build.
 */
 
-using Microsoft.Identity.Client.MtlsPop.Attestation;
-using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Client.KeyAttestation;
+using Microsoft.Identity.Client.KeyAttestation.Attestation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Microsoft.Identity.Client.MtlsPop;
 using System.Threading.Tasks;
 using System.Threading;
 
@@ -134,7 +132,7 @@ namespace Microsoft.Identity.Test.E2E
                     Assert.Inconclusive("Key was created but not KeyGuard-protected. Is KeyGuard/VBS enabled on this machine?");
                 }
 
-                // Use the new public AttestationClient from the MtlsPop package. :contentReference[oaicite:2]{index=2}
+                // Use the new public AttestationClient from the KeyAttestation package. :contentReference[oaicite:2]{index=2}
                 using var client = new AttestationClient();
                 var result = client.Attest(endpoint, key.Handle, clientId);
 
@@ -192,7 +190,7 @@ namespace Microsoft.Identity.Test.E2E
                 }
 
                 // Exercise the async facade (PopKeyAttestor) which wraps the synchronous native call in Task.Run.
-                var result = await PopKeyAttestor.AttestKeyGuardAsync(
+                var result = await PopKeyAttestor.AttestCredentialGuardAsync(
                     endpoint,
                     key.Handle,
                     clientId: clientId,

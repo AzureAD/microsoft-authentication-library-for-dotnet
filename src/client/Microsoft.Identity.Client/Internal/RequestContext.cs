@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public X509Certificate2 MtlsCertificate { get; }
 
-        internal Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> AttestationTokenProvider { get; set; }
+        public bool IsAttestationRequested { get; set; }
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken cancellationToken = default)
         {
