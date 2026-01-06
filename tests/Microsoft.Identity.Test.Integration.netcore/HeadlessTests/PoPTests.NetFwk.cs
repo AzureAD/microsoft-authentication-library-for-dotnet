@@ -717,14 +717,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             WamLoggerValidator wastestLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(app.AppId)
-               .WithAuthority(lab.Authority, "organizations")
+               .WithAuthority(app.Authority, "organizations")
                .WithLogging(wastestLogger)
                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                .Build();
@@ -741,7 +740,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, lab.TenantId, scopes, true);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes, true);
 
             Assert.IsTrue(wastestLogger.HasLogged);
 

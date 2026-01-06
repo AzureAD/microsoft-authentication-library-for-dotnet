@@ -46,8 +46,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
-            await RunHappyPathTestAsync(user, app, lab).ConfigureAwait(false);
+            await RunHappyPathTestAsync(user, app).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -55,8 +54,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
-            await RunHappyPathTestAsync(user, app, lab, isPublicClient: false).ConfigureAwait(false);
+            await RunHappyPathTestAsync(user, app, isPublicClient: false).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -65,9 +63,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserArlington).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.ArlAppIdLabsApp).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.ArlMsidLab1).ConfigureAwait(false);
             user.AzureEnvironment = LabConstants.AzureEnvironmentUsGovernment;
-            await RunHappyPathTestAsync(user, app, lab, isPublicClient: false, cloud:Cloud.Arlington).ConfigureAwait(false);
+            await RunHappyPathTestAsync(user, app, isPublicClient: false, cloud:Cloud.Arlington).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -78,8 +75,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
-            await RunHappyPathTestAsync(user, app, lab).ConfigureAwait(false);
+            await RunHappyPathTestAsync(user, app).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -124,7 +120,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunB2CHappyPathTestAsync(user, app).ConfigureAwait(false);
         }
 
-        private async Task RunHappyPathTestAsync(UserConfig user, AppConfig app, LabConfig lab, string federationMetadata = "", bool isPublicClient = true, Cloud cloud = Cloud.Public)
+        private async Task RunHappyPathTestAsync(UserConfig user, AppConfig app, string federationMetadata = "", bool isPublicClient = true, Cloud cloud = Cloud.Public)
         {
             var factory = new HttpSnifferClientFactory();
             IClientApplicationBase clientApp = null;
@@ -135,7 +131,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             .Create(app.AppId)
                             .WithTestLogging()
                             .WithHttpClientFactory(factory)
-                            .WithAuthority(lab.Authority, "organizations")
+                            .WithAuthority(app.Authority, "organizations")
                             .Build();
             }
             else
@@ -145,7 +141,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             .Create(settings.ClientId)
                             .WithTestLogging()
                             .WithHttpClientFactory(factory)
-                            .WithAuthority(lab.Authority, "organizations");
+                            .WithAuthority(app.Authority, "organizations");
 
                 if (cloud == Cloud.Arlington)
                 {
@@ -163,13 +159,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 = await GetAuthenticationResultWithAssertAsync(
                     user,
                     app,
-                    lab,
                     factory,
                     clientApp,
                     federationMetadata,
                     CorrelationId).ConfigureAwait(false);
 
-            if (AuthorityInfo.FromAuthorityUri(lab.Authority + "/" + lab.TenantId, false).AuthorityType == AuthorityType.Aad)
+            if (AuthorityInfo.FromAuthorityUri(app.Authority + "/" + user.TenantId, false).AuthorityType == AuthorityType.Aad)
             {
                 AssertTenantProfiles(authResult.Account.GetTenantProfiles(), authResult.TenantId);
             }
@@ -233,7 +228,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task<AuthenticationResult> GetAuthenticationResultWithAssertAsync(
             UserConfig user,
             AppConfig app,
-            LabConfig lab,
             HttpSnifferClientFactory factory,
             IClientApplicationBase clientApp,
             string federationMetadata,
@@ -266,7 +260,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(user.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
-            AssertTelemetryHeaders(factory, false, user, lab);
+            AssertTelemetryHeaders(factory, false, user, app);
             AssertCcsRoutingInformationIsSent(factory, user);                        
 
             return authResult;
@@ -298,10 +292,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(tenantProfile.ClaimsPrincipal.FindFirst(claim => claim.Type == "tid" && claim.Value == tenantId));
         }
 
-        private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, UserConfig user, LabConfig lab)
+        private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, UserConfig user, AppConfig app)
         {
             var (req, _) = factory.RequestsAndResponses.Single(x =>
-                x.Item1.RequestUri.AbsoluteUri == lab.Authority + "organizations/oauth2/v2.0/token" &&
+                x.Item1.RequestUri.AbsoluteUri == app.Authority + "organizations/oauth2/v2.0/token" &&
                 x.Item2.StatusCode == HttpStatusCode.OK);
 
             var telemetryCurrentValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientCurrentTelemetry).Value;

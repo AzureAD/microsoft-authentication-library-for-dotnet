@@ -225,12 +225,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
 
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(app.AppId)
                 .WithTestLogging()
-                .WithAuthority(lab.Authority, "organizations")
+                .WithAuthority(app.Authority, "organizations")
                 .BuildConcrete();
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -240,11 +239,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 #pragma warning restore CS0618
 
-            var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(app.AppId)
-                .WithAuthority(lab.Authority, user.TenantId)
-                .WithTestLogging()
-                .BuildConcrete();
+var confidentialApp = ConfidentialClientApplicationBuilder
+    .Create(app.AppId)
+    .WithAuthority(app.Authority, user.TenantId)
+    .WithTestLogging()
+    .BuildConcrete();
 
             var rt = msalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault();
 

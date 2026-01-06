@@ -34,22 +34,21 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Get lab details
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserCiam).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppCiam).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.MsidLabCiam6).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/
             authority = string.Format("https://{0}.ciamlogin.com/", user.LabName);
-            await RunCiamRopcTest(authority, user, app, lab).ConfigureAwait(false);
+            await RunCiamRopcTest(authority, user, app).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
             authority = string.Format("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", user.LabName, user.LabName);
-            await RunCiamRopcTest(authority, user, app, lab).ConfigureAwait(false);
+            await RunCiamRopcTest(authority, user, app).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/tenantGuid
-            authority = string.Format("https://{0}.ciamlogin.com/{1}", user.LabName, lab.TenantId);
-            await RunCiamRopcTest(authority, user, app, lab).ConfigureAwait(false);
+            authority = string.Format("https://{0}.ciamlogin.com/{1}", user.LabName, user.TenantId);
+            await RunCiamRopcTest(authority, user, app).ConfigureAwait(false);
         }
 
-        private async Task RunCiamRopcTest(string authority, UserConfig user, AppConfig app, LabConfig lab)
+        private async Task RunCiamRopcTest(string authority, UserConfig user, AppConfig app)
         {
             //Acquire tokens
             var msalPublicClient = PublicClientApplicationBuilder
@@ -89,7 +88,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Get lab details
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserCiam).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppCiam).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.MsidLabCiam6).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/
             authority = string.Format("https://{0}.ciamlogin.com/", user.LabName);
@@ -100,7 +98,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunCiamCCATest(authority, app.AppId).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/tenantGuid
-            authority = string.Format("https://{0}.ciamlogin.com/{1}", user.LabName, lab.TenantId);
+            authority = string.Format("https://{0}.ciamlogin.com/{1}", user.LabName, user.TenantId);
             await RunCiamCCATest(authority, app.AppId).ConfigureAwait(false);
 
             //Ciam CUD
@@ -214,13 +212,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Get lab details
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserCiam).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppCiam).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.MsidLabCiam6).ConfigureAwait(false);
 
             //Test with standard and CUD CIAM authorities
             string[] authorities =
             {
-                string.Format("https://{0}.ciamlogin.com/{1}/v2.0/", lab.TenantId, lab.TenantId),
-                string.Format("https://login.msidlabsciam.com/{0}/v2.0/", lab.TenantId)
+                string.Format("https://{0}.ciamlogin.com/{1}/v2.0/", user.TenantId, user.TenantId),
+                string.Format("https://login.msidlabsciam.com/{0}/v2.0/", user.TenantId)
             };
 
             foreach (var authority in authorities)

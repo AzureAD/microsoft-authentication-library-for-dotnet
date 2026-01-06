@@ -45,8 +45,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             // Arrange - Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
-            var result = await RunTestForUserAsync(user, app, lab).ConfigureAwait(false);
+            var result = await RunTestForUserAsync(user, app).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -56,9 +55,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             // Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserArlington).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.ArlAppIdLabsApp).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.ArlMsidLab1).ConfigureAwait(false);
             user.AzureEnvironment = LabConstants.AzureEnvironmentUsGovernment;
-            await RunTestForUserAsync(user, app, lab, false).ConfigureAwait(false);
+            await RunTestForUserAsync(user, app, false).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -66,10 +64,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
 
-            await RunPromptTestForUserAsync(user, app, lab, Prompt.Consent, true).ConfigureAwait(false);
-            await RunPromptTestForUserAsync(user, app, lab, Prompt.Consent, false).ConfigureAwait(false);
+            await RunPromptTestForUserAsync(user, app, Prompt.Consent, true).ConfigureAwait(false);
+            await RunPromptTestForUserAsync(user, app, Prompt.Consent, false).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -80,8 +77,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
-            await RunTestForUserAsync(user, app, lab).ConfigureAwait(false);
+            await RunTestForUserAsync(user, app).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -90,7 +86,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             // Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserArlington).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.ArlAppIdLabsApp).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.ArlMsidLab1).ConfigureAwait(false);
             user.AzureEnvironment = LabConstants.AzureEnvironmentUsGovernment;
             
             IPublicClientApplication pca = PublicClientApplicationBuilder
@@ -113,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result.Account.GetTenantProfiles());
             Assert.IsTrue(result.Account.GetTenantProfiles().Any());
             Assert.AreEqual(user.Upn, result.Account.Username);
-            Assert.IsTrue(lab.Authority.Contains(result.Account.Environment));
+            Assert.IsTrue(app.Authority.Contains(result.Account.Environment));
 
             Trace.WriteLine("Part 2 - Get Accounts");
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -138,7 +133,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result.Account);
             Assert.IsNotNull(result.Account.GetTenantProfiles());
             Assert.IsTrue(result.Account.GetTenantProfiles().Any());
-            Assert.IsTrue(lab.Authority.Contains(result.Account.Environment));
+            Assert.IsTrue(app.Authority.Contains(result.Account.Environment));
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -150,8 +145,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
-            await RunTestForUserAsync(user, app, lab, true).ConfigureAwait(false);
+            await RunTestForUserAsync(user, app, true).ConfigureAwait(false);
         }      
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -213,7 +207,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.AreEqual("Bearer", authResult.TokenType);
         }
 
-        private async Task<AuthenticationResult> RunTestForUserAsync(UserConfig user, AppConfig app, LabConfig lab, bool directToAdfs = false)
+        private async Task<AuthenticationResult> RunTestForUserAsync(UserConfig user, AppConfig app, bool directToAdfs = false)
         {
             HttpSnifferClientFactory factory = null;
             IPublicClientApplication pca;
@@ -231,7 +225,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 pca = PublicClientApplicationBuilder
                     .Create(app.AppId)
                     .WithRedirectUri("http://localhost:52073")
-                    .WithAuthority(lab.Authority + "common")
+                    .WithAuthority(app.Authority + "common")
                     .WithTestLogging(out factory)
                     .Build();
             }
@@ -336,7 +330,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
         }
 
-        private async Task RunPromptTestForUserAsync(UserConfig user, AppConfig app, LabConfig lab, Prompt prompt, bool useLoginHint)
+        private async Task RunPromptTestForUserAsync(UserConfig user, AppConfig app, Prompt prompt, bool useLoginHint)
         {
             var pca = PublicClientApplicationBuilder
                .Create(app.AppId)

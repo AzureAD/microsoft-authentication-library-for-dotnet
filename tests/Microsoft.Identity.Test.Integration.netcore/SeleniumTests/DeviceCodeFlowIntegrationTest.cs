@@ -41,8 +41,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
-            await AcquireTokenWithDeviceCodeFlowAsync(user, app, lab, "aad user").ConfigureAwait(false);
+            await AcquireTokenWithDeviceCodeFlowAsync(user, app, "aad user").ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -51,11 +50,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
-            var lab = await LabResponseHelper.GetLabConfigAsync(KeyVaultSecrets.Id4sLab1).ConfigureAwait(false);
-            await AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(user, app, lab, "aad user").ConfigureAwait(false);
+            await AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(user, app, "aad user").ConfigureAwait(false);
         }
 
-        private async Task AcquireTokenWithDeviceCodeFlowAsync(UserConfig user, AppConfig app, LabConfig lab, string userType)
+        private async Task AcquireTokenWithDeviceCodeFlowAsync(UserConfig user, AppConfig app, string userType)
         {
             Trace.WriteLine($"Calling AcquireTokenWithDeviceCodeAsync with {0}", userType);
             var builder = PublicClientApplicationBuilder.Create(app.AppId).WithTestLogging();
@@ -63,7 +61,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             switch (user.AzureEnvironment)
             {
                 case LabConstants.AzureEnvironmentUsGovernment:
-                    builder.WithAuthority(lab.Authority + lab.TenantId);
+                    builder.WithAuthority(app.Authority + user.TenantId);
                     break;
                 default:
                     break;
@@ -87,7 +85,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
         }
 
-        private async Task AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(UserConfig user, AppConfig app, LabConfig lab, string userType)
+        private async Task AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(UserConfig user, AppConfig app, string userType)
         {
             Trace.WriteLine($"Calling AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync with {0}", userType);
             BrokerOptions options = TestUtils.GetPlatformBroker();
@@ -96,7 +94,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             switch (user.AzureEnvironment)
             {
                 case LabConstants.AzureEnvironmentUsGovernment:
-                    builder.WithAuthority(lab.Authority + lab.TenantId);
+                    builder.WithAuthority(app.Authority + user.TenantId);
                     break;
                 default:
                     break;

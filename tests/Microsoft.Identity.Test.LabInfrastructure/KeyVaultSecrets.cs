@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     /// </summary>
     public static class KeyVaultSecrets
     {
-        // User secrets
+        // Names of key vault secrets for user configuration JSONs
         public const string UserPublicCloud = "User-PublicCloud-Config";
         public const string UserFederated = "User-Federated-Config";
         public const string UserPublicCloud2 = "MSAL-User-Default2-JSON";
@@ -19,13 +19,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string UserCiam = "MSAL-USER-CIAM-JSON";
         public const string UserPop = "MSAL-User-POP-JSON";
 
-        // Lab environment secrets
-        public const string Id4sLab1 = "ID4SLAB1";
-        public const string MsidLabB2C = "MSIDLABB2C";
-        public const string ArlMsidLab1 = "ARLMSIDLAB1";
-        public const string MsidLabCiam6 = "MSIDLABCIAM6";
-
-        // App secrets
+        // Names of key vault secrets for application configuration JSONs
         public const string AppPCAClient = "App-PCAClient-Config";
         public const string MsalAppAzureAdMultipleOrgs = "MSAL-APP-AzureADMultipleOrgs-JSON";
         public const string MsalAppAzureAdMultipleOrgsPublicClient = "MSAL-APP-AzureADMultipleOrgsPC-JSON";

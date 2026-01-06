@@ -17,7 +17,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         // Caches for configuration objects retrieved from Key Vault
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig> s_userConfigCache = new();
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, AppConfig> s_appConfigCache = new();
-        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, LabConfig> s_labConfigCache = new();
 
         static LabResponseHelper()
         {
@@ -130,63 +129,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 {
                     Debug.WriteLine($"KeyVault '{secret}': invalid JSON ({appData.Length} chars) - {jsonEx.Message}");
                     throw new InvalidOperationException($"Key Vault secret '{secret}' contains invalid JSON for AppConfig. {jsonEx.Message}", jsonEx);
-                }
-            }
-            catch (Exception e) when (!(e is InvalidOperationException))
-            {
-                Debug.WriteLine($"KeyVault '{secret}' failed: {e.Message}");
-                throw new InvalidOperationException($"Failed to retrieve or parse Key Vault secret '{secret}'. See inner exception.", e);
-            }
-        }
-
-        /// <summary>
-        /// Retrieves lab configuration from Key Vault with caching.
-        /// </summary>
-        /// <param name="secret">The name of the Key Vault secret containing lab configuration JSON.</param>
-        /// <returns>A LabConfig object deserialized from the Key Vault secret.</returns>
-        public static async Task<LabConfig> GetLabConfigAsync(string secret)
-        {
-            // Check cache first
-            if (s_labConfigCache.TryGetValue(secret, out LabConfig cachedConfig))
-            {
-                Debug.WriteLine($"LabConfig '{secret}' retrieved from cache");
-                return cachedConfig;
-            }
-
-            try
-            {
-                var keyVaultSecret = await KeyVaultSecretsProviderMsal.GetSecretByNameAsync(secret).ConfigureAwait(false);
-                string labData = keyVaultSecret.Value;
-
-                if (string.IsNullOrEmpty(labData))
-                {
-                    Debug.WriteLine($"KeyVault secret '{secret}' empty");
-                    throw new InvalidOperationException($"Found no content for secret '{secret}' in Key Vault.");
-                }
-
-                try
-                {
-                    // Parse as JObject to extract the 'lab' property (case-insensitive)
-                    var jsonObject = JObject.Parse(labData);
-                    var labToken = jsonObject.GetValue("lab", StringComparison.OrdinalIgnoreCase);
-                    
-                    if (labToken == null)
-                    {
-                        Debug.WriteLine($"KeyVault '{secret}': no 'lab' property found in JSON");
-                        throw new InvalidOperationException($"Key Vault secret '{secret}' does not contain a 'lab' property.");
-                    }
-
-                    var labConfig = labToken.ToObject<LabConfig>() ?? throw new InvalidOperationException($"Failed to deserialize 'lab' property from Key Vault secret '{secret}' to LabConfig.");
-                    Debug.WriteLine($"KeyVault '{secret}': {labConfig.TenantId ?? "Unknown lab"}");
-
-                    // Cache the result
-                    s_labConfigCache[secret] = labConfig;
-                    return labConfig;
-                }
-                catch (JsonException jsonEx)
-                {
-                    Debug.WriteLine($"KeyVault '{secret}': invalid JSON ({labData.Length} chars) - {jsonEx.Message}");
-                    throw new InvalidOperationException($"Key Vault secret '{secret}' contains invalid JSON for LabConfig. {jsonEx.Message}", jsonEx);
                 }
             }
             catch (Exception e) when (!(e is InvalidOperationException))
