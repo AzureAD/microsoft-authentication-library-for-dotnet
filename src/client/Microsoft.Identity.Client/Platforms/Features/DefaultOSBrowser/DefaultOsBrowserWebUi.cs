@@ -68,6 +68,14 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             try
             {
                 var authUriBuilder = new UriBuilder(authorizationUri);
+                
+                // Warn if response_mode was set to something other than form_post
+                if (authorizationUri.Query.Contains("response_mode=") && 
+                    !authorizationUri.Query.Contains("response_mode=form_post"))
+                {
+                    _logger.Warning("[DefaultOsBrowser] The 'response_mode' parameter will be overridden to 'form_post' for better security.");
+                }
+                
                 authUriBuilder.AppendOrReplaceQueryParameter(OAuth2Parameter.ResponseMode, "form_post");
                 authorizationUri = authUriBuilder.Uri;
 

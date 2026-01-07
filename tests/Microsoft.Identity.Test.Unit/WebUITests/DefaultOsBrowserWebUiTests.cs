@@ -93,6 +93,36 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
+        public async Task DefaultOsBrowserWebUi_ResponseModeQuery_OverriddenToFormPost_Async()
+        {
+            // Arrange - authorization URI already has response_mode=query set by developer
+            string requestUriWithQueryMode = TestAuthorizationRequestUri + "&response_mode=query";
+            var postData = System.Text.Encoding.UTF8.GetBytes(
+                "code=auth_code&state=901e7d87-6f49-4f9f-9fa7-e6b8c32d5b9595bc1797-dacc-4ff1-b9e9-0df81be286c7&session_state=test");
+            
+            var webUI = CreateTestWebUI();
+            
+            AuthorizationResult authorizationResult = await AcquireAuthCodeAsync(
+                webUI, 
+                requestUri: requestUriWithQueryMode,
+                postData: postData)
+               .ConfigureAwait(false);
+
+            Assert.AreEqual(AuthorizationStatus.Success, authorizationResult.Status);
+            Assert.AreEqual("auth_code", authorizationResult.Code);
+
+            // Verify that response_mode=form_post overrode the query mode
+            await _platformProxy.Received(1).StartDefaultOsBrowserAsync(
+                Arg.Is<string>(s => s.Contains("response_mode=form_post") && !s.Contains("response_mode=query")), 
+                Arg.Any<bool>())
+                .ConfigureAwait(false);
+
+            // Verify warning was logged
+            _logger.Received(1).Warning(
+                Arg.Is<string>(s => s.Contains("response_mode") && s.Contains("overridden") && s.Contains("form_post")));
+        }
+
+        [TestMethod]
         [TestCategory(TestCategories.Regression)] //#1773
         public async Task HttpListenerException_Cancellation_Async()
         {
