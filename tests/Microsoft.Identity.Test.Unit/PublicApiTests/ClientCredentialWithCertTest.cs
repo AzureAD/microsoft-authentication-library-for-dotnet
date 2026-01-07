@@ -850,6 +850,9 @@ namespace Microsoft.Identity.Test.Unit
                     .WithSendX5C(sendX5C)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
