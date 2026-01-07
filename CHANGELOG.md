@@ -1,3 +1,9 @@
+4.81.0
+======
+
+### Bug Fixes
+* Updated the CCA ROPC flow to add request level API WithSendX5C [#5637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5637)
+
 4.80.0
 ======
 
