@@ -1,2 +1,0 @@
-Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder
-
