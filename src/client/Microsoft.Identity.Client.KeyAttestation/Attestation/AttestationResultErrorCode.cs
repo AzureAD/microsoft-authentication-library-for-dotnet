@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
         /// <summary>The service returned an empty JWT.</summary>
         ERROREMPTYJWTRESPONSE = -31,
 
-        /// <summary>Creating the KeyGuard attestation report failed on the client.</summary>
+        /// <summary>Creating the CredentialGuard attestation report failed on the client.</summary>
         ERRORCREATEKGATTESTATIONREPORT = -32,
 
         /// <summary>Failed to extract the public key from the import-only key.</summary>
