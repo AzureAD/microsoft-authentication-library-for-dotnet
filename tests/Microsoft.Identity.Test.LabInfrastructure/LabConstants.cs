@@ -4,7 +4,6 @@
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
 
-    // 
     public enum Cloud
     {
         Public,
