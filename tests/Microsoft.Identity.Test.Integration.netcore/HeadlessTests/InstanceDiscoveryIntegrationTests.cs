@@ -30,12 +30,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AuthorityMigrationAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            LabUser user = labResponse.User;
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority("https://login.windows.net/" + labResponse.User.TenantId + "/")
+                .Create(app.AppId)
+                .WithAuthority("https://login.windows.net/" + user.TenantId + "/")
                 .WithTestLogging()
                 .Build();
 
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 // BugBug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/776308/
                 // sts.windows.net fails when doing instance discovery, e.g.:
                 // https://sts.windows.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Fsts.windows.net%2Ff645ad92-e38d-4d1a-b510-d1b09a74a8ca%2Foauth2%2Fv2.0%2Fauthorize
-                .WithTenantId(labResponse.User.TenantId)
+                .WithTenantId(user.TenantId)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
@@ -69,11 +69,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task FailedAuthorityValidationTestAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            LabUser user = labResponse.User;
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority("https://bogus.microsoft.com/common")
                 .WithTestLogging()
                 .Build();
@@ -97,11 +97,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AuthorityValidationTestWithFalseValidateAuthorityAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            LabUser user = labResponse.User;
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority("https://bogus.microsoft.com/common", false)
                 .WithTestLogging()
                 .Build();

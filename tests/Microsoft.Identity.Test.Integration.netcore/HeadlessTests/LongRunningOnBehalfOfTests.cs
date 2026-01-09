@@ -51,10 +51,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LongRunningAndNormalObo_WithDifferentKeys_TestAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            var user1 = labResponse.User;
+            var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
             var pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -104,10 +104,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LongRunningThenNormalObo_WithTheSameKey_TestAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            var user1 = labResponse.User;
+            var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
             var pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -178,10 +178,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task InitiateLRWithCustomKey_ThenAcquireLRWithSameKey_Succeeds_TestAsync()
         {
             // Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            LabUser user1 = labResponse.User;
+            var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -250,10 +250,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            LabUser user1 = labResponse.User;
+            var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
             var pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -322,10 +322,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            var user1 = labResponse.User;
+            var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
             var pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
@@ -380,10 +380,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task WithDifferentScopes_TestAsync()
         {
             string[] scopes2 = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-            var labResponse = await LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().ConfigureAwait(false);
-            var user1 = labResponse.User;
+            var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
             var pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
                 .Build();

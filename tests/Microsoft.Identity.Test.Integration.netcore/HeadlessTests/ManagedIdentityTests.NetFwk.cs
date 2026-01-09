@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
@@ -69,9 +70,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                // Fetch the env variables from the resource and set them locally
+                // Fetch the env variables from Key Vault and set them locally
                 Dictionary<string, string> envVariables = 
-                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+                    await LabResponseHelper.GetDefaultMSIEnvironmentVariablesAsync().ConfigureAwait(false);
 
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
@@ -124,9 +125,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                // Fetch the env variables from the resource and set them locally
+                // Fetch the env variables from Key Vault and set them locally
                 Dictionary<string, string> envVariables =
-                    await GetEnvironmentVariablesAsync(MsiAzureResource.WebApp).ConfigureAwait(false);
+                    await LabResponseHelper.GetDefaultMSIEnvironmentVariablesAsync().ConfigureAwait(false);
         
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
@@ -179,9 +180,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                // Fetch the env variables from the resource and set them locally
+                // Fetch the env variables from Key Vault and set them locally
                 Dictionary<string, string> envVariables =
-                    await GetEnvironmentVariablesAsync(MsiAzureResource.WebApp).ConfigureAwait(false);
+                    await LabResponseHelper.GetDefaultMSIEnvironmentVariablesAsync().ConfigureAwait(false);
 
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
@@ -284,9 +285,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                //Get the Environment Variables
+                //Get the Environment Variables from Key Vault
                 Dictionary<string, string> envVariables =
-                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+                    await LabResponseHelper.GetDefaultMSIEnvironmentVariablesAsync().ConfigureAwait(false);
 
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
@@ -326,9 +327,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                //Get the Environment Variables
+                //Get the Environment Variables from Key Vault
                 Dictionary<string, string> envVariables =
-                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+                    await LabResponseHelper.GetDefaultMSIEnvironmentVariablesAsync().ConfigureAwait(false);
 
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
@@ -367,7 +368,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             using (new EnvVariableContext())
             {
                 // ---------- Arrange ----------
-                var envVariables = await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+                var envVariables = await LabResponseHelper.GetDefaultMSIEnvironmentVariablesAsync().ConfigureAwait(false);
                 SetEnvironmentVariables(envVariables);
 
                 string uri = s_baseURL + $"MSIToken?azureresource={azureResource}&uri=";
@@ -414,38 +415,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.AreEqual(TokenSource.IdentityProvider,
                                 result3.AuthenticationResultMetadata.TokenSource);
             }
-        }
-
-        /// <summary>
-        /// Gets the environment variable
-        /// </summary>
-        /// <param name="resource"></param>
-        /// <returns></returns>
-        private async Task<Dictionary<string, string>> GetEnvironmentVariablesAsync(
-            MsiAzureResource resource)
-        {
-            Dictionary<string, string> environmentVariables = new Dictionary<string, string>();
-
-            //Get the Environment Variables from the MSI Helper Service
-            string uri = s_baseURL + "EnvironmentVariables?resource=" + resource;
-
-            var environmentVariableResponse = await LabUserHelper
-                .GetMSIEnvironmentVariablesAsync(uri)
-                .ConfigureAwait(false);
-
-            //process the response
-            if (!string.IsNullOrEmpty(environmentVariableResponse))
-            {
-#if NET8_0_OR_GREATER
-                environmentVariables = System.Text.Json.JsonSerializer.Deserialize
-                    <Dictionary<string, string>>(environmentVariableResponse);
-#else
-                environmentVariables = Microsoft.Identity.Json.JsonConvert.DeserializeObject
-                    <Dictionary<string, string>>(environmentVariableResponse);
-#endif
-            }
-
-            return environmentVariables;
         }
 
         /// <summary>
