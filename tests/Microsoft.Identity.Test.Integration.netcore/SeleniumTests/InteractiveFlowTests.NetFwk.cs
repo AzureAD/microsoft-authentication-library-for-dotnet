@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange - Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
             var result = await RunTestForUserAsync(user, app).ConfigureAwait(false);
         }
 
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task InteractiveConsentPromptAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
 
             await RunPromptTestForUserAsync(user, app, Prompt.Consent, true).ConfigureAwait(false);
             await RunPromptTestForUserAsync(user, app, Prompt.Consent, false).ConfigureAwait(false);
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                .Create(app.AppId)
