@@ -35,11 +35,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         public async Task Interactive_SSHCert_Async()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await CreateSSHCertTestAsync(labResponse).ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            await CreateSSHCertTestAsync(user).ConfigureAwait(false);
         }
 
-        private async Task CreateSSHCertTestAsync(LabResponse labResponse)
+        private async Task CreateSSHCertTestAsync(UserConfig user)
         {
             IPublicClientApplication pca = PublicClientApplicationBuilder
             .Create(_SSH_ClientId)
@@ -54,14 +54,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(_SSH_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(user, Prompt.ForceLogin))
                 .WithSSHCertificateAuthenticationScheme(jwk, "key1")
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
             userCacheAccess.AssertAccessCounts(0, 1);
             Assert.AreEqual("ssh-cert", result.TokenType);
-            IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            IAccount account = await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(1, 1); // the assert calls GetAccounts
 
             Trace.WriteLine("Part 2 - Acquire a token silent with the same keyID - should be served from the cache");
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(2, 1);
 
-            account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            account = await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(3, 1);
 
             Trace.WriteLine("Part 3 - Acquire a token silent with a different keyID - should not sbe served from the cache");
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.AreEqual("ssh-cert", result.TokenType);
             userCacheAccess.AssertAccessCounts(4, 2);
-            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);
         }
 
         private string CreateJwk()
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             return jwk;
         }
 
-        private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
+        private SeleniumWebUI CreateSeleniumCustomWebUI(UserConfig user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
         {
             return new SeleniumWebUI((driver) =>
             {
