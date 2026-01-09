@@ -3,6 +3,15 @@
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
+
+    // 
+    public enum Cloud
+    {
+        Public,
+        Adfs,
+        Arlington
+    }
+
     /// <summary>
     /// Constants for lab user configuration values used in testing.
     /// </summary>

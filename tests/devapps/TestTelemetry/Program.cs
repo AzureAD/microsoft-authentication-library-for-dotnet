@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 
@@ -18,12 +18,15 @@ internal class Program
             .AddConsoleExporter()
             .Build();
 
+        // Get app configuration from Lab
+        var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+        var cert = CertificateHelper.FindCertificateByName("LabAuth.MSIDLab.com");
+
         // Successful requests
-        IConfidentialAppSettings s_appSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-        string[] scopes = new string[] { $"{s_appSettings.ClientId}/.default", };
-        var builder = ConfidentialClientApplicationBuilder.Create(s_appSettings.ClientId)
-            .WithAuthority(s_appSettings.Authority, false)
-            .WithCertificate(s_appSettings.Certificate)
+        string[] scopes = new string[] { "https://vault.azure.net/.default" };
+        var builder = ConfidentialClientApplicationBuilder.Create(appConfig.AppId)
+            .WithAuthority(appConfig.Authority, false)
+            .WithCertificate(cert)
             .WithLogging(Log, LogLevel.Verbose, true);
 
         var cca = builder.Build();
@@ -40,8 +43,8 @@ internal class Program
         }
 
         // Failed requests
-        builder = ConfidentialClientApplicationBuilder.Create(s_appSettings.ClientId)
-            .WithAuthority(s_appSettings.Authority, false)
+        builder = ConfidentialClientApplicationBuilder.Create(appConfig.AppId)
+            .WithAuthority(appConfig.Authority, false)
             .WithClientSecret("invalid")
             .WithLogging(Log, LogLevel.Verbose, true);
 

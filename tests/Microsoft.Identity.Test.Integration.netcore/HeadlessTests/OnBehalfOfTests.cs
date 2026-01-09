@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             #pragma warning restore CS0618
 
             // Act and Assert different scenarios
-            var cca = BuildCca(userResult.TenantId, true);
+            var cca = await BuildCcaAsync(userResult.TenantId, true).ConfigureAwait(false);
 
             // OBO uses global - IdP
             var oboResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(userResult.AccessToken))
@@ -514,14 +514,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        private ConfidentialClientApplication BuildCca(string tenantId, bool withRegion = false)
+        private async Task<ConfidentialClientApplication> BuildCcaAsync(string tenantId, bool withRegion = false)
         {
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            string secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
 
             var builder = ConfidentialClientApplicationBuilder
-             .Create(withRegion ? OboConfidentialClientID : settings.ClientId)
+             .Create(withRegion ? OboConfidentialClientID : appConfig.AppId)
              .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), true)
-             .WithClientSecret(withRegion ? _confidentialClientSecret : settings.Secret)
+             .WithClientSecret(withRegion ? _confidentialClientSecret : secret)
              .WithLegacyCacheCompatibility(false);
 
             if (withRegion)

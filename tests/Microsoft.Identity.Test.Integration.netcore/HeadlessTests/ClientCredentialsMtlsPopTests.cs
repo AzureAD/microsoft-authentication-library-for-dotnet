@@ -5,10 +5,10 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -29,11 +29,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task Sni_Gets_Pop_Token_Successfully_TestAsync()
         {
-            // Arrange: Use the public cloud settings for testing
-            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            // Arrange: Use LabResponseHelper to get app configuration
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
 
-            // Retrieve the certificate from settings
-            X509Certificate2 cert = settings.Certificate;
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
             // Build Confidential Client Application with SNI certificate at App level
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
@@ -45,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Act: Acquire token with MTLS Proof of Possession at Request level
             AuthenticationResult authResult = await confidentialApp
-                .AcquireTokenForClient(settings.AppScopes)
+                .AcquireTokenForClient(appScopes)
                 .WithMtlsProofOfPossession()
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -62,7 +63,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Simulate cache retrieval to verify MTLS configuration is cached properly
             authResult = await confidentialApp
-               .AcquireTokenForClient(settings.AppScopes)
+               .AcquireTokenForClient(appScopes)
                .WithMtlsProofOfPossession()
                .ExecuteAsync()
                .ConfigureAwait(false);
