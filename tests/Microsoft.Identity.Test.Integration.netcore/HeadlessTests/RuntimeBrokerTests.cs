@@ -497,7 +497,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.App.Authority, \"organizations\")
+               .WithAuthority(labResponse.App.Authority, "organizations")
                .WithBroker(_brokerOptions)
                .Build();
 
@@ -533,7 +533,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.App.Authority, \"organizations\")
+               .WithAuthority(labResponse.App.Authority, "organizations")
                .WithBroker(_brokerOptions)
                .Build();
 
