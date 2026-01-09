@@ -13,6 +13,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Collections.Generic;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using OpenTelemetry.Logs;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -223,7 +224,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                     .WithFmiPath("SomeFmiPath/Path")
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
-
             var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{clientId}-{TenantId}-{WebApiScope}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
                           confidentialApp,
@@ -288,6 +288,44 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(expectedAudience, audience);
             Assert.IsTrue(subject.Contains(expectedFmiPath));
             Assert.AreEqual(expectedInternalCacheKey, token.CacheKey);
+        }
+
+        [TestMethod]
+        //RMA getting FMI token with attributes for a leaf entity.
+        public async Task Flow6_Token_withAttributeTest()
+        {
+            //Arrange
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            //Act
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                        .Create(RmaClientId)
+                        .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                        .WithCertificate(cert, sendX5C: true)
+                        .WithAzureRegion(AzureRegion)
+                        .BuildConcrete();
+
+            confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+            confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
+
+            //Recording test data for Asserts
+            string expectedFmiPathHash = "NlReJx-vneHBYB53A1WmQWCgwPobHn98udAu2hCDkJ8";
+            var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
+            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
+                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
+
+            var authResult = await confidentialApp.AcquireTokenForClient(new[] { "api://AzureFMITokenExchange/.default" })
+                                .WithAttributes("{\"FavoriteColor\": \"Blue\", \"file:/c/users/foobar/documents/info.txt\": \"{\\\"permissions\\\":[\\\"read\\\",\\\"write\\\"]}\"}")
+                                                    .WithFmiPath("SomeFmiPath/FmiCredentialPath")
+                                                    .ExecuteAsync()
+                                                    .ConfigureAwait(false);
+
+            var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{RmaClientId}-{TenantId}-{"api://AzureFMITokenExchange/.default"}-{expectedFmiPathHash}".ToLowerInvariant();
+            AssertResults(authResult,
+                          confidentialApp,
+                          expectedInternalCacheKey,
+                          "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265", // this is app id for the audience for api://AzureFMITokenExchange/.defaul
+                          "SomeFmiPath/FmiCredentialPath");
         }
     }
 }
