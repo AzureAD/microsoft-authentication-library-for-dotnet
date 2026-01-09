@@ -1,3 +1,9 @@
+4.81.0
+======
+
+### Bug Fixes
+* Updated the ConfidentialClientApplication's ROPC API to add WithSendX5C() during authentication requests.[#5637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5637)
+
 4.80.0
 ======
 
