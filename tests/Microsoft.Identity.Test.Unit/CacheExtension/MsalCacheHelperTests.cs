@@ -464,6 +464,10 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         [WorkItem(89)] // https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/issues/89
         public async Task CacheWorksWithAdfsAsync()
         {
+            // NOTE: This test uses static cache content generated for msidlab8 tenant.
+            // It does not need to be migrated to id4slab1 as it specifically tests cache
+            // functionality with hardcoded test data tied to the fs.msidlab8.com environment.
+            
             // Arrange
             string cacheWithOneUser = File.ReadAllText(
                 ResourceHelper.GetTestResourceRelativePath("token_cache_adfs.json"));

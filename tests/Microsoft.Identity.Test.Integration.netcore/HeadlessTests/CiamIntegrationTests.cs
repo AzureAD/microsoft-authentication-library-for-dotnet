@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunCiamRopcTest(authority, labResponse).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/tenantGuid
-            authority = string.Format("https://{0}.ciamlogin.com/{1}", labResponse.User.LabName, labResponse.Lab.TenantId);
+            authority = string.Format("https://{0}.ciamlogin.com/{1}", labResponse.User.LabName, labResponse.User.TenantId);
             await RunCiamRopcTest(authority, labResponse).ConfigureAwait(false);
         }
 
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunCiamCCATest(authority, labResponse.App.AppId).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/tenantGuid
-            authority = string.Format("https://{0}.ciamlogin.com/{1}", labResponse.User.LabName, labResponse.Lab.TenantId);
+            authority = string.Format("https://{0}.ciamlogin.com/{1}", labResponse.User.LabName, labResponse.User.TenantId);
             await RunCiamCCATest(authority, labResponse.App.AppId).ConfigureAwait(false);
 
             //Ciam CUD
@@ -213,8 +213,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Test with standard and CUD CIAM authorities
             string[] authorities =
             {
-                string.Format("https://{0}.ciamlogin.com/{1}/v2.0/", labResponse.Lab.TenantId, labResponse.Lab.TenantId),
-                string.Format("https://login.msidlabsciam.com/{0}/v2.0/", labResponse.Lab.TenantId)
+                string.Format("https://{0}.ciamlogin.com/{1}/v2.0/", labResponse.User.TenantId, labResponse.User.TenantId),
+                string.Format("https://login.msidlabsciam.com/{0}/v2.0/", labResponse.User.TenantId)
             };
 
             foreach (var authority in authorities)

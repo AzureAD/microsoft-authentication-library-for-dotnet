@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(labResponse.App.Authority, "organizations")
                .WithBroker(_brokerOptions)
                .Build();
 
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             MsalAssert.AssertAuthResult(
                 result, 
                 TokenSource.Broker, 
-                labResponse.Lab.TenantId,
+                labResponse.User.TenantId,
                 scopes, true);
 
             PoPValidator.VerifyPoPToken(
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(labResponse.App.Authority, "organizations")
                .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
                .WithBroker(_brokerOptions)
                .Build();
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(labResponse.App.Authority, "organizations")
                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                .WithBroker(_brokerOptions)
                .Build();
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             #pragma warning disable CS0618 // Type or member is obsolete
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.User.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.User.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Remove Account
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
             .Create(_SSH_ClientId)
             .WithTestLogging()
-            .WithAuthority(labResponse.Lab.Authority, "organizations")
+            .WithAuthority(labResponse.App.Authority, "organizations")
             .WithParentActivityOrWindow(windowHandleProvider)
             .WithBroker(_brokerOptions)
             .Build();
@@ -305,7 +305,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
-            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
@@ -314,7 +314,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(labResponse.App.Authority, "organizations")
                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                .WithBroker(_brokerOptions)
                .Build();
@@ -331,7 +331,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             string ropcToken = result.AccessToken;
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.User.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -370,7 +370,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(labResponse.App.Authority, "organizations")
                .WithLogging(testLogger, enablePiiLogging: true)
                .WithBroker(_brokerOptions)
                .Build();
@@ -380,7 +380,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.User.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -396,7 +396,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.User.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -423,7 +423,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(labResponse.App.Authority, "organizations")
                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
                {
                    ListOperatingSystemAccounts = true,
@@ -435,7 +435,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.User.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -486,7 +486,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-POP-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-POP-JSON", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
             string[] scopes = { "https://id4slab1.sharepoint.com/user.read" };
 
@@ -497,7 +497,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(labResponse.App.Authority, \"organizations\")
                .WithBroker(_brokerOptions)
                .Build();
 
@@ -522,7 +522,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-POP-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
+            var labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-POP-JSON", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
 
             string[] scopes = { "https://outlook.office365.com/Mail.Read" };
 
@@ -533,7 +533,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(labResponse.App.Authority, \"organizations\")
                .WithBroker(_brokerOptions)
                .Build();
 

@@ -722,7 +722,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(labResponse.App.Authority, "organizations")
                .WithLogging(wastestLogger)
                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                .Build();
@@ -739,7 +739,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes, true);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.User.TenantId, scopes, true);
 
             Assert.IsTrue(wastestLogger.HasLogged);
 

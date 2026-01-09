@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithTestLogging()
-                .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .WithAuthority(labResponse.App.Authority, "organizations")
                 .BuildConcrete();
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(labResponse.App.AppId)
-                .WithAuthority(labResponse.Lab.Authority, labResponse.User.TenantId)
+                .WithAuthority(labResponse.App.Authority, labResponse.User.TenantId)
                 .WithTestLogging()
                 .BuildConcrete();
 

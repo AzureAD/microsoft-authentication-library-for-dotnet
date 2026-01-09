@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             .Create(labResponse.App.AppId)
                             .WithTestLogging()
                             .WithHttpClientFactory(factory)
-                            .WithAuthority(labResponse.Lab.Authority, "organizations")
+                            .WithAuthority(labResponse.App.Authority, "organizations")
                             .Build();
             }
             else
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             .Create(settings.ClientId)
                             .WithTestLogging()
                             .WithHttpClientFactory(factory)
-                            .WithAuthority(labResponse.Lab.Authority, "organizations");
+                            .WithAuthority(labResponse.App.Authority, "organizations");
 
                 if (cloud == Cloud.Arlington)
                 {
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     federationMetadata,
                     CorrelationId).ConfigureAwait(false);
 
-            if (AuthorityInfo.FromAuthorityUri(labResponse.Lab.Authority + "/" + labResponse.Lab.TenantId, false).AuthorityType == AuthorityType.Aad)
+            if (AuthorityInfo.FromAuthorityUri(labResponse.App.Authority + "/" + labResponse.User.TenantId, false).AuthorityType == AuthorityType.Aad)
             {
                 AssertTenantProfiles(authResult.Account.GetTenantProfiles(), authResult.TenantId);
             }
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, LabResponse labResponse)
         {
             var (req, _) = factory.RequestsAndResponses.Single(x =>
-                x.Item1.RequestUri.AbsoluteUri == labResponse.Lab.Authority + "organizations/oauth2/v2.0/token" &&
+                x.Item1.RequestUri.AbsoluteUri == labResponse.App.Authority + "organizations/oauth2/v2.0/token" &&
                 x.Item2.StatusCode == HttpStatusCode.OK);
 
             var telemetryCurrentValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientCurrentTelemetry).Value;

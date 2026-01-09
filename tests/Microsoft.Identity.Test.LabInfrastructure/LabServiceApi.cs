@@ -55,17 +55,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             var appResponse = await GetLabResponseAsync(LabApiConstants.LabAppEndpoint + user.AppId).ConfigureAwait(false);
             LabApp[] labApps = JsonConvert.DeserializeObject<LabApp[]>(appResponse);
 
-            var labInfoResponse = await GetLabResponseAsync(LabApiConstants.LabInfoEndpoint + user.LabName).ConfigureAwait(false);
-            Lab[] labs = JsonConvert.DeserializeObject<Lab[]>(labInfoResponse);
-
-            user.TenantId = labs[0].TenantId;
-            user.FederationProvider = labs[0].FederationProvider;
-
             return new LabResponse
             {
                 User = user,
-                App = labApps[0],
-                Lab = labs[0]
+                App = labApps[0]
             };
         }
 

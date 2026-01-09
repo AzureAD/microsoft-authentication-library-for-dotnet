@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 {
                     // Parse JSON directly - let JsonException bubble up if invalid
                     var response = JsonConvert.DeserializeObject<LabResponse>(labData) ?? throw new LabUserNotFoundException(new UserQuery(), $"Failed to deserialize Key Vault secret '{secret}' to LabResponse.");
-                    Debug.WriteLine($"KeyVault '{secret}': {response.User?.Upn ?? response.App?.AppId ?? response.Lab?.TenantId ?? "Unknown"}");
+                    Debug.WriteLine($"KeyVault '{secret}': {response.User?.Upn ?? response.App?.AppId ?? "Unknown"}");
                     return response;
                 }
                 catch (JsonException jsonEx)
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     throw new LabUserNotFoundException(new UserQuery(), $"Failed to create merged LabResponse from secrets: {string.Join(", ", secrets)}");
                 }
 
-                Debug.WriteLine($"Merged [{string.Join(", ", secrets)}]: {mergedResponse.User?.Upn ?? "N/A"} | {mergedResponse.App?.AppId ?? "N/A"} | {mergedResponse.Lab?.TenantId ?? "N/A"}");
+                Debug.WriteLine($"Merged [{string.Join(", ", secrets)}]: {mergedResponse.User?.Upn ?? "N/A"} | {mergedResponse.App?.AppId ?? "N/A"}");
                 return mergedResponse;
             }
             catch (Exception e)
@@ -122,50 +122,50 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         }
         public static Task<LabResponse> GetDefaultUserAsync()
         {
-            return MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
+            return MergeKVLabDataAsync("MSAL-User-Default-JSON", "MSAL-App-Default-JSON");
         }
         
         public static Task<LabResponse> GetDefaultUserWithMultiTenantAppAsync()
         {
-            return MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgs-JSON");
+            return MergeKVLabDataAsync("MSAL-User-Default-JSON", "MSAL-APP-AzureADMultipleOrgs-JSON");
         }
         public static Task<LabResponse> GetDefaultUser2Async()
         {
-            return MergeKVLabDataAsync("MSAL-User-Default2-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
+            return MergeKVLabDataAsync("MSAL-User-Default2-JSON", "MSAL-App-Default-JSON");
         }
         public static Task<LabResponse> GetDefaultUser3Async()
         {
-            return MergeKVLabDataAsync("MSAL-User-XCG-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
+            return MergeKVLabDataAsync("MSAL-User-XCG-JSON", "MSAL-App-Default-JSON");
         }
 
         public static Task<LabResponse> GetDefaultAdfsUserAsync()
         {
-            return MergeKVLabDataAsync("MSAL-USER-FedDefault-JSON", "ID4SLAB1", "MSAL-App-Default-JSON");
+            return MergeKVLabDataAsync("MSAL-USER-FedDefault-JSON", "MSAL-App-Default-JSON");
         }
 
 
 
         public static Task<LabResponse> GetB2CLocalAccountAsync()
         {
-            return MergeKVLabDataAsync("B2C-User-IDLab-JSON", "MSIDLABB2C", "B2C-App-IDLABSAPPB2C-JSON");
+            return MergeKVLabDataAsync("B2C-User-IDLab-JSON", "B2C-App-IDLABSAPPB2C-JSON");
         }
 
         public static Task<LabResponse> GetArlingtonUserAsync()
         {
-            var response = MergeKVLabDataAsync("ARL-User-IDLab-JSON", "ARLMSIDLAB1", "ARL-App-IDLABSAPP-JSON");
+            var response = MergeKVLabDataAsync("ARL-User-IDLab-JSON", "ARL-App-IDLABSAPP-JSON");
             response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
             return response;
         }
 
         public static Task<LabResponse> GetArlingtonADFSUserAsync()
         {
-            var response = MergeKVLabDataAsync("ARL-User-fIDLAB-JSON", "ARLMSIDLAB1", "ARL-App-IDLABSAPP-JSON");
+            var response = MergeKVLabDataAsync("ARL-User-fIDLAB-JSON", "ARL-App-IDLABSAPP-JSON");
             response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
             return response;
         }
         public static Task<LabResponse> GetCIAMUserAsync()
         {
-            return MergeKVLabDataAsync("MSAL-User-CIAM-JSON", "MSIDLABCIAM6", "MSAL-App-CIAM-JSON");
+            return MergeKVLabDataAsync("MSAL-User-CIAM-JSON", "MSAL-App-CIAM-JSON");
         }
  
 

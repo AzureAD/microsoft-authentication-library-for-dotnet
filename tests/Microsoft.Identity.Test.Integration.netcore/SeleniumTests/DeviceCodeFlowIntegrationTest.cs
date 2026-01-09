@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             switch (labResponse.User.AzureEnvironment)
             {
                 case AzureEnvironment.azureusgovernment:
-                    builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
+                    builder.WithAuthority(labResponse.App.Authority + labResponse.User.TenantId);
                     break;
                 default:
                     break;
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             switch (labResponse.User.AzureEnvironment)
             {
                 case AzureEnvironment.azureusgovernment:
-                    builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
+                    builder.WithAuthority(labResponse.App.Authority + labResponse.User.TenantId);
                     break;
                 default:
                     break;
