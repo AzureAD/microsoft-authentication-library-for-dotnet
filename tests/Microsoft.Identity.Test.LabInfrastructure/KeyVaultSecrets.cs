@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         // Names of key vault secrets for application configuration JSONs
         public const string AppPCAClient = "App-PCAClient-Config";//MSAL-APP-AzureADMultipleOrgsPC-JSON
         public const string MsalAppAzureAdMultipleOrgs = "MSAL-APP-AzureADMultipleOrgs-JSON";
+        public const string MsalAppAzureAdMultipleOrgsPublicClient = "MSAL-APP-AzureADMultipleOrgsPC-JSON";
         public const string B2CAppIdLabsAppB2C = "MSAL-App-B2C-JSON";
         public const string ArlAppIdLabsApp = "MSAL-App-Arlington-JSON";
         public const string MsalAppCiam = "MSAL-App-CIAM-JSON";
