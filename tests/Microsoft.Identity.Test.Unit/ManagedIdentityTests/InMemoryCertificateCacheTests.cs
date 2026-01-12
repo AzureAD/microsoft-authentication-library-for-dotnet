@@ -28,6 +28,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             return req.CreateSelfSigned(notBefore, notAfter);
         }
 
+        /// <summary>
+        /// Creates a public-only certificate by stripping the private key.
+        /// Exports as X509ContentType.Cert (which contains only public key/metadata)
+        /// and re-imports to ensure no private key is present.
+        /// </summary>
+        private static X509Certificate2 CreatePublicOnlyCert(TimeSpan lifetime, string subjectCn = "CN=CacheTest")
+        {
+            using var certWithPrivateKey = CreateSelfSignedCert(lifetime, subjectCn);
+            // Export as Cert (public-only) and re-import
+            var publicBytes = certWithPrivateKey.Export(X509ContentType.Cert);
+            return new X509Certificate2(publicBytes);
+        }
+
         [TestMethod]
         public void TryGet_EmptyCache_ReturnsFalse()
         {
@@ -199,6 +212,121 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             var ok = cache.TryGet("will-expire", out _);
             Assert.IsFalse(ok, "Entry should be evicted when remaining lifetime drops below threshold.");
+        }
+
+        [TestMethod]
+        public void TryGet_ReturnsCloneWithoutPrivateKey_AndSameRawData()
+        {
+            var cache = new InMemoryCertificateCache();
+            using var publicOnlyCert = CreatePublicOnlyCert(TimeSpan.FromDays(2));
+            
+            // Precondition: input certificate has no private key
+            Assert.IsFalse(publicOnlyCert.HasPrivateKey, "Test precondition: input must be public-only cert.");
+
+            const string key = "public-key-test";
+            const string ep = "https://mtls.endpoint";
+            const string cid = "22222222-2222-2222-2222-222222222222";
+
+            cache.Set(key, new CertificateCacheValue(publicOnlyCert, ep, cid));
+
+            var ok = cache.TryGet(key, out var value);
+            Assert.IsTrue(ok);
+            Assert.IsNotNull(value.Certificate);
+            try
+            {
+                // Clone instance differs but has same thumbprint
+                Assert.AreNotSame(publicOnlyCert, value.Certificate);
+                Assert.AreEqual(publicOnlyCert.Thumbprint, value.Certificate.Thumbprint, ignoreCase: true);
+
+                // Clone also has no private key
+                Assert.IsFalse(value.Certificate.HasPrivateKey, "Returned clone should not have private key.");
+
+                // Raw DER bytes match
+                var originalRaw = publicOnlyCert.Export(X509ContentType.Cert);
+                var cloneRaw = value.Certificate.Export(X509ContentType.Cert);
+                CollectionAssert.AreEqual(originalRaw, cloneRaw, "Raw certificate data should match.");
+            }
+            finally
+            {
+                // Caller owns the clone returned by TryGet
+                value.Certificate.Dispose();
+            }
+        }
+
+        [TestMethod]
+        public void Concurrency_Smoke_ParallelSetAndGet()
+        {
+            var cache = new InMemoryCertificateCache();
+            
+            // Use deterministic lifetimes well below/above 24h threshold
+            using var shortCert = CreatePublicOnlyCert(TimeSpan.FromHours(12), "CN=Short");
+            using var longCert = CreatePublicOnlyCert(TimeSpan.FromHours(48), "CN=Long");
+
+            const int iterations = 100;
+            var tasks = new System.Threading.Tasks.Task[4];
+
+            // Task 1: Set short-lived cert (should be rejected by cache)
+            tasks[0] = System.Threading.Tasks.Task.Run(() =>
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    cache.Set("short-key", new CertificateCacheValue(shortCert, "https://ep1", "cid1"));
+                }
+            });
+
+            // Task 2: Set long-lived cert (should be cached)
+            tasks[1] = System.Threading.Tasks.Task.Run(() =>
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    cache.Set("long-key", new CertificateCacheValue(longCert, "https://ep2", "cid2"));
+                }
+            });
+
+            // Task 3: Get short-key
+            tasks[2] = System.Threading.Tasks.Task.Run(() =>
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    if (cache.TryGet("short-key", out var val))
+                    {
+                        val.Certificate.Dispose();
+                    }
+                }
+            });
+
+            // Task 4: Get long-key
+            tasks[3] = System.Threading.Tasks.Task.Run(() =>
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    if (cache.TryGet("long-key", out var val))
+                    {
+                        val.Certificate.Dispose();
+                    }
+                }
+            });
+
+            System.Threading.Tasks.Task.WaitAll(tasks);
+
+            // Validate final state: short-key should not be cached (< 24h)
+            Assert.IsFalse(cache.TryGet("short-key", out _), "Short-lived cert should not be cached.");
+
+            // long-key should be cached
+            var found = cache.TryGet("long-key", out var longValue);
+            Assert.IsTrue(found, "Long-lived cert should be cached.");
+            if (found)
+            {
+                try
+                {
+                    Assert.AreEqual(longCert.Thumbprint, longValue.Certificate.Thumbprint, ignoreCase: true);
+                    Assert.IsFalse(longValue.Certificate.HasPrivateKey, "Cached cert should have no private key.");
+                }
+                finally
+                {
+                    longValue.Certificate.Dispose();
+                }
+            }
         }
     }
 
