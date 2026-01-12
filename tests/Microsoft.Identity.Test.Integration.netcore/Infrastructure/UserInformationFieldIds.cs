@@ -8,11 +8,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     public class UserInformationFieldIds
     {
-        private readonly LabUser _user;
+        private readonly UserConfig _user;
         private string _passwordInputId;
         private string _passwordSignInButtonId;
 
-        public UserInformationFieldIds(LabUser user)
+        public UserInformationFieldIds(UserConfig user)
         {
             _user = user;
         }
@@ -64,14 +64,14 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         private void DetermineFieldIds()
         {
-            if (_user.UserType == UserType.Federated)
+            if (_user.UserType == LabConstants.UserTypeFederated)
             {
                 _passwordInputId = CoreUiTestConstants.AdfsV4WebPasswordId;
                 _passwordSignInButtonId = CoreUiTestConstants.AdfsV4WebSubmitId;
                 return;
             }
 
-            if (_user.UserType == UserType.B2C)
+            if (_user.UserType == LabConstants.UserTypeB2C)
             {
                 DetermineB2CFieldIds();
                 return;
@@ -85,15 +85,15 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             switch (_user.B2cProvider)
             {
-            case B2CIdentityProvider.Local:
+            case LabConstants.B2CIdentityProviderLocal:
                 _passwordInputId = CoreUiTestConstants.B2CWebPasswordId;
                 _passwordSignInButtonId = CoreUiTestConstants.B2CWebSubmitId;
                 break;
-            case B2CIdentityProvider.Facebook:
+            case LabConstants.B2CIdentityProviderFacebook:
                 _passwordInputId = CoreUiTestConstants.B2CWebPasswordFacebookId;
                 _passwordSignInButtonId = CoreUiTestConstants.B2CFacebookSubmitId;
                 break;
-            case B2CIdentityProvider.Google:
+            case LabConstants.B2CIdentityProviderGoogle:
                 _passwordInputId = CoreUiTestConstants.B2CWebPasswordGoogleId;
                 _passwordSignInButtonId = CoreUiTestConstants.B2CGoogleSignInId;
                 break;

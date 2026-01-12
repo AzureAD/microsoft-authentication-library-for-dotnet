@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
     {
         private readonly string _testWebServiceEndpoint;
         private static HttpClient s_httpClient = new HttpClient();
+        private static string s_cachedLabAccessAppId;
+        private static Azure.Core.AccessToken? s_cachedAccessToken;
 
         public MsiProxyHttpManager(string testWebServiceEndpoint)
         {
@@ -51,9 +53,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             int retryCount = 0)
         {
             //Get token for the MSIHelperService
-            var labApi = new LabServiceApi();
-            var token = await labApi.GetMSIHelperServiceTokenAsync()
-                .ConfigureAwait(false);
+            string token = await GetMSIHelperServiceTokenAsync().ConfigureAwait(false);
 
             //Add the Authorization header
             s_httpClient.DefaultRequestHeaders.Authorization =
@@ -86,6 +86,24 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             };
 
             return response;
+        }
+
+        private static async Task<string> GetMSIHelperServiceTokenAsync()
+        {
+            if (s_cachedAccessToken == null || s_cachedAccessToken.Value.ExpiresOn <= DateTimeOffset.UtcNow.AddMinutes(5))
+            {
+                if (s_cachedLabAccessAppId == null)
+                {
+                    KeyVaultSecretsProvider keyVaultSecretsProvider = new KeyVaultSecretsProvider();
+                    s_cachedLabAccessAppId = keyVaultSecretsProvider.GetSecretByName("LabVaultAppID").Value;
+                }
+
+                s_cachedAccessToken = await LabAuthenticationHelper
+                    .GetAccessTokenForLabAPIAsync(s_cachedLabAccessAppId)
+                    .ConfigureAwait(false);
+            }
+
+            return s_cachedAccessToken.Value.Token;
         }
     }
 }

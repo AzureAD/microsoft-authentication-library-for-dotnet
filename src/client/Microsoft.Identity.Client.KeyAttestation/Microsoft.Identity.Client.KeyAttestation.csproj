@@ -19,11 +19,11 @@
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MicrosoftIdentityClientVersion)-preview</Version>
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
-    <Title>MSAL.NET extension for KeyGuard attestation support</Title>
+    <Title>MSAL.NET extension for Credential Guard attestation support</Title>
     <Description>
-      This package contains binaries needed to enable KeyGuard attestation in managed identity proof-of-possession (mTLS PoP) flows using MSAL.NET.
+      This package contains binaries needed to enable Credential Guard attestation in managed identity proof-of-possession (mTLS PoP) flows using MSAL.NET.
     </Description>
-    <PackageTags>Microsoft Authentication Library Managed Identity MSAL KeyGuard Attestation Proof-of-Possession</PackageTags>
+    <PackageTags>Microsoft Authentication Library Managed Identity MSAL CredentialGuard Attestation Proof-of-Possession</PackageTags>
     <Product>Microsoft Authentication Library</Product>
   </PropertyGroup>
 

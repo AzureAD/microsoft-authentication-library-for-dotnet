@@ -2,18 +2,17 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
-    public class LabUser
+    public class UserConfig
     {
         [JsonProperty("objectId")]
         public Guid ObjectId { get; set; }
 
         [JsonProperty("userType")]
-        public UserType UserType { get; set; }
+        public string UserType { get; set; }
 
         [JsonProperty("upn")]
         public string Upn { get; set; }
@@ -22,12 +21,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public string HomeUPN { get; set; }
 
         [JsonProperty("b2cprovider")]
-        public B2CIdentityProvider B2cProvider { get; set; }
+        public string B2cProvider { get; set; }
 
         [JsonProperty("labname")]
         public string LabName { get; set; }
 
-        public FederationProvider FederationProvider { get; set; }
+        public string FederationProvider { get; set; }
 
         public string TenantId { get; set; }
 
@@ -37,13 +36,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public string AppId { get; set; }
 
         [JsonProperty("azureenvironment")]
-        public AzureEnvironment AzureEnvironment { get; set; }
+        public string AzureEnvironment { get; set; }
 
         public string GetOrFetchPassword()
         {
             if (_password == null)
             {
-                _password = LabUserHelper.FetchUserPassword(LabName);
+                _password = LabResponseHelper.FetchUserPassword(LabName);
             }
 
             return _password;
