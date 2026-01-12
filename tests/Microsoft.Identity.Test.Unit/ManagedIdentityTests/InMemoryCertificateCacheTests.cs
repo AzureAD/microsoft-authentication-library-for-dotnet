@@ -28,6 +28,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             return req.CreateSelfSigned(notBefore, notAfter);
         }
 
+        /// <summary>
+        /// This helper strips private key ONLY for cache behavior tests.
+        /// mTLS requires a private key; in real flows the private key is held/used separately 
+        /// (platform key store / key provider) and not validated by this unit test.
+        /// </summary>
+        private static X509Certificate2 CreatePublicOnlyCert(TimeSpan lifetime, string subjectCn = "CN=CacheTest")
+        {
+            using var certWithKey = CreateSelfSignedCert(lifetime, subjectCn);
+            // Export as X509ContentType.Cert (public key only) and re-import
+            var publicBytes = certWithKey.Export(X509ContentType.Cert);
+            return new X509Certificate2(publicBytes);
+        }
+
         [TestMethod]
         public void TryGet_EmptyCache_ReturnsFalse()
         {
@@ -199,6 +212,82 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             var ok = cache.TryGet("will-expire", out _);
             Assert.IsFalse(ok, "Entry should be evicted when remaining lifetime drops below threshold.");
+        }
+
+        [TestMethod]
+        public void TryGet_DoesNotIntroducePrivateKey_WhenInputIsPublicOnly()
+        {
+            var cache = new InMemoryCertificateCache();
+            using var cert = CreatePublicOnlyCert(TimeSpan.FromDays(2));
+            
+            // Precondition: input certificate has no private key
+            Assert.IsFalse(cert.HasPrivateKey, "Test precondition: input cert must be public-only.");
+
+            const string key = "public-only-key";
+            cache.Set(key, new CertificateCacheValue(cert, "https://mtls.endpoint", "client-id"));
+
+            var ok = cache.TryGet(key, out var value);
+            Assert.IsTrue(ok);
+            try
+            {
+                Assert.AreEqual(cert.Thumbprint, value.Certificate.Thumbprint, ignoreCase: true,
+                    "Certificate thumbprint should match.");
+                
+                // Note: This is a cache safety test (no private-key introduction). mTLS handshake requires a private key and is validated elsewhere.
+                Assert.IsFalse(value.Certificate.HasPrivateKey, 
+                    "Returned clone should not have private key when input is public-only.");
+            }
+            finally
+            {
+                value.Certificate.Dispose();
+            }
+        }
+
+        [TestMethod]
+        public void Concurrency_Smoke_PublicOnlyCerts_DontGainPrivateKey()
+        {
+            var cache = new InMemoryCertificateCache();
+            using var longCert = CreatePublicOnlyCert(TimeSpan.FromDays(3), "CN=Long");
+
+            // Precondition: cert is public-only
+            Assert.IsFalse(longCert.HasPrivateKey, "Test precondition: longCert must be public-only.");
+
+            var retrievedCerts = new System.Collections.Concurrent.ConcurrentBag<X509Certificate2>();
+
+            // Concurrent Set/Get calls with different keys to avoid replace race conditions
+            System.Threading.Tasks.Parallel.For(0, 100, i =>
+            {
+                string key = $"concurrent-key-{i}";
+                cache.Set(key, new CertificateCacheValue(longCert, "https://ep", "cid"));
+                
+                if (cache.TryGet(key, out var val))
+                {
+                    retrievedCerts.Add(val.Certificate);
+                }
+            });
+
+            // Dispose all retrieved certificates
+            foreach (var cert in retrievedCerts)
+            {
+                cert.Dispose();
+            }
+
+            // Final verification: retrieved cert should not have private key
+            const string finalKey = "final-key";
+            cache.Set(finalKey, new CertificateCacheValue(longCert, "https://ep", "cid"));
+            if (cache.TryGet(finalKey, out var finalValue))
+            {
+                try
+                {
+                    // Note: This is a cache safety test (no private-key introduction). mTLS handshake requires a private key and is validated elsewhere.
+                    Assert.IsFalse(finalValue.Certificate.HasPrivateKey,
+                        "Returned cert should not have private key when input certs are public-only.");
+                }
+                finally
+                {
+                    finalValue.Certificate.Dispose();
+                }
+            }
         }
     }
 
