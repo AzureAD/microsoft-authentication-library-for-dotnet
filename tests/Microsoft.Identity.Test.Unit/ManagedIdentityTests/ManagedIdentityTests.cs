@@ -92,7 +92,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
                 }
 
-                Assert.AreEqual(managedIdentitySource, await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false));
+                var miSourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(managedIdentitySource, miSourceResult.Source);
             }
         }
 

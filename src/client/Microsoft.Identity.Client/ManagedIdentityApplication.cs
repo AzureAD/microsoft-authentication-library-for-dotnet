@@ -56,11 +56,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
-        public async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
+        public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
         {
             if (ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None)
             {
-                return ManagedIdentityClient.s_sourceName;
+                return new ManagedIdentitySourceResult(ManagedIdentityClient.s_sourceName);
             }
 
             // Create a temporary RequestContext for the logger and the IMDS probe request.

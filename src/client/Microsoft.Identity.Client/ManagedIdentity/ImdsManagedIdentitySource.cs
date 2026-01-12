@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return queryParams;
         }
 
-        public static async Task<bool> ProbeImdsEndpointAsync(
+        public static async Task<(bool success, string failureReason)> ProbeImdsEndpointAsync(
             RequestContext requestContext,
             ImdsVersion imdsVersion,
             CancellationToken cancellationToken)
@@ -255,8 +255,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 case ImdsVersion.V2:
 #if NET462
-                requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
-                return false;
+                    requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
+                    return (false, "IMDSv2 is not supported on .NET Framework 4.6.2");
 #else
                     apiVersionQueryParam = ImdsV2ManagedIdentitySource.ApiVersionQueryParam;
                     imdsApiVersion = ImdsV2ManagedIdentitySource.ImdsV2ApiVersion;
@@ -303,22 +303,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     retryPolicy: retryPolicy)
                 .ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                requestContext.Logger.Info($"[Managed Identity] {imdsStringHelper} probe endpoint failure. Exception occurred while sending request to probe endpoint: {ex}");
-                return false;
+                string failureMessage = $"{imdsStringHelper} probe failed. Exception: {ex.Message}";
+                requestContext.Logger.Info(() => $"[Managed Identity] {failureMessage}");
+                return (false, failureMessage);
             }
 
             // probe omits the "Metadata: true" header and then treats 400 Bad Request as success
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 requestContext.Logger.Info(() => $"[Managed Identity] {imdsStringHelper} managed identity is available.");
-                return true;
+                return (true, null);
             }
             else
             {
+                string failureMessage = $"{imdsStringHelper} probe failed. Status code: {response.StatusCode}, Body: {response.Body}";
                 requestContext.Logger.Info(() => $"[Managed Identity] {imdsStringHelper} managed identity is not available. Status code: {response.StatusCode}, Body: {response.Body}");
-                return false;
+                return (false, failureMessage);
             }
         }
     }
