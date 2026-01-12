@@ -1,3 +1,25 @@
+4.81.0
+======
+
+### Bug Fixes
+* Updated the ConfidentialClientApplication's ROPC API to add WithSendX5C() during authentication requests.[#5637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5637)
+
+4.80.0
+======
+
+### Features
+* Added extensibility APIs—WithCertificate, OnMsalServiceFailure, and OnCompletion—to enable callback handling for certificate injection, retry on MSAL service failure events, and completion notifications [#5573](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5573)
+* Extend IAuthenticationOperation interface with Async methods in IAuthenticationOperation2 [#5376](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5376)
+* Enable IAuthenticationOperation2 to reject MSAL cached tokens and fetch new ones from ESTS [#5567](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5567)
+
+### Changes
+* IMDS Source Detection Logic Improvement [#5602](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5602)
+* Update DesktopOsHelper.IsMac to work properly on .NET 10 + macOS 26 [#5541](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5541)
+
+### Bug Fixes
+* Fix KeyNotFoundException during retry when headers lack correlation ID [#5617](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5617)
+* Implement Service Exception for IMDS Probe [#5615](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5615)
+
 4.79.2
 ======
 

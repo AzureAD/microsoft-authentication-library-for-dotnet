@@ -30,7 +30,7 @@ namespace NetCoreTestApp
           };
 
         // This app will be dynamically set to the multi-tenant app from lab
-        private static readonly string s_clientIdForPublicApp = LabUserHelper.GetDefaultUserWithMultiTenantAppAsync().Result.App.AppId;
+        private static readonly string s_clientIdForPublicApp = LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).Result.AppId;
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
 

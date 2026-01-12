@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
     public static class MsalAssert
     {
         public static async Task<IAccount> AssertSingleAccountAsync(
-            LabResponse labResponse,
+            UserConfig labUser,
             IPublicClientApplication pca,
             AuthenticationResult result)
         {
@@ -23,14 +23,14 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
             Assert.IsTrue(
                     string.Equals(
-                        labResponse.User.Upn,
+                        labUser.Upn,
                         result.Account.Username,
                         System.StringComparison.InvariantCultureIgnoreCase));
 
             return account;
         }
 
-        public static void AssertAuthResult(AuthenticationResult result, LabUser user = null)
+        public static void AssertAuthResult(AuthenticationResult result, UserConfig user = null)
         {
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
