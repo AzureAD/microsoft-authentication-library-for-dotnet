@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -263,10 +264,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using var longCert = CreatePublicOnlyCert(TimeSpan.FromHours(48), "CN=Long");
 
             const int iterations = 100;
-            var tasks = new System.Threading.Tasks.Task[4];
+            var tasks = new Task[4];
 
             // Task 1: Set short-lived cert (should be rejected by cache)
-            tasks[0] = System.Threading.Tasks.Task.Run(() =>
+            tasks[0] = Task.Run(() =>
             {
                 for (int i = 0; i < iterations; i++)
                 {
@@ -275,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             });
 
             // Task 2: Set long-lived cert (should be cached)
-            tasks[1] = System.Threading.Tasks.Task.Run(() =>
+            tasks[1] = Task.Run(() =>
             {
                 for (int i = 0; i < iterations; i++)
                 {
@@ -284,7 +285,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             });
 
             // Task 3: Get short-key
-            tasks[2] = System.Threading.Tasks.Task.Run(() =>
+            tasks[2] = Task.Run(() =>
             {
                 for (int i = 0; i < iterations; i++)
                 {
@@ -296,7 +297,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             });
 
             // Task 4: Get long-key
-            tasks[3] = System.Threading.Tasks.Task.Run(() =>
+            tasks[3] = Task.Run(() =>
             {
                 for (int i = 0; i < iterations; i++)
                 {
@@ -307,7 +308,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
             });
 
-            System.Threading.Tasks.Task.WaitAll(tasks);
+            Task.WaitAll(tasks);
 
             // Validate final state: short-key should not be cached (< 24h)
             Assert.IsFalse(cache.TryGet("short-key", out _), "Short-lived cert should not be cached.");
