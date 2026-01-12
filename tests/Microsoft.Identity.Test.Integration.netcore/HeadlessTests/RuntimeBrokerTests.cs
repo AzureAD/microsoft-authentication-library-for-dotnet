@@ -310,7 +310,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();

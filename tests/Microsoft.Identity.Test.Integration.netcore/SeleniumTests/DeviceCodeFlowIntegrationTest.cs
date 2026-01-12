@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task DeviceCodeFlowTestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
             await AcquireTokenWithDeviceCodeFlowAsync(user, app, "aad user").ConfigureAwait(false);
         }
 

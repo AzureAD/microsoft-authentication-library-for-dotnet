@@ -309,7 +309,6 @@ var confidentialApp = ConfidentialClientApplicationBuilder
 
             if (cloud == Cloud.Adfs)
             {
-                // For ADFS, use the same Lab infrastructure with KeyVaultSecrets.AppPCAClient
                 appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
                 secret = LabResponseHelper.FetchSecretString(KeyVaultSecrets.DefaultAppSecret, LabResponseHelper.KeyVaultSecretsProviderMsal);
                 cert = await GetAdfsCertificateAsync().ConfigureAwait(false);
@@ -319,12 +318,12 @@ var confidentialApp = ConfidentialClientApplicationBuilder
             }
             else if (cloud == Cloud.Arlington)
             {
-                appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.ArlAppIdLabsApp).ConfigureAwait(false);
-                secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
+                appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppArlingtonCCA).ConfigureAwait(false);
+                secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsid);
                 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
                 tenantId = appConfig.TenantId;
                 authority = appConfig.Authority;
-                appScopes = new[] { UseAppIdUri ? $"api://{appConfig.AppId}/.default" : "https://vault.azure.net/.default" };
+                appScopes = new[] { "https://graph.microsoft.com/.default" };
             }
             else // Cloud.Public
             {
@@ -333,7 +332,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
                 tenantId = appConfig.TenantId;
                 authority = appConfig.Authority;
-                appScopes = new[] { UseAppIdUri ? $"api://{appConfig.AppId}/.default" : "https://vault.azure.net/.default" };
+                appScopes = new[] { "https://vault.azure.net/.default" };
             }
 
             AuthenticationResult authResult;
