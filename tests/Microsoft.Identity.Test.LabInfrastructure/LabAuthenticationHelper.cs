@@ -8,8 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Unit;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -19,7 +17,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string LabScope = "https://request.msidlab.com/.default";
         public const string LabClientInstance = "https://login.microsoftonline.com/";
         public const string LabClientTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
-
+        private const string AutomationTestCertName = "LabAuth.MSIDLab.com";
         public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId)
         {
             string[] scopes = new string[] { LabScope };
@@ -46,7 +44,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
 
-            cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            cert = CertificateHelper.FindCertificateByName(AutomationTestCertName);
             if (cert == null)
             {
                 throw new InvalidOperationException(
