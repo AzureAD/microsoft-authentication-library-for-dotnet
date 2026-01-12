@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 
         [DllImport("AttestationClientLib.dll", CallingConvention = CallingConvention.Cdecl,
                    CharSet = CharSet.Ansi)]
-        internal static extern int AttestCredentialGuardImportKey(
+        internal static extern int AttestKeyGuardImportKey(
             string endpoint,
             string authToken,
             string clientPayload,

@@ -35,6 +35,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public const string CsrMetadataPath = "/metadata/identity/getplatformmetadata";
         public const string CertificateRequestPath = "/metadata/identity/issuecredential";
         public const string AcquireEntraTokenPath = "/oauth2/v2.0/token";
+        private const string AttestationTagEnabled = "#att=1";
+        private const string AttestationTagDisabled = "#att=0";
 
         public static async Task<CsrMetadata> GetCsrMetadataAsync(RequestContext requestContext)
         {
@@ -289,7 +291,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
             }
 
-            string certCacheKey = _requestContext.ServiceBundle.Config.ClientId;
+            string certCacheKey = GetMtlsCertCacheKey();
 
             // Get or create mTLS binding (cert + endpoint + client_id) from cache.
             // The factory delegate only executes on cache miss.
@@ -436,6 +438,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             ILoggerAdapter logger)
         {
             return _mtlsCache.GetOrCreateAsync(cacheKey, factory, cancellationToken, logger);
+        }
+
+        private string GetMtlsCertCacheKey()
+        {
+            // Today you use Config.ClientId as the base alias. Keep that unchanged.
+            // Just disambiguate by whether WithAttestationSupport() was configured.
+            string baseKey = _requestContext.ServiceBundle.Config.ClientId;
+
+            // FriendlyName encoder forbids '|', CR/LF, NULL. "#att=*" is safe.
+            return baseKey + (_attestationTokenProvider != null ? AttestationTagEnabled : AttestationTagDisabled);
         }
 
         internal static void ResetCertCacheForTest()

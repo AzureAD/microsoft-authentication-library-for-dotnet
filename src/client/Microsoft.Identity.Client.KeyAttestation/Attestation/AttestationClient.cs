@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
         }
 
         /// <summary>
-        /// Calls the native <c>AttestCredentialGuardImportKey</c> and returns a structured result.
+        /// Calls the native <c>AttestKeyGuardImportKey</c> and returns a structured result.
         /// </summary>
         public AttestationResult Attest(string endpoint,
                                         SafeNCryptKeyHandle keyHandle,
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
             {
                 keyHandle.DangerousAddRef(ref addRef);
 
-                int rc = AttestationClientLib.AttestCredentialGuardImportKey(
+                int rc = AttestationClientLib.AttestKeyGuardImportKey(
                     endpoint, null, null, keyHandle, out buf, clientId);
 
                 if (rc != 0)
