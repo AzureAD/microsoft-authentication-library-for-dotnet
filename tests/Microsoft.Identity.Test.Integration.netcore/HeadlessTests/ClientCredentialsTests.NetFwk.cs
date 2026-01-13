@@ -392,11 +392,13 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                     break;
 
                 case CredentialType.ClientClaims_ExtraClaims:
+#pragma warning disable CS0618 // Type or member is obsolete
                     builder.WithClientClaims(settings.Certificate, GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
                     break;
                 case CredentialType.ClientClaims_MergeClaims:
                     builder.WithClientClaims(settings.Certificate, GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
                     break;
+#pragma warning restore CS0618 // Type or member is obsolete
                 default:
                     throw new NotImplementedException();
             }

@@ -93,10 +93,12 @@ namespace Microsoft.Identity.Test.Unit
                                         { "client_ip", "192.168.1.2" }
                                     };
 
+#pragma warning disable CS0618 // Type or member is obsolete
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
                             .WithClientClaims(s_testCertificate, ipAddress)
                             .Build();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // Expecting an exception because MTLS PoP requires a certificate to sign the claims
             MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>

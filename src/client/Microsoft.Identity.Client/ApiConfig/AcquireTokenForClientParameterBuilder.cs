@@ -155,6 +155,38 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Specifies extra claims to be included in the client assertion. 
+        /// These claims will be merged with default claims when the client assertion is generated.
+        /// This lets higher level APIs like Microsoft.Identity.Web provide additional claims for the client assertion.
+        /// Important: tokens are associated with the extra client assertion claims, which impacts cache lookups.
+        /// This is an extensibility API and should not be used by applications directly.
+        /// </summary>
+        /// <param name="claimsToSign">Additional claims in JSON format to be signed in the client assertion.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <exception cref="ArgumentNullException">Thrown when claimsToSign is null or whitespace.</exception>
+        public AcquireTokenForClientParameterBuilder WithExtraClientAssertionClaims(string claimsToSign)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            if (string.IsNullOrWhiteSpace(claimsToSign))
+            {
+                throw new ArgumentNullException(nameof(claimsToSign));
+            }
+
+            CommonParameters.ExtraClientAssertionClaims = claimsToSign;
+
+            // Add the extra claims to the cache key so different claims result in different cache entries
+            var cacheKey = new SortedList<string, Func<CancellationToken, Task<string>>>
+            {
+                { "extra_client_assertion_claims", (CancellationToken ct) => Task.FromResult(claimsToSign) }
+            };
+
+            this.WithAdditionalCacheKeyComponents(cacheKey);
+
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
