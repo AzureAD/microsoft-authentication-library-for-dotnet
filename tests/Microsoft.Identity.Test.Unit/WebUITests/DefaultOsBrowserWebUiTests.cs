@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 .ConfigureAwait(false);
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
-                TestPort, "/", Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
+                TestPort, "/", Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -117,8 +117,10 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 Arg.Any<bool>())
                 .ConfigureAwait(false);
 
-            // Verify warning was logged
-            _logger.Received(1).Warning(
+            // Verify warning was logged about the override
+            _logger.Received(1).Log(
+                LogLevel.Warning,
+                Arg.Is<string>(s => s.Contains("response_mode") && s.Contains("overridden") && s.Contains("form_post")),
                 Arg.Is<string>(s => s.Contains("response_mode") && s.Contains("overridden") && s.Contains("form_post")));
         }
 
@@ -133,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             _tcpInterceptor.When(x => x.ListenToSingleRequestAndRespondAsync(
                 TestPort,
                 "/",
-                Arg.Any<Func<Uri, MessageAndHttpCode>>(),
+                Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(),
                 cts.Token))
                .Do(_ =>
                {
@@ -172,7 +174,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
                 "/",
-                Arg.Any<Func<Uri, MessageAndHttpCode>>(),
+                Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(),
                 CancellationToken.None)
                .Returns(Task.FromResult(authResponse));
 
@@ -188,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 .ConfigureAwait(false);
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
-                TestPort, "/", Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
+                TestPort, "/", Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
 
             Assert.IsTrue(customOpenBrowserCalled);
         }
@@ -219,7 +221,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
                 "/",
-                Arg.Any<Func<Uri, MessageAndHttpCode>>(),
+                Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(),
                 CancellationToken.None)
                .Returns(Task.FromResult(new AuthorizationResponse(responseUri, postData)));
 

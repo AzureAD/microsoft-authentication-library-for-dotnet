@@ -116,12 +116,12 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 Task<AuthorizationResponse> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
                     redirectUri.Port,
                     redirectUri.AbsolutePath,
-                    (uri) =>
+                    (authResponse) =>
                     {
-                        authCodeUri = uri;
+                        authCodeUri = authResponse.RequestUri;
 
                         _logger.Info("Auth code intercepted. Writing message back to browser");
-                        return GetMessageToShowInBroswerAfterAuth(uri);
+                        return GetMessageToShowInBroswerAfterAuth(authResponse.RequestUri);
                     },
                     tcpCancellationToken.Token);
 
