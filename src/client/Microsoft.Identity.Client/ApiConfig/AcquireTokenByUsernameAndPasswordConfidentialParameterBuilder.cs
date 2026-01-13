@@ -56,6 +56,24 @@ namespace Microsoft.Identity.Client
                    .WithScopes(scopes);
         }
 
+        /// <summary>
+        /// Applicable to first-party applications only, this method also allows to specify 
+        /// if the <see href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.7">x5c claim</see> should be sent to Azure AD.
+        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
+        /// this method will send the certificate chain to Azure AD along with the token request,
+        /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
+        /// This saves the application admin from the need to explicitly manage the certificate rollover
+        /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
+        /// </summary>
+        /// <param name="withSendX5C"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>.
+        /// The default is <c>false</c></param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder WithSendX5C(bool withSendX5C)
+        {
+            Parameters.SendX5C = withSendX5C;
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

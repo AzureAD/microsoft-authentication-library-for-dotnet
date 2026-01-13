@@ -30,10 +30,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task SilentAuth_ForceRefresh_Async()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithAuthority("https://login.microsoftonline.com/organizations")
                 .WithTestLogging()
                 .Build();
@@ -41,19 +42,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Part 1 - Acquire a token with U/P");
             #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await pca
-                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync(new CancellationTokenSource().Token)
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            await ValidateAuthResultAsync(authResult, labResponse).ConfigureAwait(false);
+            await ValidateAuthResultAsync(authResult, user).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task SilentAuth_TokenCacheRemainsPersistent_Async()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            var user = labResponse.User;
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string cacheFilePath = null;
 
             try
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 cacheFilePath = Path.GetTempFileName();
 
                 var pca1 = PublicClientApplicationBuilder
-                   .Create(labResponse.App.AppId)
+                   .Create(app.AppId)
                    .WithTestLogging()
                    .WithAuthority("https://login.microsoftonline.com/organizations")
                    .Build();
@@ -82,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 // simulate a restart by creating a new client
                 var pca2 = PublicClientApplicationBuilder
-                 .Create(labResponse.App.AppId)
+                 .Create(app.AppId)
                  .WithTestLogging()
                  .Build();
 
@@ -106,41 +107,41 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private async Task ValidateAuthResultAsync(
             AuthenticationResult authResult,
-            LabResponse labResponse)
+            UserConfig user)
         {
-            MsalAssert.AssertAuthResult(authResult, labResponse.User);
+            MsalAssert.AssertAuthResult(authResult, user);
             var at1 = authResult.AccessToken;
             // If test fails with "user needs to consent to the application, do an interactive request" error - see UsernamePassword tests
 
             Trace.WriteLine("Part 2 - Acquire a token silently, with forceRefresh = true");
-            IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, authResult).ConfigureAwait(false);
+            IAccount account = await MsalAssert.AssertSingleAccountAsync(user, pca, authResult).ConfigureAwait(false);
 
             authResult = await pca.AcquireTokenSilent(s_scopes, account)
                 .WithForceRefresh(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
-            MsalAssert.AssertAuthResult(authResult, labResponse.User);
+            MsalAssert.AssertAuthResult(authResult, user);
             var at2 = authResult.AccessToken;
 
-            string tenantId = labResponse.User.UserType == UserType.MSA ?
+            string tenantId = user.UserType == LabConstants.UserTypeMSA ?
                 Constants.MsaTenantId :
-                labResponse.User.TenantId;
+                user.TenantId;
 
             Assert.AreEqual(
                  $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token",
                  authResult.AuthenticationResultMetadata.TokenEndpoint);
 
             Trace.WriteLine("Part 3 - Acquire a token silently with a login hint, with forceRefresh = true");
-            authResult = await pca.AcquireTokenSilent(s_scopes, labResponse.User.Upn)
+            authResult = await pca.AcquireTokenSilent(s_scopes, user.Upn)
                .WithForceRefresh(true)
                .ExecuteAsync()
                .ConfigureAwait(false);
-            MsalAssert.AssertAuthResult(authResult, labResponse.User);
+            MsalAssert.AssertAuthResult(authResult, user);
             var at3 = authResult.AccessToken;
 
-            tenantId = labResponse.User.UserType == UserType.MSA ?
+            tenantId = user.UserType == LabConstants.UserTypeMSA ?
                Constants.MsaTenantId :
-               labResponse.User.TenantId;
+               user.TenantId;
 
             Assert.IsFalse(at1.Equals(at2, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsFalse(at1.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));

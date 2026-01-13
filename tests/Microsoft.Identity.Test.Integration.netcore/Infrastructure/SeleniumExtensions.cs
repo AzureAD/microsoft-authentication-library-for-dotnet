@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             return driver.FindElement(By.Id(id));
         }
 
-        public static void PerformLogin(this IWebDriver driver, LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
+        public static void PerformLogin(this IWebDriver driver, UserConfig user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
         }
 
-        private static void HandleConsent(IWebDriver driver, LabUser user, UserInformationFieldIds fields, Prompt prompt)
+        private static void HandleConsent(IWebDriver driver, UserConfig user, UserInformationFieldIds fields, Prompt prompt)
         {
             // For MSA, a special consent screen seems to come up every now and then
             if (user.Upn.Contains("outlook.com"))
@@ -311,7 +311,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
         }
 
-        private static void EnterPassword(IWebDriver driver, LabUser user, UserInformationFieldIds fields)
+        private static void EnterPassword(IWebDriver driver, UserConfig user, UserInformationFieldIds fields)
         {
             Trace.WriteLine("Logging in ... Entering password");
             string password = user.GetOrFetchPassword();
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordSignInButtonId())).Click();
         }
 
-        private static void EnterUsername(IWebDriver driver, LabUser user, bool withLoginHint, bool adfsOnly, UserInformationFieldIds fields)
+        private static void EnterUsername(IWebDriver driver, UserConfig user, bool withLoginHint, bool adfsOnly, UserInformationFieldIds fields)
         {
             if (adfsOnly && !withLoginHint)
             {
@@ -354,7 +354,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static void PerformDeviceCodeLogin(
             DeviceCodeResult deviceCodeResult,
-            LabUser user,
+            UserConfig user,
             TestContext testContext,
             bool isAdfs = false)
         {

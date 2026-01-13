@@ -116,6 +116,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
 
         /// <summary>
+        /// The certificate resolved and used for client authentication (if certificate-based authentication was used).
+        /// This is set during the token request when the certificate is resolved.
+        /// </summary>
+        public X509Certificate2 ResolvedCertificate { get; set; }
+
+        /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>
         /// <remarks>If user configured claims, request should bypass cache</remarks>

@@ -19,6 +19,11 @@ namespace Microsoft.Identity.Client
         ManagedIdentityDefault,
 
         /// <summary>
+        /// Instance Metadata Service (IMDS) v1 and v2 probe request, used to probe IMDS v1 and v2 managed identities to determine if they are available.
+        /// </summary>
+        ImdsProbe,
+
+        /// <summary>
         /// Instance Metadata Service (IMDS) request, used for obtaining tokens from the Azure VM metadata endpoint.
         /// </summary>
         Imds,
@@ -26,11 +31,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Region Discovery request, used for region discovery operations with exponential backoff retry strategy.
         /// </summary>
-        RegionDiscovery,
-
-        /// <summary>
-        /// CSR Metadata Probe request, used to probe an IMDSv2 managed identity for metadata to be used in acquiring a token.
-        /// </summary>
-        CsrMetadataProbe
+        RegionDiscovery
     }
 }

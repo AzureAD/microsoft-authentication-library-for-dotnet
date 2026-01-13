@@ -169,7 +169,12 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(claimsToSign));
             }
 
-            Config.ClientCredential = new CertificateAndClaimsClientCredential(certificate, claimsToSign, mergeWithDefaultClaims);
+            // Wrap the static certificate in a provider delegate
+            Config.ClientCredential = new CertificateAndClaimsClientCredential(
+                certificateProvider: _ => Task.FromResult(certificate),
+                claimsToSign: claimsToSign,
+                appendDefaultClaims: mergeWithDefaultClaims,
+                certificate: certificate);
             Config.SendX5C = sendX5C;
             return this;
         }

@@ -89,9 +89,9 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
         }
 
-        internal new Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)
+        internal new Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response, CancellationToken cancellationToken = default)
         {
-            return base.CacheTokenResponseAndCreateAuthenticationResultAsync(response);
+            return base.CacheTokenResponseAndCreateAuthenticationResultAsync(response, cancellationToken);
         }
 
         //internal for test
