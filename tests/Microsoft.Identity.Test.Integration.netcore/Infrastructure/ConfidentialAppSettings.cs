@@ -67,12 +67,12 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         private class AdfsConfidentialAppSettings : IConfidentialAppSettings
         {
             private const string AdfsCertName = "IDLABS-APP-Confidential-Client-Cert-OnPrem";
-            private static readonly Lazy<LabResponse> s_adfsLabResponse = new Lazy<LabResponse>(() =>
+            private static readonly Lazy<AppConfig> s_adfsAppConfig = new Lazy<AppConfig>(() =>
             {
-                return LabUserHelper.GetDefaultAdfsUserAsync().GetAwaiter().GetResult();
+                return LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).GetAwaiter().GetResult();
             });
 
-            public string ClientId => s_adfsLabResponse.Value.App.AppId;
+            public string ClientId => s_adfsAppConfig.Value.AppId;
 
             public string TenantId => "";
 

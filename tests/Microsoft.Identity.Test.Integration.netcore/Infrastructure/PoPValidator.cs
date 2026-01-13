@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
         private static HttpClient s_httpClient = new HttpClient();
         private static Lazy<string> s_popValidationEndpointLazy = new Lazy<string>(
-            () => LabUserHelper.KeyVaultSecretsProviderMsal.GetSecretByName(
+            () => LabResponseHelper.KeyVaultSecretsProviderMsal.GetSecretByName(
                 "automation-pop-validation-endpoint",
                 "841fc7c2ccdd48d7a9ef727e4ae84325").Value);
 
