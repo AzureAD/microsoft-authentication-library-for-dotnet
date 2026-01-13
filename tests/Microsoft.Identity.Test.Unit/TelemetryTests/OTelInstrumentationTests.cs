@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -36,8 +37,13 @@ namespace Microsoft.Identity.Test.Unit
 
         private const string callerSdkId = "123";
         private const string callerSdkVersion = "1.1.1.1";
+        private Dictionary<string, (string, bool)> extraQueryParams = new()
+            {
+                { "caller-sdk-id", (callerSdkId, false) },
+                { "caller-sdk-ver", (callerSdkVersion, false) }
+            };
 
-        [TestCleanup]
+[TestCleanup]
         public override void TestCleanup()
         {
             s_meterProvider?.Dispose();
@@ -101,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 _harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
                 AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 // Assert
@@ -116,7 +122,7 @@ namespace Microsoft.Identity.Test.Unit
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -132,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Trace.WriteLine("5. ATS - should not perform an RT refresh, as the token is still valid");
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -162,8 +168,8 @@ namespace Microsoft.Identity.Test.Unit
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
+                
+                
 
                 var mi = miBuilder.BuildConcrete();
 
@@ -174,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit
                         ManagedIdentitySource.AppService);
 
                 AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(resource)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -191,7 +197,7 @@ namespace Microsoft.Identity.Test.Unit
                 // Act
                 Trace.WriteLine("4. ATM - should perform an RT refresh");
                 result = await mi.AcquireTokenForManagedIdentity(resource)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -208,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
 
                 result = await mi.AcquireTokenForManagedIdentity(resource)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -240,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 string oboCacheKey = "obo-cache-key";
                 var result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
@@ -253,7 +259,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Trace.WriteLine("3. Configure AAD to respond with a valid token");
                 result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
@@ -265,7 +271,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Trace.WriteLine("4. Fetch token from cache");
                 result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
@@ -299,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 // Act
                 AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -313,7 +319,7 @@ namespace Microsoft.Identity.Test.Unit
                 _harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
 
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -342,13 +348,13 @@ namespace Microsoft.Identity.Test.Unit
 
                 // Acquire token for client with scope
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .WithAuthenticationExtension(authExtension)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
 
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .WithAuthenticationExtension(authExtension)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -358,13 +364,13 @@ namespace Microsoft.Identity.Test.Unit
                 _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
                 // Acquire token for client with scope
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
 
                 // Acquire token from the cache
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithExtraQueryParameters(extraQueryParams)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
             }
@@ -377,7 +383,7 @@ namespace Microsoft.Identity.Test.Unit
             //Test for MsalServiceException
             MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
                 () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
-                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                .WithExtraQueryParameters(extraQueryParams)
                 .WithTenantId(TestConstants.Utid)
                 .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 
@@ -390,7 +396,7 @@ namespace Microsoft.Identity.Test.Unit
             //Test for MsalClientException
             MsalClientException exClient = await AssertException.TaskThrowsAsync<MsalClientException>(
                 () => _cca.AcquireTokenForClient(null) // null scope -> client exception
-                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                .WithExtraQueryParameters(extraQueryParams)
                 .WithTenantId(TestConstants.Utid)
                 .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 

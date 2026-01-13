@@ -149,10 +149,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
 
-            // Add Kerberos Ticket claims if there's valid service principal name in Configuration.
-            // Kerberos Ticket claim is only allowed at token request due to security issue.
-            // It should not be included for authorize request.
-            AddClaims();
+            _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.ClaimsAndClientCapabilities);
 
             foreach (var kvp in additionalBodyParameters)
             {
@@ -181,42 +178,6 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             AddExtraHttpHeaders();
-        }
-
-        /// <summary>
-        /// Add Claims, including ClientCapabilities, to body parameter for POST request.
-        /// </summary>
-        private void AddClaims()
-        {
-            string kerberosClaim = KerberosSupplementalTicketManager.GetKerberosTicketClaim(
-                _requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName,
-                _requestParams.RequestContext.ServiceBundle.Config.TicketContainer);
-            string resolvedClaims;
-            if (string.IsNullOrEmpty(kerberosClaim))
-            {
-                resolvedClaims = _requestParams.ClaimsAndClientCapabilities;
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(_requestParams.ClaimsAndClientCapabilities))
-                {
-                    var existingClaims = JsonHelper.ParseIntoJsonObject(_requestParams.ClaimsAndClientCapabilities);
-                    var mergedClaims = ClaimsHelper.MergeClaimsIntoCapabilityJson(kerberosClaim, existingClaims);
-
-                    resolvedClaims = JsonHelper.JsonObjectToString(mergedClaims);
-                    _requestParams.RequestContext.Logger.Verbose(
-                        () => $"Adding kerberos claim + Claims/ClientCapabilities to request: {resolvedClaims}");
-                }
-                else
-                {
-                    resolvedClaims = kerberosClaim;
-                    _requestParams.RequestContext.Logger.Verbose(
-                        () => $"Adding kerberos claim to request: {resolvedClaims}");
-                }
-            }
-
-            // no-op if resolvedClaims is null
-            _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, resolvedClaims);
         }
 
         private void AddExtraHttpHeaders()

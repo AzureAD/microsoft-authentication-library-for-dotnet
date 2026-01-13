@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo);
                 throw;
-            }           
+            }
         }
 
         private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         ServiceBundle.PlatformProxy.GetProductName(),
                         errorCodeToLog,
                         apiEvent.ApiId,
-                        apiEvent.CallerSdkApiId, 
+                        apiEvent.CallerSdkApiId,
                         apiEvent.CallerSdkVersion,
                         cacheRefreshReason,
                         apiEvent.TokenType);
@@ -267,12 +267,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-id", out callerSdkId))
             {
                 AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-id");
-            } 
+            }
             else
             {
                 callerSdkId = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientName;
             }
-            
+
             if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-ver", out callerSdkVer))
             {
                 AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-ver");
@@ -312,25 +312,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return AssertionType.None;
         }
 
-        protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse)
+        protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse, CancellationToken cancellationToken = default)
         {
             // developer passed in user object.
             AuthenticationRequestParameters.RequestContext.Logger.Info("Checking client info returned from the server..");
 
-            ClientInfo fromServer = null;
+            ClientInfo clientInfoFromServer = null;
 
-            if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
-                AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity &&
+            if (AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenByRefreshToken &&
                 AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs &&
                 !(msalTokenResponse.ClientInfo is null))
             {
-                //client_info is not returned from client credential and managed identity flows because there is no user present.
-                fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
+                //client_info is not returned from managed identity flows because there is no user present.
+                clientInfoFromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
+                ValidateAccountIdentifiers(clientInfoFromServer);
             }
-
-            ValidateAccountIdentifiers(fromServer);
 
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
@@ -338,8 +336,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var atItem = tuple.Item1;
             var idtItem = tuple.Item2;
             Account account = tuple.Item3;
-
-            return new AuthenticationResult(
+#if !MOBILE
+            atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
+#endif
+            return await AuthenticationResult.CreateAsync(
                 atItem,
                 idtItem,
                 AuthenticationRequestParameters.AuthenticationScheme,
@@ -348,7 +348,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
                 msalTokenResponse.SpaAuthCode,
-                msalTokenResponse.CreateExtensionDataStringMap());
+                msalTokenResponse.CreateExtensionDataStringMap(),
+                cancellationToken).ConfigureAwait(false);
         }
 
         protected virtual void ValidateAccountIdentifiers(ClientInfo fromServer)
@@ -517,7 +518,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
+        internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(
+            MsalServiceException e, 
+            MsalAccessTokenCacheItem cachedAccessTokenItem, 
+            CancellationToken cancellationToken)
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
@@ -530,7 +534,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var idToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
 
-                return new AuthenticationResult(
+                return await AuthenticationResult.CreateAsync(
                     cachedAccessTokenItem,
                     idToken,
                     AuthenticationRequestParameters.AuthenticationScheme,
@@ -539,7 +543,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.ApiEvent,
                     account,
                     spaAuthCode: null,
-                    additionalResponseParameters: null);
+                    additionalResponseParameters: null, 
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");

@@ -24,15 +24,9 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
-    public class HttpManagerTests
+    public class HttpManagerTests : TestBase
     {
         private readonly TestDefaultRetryPolicy _stsRetryPolicy = new TestDefaultRetryPolicy(RequestType.STS);
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         public async Task MtlsCertAsync()
@@ -584,6 +578,47 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 {
                     Assert.AreEqual("Request to the endpoint timed out.", exc.Message);
                 }
+            }
+        }
+
+        // Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/XXXX
+        // Verifies that timeout with headers but without correlation ID does not throw KeyNotFoundException
+        [TestMethod]
+        public async Task TestRetryOnTimeoutWithHeadersButNoCorrelationIdAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Simulate permanent errors (to trigger the maximum number of retries)
+                const int Num500Errors = 1 + TestDefaultRetryPolicy.DefaultStsMaxRetries; // initial request + maximum number of retries
+                for (int i = 0; i < Num500Errors; i++)
+                {
+                    httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
+                }
+
+                // Create headers without correlation ID - this was causing KeyNotFoundException
+                var headers = new Dictionary<string, string>
+                {
+                    ["some-other-header"] = "some-value"
+                };
+
+                var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    httpManager.SendRequestAsync(
+                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                        headers: headers,
+                        body: new FormUrlEncodedContent(new Dictionary<string, string>()),
+                        method: HttpMethod.Post,
+                        logger: Substitute.For<ILoggerAdapter>(),
+                        doNotThrow: false,
+                        mtlsCertificate: null,
+                        validateServerCert: null,
+                        cancellationToken: default,
+                        retryPolicy: _stsRetryPolicy))
+                    .ConfigureAwait(false);
+
+                // Should get timeout error without KeyNotFoundException
+                Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
+                Assert.AreEqual("Request to the endpoint timed out.", exc.Message);
+                Assert.IsNull(exc.CorrelationId);
             }
         }
 

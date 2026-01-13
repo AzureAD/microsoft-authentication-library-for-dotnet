@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                TestCommon.ResetInternalStaticCaches();
+                ApplicationBase.ResetStateForTest();
                 IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CNoTenantIdTestData.txt"));
                 RunCacheFormatValidation(harness);
             }

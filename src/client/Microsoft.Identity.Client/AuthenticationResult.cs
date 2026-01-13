@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
@@ -22,7 +23,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial class AuthenticationResult
     {
-        private readonly IAuthenticationOperation _authenticationScheme;
+        private IAuthenticationOperation _authenticationScheme;
 
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
@@ -126,19 +127,76 @@ namespace Microsoft.Identity.Client
 
         }
 
-        internal AuthenticationResult(
+        /// <summary>
+        /// This method must be used by the product code to create an <see cref="AuthenticationResult"/> instance.
+        /// It calls IAuthenticationOperation.FormatResult or FormatResultAsync on the authentication scheme
+        /// </summary>
+        internal static async Task<AuthenticationResult> CreateAsync(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem,
             IAuthenticationOperation authenticationScheme,
+            Guid correlationId,
+            TokenSource tokenSource,
+            ApiEvent apiEvent,
+            Account account,
+            string spaAuthCode,
+            IReadOnlyDictionary<string, string> additionalResponseParameters,
+            CancellationToken cancellationToken = default)
+        {
+            if (authenticationScheme == null)
+            {
+                throw new ArgumentNullException(nameof(authenticationScheme));
+            }
+
+            // Create the AuthenticationResult without calling FormatResult in constructor
+            var result = new AuthenticationResult(
+                msalAccessTokenCacheItem,
+                msalIdTokenCacheItem,
+                correlationId,
+                tokenSource,
+                apiEvent,
+                account,
+                spaAuthCode,
+                additionalResponseParameters,
+                authenticationScheme);
+
+            // Apply token formatting (async if supported, sync otherwise)
+            var measuredResultDuration = await StopwatchService.MeasureCodeBlockAsync(async () =>
+            {
+                if (authenticationScheme is IAuthenticationOperation2 asyncAuthScheme)
+                {
+                    await asyncAuthScheme.FormatResultAsync(result, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    authenticationScheme.FormatResult(result);
+                }
+            }).ConfigureAwait(false);
+
+            // Update telemetry metadata
+            result.AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
+            result.AuthenticationResultMetadata.TelemetryTokenType = authenticationScheme.TelemetryTokenType;
+
+            return result;
+        }
+
+        //Default constructor for testing
+        internal AuthenticationResult() { }
+
+        /// <summary>
+        /// This is to help CreateAsync
+        /// </summary>
+        private AuthenticationResult(
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem,
             Guid correlationID,
             TokenSource tokenSource,
             ApiEvent apiEvent,
             Account account,
             string spaAuthCode,
-            IReadOnlyDictionary<string, string> additionalResponseParameters)
+            IReadOnlyDictionary<string, string> additionalResponseParameters,
+            IAuthenticationOperation authenticationScheme)
         {
-            _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
-
             string homeAccountId =
                 msalAccessTokenCacheItem?.HomeAccountId ??
                 msalIdTokenCacheItem?.HomeAccountId;
@@ -163,13 +221,15 @@ namespace Microsoft.Identity.Client
             TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             SpaAuthCode = spaAuthCode;
-
+            _authenticationScheme = authenticationScheme;
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
+
             AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
                                                                     (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
                                                                     additionalResponseParameters;
+
             if (msalAccessTokenCacheItem != null)
             {
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
@@ -189,19 +249,7 @@ namespace Microsoft.Identity.Client
 
                 AccessToken = msalAccessTokenCacheItem.Secret;
             }
-
-            var measuredResultDuration = StopwatchService.MeasureCodeBlock(() =>
-            {
-                //Important: only call this at the end
-                authenticationScheme.FormatResult(this);
-            });
-
-            AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
-            AuthenticationResultMetadata.TelemetryTokenType = authenticationScheme.TelemetryTokenType;
         }
-
-        //Default constructor for testing
-        internal AuthenticationResult() { }
 
         /// <summary>
         /// Access Token that can be used as a bearer token to access protected web APIs

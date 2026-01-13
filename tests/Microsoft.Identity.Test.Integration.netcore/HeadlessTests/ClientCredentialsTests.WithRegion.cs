@@ -29,6 +29,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class RegionalAuthIntegrationTests
     {
+        // TODO: TENANT MIGRATION - These tests currently use original tenant configuration
+        // Regional endpoints (eastus2.login.microsoft.com) return AADSTS100007 with new tenant
+        // "Only managed identities and Microsoft internal service identities are supported"
+        // Regional endpoints are restricted by Azure AD policy for regular app registrations
+        
         private KeyVaultSecretsProvider _keyVault;
 
         private const string RegionalHost = "centralus.login.microsoft.com";
@@ -38,7 +43,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
 
             if (_keyVault == null)
             {
@@ -59,7 +64,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy); // Use legacy config for regional tests          
             settings.InstanceDiscoveryEndpoint = instanceDiscoveryEnabled;
             _confidentialClientApplication = BuildCCA(settings, factory);
 
@@ -78,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy); // Use legacy config for regional tests
             _confidentialClientApplication = BuildCCA(settings, factory, true, "invalid");
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
@@ -131,7 +136,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
             else
             {
-                builder.WithCertificate(settings.GetCertificate());
+                builder.WithCertificate(settings.Certificate);
             }
 
             builder.WithAuthority($@"https://{settings.Environment}/{settings.TenantId}")
@@ -193,7 +198,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var manager = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
 
             var jwtToken = new JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
-            var cert = ConfidentialAppSettings.GetSettings(Cloud.Public).GetCertificate();
+            var cert = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy).Certificate; // Use legacy config for regional tests
 
             return jwtToken.Sign(cert, true, true);
         }

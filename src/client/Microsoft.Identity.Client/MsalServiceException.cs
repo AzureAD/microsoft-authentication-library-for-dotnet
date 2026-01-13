@@ -242,10 +242,9 @@ namespace Microsoft.Identity.Client
         {
             return base.ToString() + string.Format(
                 CultureInfo.InvariantCulture,
-                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}",
+                "\n\tStatusCode: {0} \n\tResponseBody: {1}",
                 StatusCode,
-                ResponseBody,
-                Headers);
+                ResponseBody);
         }
 
         #region Serialization

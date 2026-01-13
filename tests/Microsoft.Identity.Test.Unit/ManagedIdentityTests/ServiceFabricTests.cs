@@ -20,15 +20,9 @@ using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     [TestClass]
-    public class ServiceFabricTests
+    public class ServiceFabricTests : TestBase
     {
         private const string Resource = "https://management.azure.com";
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         public async Task ServiceFabricInvalidEndpointAsync()
@@ -42,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 // Disabling the shared cache to avoid the test to pass because of the cache
-                miBuilder.Config.AccessorOptions = null;
+                
 
                 var mi = miBuilder.Build();
 
@@ -77,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 // Disabling the shared cache to avoid the test to pass because of the cache
-                miBuilder.Config.AccessorOptions = null;
+                
 
                 var mi = miBuilder.BuildConcrete();
 
@@ -102,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpClientFactory(new MsalSFFactoryNotImplementedException());
 
                 // Disabling the shared cache to avoid the test to pass because of the cache
-                miBuilder.Config.AccessorOptions = null;
+                
                 var mi = miBuilder.BuildConcrete();
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>

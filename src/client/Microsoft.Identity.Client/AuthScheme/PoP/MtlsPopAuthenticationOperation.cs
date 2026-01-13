@@ -4,13 +4,15 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-    internal class MtlsPopAuthenticationOperation : IAuthenticationOperation
+    internal class MtlsPopAuthenticationOperation : IAuthenticationOperation2
     {
         private readonly X509Certificate2 _mtlsCert;
 
@@ -36,9 +38,21 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             };
         }
 
+        public Task FormatResultAsync(AuthenticationResult authenticationResult, CancellationToken cancellationToken = default)
+        {
+            FormatResult(authenticationResult);
+            return Task.CompletedTask;
+        }
+
         public void FormatResult(AuthenticationResult authenticationResult)
         {
             authenticationResult.BindingCertificate = _mtlsCert;
+        }
+
+        public Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData)
+        {
+            // no-op
+            return Task.FromResult(true);
         }
     }
 }

@@ -3,10 +3,12 @@
 
 using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
@@ -39,10 +41,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate two 404s (to trigger retries), then a successful response
                 const int Num404Errors = 2;
@@ -98,10 +99,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate four 410s (to trigger retries), then a successful response
                 const int Num410Errors = 4;
@@ -157,10 +157,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate permanent 410s (to trigger the maximum number of retries)
                 const int Num410Errors = 1 + TestImdsRetryPolicy.LinearStrategyNumRetries; // initial request + maximum number of retries
@@ -213,10 +212,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate permanent 504s (to trigger the maximum number of retries)
                 const int Num504Errors = 1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries; // initial request + maximum number of retries
@@ -269,10 +267,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
@@ -321,10 +318,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
@@ -367,10 +363,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
-                // Disable cache to avoid pollution
-                miBuilder.Config.AccessorOptions = null;
-
                 IManagedIdentityApplication mi = miBuilder.Build();
+
+                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds);
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
                 const int Num504Errors = 1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries; // initial request + maximum number of retries

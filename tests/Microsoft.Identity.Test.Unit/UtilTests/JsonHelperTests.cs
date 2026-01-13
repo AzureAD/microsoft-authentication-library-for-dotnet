@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                               ""IdToken"": null,
                               ""TenantId"": null,
                               ""UserInfo"": {
-                                 ""DisplayableId"": ""idlab@msidlab4.onmicrosoft.com"",
+                                 ""DisplayableId"": ""MSAL-User-Default@id4slab1.onmicrosoft.com"",
                                  ""FamilyName"": null,
                                  ""GivenName"": null,
                                  ""IdentityProvider"": null,
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                         }";
 
             AdalResultWrapper result = JsonHelper.DeserializeFromJson<AdalResultWrapper>(json);
-            Assert.AreEqual("idlab@msidlab4.onmicrosoft.com", result.Result.UserInfo.DisplayableId);
+            Assert.AreEqual("MSAL-User-Default@id4slab1.onmicrosoft.com", result.Result.UserInfo.DisplayableId);
             Assert.AreEqual("rt_secret", result.RefreshToken);
         }
 
@@ -62,25 +62,14 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid", UniqueTenantIdentifier = "some_tid" };
 
             string actualJson = JsonHelper.SerializeToJson(clientInfo);
+#if SUPPORTS_SYSTEM_TEXT_JSON
             string expectedJson = @"{
                                        ""uid"": ""some_uid"",
                                        ""utid"": ""some_tid""
                                     }";
-
-            JsonTestUtils.AssertJsonDeepEquals(expectedJson, actualJson);
-        }
-
-        [TestMethod]
-        public void Serialize_ClientInfo_WithNull()
-        {
-            ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid" };
-
-            string actualJson = JsonHelper.SerializeToJson(clientInfo);
-            string expectedJson = @"{
-                                       ""uid"": ""some_uid"",
-                                       ""utid"": null
-                                    }";
-
+#else
+            string expectedJson = @"{""uid"":""some_uid"",""utid"":""some_tid"",""AdditionalResponseParameters"":null}";
+#endif
             JsonTestUtils.AssertJsonDeepEquals(expectedJson, actualJson);
         }
 

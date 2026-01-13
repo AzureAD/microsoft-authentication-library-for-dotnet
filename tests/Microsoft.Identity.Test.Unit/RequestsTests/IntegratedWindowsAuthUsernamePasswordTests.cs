@@ -25,15 +25,9 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class IntegratedWindowsAuthAndUsernamePasswordTests
+    public class IntegratedWindowsAuthAndUsernamePasswordTests : TestBase
     {
         private string _password = "x";
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         private MockHttpMessageHandler AddMockHandlerDefaultUserRealmDiscovery(MockHttpManager httpManager)
         {
@@ -301,7 +295,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParameters)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                         .BuildConcrete();
 
                 AuthenticationResult result = await app
@@ -345,7 +339,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParameters)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                         .BuildConcrete();
 
                 AuthenticationResult result = await app
@@ -398,7 +392,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParameters)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
                                                         .BuildConcrete();
 
                 MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(

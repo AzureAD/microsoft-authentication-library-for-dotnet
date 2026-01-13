@@ -1078,3 +1078,45 @@ Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAsserti
 static Microsoft.Identity.Client.Extensibility.AcquireTokenForClientBuilderExtensions.WithExtraBodyParameters(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, System.Collections.Generic.Dictionary<string, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string>>> extrabodyparams) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithExtraHttpHeaders<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IDictionary<string, string> extraHttpHeaders) -> T
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, (string Value, bool IncludeInCacheKey)> extraQueryParameters) -> T
+Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, (string Value, bool IncludeInCacheKey)> extraQueryParameters) -> T
+const Microsoft.Identity.Client.MsalError.CannotSwitchBetweenImdsVersionsForPreview = "cannot_switch_between_imds_versions_for_preview" -> string
+const Microsoft.Identity.Client.MsalError.InvalidCertificate = "invalid_certificate" -> string
+const Microsoft.Identity.Client.MsalError.MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity" -> string
+const Microsoft.Identity.Client.MsalError.MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1" -> string
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory
+Microsoft.Identity.Client.IMsalMtlsHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ImdsV2 = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, string> extraQueryParameters) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+static Microsoft.Identity.Client.ApplicationBase.ResetStateForTest() -> void
+const Microsoft.Identity.Client.MsalError.ImdsServiceError = "imds_service_error" -> string
+const Microsoft.Identity.Client.MsalError.ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable" -> string
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.FormatResultAsync(Microsoft.Identity.Client.AuthenticationResult authenticationResult, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.ValidateCachedTokenAsync(Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData cachedTokenData) -> System.Threading.Tasks.Task<bool>
+Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData
+Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.MsalCacheValidationData() -> void
+Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.PersistedCacheParameters.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.AssertionRequestOptions.Authority.get -> string
+Microsoft.Identity.Client.AssertionRequestOptions.Authority.set -> void
+Microsoft.Identity.Client.AssertionRequestOptions.TenantId.get -> string
+Microsoft.Identity.Client.AssertionRequestOptions.TenantId.set -> void
+const Microsoft.Identity.Client.MsalError.InvalidClientCredentialConfiguration = "invalid_client_credential_configuration" -> string
+Microsoft.Identity.Client.Extensibility.ExecutionResult
+Microsoft.Identity.Client.Extensibility.ExecutionResult.ClientCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.Extensibility.ExecutionResult.Exception.get -> Microsoft.Identity.Client.MsalException
+Microsoft.Identity.Client.Extensibility.ExecutionResult.Result.get -> Microsoft.Identity.Client.AuthenticationResult
+Microsoft.Identity.Client.Extensibility.ExecutionResult.Successful.get -> bool
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnCompletion(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task> onCompletion) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnMsalServiceFailure(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task<bool>> onMsalServiceFailure) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2>> certificateProvider) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ManagedIdentitySourceResult(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> void
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.Source.get -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult>
+Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder
+

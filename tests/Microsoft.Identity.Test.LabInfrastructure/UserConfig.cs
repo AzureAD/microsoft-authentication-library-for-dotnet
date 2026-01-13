@@ -1,0 +1,51 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+using Newtonsoft.Json;
+
+namespace Microsoft.Identity.Test.LabInfrastructure
+{
+    public class UserConfig
+    {
+        [JsonProperty("objectId")]
+        public Guid ObjectId { get; set; }
+
+        [JsonProperty("userType")]
+        public string UserType { get; set; }
+
+        [JsonProperty("upn")]
+        public string Upn { get; set; }
+
+        [JsonProperty("homeupn")]
+        public string HomeUPN { get; set; }
+
+        [JsonProperty("b2cprovider")]
+        public string B2cProvider { get; set; }
+
+        [JsonProperty("labname")]
+        public string LabName { get; set; }
+
+        public string FederationProvider { get; set; }
+
+        public string TenantId { get; set; }
+
+        private string _password = null;
+
+        [JsonProperty("appid")]
+        public string AppId { get; set; }
+
+        [JsonProperty("azureenvironment")]
+        public string AzureEnvironment { get; set; }
+
+        public string GetOrFetchPassword()
+        {
+            if (_password == null)
+            {
+                _password = LabResponseHelper.FetchUserPassword(LabName);
+            }
+
+            return _password;
+        }
+    }
+}

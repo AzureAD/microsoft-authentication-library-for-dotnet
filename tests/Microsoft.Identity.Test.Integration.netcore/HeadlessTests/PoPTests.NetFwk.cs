@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();           
+            ApplicationBase.ResetStateForTest();
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -66,7 +66,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task PoP_BearerAndPoP_CanCoexist_Async()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await BearerAndPoP_CanCoexist_Async().ConfigureAwait(false);
         }
 
@@ -81,7 +80,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
@@ -109,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .WithAuthority(settings.Authority).Build();
@@ -159,7 +158,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = ConfidentialClientApplicationBuilder.Create(settings.ClientId)
                 .WithTestLogging()
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
             ConfigureInMemoryCache(cca);
@@ -181,7 +180,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                 .Build();
@@ -228,7 +227,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
@@ -266,7 +265,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -300,12 +299,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ROPC_PopTestWithRSAAsync()
         {
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
 
+            // Use the lab response app and tenant for consistency instead of mixing configurations
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .Create(app.AppId)
+                .WithAuthority($"https://login.microsoftonline.com/{user.TenantId}")
+                .WithClientSecret(settings.Secret) // Still use the certificate/secret from settings
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -314,14 +315,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
             popConfig.HttpMethod = HttpMethod.Get;
 
-            var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+            var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, user.Upn, user.GetOrFetchPassword())
                 .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                settings.ClientId,
+                app.AppId, // Use consistent app ID from lab response
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
@@ -337,7 +338,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -404,7 +405,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -458,7 +459,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(settings.ClientId)
                 .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .Build();
 
             // 3. When acquiring a token, use WithPopKeyId and OnBeforeTokenRequest extensiblity methods
@@ -538,7 +539,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -591,7 +592,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -680,7 +681,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority)
-                .WithClientSecret(settings.GetSecret())
+                .WithClientSecret(settings.Secret)
                 .WithExperimentalFeatures(true)
                 .Build();
 
@@ -714,14 +715,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [IgnoreOnOneBranch]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             WamLoggerValidator wastestLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .Create(app.AppId)
+               .WithAuthority(app.Authority, "organizations")
                .WithLogging(wastestLogger)
                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                .Build();
@@ -732,18 +734,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var result = await pca
                 .AcquireTokenByUsernamePassword(
                     scopes,
-                    labResponse.User.Upn,
-                    labResponse.User.GetOrFetchPassword())
+                    user.Upn,
+                    user.GetOrFetchPassword())
                 .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
                 .ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes, true);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes, true);
 
             Assert.IsTrue(wastestLogger.HasLogged);
 
             PoPValidator.VerifyPoPToken(
-                labResponse.App.AppId,
+                app.AppId,
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
