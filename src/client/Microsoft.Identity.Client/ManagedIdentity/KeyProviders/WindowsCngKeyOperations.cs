@@ -10,13 +10,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 {
     /// <summary>
     /// Provides CNG-backed cryptographic key operations for Windows platforms, supporting both 
-    /// KeyGuard-protected keys (with VBS/TPM integration) and hardware-backed TPM/KSP keys
+    /// CredentialGuard-protected keys (with VBS/TPM integration) and hardware-backed TPM/KSP keys
     /// for managed identity authentication scenarios.
     /// </summary>
     /// <remarks>
     /// This class handles two primary key protection mechanisms:
     /// <list type="bullet">
-    /// <item><description>KeyGuard: Requires Virtualization Based Security (VBS) and provides enhanced key protection</description></item>
+    /// <item><description>CredentialGuard: Requires Virtualization Based Security (VBS) and provides enhanced key protection</description></item>
     /// <item><description>Hardware TPM/KSP: Uses Platform Crypto Provider (PCP) for TPM-backed keys</description></item>
     /// </list>
     /// All operations are performed in user scope with silent key access patterns.
@@ -34,21 +34,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         private const CngKeyCreationOptions NCryptUsePerBootKeyFlag = (CngKeyCreationOptions)0x00040000;
 
         /// <summary>
-        /// Attempts to get or create a KeyGuard-protected RSA key for managed identity operations.
-        /// This method first tries to open an existing key, and if not found, creates a fresh KeyGuard-protected key.
-        /// KeyGuard requires VBS (Virtualization Based Security) to be enabled and supported.
+        /// Attempts to get or create a CredentialGuard-protected RSA key for managed identity operations.
+        /// This method first tries to open an existing key, and if not found, creates a fresh CredentialGuard-protected key.
+        /// CredentialGuard requires VBS (Virtualization Based Security) to be enabled and supported.
         /// </summary>
         /// <param name="logger">Logger adapter for diagnostic messages and error reporting</param>
-        /// <param name="rsa">When this method returns <see langword="true"/>, contains the RSA instance with the KeyGuard-protected key; 
+        /// <param name="rsa">When this method returns <see langword="true"/>, contains the RSA instance with the CredentialGuard-protected key; 
         /// when this method returns <see langword="false"/>, this parameter is set to <see langword="null"/></param>
-        /// <returns><see langword="true"/> if a KeyGuard-protected RSA key was successfully obtained or created; 
-        /// <see langword="false"/> if KeyGuard is unavailable, VBS is not supported, or the operation failed</returns>
+        /// <returns><see langword="true"/> if a CredentialGuard-protected RSA key was successfully obtained or created; 
+        /// <see langword="false"/> if CredentialGuard is unavailable, VBS is not supported, or the operation failed</returns>
         /// <remarks>
         /// <para>This method performs the following operations in sequence:</para>
         /// <list type="number">
-        /// <item><description>Attempts to open an existing KeyGuard key using the software KSP in user scope</description></item>
-        /// <item><description>If the key doesn't exist, creates a new KeyGuard-protected key</description></item>
-        /// <item><description>Validates that the key is actually KeyGuard-protected</description></item>
+        /// <item><description>Attempts to open an existing CredentialGuard key using the software KSP in user scope</description></item>
+        /// <item><description>If the key doesn't exist, creates a new CredentialGuard-protected key</description></item>
+        /// <item><description>Validates that the key is actually CredentialGuard-protected</description></item>
         /// <item><description>If validation fails, recreates the key and re-validates</description></item>
         /// <item><description>Ensures the RSA key size is at least 2048 bits when possible</description></item>
         /// </list>
@@ -74,18 +74,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
                 catch (CryptographicException)
                 {
                     // Not found -> create fresh (helper may return null if VBS unavailable)
-                    logger?.Info(() => "[MI][WinKeyProvider] KeyGuard key not found; creating fresh.");
+                    logger?.Info(() => "[MI][WinKeyProvider] CredentialGuard key not found; creating fresh.");
                     key = CreateFresh(logger);
                 }
 
                 // If VBS is unavailable, CreateFresh() returns null. Bail out cleanly.
                 if (key == null)
                 {
-                    logger?.Info(() => "[MI][WinKeyProvider] KeyGuard unavailable (VBS off or not supported).");
+                    logger?.Info(() => "[MI][WinKeyProvider] CredentialGuard unavailable (VBS off or not supported).");
                     return false;
                 }
 
-                // Ensure actually KeyGuard-protected; recreate if not
+                // Ensure actually CredentialGuard-protected; recreate if not
                 if (!IsKeyGuardProtected(key))
                 {
                     logger?.Info(() => "[MI][WinKeyProvider] KeyGuard key found but not protected; recreating.");

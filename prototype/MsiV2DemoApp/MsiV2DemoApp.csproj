@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Identity.Client" />
-    <PackageReference Include="Microsoft.Identity.Client.MtlsPop" />
+    <PackageReference Include="Microsoft.Identity.Client.KeyAttestation" />
   </ItemGroup>
 
 </Project>
