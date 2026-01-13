@@ -1,11 +1,11 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.Identity.Client.MtlsPop.Attestation
+namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 {
     /// <summary>
     /// Error codes returned by <c>AttestationClientLib.dll</c>.
@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
         /// <summary>The attestation enclave rejected the supplied evidence (policy or signature failure).</summary>
         ERRORATTESTATIONFAILED = -6,
 
-        /// <summary>libcurl reported “couldn’t send” (DNS resolution, TLS handshake, or socket error).</summary>
+        /// <summary>libcurl reported "couldn't send" (DNS resolution, TLS handshake, or socket error).</summary>
         ERRORSENDINGCURLREQUESTFAILED = -7,
 
         /// <summary>One or more input parameters passed to the native API were invalid or null.</summary>
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
         /// <summary>The service returned an empty JWT.</summary>
         ERROREMPTYJWTRESPONSE = -31,
 
-        /// <summary>Creating the KeyGuard attestation report failed on the client.</summary>
+        /// <summary>Creating the CredentialGuard attestation report failed on the client.</summary>
         ERRORCREATEKGATTESTATIONREPORT = -32,
 
         /// <summary>Failed to extract the public key from the import-only key.</summary>

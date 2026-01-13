@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Client.MtlsPop;
+using Microsoft.Identity.Client.KeyAttestation;
 
 internal class Program
 {
@@ -28,11 +28,19 @@ internal class Program
     // Session flags
     private static bool s_forceRefresh = false;        // persistent toggle
     private static bool s_forceRefreshNext = false;    // one-shot bypass
-    private static bool s_lastWasBound = false;
     private static bool s_hasLast = false;
 
     // Toggle for full token printing (default OFF)
     private static bool s_printFullToken = false;
+
+    private enum AcquireMode
+    {
+        Bearer,
+        BoundWithAttestation,
+        BoundNoAttestation
+    }
+
+    private static AcquireMode s_lastMode = AcquireMode.Bearer;
 
     private static async Task Main()
     {
@@ -52,17 +60,18 @@ internal class Program
             DrawStatusBar();
             WriteMenu();
 
-            Console.Write("\nChoice (A/P/T/B/F/I/R/H/Enter/X): ");
+            Console.Write("\nChoice (A/P/N/T/B/F/I/R/H/Enter/X): ");
             var key = Console.ReadKey(intercept: true);
 
             if (key.Key == ConsoleKey.Enter)
             {
                 if (!s_hasLast)
                 {
-                    Info("No previous acquisition yet. Press A or P first.");
+                    Info("No previous acquisition yet. Press A, P or N first.");
                     continue;
                 }
-                await AcquireAndReportAsync(bound: s_lastWasBound, forceRefresh: s_forceRefresh).ConfigureAwait(false);
+
+                await AcquireAndReportAsync(mode: s_lastMode, forceRefresh: s_forceRefresh).ConfigureAwait(false);
                 continue;
             }
 
@@ -74,14 +83,20 @@ internal class Program
                 switch (ch)
                 {
                     case 'A': // Bearer
-                        await AcquireAndReportAsync(bound: false, forceRefresh: s_forceRefresh).ConfigureAwait(false);
-                        s_lastWasBound = false;
+                        await AcquireAndReportAsync(mode: AcquireMode.Bearer, forceRefresh: s_forceRefresh).ConfigureAwait(false);
+                        s_lastMode = AcquireMode.Bearer;
                         s_hasLast = true;
                         break;
 
-                    case 'P': // PoP (mTLS-bound)
-                        await AcquireAndReportAsync(bound: true, forceRefresh: s_forceRefresh).ConfigureAwait(false);
-                        s_lastWasBound = true;
+                    case 'P': // PoP (mTLS-bound) WITH attestation
+                        await AcquireAndReportAsync(mode: AcquireMode.BoundWithAttestation, forceRefresh: s_forceRefresh).ConfigureAwait(false);
+                        s_lastMode = AcquireMode.BoundWithAttestation;
+                        s_hasLast = true;
+                        break;
+
+                    case 'N': // PoP (mTLS-bound) WITHOUT attestation
+                        await AcquireAndReportAsync(mode: AcquireMode.BoundNoAttestation, forceRefresh: s_forceRefresh).ConfigureAwait(false);
+                        s_lastMode = AcquireMode.BoundNoAttestation;
                         s_hasLast = true;
                         break;
 
@@ -162,7 +177,16 @@ internal class Program
         Console.WriteLine("\n================ STATUS ================");
         Console.WriteLine($"Resource : {s_resource}");
         Console.WriteLine($"Identity : {s_identityLabel}");
-        Console.WriteLine($"Mode     : {(s_lastWasBound ? "Bound (mTLS PoP)" : "Bearer")}, ForceRefresh={(s_forceRefresh ? "ON" : "OFF")}, NextBypass={(s_forceRefreshNext ? "ON" : "OFF")}");
+
+        string modeLabel = s_lastMode switch
+        {
+            AcquireMode.Bearer => "Bearer",
+            AcquireMode.BoundWithAttestation => "Bound (mTLS PoP + Attestation)",
+            AcquireMode.BoundNoAttestation => "Bound (mTLS PoP, NO Attestation)",
+            _ => "Unknown"
+        };
+
+        Console.WriteLine($"Mode     : {modeLabel}, ForceRefresh={(s_forceRefresh ? "ON" : "OFF")}, NextBypass={(s_forceRefreshNext ? "ON" : "OFF")}");
         Console.WriteLine($"Secrets  : FullTokenPrint={(s_printFullToken ? "ON" : "OFF")}");
         Console.WriteLine("=======================================\n");
         Console.ForegroundColor = old;
@@ -173,7 +197,8 @@ internal class Program
         var old = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("A) Acquire Bearer token");
-        Console.WriteLine("P) Acquire Bound token (mTLS PoP)");
+        Console.WriteLine("P) Acquire Bound token (mTLS PoP) WITH attestation");
+        Console.WriteLine("N) Acquire Bound token (mTLS PoP) WITHOUT attestation");
         Console.WriteLine("T) Toggle Force Refresh (persistent)");
         Console.WriteLine("B) Bypass cache on NEXT acquisition (one-shot)");
         Console.WriteLine("F) Toggle Full Token Print");
@@ -191,7 +216,8 @@ internal class Program
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.WriteLine("Help:");
         Console.WriteLine(" - A: Get a Bearer token for the current resource.");
-        Console.WriteLine(" - P: Get a Bound (mTLS PoP) token (only useful if the API accepts cert-bound tokens).");
+        Console.WriteLine(" - P: Get a Bound (mTLS PoP) token WITH attestation support.");
+        Console.WriteLine(" - N: Get a Bound (mTLS PoP) token WITHOUT attestation support (for manual negative-path/cache testing).");
         Console.WriteLine(" - T: Toggle Force Refresh to bypass cache on every acquisition until turned off.");
         Console.WriteLine(" - B: One-shot bypass; only the NEXT acquisition will bypass cache, then it resets.");
         Console.WriteLine(" - F: Toggle Full Token Print. WARNING: prints the entire token (secret).");
@@ -285,17 +311,28 @@ internal class Program
         Success($"Identity set to {s_identityLabel}");
     }
 
-    private static async Task AcquireAndReportAsync(bool bound, bool forceRefresh)
+    private static async Task AcquireAndReportAsync(AcquireMode mode, bool forceRefresh)
     {
         // Compute effective force refresh (global OR one-shot), then consume one-shot
         bool effectiveForceRefresh = forceRefresh || s_forceRefreshNext;
         s_forceRefreshNext = false; // consume one-shot if it was set
 
-        Info($"\nAcquiring {(bound ? "BOUND (mTLS PoP)" : "BEARER")} token for {s_resource} ...");
+        Info($"\nAcquiring {mode} token for {s_resource} ...");
 
         var builder = s_miApp.AcquireTokenForManagedIdentity(s_resource);
+
+        bool bound = mode == AcquireMode.BoundWithAttestation || mode == AcquireMode.BoundNoAttestation;
+        bool useAttestation = mode == AcquireMode.BoundWithAttestation;
+
         if (bound)
+        {
             builder = builder.WithMtlsProofOfPossession();
+            if (useAttestation)
+            {
+                builder = builder.WithAttestationSupport();
+            }
+        }
+
         if (effectiveForceRefresh)
             builder = builder.WithForceRefresh(true);
 
@@ -305,7 +342,7 @@ internal class Program
         var source = result.AuthenticationResultMetadata?.TokenSource.ToString() ?? "Unknown";
         Console.WriteLine($"  Token source : {source}");
         Console.WriteLine($"  Expires On   : {result.ExpiresOn.UtcDateTime:O} (UTC)");
-        Console.WriteLine($"  Token type   : {(bound ? "Bound (mTLS PoP)" : "Bearer")}");
+        Console.WriteLine($"  Token type   : {mode}");
 
         if (s_printFullToken)
         {

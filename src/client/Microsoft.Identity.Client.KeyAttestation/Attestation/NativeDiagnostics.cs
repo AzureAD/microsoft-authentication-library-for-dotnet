@@ -1,11 +1,11 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.ComponentModel;
 using System.IO;
 
-namespace Microsoft.Identity.Client.MtlsPop.Attestation
+namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 {
     internal static class NativeDiagnostics
     {
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.MtlsPop.Attestation
                 return $"Unable to load {NativeDll}: {ex.Message}";
             }
 
-            // success – unload and return null (meaning “no error”)
+            // success – unload and return null (meaning "no error")
             WindowsDllLoader.Free(h);
             return null;
         }
