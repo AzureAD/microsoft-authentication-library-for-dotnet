@@ -19,7 +19,7 @@ internal class Program
             .Build();
 
         // Get app configuration from Lab
-        var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+        var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
         var cert = CertificateHelper.FindCertificateByName("LabAuth.MSIDLab.com");
 
         // Successful requests

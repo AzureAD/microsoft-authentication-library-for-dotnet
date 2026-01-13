@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             runOn.AssertFramework();
 
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
             string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
@@ -327,7 +327,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
             }
             else // Cloud.Public
             {
-                appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+                appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
                 secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
                 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
                 tenantId = appConfig.TenantId;

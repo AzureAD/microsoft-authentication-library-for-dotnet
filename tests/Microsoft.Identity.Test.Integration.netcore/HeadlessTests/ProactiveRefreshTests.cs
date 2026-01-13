@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .AddInMemoryExporter(exportedMetrics)
                 .Build();
 
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
             string[] appScopes = new[] { "https://vault.azure.net/.default" };
 

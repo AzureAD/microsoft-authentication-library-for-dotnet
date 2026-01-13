@@ -29,7 +29,7 @@ namespace NetCoreTestApp
           };
 
         // This app will be dynamically set to the multi-tenant app from lab
-        private static readonly string s_clientIdForPublicApp = LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).Result.AppId;
+        private static readonly string s_clientIdForPublicApp = LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).Result.AppId;
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
 
@@ -65,7 +65,7 @@ namespace NetCoreTestApp
 
         public static void Main(string[] args)
         {
-            var ccaConfig = LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).Result;
+            var ccaConfig = LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).Result;
             s_clientIdForConfidentialApp = ccaConfig.AppId;
             s_ccaAuthority = ccaConfig.Authority;
             s_confidentialClientCertificate = CertificateHelper.FindCertificateByName("LabAuth.MSIDLab.com");

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task Sni_Gets_Pop_Token_Successfully_TestAsync()
         {
             // Arrange: Use LabResponseHelper to get app configuration
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 

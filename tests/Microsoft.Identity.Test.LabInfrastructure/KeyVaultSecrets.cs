@@ -20,20 +20,18 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string UserPop = "MSAL-User-POP-JSON";
 
         // Names of key vault secrets for application configuration JSONs
-        public const string AppPCAClient = "App-PCAClient-Config";//MSAL-APP-AzureADMultipleOrgsPC-JSON
-        public const string MsalAppAzureAdMultipleOrgs = "MSAL-APP-AzureADMultipleOrgs-JSON";
-        public const string MsalAppAzureAdMultipleOrgsPublicClient = "MSAL-APP-AzureADMultipleOrgsPC-JSON";
+        //  - Broad test scenarios
+        public const string AppS2S = "Temp-App-S2S-Config";
+        public const string AppPCAClient = "Temp-App-PCAClient-Config";
+        public const string AppWebApi = "Temp-App-WebApi-Config";
+        //  - More specific test scenarios, edge cases, etc.
         public const string B2CAppIdLabsAppB2C = "MSAL-App-B2C-JSON";
         public const string ArlAppIdLabsApp = "MSAL-App-Arlington-JSON";
         public const string MsalAppCiam = "MSAL-App-CIAM-JSON";
         public const string MsalAppAzureAdMultipleOrgsRegional = "MSAL-APP-AzureADMultipleOrgsRegional-JSON";
         public const string MsalAppArlingtonCCA = "MSAL-App-ArlingtonCCA-JSON";
 
-        // Other configuration secrets
-        public const string EnvVariablesMsiConfig = "EnvVariables-MSI-Config";
-
-        // Name of key value secrets for app secrets and certificates
+        // Name of key vault secrets for app secrets and certificates
         public const string DefaultAppSecret = "MSAL-App-Default";
-
     }
 }

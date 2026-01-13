@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LegacyPoPAsync()
         {
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             X509Certificate2 clientCredsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
             string[] appScopes = new[] { "https://vault.azure.net/.default" };
             RsaSecurityKey popKey = CreateRsaSecurityKey();
@@ -401,7 +401,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LegacyPopUsingNewProtocol_CertThumbprinJWK_Async()
         {
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             X509Certificate2 clientCredsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
             string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
@@ -446,7 +446,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LegacyPopUsingNewProtocol_RsaKey_Async()
         {
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             X509Certificate2 clientCredsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
             string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
