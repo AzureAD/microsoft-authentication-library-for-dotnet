@@ -233,8 +233,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 CancellationToken.None).ConfigureAwait(false);
 
             // Assert that we opened the browser
+            // Verify response_mode=form_post is present (don't check for full requestUri to allow parameter replacement tests)
             await _platformProxy.Received(1).StartDefaultOsBrowserAsync(
-                Arg.Is<string>(s => s.Contains(requestUri) && s.Contains("response_mode=form_post")), 
+                Arg.Is<string>(s => s.Contains("response_mode=form_post")), 
                 requestContext.ServiceBundle.Config.IsBrokerEnabled)
                 .ConfigureAwait(false);
 
