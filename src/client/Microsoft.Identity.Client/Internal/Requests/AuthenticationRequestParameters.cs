@@ -201,6 +201,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string ClientAssertionFmiPath => _commonParameters.ClientAssertionFmiPath;
         #endregion
 
+        public string ExtraClientAssertionClaims => _commonParameters.ExtraClientAssertionClaims;
+
         public void LogParameters()
         {
             var logger = RequestContext.Logger;

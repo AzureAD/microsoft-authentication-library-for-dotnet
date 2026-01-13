@@ -72,12 +72,25 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
                 bool useSha2 = requestParameters.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported;
 
-                var jwtToken = new JsonWebToken(
-                cryptographyManager,
-                clientId,
-                tokenEndpoint,
-                _claimsToSign,
-                _appendDefaultClaims);
+                JsonWebToken jwtToken;
+                if (string.IsNullOrEmpty(requestParameters.ExtraClientAssertionClaims))
+                {
+                    jwtToken = new JsonWebToken(
+                        cryptographyManager,
+                        clientId,
+                        tokenEndpoint,
+                        _claimsToSign,
+                        _appendDefaultClaims);
+                }
+                else
+                {
+                    jwtToken = new JsonWebToken(
+                        cryptographyManager,
+                        clientId,
+                        tokenEndpoint,
+                        requestParameters.ExtraClientAssertionClaims,
+                        _appendDefaultClaims);
+                }
 
                 string assertion = jwtToken.Sign(certificate, requestParameters.SendX5C, useSha2);
 
