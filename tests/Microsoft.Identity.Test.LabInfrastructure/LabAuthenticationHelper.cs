@@ -17,6 +17,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string LabScope = "https://request.msidlab.com/.default";
         public const string LabClientInstance = "https://login.microsoftonline.com/";
         public const string LabClientTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+        
+        /// <summary>
+        /// Certificate name for Microsoft Identity lab authentication. 
+        /// This certificate is used for automated testing and is available only to Microsoft employees.
+        /// </summary>
         private const string AutomationTestCertName = "LabAuth.MSIDLab.com";
         public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId)
         {
@@ -42,7 +47,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             IConfidentialClientApplication confidentialApp;
             X509Certificate2 cert;
 
-            var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
+            var clientIdForCertAuth = string.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
 
             cert = CertificateHelper.FindCertificateByName(AutomationTestCertName);
             if (cert == null)
