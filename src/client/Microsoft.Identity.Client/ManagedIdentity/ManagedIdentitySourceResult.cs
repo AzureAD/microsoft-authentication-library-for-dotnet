@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// Result of managed identity source detection, including the detected source and any failure information from IMDS probes.
     /// </summary>
     /// <remarks>
-    /// This class is returned by <see cref="ManagedIdentityApplication.GetManagedIdentitySourceAsync"/> to provide
+    /// This class is returned by <see cref="ManagedIdentityApplication.GetManagedIdentitySourceAsync(bool, System.Threading.CancellationToken)"/> to provide
     /// detailed information about managed identity source detection, including failure reasons when IMDS probes fail.
     /// This information is useful for credential chains like DefaultAzureCredential to determine whether to skip
     /// managed identity authentication entirely.

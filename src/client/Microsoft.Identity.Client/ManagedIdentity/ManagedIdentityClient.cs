@@ -44,7 +44,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
-            AbstractManagedIdentity msi = await GetOrSelectManagedIdentitySourceAsync(requestContext, parameters.IsMtlsPopRequested, cancellationToken).ConfigureAwait(false);
+            AbstractManagedIdentity msi =
+                await GetOrSelectManagedIdentitySourceAsync(requestContext, parameters.IsMtlsPopRequested, cancellationToken)
+                    .ConfigureAwait(false);
+
             return await msi.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -64,8 +67,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 // If the source is not already set, determine it
                 if (s_sourceName == ManagedIdentitySource.None)
                 {
-                    // First invocation: detect and cache
-                    sourceResult = await GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested, cancellationToken).ConfigureAwait(false);
+                    // Default behavior: do NOT probe IMDS during selection.
+                    // If no env-based source is found, this will return DefaultToImds.
+                    sourceResult = await GetManagedIdentitySourceAsync(
+                        requestContext,
+                        isMtlsPopRequested,
+                        probe: false,
+                        cancellationToken)
+                        .ConfigureAwait(false);
+
                     source = sourceResult.Source;
                 }
                 else
@@ -79,7 +89,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 if (source == ManagedIdentitySource.ImdsV2 && !isMtlsPopRequested)
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but mTLS PoP was not requested. Falling back to ImdsV1 for this request only. Please use the \"WithMtlsProofOfPossession\" API to request a token via ImdsV2.");
-                    
+
                     // Mark that we used IMDSv1 in this process while IMDSv2 is cached (preview behavior).
                     s_imdsV1UsedForPreview = true;
 
@@ -99,7 +109,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 // If the source is determined to be ImdsV1 and mTLS PoP was requested,
                 // throw an exception since ImdsV1 does not support mTLS PoP
-                if (source == ManagedIdentitySource.Imds && isMtlsPopRequested)
+                if (source == ManagedIdentitySource.DefaultToImds && isMtlsPopRequested)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopTokenNotSupportedinImdsV1,
@@ -113,6 +123,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     ManagedIdentitySource.MachineLearning => MachineLearningManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
+                    // DefaultToImds means: no env-based source detected; don't probe; fall back to IMDS as the default source.
+                    // For mTLS PoP requests we must use the IMDSv2 flow. For non-PoP, use IMDSv1 flow.
+                    ManagedIdentitySource.DefaultToImds => isMtlsPopRequested
+                        ? ImdsV2ManagedIdentitySource.Create(requestContext)
+                        : ImdsManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.ImdsV2 => ImdsV2ManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.Imds => ImdsManagedIdentitySource.Create(requestContext),
                     _ => throw CreateManagedIdentityUnavailableException(sourceResult)
@@ -120,11 +135,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
+        // Back-compat wrapper: previous callers who don't specify probe now get probe=false behavior (no probe).
+        internal Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(
+            RequestContext requestContext,
+            bool isMtlsPopRequested,
+            CancellationToken cancellationToken)
+        {
+            return GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested, probe: false, cancellationToken);
+        }
+
         // Detect managed identity source based on the availability of environment variables and csr metadata probe request.
         // This method is perf sensitive any changes should be benchmarked.
         internal async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(
             RequestContext requestContext,
             bool isMtlsPopRequested,
+            bool probe,
             CancellationToken cancellationToken)
         {
             // First check env vars to avoid the probe if possible
@@ -135,19 +160,33 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return new ManagedIdentitySourceResult(source);
             }
 
+            // Default behavior: do NOT probe IMDS here.
+            // If no env-based source is found, return DefaultToImds and do not throw.
+            if (!probe)
+            {
+                requestContext.Logger.Info("[Managed Identity] No environment-based source detected. Returning DefaultToImds without probing.");
+                s_sourceName = ManagedIdentitySource.DefaultToImds;
+                return new ManagedIdentitySourceResult(s_sourceName);
+            }
+
+            // Probe mode: probe IMDS and return None if unreachable (no fatal throw from detection)
             string imdsV2FailureReason = null;
             string imdsV1FailureReason = null;
 
             // skip the ImdsV2 probe if MtlsPop was NOT requested
             if (isMtlsPopRequested)
             {
-                var (imdsV2Success, imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
+                var (imdsV2Success, imdsV2Failure) =
+                    await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken)
+                        .ConfigureAwait(false);
+
                 if (imdsV2Success)
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
                     s_sourceName = ManagedIdentitySource.ImdsV2;
                     return new ManagedIdentitySourceResult(s_sourceName);
                 }
+
                 imdsV2FailureReason = imdsV2Failure;
             }
             else
@@ -155,18 +194,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 requestContext.Logger.Info("[Managed Identity] Mtls Pop was not requested; skipping ImdsV2 probe.");
             }
 
-            var (imdsV1Success, imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
+            var (imdsV1Success, imdsV1Failure) =
+                await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken)
+                    .ConfigureAwait(false);
+
             if (imdsV1Success)
             {
                 requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
                 s_sourceName = ManagedIdentitySource.Imds;
                 return new ManagedIdentitySourceResult(s_sourceName);
             }
+
             imdsV1FailureReason = imdsV1Failure;
 
             requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");
             s_sourceName = ManagedIdentitySource.None;
-            
+
             return new ManagedIdentitySourceResult(s_sourceName)
             {
                 ImdsV1FailureReason = imdsV1FailureReason,
@@ -225,10 +268,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 logger?.Info("[Managed Identity] Azure Arc detected.");
                 return ManagedIdentitySource.AzureArc;
             }
-            else
-            {
-                return ManagedIdentitySource.None;
-            }
+
+            return ManagedIdentitySource.None;
         }
 
         // Method to return true if a file exists and is not empty to validate the Azure arc environment.
@@ -252,8 +293,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through file detection.");
                 return true;
-            } 
-            
+            }
+
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
         }
