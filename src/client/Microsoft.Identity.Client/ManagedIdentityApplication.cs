@@ -2,15 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client
@@ -28,6 +24,8 @@ namespace Microsoft.Identity.Client
         : ApplicationBase,
             IManagedIdentityApplication
     {
+        internal ManagedIdentityClient ManagedIdentityClient { get; }
+        
         internal ManagedIdentityApplication(
             ApplicationConfiguration configuration)
             : base(configuration)
@@ -37,6 +35,8 @@ namespace Microsoft.Identity.Client
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
 
             this.ServiceBundle.ApplicationLogger.Verbose(()=>$"ManagedIdentityApplication {configuration.GetHashCode()} created");
+        
+            ManagedIdentityClient = new ManagedIdentityClient();
         }
 
         // Stores all app tokens
@@ -55,13 +55,38 @@ namespace Microsoft.Identity.Client
                 resource);
         }
 
+        /// <inheritdoc/>
+        public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
+        {
+            if (ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None)
+            {
+                return new ManagedIdentitySourceResult(ManagedIdentityClient.s_sourceName);
+            }
+
+            // Create a temporary RequestContext for the logger and the IMDS probe request.
+            var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
+
+            // GetManagedIdentitySourceAsync might return ImdsV2 = true, but it still requires .WithMtlsProofOfPossesion on the Managed Identity Application object to hit the ImdsV2 flow
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested: true, cancellationToken).ConfigureAwait(false);
+        }
+
         /// <summary>
         /// Detects and returns the managed identity source available on the environment.
         /// </summary>
         /// <returns>Managed identity source detected on the environment if any.</returns>
+        [Obsolete("Use GetManagedIdentitySourceAsync() instead. \"ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;\"")]
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
-            return ManagedIdentityClient.GetManagedIdentitySource();
+            var source = ManagedIdentityClient.GetManagedIdentitySourceNoImds();
+            
+            return source == ManagedIdentitySource.None
+#pragma warning disable CS0618
+                // ManagedIdentitySource.DefaultToImds is marked obsolete, but is intentionally used here as a sentinel value to support legacy detection logic.
+                // This value signals that none of the environment-based managed identity sources were detected.
+                ? ManagedIdentitySource.DefaultToImds
+#pragma warning restore CS0618
+                : source;
+
         }
     }
 }

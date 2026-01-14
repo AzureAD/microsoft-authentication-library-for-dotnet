@@ -4,12 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Azure.Core;
 using Castle.Core.Internal;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -36,14 +39,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //http proxy base URL 
         private static readonly string s_baseURL = "https://service.msidlab.com/";
 
-        //Shared User Assigned Client ID
-        private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
+        //Shared User Assigned Client ID - Consolidated UAMI for both MSI endpoints and Key Vault access
+        private const string UserAssignedClientID = "45344e7d-c562-4be6-868f-18dac789c021";
         
+        //Lab Access Client ID for certificate-based authentication to lab resources
         private const string LabAccessClientID = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
 
-        private const string LabVaultAccessUserAssignedClientID = "4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6";
-
-        private const string UserAssignedObjectID = "9fc6a41b-e161-43ba-90ba-12f172141c23";
+        private const string UserAssignedObjectID = "a38637b6-b365-4652-af1f-cf5d8cf829ad";
 
         //Non Existent User Assigned Client/Object ID 
         private const string SomeRandomGuid = "f07359bb-f4f6-4e3c-ba9f-ccdf48eb80ce";
@@ -55,10 +57,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //Resource ID of the User Assigned Identity 
         private const string UamiResourceId = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
             "resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/" +
-            "MSAL_MSI_USERID";
+            "Msal_Integration_tests";
 
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
+
+        private AccessToken? _labApiAccessToken;
+        private string _labAccessAppId = new KeyVaultSecretsProvider().GetSecretByName("LabVaultAppID").Value;
 
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
@@ -70,7 +75,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                // Fetch the env variables from the resource and set them locally
+                // Fetch the env variables from Key Vault and set them locally
                 Dictionary<string, string> envVariables = 
                     await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
 
@@ -125,7 +130,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                // Fetch the env variables from the resource and set them locally
+                // Fetch the env variables from Key Vault and set them locally
                 Dictionary<string, string> envVariables =
                     await GetEnvironmentVariablesAsync(MsiAzureResource.WebApp).ConfigureAwait(false);
         
@@ -191,8 +196,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={MsiAzureResource.WebApp}&uri=";
 
-                //Create CCA with Proxy
-                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, LabVaultAccessUserAssignedClientID, UserAssignedIdentityId.ClientId);
+                //Create CCA with Proxy - using the consolidated UAMI for both MSI and Key Vault access
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, UserAssignedClientID, UserAssignedIdentityId.ClientId);
 
                 AuthenticationResult result;
                 //Act
@@ -430,8 +435,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Get the Environment Variables from the MSI Helper Service
             string uri = s_baseURL + "EnvironmentVariables?resource=" + resource;
 
-            var environmentVariableResponse = await LabUserHelper
-                .GetMSIEnvironmentVariablesAsync(uri)
+            var environmentVariableResponse = await 
+                GetMSIEnvironmentVariablesAsync(uri)
                 .ConfigureAwait(false);
 
             //process the response
@@ -447,6 +452,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
 
             return environmentVariables;
+        }
+
+        internal async Task<string> GetMSIEnvironmentVariablesAsync(string uri)
+        {
+            string result = await GetLabResponseAsync(uri).ConfigureAwait(false);
+            Debug.WriteLine($"MSI env vars: {result?.Length ?? 0} chars from {uri}");
+            return result;
+        }
+
+        internal async Task<string> GetLabResponseAsync(string address)
+        {
+            if (_labApiAccessToken == null)
+                _labApiAccessToken = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId).ConfigureAwait(false);
+
+            using (HttpClient httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", _labApiAccessToken.Value.Token));
+                return await httpClient.GetStringAsync(address).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -491,7 +515,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     break;
             }
 
-            // Disabling shared cache options to avoid cross test pollution.
+            
             builder.Config.AccessorOptions = null;
 
             IManagedIdentityApplication mia = builder.WithClientCapabilities(new[] { "cp1" })

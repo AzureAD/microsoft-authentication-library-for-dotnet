@@ -97,7 +97,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             //Arrange & Act
@@ -105,8 +106,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync("https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .Create(app.AppId)
+               .WithAuthority(app.Authority, "organizations")
                .WithBroker(_brokerOptions)
                .Build();
 
@@ -118,8 +119,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var result = await pca
                 .AcquireTokenByUsernamePassword(
                     scopes,
-                    labResponse.User.Upn,
-                    labResponse.User.GetOrFetchPassword())
+                    user.Upn,
+                    user.GetOrFetchPassword())
                 .WithProofOfPossession(
                     parsedHeaders.PopNonce, 
                     HttpMethod.Get,
@@ -130,11 +131,11 @@ namespace Microsoft.Identity.Test.Integration.Broker
             MsalAssert.AssertAuthResult(
                 result, 
                 TokenSource.Broker, 
-                labResponse.Lab.TenantId,
+                user.TenantId,
                 scopes, true);
 
             PoPValidator.VerifyPoPToken(
-                labResponse.App.AppId,
+                app.AppId,
                 requestUri.AbsoluteUri,
                 HttpMethod.Get,
                 result);
@@ -145,13 +146,14 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamInvalidROPC_ThrowsException_TestAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
             WamLoggerValidator wastestLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .Create(app.AppId)
+               .WithAuthority(app.Authority, "organizations")
                .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
                .WithBroker(_brokerOptions)
                .Build();
@@ -208,7 +210,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamUsernamePasswordRequestAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };            
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
@@ -216,9 +219,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
+               .Create(app.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(app.Authority, "organizations")
                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                .WithBroker(_brokerOptions)
                .Build();
@@ -228,9 +231,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             // Acquire token using username password
             #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -243,7 +246,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Remove Account
@@ -266,12 +269,13 @@ namespace Microsoft.Identity.Test.Integration.Broker
         {
             IntPtr intPtr = TestUtils.GetWindowHandle();
             Func<IntPtr> windowHandleProvider = () => intPtr;
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
             .Create(_SSH_ClientId)
             .WithTestLogging()
-            .WithAuthority(labResponse.Lab.Authority, "organizations")
+            .WithAuthority(app.Authority, "organizations")
             .WithParentActivityOrWindow(windowHandleProvider)
             .WithBroker(_brokerOptions)
             .Build();
@@ -280,7 +284,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             //Do a login with username password
             #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult result = await pca
-            .AcquireTokenByUsernamePassword(_SSH_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+            .AcquireTokenByUsernamePassword(_SSH_scopes, user.Upn, user.GetOrFetchPassword())
             .ExecuteAsync()
             .ConfigureAwait(false);
             #pragma warning restore CS0618
@@ -305,16 +309,17 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
+               .Create(app.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(app.Authority, "organizations")
                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                .WithBroker(_brokerOptions)
                .Build();
@@ -323,15 +328,15 @@ namespace Microsoft.Identity.Test.Integration.Broker
             #pragma warning disable CS0618 // Type or member is obsolete
             var result = await pca.AcquireTokenByUsernamePassword(
                 scopes, 
-                labResponse.User.Upn, 
-                labResponse.User.GetOrFetchPassword())
+                user.Upn, 
+                user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
 
             string ropcToken = result.AccessToken;
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -358,7 +363,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
@@ -368,19 +374,19 @@ namespace Microsoft.Identity.Test.Integration.Broker
             WamLoggerValidator testLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
+               .Create(app.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(app.Authority, "organizations")
                .WithLogging(testLogger, enablePiiLogging: true)
                .WithBroker(_brokerOptions)
                .Build();
 
             // Acquire token using username password
             #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -396,7 +402,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -413,7 +419,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
         {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
@@ -421,9 +428,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
+               .Create(app.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(app.Authority, "organizations")
                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
                {
                    ListOperatingSystemAccounts = true,
@@ -432,10 +439,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             // Acquire token using username password
             #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, scopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             // Get Accounts
@@ -445,7 +452,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             //This test does not actually get a work or school account
             //it simply validates that the GetAccounts merging works and accounts are returned
             var account = accounts.FirstOrDefault();
-            Assert.AreEqual(labResponse.User.Upn, account.Username);
+            Assert.AreEqual(user.Upn, account.Username);
         }
 
         [IgnoreOnOneBranch]
@@ -486,20 +493,19 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            
-            string popUser = "popUser@msidlab4.onmicrosoft.com";
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPop).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
-            string[] scopes = { "https://msidlab4.sharepoint.com/user.read" };
+            string[] scopes = { "https://id4slab1.sharepoint.com/user.read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
+               .Create(app.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(app.Authority, "organizations")
                .WithBroker(_brokerOptions)
                .Build();
 
@@ -507,14 +513,14 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // CA policy enforces token issuance to popUser only for SPO
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
             #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword())
                 .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
 
             //Act
-            Assert.AreEqual(popUser, result.Account.Username);
+            Assert.AreEqual(user.Upn, result.Account.Username);
         }
 
         [DoNotRunOnLinux] // POP are not supported on Linux  
@@ -524,28 +530,27 @@ namespace Microsoft.Identity.Test.Integration.Broker
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPop).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
-            string popUser = "popUser@msidlab4.onmicrosoft.com";
-
-            string[] scopes = { "user.read" };
+            string[] scopes = { "https://outlook.office365.com/Mail.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
+               .Create(app.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithAuthority(app.Authority, "organizations")
                .WithBroker(_brokerOptions)
                .Build();
 
             // Acquire token using username password with POP on a resource not in the CA policy
-            // CA policy enforces token issuance to popUser only for SPO this call will fail with UI Required Exception
+            // CA policy enforces token issuance to popUser only for Exchange Online this call will fail with UI Required Exception
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
             #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword())
                 .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                 .ExecuteAsync()
                 .ConfigureAwait(false);

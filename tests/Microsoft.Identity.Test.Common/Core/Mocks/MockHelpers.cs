@@ -2,16 +2,25 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Castle.Core.Logging;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
+using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -70,12 +79,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
-              return
-            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
-            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
-            ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
-            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
+            return
+          "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
+          "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
+          ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
+          ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+          ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
         }
 
         public static string GetPopTokenResponse()
@@ -113,24 +122,29 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
-        public static string GetMsiSuccessfulResponse(int expiresInHours = 1, bool useIsoFormat = false)
+        public static string GetMsiSuccessfulResponse(
+            int expiresInHours = 1,
+            bool useIsoFormat = false,
+            bool imdsV2 = false)
         {
-            string expiresOn;
-
+            var expiresOnKey = imdsV2 ? "expires_in" : "expires_on";
+            string expiresOnValue;
             if (useIsoFormat)
             {
                 // Return ISO 8601 format
-                expiresOn = DateTime.UtcNow.AddHours(expiresInHours).ToString("o", CultureInfo.InvariantCulture);
+                expiresOnValue = DateTime.UtcNow.AddHours(expiresInHours).ToString("o", CultureInfo.InvariantCulture);
             }
             else
             {
                 // Return Unix timestamp format
-                expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
+                expiresOnValue = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
             }
 
+            var tokenType = imdsV2 ? "mtls_pop" : "Bearer";
+
             return
-          "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
-          "\"Bearer\",\"client_id\":\"client_id\"}";
+                "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"" + expiresOnKey + "\":\"" + expiresOnValue + "\",\"resource\":\"https://management.azure.com/\"," +
+                "\"token_type\":\"" + tokenType + "\",\"client_id\":\"client_id\"}";
         }
 
         public static string GetMsiErrorBadJson()
@@ -170,8 +184,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"correlation_id\":\"77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\",\"error_uri\":\"https://westus2.login.microsoft.com/error?code=500011\"}";
         }
 
-        public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)
+        public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid, bool CreateClientInfoForS2S = false)
         {
+            if (CreateClientInfoForS2S)
+            {
+                return Base64UrlHelpers.Encode("{\"authz\":[\"value1\",\"value2\"]}");
+            }
+
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
         }
 
@@ -354,6 +373,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\"}");
         }
 
+        public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseWithClientInfoMessage(
+            string token = "header.payload.signature",
+            string expiry = "3599",
+            string tokenType = "Bearer",
+            bool CreateClientInfoForS2S = false
+            )
+        {
+            return CreateSuccessResponseMessage(
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"client_info\":\"" + CreateClientInfo(null, null, CreateClientInfoForS2S) + "\"}");
+        }
+
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(
             string token = "header.payload.signature",
             string expiry = "3599",
@@ -396,7 +426,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                   idToken +
                                   (foci ? "\",\"foci\":\"1" : "") +
                                   "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo(uniqueId, utid) + "\"}";
-            
+
             return stringContent;
         }
 
@@ -582,6 +612,370 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 WamAccountId = TestConstants.LocalAccountId,
                 TokenSource = TokenSource.Broker
             };
+        }
+
+        public static MockHttpMessageHandler MockImdsProbe(
+            ImdsVersion imdsVersion,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            bool success = true,
+            bool retry = false)
+        {
+            string apiVersionQueryParam;
+            string imdsApiVersion;
+            string imdsEndpoint;
+
+            switch (imdsVersion)
+            {
+                case ImdsVersion.V2:
+                    apiVersionQueryParam = ImdsV2ManagedIdentitySource.ApiVersionQueryParam;
+                    imdsApiVersion = ImdsV2ManagedIdentitySource.ImdsV2ApiVersion;
+                    imdsEndpoint = ImdsV2ManagedIdentitySource.CsrMetadataPath;
+                    break;
+
+                case ImdsVersion.V1:
+                    apiVersionQueryParam = ImdsManagedIdentitySource.ApiVersionQueryParam;
+                    imdsApiVersion = ImdsManagedIdentitySource.ImdsApiVersion;
+                    imdsEndpoint = ImdsManagedIdentitySource.ImdsTokenPath;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(imdsVersion), imdsVersion, null);
+            }
+
+            HttpStatusCode statusCode;
+
+            if (success)
+            {
+                statusCode = HttpStatusCode.BadRequest; // IMDS probe success returns 400 Bad Request
+            }
+            else
+            {
+                if (retry)
+                {
+                    statusCode = HttpStatusCode.InternalServerError;
+                }
+                else
+                {
+                    statusCode = HttpStatusCode.NotFound;
+                }
+            }
+
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
+
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                    (ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
+                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
+            }
+            expectedQueryParams.Add(apiVersionQueryParam, imdsApiVersion);
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{imdsEndpoint}",
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(statusCode)
+                {
+                    Content = new StringContent(""),
+                }
+            };
+            
+            return handler;
+        }
+
+        public static MockHttpMessageHandler MockImdsProbeFailure(
+            ImdsVersion imdsVersion,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            bool retry = false)
+        {
+            return MockImdsProbe(imdsVersion, userAssignedIdentityId, userAssignedId, success: false, retry: retry);
+        }
+
+        public static MockHttpMessageHandler MockCsrResponse(
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            string responseServerHeader = "IMDS/150.870.65.1854",
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            string clientIdOverride = null,
+            string tenantIdOverride = null,
+            string attestationEndpointOverride = null)
+        {
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
+
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                    (ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
+                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
+            }
+            expectedQueryParams.Add("cred-api-version", "2.0");
+            expectedRequestHeaders.Add("Metadata", "true");
+
+            string content =
+                "{" +
+                "\"cuId\": { \"vmId\": \"fake_vmId\" }," +
+                "\"clientId\": \"" + (clientIdOverride ?? TestConstants.ClientId) + "\"," +
+                "\"tenantId\": \"" + (tenantIdOverride ?? TestConstants.TenantId) + "\"," +
+                "\"attestationEndpoint\": \"" + (attestationEndpointOverride ?? "https://fake_attestation_endpoint") + "\"" +
+                "}";
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CsrMetadataPath}",
+                ExpectedMethod = HttpMethod.Get,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(statusCode)
+                {
+                    Content = new StringContent(content),
+                }
+            };
+
+            if (responseServerHeader != null)
+                handler.ResponseMessage.Headers.TryAddWithoutValidation("server", responseServerHeader);
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler MockCsrResponseFailure()
+        {
+            // 400 doesn't trigger the retry policy
+            return MockCsrResponse(HttpStatusCode.BadRequest);
+        }
+
+        public static MockHttpMessageHandler MockCertificateRequestResponse(
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            string certificate = TestConstants.ValidRawCertificate,
+            string clientIdOverride = null,
+            string tenantIdOverride = null,
+            string mtlsEndpointOverride = null)
+        {
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
+
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                    (ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
+                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
+            }
+            expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
+            expectedRequestHeaders.Add("Metadata", "true");
+
+            string content =
+                "{" +
+                "\"client_id\": \"" + (clientIdOverride ?? TestConstants.ClientId) + "\"," +
+                "\"tenant_id\": \"" + (tenantIdOverride ?? TestConstants.TenantId) + "\"," +
+                "\"certificate\": \"" + certificate + "\"," +
+                "\"identity_type\": \"fake_identity_type\"," + // "SystemAssigned" or "UserAssigned" - not relevant in tests
+                "\"mtls_authentication_endpoint\": \"" + (mtlsEndpointOverride ?? TestConstants.MtlsAuthenticationEndpoint) + "\"" +
+                "}";
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CertificateRequestPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(content),
+                }
+            };
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponse(
+            IdentityLoggerAdapter identityLoggerAdapter)
+        {
+            IDictionary<string, string> expectedPostData = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>
+                {
+                    { ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue }
+                };
+            IList<string> presentRequestHeaders = new List<string>
+                {
+                    OAuth2Header.XMsCorrelationId
+                };
+
+            var idParams = MsalIdHelper.GetMsalIdParameters(identityLoggerAdapter);
+            foreach (var idParam in idParams)
+            {
+                expectedRequestHeaders[idParam.Key] = idParam.Value;
+            }
+
+            expectedPostData.Add("token_type", "mtls_pop");
+
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = expectedPostData,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(GetMsiSuccessfulResponse(imdsV2: true)),
+                }
+            };
+
+            return handler;
+        }
+
+        internal static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponseExpectClientId(
+            IdentityLoggerAdapter identityLoggerAdapter,
+            bool mTLSPop = false,
+            string expectedClientId = TestConstants.ClientId)
+        {
+            IDictionary<string, string> expectedPostData = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>
+        {
+            { ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue }
+        };
+            IList<string> presentRequestHeaders = new List<string>
+        {
+            OAuth2Header.XMsCorrelationId
+        };
+
+            var idParams = MsalIdHelper.GetMsalIdParameters(identityLoggerAdapter);
+            foreach (var idParam in idParams)
+            {
+                expectedRequestHeaders[idParam.Key] = idParam.Value;
+            }
+
+            var tokenType = mTLSPop ? "mtls_pop" : "bearer";
+            expectedPostData.Add("token_type", tokenType);
+            expectedPostData.Add("client_id", expectedClientId); // <— assert canonical GUID
+
+            return new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = expectedPostData,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(GetMsiSuccessfulResponse(imdsV2: true)),
+                }
+            };
+        }
+
+        internal static void AddMocksToGetEntraTokenUsingCachedCert(
+            MockHttpManager httpManager,
+            IdentityLoggerAdapter identityLoggerAdapter,
+            bool mTLSPop = false,
+            bool assertClientId = false,
+            string expectedClientId = TestConstants.ClientId,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            // cached‑cert refresh still calls /getplatformmetadata (SAMI or UAMI flavor)
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                httpManager.AddMockHandler(
+                    MockHelpers.MockCsrResponse(userAssignedIdentityId: userAssignedIdentityId, userAssignedId: userAssignedId));
+            }
+            else
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+            }
+
+            // Token request (no /issuecredential added here)
+            if (assertClientId)
+            {
+                httpManager.AddMockHandler(
+                    MockHelpers.MockImdsV2EntraTokenRequestResponseExpectClientId(identityLoggerAdapter, mTLSPop, expectedClientId));
+            }
+            else
+            {
+                httpManager.AddMockHandler(
+                    MockHelpers.MockImdsV2EntraTokenRequestResponse(identityLoggerAdapter));
+            }
+        }
+
+        public static MockHttpMessageHandler MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400(
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IList<string> presentRequestHeaders = new List<string>
+            {
+                OAuth2Header.XMsCorrelationId
+            };
+
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                    (ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
+
+                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
+            }
+
+            expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
+            expectedRequestHeaders.Add("Metadata", "true");
+
+            string content =
+                "{\"error\":\"invalid_request\",\"error_description\":\"Attestation Token is missing / empty in the issue credential request\"}";
+
+            return new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CertificateRequestPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(content),
+                }
+            };
+        }
+
+        internal static void AddMocks_AttestedCertMustNotBeReused_ExpectIssueCredential400(
+            MockHttpManager httpManager,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            // Even on refresh, MSAL calls /getplatformmetadata (CSR metadata)
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(userAssignedIdentityId: userAssignedIdentityId, userAssignedId: userAssignedId));
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400(userAssignedIdentityId, userAssignedId));
+            }
+            else
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400());
+            }
+
+            // IMPORTANT: DO NOT add MockImdsV2EntraTokenRequestResponse here.
+            // If MSAL incorrectly reuses the cert and calls /token, the test should fail,
+            // and will pass after the product fix.
         }
     }
 }

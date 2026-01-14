@@ -76,5 +76,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             return $"https://{host}/.well-known/webfinger?rel={DefaultRealm}&resource={resource}";
         }
+
+        public const int RsaKeySize = 2048;
     }
 }

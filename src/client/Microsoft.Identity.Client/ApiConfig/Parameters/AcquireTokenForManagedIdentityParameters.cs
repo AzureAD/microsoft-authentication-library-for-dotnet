@@ -4,9 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
@@ -20,6 +24,16 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string RevokedTokenHash { get; set; }
 
+        public bool IsMtlsPopRequested { get; set; }
+
+        internal X509Certificate2 MtlsCertificate { get; set; }
+
+        /// <summary>
+        /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
+        /// Set by the KeyAttestation package via .WithAttestationSupport().
+        /// </summary>
+        public Func<string, SafeHandle, string, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
+
         public void LogParameters(ILoggerAdapter logger)
         {
             if (logger.IsLoggingEnabled(LogLevel.Info))
@@ -31,6 +45,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                      Resource: {Resource}
                      Claims: {!string.IsNullOrEmpty(Claims)}
                      RevokedTokenHash: {!string.IsNullOrEmpty(RevokedTokenHash)}
+                     IsMtlsPopRequested: {IsMtlsPopRequested}
                      """);
             }
         }

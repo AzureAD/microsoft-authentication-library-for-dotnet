@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
@@ -28,6 +30,8 @@ namespace Microsoft.Identity.Client.Internal
         public CancellationToken UserCancellationToken { get; }
 
         public X509Certificate2 MtlsCertificate { get; }
+
+        public bool IsAttestationRequested { get; set; }
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken cancellationToken = default)
         {

@@ -430,6 +430,41 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         }
 
         [TestMethod]
+        public void ServiceException_ToString_DoesNotIncludeHeaders()
+        {
+            // Arrange
+            const string jsonError = @"{ ""error"":""invalid_grant"",
+                ""error_description"":""Error description""}";
+
+            var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            {
+                Content = new StringContent(jsonError)
+            };
+            httpResponseMessage.Headers.Add("X-Custom-Header", "SensitiveValue");
+            httpResponseMessage.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(120));
+
+            HttpResponse httpResponse = HttpManager.CreateResponseAsync(httpResponseMessage).Result;
+
+            // Act
+            var ex = MsalServiceExceptionFactory.FromHttpResponse("errCode", "errMessage", httpResponse);
+            string exceptionString = ex.ToString();
+
+            // Assert - Headers should NOT be in ToString()
+            Assert.IsFalse(exceptionString.Contains("X-Custom-Header"), "Headers should not be included in ToString()");
+            Assert.IsFalse(exceptionString.Contains("SensitiveValue"), "Header values should not be included in ToString()");
+            Assert.IsFalse(exceptionString.Contains("RetryAfter"), "RetryAfter header should not be included in ToString()");
+            
+            // Assert - Headers property should still be accessible
+            Assert.IsNotNull(ex.Headers, "Headers property should still be accessible");
+            Assert.IsNotNull(ex.Headers.RetryAfter, "RetryAfter header should be accessible via Headers property");
+            Assert.AreEqual(TimeSpan.FromSeconds(120), ex.Headers.RetryAfter.Delta, "RetryAfter value should be preserved");
+            
+            // Assert - Other information should still be in ToString()
+            Assert.IsTrue(exceptionString.Contains("errCode"), "Error code should be in ToString()");
+            Assert.IsTrue(exceptionString.Contains("StatusCode"), "Status code label should be in ToString()");
+        }
+
+        [TestMethod]
         public void ExceptionsPropertiesHavePublicSetters()
         {
             AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "Headers");

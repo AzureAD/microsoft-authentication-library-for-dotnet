@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         // regression test based on SAL introducing a new SKU value and making ESTS not issue the refresh_in value
@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .AcquireTokenForClient(settings.AppScopes)
                 .OnBeforeTokenRequest((data) =>
                 {
-                    ModifyRequest(data, settings.GetCertificate()); // Adding a certificate via handler instead of using WithCertificate
+                    ModifyRequest(data, settings.Certificate); // Adding a certificate via handler instead of using WithCertificate
                     return Task.CompletedTask;
                 })
                 .ExecuteAsync(CancellationToken.None)
@@ -223,26 +223,27 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ByRefreshTokenTestAsync()
         {
             // Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithTestLogging()
-                .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .WithAuthority(app.Authority, "organizations")
                 .BuildConcrete();
 
 #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 #pragma warning restore CS0618
 
-            var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority(labResponse.Lab.Authority, labResponse.User.TenantId)
-                .WithTestLogging()
-                .BuildConcrete();
+var confidentialApp = ConfidentialClientApplicationBuilder
+    .Create(app.AppId)
+    .WithAuthority(app.Authority, user.TenantId)
+    .WithTestLogging()
+    .BuildConcrete();
 
             var rt = msalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault();
 
@@ -262,12 +263,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Assert
             Assert.IsNotNull(authResult);
-            Assert.AreEqual(labResponse.User.Upn, authResult.Account.Username);
-            Assert.AreEqual(labResponse.User.ObjectId.ToString(), authResult.Account.HomeAccountId.ObjectId);
-            Assert.AreEqual(labResponse.User.TenantId, authResult.Account.HomeAccountId.TenantId);
-            Assert.AreEqual(labResponse.User.Upn, account2.Username);
-            Assert.AreEqual(labResponse.User.ObjectId.ToString(), account2.HomeAccountId.ObjectId);
-            Assert.AreEqual(labResponse.User.TenantId, account2.HomeAccountId.TenantId);
+            Assert.AreEqual(user.Upn, authResult.Account.Username);
+            Assert.AreEqual(user.ObjectId.ToString(), authResult.Account.HomeAccountId.ObjectId);
+            Assert.AreEqual(user.TenantId, authResult.Account.HomeAccountId.TenantId);
+            Assert.AreEqual(user.Upn, account2.Username);
+            Assert.AreEqual(user.ObjectId.ToString(), account2.HomeAccountId.ObjectId);
+            Assert.AreEqual(user.TenantId, account2.HomeAccountId.TenantId);
         }
 
         private static void ModifyRequest(OnBeforeTokenRequestData data, X509Certificate2 certificate)
@@ -360,10 +361,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             switch (credentialType)
             {
                 case CredentialType.Cert:
-                    builder.WithCertificate(settings.GetCertificate());
+                    builder.WithCertificate(settings.Certificate);
                     break;
                 case CredentialType.Secret:
-                    builder.WithClientSecret(settings.GetSecret());
+                    builder.WithClientSecret(settings.Secret);
                     break;
                 case CredentialType.ClientAssertion_Manual:
 
@@ -374,7 +375,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     builder.WithClientAssertion(() => GetSignedClientAssertionManual(
                       settings.ClientId,
                       aud, // for AAD use v2.0, but not for ADFS
-                      settings.GetCertificate(),
+                      settings.Certificate,
                       useSha2AndPssForAssertion));
                     break;
 
@@ -387,14 +388,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         () => GetSignedClientAssertionUsingWilson(
                             settings.ClientId,
                             aud2,
-                            settings.GetCertificate()));
+                            settings.Certificate));
                     break;
 
                 case CredentialType.ClientClaims_ExtraClaims:
-                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
+                    builder.WithClientClaims(settings.Certificate, GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
                     break;
                 case CredentialType.ClientClaims_MergeClaims:
-                    builder.WithClientClaims(settings.GetCertificate(), GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
+                    builder.WithClientClaims(settings.Certificate, GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
                     break;
                 default:
                     throw new NotImplementedException();

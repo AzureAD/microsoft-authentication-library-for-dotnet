@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            ApplicationBase.ResetStateForTest();
         }
 
         #endregion
@@ -45,15 +45,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         public async Task FociSignInSignOutAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            LabUser user = labResponse.User;
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string cacheFilePath = null;
 
             try
             {
                 cacheFilePath = Path.GetTempFileName();
 
-                CreateFamilyApps(labResponse, cacheFilePath, out IPublicClientApplication pca_fam1, out IPublicClientApplication pca_fam2, out IPublicClientApplication pca_nonFam);
+                CreateFamilyApps(app.AppId, cacheFilePath, out IPublicClientApplication pca_fam1, out IPublicClientApplication pca_fam2, out IPublicClientApplication pca_nonFam);
 
                 var userCacheAccess1 = pca_fam1.UserTokenCache.RecordAccess();
                 var userCacheAccess2 = pca_fam2.UserTokenCache.RecordAccess();
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 {
                     SeleniumExtensions.PerformDeviceCodeLogin(
                         deviceCodeResult,
-                        labResponse.User,
+                        user,
                         TestContext,
                         false);
 
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
         }
 
-        private static void CreateFamilyApps(LabResponse labResponse, string cacheFilePath, out IPublicClientApplication pca_fam1, out IPublicClientApplication pca_fam2, out IPublicClientApplication pca_nonFam)
+        private static void CreateFamilyApps(string nonFamilyAppId, string cacheFilePath, out IPublicClientApplication pca_fam1, out IPublicClientApplication pca_fam2, out IPublicClientApplication pca_nonFam)
         {
             var keyvault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
             var clientId1 = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
               .Build();
 
             pca_nonFam = PublicClientApplicationBuilder
-              .Create(labResponse.App.AppId)
+              .Create(nonFamilyAppId)
                .WithTestLogging()
               .Build();
 

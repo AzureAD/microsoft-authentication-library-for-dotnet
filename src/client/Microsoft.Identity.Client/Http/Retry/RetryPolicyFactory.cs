@@ -14,6 +14,8 @@ namespace Microsoft.Identity.Client.Http.Retry
                 case RequestType.STS:
                 case RequestType.ManagedIdentityDefault:
                     return new DefaultRetryPolicy(requestType);
+                case RequestType.ImdsProbe:
+                    return new ImdsProbeRetryPolicy();
                 case RequestType.Imds:
                     return new ImdsRetryPolicy();
                 case RequestType.RegionDiscovery:

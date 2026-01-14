@@ -13,7 +13,8 @@ namespace DesktopTestApp
     class PublicClientHandler
     {
         private const string _clientName = "DesktopTestApp";
-        private const string _ciamExtraQParams = "dc=ESTS-PUB-EUS-AZ1-FD000-TEST1";
+        private Dictionary<string, (string, bool)> _ciamExtraQParams = new Dictionary<string, (string value, bool includeInCacheKey)> { { "dc", ("ESTS-PUB-EUS-AZ1-FD000-TEST1", false) } };
+
         private const string _ciamRedirectUri = "http://localhost";
 
         public PublicClientHandler(string clientId, LogCallback logCallback)
@@ -44,6 +45,7 @@ namespace DesktopTestApp
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
 
             AuthenticationResult result;
+#pragma warning disable CS0618 // Type or member is obsolete
             if (CurrentUser != null)
             {
                 result = await PublicClientApplication
@@ -64,6 +66,7 @@ namespace DesktopTestApp
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
+#pragma warning restore CS0618 // Type or member is obsolete
             CurrentUser = result.Account;
 
             return result;
@@ -77,6 +80,7 @@ namespace DesktopTestApp
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
 
             AuthenticationResult result;
+#pragma warning disable CS0618 // Type or member is obsolete
             if (CurrentUser != null)
             {
                 result = await PublicClientApplication
@@ -99,6 +103,7 @@ namespace DesktopTestApp
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
+#pragma warning restore CS0618 // Type or member is obsolete
 
             CurrentUser = result.Account;
             return result;
@@ -127,6 +132,8 @@ namespace DesktopTestApp
         {
             CreateOrUpdatePublicClientApp(b2cAuthority, ApplicationId);
             AuthenticationResult result;
+
+#pragma warning disable CS0618 // Type or member is obsolete
             result = await PublicClientApplication
                    .AcquireTokenInteractive(scopes)
                    .WithAccount(CurrentUser)
@@ -135,6 +142,7 @@ namespace DesktopTestApp
                    .WithB2CAuthority(b2cAuthority)
                    .ExecuteAsync(CancellationToken.None)
                    .ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             CurrentUser = result.Account;
             return result;

@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
 
         [TestMethod]
-        public void ValidatePopRequestAndToken()
+        public async Task ValidatePopRequestAndToken()
         {
             using (var harness = CreateTestHarness())
             {
@@ -70,7 +70,17 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 PopAuthenticationOperation authenticationScheme = new PopAuthenticationOperation(popConfig, harness.ServiceBundle);
                 var tokenParams = authenticationScheme.GetTokenRequestParams();
-                AuthenticationResult ar = new AuthenticationResult(msalAccessTokenCacheItem, null, authenticationScheme, Guid.NewGuid(), TokenSource.IdentityProvider, default, default, default, default);
+                AuthenticationResult ar = await AuthenticationResult.CreateAsync(
+                    msalAccessTokenCacheItem, 
+                    null, 
+                    authenticationScheme, 
+                    Guid.NewGuid(), 
+                    TokenSource.IdentityProvider, 
+                    default, 
+                    default, 
+                    default, 
+                    default, 
+                    default).ConfigureAwait(false);
                 JwtSecurityToken decodedPopToken = new JwtSecurityToken(ar.AccessToken);
 
                 // Assert

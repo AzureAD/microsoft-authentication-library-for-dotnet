@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -23,6 +24,10 @@ namespace Microsoft.Identity.Client
     public sealed class AcquireTokenForManagedIdentityParameterBuilder :
         AbstractManagedIdentityAcquireTokenParameterBuilder<AcquireTokenForManagedIdentityParameterBuilder>
     {
+        private const string MiAttCacheKeyComponent = "mi_att";
+        private static readonly Task<string> s_att0 = Task.FromResult("0");
+        private static readonly Task<string> s_att1 = Task.FromResult("1");
+
         private AcquireTokenForManagedIdentityParameters Parameters { get; } = new AcquireTokenForManagedIdentityParameters();
 
         /// <inheritdoc/>
@@ -80,6 +85,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
+            ApplyMtlsPopAndAttestation(acquireTokenForManagedIdentityParameters: Parameters, acquireTokenCommonParameters: CommonParameters);
             return ManagedIdentityApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
@@ -92,6 +98,24 @@ namespace Microsoft.Identity.Client
             }
 
             return ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity;
+        }
+
+        private static void ApplyMtlsPopAndAttestation(
+            AcquireTokenCommonParameters acquireTokenCommonParameters, 
+            AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
+        {
+            acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
+            acquireTokenForManagedIdentityParameters.AttestationTokenProvider = acquireTokenCommonParameters.AttestationTokenProvider;
+
+            // PoP requests should be partitioned by attestation-support mode.
+            if (acquireTokenCommonParameters.IsMtlsPopRequested)
+            {
+                acquireTokenCommonParameters.CacheKeyComponents ??=
+                    new SortedList<string, Func<CancellationToken, Task<string>>>();
+
+                acquireTokenCommonParameters.CacheKeyComponents[MiAttCacheKeyComponent] =
+                    _ => acquireTokenCommonParameters.AttestationTokenProvider != null ? s_att1 : s_att0;
+            }
         }
     }
 }

@@ -17,6 +17,8 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
+using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 using Microsoft.IdentityModel.Abstractions;
@@ -127,6 +129,22 @@ namespace Microsoft.Identity.Client
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
         internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
+        internal ICsrFactory CsrFactory { get; set; }
+
+        #region Extensibility Callbacks
+
+        /// <summary>
+        /// MSAL service failure callback that determines whether to retry after a token acquisition failure from the identity provider.
+        /// Only invoked for MsalServiceException (errors from the Security Token Service).
+        /// </summary>
+        public Func<AssertionRequestOptions, ExecutionResult, Task<bool>> OnMsalServiceFailure { get; set; }
+
+        /// <summary>
+        /// Success callback that receives the result of token acquisition attempts (typically successful, but can include failures after retries are exhausted).
+        /// </summary>
+        public Func<AssertionRequestOptions, ExecutionResult, Task> OnCompletion { get; set; }
+
+        #endregion
 
         #region ClientCredentials
 
@@ -151,14 +169,22 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// This is here just to support the public IAppConfig. Should not be used internally, instead use the <see cref="ClientCredential" /> abstraction.
+        /// Note: This returns null when using dynamic certificate providers since the certificate is resolved at runtime.
         /// </summary>
         public X509Certificate2 ClientCredentialCertificate
         {
             get
             {
-                if (ClientCredential is CertificateAndClaimsClientCredential cred)
+                // Return the certificate if using static certificate (CertificateClientCredential)
+                if (ClientCredential is CertificateClientCredential certCred)
                 {
-                    return cred.Certificate;
+                    return certCred.Certificate;
+                }
+                
+                // Return the certificate if using CertificateAndClaimsClientCredential with a static certificate
+                if (ClientCredential is CertificateAndClaimsClientCredential certAndClaimsCred)
+                {
+                    return certAndClaimsCred.Certificate;
                 }
                
                 return null;

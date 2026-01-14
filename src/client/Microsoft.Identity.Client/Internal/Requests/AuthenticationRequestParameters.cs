@@ -116,6 +116,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
 
         /// <summary>
+        /// The certificate resolved and used for client authentication (if certificate-based authentication was used).
+        /// This is set during the token request when the certificate is resolved.
+        /// </summary>
+        public X509Certificate2 ResolvedCertificate { get; set; }
+
+        /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>
         /// <remarks>If user configured claims, request should bypass cache</remarks>
@@ -127,7 +133,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        public IAuthenticationOperation AuthenticationScheme => _commonParameters.AuthenticationOperation;
+        private IAuthenticationOperation _requestOverrideScheme;
+
+        /// <summary>
+        /// Effective authentication operation (scheme) for this request.
+        /// Defaults to the app's configured operation unless a request-scoped override is applied.
+        /// </summary>
+        public IAuthenticationOperation AuthenticationScheme
+        {
+            get => _requestOverrideScheme ?? _commonParameters.AuthenticationOperation;
+            internal set => _requestOverrideScheme = value;
+        }
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
