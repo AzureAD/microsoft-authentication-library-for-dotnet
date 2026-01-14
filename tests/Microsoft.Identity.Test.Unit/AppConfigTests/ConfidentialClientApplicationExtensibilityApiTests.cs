@@ -5,6 +5,7 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Test.Common;
@@ -17,6 +18,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
     public class ConfidentialClientApplicationExtensibilityApiTests
     {
         private X509Certificate2 _certificate;
+        private CertificateOptions _certificateOptions = new CertificateOptions();
 
         [TestInitialize]
         public void TestInitialize()
@@ -47,7 +49,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithExperimentalFeatures()
-                .WithCertificate(certificateProvider)
+                .WithCertificate(certificateProvider, _certificateOptions)
                 .BuildConcrete();
 
             // Assert
@@ -64,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
-                    .WithCertificate((Func<AssertionRequestOptions, Task<X509Certificate2>>)null)
+                    .WithCertificate((Func<AssertionRequestOptions, Task<X509Certificate2>>) null, null)
                     .Build());
 
             Assert.AreEqual("certificateProvider", ex.ParamName);
@@ -93,8 +95,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithExperimentalFeatures()
-                .WithCertificate(firstProvider)
-                .WithCertificate(secondProvider)
+                .WithCertificate(firstProvider, _certificateOptions)
+                .WithCertificate(secondProvider, _certificateOptions)
                 .BuildConcrete();
 
             // Assert - last one should be stored
@@ -102,6 +104,65 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNotNull(config);
             Assert.IsNotNull(config.ClientCredential);
             Assert.IsInstanceOfType(config.ClientCredential, typeof(DynamicCertificateClientCredential));
+        }
+
+        [TestMethod]
+        public void WithCertificate_CertificateOptions_SendX5C_True_IsStored()
+        {
+            // Arrange
+            var certificateOptions = new CertificateOptions { SendX5C = true };
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithCertificate(certificateProvider, certificateOptions)
+                .BuildConcrete();
+
+            // Assert
+            var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config);
+            Assert.IsTrue(config.SendX5C, "SendX5C should be true when CertificateOptions.SendX5C is true");
+        }
+
+        [TestMethod]
+        public void WithCertificate_CertificateOptions_SendX5C_False_IsStored()
+        {
+            // Arrange
+            var certificateOptions = new CertificateOptions { SendX5C = false };
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithCertificate(certificateProvider, certificateOptions)
+                .BuildConcrete();
+
+            // Assert
+            var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config);
+            Assert.IsFalse(config.SendX5C, "SendX5C should be false when CertificateOptions.SendX5C is false");
+        }
+
+        [TestMethod]
+        public void WithCertificate_NullCertificateOptions_DefaultsToSendX5C_False()
+        {
+            // Arrange
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithCertificate(certificateProvider, null)
+                .BuildConcrete();
+
+            // Assert
+            var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config);
+            Assert.IsFalse(config.SendX5C, "SendX5C should default to false when CertificateOptions is null");
         }
 
         #endregion
@@ -258,7 +319,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithExperimentalFeatures()
-                .WithCertificate(certificateProvider)
+                .WithCertificate(certificateProvider, _certificateOptions)
                 .OnMsalServiceFailure(onMsalServiceFailure)
                 .OnCompletion(onSuccess)
                 .BuildConcrete();
@@ -284,7 +345,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .WithExperimentalFeatures()
                 .OnCompletion(onSuccess)
                 .OnMsalServiceFailure(onMsalServiceFailure)
-                .WithCertificate(certificateProvider)
+                .WithCertificate(certificateProvider, _certificateOptions)
                 .BuildConcrete();
 
             // Act - Order: OnMsalServiceFailure, Certificate, OnCompletion
@@ -292,7 +353,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .Create(TestConstants.ClientId)
                 .WithExperimentalFeatures()
                 .OnMsalServiceFailure(onMsalServiceFailure)
-                .WithCertificate(certificateProvider)
+                .WithCertificate(certificateProvider, _certificateOptions)
                 .OnCompletion(onSuccess)
                 .BuildConcrete();
 
@@ -325,7 +386,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .Create(TestConstants.ClientId)
                 .WithExperimentalFeatures()
                 .WithAuthority(TestConstants.AadAuthorityWithTestTenantId)
-                .WithCertificate(certificateProvider)
+                .WithCertificate(certificateProvider, _certificateOptions)
                 .BuildConcrete();
 
             // Assert

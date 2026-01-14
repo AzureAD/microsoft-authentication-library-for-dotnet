@@ -189,8 +189,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string tokenType = "Bearer",
             IList<string> unexpectedHttpHeaders = null,
             Dictionary<string, string> expectedPostData = null,
-            bool addClientInfo = false
-            )
+            bool addClientInfo = false,
+            bool sendX5C = false)
         {
             var handler = new MockHttpMessageHandler()
             {
@@ -200,6 +200,29 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 UnexpectedRequestHeaders = unexpectedHttpHeaders,
                 ExpectedPostData = expectedPostData
             };
+
+            if (sendX5C)
+            {
+                handler.AdditionalRequestValidation = (request) =>
+                {
+                    // validate that the request have x5c header
+                    if (expectedPostData != null && expectedPostData.ContainsKey("client_assertion"))
+                    {
+                        string clientAssertion = expectedPostData["client_assertion"];
+                        string[] assertionParts = clientAssertion.Split('.');
+                        if (assertionParts.Length != 3)
+                        {
+                            throw new InvalidDataException("client_assertion is not in the correct format");
+                        }
+                        string header = assertionParts[0];
+                        string headerJson = Base64UrlHelpers.Decode(header);
+                        if (!headerJson.Contains("\"x5c\""))
+                        {
+                            throw new InvalidDataException("client_assertion does not contain x5c header");
+                        }
+                    }
+                };
+            }
 
             httpManager.AddMockHandler(handler);
 
