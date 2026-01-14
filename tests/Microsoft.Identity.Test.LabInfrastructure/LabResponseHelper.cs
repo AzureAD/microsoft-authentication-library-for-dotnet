@@ -15,8 +15,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsid { get; }
 
         // Caches for configuration objects retrieved from Key Vault
-        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig> s_userConfigCache = new();
-        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, AppConfig> s_appConfigCache = new();
+         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig> s_userConfigCache = new System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig>();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, AppConfig> s_appConfigCache = new System.Collections.Concurrent.ConcurrentDictionary<string, AppConfig>();
 
         static LabResponseHelper()
         {
