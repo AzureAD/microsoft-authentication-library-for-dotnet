@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private static X509Certificate2 FindCertificateByName(string certName, StoreLocation location, StoreName name)
         {
             // Unix LocalMachine X509Store is limited to the Root and CertificateAuthority stores
-            if (SharedUtilities.IsLinuxPlatform())
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var certPasswrod = Environment.GetEnvironmentVariable("CERTIFICATE_PASSWORD");
                 var certLocation = Environment.GetEnvironmentVariable("CERTIFICATE_LOCATION");
