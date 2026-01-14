@@ -150,11 +150,6 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(certificate));
             }
 
-            if (certificateOptions?.SendX5C?? false && !certificate.HasPrivateKey)
-            {
-                throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificate)));
-            }
-
             if (!certificate.HasPrivateKey)
             {
                 throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificate)));
