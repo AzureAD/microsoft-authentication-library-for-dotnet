@@ -305,7 +305,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
             string secret = null;
             string tenantId;
             string authority;
-            string[] appScopes;
+            string[] scopes;
 
             if (cloud == Cloud.Adfs)
             {
@@ -314,7 +314,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                 cert = await GetAdfsCertificateAsync().ConfigureAwait(false);
                 tenantId = "";  // ADFS doesn't use tenant ID
                 authority = "https://fs.id4slab1.com/adfs";
-                appScopes = new[] { "openid", "profile" };
+                scopes = new[] { "openid", "profile" };
             }
             else if (cloud == Cloud.Arlington)
             {
@@ -323,7 +323,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
                 tenantId = appConfig.TenantId;
                 authority = appConfig.Authority;
-                appScopes = new[] { "https://graph.microsoft.com/.default" };
+                scopes = new[] { "https://graph.microsoft.com/.default" };
             }
             else // Cloud.Public
             {
@@ -332,7 +332,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
                 tenantId = appConfig.TenantId;
                 authority = appConfig.Authority;
-                appScopes = new[] { "https://vault.azure.net/.default" };
+                scopes = new[] { "https://vault.azure.net/.default" };
             }
 
             AuthenticationResult authResult;
@@ -349,7 +349,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
             Guid correlationId = Guid.NewGuid();
             authResult = await confidentialApp
-                .AcquireTokenForClient(appScopes)
+                .AcquireTokenForClient(scopes)
                 .WithCorrelationId(correlationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
@@ -361,8 +361,8 @@ var confidentialApp = ConfidentialClientApplicationBuilder
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(correlationId, appCacheRecorder.LastAfterAccessNotificationArgs.CorrelationId);
             Assert.AreEqual(correlationId, appCacheRecorder.LastBeforeAccessNotificationArgs.CorrelationId);
-            CollectionAssert.AreEquivalent(appScopes.ToArray(), appCacheRecorder.LastBeforeAccessNotificationArgs.RequestScopes.ToArray());
-            CollectionAssert.AreEquivalent(appScopes.ToArray(), appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
+            CollectionAssert.AreEquivalent(scopes.ToArray(), appCacheRecorder.LastBeforeAccessNotificationArgs.RequestScopes.ToArray());
+            CollectionAssert.AreEquivalent(scopes.ToArray(), appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
             Assert.AreEqual(tenantId, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestTenantId ?? "");
             Assert.AreEqual(tenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
@@ -376,7 +376,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
-               .AcquireTokenForClient(appScopes)
+               .AcquireTokenForClient(scopes)
                .ExecuteAsync()
                .ConfigureAwait(false);
 
