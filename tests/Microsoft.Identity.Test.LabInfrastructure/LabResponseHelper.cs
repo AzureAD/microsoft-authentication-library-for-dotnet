@@ -138,49 +138,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
 
-        private static async Task<System.Collections.Generic.Dictionary<string, string>> GetJsonOfKeyValuePairsFromKVAsync(string secret)
-        {
-            try
-            {
-                var keyVaultSecret = await KeyVaultSecretsProviderMsal.GetSecretByNameAsync(secret).ConfigureAwait(false);
-                string jsonData = keyVaultSecret.Value;
-
-                if (string.IsNullOrEmpty(jsonData))
-                {
-                    Debug.WriteLine($"KeyVault secret '{secret}' empty");
-                    throw new InvalidOperationException($"Found no content for secret '{secret}' in Key Vault.");
-                }
-
-                try
-                {
-                    var keyValuePairs = JsonConvert.DeserializeObject<System.Collections.Generic.Dictionary<string, string>>(jsonData);
-                    if (keyValuePairs == null)
-                    {
-                        Debug.WriteLine($"KeyVault '{secret}': failed to deserialize to Dictionary<string, string>");
-                        throw new InvalidOperationException($"Failed to deserialize Key Vault secret '{secret}' to Dictionary<string, string>.");
-                    }
-
-                    Debug.WriteLine($"KeyVault '{secret}': retrieved {keyValuePairs.Count} key-value pairs");
-                    return keyValuePairs;
-                }
-                catch (JsonException jsonEx)
-                {
-                    Debug.WriteLine($"KeyVault '{secret}': invalid JSON ({jsonData.Length} chars) - {jsonEx.Message}");
-                    throw new InvalidOperationException($"Key Vault secret '{secret}' contains invalid JSON for Dictionary<string, string>. {jsonEx.Message}", jsonEx);
-                }
-            }
-            catch (Exception e) when (!(e is InvalidOperationException))
-            {
-                Debug.WriteLine($"KeyVault '{secret}' failed: {e.Message}");
-                throw new InvalidOperationException($"Failed to retrieve or parse Key Vault secret '{secret}'. See inner exception.", e);
-            }
-        }
-
-        public static Task<System.Collections.Generic.Dictionary<string, string>> GetDefaultMSIEnvironmentVariablesAsync()
-        {
-            return GetJsonOfKeyValuePairsFromKVAsync("EnvVariables-MSI-Config");
-        }
-
         public static string FetchUserPassword(string userLabName)
         {
             // TODO: Implement caching to avoid repeated Key Vault calls
