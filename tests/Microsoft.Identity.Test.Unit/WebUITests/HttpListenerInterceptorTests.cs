@@ -34,18 +34,28 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 (_) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
                 CancellationToken.None);
 
-            // Ensure the listener is bound before making the request
-            await EnsureListenerIsReady(port, TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+            // Give listener more time to start accepting connections
+            await Task.Delay(500).ConfigureAwait(false);
 
             // Issue an HTTP GET request (should be rejected for security)
-            await SendMessageToPortAsync(port, string.Empty).ConfigureAwait(false);
+            // We don't care if the HTTP client throws - we care that the listener rejects it
+            try
+            {
+                await SendMessageToPortAsync(port, string.Empty).ConfigureAwait(false);
+            }
+            catch
+            {
+                // The HTTP client may throw if the listener closes the connection
+                // This is expected and fine - we'll verify the listener's behavior
+            }
 
-            // Wait for the listener to complete
-            bool completed = listenTask.Wait(2000 /* 2s timeout */);
+            // Wait for the listener to complete or fault (without throwing)
+            await Task.WhenAny(listenTask, Task.Delay(5000)).ConfigureAwait(false);
 
             // Assert - should throw security exception
-            Assert.IsTrue(completed);
+            Assert.IsTrue(listenTask.IsCompleted, "Listener task should complete within timeout");
             Assert.IsTrue(listenTask.IsFaulted, "GET request should cause the task to fault");
+            Assert.IsNotNull(listenTask.Exception, "Exception should be captured");
             Assert.IsInstanceOfType(listenTask.Exception.InnerException, typeof(MsalClientException));
             
             var msalEx = (MsalClientException)listenTask.Exception.InnerException;

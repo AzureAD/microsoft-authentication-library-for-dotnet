@@ -139,8 +139,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             throw new MsalClientException(
                 MsalError.AuthenticationFailed,
                 $"Expected POST request for form_post response mode, but received {context.Request.HttpMethod}. " +
-                "This is a security issue as the authorization code would be exposed in browser history and logs. " +
-                "Ensure the authorization server supports response_mode=form_post and the redirect URI is registered as a 'Web' platform.");
+                "This is a security issue as the authorization code is exposed in the URL query parameters and browser history.");
         }
 
         private static void TryStopListening(HttpListener httpListener)
