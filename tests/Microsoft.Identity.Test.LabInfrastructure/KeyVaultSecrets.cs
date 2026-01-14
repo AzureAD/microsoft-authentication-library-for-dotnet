@@ -21,9 +21,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         // Names of key vault secrets for application configuration JSONs
         //  - Broad test scenarios
-        public const string AppS2S = "Temp-App-S2S-Config";
-        public const string AppPCAClient = "Temp-App-PCAClient-Config";
-        public const string AppWebApi = "Temp-App-WebApi-Config";
+        public const string AppS2S = "App-S2S-Config";
+        public const string AppPCAClient = "App-PCAClient-Config";
+        public const string AppWebApi = "App-WebApi-Config";
         //  - More specific test scenarios, edge cases, etc.
         public const string B2CAppIdLabsAppB2C = "MSAL-App-B2C-JSON";
         public const string ArlAppIdLabsApp = "MSAL-App-Arlington-JSON";
