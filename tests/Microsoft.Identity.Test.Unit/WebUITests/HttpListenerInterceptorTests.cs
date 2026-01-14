@@ -34,6 +34,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 (_) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
                 CancellationToken.None);
 
+            // Ensure the listener is bound before making the request
+            await EnsureListenerIsReady(port, TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+
             // Issue an HTTP GET request (should be rejected for security)
             await SendMessageToPortAsync(port, string.Empty).ConfigureAwait(false);
 
