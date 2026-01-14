@@ -110,15 +110,16 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Ensure the listener is bound before making the request
             await EnsureListenerIsReady(port, TimeSpan.FromSeconds(2)).ConfigureAwait(false);
 
-            // Issue an HTTP request
-            await SendMessageToPortAsync(port, "TestPath").ConfigureAwait(false);
+            // Issue an HTTP POST request (form_post requires POST)
+            await SendPostMessageToPortAsync(port, "TestPath", "code=test_code&state=test_state").ConfigureAwait(false);
 
             // Wait for listener to handle request with a timeout
             bool completed = (await Task.WhenAny(listenTask, Task.Delay(5000)).ConfigureAwait(false)) == listenTask;
 
             // Assert
             Assert.IsTrue(completed, "Listener did not complete within timeout.");
-            Assert.AreEqual(GetLocalhostUriWithParams(port, "TestPath"), listenTask.Result.ToString());
+            Assert.IsTrue(listenTask.Result.RequestUri.ToString().StartsWith($"http://localhost:{port}/TestPath/"), 
+                "Request URI should include the custom path");
         }
 
         /// <summary>

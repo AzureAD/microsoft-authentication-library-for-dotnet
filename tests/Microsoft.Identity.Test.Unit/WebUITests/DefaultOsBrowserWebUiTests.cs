@@ -118,9 +118,10 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 .ConfigureAwait(false);
 
             // Verify warning was logged about the override
+            // Warning() extension method translates to Log(LogLevel.Warning, string.Empty, message)
             _logger.Received(1).Log(
                 LogLevel.Warning,
-                Arg.Is<string>(s => s.Contains("response_mode") && s.Contains("overridden") && s.Contains("form_post")),
+                string.Empty,
                 Arg.Is<string>(s => s.Contains("response_mode") && s.Contains("overridden") && s.Contains("form_post")));
         }
 
@@ -169,7 +170,8 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             var webUI = CreateTestWebUI(options);
             var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
             var responseUri = new Uri(TestAuthorizationResponseUri);
-            var authResponse = new AuthorizationResponse(responseUri, null);
+            var postData = new Dictionary<string, string> { { "code", "some_auth_code" }, { "state", "some_state" } };
+            var authResponse = new AuthorizationResponse(responseUri, postData);
 
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
