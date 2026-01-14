@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
@@ -170,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             var webUI = CreateTestWebUI(options);
             var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
             var responseUri = new Uri(TestAuthorizationResponseUri);
-            var postData = new Dictionary<string, string> { { "code", "some_auth_code" }, { "state", "some_state" } };
+            var postData = System.Text.Encoding.UTF8.GetBytes("code=some_auth_code&state=some_state");
             var authResponse = new AuthorizationResponse(responseUri, postData);
 
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
