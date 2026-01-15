@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
@@ -101,6 +102,13 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Uri redirectUri,
             CancellationToken externalCancellationToken)
         {
+            // Add response_mode=form_post to match production behavior
+            var authUriBuilder = new UriBuilder(authorizationUri);
+            authUriBuilder.AppendOrReplaceQueryParameter("response_mode", "form_post");
+            authorizationUri = authUriBuilder.Uri;
+            
+            _logger.Info($"[SeleniumWebUI] Authorization URI with form_post: {authorizationUri.AbsoluteUri}");
+            
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
             {
                 var listener = new HttpListenerInterceptor(_logger);
