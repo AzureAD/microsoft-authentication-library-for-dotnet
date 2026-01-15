@@ -1,1 +1,1 @@
-Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithExtraClientAssertionClaims(string claimsToSign) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+static Microsoft.Identity.Client.Extensibility.AcquireTokenForClientBuilderExtensions.WithExtraClientAssertionClaims(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, string claimsToSign) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
