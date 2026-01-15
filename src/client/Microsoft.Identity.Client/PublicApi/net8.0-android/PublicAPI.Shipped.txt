@@ -25,7 +25,7 @@ const Microsoft.Identity.Client.MsalError.BrokerResponseHashMismatch = "broker_r
 const Microsoft.Identity.Client.MsalError.BrokerResponseReturnedError = "broker_response_returned_error" -> string
 const Microsoft.Identity.Client.MsalError.CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed" -> string
 const Microsoft.Identity.Client.MsalError.CannotInvokeBroker = "cannot_invoke_broker" -> string
-const Microsoft.Identity.Client.MsalError.CertificateNotRsa = "certificaFwithcertificatete_not_rsa" -> string
+const Microsoft.Identity.Client.MsalError.CertificateNotRsa = "certificate_not_rsa"
 const Microsoft.Identity.Client.MsalError.CertWithoutPrivateKey = "cert_without_private_key" -> string
 const Microsoft.Identity.Client.MsalError.ClientCredentialAuthenticationTypeMustBeDefined = "Client_Credentials_Required_In_Confidential_Client_Application" -> string
 const Microsoft.Identity.Client.MsalError.ClientCredentialAuthenticationTypesAreMutuallyExclusive = "Client_Credential_Authentication_Types_Are_Mutually_Exclusive" -> string
@@ -1075,7 +1075,6 @@ Microsoft.Identity.Client.Extensibility.ExecutionResult.Result.get -> Microsoft.
 Microsoft.Identity.Client.Extensibility.ExecutionResult.Successful.get -> bool
 static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnCompletion(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task> onCompletion) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnMsalServiceFailure(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task<bool>> onMsalServiceFailure) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
-static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2>> certificateProvider) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.get -> string
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.set -> void
