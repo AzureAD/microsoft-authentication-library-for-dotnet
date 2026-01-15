@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -141,7 +142,7 @@ namespace Microsoft.Identity.Client
         /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        /// <param name="certificateOptions">Configuration options for certificate handling.</param>
+        /// <param name="certificateOptions">Configuration options for certificate handling. See <see cref="CertificateOptions"/> for more information.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, CertificateOptions certificateOptions)
         {
@@ -155,8 +156,14 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificate)));
             }
 
+            if (certificateOptions?.AssociateTokensWithCertificateSerialNumber ?? false)
+            {
+                Config.CertificateIdToAssociateWithToken = certificate.SerialNumber;
+            }
+
             Config.ClientCredential = new CertificateClientCredential(certificate);
             Config.SendX5C = certificateOptions?.SendX5C ?? false;
+            
             return this;
         }
 

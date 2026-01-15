@@ -8,6 +8,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.RP;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -163,6 +164,74 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var config = app.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config);
             Assert.IsFalse(config.SendX5C, "SendX5C should default to false when CertificateOptions is null");
+        }
+
+        [TestMethod]
+        public void WithCertificate_CertificateOptions_AssociateTokensWithCertificateSerialNumber_True_IsStored()
+        {
+            // Arrange
+            var certificateOptions = new CertificateOptions { AssociateTokensWithCertificateSerialNumber = true };
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithCertificate(certificateProvider, certificateOptions)
+                .BuildConcrete();
+
+            // Assert
+            var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config);
+            Assert.IsTrue(certificateOptions.AssociateTokensWithCertificateSerialNumber, 
+                "CertificateOptions.AssociateTokensWithCertificateSerialNumber should be true");
+        }
+
+        [TestMethod]
+        public void WithCertificate_CertificateOptions_AssociateTokensWithCertificateSerialNumber_False_IsStored()
+        {
+            // Arrange
+            var certificateOptions = new CertificateOptions { AssociateTokensWithCertificateSerialNumber = false };
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithCertificate(certificateProvider, certificateOptions)
+                .BuildConcrete();
+
+            // Assert
+            var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config);
+            Assert.IsFalse(certificateOptions.AssociateTokensWithCertificateSerialNumber, 
+                "CertificateOptions.AssociateTokensWithCertificateSerialNumber should be false");
+        }
+
+        [TestMethod]
+        public void WithCertificate_CertificateOptions_BothPropertiesSet_AreStored()
+        {
+            // Arrange
+            var certificateOptions = new CertificateOptions 
+            { 
+                SendX5C = true, 
+                AssociateTokensWithCertificateSerialNumber = true 
+            };
+            Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithCertificate(certificateProvider, certificateOptions)
+                .BuildConcrete();
+
+            // Assert
+            var config = app.AppConfig as ApplicationConfiguration;
+            Assert.IsNotNull(config);
+            Assert.IsTrue(config.SendX5C, "SendX5C should be true");
+            Assert.IsTrue(certificateOptions.AssociateTokensWithCertificateSerialNumber, 
+                "AssociateTokensWithCertificateSerialNumber should be true");
         }
 
         #endregion
