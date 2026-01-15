@@ -107,8 +107,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         MsalErrorMessage.CannotSwitchBetweenImdsVersionsForPreview);
                 }
 
-                // If the source is determined to be ImdsV1 and mTLS PoP was requested,
-                // throw an exception since ImdsV1 does not support mTLS PoP
+                // If we are in DefaultToImds (no-probe sentinel) and PoP was requested,
+                // fail fast rather than implicitly probing/attempting IMDSv2.
                 if (source == ManagedIdentitySource.DefaultToImds && isMtlsPopRequested)
                 {
                     throw new MsalClientException(
@@ -133,15 +133,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     _ => throw CreateManagedIdentityUnavailableException(sourceResult)
                 };
             }
-        }
-
-        // Back-compat wrapper: previous callers who don't specify probe now get probe=false behavior (no probe).
-        internal Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(
-            RequestContext requestContext,
-            bool isMtlsPopRequested,
-            CancellationToken cancellationToken)
-        {
-            return GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested, probe: false, cancellationToken);
         }
 
         // Detect managed identity source based on the availability of environment variables and csr metadata probe request.

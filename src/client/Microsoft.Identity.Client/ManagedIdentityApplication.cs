@@ -55,21 +55,14 @@ namespace Microsoft.Identity.Client
                 resource);
         }
 
-        /// <inheritdoc/>
-        public Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
-        {
-            // Default behavior: do NOT probe IMDS.
-            return GetManagedIdentitySourceAsync(probe: false, cancellationToken: cancellationToken);
-        }
-
         /// <summary>
         /// Detects and returns the managed identity source available on the environment.
         /// probe=false: no IMDS probe; returns DefaultToImds if no env-based MI source detected.
         /// probe=true: probes IMDS; returns None if IMDS is unreachable.
         /// </summary>
         public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(
-            bool probe = false,
-            CancellationToken cancellationToken = default)
+            bool probe,
+            CancellationToken cancellationToken)
         {
             var cached = ManagedIdentityClient.s_sourceName;
 

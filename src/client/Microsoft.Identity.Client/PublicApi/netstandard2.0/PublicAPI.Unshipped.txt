@@ -1,3 +1,3 @@
-Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(bool probe = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult>
+Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(bool probe, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult>
 Microsoft.Identity.Client.ManagedIdentityPopExtensions
 static Microsoft.Identity.Client.ManagedIdentityPopExtensions.WithMtlsProofOfPossession(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder

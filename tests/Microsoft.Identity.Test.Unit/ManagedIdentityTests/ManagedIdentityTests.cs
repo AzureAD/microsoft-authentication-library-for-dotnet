@@ -1167,7 +1167,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build() as ManagedIdentityApplication;
 
-                var result = await mi.GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                var result = await mi.GetManagedIdentitySourceAsync(probe: false, cancellationToken: ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
 
