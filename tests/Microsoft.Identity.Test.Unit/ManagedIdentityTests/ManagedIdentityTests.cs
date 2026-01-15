@@ -1575,5 +1575,36 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual("value3", miBuilder.Config.ExtraQueryParameters["param3"]);
             Assert.AreEqual("value4", miBuilder.Config.ExtraQueryParameters["param4"]);
         }
+
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySource.AppService, ManagedIdentityTests.AppServiceEndpoint)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, ManagedIdentityTests.ServiceFabricEndpoint)]
+        public async Task NonImdsSources_MtlsPopRequested_ReturnsBearer(
+            ManagedIdentitySource source, 
+            string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(source, endpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    source);
+
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("Bearer", result.TokenType);
+            }
+        }
     }
 }
