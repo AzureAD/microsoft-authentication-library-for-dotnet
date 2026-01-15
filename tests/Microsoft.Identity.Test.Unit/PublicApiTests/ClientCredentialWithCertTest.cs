@@ -976,6 +976,8 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public async Task EnsureDefaultCacheKeyBehaviorWhenCertSerialNumberIsNotUsedTestAsync(bool useCertificateOptions)
         {
             using (var httpManager = new MockHttpManager())
