@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ROPC_AAD_CCA_Async()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             await RunHappyPathTestAsync(user, app, isPublicClient: false).ConfigureAwait(false);
         }
 
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ARLINGTON_ROPC_AAD_CCA_Async()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserArlington).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.ArlAppIdLabsApp).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppArlingtonCCA).ConfigureAwait(false);
             user.AzureEnvironment = LabConstants.AzureEnvironmentUsGovernment;
             await RunHappyPathTestAsync(user, app, isPublicClient: false, cloud:Cloud.Arlington).ConfigureAwait(false);
         }
@@ -136,20 +136,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
             else
             {
-                IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
                 var clientAppBuilder = ConfidentialClientApplicationBuilder
-                            .Create(settings.ClientId)
+                            .Create(app.AppId)
                             .WithTestLogging()
                             .WithHttpClientFactory(factory)
-                            .WithAuthority(app.Authority, "organizations");
+                            .WithAuthority(app.Authority);
 
                 if (cloud == Cloud.Arlington)
                 {
-                    clientAppBuilder.WithClientSecret(settings.Secret);
+                    clientAppBuilder.WithClientSecret(LabResponseHelper.FetchSecretString(TestConstants.MsalArlingtonCCAKeyVaultSecretName, LabResponseHelper.KeyVaultSecretsProviderMsid));
                 }
                 else
                 {
-                    clientAppBuilder.WithCertificate(settings.Certificate, true);
+                    clientAppBuilder.WithCertificate(CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName), true);
                 }
 
                  clientApp = clientAppBuilder.Build();
@@ -255,6 +254,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
             }
 
+            Console.WriteLine("Access Token: " + authResult.AccessToken);
+
             Assert.IsNotNull(authResult);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(authResult.AccessToken);
@@ -294,8 +295,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, UserConfig user, AppConfig app)
         {
+            // Ensure that a request to the token endpoint was made using the expected authority.
             var (req, _) = factory.RequestsAndResponses.Single(x =>
-                x.Item1.RequestUri.AbsoluteUri == app.Authority + "organizations/oauth2/v2.0/token" &&
+                x.Item1.RequestUri.AbsoluteUri.StartsWith(app.Authority, StringComparison.OrdinalIgnoreCase) &&
+                x.Item1.RequestUri.AbsoluteUri.EndsWith("oauth2/v2.0/token", StringComparison.OrdinalIgnoreCase) &&
                 x.Item2.StatusCode == HttpStatusCode.OK);
 
             var telemetryCurrentValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientCurrentTelemetry).Value;
