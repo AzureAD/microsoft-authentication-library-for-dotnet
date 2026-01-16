@@ -55,19 +55,40 @@ namespace Microsoft.Identity.Client
                 resource);
         }
 
-        /// <inheritdoc/>
-        public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// Detects and returns the managed identity source available on the environment.
+        /// probe=false: no IMDS probe; returns DefaultToImds if no env-based MI source detected.
+        /// probe=true: probes IMDS; returns None if IMDS is unreachable.
+        /// </summary>
+        public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(
+            bool probe,
+            CancellationToken cancellationToken)
         {
-            if (ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None)
+            var cached = ManagedIdentityClient.s_sourceName;
+
+            if (!probe && cached != ManagedIdentitySource.None)
             {
-                return new ManagedIdentitySourceResult(ManagedIdentityClient.s_sourceName);
+                return new ManagedIdentitySourceResult(cached);
             }
 
-            // Create a temporary RequestContext for the logger and the IMDS probe request.
+            if (probe && cached != ManagedIdentitySource.None)
+            {
+                if (cached != ManagedIdentitySource.DefaultToImds)
+                {
+                    // Cache contains a concrete source; no need to probe again.
+                    return new ManagedIdentitySourceResult(cached);
+                }
+
+                // If cached is DefaultToImds, probing can refine to Imds/ImdsV2/None.
+            }
+
+            // Create a temporary RequestContext for the logger and the optional IMDS probe request.
             var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
 
-            // GetManagedIdentitySourceAsync might return ImdsV2 = true, but it still requires .WithMtlsProofOfPossesion on the Managed Identity Application object to hit the ImdsV2 flow
-            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested: true, cancellationToken).ConfigureAwait(false);
+            // Use isMtlsPopRequested: true so probe mode can detect IMDSv2 capability when available.
+            return await ManagedIdentityClient
+                .GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested: true, probe: probe, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -80,11 +101,9 @@ namespace Microsoft.Identity.Client
             var source = ManagedIdentityClient.GetManagedIdentitySourceNoImds();
             
             return source == ManagedIdentitySource.None
-#pragma warning disable CS0618
                 // ManagedIdentitySource.DefaultToImds is marked obsolete, but is intentionally used here as a sentinel value to support legacy detection logic.
                 // This value signals that none of the environment-based managed identity sources were detected.
                 ? ManagedIdentitySource.DefaultToImds
-#pragma warning restore CS0618
                 : source;
 
         }
