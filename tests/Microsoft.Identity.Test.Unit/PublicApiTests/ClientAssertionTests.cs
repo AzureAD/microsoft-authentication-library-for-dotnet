@@ -721,7 +721,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.AreEqual("header.payload.signature", secondResult.AccessToken);
                     Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, secondResult.TokenType);
                     Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
-                    
+
                     // Cached result must still carry the cert
                     Assert.IsNotNull(secondResult.BindingCertificate);
                     Assert.AreEqual(result.BindingCertificate.Thumbprint,
