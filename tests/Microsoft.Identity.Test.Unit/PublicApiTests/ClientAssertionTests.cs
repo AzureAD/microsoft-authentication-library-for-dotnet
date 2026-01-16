@@ -670,6 +670,162 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        public async Task ClientAssertion_WithMtlsPop_SuccessAsync()
+        {
+            const string region = "eastus";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    // Set up mock handler with expected token endpoint URL
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
+
+                    var cert = CertHelper.GetOrCreateTestCert();
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .WithExperimentalFeatures(true)
+                        .WithClientAssertion((opts, ct) => Task.FromResult(new ClientSignedAssertion
+                        {
+                            Assertion = "fake_jwt_with_cert_binding",
+                            TokenBindingCertificate = cert
+                        }))
+                        .BuildConcrete();
+
+                    // First token acquisition - should hit the identity provider
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+
+                    Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should be present.");
+                    Assert.AreEqual(cert.Thumbprint, result.BindingCertificate.Thumbprint,
+                        "BindingCertificate must match the cert provided by the client assertion delegate.");
+
+                    // Second token acquisition - should retrieve from cache
+                    AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", secondResult.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, secondResult.TokenType);
+                    Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
+                    
+                    // Cached result must still carry the cert
+                    Assert.IsNotNull(secondResult.BindingCertificate);
+                    Assert.AreEqual(result.BindingCertificate.Thumbprint,
+                        secondResult.BindingCertificate.Thumbprint);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertion_WithMtlsPop_BearerFlow_SuccessAsync()
+        {
+            const string region = "eastus";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    // Set up mock handler with expected bearer token response
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .WithExperimentalFeatures(true)
+                        .WithClientAssertion((opts, ct) => Task.FromResult(new ClientSignedAssertion
+                        {
+                            Assertion = "fake_jwt_bearer",
+                            TokenBindingCertificate = null  // No certificate = bearer flow
+                        }))
+                        .BuildConcrete();
+
+                    // Token acquisition with no certificate should use bearer flow
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", result.AccessToken);
+                    Assert.AreEqual("Bearer", result.TokenType);
+                    Assert.IsNull(result.BindingCertificate, "BindingCertificate should be null for bearer tokens.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientAssertion_WithMtlsPop_SendsJwtPopAssertionTypeAsync()
+        {
+            const string region = "eastus";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var cert = CertHelper.GetOrCreateTestCert();
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = $"https://eastus.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop"),
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, TestConstants.ClientId },
+                            { OAuth2Parameter.Scope, TestConstants.s_scope.AsSingleString() },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
+                            { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtPop },
+                            { OAuth2Parameter.ClientAssertion, "fake_jwt_with_cert_binding" },
+                            { "token_type", "mtls_pop" }
+                        }
+                    };
+
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithHttpManager(harness.HttpManager)
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithExperimentalFeatures(true)
+                        .WithClientAssertion((opts, ct) => Task.FromResult(new ClientSignedAssertion
+                        {
+                            Assertion = "fake_jwt_with_cert_binding",
+                            TokenBindingCertificate = cert
+                        }))
+                        .Build();
+
+                    // Act
+                    var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    // Assert
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.IsNotNull(result.BindingCertificate);
+                    Assert.AreEqual(cert.Thumbprint, result.BindingCertificate.Thumbprint);
+                }
+            }
+        }
+
         #region Helper ---------------------------------------------------------------
         private static Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>>
         BearerDelegate(string jwt = "fake_jwt") =>

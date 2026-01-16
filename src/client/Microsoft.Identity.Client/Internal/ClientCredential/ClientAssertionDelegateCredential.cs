@@ -69,9 +69,19 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             if (IsMtlsPopRequested && resp.TokenBindingCertificate != null)
             {
+                // When mTLS PoP is requested and certificate is provided, use jwt-pop assertion type
+                // Note: The certificate and AuthenticationScheme are already set by InitMtlsPopParametersAsync
+                // before this method is called
+                
+                p.RequestContext.Logger.Verbose(() => 
+                    "[ClientAssertionDelegateCredential] Using jwt-pop assertion type for mTLS PoP with client assertion.");
+                
+                // Store the certificate for later use (e.g., ExecutionResult)
+                p.ResolvedCertificate = resp.TokenBindingCertificate;
+                
                 oAuth2Client.AddBodyParameter(
                     OAuth2Parameter.ClientAssertionType,
-                    OAuth2AssertionType.JwtPop /* constant added in OAuth2AssertionType */);
+                    OAuth2AssertionType.JwtPop);
             }
             else
             {
