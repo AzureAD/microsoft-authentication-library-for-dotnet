@@ -64,15 +64,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 ManagedIdentitySourceResult sourceResult = null;
                 ManagedIdentitySource source;
 
-                // If the source is not already set, determine it
-                if (s_sourceName == ManagedIdentitySource.None)
+                // If PoP is requested and the cached value is unknown/sentinel, we must probe to
+                // determine whether IMDSv2 is available (otherwise PoP will never work on VMs).
+                bool mustProbeForPop =
+                    isMtlsPopRequested &&
+                    (s_sourceName == ManagedIdentitySource.None || s_sourceName == ManagedIdentitySource.DefaultToImds);
+
+                // Determine source when not cached OR when PoP requires refining DefaultToImds.
+                if (s_sourceName == ManagedIdentitySource.None || mustProbeForPop)
                 {
-                    // Default behavior: do NOT probe IMDS during selection.
-                    // If no env-based source is found, this will return DefaultToImds.
                     sourceResult = await GetManagedIdentitySourceAsync(
                         requestContext,
                         isMtlsPopRequested,
-                        probe: false,
+                        probe: mustProbeForPop, // false for Bearer default, true for PoP on VMs
                         cancellationToken)
                         .ConfigureAwait(false);
 
@@ -80,7 +84,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-                    // Reuse cached value
                     source = s_sourceName;
                 }
 
@@ -109,7 +112,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 // If we are in DefaultToImds (no-probe sentinel) and PoP was requested,
                 // fail fast rather than implicitly probing/attempting IMDSv2.
-                if (source == ManagedIdentitySource.DefaultToImds && isMtlsPopRequested)
+                // If the environment was determined to be IMDSv1, mTLS PoP cannot work.
+                if (source == ManagedIdentitySource.Imds && isMtlsPopRequested)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopTokenNotSupportedinImdsV1,
