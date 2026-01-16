@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
@@ -23,17 +24,17 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 {
     internal class TestTcpInterceptor : IUriInterceptor
     {
-        private readonly Uri _expectedUri;
+        private readonly AuthorizationResponse _expectedResponse;
         public Func<Uri, string> ResponseProducer { get; }
 
-        public TestTcpInterceptor(Uri expectedUri)
+        public TestTcpInterceptor(Uri expectedUri, byte[] postData = null)
         {
-            _expectedUri = expectedUri;
+            _expectedResponse = new AuthorizationResponse(expectedUri, postData);
         }
 
-        public Task<Uri> ListenToSingleRequestAndRespondAsync(int port, string path, Func<Uri, MessageAndHttpCode> responseProducer, CancellationToken cancellationToken)
+        public Task<AuthorizationResponse> ListenToSingleRequestAndRespondAsync(int port, string path, Func<AuthorizationResponse, MessageAndHttpCode> responseProducer, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_expectedUri);
+            return Task.FromResult(_expectedResponse);
         }
     }
 
@@ -65,18 +66,64 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
-        public async Task DefaultOsBrowserWebUi_HappyPath_Async()
+        public async Task DefaultOsBrowserWebUi_FormPost_HappyPath_Async()
         {
+            // Test with form_post (POST data)
+            var postData = System.Text.Encoding.UTF8.GetBytes(
+                "code=auth_code&state=901e7d87-6f49-4f9f-9fa7-e6b8c32d5b9595bc1797-dacc-4ff1-b9e9-0df81be286c7&session_state=test");
+            
             var webUI = CreateTestWebUI();
-            AuthorizationResult authorizationResult = await AcquireAuthCodeAsync(webUI)
+            AuthorizationResult authorizationResult = await AcquireAuthCodeAsync(
+                webUI, 
+                postData: postData)
                .ConfigureAwait(false);
 
             // Assert
             Assert.AreEqual(AuthorizationStatus.Success, authorizationResult.Status);
             Assert.IsFalse(string.IsNullOrEmpty(authorizationResult.Code));
+            Assert.AreEqual("auth_code", authorizationResult.Code);
+
+            // Verify that response_mode=form_post was added to the authorization URI
+            await _platformProxy.Received(1).StartDefaultOsBrowserAsync(
+                Arg.Is<string>(s => s.Contains("response_mode=form_post")), 
+                Arg.Any<bool>())
+                .ConfigureAwait(false);
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
-                TestPort, "/", Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
+                TestPort, "/", Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task DefaultOsBrowserWebUi_ResponseModeQuery_OverriddenToFormPost_Async()
+        {
+            // Arrange - authorization URI already has response_mode=query set by developer
+            string requestUriWithQueryMode = TestAuthorizationRequestUri + "&response_mode=query";
+            var postData = System.Text.Encoding.UTF8.GetBytes(
+                "code=auth_code&state=901e7d87-6f49-4f9f-9fa7-e6b8c32d5b9595bc1797-dacc-4ff1-b9e9-0df81be286c7&session_state=test");
+            
+            var webUI = CreateTestWebUI();
+            
+            AuthorizationResult authorizationResult = await AcquireAuthCodeAsync(
+                webUI, 
+                requestUri: requestUriWithQueryMode,
+                postData: postData)
+               .ConfigureAwait(false);
+
+            Assert.AreEqual(AuthorizationStatus.Success, authorizationResult.Status);
+            Assert.AreEqual("auth_code", authorizationResult.Code);
+
+            // Verify that response_mode=form_post overrode the query mode
+            await _platformProxy.Received(1).StartDefaultOsBrowserAsync(
+                Arg.Is<string>(s => s.Contains("response_mode=form_post") && !s.Contains("response_mode=query")), 
+                Arg.Any<bool>())
+                .ConfigureAwait(false);
+
+            // Verify warning was logged about the override
+            // Warning() extension method translates to Log(LogLevel.Warning, string.Empty, message)
+            _logger.Received(1).Log(
+                LogLevel.Warning,
+                string.Empty,
+                Arg.Is<string>(s => s.Contains("response_mode") && s.Contains("overridden") && s.Contains("form_post")));
         }
 
         [TestMethod]
@@ -90,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             _tcpInterceptor.When(x => x.ListenToSingleRequestAndRespondAsync(
                 TestPort,
                 "/",
-                Arg.Any<Func<Uri, MessageAndHttpCode>>(),
+                Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(),
                 cts.Token))
                .Do(_ =>
                {
@@ -124,13 +171,15 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             var webUI = CreateTestWebUI(options);
             var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
             var responseUri = new Uri(TestAuthorizationResponseUri);
+            var postData = System.Text.Encoding.UTF8.GetBytes("code=some_auth_code&state=some_state");
+            var authResponse = new AuthorizationResponse(responseUri, postData);
 
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
                 "/",
-                Arg.Any<Func<Uri, MessageAndHttpCode>>(),
+                Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(),
                 CancellationToken.None)
-               .Returns(Task.FromResult(responseUri));
+               .Returns(Task.FromResult(authResponse));
 
             // Act
             AuthorizationResult authorizationResult = await webUI.AcquireAuthorizationAsync(
@@ -144,7 +193,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 .ConfigureAwait(false);
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
-                TestPort, "/", Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
+                TestPort, "/", Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
 
             Assert.IsTrue(customOpenBrowserCalled);
         }
@@ -165,7 +214,8 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             IWebUI webUI,
             string redirectUri = TestRedirectUri,
             string requestUri = TestAuthorizationRequestUri,
-            string responseUriString = TestAuthorizationResponseUri)
+            string responseUriString = TestAuthorizationResponseUri,
+            byte[] postData = null)
         {
             // Arrange
             var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
@@ -174,9 +224,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
                 "/",
-                Arg.Any<Func<Uri, MessageAndHttpCode>>(),
+                Arg.Any<Func<AuthorizationResponse, MessageAndHttpCode>>(),
                 CancellationToken.None)
-               .Returns(Task.FromResult(responseUri));
+               .Returns(Task.FromResult(new AuthorizationResponse(responseUri, postData)));
 
             // Act
             AuthorizationResult authorizationResult = await webUI.AcquireAuthorizationAsync(
@@ -186,7 +236,10 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 CancellationToken.None).ConfigureAwait(false);
 
             // Assert that we opened the browser
-            await _platformProxy.Received(1).StartDefaultOsBrowserAsync(requestUri, requestContext.ServiceBundle.Config.IsBrokerEnabled)
+            // Verify response_mode=form_post is present (don't check for full requestUri to allow parameter replacement tests)
+            await _platformProxy.Received(1).StartDefaultOsBrowserAsync(
+                Arg.Is<string>(s => s.Contains("response_mode=form_post")), 
+                requestContext.ServiceBundle.Config.IsBrokerEnabled)
                 .ConfigureAwait(false);
 
             return authorizationResult;
@@ -298,7 +351,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 new Uri(TestErrorAuthorizationResponseUri);
 
             // Act
-            MessageAndHttpCode messageAndCode = webUi.GetResponseMessage(successAuthCodeUri);
+            MessageAndHttpCode messageAndCode = webUi.GetResponseMessage(new AuthorizationResponse(successAuthCodeUri, null));
 
             // Assert
             if (expectedMessage != null)
