@@ -13,7 +13,8 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -342,22 +343,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LegacyPoPAsync()
         {
-            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            X509Certificate2 clientCredsCert = settings.Certificate;
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            X509Certificate2 clientCredsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
             RsaSecurityKey popKey = CreateRsaSecurityKey();
 
+            Console.Out.WriteLine("Authority in app config: " + appConfig.Authority);
+
             var cca = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority, true)
+                .Create(appConfig.AppId)
+                .WithAuthority(appConfig.Authority, true)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
 
-            var result = await cca.AcquireTokenForClient(settings.AppScopes)
+            var result = await cca.AcquireTokenForClient(appScopes)
                 .WithProofOfPosessionKeyId(popKey.KeyId)
                 .OnBeforeTokenRequest((data) =>
                     {
-                        ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey);
+                        ModifyRequestWithLegacyPop(data, appConfig.AppId, clientCredsCert, popKey);
                         return Task.CompletedTask;
                     })
                 .ExecuteAsync().ConfigureAwait(false);
@@ -366,11 +370,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAccessTokenCacheItem at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
             Assert.AreEqual(at.KeyId, popKey.KeyId);
 
-            result = await cca.AcquireTokenForClient(settings.AppScopes)
+            result = await cca.AcquireTokenForClient(appScopes)
                 .WithProofOfPosessionKeyId(popKey.KeyId)
                 .OnBeforeTokenRequest((data) =>
                 {
-                    ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey);
+                    ModifyRequestWithLegacyPop(data, appConfig.AppId, clientCredsCert, popKey);
                     return Task.CompletedTask;
                 }).ExecuteAsync().ConfigureAwait(false);
 
@@ -380,11 +384,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             RsaSecurityKey popKey2 = CreateRsaSecurityKey();
 
-            result = await cca.AcquireTokenForClient(settings.AppScopes)
+            result = await cca.AcquireTokenForClient(appScopes)
                 .WithProofOfPosessionKeyId(popKey2.KeyId)
                 .OnBeforeTokenRequest((data) =>
                 {
-                    ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey2);
+                    ModifyRequestWithLegacyPop(data, appConfig.AppId, clientCredsCert, popKey2);
                     return Task.CompletedTask;
                 }).ExecuteAsync().ConfigureAwait(false);
 
@@ -397,12 +401,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LegacyPopUsingNewProtocol_CertThumbprinJWK_Async()
         {
-            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            X509Certificate2 clientCredsCert = settings.Certificate;
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            X509Certificate2 clientCredsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
             var cca = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority, true)
+                .Create(appConfig.AppId)
+                .WithAuthority(appConfig.Authority, true)
                 .WithCertificate(clientCredsCert)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
@@ -411,7 +416,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var thumbprint = Base64UrlEncoder.Encode(clientCredsCert.GetCertHash(HashAlgorithmName.SHA256));
             var reqCnf = $@"{{""kty"":""RSA"",""x5t#S256"":""{thumbprint}"",""kid"":""{thumbprint}""}}";
 
-            var result = await cca.AcquireTokenForClient(settings.AppScopes)
+            var result = await cca.AcquireTokenForClient(appScopes)
                 .WithAtPop(thumbprint, reqCnf)               
                 .ExecuteAsync().ConfigureAwait(false);
 
@@ -419,7 +424,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAccessTokenCacheItem at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
             Assert.AreEqual(at.KeyId, thumbprint);
 
-            result = await cca.AcquireTokenForClient(settings.AppScopes)
+            result = await cca.AcquireTokenForClient(appScopes)
                 .WithAtPop(thumbprint, reqCnf)
                 .ExecuteAsync().ConfigureAwait(false);
 
@@ -428,7 +433,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(at.KeyId, thumbprint);
 
             string otherKeyId = thumbprint + "2";
-            result = await cca.AcquireTokenForClient(settings.AppScopes)
+            result = await cca.AcquireTokenForClient(appScopes)
                 .WithAtPop(otherKeyId, reqCnf)
                 .ExecuteAsync().ConfigureAwait(false);
 
@@ -441,12 +446,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task LegacyPopUsingNewProtocol_RsaKey_Async()
         {
-            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            X509Certificate2 clientCredsCert = settings.Certificate;
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            X509Certificate2 clientCredsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
             var cca = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority, true)
+                .Create(appConfig.AppId)
+                .WithAuthority(appConfig.Authority, true)
                 .WithCertificate(clientCredsCert)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
@@ -456,7 +462,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var reqCnf = CreateJwkClaim(popKey, SecurityAlgorithms.RsaSha256);
             var keyId = ComputeSHA256(reqCnf); // can be anything
 
-            var result = await cca.AcquireTokenForClient(settings.AppScopes)
+            var result = await cca.AcquireTokenForClient(appScopes)
                 .WithAtPop(keyId, reqCnf)
                 .ExecuteAsync().ConfigureAwait(false);
 
@@ -464,7 +470,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAccessTokenCacheItem at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
             Assert.AreEqual(at.KeyId, keyId);
 
-            result = await cca.AcquireTokenForClient(settings.AppScopes)
+            result = await cca.AcquireTokenForClient(appScopes)
                 .WithAtPop(keyId, reqCnf)
                 .ExecuteAsync().ConfigureAwait(false);
 
@@ -472,11 +478,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
           
         }
 
-        private static void ModifyRequestWithLegacyPop(OnBeforeTokenRequestData data, IConfidentialAppSettings settings, X509Certificate2 clientCredsCert, RsaSecurityKey popKey)
+        private static void ModifyRequestWithLegacyPop(OnBeforeTokenRequestData data, string clientId, X509Certificate2 clientCredsCert, RsaSecurityKey popKey)
         {
             var clientCredsSigningCredentials = new SigningCredentials(new X509SecurityKey(clientCredsCert), SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
             string request = CreateMs10ATPOPAssertion(
-                settings.ClientId,
+                clientId,
                 data.RequestUri.AbsoluteUri,
                 clientCredsSigningCredentials,
                 popKey,

@@ -173,5 +173,46 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 throw new InvalidOperationException($"Test setup: cannot get the user password from Key Vault secret '{userLabName}'. See inner exception.", e);
             }
         }
+
+        /// <summary>
+        /// Retrieves a secret string value from the specified Key Vault.
+        /// </summary>
+        /// <param name="secretName">The name of the secret to retrieve.</param>
+        /// <param name="keyVault">The Key Vault instance to retrieve the secret from.</param>
+        /// <returns>The secret value as a string.</returns>
+        public static string FetchSecretString(string secretName, KeyVaultSecretsProvider keyVault)
+        {
+            if (string.IsNullOrWhiteSpace(secretName))
+            {
+                Debug.WriteLine("Secret fetch failed: empty secret name");
+                throw new InvalidOperationException("Error: secret name cannot be empty.");
+            }
+
+            if (keyVault == null)
+            {
+                Debug.WriteLine("Secret fetch failed: KeyVault provider is null");
+                throw new InvalidOperationException("Error: KeyVault secrets provider cannot be null.");
+            }
+
+            try
+            {
+                var keyVaultSecret = keyVault.GetSecretByName(secretName);
+                string secretValue = keyVaultSecret.Value;
+                
+                if (!string.IsNullOrEmpty(secretValue))
+                {
+                    Debug.WriteLine($"Secret retrieved for {secretName} ({secretValue.Length} chars)");
+                    return secretValue;
+                }
+                
+                Debug.WriteLine($"Secret empty for {secretName}");
+                throw new InvalidOperationException($"Secret '{secretName}' found but was empty in Key Vault.");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Secret fetch failed for {secretName}: {e.Message}");
+                throw new InvalidOperationException($"Failed to retrieve Key Vault secret '{secretName}'. See inner exception.", e);
+            }
+        }
     }
 }
