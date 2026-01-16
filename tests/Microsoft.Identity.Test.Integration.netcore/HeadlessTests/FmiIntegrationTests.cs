@@ -313,12 +313,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
                 (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
-
+            var attributesString = "{\"FavoriteColor\": \"Blue\", \"file:/c/users/foobar/documents/info.txt\": \"{\\\"permissions\\\":[\\\"read\\\",\\\"write\\\"]}\"}"
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { "api://AzureFMITokenExchange/.default" })
-                                .WithAttributes("{\"FavoriteColor\": \"Blue\", \"file:/c/users/foobar/documents/info.txt\": \"{\\\"permissions\\\":[\\\"read\\\",\\\"write\\\"]}\"}")
+                                .WithAttributes(attributesString)
                                                     .WithFmiPath("SomeFmiPath/FmiCredentialPath")
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
+            Assert.IsTrue(jsonToken.Payload.ContainsKey("xms_attr"), "xms_attr claim should exist in the token");
+            var xmsAttr = jsonToken.Payload["xms_attr"].ToString();
+            Assert.IsTrue(xmsAttr.Contains(attributesString), "xms_attr claim should contain attribute string");
 
             var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{RmaClientId}-{TenantId}-{"api://AzureFMITokenExchange/.default"}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
