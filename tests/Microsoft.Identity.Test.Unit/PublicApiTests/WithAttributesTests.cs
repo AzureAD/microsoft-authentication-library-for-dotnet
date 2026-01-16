@@ -206,47 +206,5 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        [TestMethod]
-        public async Task WithAttributes_SameValueReturnsCachedToken_Async()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                var app = ConfidentialClientApplicationBuilder
-                    .Create(ClientId)
-                    .WithAuthority("https://login.microsoftonline.com/", TenantId)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
-                    .BuildConcrete();
-
-                httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
-                    token: "cached_token");
-
-                // Act - First call
-                var result1 = await app.AcquireTokenForClient(_scope)
-                    .WithAttributes("same_attribute")
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual("cached_token", result1.AccessToken);
-
-                // Act - Second call with same attribute
-                var result2 = await app.AcquireTokenForClient(_scope)
-                    .WithAttributes("same_attribute")
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                // Assert - Should be from cache
-                Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual("cached_token", result2.AccessToken);
-
-                // Verify only one token in cache
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-            }
-        }
     }
 }

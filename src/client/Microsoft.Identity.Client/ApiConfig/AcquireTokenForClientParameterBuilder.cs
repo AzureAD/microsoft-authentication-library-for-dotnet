@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
             }
             var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
             {
-                { OAuth2Parameter.Attributes, (CancellationToken ct) => Task.FromResult(attributeJson) }
+                { OAuth2Parameter.Attributes, _ => Task.FromResult(attributeJson) }
             };
 
             this.WithExtraBodyParameters(extraBodyParams);
