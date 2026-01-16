@@ -1353,6 +1353,153 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNotNull(assertion);
             }
         }
+
+        [TestMethod]
+        public async Task WithExtraClientAssertionClaims_WorksWithOboFlow_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var certificate = CertHelper.GetOrCreateTestCert();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/tid")
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .Build();
+
+                var handler = harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
+                JwtSecurityToken assertion = null;
+                handler.AdditionalRequestValidation = (r) =>
+                {
+                    var requestContent = r.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
+
+                    Assert.IsTrue(formsData.TryGetValue("client_assertion", out string encodedJwt), "Missing client_assertion from request");
+
+                    var jwtHandler = new JwtSecurityTokenHandler();
+                    assertion = jwtHandler.ReadJwtToken(encodedJwt);
+
+                    // Validate extra claims are present in the client assertion
+                    var customClaimsClaim = assertion.Claims.FirstOrDefault(c => c.Type == "custom_claims");
+                    Assert.IsNotNull(customClaimsClaim, "custom_claims should be present");
+
+                    // Parse the nested claim value as JSON
+                    var jsonElement = JsonSerializer.Deserialize<JsonElement>(customClaimsClaim.Value);
+                    Assert.AreEqual(JsonValueKind.Object, jsonElement.ValueKind, "custom_claims should be a JSON object");
+                    
+                    // Validate nested properties
+                    Assert.IsTrue(jsonElement.TryGetProperty("xms_az_tm", out var tmProperty));
+                    Assert.AreEqual("azureinfra", tmProperty.GetString());
+                    
+                    Assert.IsTrue(jsonElement.TryGetProperty("xms_az_nwperimid", out var nwperimidProperty));
+                    Assert.AreEqual(JsonValueKind.Array, nwperimidProperty.ValueKind);
+                    Assert.AreEqual(2, nwperimidProperty.GetArrayLength());
+
+                    // Verify it's an OBO flow by checking for the user assertion
+                    Assert.IsTrue(formsData.TryGetValue("grant_type", out string grantType));
+                    Assert.AreEqual("urn:ietf:params:oauth:grant-type:jwt-bearer", grantType);
+                    Assert.IsTrue(formsData.TryGetValue("assertion", out string userAssertion));
+                    Assert.AreEqual(TestConstants.DefaultAccessToken, userAssertion);
+                };
+
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                AuthenticationResult result = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .WithExtraClientAssertionClaims(_clientAssertionClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+                Assert.IsNotNull(assertion);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithExtraClientAssertionClaims_OboFlow_DifferentClaims_ResultsInDifferentCacheEntries_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var certificate = CertHelper.GetOrCreateTestCert();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/tid")
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
+
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                // First request with _clientAssertionClaims
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
+
+                AuthenticationResult result1 = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .WithExtraClientAssertionClaims(_clientAssertionClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result1.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                // Second request with different claims should go to IdP
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
+                string extraClaims2 = "{\"claim2\":\"value2\"}";
+
+                AuthenticationResult result2 = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .WithExtraClientAssertionClaims(extraClaims2)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result2.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+
+                // Verify we have 2 tokens in cache (OBO uses user token cache)
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+            }
+        }
+
+        [TestMethod]
+        public async Task WithExtraClientAssertionClaims_OboFlow_SameClaims_UsesCache_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var certificate = CertHelper.GetOrCreateTestCert();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/tid")
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
+
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
+
+                // First request
+                AuthenticationResult result1 = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .WithExtraClientAssertionClaims(_clientAssertionClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result1.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                // Second request with same claims should use cache
+                AuthenticationResult result2 = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .WithExtraClientAssertionClaims(_clientAssertionClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result2.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(result1.AccessToken, result2.AccessToken);
+            }
+        }
         private void BeforeCacheAccess(TokenCacheNotificationArgs args)
         {
             args.TokenCache.DeserializeMsalV3(_serializedCache);
