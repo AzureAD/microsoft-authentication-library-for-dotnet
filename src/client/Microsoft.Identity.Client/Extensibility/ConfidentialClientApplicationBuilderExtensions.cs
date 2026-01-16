@@ -4,6 +4,7 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 
 namespace Microsoft.Identity.Client.Extensibility
@@ -41,8 +42,8 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="certificateProvider">
         /// An async callback that provides the certificate based on the application configuration.
         /// Called before each network request to acquire a token.
-        /// Must return a valid <see cref="X509Certificate2"/> with a private key.
-        /// </param>
+        /// Must return a valid <see cref="X509Certificate2"/> with a private key.</param>
+        /// <param name="certificateOptions">Configuration options for the certificate handling.</param>
         /// <returns>The builder to chain additional configuration calls.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="certificateProvider"/> is null.</exception>
         /// <exception cref="MsalClientException">
@@ -58,8 +59,11 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </remarks>
         public static ConfidentialClientApplicationBuilder WithCertificate(
             this ConfidentialClientApplicationBuilder builder,
-            Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider)
+            Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider, 
+            CertificateOptions certificateOptions)
         {
+            builder.ValidateUseOfExperimentalFeature();
+
             if (certificateProvider == null)
             {
                 throw new ArgumentNullException(nameof(certificateProvider));
@@ -69,7 +73,9 @@ namespace Microsoft.Identity.Client.Extensibility
             // The certificate will be resolved dynamically via the provider in ResolveCertificateAsync
             builder.Config.ClientCredential = new DynamicCertificateClientCredential(
                 certificateProvider: certificateProvider);
-            
+
+            builder.Config.SendX5C = certificateOptions?.SendX5C ?? false;
+
             return builder;
         }
 
@@ -118,6 +124,8 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<AssertionRequestOptions, ExecutionResult, Task<bool>> onMsalServiceFailure)
         {
+            builder.ValidateUseOfExperimentalFeature();
+
             if (onMsalServiceFailure == null)
                 throw new ArgumentNullException(nameof(onMsalServiceFailure));
 
