@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager,
                     userAssignedIdentityId,
                     userAssignedId,
-                    addProbeMock: true,
+                    addProbeMock: false,
                     addSourceCheck: false,
                     imdsVersion: ImdsVersion.V1)
                     .ConfigureAwait(false);
@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
+                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
             }
         }
 
