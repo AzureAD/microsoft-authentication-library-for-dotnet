@@ -114,10 +114,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         MsalErrorMessage.CannotSwitchBetweenImdsVersionsForPreview);
                 }
 
-                // If we are in DefaultToImds (no-probe sentinel) and PoP was requested,
+                // If we are in DefaultToImds or if source was determined as Imds and PoP was requested,
                 // fail fast rather than implicitly probing/attempting IMDSv2.
                 // If the environment was determined to be IMDSv1, mTLS PoP cannot work.
-                if (source == ManagedIdentitySource.DefaultToImds && isMtlsPopRequested)
+                // throwing here avoids unnecessary network calls and latency.
+                if ((source == ManagedIdentitySource.DefaultToImds || source == ManagedIdentitySource.Imds) && isMtlsPopRequested)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopTokenNotSupportedinImdsV1,
