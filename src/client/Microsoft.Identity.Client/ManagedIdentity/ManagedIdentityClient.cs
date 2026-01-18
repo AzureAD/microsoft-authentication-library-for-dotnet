@@ -64,19 +64,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 ManagedIdentitySourceResult sourceResult = null;
                 ManagedIdentitySource source;
 
-                // If PoP is requested and the cached value is unknown/sentinel, we must probe to
-                // determine whether IMDSv2 is available (otherwise PoP will never work on VMs).
-                bool mustProbeForPop =
-                    isMtlsPopRequested &&
-                    (s_sourceName == ManagedIdentitySource.None || s_sourceName == ManagedIdentitySource.DefaultToImds);
-
-                // Determine source when not cached OR when PoP requires refining DefaultToImds.
-                if (s_sourceName == ManagedIdentitySource.None || mustProbeForPop)
+                // We always need to select a source on first use (cached source == None).
+                bool isFirstSelection = (s_sourceName == ManagedIdentitySource.None);
+                
+                // Only PoP requests can require probing IMDS to distinguish V2 vs V1.
+                // (We *don't* probe by default for Bearer perf reasons.)
+                bool shouldProbeForPop = isMtlsPopRequested &&
+                (isFirstSelection || s_sourceName == ManagedIdentitySource.DefaultToImds);
+                
+                bool shouldDetermineSource = isFirstSelection || shouldProbeForPop;
+                
+                if (shouldDetermineSource)
                 {
                     sourceResult = await GetManagedIdentitySourceAsync(
                         requestContext,
                         isMtlsPopRequested,
-                        probe: mustProbeForPop, // false for Bearer default, true for PoP on VMs
+                        probe: shouldProbeForPop, // false for Bearer default, true for PoP refinement
                         cancellationToken)
                         .ConfigureAwait(false);
 
