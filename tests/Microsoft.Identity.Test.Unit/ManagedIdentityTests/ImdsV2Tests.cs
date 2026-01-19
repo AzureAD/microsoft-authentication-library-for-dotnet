@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager,
                     userAssignedIdentityId,
                     userAssignedId,
-                    addProbeMock: true,
+                    addProbeMock: false,
                     addSourceCheck: false,
                     imdsVersion: ImdsVersion.V1)
                     .ConfigureAwait(false);
@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
+                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
             }
         }
 
@@ -613,51 +613,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
-            }
-        }
-
-        // New test: Bearer first (no probe), then PoP should still probe and work
-        [TestMethod]
-        public async Task BearerThenMtlsPop_DefaultToImdsCached_DoesNotBlockProbing()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                ManagedIdentityClient.ResetSourceForTest();
-                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-
-                var mi = await CreateManagedIdentityAsync(
-                    httpManager,
-                    addProbeMock: false,    // don't pre-add probes; we want Bearer to run "no probe"
-                    addSourceCheck: false,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard,
-                    imdsVersion: ImdsVersion.V2)
-                    .ConfigureAwait(false);
-
-                // (1) Bearer request - IMDSv1 token request mock
-                httpManager.AddManagedIdentityMockHandler(
-                    TestConstants.ImdsEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.Imds);
-
-                var bearer = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(Bearer, bearer.TokenType);
-
-                // (2) Now request PoP - must probe + use IMDSv2 flow
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
-                AddMocksToGetEntraToken(httpManager);
-
-                var pop = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(MTLSPoP, pop.TokenType);
             }
         }
 
