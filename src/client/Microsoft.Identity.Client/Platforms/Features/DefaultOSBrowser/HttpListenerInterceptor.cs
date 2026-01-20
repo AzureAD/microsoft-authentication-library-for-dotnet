@@ -35,29 +35,27 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             cancellationToken.ThrowIfCancellationRequested();
 
             HttpListener httpListener = null;
-            string urlToListenTo = string.Empty;
+            UriBuilder urlToListenTo = new UriBuilder()
+            {
+                Scheme = Uri.UriSchemeHttp,
+                Host = "localhost",
+                Port = port,
+                Path = path
+            };
             try
             {
-                if(string.IsNullOrEmpty(path))
+                
+                if (!urlToListenTo.Path.EndsWith("/"))
                 {
-                    path = "/";
-                }
-                else
-                {
-                    path = (path.StartsWith("/") ? path : "/" + path);
-                }
-
-                urlToListenTo = "http://localhost:" + port + path;
-
-                if (!urlToListenTo.EndsWith("/"))
-                {
-                    urlToListenTo += "/";
+                    urlToListenTo.Path += "/";
                 }
 
                 httpListener = new HttpListener();
-                httpListener.Prefixes.Add(urlToListenTo);
+                httpListener.Prefixes.Add(urlToListenTo.Uri.ToString());
+                httpListener.Prefixes.Add(new UriBuilder(urlToListenTo.Uri) { Host = "127.0.0.1" }.Uri.ToString());
+                httpListener.Prefixes.Add(new UriBuilder(urlToListenTo.Uri) { Host = "[::1]" }.Uri.ToString());
 
-                TestBeforeStart?.Invoke(urlToListenTo);
+                TestBeforeStart?.Invoke(urlToListenTo.Uri.ToString());
 
                 httpListener.Start();
                 _logger.Info(() => "Listening for authorization code on " + urlToListenTo);
@@ -92,7 +90,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                 if (ex is HttpListenerException)
                 {
                     throw new MsalClientException(MsalError.HttpListenerError, 
-                        $"An HttpListenerException occurred while listening on {urlToListenTo} for the system browser to complete the login. " +
+                        $"An HttpListenerException occurred while listening on {urlToListenTo.Uri} for the system browser to complete the login. " +
                         "Possible cause and mitigation: the app is unable to listen on the specified URL; " +
                         "run 'netsh http add iplisten 127.0.0.1' from the Admin command prompt.",
                         ex);
