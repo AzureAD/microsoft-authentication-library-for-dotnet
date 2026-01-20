@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
+                Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
             }
         }
 
@@ -618,7 +618,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         // New test: PoP first-call on VM fails when both IMDS probes fail
         [TestMethod]
-        public async Task MtlsPop_FirstCall_BothImdsProbesFail_ThrowsAllSourcesUnavailable()
+        public async Task MtlsPop_FirstCall_ImdsV2ProbeFails_ThrowsMtlsPopTokenNotSupportedinImdsV1()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -635,7 +635,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
 
                 var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -644,7 +643,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .ConfigureAwait(false))
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
+                Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
             }
         }
 

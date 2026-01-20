@@ -73,7 +73,9 @@ namespace Microsoft.Identity.Client
 
             if (probe && cached != ManagedIdentitySource.None)
             {
+#pragma warning disable CS0618 // DefaultToImds is obsolete                
                 if (cached != ManagedIdentitySource.DefaultToImds)
+#pragma warning restore CS0618 // DefaultToImds is obsolete
                 {
                     // Cache contains a concrete source; no need to probe again.
                     return new ManagedIdentitySourceResult(cached);
@@ -85,9 +87,14 @@ namespace Microsoft.Identity.Client
             // Create a temporary RequestContext for the logger and the optional IMDS probe request.
             var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
 
-            // Use isMtlsPopRequested: true so probe mode can detect IMDSv2 capability when available.
+            bool isMtlsPopRequestedForDetection = probe;
+
             return await ManagedIdentityClient
-                .GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested: true, probe: probe, cancellationToken: cancellationToken)
+                .GetManagedIdentitySourceAsync(
+                    requestContext,
+                    isMtlsPopRequested: isMtlsPopRequestedForDetection,
+                    probe: probe,
+                    cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
 

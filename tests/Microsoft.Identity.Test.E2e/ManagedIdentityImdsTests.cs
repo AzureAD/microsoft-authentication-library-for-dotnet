@@ -13,7 +13,6 @@ namespace Microsoft.Identity.Test.E2E
     [TestClass]
     public class ManagedIdentityImdsTests
     {
-        public TestContext TestContext { get; set; }
         private const string ArmScope = "https://management.azure.com";
 
         private static IManagedIdentityApplication BuildMi(
@@ -32,25 +31,7 @@ namespace Microsoft.Identity.Test.E2E
 
             var builder = ManagedIdentityApplicationBuilder.Create(miId);
             builder.Config.AccessorOptions = null;
-            builder.WithLogging(
-                MsalLogCallback,
-                LogLevel.Verbose,
-                enablePiiLogging: false,
-                enableDefaultPlatformLogging: false);
             return builder.Build();
-        }
-
-        private static void MsalLogCallback(LogLevel level, string message, bool containsPii)
-        {
-            // Keep PII off. containsPii will be false in our config below, but keep this guard anyway.
-            if (containsPii)
-            {
-                return;
-            }
-
-            // Make logs visible in ADO + local runs.
-            // TestContext is not available in static context, so only use Console.WriteLine here.
-            Console.WriteLine($"[MSAL:{level}] {message}");
         }
 
         [RunOnAzureDevOps]

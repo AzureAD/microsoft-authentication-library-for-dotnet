@@ -1171,7 +1171,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
 
+#pragma warning disable CS0618 // DefaultToImds is obsolete
                 Assert.AreEqual(ManagedIdentitySource.DefaultToImds, result.Source);
+#pragma warning restore CS0618 // DefaultToImds is obsolete
             }
         }
 
