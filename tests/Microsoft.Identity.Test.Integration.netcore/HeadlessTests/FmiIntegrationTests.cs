@@ -224,6 +224,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                     .WithFmiPath("SomeFmiPath/Path")
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
+            Assert.IsFalse(jsonToken.Payload.ContainsKey("xms_attr"), "xms_attr claim should not exist in the token");
+
             var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{clientId}-{TenantId}-{WebApiScope}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
                           confidentialApp,
