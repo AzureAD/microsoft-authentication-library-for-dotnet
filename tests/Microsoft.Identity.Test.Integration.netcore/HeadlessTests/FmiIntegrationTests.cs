@@ -317,7 +317,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
                 (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
-            var attributesString = "{\"FavoriteColor\": \"Blue\", \"file:/c/users/foobar/documents/info.txt\": \"{\\\"permissions\\\":[\\\"read\\\",\\\"write\\\"]}\"}"
+            var attributesString = "{\"FavoriteColor\": \"Blue\", \"file:/c/users/foobar/documents/info.txt\": \"{\\\"permissions\\\":[\\\"read\\\",\\\"write\\\"]}\"}";
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { "api://AzureFMITokenExchange/.default" })
                                 .WithAttributes(attributesString)
                                                     .WithFmiPath("SomeFmiPath/FmiCredentialPath")
