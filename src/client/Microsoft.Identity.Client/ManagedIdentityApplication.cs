@@ -80,11 +80,7 @@ namespace Microsoft.Identity.Client
             var source = ManagedIdentityClient.GetManagedIdentitySourceNoImds();
             
             return source == ManagedIdentitySource.None
-#pragma warning disable CS0618
-                // ManagedIdentitySource.DefaultToImds is marked obsolete, but is intentionally used here as a sentinel value to support legacy detection logic.
-                // This value signals that none of the environment-based managed identity sources were detected.
                 ? ManagedIdentitySource.DefaultToImds
-#pragma warning restore CS0618
                 : source;
 
         }
