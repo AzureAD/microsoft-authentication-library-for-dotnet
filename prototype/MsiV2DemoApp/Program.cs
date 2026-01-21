@@ -40,7 +40,7 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.MtlsPop;
+using Microsoft.Identity.Client.KeyAttestation;
 using Microsoft.IdentityModel.Abstractions;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -256,7 +256,7 @@ internal class Program
         bool showFullToken)
     {
         var builder = app.AcquireTokenForManagedIdentity(scope);
-        if (useMtls) builder = builder.WithMtlsProofOfPossession();
+        if (useMtls) builder = builder.WithMtlsProofOfPossession().WithAttestationSupport();
         if (forceRefresh) builder = builder.WithForceRefresh(true);
 
         var result = await Ui.WithSpinnerAsync(

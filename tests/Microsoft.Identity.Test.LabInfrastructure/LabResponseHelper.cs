@@ -15,8 +15,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsid { get; }
 
         // Caches for configuration objects retrieved from Key Vault
-        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig> s_userConfigCache = new();
-        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, AppConfig> s_appConfigCache = new();
+         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig> s_userConfigCache = new System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig>();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, AppConfig> s_appConfigCache = new System.Collections.Concurrent.ConcurrentDictionary<string, AppConfig>();
 
         static LabResponseHelper()
         {
@@ -138,49 +138,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
 
-        private static async Task<System.Collections.Generic.Dictionary<string, string>> GetJsonOfKeyValuePairsFromKVAsync(string secret)
-        {
-            try
-            {
-                var keyVaultSecret = await KeyVaultSecretsProviderMsal.GetSecretByNameAsync(secret).ConfigureAwait(false);
-                string jsonData = keyVaultSecret.Value;
-
-                if (string.IsNullOrEmpty(jsonData))
-                {
-                    Debug.WriteLine($"KeyVault secret '{secret}' empty");
-                    throw new InvalidOperationException($"Found no content for secret '{secret}' in Key Vault.");
-                }
-
-                try
-                {
-                    var keyValuePairs = JsonConvert.DeserializeObject<System.Collections.Generic.Dictionary<string, string>>(jsonData);
-                    if (keyValuePairs == null)
-                    {
-                        Debug.WriteLine($"KeyVault '{secret}': failed to deserialize to Dictionary<string, string>");
-                        throw new InvalidOperationException($"Failed to deserialize Key Vault secret '{secret}' to Dictionary<string, string>.");
-                    }
-
-                    Debug.WriteLine($"KeyVault '{secret}': retrieved {keyValuePairs.Count} key-value pairs");
-                    return keyValuePairs;
-                }
-                catch (JsonException jsonEx)
-                {
-                    Debug.WriteLine($"KeyVault '{secret}': invalid JSON ({jsonData.Length} chars) - {jsonEx.Message}");
-                    throw new InvalidOperationException($"Key Vault secret '{secret}' contains invalid JSON for Dictionary<string, string>. {jsonEx.Message}", jsonEx);
-                }
-            }
-            catch (Exception e) when (!(e is InvalidOperationException))
-            {
-                Debug.WriteLine($"KeyVault '{secret}' failed: {e.Message}");
-                throw new InvalidOperationException($"Failed to retrieve or parse Key Vault secret '{secret}'. See inner exception.", e);
-            }
-        }
-
-        public static Task<System.Collections.Generic.Dictionary<string, string>> GetDefaultMSIEnvironmentVariablesAsync()
-        {
-            return GetJsonOfKeyValuePairsFromKVAsync("EnvVariables-MSI-Config");
-        }
-
         public static string FetchUserPassword(string userLabName)
         {
             // TODO: Implement caching to avoid repeated Key Vault calls
@@ -214,6 +171,47 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             {
                 Debug.WriteLine($"Password fetch failed for {userLabName}: {e.Message}");
                 throw new InvalidOperationException($"Test setup: cannot get the user password from Key Vault secret '{userLabName}'. See inner exception.", e);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves a secret string value from the specified Key Vault.
+        /// </summary>
+        /// <param name="secretName">The name of the secret to retrieve.</param>
+        /// <param name="keyVault">The Key Vault instance to retrieve the secret from.</param>
+        /// <returns>The secret value as a string.</returns>
+        public static string FetchSecretString(string secretName, KeyVaultSecretsProvider keyVault)
+        {
+            if (string.IsNullOrWhiteSpace(secretName))
+            {
+                Debug.WriteLine("Secret fetch failed: empty secret name");
+                throw new InvalidOperationException("Error: secret name cannot be empty.");
+            }
+
+            if (keyVault == null)
+            {
+                Debug.WriteLine("Secret fetch failed: KeyVault provider is null");
+                throw new InvalidOperationException("Error: KeyVault secrets provider cannot be null.");
+            }
+
+            try
+            {
+                var keyVaultSecret = keyVault.GetSecretByName(secretName);
+                string secretValue = keyVaultSecret.Value;
+                
+                if (!string.IsNullOrEmpty(secretValue))
+                {
+                    Debug.WriteLine($"Secret retrieved for {secretName} ({secretValue.Length} chars)");
+                    return secretValue;
+                }
+                
+                Debug.WriteLine($"Secret empty for {secretName}");
+                throw new InvalidOperationException($"Secret '{secretName}' found but was empty in Key Vault.");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Secret fetch failed for {secretName}: {e.Message}");
+                throw new InvalidOperationException($"Failed to retrieve Key Vault secret '{secretName}'. See inner exception.", e);
             }
         }
     }

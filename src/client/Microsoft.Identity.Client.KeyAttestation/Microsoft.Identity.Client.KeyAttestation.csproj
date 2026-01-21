@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- ─── Target frameworks ─────────────────────────────────────────────── -->
   <PropertyGroup>
@@ -19,18 +19,17 @@
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MicrosoftIdentityClientVersion)-preview</Version>
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
-    <Title>MSAL.NET extension for managed identity proof-of-possession flows</Title>
+    <Title>MSAL.NET extension for Credential Guard attestation support</Title>
     <Description>
-      This package contains binaries needed to use managed identity proof-of-possession (MTLS PoP) flows in applications using MSAL.NET.
+      This package contains binaries needed to enable Credential Guard attestation in managed identity proof-of-possession (mTLS PoP) flows using MSAL.NET.
     </Description>
-    <PackageTags>Microsoft Authentication Library Managed Identity MSAL Proof-of-Possession</PackageTags>
+    <PackageTags>Microsoft Authentication Library Managed Identity MSAL CredentialGuard Attestation Proof-of-Possession</PackageTags>
     <Product>Microsoft Authentication Library</Product>
   </PropertyGroup>
 
   <!-- ─── File inclusions ───────────────────────────────────────────────── -->
   <ItemGroup>
-    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" 
-             Link="Properties\InternalsVisibleTo.cs" />
+    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
   </ItemGroup>
 
   <!-- ─── References ────────────────────────────────────────────────────── -->

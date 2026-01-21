@@ -24,8 +24,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class OnBehalfOfTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
-        private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
+        //private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
+        //const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();
         private string _confidentialClientSecret;
@@ -60,7 +60,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Setup: Get lab users, create PCA and get user tokens
             var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var user2 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud2).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+
             var partitionedInMemoryTokenCache = new InMemoryPartitionedTokenCache();
             var nonPartitionedInMemoryTokenCache = new InMemoryTokenCache();
             var oboTokens = new HashSet<string>();
@@ -72,14 +74,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             #pragma warning disable CS0618 // Type or member is obsolete
             var user1AuthResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
+                .AcquireTokenByUsernamePassword([appApi.DefaultScopes], user1.Upn, user1.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
 
             #pragma warning disable CS0618 // Type or member is obsolete
             var user2AuthResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user2.Upn, user2.GetOrFetchPassword())
+                .AcquireTokenByUsernamePassword([appApi.DefaultScopes], user2.Upn, user2.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
@@ -148,7 +150,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IConfidentialClientApplication CreateCCA()
             {
                 var app = ConfidentialClientApplicationBuilder
-                .Create(OboConfidentialClientID)
+                .Create(appApi.AppId)
                 .WithAuthority(new Uri($"https://login.microsoftonline.com/{user1AuthResult.TenantId}"), true)
                 .WithClientSecret(_confidentialClientSecret)
                 .WithLegacyCacheCompatibility(false)
@@ -179,7 +181,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Setup: Get lab user, create PCA and get user tokens
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
 
             // Use the correct public client ID from KeyVault for all tests
             var publicClientId = app.AppId;
@@ -190,13 +193,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             #pragma warning disable CS0618 // Type or member is obsolete
             var userResult = await pca
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, user.GetOrFetchPassword())
+                .AcquireTokenByUsernamePassword([appApi.DefaultScopes], user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
 
             // Act and Assert different scenarios
-            var cca = BuildCca(userResult.TenantId, true);
+            var cca = await BuildCcaAsync(userResult.TenantId, true).ConfigureAwait(false);
 
             // OBO uses global - IdP
             var oboResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(userResult.AccessToken))
@@ -301,7 +304,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task WithCache_TestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
 
             var factory = new HttpSnifferClientFactory();
 
@@ -313,13 +317,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                                  .Build();
 
             #pragma warning disable CS0618 // Type or member is obsolete
-            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, user.GetOrFetchPassword())
+            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword([appApi.DefaultScopes], user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(OboConfidentialClientID)
+                .Create(appApi.AppId)
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
                 .WithClientSecret(_confidentialClientSecret)
                 .WithTestLogging()
@@ -372,7 +376,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //creating second app with no refresh tokens
             var atItems = confidentialApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
             var confidentialApp2 = ConfidentialClientApplicationBuilder
-                .Create(OboConfidentialClientID)
+                .Create(appApi.AppId)
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
                 .WithClientSecret(_confidentialClientSecret)
                 .WithTestLogging()
@@ -430,9 +434,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Get multiTenantAppId if not provided
             if (string.IsNullOrEmpty(multiTenantAppId))
             {
-                var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+                var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
                 multiTenantAppId = app.AppId;
             }
+
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                 .Create(multiTenantAppId)
@@ -444,7 +450,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             try
             {
                 authResult = await pca
-                    .AcquireTokenSilent(s_oboServiceScope, user.Upn)
+                    .AcquireTokenSilent([appApi.DefaultScopes], user.Upn)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
@@ -454,8 +460,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.IsFalse(silentCallShouldSucceed, "ATS should have found a token, but it didn't");
 #pragma warning disable CS0618 // Type or member is obsolete
                 authResult = await pca
-                    .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, user.GetOrFetchPassword())
-                    //.AcquireTokenInteractive(s_oboServiceScope)
+                    .AcquireTokenByUsernamePassword([appApi.DefaultScopes], user.Upn, user.GetOrFetchPassword())
+                    //.AcquireTokenInteractive([appApi.DefaultScopes])
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
                     #pragma warning restore CS0618
@@ -463,10 +469,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
 
             MsalAssert.AssertAuthResult(authResult, user);
-            Assert.IsTrue(authResult.Scopes.Any(s => string.Equals(s, s_oboServiceScope.Single(), StringComparison.OrdinalIgnoreCase)));
+            Assert.IsTrue(authResult.Scopes.Any(s => string.Equals(s, appApi.DefaultScopes, StringComparison.OrdinalIgnoreCase)));
 
             var cca = ConfidentialClientApplicationBuilder
-                .Create(OboConfidentialClientID)
+                .Create(appApi.AppId)
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
                 .WithTestLogging(out HttpSnifferClientFactory factory)
                 .WithClientSecret(_confidentialClientSecret)
@@ -514,14 +520,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        private ConfidentialClientApplication BuildCca(string tenantId, bool withRegion = false)
+        private async Task<ConfidentialClientApplication> BuildCcaAsync(string tenantId, bool withRegion = false)
         {
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var appApiConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            string secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
 
             var builder = ConfidentialClientApplicationBuilder
-             .Create(withRegion ? OboConfidentialClientID : settings.ClientId)
+             .Create(withRegion ? appApiConfig.AppId : appConfig.AppId)
              .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), true)
-             .WithClientSecret(withRegion ? _confidentialClientSecret : settings.Secret)
+             .WithClientSecret(withRegion ? _confidentialClientSecret : secret)
              .WithLegacyCacheCompatibility(false);
 
             if (withRegion)
