@@ -328,8 +328,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
             Assert.IsTrue(jsonToken.Payload.ContainsKey("xms_attr"), "xms_attr claim should exist in the token");
             var xmsAttr = jsonToken.Payload["xms_attr"].ToString();
-            Assert.IsTrue(xmsAttr.Contains(attributesString), "xms_attr claim should contain attribute string");
-
+            Assert.IsTrue(xmsAttr.Contains("FavoriteColor"), "xms_attr claim should contain 'FavoriteColor' attribute");
+            Assert.IsTrue(xmsAttr.Contains("Blue"), "xms_attr claim should contain 'Blue' value");
+            Assert.IsTrue(xmsAttr.Contains("file:/c/users/foobar/documents/info.txt"), "xms_attr claim should contain file path attribute");
+           
             var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{RmaClientId}-{TenantId}-{"api://AzureFMITokenExchange/.default"}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
                           confidentialApp,
