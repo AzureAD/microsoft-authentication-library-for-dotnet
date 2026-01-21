@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     internal class CertificateAndClaimsClientCredential : IClientCredential
     {
         private readonly IDictionary<string, string> _claimsToSign;
-        private readonly bool _appendDefaultClaims;
+        private readonly bool _appendDefaultClaims = true;
         private readonly Func<AssertionRequestOptions, Task<X509Certificate2>> _certificateProvider;
 
         public AssertionType AssertionType => AssertionType.CertificateWithoutSni;
