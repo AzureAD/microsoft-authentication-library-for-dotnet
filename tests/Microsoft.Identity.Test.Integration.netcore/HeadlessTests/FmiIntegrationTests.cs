@@ -307,6 +307,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
                         .WithCertificate(cert, sendX5C: true)
                         .WithAzureRegion(AzureRegion)
+                        .WithExperimentalFeatures()
                         .BuildConcrete();
 
             confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
