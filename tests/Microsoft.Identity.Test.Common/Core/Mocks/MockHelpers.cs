@@ -916,5 +916,66 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     MockHelpers.MockImdsV2EntraTokenRequestResponse(identityLoggerAdapter));
             }
         }
+
+        public static MockHttpMessageHandler MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400(
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IList<string> presentRequestHeaders = new List<string>
+            {
+                OAuth2Header.XMsCorrelationId
+            };
+
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                    (ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
+
+                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
+            }
+
+            expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
+            expectedRequestHeaders.Add("Metadata", "true");
+
+            string content =
+                "{\"error\":\"invalid_request\",\"error_description\":\"Attestation Token is missing / empty in the issue credential request\"}";
+
+            return new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CertificateRequestPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(content),
+                }
+            };
+        }
+
+        internal static void AddMocks_AttestedCertMustNotBeReused_ExpectIssueCredential400(
+            MockHttpManager httpManager,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            // Even on refresh, MSAL calls /getplatformmetadata (CSR metadata)
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(userAssignedIdentityId: userAssignedIdentityId, userAssignedId: userAssignedId));
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400(userAssignedIdentityId, userAssignedId));
+            }
+            else
+            {
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400());
+            }
+
+            // IMPORTANT: DO NOT add MockImdsV2EntraTokenRequestResponse here.
+            // If MSAL incorrectly reuses the cert and calls /token, the test should fail,
+            // and will pass after the product fix.
+        }
     }
 }

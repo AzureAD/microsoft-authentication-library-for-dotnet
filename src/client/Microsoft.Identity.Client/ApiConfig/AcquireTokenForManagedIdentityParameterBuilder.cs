@@ -24,6 +24,10 @@ namespace Microsoft.Identity.Client
     public sealed class AcquireTokenForManagedIdentityParameterBuilder :
         AbstractManagedIdentityAcquireTokenParameterBuilder<AcquireTokenForManagedIdentityParameterBuilder>
     {
+        private const string MiAttCacheKeyComponent = "mi_att";
+        private static readonly Task<string> s_att0 = Task.FromResult("0");
+        private static readonly Task<string> s_att1 = Task.FromResult("1");
+
         private AcquireTokenForManagedIdentityParameters Parameters { get; } = new AcquireTokenForManagedIdentityParameters();
 
         /// <inheritdoc/>
@@ -96,28 +100,22 @@ namespace Microsoft.Identity.Client
             return ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity;
         }
 
-        /// <summary>
-        /// TEST HOOK ONLY: Allows unit tests to inject a fake attestation-token provider
-        /// so we don't hit the real attestation service. Not part of the public API.
-        /// </summary>
-        internal AcquireTokenForManagedIdentityParameterBuilder WithAttestationProviderForTests(
-            Func<AttestationTokenInput, CancellationToken, Task<AttestationTokenResponse>> provider)
-        {
-            if (provider is null)
-            {
-                throw new ArgumentNullException(nameof(provider));
-            }
-
-            CommonParameters.AttestationTokenProvider = provider;
-            return this;
-        }
-
         private static void ApplyMtlsPopAndAttestation(
-            AcquireTokenCommonParameters acquireTokenCommonParameters,
+            AcquireTokenCommonParameters acquireTokenCommonParameters, 
             AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
         {
             acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
-            acquireTokenForManagedIdentityParameters.AttestationTokenProvider ??= acquireTokenCommonParameters.AttestationTokenProvider;
+            acquireTokenForManagedIdentityParameters.AttestationTokenProvider = acquireTokenCommonParameters.AttestationTokenProvider;
+
+            // PoP requests should be partitioned by attestation-support mode.
+            if (acquireTokenCommonParameters.IsMtlsPopRequested)
+            {
+                acquireTokenCommonParameters.CacheKeyComponents ??=
+                    new SortedList<string, Func<CancellationToken, Task<string>>>();
+
+                acquireTokenCommonParameters.CacheKeyComponents[MiAttCacheKeyComponent] =
+                    _ => acquireTokenCommonParameters.AttestationTokenProvider != null ? s_att1 : s_att0;
+            }
         }
     }
 }

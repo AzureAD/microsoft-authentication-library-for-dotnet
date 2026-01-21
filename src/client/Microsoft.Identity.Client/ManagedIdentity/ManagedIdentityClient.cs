@@ -22,6 +22,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
+        // Preview guard: once we fall back to IMDSv1 while IMDSv2 is cached,
+        // disallow switching to IMDSv2 PoP in the same process (preview behavior).
+        internal static bool s_imdsV1UsedForPreview = false;
 
         // Holds the most recently minted mTLS binding certificate for this application instance.
         private X509Certificate2 _runtimeMtlsBindingCertificate;
@@ -30,6 +33,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal static void ResetSourceForTest()
         {
             s_sourceName = ManagedIdentitySource.None;
+            s_imdsV1UsedForPreview = false;
 
             // Clear cert caches so each test starts fresh
             ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
@@ -75,9 +79,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 if (source == ManagedIdentitySource.ImdsV2 && !isMtlsPopRequested)
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but mTLS PoP was not requested. Falling back to ImdsV1 for this request only. Please use the \"WithMtlsProofOfPossession\" API to request a token via ImdsV2.");
+                    
+                    // Mark that we used IMDSv1 in this process while IMDSv2 is cached (preview behavior).
+                    s_imdsV1UsedForPreview = true;
+
                     // Do NOT modify s_sourceName; keep cached ImdsV2 so future PoP
                     // requests can leverage it.
                     source = ManagedIdentitySource.Imds;
+                }
+
+                // Preview behavior: once we've used IMDSv1 fallback while IMDSv2 is cached,
+                // we disallow switching back to IMDSv2 PoP in this process.
+                if (source == ManagedIdentitySource.ImdsV2 && isMtlsPopRequested && s_imdsV1UsedForPreview)
+                {
+                    throw new MsalClientException(
+                        MsalError.CannotSwitchBetweenImdsVersionsForPreview,
+                        MsalErrorMessage.CannotSwitchBetweenImdsVersionsForPreview);
                 }
 
                 // If the source is determined to be ImdsV1 and mTLS PoP was requested,

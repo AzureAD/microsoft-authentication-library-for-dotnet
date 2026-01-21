@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// <summary>
     /// Provides managed identity keys for authentication scenarios.
     /// Implementations of this interface are responsible for obtaining or creating
-    /// the best available key type (KeyGuard, Hardware, or InMemory) for managed identity authentication.
+    /// the best available key type (CredentialGuard, Hardware, or InMemory) for managed identity authentication.
     /// </summary>
     internal interface IManagedIdentityKeyProvider
     {

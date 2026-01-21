@@ -19,12 +19,13 @@ namespace CommonCache.Test.Unit
 
         private static async Task<LabUserData> GetPublicAadUserDataAsync()
         {
-            var labUser = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             return new LabUserData(
-              labUser.User.Upn,
-              labUser.User.GetOrFetchPassword(),
-              labUser.App.AppId,
-              labUser.User.TenantId);
+              user.Upn,
+              user.GetOrFetchPassword(),
+              app.AppId,
+              user.TenantId);
         }
 
         [AssemblyInitialize]

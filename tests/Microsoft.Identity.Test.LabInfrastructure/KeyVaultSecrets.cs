@@ -1,0 +1,37 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+namespace Microsoft.Identity.Test.LabInfrastructure
+{
+    /// <summary>
+    /// Contains names of secrets stored in Azure Key Vault for lab configuration.
+    /// These secrets contain JSON-serialized configuration objects for users, apps, and lab environments.
+    /// </summary>
+    public static class KeyVaultSecrets
+    {
+        // Names of key vault secrets for user configuration JSONs
+        public const string UserPublicCloud = "User-PublicCloud-Config";
+        public const string UserFederated = "User-Federated-Config";
+        public const string UserPublicCloud2 = "MSAL-User-Default2-JSON";
+        public const string UserXcg = "MSAL-User-XCG-JSON";
+        public const string UserB2C = "MSAL-USER-B2C-JSON";
+        public const string UserArlington = "MSAL-USER-Arlington-JSON";
+        public const string UserCiam = "MSAL-USER-CIAM-JSON";
+        public const string UserPop = "MSAL-User-POP-JSON";
+
+        // Names of key vault secrets for application configuration JSONs
+        //  - Broad test scenarios
+        public const string AppS2S = "App-S2S-Config";
+        public const string AppPCAClient = "App-PCAClient-Config";
+        public const string AppWebApi = "App-WebApi-Config";
+        //  - More specific test scenarios, edge cases, etc.
+        public const string B2CAppIdLabsAppB2C = "MSAL-App-B2C-JSON";
+        public const string ArlAppIdLabsApp = "MSAL-App-Arlington-JSON";
+        public const string MsalAppCiam = "MSAL-App-CIAM-JSON";
+        public const string MsalAppAzureAdMultipleOrgsRegional = "MSAL-APP-AzureADMultipleOrgsRegional-JSON";
+        public const string MsalAppArlingtonCCA = "MSAL-App-ArlingtonCCA-JSON";
+
+        // Name of key vault secrets for app secrets and certificates
+        public const string DefaultAppSecret = "MSAL-App-Default";
+    }
+}
