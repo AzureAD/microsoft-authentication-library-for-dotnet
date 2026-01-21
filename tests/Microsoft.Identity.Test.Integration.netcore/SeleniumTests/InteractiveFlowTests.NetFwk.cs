@@ -43,8 +43,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task Interactive_AADAsync()
         {
             // Arrange - Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
-            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
-            var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var result = await RunTestForUserAsync(user, app).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -52,17 +53,20 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task Arlington_Interactive_AADAsync()
         {
             // Arrange
-            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserArlington).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.ArlAppIdLabsApp).ConfigureAwait(false);
+            user.AzureEnvironment = LabConstants.AzureEnvironmentUsGovernment;
+            await RunTestForUserAsync(user, app, false).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
         public async Task InteractiveConsentPromptAsync()
         {
-            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
-            await RunPromptTestForUserAsync(labResponse, Prompt.Consent, true).ConfigureAwait(false);
-            await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
+            await RunPromptTestForUserAsync(user, app, Prompt.Consent, true).ConfigureAwait(false);
+            await RunPromptTestForUserAsync(user, app, Prompt.Consent, false).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -71,28 +75,21 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #endif
         public async Task Interactive_Adfs_FederatedAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
-        [TestCategory(TestCategories.Arlington)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
-        public async Task Arlington_Interactive_AdfsV2019_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            await RunTestForUserAsync(user, app).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
         public async Task Interactive_Arlington_MultiCloudSupport_AADAsync()
         {
             // Arrange
-            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserArlington).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.ArlAppIdLabsApp).ConfigureAwait(false);
+            user.AzureEnvironment = LabConstants.AzureEnvironmentUsGovernment;
+            
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                    .Create(labResponse.App.AppId)
+                    .Create(app.AppId)
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .WithAuthority("https://login.microsoftonline.com/common")
                     .WithMultiCloudSupport(true)
@@ -102,7 +99,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 1 - Acquire a token interactively");
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(user, Prompt.SelectAccount, false))
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
@@ -110,8 +107,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result.Account);
             Assert.IsNotNull(result.Account.GetTenantProfiles());
             Assert.IsTrue(result.Account.GetTenantProfiles().Any());
-            Assert.AreEqual(labResponse.User.Upn, result.Account.Username);
-            Assert.IsTrue(labResponse.Lab.Authority.Contains(result.Account.Environment));
+            Assert.AreEqual(user.Upn, result.Account.Username);
+            Assert.IsTrue(app.Authority.Contains(result.Account.Environment));
 
             Trace.WriteLine("Part 2 - Get Accounts");
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -123,7 +120,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(account.GetTenantProfiles());
             Assert.IsTrue(account.GetTenantProfiles().Any());
-            Assert.AreEqual(labResponse.User.Upn, account.Username);
+            Assert.AreEqual(user.Upn, account.Username);
             Assert.AreEqual("login.microsoftonline.us", account.Environment);
 
             Trace.WriteLine("Part 3 - Acquire a token silently");
@@ -136,7 +133,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result.Account);
             Assert.IsNotNull(result.Account.GetTenantProfiles());
             Assert.IsTrue(result.Account.GetTenantProfiles().Any());
-            Assert.IsTrue(labResponse.Lab.Authority.Contains(result.Account.Environment));
+            Assert.IsTrue(app.Authority.Contains(result.Account.Environment));
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -146,17 +143,19 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #endif
         public async Task Interactive_Adfs_DirectAsync()
         {
-            LabResponse labResponse = await LabUserHelper.GetDefaultAdfsUserAsync().ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            await RunTestForUserAsync(user, app, true).ConfigureAwait(false);
         }      
 
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
-            LabResponse labResponse = await LabUserHelper.MergeKVLabDataAsync("MSAL-User-Default-JSON", "ID4SLAB1", "MSAL-APP-AzureADMultipleOrgsPC-JSON").ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
+               .Create(app.AppId)
                .WithDefaultRedirectUri()
                .WithRedirectUri("http://localhost:52073")
                .WithTestLogging(out HttpSnifferClientFactory factory)
@@ -165,13 +164,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             AuthenticationResult authResult = await pca
                .AcquireTokenInteractive(s_scopes)
                .WithPrompt(Prompt.SelectAccount)
-               .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount))
+               .WithCustomWebUi(CreateSeleniumCustomWebUI(user, Prompt.SelectAccount))
                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                .ConfigureAwait(false);
 
             var CcsHeader = TestCommon.GetCcsHeaderFromSnifferFactory(factory);
-            var userObjectId = labResponse.User.ObjectId;
-            var userTenantID = labResponse.User.TenantId;
+            var userObjectId = user.ObjectId;
+            var userTenantID = user.TenantId;
             Assert.AreEqual($"x-anchormailbox:oid:{userObjectId}@{userTenantID}", $"{CcsHeader.Key}:{CcsHeader.Value.FirstOrDefault()}");
 
             Assert.IsNotNull(authResult);
@@ -208,14 +207,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.AreEqual("Bearer", authResult.TokenType);
         }
 
-        private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
+        private async Task<AuthenticationResult> RunTestForUserAsync(UserConfig user, AppConfig app, bool directToAdfs = false)
         {
             HttpSnifferClientFactory factory = null;
             IPublicClientApplication pca;
             if (directToAdfs)
             {
                 pca = PublicClientApplicationBuilder
-                    .Create(labResponse.App.AppId)
+                    .Create(app.AppId)
                     .WithRedirectUri("http://localhost:52073")
                     .WithAdfsAuthority("https://fs.id4slab1.com/adfs", validateAuthority: false)
                     .WithTestLogging()
@@ -224,9 +223,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             else
             {
                 pca = PublicClientApplicationBuilder
-                    .Create(labResponse.App.AppId)
+                    .Create(app.AppId)
                     .WithRedirectUri("http://localhost:52073")
-                    .WithAuthority(labResponse.Lab.Authority + "common")
+                    .WithAuthority(app.Authority + "common")
                     .WithTestLogging(out factory)
                     .Build();
             }
@@ -236,7 +235,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false, directToAdfs))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(user, Prompt.SelectAccount, false, directToAdfs))
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
@@ -244,7 +243,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs > 0);
 
             userCacheAccess.AssertAccessCounts(0, 1);
-            IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            IAccount account = await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);
 
             userCacheAccess.AssertAccessCounts(1, 1); // the assert calls GetAccounts
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
@@ -264,15 +263,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
                 .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin, true, directToAdfs))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(user, Prompt.ForceLogin, true, directToAdfs))
                 .WithPrompt(Prompt.ForceLogin)
-                .WithLoginHint(labResponse.User.Upn)
+                .WithLoginHint(user.Upn)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(2, 3);
-            AssertCcsRoutingInformationIsSent(factory, labResponse);
+            AssertCcsRoutingInformationIsSent(factory, user);
 
-            account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            account = await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(3, 3);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
 
@@ -294,16 +293,16 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
-            AssertCcsRoutingInformationIsSent(factory, labResponse);
+            AssertCcsRoutingInformationIsSent(factory, user);
 
             return result;
         }
 
-        private void AssertCcsRoutingInformationIsSent(HttpSnifferClientFactory factory, LabResponse labResponse)
+        private void AssertCcsRoutingInformationIsSent(HttpSnifferClientFactory factory, UserConfig user)
         {
-            if (labResponse.User.FederationProvider != FederationProvider.None)
+            if (user.FederationProvider != LabConstants.FederationProviderNone)
             {
                 return;
             }
@@ -312,29 +311,29 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             if (!String.IsNullOrEmpty(CcsHeader.Value?.FirstOrDefault()))
             {
-                ValidateCcsHeader(CcsHeader, labResponse);
+                ValidateCcsHeader(CcsHeader, user);
             }
         }
 
-        private void ValidateCcsHeader(KeyValuePair<string, IEnumerable<string>> CcsHeader, LabResponse labResponse)
+        private void ValidateCcsHeader(KeyValuePair<string, IEnumerable<string>> CcsHeader, UserConfig user)
         {
             var ccsHeaderValue = CcsHeader.Value.FirstOrDefault();
             if (ccsHeaderValue.Contains("upn"))
             {
-                Assert.AreEqual($"X-AnchorMailbox:UPN:{labResponse.User.Upn}", $"{CcsHeader.Key}:{ccsHeaderValue}");
+                Assert.AreEqual($"X-AnchorMailbox:UPN:{user.Upn}", $"{CcsHeader.Key}:{ccsHeaderValue}");
             }
             else
             {
-                var userObjectId = labResponse.User.ObjectId;
-                var userTenantID = labResponse.User.TenantId;
+                var userObjectId = user.ObjectId;
+                var userTenantID = user.TenantId;
                 Assert.AreEqual($"X-AnchorMailbox:Oid:{userObjectId}@{userTenantID}", $"{CcsHeader.Key}:{ccsHeaderValue}");
             }
         }
 
-        private async Task RunPromptTestForUserAsync(LabResponse labResponse, Prompt prompt, bool useLoginHint)
+        private async Task RunPromptTestForUserAsync(UserConfig user, AppConfig app, Prompt prompt, bool useLoginHint)
         {
             var pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
+               .Create(app.AppId)
                .WithDefaultRedirectUri()
                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                .WithTestLogging()
@@ -343,21 +342,21 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             AcquireTokenInteractiveParameterBuilder builder = pca
                .AcquireTokenInteractive(s_scopes)
                .WithPrompt(prompt)
-               .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, prompt, useLoginHint));
+               .WithCustomWebUi(CreateSeleniumCustomWebUI(user, prompt, useLoginHint));
 
             if (useLoginHint)
             {
-                builder = builder.WithLoginHint(labResponse.User.Upn);
+                builder = builder.WithLoginHint(user.Upn);
             }
 
             AuthenticationResult result = await builder
                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                .ConfigureAwait(false);
 
-            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);
         }
 
-        private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
+        private SeleniumWebUI CreateSeleniumCustomWebUI(UserConfig user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
         {
             return new SeleniumWebUI((driver) =>
             {

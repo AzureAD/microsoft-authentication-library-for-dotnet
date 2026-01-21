@@ -4,12 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Azure.Core;
 using Castle.Core.Internal;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -59,6 +62,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
+        private AccessToken? _labApiAccessToken;
+        private string _labAccessAppId = new KeyVaultSecretsProvider().GetSecretByName("LabVaultAppID").Value;
+
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
@@ -69,7 +75,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                // Fetch the env variables from the resource and set them locally
+                // Fetch the env variables from Key Vault and set them locally
                 Dictionary<string, string> envVariables = 
                     await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
 
@@ -124,7 +130,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                // Fetch the env variables from the resource and set them locally
+                // Fetch the env variables from Key Vault and set them locally
                 Dictionary<string, string> envVariables =
                     await GetEnvironmentVariablesAsync(MsiAzureResource.WebApp).ConfigureAwait(false);
         
@@ -429,8 +435,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Get the Environment Variables from the MSI Helper Service
             string uri = s_baseURL + "EnvironmentVariables?resource=" + resource;
 
-            var environmentVariableResponse = await LabUserHelper
-                .GetMSIEnvironmentVariablesAsync(uri)
+            var environmentVariableResponse = await 
+                GetMSIEnvironmentVariablesAsync(uri)
                 .ConfigureAwait(false);
 
             //process the response
@@ -446,6 +452,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
 
             return environmentVariables;
+        }
+
+        internal async Task<string> GetMSIEnvironmentVariablesAsync(string uri)
+        {
+            string result = await GetLabResponseAsync(uri).ConfigureAwait(false);
+            Debug.WriteLine($"MSI env vars: {result?.Length ?? 0} chars from {uri}");
+            return result;
+        }
+
+        internal async Task<string> GetLabResponseAsync(string address)
+        {
+            if (_labApiAccessToken == null)
+                _labApiAccessToken = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId).ConfigureAwait(false);
+
+            using (HttpClient httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", _labApiAccessToken.Value.Token));
+                return await httpClient.GetStringAsync(address).ConfigureAwait(false);
+            }
         }
 
         /// <summary>

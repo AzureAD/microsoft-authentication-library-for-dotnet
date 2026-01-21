@@ -184,21 +184,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             runOn.AssertFramework();
 
-            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
             AuthenticationResult authResult;
 
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority, true)
+                .Create(appConfig.AppId)
+                .WithAuthority(appConfig.Authority, true)
                 .WithTestLogging()
                 .Build();
 
             authResult = await confidentialApp
-                .AcquireTokenForClient(settings.AppScopes)
+                .AcquireTokenForClient(appScopes)
                 .OnBeforeTokenRequest((data) =>
                 {
-                    ModifyRequest(data, settings.Certificate); // Adding a certificate via handler instead of using WithCertificate
+                    ModifyRequest(data, cert); // Adding a certificate via handler instead of using WithCertificate
                     return Task.CompletedTask;
                 })
                 .ExecuteAsync(CancellationToken.None)
@@ -208,7 +210,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
-               .AcquireTokenForClient(settings.AppScopes)
+               .AcquireTokenForClient(appScopes)
                 .OnBeforeTokenRequest((data) =>
                 {
                     throw new InvalidOperationException("Should not be invoking this callback when the token is fetched from the cache");
@@ -223,26 +225,27 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ByRefreshTokenTestAsync()
         {
             // Arrange
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(app.AppId)
                 .WithTestLogging()
-                .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .WithAuthority(app.Authority, "organizations")
                 .BuildConcrete();
 
 #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 #pragma warning restore CS0618
 
-            var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority(labResponse.Lab.Authority, labResponse.User.TenantId)
-                .WithTestLogging()
-                .BuildConcrete();
+var confidentialApp = ConfidentialClientApplicationBuilder
+    .Create(app.AppId)
+    .WithAuthority(app.Authority, user.TenantId)
+    .WithTestLogging()
+    .BuildConcrete();
 
             var rt = msalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault();
 
@@ -262,12 +265,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Assert
             Assert.IsNotNull(authResult);
-            Assert.AreEqual(labResponse.User.Upn, authResult.Account.Username);
-            Assert.AreEqual(labResponse.User.ObjectId.ToString(), authResult.Account.HomeAccountId.ObjectId);
-            Assert.AreEqual(labResponse.User.TenantId, authResult.Account.HomeAccountId.TenantId);
-            Assert.AreEqual(labResponse.User.Upn, account2.Username);
-            Assert.AreEqual(labResponse.User.ObjectId.ToString(), account2.HomeAccountId.ObjectId);
-            Assert.AreEqual(labResponse.User.TenantId, account2.HomeAccountId.TenantId);
+            Assert.AreEqual(user.Upn, authResult.Account.Username);
+            Assert.AreEqual(user.ObjectId.ToString(), authResult.Account.HomeAccountId.ObjectId);
+            Assert.AreEqual(user.TenantId, authResult.Account.HomeAccountId.TenantId);
+            Assert.AreEqual(user.Upn, account2.Username);
+            Assert.AreEqual(user.ObjectId.ToString(), account2.HomeAccountId.ObjectId);
+            Assert.AreEqual(user.TenantId, account2.HomeAccountId.TenantId);
         }
 
         private static void ModifyRequest(OnBeforeTokenRequestData data, X509Certificate2 certificate)
@@ -285,20 +288,68 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             data.BodyParameters.Add("client_assertion", assertion);
         }
 
+        private static async Task<X509Certificate2> GetAdfsCertificateAsync()
+        {
+            const string AdfsCertName = "IDLABS-APP-Confidential-Client-Cert-OnPrem";
+            KeyVaultSecretsProvider kv = new KeyVaultSecretsProvider();
+            return await kv.GetCertificateWithPrivateMaterialAsync(AdfsCertName).ConfigureAwait(false);
+        }
+
         private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType, bool UseAppIdUri = false, bool sendX5C = false)
         {
             Trace.WriteLine($"Running test with settings for cloud {cloud}, credential type {credentialType}");
-            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
+            
+            // Get configuration based on cloud type
+            AppConfig appConfig;
+            X509Certificate2 cert = null;
+            string secret = null;
+            string tenantId;
+            string authority;
+            string[] scopes;
 
-            settings.UseAppIdUri = UseAppIdUri;
+            if (cloud == Cloud.Adfs)
+            {
+                appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+                secret = LabResponseHelper.FetchSecretString(KeyVaultSecrets.DefaultAppSecret, LabResponseHelper.KeyVaultSecretsProviderMsal);
+                cert = await GetAdfsCertificateAsync().ConfigureAwait(false);
+                tenantId = "";  // ADFS doesn't use tenant ID
+                authority = "https://fs.id4slab1.com/adfs";
+                scopes = new[] { "openid", "profile" };
+            }
+            else if (cloud == Cloud.Arlington)
+            {
+                appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppArlingtonCCA).ConfigureAwait(false);
+                secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsid);
+                cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+                tenantId = appConfig.TenantId;
+                authority = appConfig.Authority;
+                scopes = new[] { "https://graph.microsoft.com/.default" };
+            }
+            else // Cloud.Public
+            {
+                appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+                secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
+                cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+                tenantId = appConfig.TenantId;
+                authority = appConfig.Authority;
+                scopes = new[] { "https://vault.azure.net/.default" };
+            }
 
             AuthenticationResult authResult;
 
-            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C, cloud != Cloud.Adfs);
+            IConfidentialClientApplication confidentialApp = CreateApp(
+                credentialType, 
+                appConfig.AppId, 
+                authority, 
+                cert, 
+                secret, 
+                sendX5C, 
+                cloud != Cloud.Adfs);
+            
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
             Guid correlationId = Guid.NewGuid();
             authResult = await confidentialApp
-                .AcquireTokenForClient(settings.AppScopes)
+                .AcquireTokenForClient(scopes)
                 .WithCorrelationId(correlationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
@@ -310,14 +361,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(correlationId, appCacheRecorder.LastAfterAccessNotificationArgs.CorrelationId);
             Assert.AreEqual(correlationId, appCacheRecorder.LastBeforeAccessNotificationArgs.CorrelationId);
-            CollectionAssert.AreEquivalent(settings.AppScopes.ToArray(), appCacheRecorder.LastBeforeAccessNotificationArgs.RequestScopes.ToArray());
-            CollectionAssert.AreEquivalent(settings.AppScopes.ToArray(), appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
-            Assert.AreEqual(settings.TenantId, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestTenantId ?? "");
-            Assert.AreEqual(settings.TenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
+            CollectionAssert.AreEquivalent(scopes.ToArray(), appCacheRecorder.LastBeforeAccessNotificationArgs.RequestScopes.ToArray());
+            CollectionAssert.AreEquivalent(scopes.ToArray(), appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
+            Assert.AreEqual(tenantId, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestTenantId ?? "");
+            Assert.AreEqual(tenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
             Assert.AreEqual(
-              GetExpectedCacheKey(settings.ClientId, settings.TenantId),
+              GetExpectedCacheKey(appConfig.AppId, tenantId),
               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
 
             Assert.IsNull(authResult.BindingCertificate,
@@ -325,7 +376,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
-               .AcquireTokenForClient(settings.AppScopes)
+               .AcquireTokenForClient(scopes)
                .ExecuteAsync()
                .ConfigureAwait(false);
 
@@ -339,7 +390,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreNotEqual(correlationId, appCacheRecorder.LastAfterAccessNotificationArgs.CorrelationId);
             Assert.AreNotEqual(correlationId, appCacheRecorder.LastBeforeAccessNotificationArgs.CorrelationId);
             Assert.AreEqual(
-               GetExpectedCacheKey(settings.ClientId, settings.TenantId),
+               GetExpectedCacheKey(appConfig.AppId, tenantId),
                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
 
             Assert.IsNull(authResult.BindingCertificate,
@@ -348,53 +399,56 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static IConfidentialClientApplication CreateApp(
             CredentialType credentialType,
-            IConfidentialAppSettings settings,
+            string clientId,
+            string authority,
+            X509Certificate2 cert,
+            string secret,
             bool sendX5C,
             bool useSha2AndPssForAssertion)
         {
             var builder = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority, true)
+                .Create(clientId)
+                .WithAuthority(authority, true)
                 .WithTestLogging();
 
             switch (credentialType)
             {
                 case CredentialType.Cert:
-                    builder.WithCertificate(settings.Certificate);
+                    builder.WithCertificate(cert);
                     break;
                 case CredentialType.Secret:
-                    builder.WithClientSecret(settings.Secret);
+                    builder.WithClientSecret(secret);
                     break;
                 case CredentialType.ClientAssertion_Manual:
 
-                    var aud = settings.Cloud == Cloud.Adfs ?
-                        settings.Authority + "/oauth2/token" :
-                        settings.Authority + "/oauth2/v2.0/token";
+                    var aud = authority.Contains("/adfs/") ?
+                        authority + "/oauth2/token" :
+                        authority + "/oauth2/v2.0/token";
 
                     builder.WithClientAssertion(() => GetSignedClientAssertionManual(
-                      settings.ClientId,
+                      clientId,
                       aud, // for AAD use v2.0, but not for ADFS
-                      settings.Certificate,
+                      cert,
                       useSha2AndPssForAssertion));
                     break;
 
                 case CredentialType.ClientAssertion_Wilson:
-                    var aud2 = settings.Cloud == Cloud.Adfs ?
-                       settings.Authority + "/oauth2/token" :
-                       settings.Authority + "/oauth2/v2.0/token";
+                    var aud2 = authority.Contains("/adfs/") ?
+                       authority + "/oauth2/token" :
+                       authority + "/oauth2/v2.0/token";
 
                     builder.WithClientAssertion(
                         () => GetSignedClientAssertionUsingWilson(
-                            settings.ClientId,
+                            clientId,
                             aud2,
-                            settings.Certificate));
+                            cert));
                     break;
 
                 case CredentialType.ClientClaims_ExtraClaims:
-                    builder.WithClientClaims(settings.Certificate, GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
+                    builder.WithClientClaims(cert, GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
                     break;
                 case CredentialType.ClientClaims_MergeClaims:
-                    builder.WithClientClaims(settings.Certificate, GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
+                    builder.WithClientClaims(cert, GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
                     break;
                 default:
                     throw new NotImplementedException();

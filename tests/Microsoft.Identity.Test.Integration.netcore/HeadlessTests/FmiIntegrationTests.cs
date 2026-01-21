@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private byte[] _serializedCache;
         private const string AzureRegion = "westus3";
-        private const string TenantId = ConfidentialAppSettings.ID4SLab1TenantId;
+        private const string TenantId = "10c419d4-4a50-45b2-aa4e-919fb84df24f";
         private const string RmaClientId = "3bf56293-fbb5-42bd-a407-248ba7431a8c";
         private const string WebApiScope = "api://aa464f73-2868-4f67-b0e7-fc2f749e757f/.default";
         private const string ExpectedResourceAudience = "api://aa464f73-2868-4f67-b0e7-fc2f749e757f";
