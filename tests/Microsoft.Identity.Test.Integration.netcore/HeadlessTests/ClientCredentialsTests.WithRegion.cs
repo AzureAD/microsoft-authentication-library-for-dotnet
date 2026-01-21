@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -64,17 +65,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy); // Use legacy config for regional tests          
-            settings.InstanceDiscoveryEndpoint = instanceDiscoveryEnabled;
-            _confidentialClientApplication = BuildCCA(settings, factory);
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsRegional).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+            
+            _confidentialClientApplication = BuildCCA(appConfig.AppId, appConfig.TenantId, appConfig.Authority, cert, factory, instanceDiscoveryEnabled);
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-            AuthenticationResult result = await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false); // regional endpoint
+            AuthenticationResult result = await GetAuthenticationResultAsync(appScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
             AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheRefreshReason.NoCachedAccessToken:D},centralus,3,4|0,1,1,,");
             Assert.AreEqual(
-                $"https://{RegionalHost}/{settings.TenantId}/oauth2/v2.0/token",
+                $"https://{RegionalHost}/{appConfig.TenantId}/oauth2/v2.0/token",
                 result.AuthenticationResultMetadata.TokenEndpoint);
         }
 
@@ -83,13 +86,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy); // Use legacy config for regional tests
-            _confidentialClientApplication = BuildCCA(settings, factory, true, "invalid");
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsRegional).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+            
+            _confidentialClientApplication = BuildCCA(appConfig.AppId, appConfig.TenantId, appConfig.Authority, cert, factory, true, true, "invalid");
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
             var ex = await Assert.ThrowsExceptionAsync<HttpRequestException>(
-                async () => await GetAuthenticationResultAsync(settings.AppScopes).ConfigureAwait(false)).ConfigureAwait(false);
+                async () => await GetAuthenticationResultAsync(appScopes).ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.IsTrue(ex is HttpRequestException);
         }
@@ -124,23 +130,27 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         private IConfidentialClientApplication BuildCCA(
-            IConfidentialAppSettings settings,
+            string clientId,
+            string tenantId,
+            string authority,
+            X509Certificate2 cert,
             HttpSnifferClientFactory factory,
+            bool instanceDiscoveryEnabled = true,
             bool useClaims = false,
             string region = ConfidentialClientApplication.AttemptRegionDiscovery)
         {
-            var builder = ConfidentialClientApplicationBuilder.Create(settings.ClientId);
+            var builder = ConfidentialClientApplicationBuilder.Create(clientId);
             if (useClaims)
             {
-                builder.WithClientAssertion(() => GetSignedClientAssertionUsingMsalInternal(settings.ClientId, GetClaims(settings)));
+                builder.WithClientAssertion(() => GetSignedClientAssertionUsingMsalInternal(clientId, GetClaims(clientId, tenantId, authority)));
             }
             else
             {
-                builder.WithCertificate(settings.Certificate);
+                builder.WithCertificate(cert);
             }
 
-            builder.WithAuthority($@"https://{settings.Environment}/{settings.TenantId}")
-                .WithInstanceDiscovery(settings.InstanceDiscoveryEndpoint)
+            builder.WithAuthority(authority)
+                .WithInstanceDiscovery(instanceDiscoveryEnabled)
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory);
@@ -174,7 +184,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             return (long)diff.TotalSeconds;
         }
 
-        private static IDictionary<string, string> GetClaims(IConfidentialAppSettings settings)
+        private static IDictionary<string, string> GetClaims(string clientId, string tenantId, string authority)
         {
             DateTime validFrom = DateTime.UtcNow;
             var nbf = ConvertToTimeT(validFrom);
@@ -182,12 +192,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             return new Dictionary<string, string>()
                 {
-                { "aud", $"https://{settings.Environment}/{settings.TenantId}/v2.0" },
+                { "aud", $"{authority}/v2.0" },
                 { "exp", exp.ToString(CultureInfo.InvariantCulture) },
-                { "iss", settings.ClientId },
+                { "iss", clientId },
                 { "jti", Guid.NewGuid().ToString() },
                 { "nbf", nbf.ToString(CultureInfo.InvariantCulture) },
-                { "sub", settings.ClientId },
+                { "sub", clientId },
                 { "ip", "192.168.2.1" }
                 };
 
@@ -198,7 +208,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var manager = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
 
             var jwtToken = new JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
-            var cert = ConfidentialAppSettings.GetSettings(Cloud.PublicLegacy).Certificate; // Use legacy config for regional tests
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             return jwtToken.Sign(cert, true, true);
         }
