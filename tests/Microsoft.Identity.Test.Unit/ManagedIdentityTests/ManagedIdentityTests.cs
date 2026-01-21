@@ -1549,5 +1549,33 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual("value3", miBuilder.Config.ExtraQueryParameters["param3"]);
             Assert.AreEqual("value4", miBuilder.Config.ExtraQueryParameters["param4"]);
         }
+
+        [DataTestMethod]
+        // IMDS sources should default to DefaultToImds
+        [DataRow(ManagedIdentitySource.Imds, null, ManagedIdentitySource.DefaultToImds)]
+        [DataRow(ManagedIdentitySource.ImdsV2, null, ManagedIdentitySource.DefaultToImds)]
+        // Non-IMDS sources should return their respective source
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, ManagedIdentitySource.AppService)]
+        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint, ManagedIdentitySource.AzureArc)]
+        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint, ManagedIdentitySource.CloudShell)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(ManagedIdentitySource.MachineLearning, MachineLearningEndpoint, ManagedIdentitySource.MachineLearning)]
+        public void GetManagedIdentitySource_StaticApi_ReturnsExpectedSource(
+            ManagedIdentitySource envConfiguredSource,
+            string endpoint,
+            ManagedIdentitySource expected)
+        {
+            using (new EnvVariableContext())
+            {
+                // Arrange: configure environment variables for the desired source
+                SetEnvironmentVariables(envConfiguredSource, endpoint);
+
+                // Act
+                ManagedIdentitySource actual = ManagedIdentityApplication.GetManagedIdentitySource();
+
+                // Assert
+                Assert.AreEqual(expected, actual);
+            }
+        }
     }
 }
