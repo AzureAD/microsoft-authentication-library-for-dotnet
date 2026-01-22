@@ -6,7 +6,7 @@ namespace Microsoft.Identity.Client.AppConfig
     /// <summary>
     /// Represents configuration options for certificate handling or management.
     /// </summary>
-    public class CertificateOptions
+    public record CertificateOptions
     {
         /// <summary>
         /// Gets or sets a value indicating whether the X.509 certificate chain (x5c) should be included in the token
@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <remarks>Set this property to <see langword="true"/> to include X5C in the token request 
         /// otherwise, set it to <see langword="false"/>.</remarks>
-        public bool SendX5C { get; set; } = false;
+        public bool SendX5C { get; init; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating if the application tokens acquired from Azure AD are associated with the certificate serial number.
@@ -23,6 +23,6 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <remarks>Set this property to <see langword="true"/> to indicate that the tokens acquired from Azure AD are associated with the certificate serial number,
         /// by default it is set to <see langword="false"/> /></remarks>
         /// </summary>
-        public bool AssociateTokensWithCertificateSerialNumber { get; set; } = false;
+        public bool AssociateTokensWithCertificate { get; init; } = false;
     }
 }

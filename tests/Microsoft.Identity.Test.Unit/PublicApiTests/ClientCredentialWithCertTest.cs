@@ -878,7 +878,7 @@ namespace Microsoft.Identity.Test.Unit
                     CertificateOptions certificateOptions = new CertificateOptions()
                     {
                         SendX5C = true,
-                        AssociateTokensWithCertificateSerialNumber = true
+                        AssociateTokensWithCertificate = true
                     };
 
                     builder.WithCertificate(certificate, certificateOptions);

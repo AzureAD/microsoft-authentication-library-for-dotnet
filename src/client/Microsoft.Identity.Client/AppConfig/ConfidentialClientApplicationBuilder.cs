@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificate)));
             }
 
-            if (certificateOptions?.AssociateTokensWithCertificateSerialNumber ?? false)
+            if (certificateOptions?.AssociateTokensWithCertificate ?? false)
             {
                 Config.CertificateIdToAssociateWithToken = certificate.SerialNumber;
             }
