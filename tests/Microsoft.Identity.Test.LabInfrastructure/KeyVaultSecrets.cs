@@ -33,5 +33,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         // Name of key vault secrets for app secrets and certificates
         public const string DefaultAppSecret = "MSAL-App-Default";
+
+        // dSTS configuration
+        public const string AppDsts = "MISE-dSTS-CustomAppConfig";
     }
 }
