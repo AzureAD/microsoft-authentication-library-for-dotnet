@@ -13,6 +13,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Collections.Generic;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using OpenTelemetry.Logs;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -223,6 +224,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                     .WithFmiPath("SomeFmiPath/Path")
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
+            Assert.IsFalse(jsonToken.Payload.ContainsKey("xms_attr"), "xms_attr claim should not exist in the token");
 
             var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{clientId}-{TenantId}-{WebApiScope}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
@@ -288,6 +292,52 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(expectedAudience, audience);
             Assert.IsTrue(subject.Contains(expectedFmiPath));
             Assert.AreEqual(expectedInternalCacheKey, token.CacheKey);
+        }
+
+        [TestMethod]
+        //RMA getting FMI token with attributes for a leaf entity.
+        public async Task Flow6_Token_withAttributeTest()
+        {
+            //Arrange
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            //Act
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                        .Create(RmaClientId)
+                        .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                        .WithCertificate(cert, sendX5C: true)
+                        .WithAzureRegion(AzureRegion)
+                        .WithExperimentalFeatures()
+                        .BuildConcrete();
+
+            confidentialApp.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
+            confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
+
+            //Recording test data for Asserts
+            string expectedFmiPathHash = "NlReJx-vneHBYB53A1WmQWCgwPobHn98udAu2hCDkJ8";
+            var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
+            var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
+                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
+            var attributesString = "{\"FavoriteColor\": \"Blue\", \"file:/c/users/foobar/documents/info.txt\": \"{\\\"permissions\\\":[\\\"read\\\",\\\"write\\\"]}\"}";
+            var authResult = await confidentialApp.AcquireTokenForClient(new[] { "api://AzureFMITokenExchange/.default" })
+                                .WithAttributes(attributesString)
+                                                    .WithFmiPath("SomeFmiPath/FmiCredentialPath")
+                                                    .ExecuteAsync()
+                                                    .ConfigureAwait(false);
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
+            Assert.IsTrue(jsonToken.Payload.ContainsKey("xms_attr"), "xms_attr claim should exist in the token");
+            var xmsAttr = jsonToken.Payload["xms_attr"].ToString();
+            Assert.IsTrue(xmsAttr.Contains("FavoriteColor"), "xms_attr claim should contain 'FavoriteColor' attribute");
+            Assert.IsTrue(xmsAttr.Contains("Blue"), "xms_attr claim should contain 'Blue' value");
+            Assert.IsTrue(xmsAttr.Contains("file:/c/users/foobar/documents/info.txt"), "xms_attr claim should contain file path attribute");
+           
+            var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{RmaClientId}-{TenantId}-{"api://AzureFMITokenExchange/.default"}-{expectedFmiPathHash}".ToLowerInvariant();
+            AssertResults(authResult,
+                          confidentialApp,
+                          expectedInternalCacheKey,
+                          "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265", // this is app id for the audience for api://AzureFMITokenExchange/.defaul
+                          "SomeFmiPath/FmiCredentialPath");
         }
     }
 }

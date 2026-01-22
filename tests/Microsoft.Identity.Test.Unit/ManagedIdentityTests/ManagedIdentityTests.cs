@@ -49,14 +49,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             MockHttpManager httpManager,
             ManagedIdentitySource managedIdentitySource,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-            string userAssignedId = null,
-            bool probe = false)
+            string userAssignedId = null)
         {
-            if (!probe)
-            {
-                return;
-            }
-
             if (managedIdentitySource == ManagedIdentitySource.Imds)
             {
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
@@ -98,7 +92,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
                 }
 
-                var miSourceResult = await mi.GetManagedIdentitySourceAsync(probe: true, cancellationToken: ImdsProbesCancellationToken).ConfigureAwait(false);
+                var miSourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(managedIdentitySource, miSourceResult.Source);
             }
         }
@@ -1156,48 +1150,28 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task GetManagedIdentitySource_DefaultDoesNotProbe_ReturnsDefaultToImdsAsync()
-        {
-            using (new EnvVariableContext())
-            {
-                ManagedIdentityClient.ResetSourceForTest();
-
-                var miBuilder = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned);
-
-                var mi = miBuilder.Build() as ManagedIdentityApplication;
-
-                var result = await mi.GetManagedIdentitySourceAsync(probe: false, cancellationToken: ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-
-                Assert.AreEqual(ManagedIdentitySource.DefaultToImds, result.Source);
-            }
-        }
-
-        [TestMethod]
-        public async Task GetManagedIdentitySource_ProbeImds_Unreachable_ReturnsNoneAsync()
+        public async Task UnavailableManagedIdentitySource_ThrowsExceptionDuringTokenAcquisitionAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ImdsEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                var mi = miBuilder.Build() as ManagedIdentityApplication;
+                var mi = miBuilder.Build();
 
-                // Probe sequence: V2 (because isMtlsPopRequested=true), then V1.
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
 
-                var result = await mi.GetManagedIdentitySourceAsync(probe: true, cancellationToken: ManagedIdentityTests.ImdsProbesCancellationToken)
-                    .ConfigureAwait(false);
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
+                        .ExecuteAsync()
+                        .ConfigureAwait(false)).ConfigureAwait(false);
 
-                Assert.IsNotNull(result);
-                Assert.AreEqual(ManagedIdentitySource.None, result.Source);
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
             }
         }
 
@@ -1574,37 +1548,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual("value2", miBuilder.Config.ExtraQueryParameters["param2"]);
             Assert.AreEqual("value3", miBuilder.Config.ExtraQueryParameters["param3"]);
             Assert.AreEqual("value4", miBuilder.Config.ExtraQueryParameters["param4"]);
-        }
-
-        [DataTestMethod]
-        [DataRow(ManagedIdentitySource.AppService, ManagedIdentityTests.AppServiceEndpoint)]
-        [DataRow(ManagedIdentitySource.ServiceFabric, ManagedIdentityTests.ServiceFabricEndpoint)]
-        public async Task NonImdsSources_MtlsPopRequested_ReturnsBearer(
-            ManagedIdentitySource source, 
-            string endpoint)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(source, endpoint);
-
-                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    source);
-
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual("Bearer", result.TokenType);
-            }
         }
     }
 }

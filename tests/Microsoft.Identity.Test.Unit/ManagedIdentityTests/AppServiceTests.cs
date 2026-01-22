@@ -65,9 +65,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
+                
+                
+
                 ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;
 
-                var miSourceResult = await mi.GetManagedIdentitySourceAsync(probe: false, cancellationToken: ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                var miSourceResult = await mi.GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(expectedManagedIdentitySource, miSourceResult.Source);
             }
         }
