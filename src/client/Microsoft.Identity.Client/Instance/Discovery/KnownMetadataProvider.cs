@@ -79,12 +79,36 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 PreferredCache = "login.windows-ppe.net"
             };
 
+            InstanceDiscoveryMetadataEntry bleuCloudEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "login.sovcloud-identity.fr" },
+                PreferredNetwork = "login.sovcloud-identity.fr",
+                PreferredCache = "login.sovcloud-identity.fr"
+            };
+
+            InstanceDiscoveryMetadataEntry delosCloudEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "login.sovcloud-identity.de" },
+                PreferredNetwork = "login.sovcloud-identity.de",
+                PreferredCache = "login.sovcloud-identity.de"
+            };
+
+            InstanceDiscoveryMetadataEntry govSGCloudEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "login.sovcloud-identity.sg" },
+                PreferredNetwork = "login.sovcloud-identity.sg",
+                PreferredCache = "login.sovcloud-identity.sg"
+            };
+
             AddToKnownCache(publicCloudEntry);
             AddToKnownCache(cloudEntryChina);
             AddToKnownCache(cloudEntryGermany);
             AddToKnownCache(usGovCloudEntry);
             AddToKnownCache(usCloudEntry);
             AddToKnownCache(ppeCloudEntry);
+            AddToKnownCache(bleuCloudEntry);
+            AddToKnownCache(delosCloudEntry);
+            AddToKnownCache(govSGCloudEntry);
             AddToPublicEnvironment(publicCloudEntry);
         }
 

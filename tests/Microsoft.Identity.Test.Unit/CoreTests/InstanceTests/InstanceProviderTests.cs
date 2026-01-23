@@ -123,6 +123,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.microsoftonline.de"));
             Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.microsoftonline.de"));
+            
+            // New sovereign clouds
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.sovcloud-identity.fr"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.sovcloud-identity.fr"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.sovcloud-identity.de"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.sovcloud-identity.de"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.sovcloud-identity.sg"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.sovcloud-identity.sg"));
         }
 
         [TestMethod]
@@ -136,6 +144,39 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsTrue(KnownMetadataProvider.IsPublicEnvironment("login.microsoft.com"));
             Assert.IsTrue(KnownMetadataProvider.IsPublicEnvironment("login.microsoftonline.com"));
             Assert.IsTrue(KnownMetadataProvider.IsPublicEnvironment("Login.microsoftonline.com"));
+            
+            // New sovereign clouds should NOT be public environments
+            Assert.IsFalse(KnownMetadataProvider.IsPublicEnvironment("login.sovcloud-identity.fr"));
+            Assert.IsFalse(KnownMetadataProvider.IsPublicEnvironment("login.sovcloud-identity.de"));
+            Assert.IsFalse(KnownMetadataProvider.IsPublicEnvironment("login.sovcloud-identity.sg"));
+        }
+
+        [TestMethod]
+        public void KnownMetadataProvider_NewSovereignClouds()
+        {
+            // Arrange
+            KnownMetadataProvider knownMetadataProvider = new KnownMetadataProvider();
+
+            // Test Bleu cloud
+            InstanceDiscoveryMetadataEntry result = knownMetadataProvider.GetMetadata(
+                "login.sovcloud-identity.fr", null, _logger);
+            Assert.IsNotNull(result);
+            Assert.AreEqual("login.sovcloud-identity.fr", result.PreferredNetwork);
+            Assert.AreEqual("login.sovcloud-identity.fr", result.PreferredCache);
+
+            // Test Delos cloud
+            result = knownMetadataProvider.GetMetadata(
+                "login.sovcloud-identity.de", null, _logger);
+            Assert.IsNotNull(result);
+            Assert.AreEqual("login.sovcloud-identity.de", result.PreferredNetwork);
+            Assert.AreEqual("login.sovcloud-identity.de", result.PreferredCache);
+
+            // Test GovSG cloud
+            result = knownMetadataProvider.GetMetadata(
+                "login.sovcloud-identity.sg", null, _logger);
+            Assert.IsNotNull(result);
+            Assert.AreEqual("login.sovcloud-identity.sg", result.PreferredNetwork);
+            Assert.AreEqual("login.sovcloud-identity.sg", result.PreferredCache);
         }
     }
 }
