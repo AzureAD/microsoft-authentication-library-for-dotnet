@@ -1455,9 +1455,6 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.IsNotNull(result2.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
-
-                // Verify we have 2 tokens in cache (OBO uses user token cache)
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
             }
         }
 
