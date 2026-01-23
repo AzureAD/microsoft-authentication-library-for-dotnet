@@ -33,6 +33,8 @@ namespace Microsoft.Identity.Client.Internal
 
         public bool IsAttestationRequested { get; set; }
 
+        public bool IsMtlsRequested { get; set; }
+
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken cancellationToken = default)
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
@@ -40,6 +42,7 @@ namespace Microsoft.Identity.Client.Internal
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
             MtlsCertificate = mtlsCertificate;
+            IsMtlsRequested = mtlsCertificate != null;
         }
     }
 }

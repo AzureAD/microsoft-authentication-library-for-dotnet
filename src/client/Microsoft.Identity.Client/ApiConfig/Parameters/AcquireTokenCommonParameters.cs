@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
-        
+        public bool IsMtlsRequested { get; internal set; }
+
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
         /// Set by the KeyAttestation package via .WithAttestationSupport().
@@ -51,14 +52,52 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         internal async Task InitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {
+            // ─────────────────────────────────────────────────────────────
+            // Bearer-over-mTLS (implicit) for client assertion delegate
+            // If PoP is NOT requested, we still might need mTLS transport
+            // when the assertion delegate returns a TokenBindingCertificate.
+            // ─────────────────────────────────────────────────────────────
             if (!IsMtlsPopRequested)
             {
-                return; // PoP not requested
+                if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc &&
+                    cadc.CanReturnTokenBindingCertificate)
+                {
+                    var opts = new AssertionRequestOptions
+                    {
+                        ClientID = serviceBundle.Config.ClientId,
+                        ClientCapabilities = serviceBundle.Config.ClientCapabilities,
+                        Claims = Claims,
+                        CancellationToken = ct,
+                    };
+
+                    ClientSignedAssertion ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
+
+                    if (ar?.TokenBindingCertificate != null)
+                    {
+                        MtlsCertificate = ar.TokenBindingCertificate;
+                        IsMtlsRequested = true;
+
+                        // Check for Azure region only if the authority is AAD
+                        // AzureRegion is by default set to null or set to null when the application is created
+                        // with region set to DisableForceRegion (see ConfidentialClientApplicationBuilder.Validate)
+                        if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
+                            serviceBundle.Config.AzureRegion == null)
+                        {
+                            throw new MsalClientException(
+                                MsalError.MtlsBearerWithoutRegion,
+                                MsalErrorMessage.MtlsBearerWithoutRegion);
+                        }
+                    }
+                }
+
+                return; // IMPORTANT: do not run PoP logic
             }
 
             // ────────────────────────────────────
-            // Case 1 – Certificate credential
+            // EXISTING PoP behavior (UNCHANGED)
             // ────────────────────────────────────
+
+            // Case 1 – Certificate credential
             if (serviceBundle.Config.ClientCredential is CertificateClientCredential certCred)
             {
                 if (certCred.Certificate == null)
@@ -74,7 +113,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             // ────────────────────────────────────
             // Case 2 – Client‑assertion delegate
             // ────────────────────────────────────
-            if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc)
+            if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc2)
             {
                 var opts = new AssertionRequestOptions
                 {
@@ -84,7 +123,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                     CancellationToken = ct
                 };
 
-                ClientSignedAssertion ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
+                ClientSignedAssertion ar = await cadc2.GetAssertionAsync(opts, ct).ConfigureAwait(false);
 
                 if (ar.TokenBindingCertificate == null)
                 {
@@ -99,7 +138,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
             // ────────────────────────────────────
             // Case 3 – Any other credential (client‑secret etc.)
-            // ────────────────────────────────────
+            // ────────────────────────────────────            
             throw new MsalClientException(
                 MsalError.MtlsCertificateNotProvided,
                 MsalErrorMessage.MtlsCertificateNotProvidedMessage);
@@ -113,7 +152,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             {
                 throw new MsalClientException(MsalError.MtlsPopWithoutRegion, MsalErrorMessage.MtlsPopWithoutRegion);
             }
-
+            
             AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
             MtlsCertificate = cert;
         }

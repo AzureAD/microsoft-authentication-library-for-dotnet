@@ -34,6 +34,16 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
+        internal ClientAssertionDelegateCredential(
+        Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider,
+        bool canReturnTokenBindingCertificate)
+        {
+            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
+            CanReturnTokenBindingCertificate = canReturnTokenBindingCertificate;
+        }
+
+        internal bool CanReturnTokenBindingCertificate { get; }
+
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
         // ──────────────────────────────────

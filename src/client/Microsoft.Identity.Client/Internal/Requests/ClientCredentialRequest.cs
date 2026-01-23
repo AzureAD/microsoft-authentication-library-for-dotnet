@@ -400,7 +400,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //    the cached token's KeyId matches the one provided in the request.
             X509Certificate2 requestCert = AuthenticationRequestParameters.MtlsCertificate;
             
-            if (requestCert != null)
+            if (requestCert != null && AuthenticationRequestParameters.IsMtlsPopRequested)
             {
                 string expectedKid = CoreHelpers.ComputeX5tS256KeyId(requestCert);
 
