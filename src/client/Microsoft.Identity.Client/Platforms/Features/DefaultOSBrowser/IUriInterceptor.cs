@@ -8,22 +8,6 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
     /// <summary>
-    /// Result from intercepting an authorization response
-    /// </summary>
-    internal class AuthorizationResponse
-    {
-        public AuthorizationResponse(Uri requestUri, byte[] postData)
-        {
-            RequestUri = requestUri;
-            PostData = postData;
-        }
-
-        public Uri RequestUri { get; set; }
-        public byte[] PostData { get; set; }
-        public bool IsFormPost => PostData != null && PostData.Length > 0;
-    }
-
-    /// <summary>
     /// An abstraction over objects that are able to listen to localhost url (e.g. http://localhost:1234)
     /// and to retrieve the authorization response via GET (query params) or POST (form data)
     /// </summary>
