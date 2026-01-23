@@ -443,7 +443,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                             aud2,
                             cert));
                     break;
-
+#pragma warning disable CS0618 // Type or member is obsolete
                 case CredentialType.ClientClaims_ExtraClaims:
                     builder.WithClientClaims(cert, GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
                     break;
