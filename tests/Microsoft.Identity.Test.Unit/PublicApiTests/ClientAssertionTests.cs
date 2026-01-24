@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -17,8 +18,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -701,6 +702,86 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task BearerClientAssertion_WithPoPDelegate_CanReturnDifferentPairsAcrossTheTwoDelegateInvocations()
+        {
+            const string region = "eastus";
+            const string tenantId = "123456-1234-2345-1234561234";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                // Set the expected mTLS endpoint for public cloud
+                string globalEndpoint = "mtlsauth.microsoft.com";
+                string expectedTokenEndpoint =
+                    $"https://{region}.{globalEndpoint}/{tenantId}/oauth2/v2.0/token";
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    // Token endpoint mock
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                    using var certA = CreateSelfSignedCert(TimeSpan.FromDays(3), "CN=A");
+                    using var certB = CreateSelfSignedCert(TimeSpan.FromDays(3), "CN=B");
+                    {
+                        var calls = new List<(string TokenEndpoint, string Assertion, string CertThumbprint)>();
+                        int callCount = 0;
+
+                        Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider =
+                            (options, ct) =>
+                            {
+                                int call = Interlocked.Increment(ref callCount);
+
+                                X509Certificate2 cert = call == 1 ? certA : certB;
+                                string assertion = call == 1 ? "assertion-a" : "assertion-b";
+
+                                calls.Add((options?.TokenEndpoint, assertion, cert.Thumbprint));
+
+                                return Task.FromResult(new ClientSignedAssertion
+                                {
+                                    Assertion = assertion,
+                                    TokenBindingCertificate = cert
+                                });
+                            };
+
+                        var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithExperimentalFeatures(true)
+                            .WithClientAssertion(provider)
+                            .WithAuthority($"https://login.microsoftonline.com/{tenantId}")
+                            .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                            .WithHttpManager(httpManager)
+                            .BuildConcrete();
+
+                        // Act
+                        AuthenticationResult result = await app
+                            .AcquireTokenForClient(TestConstants.s_scope)
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+                        // Assert
+                        Assert.AreEqual("header.payload.signature", result.AccessToken);
+                        Assert.AreEqual(Constants.BearerTokenType, result.TokenType, ignoreCase: true);
+                        Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                        Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                        Assert.IsNull(result.BindingCertificate, "BindingCertificate should not be present.");
+
+                        // Core of the test: prove 2 invocations + capture the two distinct pairs
+                        Assert.AreEqual(2, calls.Count,
+                            "Expected the client assertion provider delegate to be invoked twice for a single token acquisition.");
+
+                        // First invocation: cert A + assertion A
+                        Assert.AreEqual("assertion-a", calls[0].Assertion);
+                        Assert.AreEqual(certA.Thumbprint, calls[0].CertThumbprint);
+
+                        // Second invocation: cert B + assertion B
+                        Assert.AreEqual("assertion-b", calls[1].Assertion);
+                        Assert.AreEqual(certB.Thumbprint, calls[1].CertThumbprint);
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task WithMtlsAssertion_NoRegion_ThrowsAsync()
         {
             using var http = new MockHttpManager();
@@ -746,6 +827,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TokenBindingCertificate = cert
                 });
             };
-#endregion
+
+        private static X509Certificate2 CreateSelfSignedCert(TimeSpan lifetime, string subjectCn = "CN=CacheTest")
+        {
+            using var rsa = RSA.Create(2048);
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                new X500DistinguishedName(subjectCn),
+                rsa,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            // Give NotBefore a small headroom to avoid clock skew flakes
+            var notBefore = DateTimeOffset.UtcNow.AddMinutes(-2);
+            var notAfter = notBefore.Add(lifetime);
+            return req.CreateSelfSigned(notBefore, notAfter);
+        }
+        #endregion
     }
 }
