@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -803,6 +804,157 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(MsalError.MtlsBearerWithoutRegion, ex.ErrorCode);
             }
+        }
+
+        [TestMethod]
+        public async Task BearerOverMtls_CertChangesAcrossRequests_DoesNotBypassCache_Async()
+        {
+            const string region = "eastus";
+            const string tenantId = "123456-1234-2345-1234561234";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    // Only ONE network response. If MSAL tries a second network call, test will fail.
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "bearer-token");
+
+                    using var certA = CreateSelfSignedCert(TimeSpan.FromDays(3), "CN=A");
+                    using var certB = CreateSelfSignedCert(TimeSpan.FromDays(3), "CN=B");
+
+                    // The delegate can be called multiple times per acquire. Keep cert stable per acquire.
+                    X509Certificate2 currentCert = certA;
+
+                    Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider =
+                        (options, ct) => Task.FromResult(new ClientSignedAssertion
+                        {
+                            Assertion = "jwt",
+                            TokenBindingCertificate = currentCert
+                        });
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures(true)
+                        .WithClientSecret(TestConstants.ClientSecret)
+                        .WithClientAssertion(provider)
+                        .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), validateAuthority: false)
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    // Acquire #1 -> network, with certA
+                    currentCert = certA;
+                    var first = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual("bearer-token", first.AccessToken);
+                    Assert.AreEqual(Constants.BearerTokenType, first.TokenType, ignoreCase: true);
+
+                    // Acquire #2 -> MUST be cache even though cert changes to certB.
+                    currentCert = certB;
+                    var second = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(first.AccessToken, second.AccessToken);
+                    Assert.AreEqual(Constants.BearerTokenType, second.TokenType, ignoreCase: true);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task PopRequest_DoesNotReuseCachedBearerOverMtlsToken_Async()
+        {
+            const string region = "eastus";
+            const string tenantId = "123456-1234-2345-1234561234";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    // 1) First acquire returns bearer token
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        token: "bearer-token");
+
+                    // 2) Second acquire returns PoP token
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        token: "pop-token",
+                        tokenType: "mtls_pop");
+
+                    using var cert = CreateSelfSignedCert(TimeSpan.FromDays(3), "CN=PoP");
+
+                    Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider =
+                        (options, ct) => Task.FromResult(new ClientSignedAssertion
+                        {
+                            Assertion = "jwt",
+                            TokenBindingCertificate = cert
+                        });
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures(true)
+                        .WithClientSecret(TestConstants.ClientSecret)
+                        .WithClientAssertion(provider)
+                        .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), validateAuthority: false)
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    // Step 1: implicit bearer-over-mTLS (cert returned, but no WithMtlsProofOfPossession)
+                    var bearer = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(TokenSource.IdentityProvider, bearer.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual("bearer-token", bearer.AccessToken);
+                    Assert.AreEqual(Constants.BearerTokenType, bearer.TokenType, ignoreCase: true);
+                    Assert.IsNull(bearer.BindingCertificate);
+
+                    // Step 2: explicit PoP must NOT reuse the cached bearer token
+                    var pop = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(TokenSource.IdentityProvider, pop.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual("pop-token", pop.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, pop.TokenType);
+                    Assert.IsNotNull(pop.BindingCertificate);
+                    Assert.AreEqual(cert.Thumbprint, pop.BindingCertificate.Thumbprint);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void ClientAssertion_CanReturnTokenBindingCertificate_FlagIsCorrect()
+        {
+            // Old overloads (returning string) should NOT be marked as “can return cert”
+            var app1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithClientAssertion((AssertionRequestOptions o) => Task.FromResult("jwt"))
+                .BuildConcrete();
+
+            var cred1 = (app1.AppConfig as ApplicationConfiguration).ClientCredential as ClientAssertionDelegateCredential;
+            Assert.IsNotNull(cred1);
+            Assert.IsFalse(cred1.CanReturnTokenBindingCertificate);
+
+            // New overload (returning ClientSignedAssertion) SHOULD be marked as “can return cert”
+            var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithClientAssertion((AssertionRequestOptions o, CancellationToken ct) =>
+                    Task.FromResult(new ClientSignedAssertion { Assertion = "jwt", TokenBindingCertificate = null }))
+                .BuildConcrete();
+
+            var cred2 = (app2.AppConfig as ApplicationConfiguration).ClientCredential as ClientAssertionDelegateCredential;
+            Assert.IsNotNull(cred2);
+            Assert.IsTrue(cred2.CanReturnTokenBindingCertificate);
         }
 
         #region Helper ---------------------------------------------------------------
