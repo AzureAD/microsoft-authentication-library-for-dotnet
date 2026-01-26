@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         public static string GetHomeAccountId(AuthenticationRequestParameters requestParams, MsalTokenResponse response, IdToken idToken)
         {
             ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
-            string homeAccountId = clientInfo?.ToAccountIdentifier() ?? idToken?.Subject ?? requestParams.Account.HomeAccountId.Identifier; // ADFS does not have client info, so we use subject
+            string homeAccountId = clientInfo?.ToAccountIdentifier() ?? idToken?.Subject ?? requestParams.Account?.HomeAccountId?.Identifier; // ADFS does not have client info, so we use subject
 
             if (homeAccountId == null)
             {
