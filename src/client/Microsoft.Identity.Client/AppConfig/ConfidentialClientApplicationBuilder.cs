@@ -179,6 +179,8 @@ namespace Microsoft.Identity.Client
         /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
         /// Does not send the certificate (as x5c parameter) with the request by default.
         /// </remarks>
+        [Obsolete("This method is obsolete. Use the WithExtraClientAssertionClaims method on AcquireTokenForClientParameterBuilder", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims)
         {
             return WithClientClaims(certificate, claimsToSign, mergeWithDefaultClaims, false);
@@ -194,6 +196,8 @@ namespace Microsoft.Identity.Client
         /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
         /// <param name="sendX5C">To send X5C with every request or not.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.</remarks>
+        [Obsolete("This method is obsolete. Use the WithExtraClientAssertionClaims method on AcquireTokenForClientParameterBuilder", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true, bool sendX5C = false)
         {
             if (certificate == null)

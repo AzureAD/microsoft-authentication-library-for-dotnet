@@ -481,7 +481,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             switch (credentialType)
             {
                 case CredentialType.CertificateAndClaims:
+#pragma warning disable CS0618 // Type or member is obsolete
                     builder = builder.WithClientClaims(cert, TestConstants.s_clientAssertionClaims);
+#pragma warning restore CS0618 // Type or member is obsolete
                     app = builder.BuildConcrete();
                     Assert.AreEqual(cert, app.Certificate);
                     break;

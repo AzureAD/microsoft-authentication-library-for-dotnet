@@ -1,3 +1,4 @@
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithExtraClientAssertionClaims<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, string clientAssertionClaims) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
 Microsoft.Identity.Client.ManagedIdentityPopExtensions
 Microsoft.Identity.Client.AppConfig.CertificateOptions
 Microsoft.Identity.Client.AppConfig.CertificateOptions.AssociateTokensWithCertificate.get -> bool
