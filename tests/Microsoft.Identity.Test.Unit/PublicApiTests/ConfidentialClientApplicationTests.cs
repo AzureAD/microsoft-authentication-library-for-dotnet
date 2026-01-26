@@ -870,7 +870,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // Act &  Assert
             Assert.ThrowsException<ArgumentNullException>(() =>
-                new ClientAssertionDelegateCredential(nullDelegate));
+                new ClientAssertionDelegateCredential(nullDelegate, false));
         }
 
         [DataTestMethod]
@@ -889,7 +889,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 });
 
             // Act
-            var credential = new ClientAssertionDelegateCredential(validDelegate);
+            var credential = new ClientAssertionDelegateCredential(validDelegate, true);
 
             // Assert
             Assert.IsNotNull(credential);

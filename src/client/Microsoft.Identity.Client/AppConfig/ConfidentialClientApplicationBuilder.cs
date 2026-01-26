@@ -242,7 +242,8 @@ namespace Microsoft.Identity.Client
                     Task.FromResult(new ClientSignedAssertion
                     {
                         Assertion = clientAssertionDelegate()   // bearer
-                    }));
+                    }),
+                canReturnTokenBindingCertificate: false);
         }
 
         /// <summary>
@@ -265,7 +266,8 @@ namespace Microsoft.Identity.Client
                 {
                     string jwt = await clientAssertionAsyncDelegate(ct).ConfigureAwait(false);
                     return new ClientSignedAssertion { Assertion = jwt };    // bearer
-                });
+                },
+                canReturnTokenBindingCertificate: false);
         }
 
         /// <summary>
@@ -287,7 +289,8 @@ namespace Microsoft.Identity.Client
                 {
                     string jwt = await clientAssertionAsyncDelegate(opts).ConfigureAwait(false);
                     return new ClientSignedAssertion { Assertion = jwt };    // bearer
-                });
+                },
+                canReturnTokenBindingCertificate: false);
         }
 
         /// <summary>
@@ -306,18 +309,22 @@ namespace Microsoft.Identity.Client
             CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
             ValidateUseOfExperimentalFeature();
-            return WithClientAssertionInternal(clientSignedAssertionProvider);
+            return WithClientAssertionInternal(
+                clientSignedAssertionProvider: clientSignedAssertionProvider,
+                canReturnTokenBindingCertificate: true);
         }
 
         /// <summary>
         /// Internal helper to set the client assertion provider.
         /// </summary>
         /// <param name="clientSignedAssertionProvider"></param>
+        /// <param name="canReturnTokenBindingCertificate"></param>
         /// <returns></returns>
         internal ConfidentialClientApplicationBuilder WithClientAssertionInternal(
-            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider,
+            bool canReturnTokenBindingCertificate)
         {
-            Config.ClientCredential = new ClientAssertionDelegateCredential(clientSignedAssertionProvider);
+            Config.ClientCredential = new ClientAssertionDelegateCredential(clientSignedAssertionProvider, canReturnTokenBindingCertificate);
             return this;
         }
 

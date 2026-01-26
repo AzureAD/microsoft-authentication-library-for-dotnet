@@ -1,3 +1,4 @@
+const Microsoft.Identity.Client.MsalError.MtlsBearerWithoutRegion = "mtls_bearer_without_region" -> string
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithExtraClientAssertionClaims<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, string clientAssertionClaims) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
 Microsoft.Identity.Client.ManagedIdentityPopExtensions
 static Microsoft.Identity.Client.ManagedIdentityPopExtensions.WithMtlsProofOfPossession(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
