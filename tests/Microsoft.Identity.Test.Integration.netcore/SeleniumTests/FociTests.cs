@@ -115,9 +115,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private static void CreateFamilyApps(string nonFamilyAppId, string cacheFilePath, out IPublicClientApplication pca_fam1, out IPublicClientApplication pca_fam2, out IPublicClientApplication pca_nonFam)
         {
             var keyvault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
-            var clientId1 = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1"; // Visual Stodio Known App
-            //var clientId2 = "1950a258-227b-4e31-a9cf-717495945fc2"; // Powershell Known App
-            var clientId2 = "d326c1ce-6cc6-4de2-bebc-4591e5e13ef0"; // Sharepoint Known App
+            var clientId1 = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1"; // Visual Studio Known App
+            //var clientId2 = "1950a258-227b-4e31-a9cf-717495945fc2"; // PowerShell Known App
+            var clientId2 = "d326c1ce-6cc6-4de2-bebc-4591e5e13ef0"; // SharePoint Known App
 
             pca_fam1 = PublicClientApplicationBuilder
                .Create(clientId1)
