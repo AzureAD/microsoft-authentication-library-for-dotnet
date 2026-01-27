@@ -9,6 +9,7 @@ namespace Microsoft.Identity.Client.OAuth2
     internal static class OAuth2Parameter
     {
         public const string ResponseType = "response_type";
+        public const string ResponseMode = "response_mode";
         public const string GrantType = "grant_type";
         public const string ClientId = "client_id";
         public const string ClientSecret = "client_secret";

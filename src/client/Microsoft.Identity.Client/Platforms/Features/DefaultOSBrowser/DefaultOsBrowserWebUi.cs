@@ -11,9 +11,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
@@ -22,16 +24,20 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         internal const string DefaultSuccessHtml = @"<html>
   <head><title>Authentication Complete</title></head>
   <body>
-    Authentication complete. You can return to the application. Feel free to close this browser tab.
+    <h3>Authentication complete.</h3>
+    <p>You can return to the application. Please close this browser tab.</p>
+    <p><strong>For your security:</strong> Do not share the contents of this page, the address bar, or take screenshots.</p>
   </body>
 </html>";
 
         internal const string DefaultFailureHtml = @"<html>
   <head><title>Authentication Failed</title></head>
   <body>
-    Authentication failed. You can return to the application. Feel free to close this browser tab.
-</br></br></br></br>
-    Error details: error {0} error_description: {1}
+    <h3>Authentication failed.</h3>
+    <p>You can return to the application. Please close this browser tab.</p>
+    <p><strong>For your security:</strong> Do not share the contents of this page, the address bar, or take screenshots.</p>
+    </br>
+    <p>Error details: error {0} error_description: {1}</p>
   </body>
 </html>";
 
@@ -61,24 +67,48 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         {
             try
             {
-                var authCodeUri = await InterceptAuthorizationUriAsync(
+                var authUriBuilder = new UriBuilder(authorizationUri);
+                
+                // Warn if response_mode was set to something other than form_post
+                if (authorizationUri.Query.Contains("response_mode=") && 
+                    !authorizationUri.Query.Contains("response_mode=form_post"))
+                {
+                    _logger.Warning("[DefaultOsBrowser] The 'response_mode' parameter will be overridden to 'form_post' for better security.");
+                }
+                
+                authUriBuilder.AppendOrReplaceQueryParameter(OAuth2Parameter.ResponseMode, "form_post");
+                authorizationUri = authUriBuilder.Uri;
+
+                _logger.Info(() => $"[DefaultOsBrowser] Authorization URI with form_post: {authorizationUri.AbsoluteUri}");
+                _logger.Verbose(() => $"[DefaultOsBrowser] Query string contains response_mode: {authorizationUri.Query.Contains("response_mode=form_post")}");
+
+                var authResponse = await InterceptAuthorizationUriAsync(
                     authorizationUri,
                     redirectUri,
                     requestContext.ServiceBundle.Config.IsBrokerEnabled,
                     cancellationToken)
                     .ConfigureAwait(true);
 
-                if (!authCodeUri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) ||
-                   !authCodeUri.AbsolutePath.Equals(redirectUri.AbsolutePath))
+                if (!authResponse.RequestUri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) ||
+                   !authResponse.RequestUri.AbsolutePath.Equals(redirectUri.AbsolutePath))
                 {
                     throw new MsalClientException(
                         MsalError.LoopbackResponseUriMismatch,
                         MsalErrorMessage.RedirectUriMismatch(
-                            authCodeUri.AbsolutePath,
+                            authResponse.RequestUri.AbsolutePath,
                             redirectUri.AbsolutePath));
                 }
-
-                return AuthorizationResult.FromUri(authCodeUri.OriginalString);
+                if (authResponse.IsFormPost)
+                {
+                    _logger.Info(() => "[DefaultOsBrowser] Processing form_post response securely from POST data");
+                    return AuthorizationResult.FromPostData(authResponse.PostData);
+                }
+                else
+                {
+                    throw new MsalClientException(
+                        MsalError.AuthenticationFailed,
+                        "The authorization server did not honor response_mode=form_post");
+                }
             }
             catch (System.Net.HttpListenerException) // sometimes this exception sneaks out (see issue 1773)
             {
@@ -127,7 +157,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             }
         }
 
-        private async Task<Uri> InterceptAuthorizationUriAsync(
+        private async Task<AuthorizationResponse> InterceptAuthorizationUriAsync(
             Uri authorizationUri,
             Uri redirectUri,
             bool isBrokerConfigured,
@@ -148,10 +178,21 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             .ConfigureAwait(false);
         }
 
-        internal /* internal for testing only */ MessageAndHttpCode GetResponseMessage(Uri authCodeUri)
+        internal /* internal for testing only */ MessageAndHttpCode GetResponseMessage(AuthorizationResponse authResponse)
         {
-            // Parse the uri to understand if an error was returned. This is done just to show the user a nice error message in the browser.
-            var authorizationResult = AuthorizationResult.FromUri(authCodeUri.OriginalString);
+            // Parse the response to understand if an error was returned. This is done just to show the user a nice error message in the browser.
+            AuthorizationResult authorizationResult;
+            
+            if (authResponse.IsFormPost)
+            {
+                // For form_post, parse from POST data
+                authorizationResult = AuthorizationResult.FromPostData(authResponse.PostData);
+            }
+            else
+            {
+                // For GET/query string responses, parse from URI
+                authorizationResult = AuthorizationResult.FromUri(authResponse.RequestUri.OriginalString);
+            }
 
             if (!string.IsNullOrEmpty(authorizationResult.Error))
             {
