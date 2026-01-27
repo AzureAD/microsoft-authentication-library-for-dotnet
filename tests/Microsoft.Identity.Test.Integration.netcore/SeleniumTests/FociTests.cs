@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         /// </summary>
         /// <remarks>The FOCI flag does not appear in the U/P flow, an interactive flow is required. Interactive flow
         /// cannot be automated because http://localhost cannot currently be added to the family apps</remarks>
-        [Ignore]
         [TestMethod]
         public async Task FociSignInSignOutAsync()
         {
@@ -116,8 +115,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private static void CreateFamilyApps(string nonFamilyAppId, string cacheFilePath, out IPublicClientApplication pca_fam1, out IPublicClientApplication pca_fam2, out IPublicClientApplication pca_nonFam)
         {
             var keyvault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
-            var clientId1 = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
-            var clientId2 = "1950a258-227b-4e31-a9cf-717495945fc2";
+            var clientId1 = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1"; // Visual Stodio Known App
+            //var clientId2 = "1950a258-227b-4e31-a9cf-717495945fc2"; // Powershell Known App
+            var clientId2 = "d326c1ce-6cc6-4de2-bebc-4591e5e13ef0"; // Sharepoint Known App
 
             pca_fam1 = PublicClientApplicationBuilder
                .Create(clientId1)
