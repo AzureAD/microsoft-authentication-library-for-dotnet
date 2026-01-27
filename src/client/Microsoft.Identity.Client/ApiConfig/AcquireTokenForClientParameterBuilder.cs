@@ -193,6 +193,9 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="ConfidentialClientApplicationBuilder.Validate"/> for a comment inside this function for AzureRegion.
         protected override void Validate()
         {
+            // Derive "mTLS requested" from "mTLS PoP requested"
+            CommonParameters.IsMtlsRequested |= CommonParameters.IsMtlsPopRequested;
+
             if (CommonParameters.MtlsCertificate != null)
             {
                 // Check for Azure region only if the authority is AAD
