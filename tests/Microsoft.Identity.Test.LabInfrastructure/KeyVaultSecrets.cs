@@ -35,6 +35,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string DefaultAppSecret = "MSAL-App-Default";
 
         // dSTS configuration
-        public const string AppDsts = "MISE-dSTS-CustomAppConfig";
+        public const string AppDsts = "MISE-App-DSTS-JSON";
     }
 }
