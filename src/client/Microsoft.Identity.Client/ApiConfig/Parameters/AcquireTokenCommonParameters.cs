@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
         public string ExtraClientAssertionClaims { get; internal set; }
-        public bool IsMtlsRequested { get; internal set; }
+        internal bool IsEffectiveMtlsPop => IsMtlsPopRequested || MtlsCertificate != null;
 
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
@@ -51,7 +51,15 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// </summary>
         public Func<string, SafeHandle, string, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
 
-        internal async Task InitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
+        /// <summary>
+        /// This tries to see if the token request should be done over mTLS or over normal HTTP 
+        /// and set the correct parameters
+        /// </summary>
+        /// <param name="serviceBundle"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        /// <exception cref="MsalClientException"></exception>
+        internal async Task TryInitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {
             // ─────────────────────────────────────────────────────────────
             // Bearer-over-mTLS (implicit) for client assertion delegate
@@ -60,8 +68,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             // ─────────────────────────────────────────────────────────────
             if (!IsMtlsPopRequested)
             {
-                if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc &&
-                    cadc.CanReturnTokenBindingCertificate)
+                if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc)
                 {
                     var opts = new AssertionRequestOptions
                     {
@@ -69,6 +76,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         ClientCapabilities = serviceBundle.Config.ClientCapabilities,
                         Claims = Claims,
                         CancellationToken = ct,
+                        TokenEndpoint = serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.Authority
                     };
 
                     ClientSignedAssertion ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
@@ -76,7 +84,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                     if (ar?.TokenBindingCertificate != null)
                     {
                         MtlsCertificate = ar.TokenBindingCertificate;
-                        IsMtlsRequested = true;
 
                         // Check for Azure region only if the authority is AAD
                         // AzureRegion is by default set to null or set to null when the application is created

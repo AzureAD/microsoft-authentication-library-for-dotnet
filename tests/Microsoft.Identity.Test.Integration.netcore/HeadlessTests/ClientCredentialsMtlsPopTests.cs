@@ -176,5 +176,98 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Optional: if you rely on regional mTLS endpoints, check the host
             StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com");
         }
+
+        [DoNotRunOnLinux]
+        //[TestMethod] // Temporarily disabled due to feature not ready in ESTS
+        public async Task Sni_AssertionFlow_Uses_JwtPop_And_Acquires_Bearer_Token_TestAsync()
+        {
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            // Step 1: obtain a real JWT to reuse as the "assertion"
+            IConfidentialClientApplication firstApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3")
+                .WithCertificate(cert, true)
+                .WithTestLogging()
+                .Build();
+
+            AuthenticationResult first = await firstApp
+                .AcquireTokenForClient(new[] { TokenExchangeUrl })
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            string assertionJwt = first.AccessToken;
+            Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
+
+            // Step 2: build the assertion-based app (NO WithCertificate here)
+            bool assertionProviderCalled = false;
+            string tokenEndpointSeenByProvider = null;
+
+            string requestUriSeen = null;
+            string clientAssertionType = null;
+            bool sawClientAssertionParam = false;
+            bool sawClientAssertionTypeParam = false;
+
+            IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithExperimentalFeatures()
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3")
+                .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
+                {
+                    assertionProviderCalled = true;
+                    tokenEndpointSeenByProvider = options.TokenEndpoint;
+
+                    return Task.FromResult(new ClientSignedAssertion
+                    {
+                        Assertion = assertionJwt,      // forwarded as client_assertion
+                        TokenBindingCertificate = cert // binds assertion for mTLS PoP (jwt-pop)
+                    });
+                })
+                .WithTestLogging()
+                .Build();
+
+            // Step 3: second leg should now SUCCEED
+            AuthenticationResult second = await assertionApp
+                .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+                .OnBeforeTokenRequest(data =>
+                {
+                    requestUriSeen = data.RequestUri?.ToString();
+
+                    if (data.BodyParameters != null)
+                    {
+                        sawClientAssertionParam = data.BodyParameters.ContainsKey("client_assertion");
+                        sawClientAssertionTypeParam = data.BodyParameters.ContainsKey("client_assertion_type");
+
+                        data.BodyParameters.TryGetValue("client_assertion_type", out clientAssertionType);
+                    }
+
+                    return Task.CompletedTask;
+                })
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Success assertions
+            Assert.IsNotNull(second, "Second leg returned null AuthenticationResult.");
+            Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
+            CollectionAssert.Contains(second.Scopes.ToArray(), "https://vault.azure.net/.default",
+                "Second leg token is not for Key Vault scope.");
+
+            // Prove MSAL used the assertion + jwt-pop binding
+            Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
+            Assert.IsFalse(string.IsNullOrEmpty(tokenEndpointSeenByProvider),
+                "AssertionRequestOptions.TokenEndpoint should be provided to the callback.");
+
+            Assert.IsTrue(sawClientAssertionParam, "Token request should include client_assertion body parameter.");
+            Assert.IsTrue(sawClientAssertionTypeParam, "Token request should include client_assertion_type body parameter.");
+
+            Assert.AreEqual(
+                "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
+                clientAssertionType,
+                "When TokenBindingCertificate is supplied and PoP is enabled, MSAL should use jwt-pop client_assertion_type.");
+
+            // Optional: if you rely on regional mTLS endpoints, check the host
+            StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com");
+        }
     }
 }

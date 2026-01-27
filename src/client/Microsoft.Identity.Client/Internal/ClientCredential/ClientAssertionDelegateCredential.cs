@@ -29,14 +29,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _provider(options, cancellationToken);
 
         internal ClientAssertionDelegateCredential(
-            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider, 
-            bool canReturnTokenBindingCertificate)
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider)
         {
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
-            CanReturnTokenBindingCertificate = canReturnTokenBindingCertificate;
         }
 
-        internal bool CanReturnTokenBindingCertificate { get; }
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
         // ──────────────────────────────────
@@ -67,10 +64,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     MsalErrorMessage.InvalidClientAssertionEmpty);
             }
 
+            // ──────────────────────────────
             // Decide bearer vs mTLS PoP
-            bool IsMtlsPopRequested = p.IsMtlsPopRequested;
+            // ───────────────────────────────
+            bool useClientAssertionJwtPop = p.UseClientAssertionJwtPop;
 
-            if (IsMtlsPopRequested && resp.TokenBindingCertificate != null)
+            if (useClientAssertionJwtPop)
             {
                 oAuth2Client.AddBodyParameter(
                     OAuth2Parameter.ClientAssertionType,

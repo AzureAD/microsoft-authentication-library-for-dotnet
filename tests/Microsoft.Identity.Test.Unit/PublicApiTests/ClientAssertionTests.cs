@@ -942,7 +942,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var cred1 = (app1.AppConfig as ApplicationConfiguration).ClientCredential as ClientAssertionDelegateCredential;
             Assert.IsNotNull(cred1);
-            Assert.IsFalse(cred1.CanReturnTokenBindingCertificate);
 
             // New overload (returning ClientSignedAssertion) SHOULD be marked as “can return cert”
             var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -954,7 +953,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var cred2 = (app2.AppConfig as ApplicationConfiguration).ClientCredential as ClientAssertionDelegateCredential;
             Assert.IsNotNull(cred2);
-            Assert.IsTrue(cred2.CanReturnTokenBindingCertificate);
         }
 
         #region Helper ---------------------------------------------------------------

@@ -111,9 +111,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Guid CorrelationId => _commonParameters.CorrelationId;
 
-        public X509Certificate2 MtlsCertificate => _commonParameters.MtlsCertificate;
+        public X509Certificate2 MtlsCertificate
+        {
+            get => _commonParameters.MtlsCertificate;
+            internal set => _commonParameters.MtlsCertificate = value;
+        }
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+
+        internal bool UseClientAssertionJwtPop => IsMtlsPopRequested || MtlsCertificate != null;
 
         /// <summary>
         /// The certificate resolved and used for client authentication (if certificate-based authentication was used).
