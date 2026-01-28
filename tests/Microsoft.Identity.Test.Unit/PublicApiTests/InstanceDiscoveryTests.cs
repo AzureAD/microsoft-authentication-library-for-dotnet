@@ -52,10 +52,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .BuildConcrete();
 
                 Uri expectedDiscoveryEndpoint = new Uri($"https://{discoveryHost}/tenant/discovery/instance");
-                var h2 = httpManager.AddInstanceDiscoveryMockHandler(customDiscoveryEndpoint: expectedDiscoveryEndpoint);
+                httpManager.AddInstanceDiscoveryMockHandler(customDiscoveryEndpoint: expectedDiscoveryEndpoint);
                 var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
                 handler.ExpectedUrl = $"https://{discoveryHost}/tenant/oauth2/v2.0/token";
-                
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 
