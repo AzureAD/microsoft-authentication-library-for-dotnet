@@ -931,19 +931,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void ClientAssertion_CanReturnTokenBindingCertificate_FlagIsCorrect()
+        public void ClientAssertion_CredentialTypesAndCapabilities_AreCorrect()
         {
-            // Old overloads (returning string) should NOT be marked as “can return cert”
+            // Old overloads (returning string) should NOT be cert-capable and should NOT implement IClientSignedAssertionProvider
             var app1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithClientAssertion((AssertionRequestOptions o) => Task.FromResult("jwt"))
                 .BuildConcrete();
 
-            var cred1 = (app1.AppConfig as ApplicationConfiguration).ClientCredential as ClientAssertionDelegateCredential;
-            Assert.IsNotNull(cred1);
+            var cc1 = (app1.AppConfig as ApplicationConfiguration).ClientCredential;
+            Assert.IsNotNull(cc1);
 
-            // New overload (returning ClientSignedAssertion) SHOULD be marked as “can return cert”
+            Assert.IsInstanceOfType(cc1, typeof(ClientAssertionStringDelegateCredential),
+                "String assertion overloads must use the string credential type.");
+            Assert.IsFalse(cc1 is IClientSignedAssertionProvider,
+                "String assertion credential must NOT be signed-assertion capable (cannot return TokenBindingCertificate).");
+
+            // New overload (returning ClientSignedAssertion) SHOULD be cert-capable and implement IClientSignedAssertionProvider
             var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
                 .WithClientSecret(TestConstants.ClientSecret)
@@ -951,8 +956,99 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Task.FromResult(new ClientSignedAssertion { Assertion = "jwt", TokenBindingCertificate = null }))
                 .BuildConcrete();
 
-            var cred2 = (app2.AppConfig as ApplicationConfiguration).ClientCredential as ClientAssertionDelegateCredential;
-            Assert.IsNotNull(cred2);
+            var cc2 = (app2.AppConfig as ApplicationConfiguration).ClientCredential;
+            Assert.IsNotNull(cc2);
+
+            Assert.IsInstanceOfType(cc2, typeof(ClientAssertionDelegateCredential),
+                "ClientSignedAssertion overloads must use the signed-assertion credential type.");
+            Assert.IsTrue(cc2 is IClientSignedAssertionProvider,
+                "Signed assertion credential must implement IClientSignedAssertionProvider for mTLS preflight.");
+        }
+
+        [TestMethod]
+        public async Task FmiPathClientAssertion_StringDelegate_IsNeverInvokedWithNullFmiPathAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                int callCount = 0;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTestTenant)
+                    .WithExperimentalFeatures(true)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions o) =>
+                    {
+                        Interlocked.Increment(ref callCount);
+
+                        Assert.AreEqual(
+                            AssertionFmiPath1,
+                            o.ClientAssertionFmiPath,
+                            "ClientAssertionFmiPath must be set for every invocation of the client assertion delegate.");
+
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithFmiPathForClientAssertion(AssertionFmiPath1)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsTrue(callCount >= 1, "Expected the client assertion delegate to be called at least once.");
+            }
+        }
+
+        [TestMethod]
+        public async Task FmiPathClientAssertion_ClientSignedAssertionProvider_PreflightPassesFmiPathAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                int callCount = 0;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTestTenant)
+                    .WithExperimentalFeatures(true)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion((AssertionRequestOptions o, CancellationToken ct) =>
+                    {
+                        Interlocked.Increment(ref callCount);
+
+                        // Key guard: preflight calls must also carry FMI path
+                        Assert.AreEqual(
+                            AssertionFmiPath1,
+                            o.ClientAssertionFmiPath,
+                            "ClientAssertionFmiPath must be set for every invocation of the client assertion provider.");
+
+                        // Return NO cert to avoid region requirements for this unit test
+                        return Task.FromResult(new ClientSignedAssertion
+                        {
+                            Assertion = "jwt",
+                            TokenBindingCertificate = null
+                        });
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithFmiPathForClientAssertion(AssertionFmiPath1)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsTrue(callCount >= 1, "Expected the client assertion provider to be called at least once.");
+            }
         }
 
         #region Helper ---------------------------------------------------------------

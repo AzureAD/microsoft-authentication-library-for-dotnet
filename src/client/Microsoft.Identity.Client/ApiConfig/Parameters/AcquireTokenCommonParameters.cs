@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
         public string ExtraClientAssertionClaims { get; internal set; }
-        internal bool IsEffectiveMtlsPop => IsMtlsPopRequested || MtlsCertificate != null;
 
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
@@ -61,120 +60,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <exception cref="MsalClientException"></exception>
         internal async Task TryInitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {
-            // ─────────────────────────────────────────────────────────────
-            // NON-PoP request:
-            // We may still need mTLS transport if the client-assertion delegate
-            // returns a TokenBindingCertificate (implicit bearer-over-mTLS).
-            // This behavior is required by existing unit/integration tests.
-            // ─────────────────────────────────────────────────────────────
-            if (!IsMtlsPopRequested)
-            {
-                // If a cert is already known, just enforce policy and return.
-                if (MtlsCertificate != null)
-                {
-                    ThrowIfRegionMissingForImplicitMtls(serviceBundle);
-                    return;
-                }
-
-                // Only the assertion delegate can dynamically return a token-binding cert.
-                if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc)
-                {
-                    var opts = new AssertionRequestOptions
-                    {
-                        ClientID = serviceBundle.Config.ClientId,
-                        ClientCapabilities = serviceBundle.Config.ClientCapabilities,
-                        Claims = Claims,
-                        CancellationToken = ct,
-                        TokenEndpoint = serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.Authority
-                    };
-
-                    ClientSignedAssertion ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
-
-                    if (ar?.TokenBindingCertificate != null)
-                    {
-                        MtlsCertificate = ar.TokenBindingCertificate;
-
-                        // Implicit bearer-over-mTLS policy check
-                        ThrowIfRegionMissingForImplicitMtls(serviceBundle);
-                    }
-                }
-
-                return; // IMPORTANT: do not run explicit PoP logic
-            }
-
-            // ────────────────────────────────────
-            // EXPLICIT PoP requested:
-            // Validate and initialize PoP parameters (auth scheme + cert + region check).
-            // ────────────────────────────────────
-
-            // Case 1 – Certificate credential
-            if (serviceBundle.Config.ClientCredential is CertificateClientCredential certCred)
-            {
-                if (certCred.Certificate == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-                }
-
-                // IMPORTANT: initialize auth scheme + MtlsCertificate
-                InitMtlsPopParameters(certCred.Certificate, serviceBundle);
-                return;
-            }
-
-            // Case 2 – Client-assertion delegate
-            if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc2)
-            {
-                var opts = new AssertionRequestOptions
-                {
-                    ClientID = serviceBundle.Config.ClientId,
-                    ClientCapabilities = serviceBundle.Config.ClientCapabilities,
-                    Claims = Claims,
-                    CancellationToken = ct
-                };
-
-                ClientSignedAssertion ar = await cadc2.GetAssertionAsync(opts, ct).ConfigureAwait(false);
-
-                if (ar?.TokenBindingCertificate == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-                }
-
-                InitMtlsPopParameters(ar.TokenBindingCertificate, serviceBundle);
-                return;
-            }
-
-            // Case 3 – Any other credential (client-secret etc.)
-            throw new MsalClientException(
-                MsalError.MtlsCertificateNotProvided,
-                MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-        }
-
-        private void InitMtlsPopParameters(X509Certificate2 cert, IServiceBundle serviceBundle)
-        {
-            // region check (AAD only)
-            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                serviceBundle.Config.AzureRegion == null)
-            {
-                throw new MsalClientException(MsalError.MtlsPopWithoutRegion, MsalErrorMessage.MtlsPopWithoutRegion);
-            }
-
-            AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
-            MtlsCertificate = cert;
-        }
-
-        private static void ThrowIfRegionMissingForImplicitMtls(IServiceBundle serviceBundle)
-        {
-            // Implicit bearer-over-mTLS requires region only for AAD
-            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                serviceBundle.Config.AzureRegion == null)
-            {
-                throw new MsalClientException(
-                    MsalError.MtlsBearerWithoutRegion,
-                    MsalErrorMessage.MtlsBearerWithoutRegion);
-            }
+            await MtlsPopParametersInitializer.TryInitAsync(this, serviceBundle, ct).ConfigureAwait(false);
         }
     }
 }
