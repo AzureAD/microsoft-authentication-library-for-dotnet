@@ -71,6 +71,23 @@ namespace Microsoft.Identity.Client.Region
         {
             string host = authority.Host;
 
+            // Block mTLS for unsupported sovereign hosts
+            if (requestContext.MtlsCertificate != null)
+            {
+                if (host == "login.usgovcloudapi.net")
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsPopNotSupportedForEnvironment,
+                        MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage);
+                }
+                if (host == "login.chinacloudapi.cn")
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsPopNotSupportedForEnvironment,
+                        MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage);
+                }
+            }
+
             if (KnownMetadataProvider.IsPublicEnvironment(host))
             {
                 if (requestContext.MtlsCertificate != null)
