@@ -177,8 +177,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com");
         }
 
+        //Downgraded test to verify bearer token acquisition works in SNI + jwt-pop scenario
         [DoNotRunOnLinux]
-        //[TestMethod] // Temporarily disabled due to feature not ready in ESTS
+        [TestMethod]
         public async Task Sni_AssertionFlow_Uses_JwtPop_And_Acquires_Bearer_Token_TestAsync()
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
@@ -229,7 +230,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Step 3: second leg should now SUCCEED
             AuthenticationResult second = await assertionApp
-                .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+                .AcquireTokenForClient(new[] { "https://storage.azure.com/.default" })
                 .OnBeforeTokenRequest(data =>
                 {
                     requestUriSeen = data.RequestUri?.ToString();
@@ -250,7 +251,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Success assertions
             Assert.IsNotNull(second, "Second leg returned null AuthenticationResult.");
             Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
-            CollectionAssert.Contains(second.Scopes.ToArray(), "https://vault.azure.net/.default",
+            CollectionAssert.Contains(second.Scopes.ToArray(), "https://storage.azure.com/.default",
                 "Second leg token is not for Key Vault scope.");
 
             // Prove MSAL used the assertion + jwt-pop binding

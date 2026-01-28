@@ -62,12 +62,21 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         internal async Task TryInitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {
             // ─────────────────────────────────────────────────────────────
-            // Bearer-over-mTLS (implicit) for client assertion delegate
-            // If PoP is NOT requested, we still might need mTLS transport
-            // when the assertion delegate returns a TokenBindingCertificate.
+            // NON-PoP request:
+            // We may still need mTLS transport if the client-assertion delegate
+            // returns a TokenBindingCertificate (implicit bearer-over-mTLS).
+            // This behavior is required by existing unit/integration tests.
             // ─────────────────────────────────────────────────────────────
             if (!IsMtlsPopRequested)
             {
+                // If a cert is already known, just enforce policy and return.
+                if (MtlsCertificate != null)
+                {
+                    ThrowIfRegionMissingForImplicitMtls(serviceBundle);
+                    return;
+                }
+
+                // Only the assertion delegate can dynamically return a token-binding cert.
                 if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc)
                 {
                     var opts = new AssertionRequestOptions
@@ -85,24 +94,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                     {
                         MtlsCertificate = ar.TokenBindingCertificate;
 
-                        // Check for Azure region only if the authority is AAD
-                        // AzureRegion is by default set to null or set to null when the application is created
-                        // with region set to DisableForceRegion (see ConfidentialClientApplicationBuilder.Validate)
-                        if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                            serviceBundle.Config.AzureRegion == null)
-                        {
-                            throw new MsalClientException(
-                                MsalError.MtlsBearerWithoutRegion,
-                                MsalErrorMessage.MtlsBearerWithoutRegion);
-                        }
+                        // Implicit bearer-over-mTLS policy check
+                        ThrowIfRegionMissingForImplicitMtls(serviceBundle);
                     }
                 }
 
-                return; // IMPORTANT: do not run PoP logic
+                return; // IMPORTANT: do not run explicit PoP logic
             }
 
             // ────────────────────────────────────
-            // EXISTING PoP behavior (UNCHANGED)
+            // EXPLICIT PoP requested:
+            // Validate and initialize PoP parameters (auth scheme + cert + region check).
             // ────────────────────────────────────
 
             // Case 1 – Certificate credential
@@ -115,12 +117,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalErrorMessage.MtlsCertificateNotProvidedMessage);
                 }
 
+                // IMPORTANT: initialize auth scheme + MtlsCertificate
+                InitMtlsPopParameters(certCred.Certificate, serviceBundle);
                 return;
             }
 
-            // ────────────────────────────────────
-            // Case 2 – Client‑assertion delegate
-            // ────────────────────────────────────
+            // Case 2 – Client-assertion delegate
             if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc2)
             {
                 var opts = new AssertionRequestOptions
@@ -133,7 +135,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
                 ClientSignedAssertion ar = await cadc2.GetAssertionAsync(opts, ct).ConfigureAwait(false);
 
-                if (ar.TokenBindingCertificate == null)
+                if (ar?.TokenBindingCertificate == null)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsCertificateNotProvided,
@@ -144,9 +146,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 return;
             }
 
-            // ────────────────────────────────────
-            // Case 3 – Any other credential (client‑secret etc.)
-            // ────────────────────────────────────
+            // Case 3 – Any other credential (client-secret etc.)
             throw new MsalClientException(
                 MsalError.MtlsCertificateNotProvided,
                 MsalErrorMessage.MtlsCertificateNotProvidedMessage);
@@ -163,6 +163,18 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
             AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
             MtlsCertificate = cert;
+        }
+
+        private static void ThrowIfRegionMissingForImplicitMtls(IServiceBundle serviceBundle)
+        {
+            // Implicit bearer-over-mTLS requires region only for AAD
+            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
+                serviceBundle.Config.AzureRegion == null)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsBearerWithoutRegion,
+                    MsalErrorMessage.MtlsBearerWithoutRegion);
+            }
         }
     }
 }

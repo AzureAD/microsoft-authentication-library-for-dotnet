@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         // ──────────────────────────────────
         //  Main hook for token requests
         // ──────────────────────────────────
-        public async Task AddConfidentialClientParametersAsync(
+        public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
             AuthenticationRequestParameters p,
             ICryptographyManager _,
@@ -60,29 +60,23 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             if (string.IsNullOrWhiteSpace(resp?.Assertion))
             {
-                throw new MsalClientException(MsalError.InvalidClientAssertion,
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
                     MsalErrorMessage.InvalidClientAssertionEmpty);
             }
 
-            // ──────────────────────────────
-            // Decide bearer vs mTLS PoP
-            // ───────────────────────────────
-            bool useClientAssertionJwtPop = p.UseClientAssertionJwtPop;
+            // JWT-PoP if explicit PoP was requested OR delegate returned a cert (implicit mTLS)
+            bool useJwtPop = p.IsMtlsPopRequested || resp.TokenBindingCertificate != null;
 
-            if (useClientAssertionJwtPop)
-            {
-                oAuth2Client.AddBodyParameter(
-                    OAuth2Parameter.ClientAssertionType,
-                    OAuth2AssertionType.JwtPop /* constant added in OAuth2AssertionType */);
-            }
-            else
-            {
-                oAuth2Client.AddBodyParameter(
-                    OAuth2Parameter.ClientAssertionType,
-                    OAuth2AssertionType.JwtBearer);
-            }
+            oAuth2Client.AddBodyParameter(
+                OAuth2Parameter.ClientAssertionType,
+                useJwtPop ? OAuth2AssertionType.JwtPop : OAuth2AssertionType.JwtBearer);
 
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, resp.Assertion);
+
+            return (useJwtPop || resp.TokenBindingCertificate != null)
+                ? new ClientCredentialApplicationResult(useJwtPop, resp.TokenBindingCertificate)
+                : ClientCredentialApplicationResult.None;
         }
     }
 }

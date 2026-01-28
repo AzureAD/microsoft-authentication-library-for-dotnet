@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// <param name="certificate">Optional static certificate for backward compatibility</param>
         public CertificateAndClaimsClientCredential(
             Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider,
-            IDictionary<string, string> claimsToSign, 
+            IDictionary<string, string> claimsToSign,
             bool appendDefaultClaims,
             X509Certificate2 certificate = null)
         {
@@ -48,24 +48,29 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             Certificate = certificate;
         }
 
-        public async Task AddConfidentialClientParametersAsync(
+        public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters requestParameters, 
-            ICryptographyManager cryptographyManager, 
+            AuthenticationRequestParameters requestParameters,
+            ICryptographyManager cryptographyManager,
             string tokenEndpoint,
             CancellationToken cancellationToken)
         {
             string clientId = requestParameters.AppConfig.ClientId;
 
             // Log the incoming request parameters for diagnostic purposes
-            requestParameters.RequestContext.Logger.Verbose(() => $"Building assertion from certificate with clientId: {clientId} at endpoint: {tokenEndpoint}");
+            requestParameters.RequestContext.Logger.Verbose(
+                () => $"Building assertion from certificate with clientId: {clientId} at endpoint: {tokenEndpoint}");
 
+            // If mTLS cert is not already set for the request, proceed with JWT bearer client assertion.
             if (requestParameters.MtlsCertificate == null)
             {
-                requestParameters.RequestContext.Logger.Verbose(() => "Proceeding with JWT token creation and adding client assertion.");
+                requestParameters.RequestContext.Logger.Verbose(
+                    () => "Proceeding with JWT token creation and adding client assertion.");
 
                 // Resolve the certificate via the provider
-                X509Certificate2 certificate = await ResolveCertificateAsync(requestParameters, tokenEndpoint, cancellationToken).ConfigureAwait(false);
+                X509Certificate2 certificate =
+                    await ResolveCertificateAsync(requestParameters, tokenEndpoint, cancellationToken)
+                        .ConfigureAwait(false);
 
                 // Store the resolved certificate in request parameters for later use (e.g., ExecutionResult)
                 requestParameters.ResolvedCertificate = certificate;
@@ -96,15 +101,24 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
                 oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
                 oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
+
+                // No extra outputs for the common case.
+                return ClientCredentialApplicationResult.None;
             }
-            else
+
+            // mTLS path: a certificate is already set on the request (e.g., mTLS/PoP transport).
+            requestParameters.RequestContext.Logger.Verbose(
+                () => "mTLS certificate is set for this request. Skipping JWT client assertion generation.");
+
+            requestParameters.ResolvedCertificate = requestParameters.MtlsCertificate;
+
+            // Return the mTLS certificate via the result object so the pipeline can use it
+            // (HTTP handler + policy/region checks).
+            return new ClientCredentialApplicationResult
             {
-                // Log that MTLS PoP is required and JWT token creation is skipped
-                requestParameters.RequestContext.Logger.Verbose(() => "MTLS PoP Client credential request. Skipping client assertion.");
-                
-                // Store the mTLS certificate in request parameters for later use (e.g., ExecutionResult)
-                requestParameters.ResolvedCertificate = requestParameters.MtlsCertificate;
-            }
+                MtlsCertificate = requestParameters.MtlsCertificate,
+                UseJwtPopClientAssertion = false // no client assertion set here
+            };
         }
 
         /// <summary>
@@ -126,7 +140,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             // Create AssertionRequestOptions for the callback
             var options = new AssertionRequestOptions(
-                requestParameters.AppConfig, 
+                requestParameters.AppConfig,
                 tokenEndpoint,
                 requestParameters.AuthorityManager.Authority.TenantId)
             {
@@ -143,7 +157,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 requestParameters.RequestContext.Logger.Error(
                     "[CertificateAndClaimsClientCredential] Certificate provider returned null.");
- 
+
                 throw new MsalClientException(
                     MsalError.InvalidClientAssertion,
                     "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
@@ -155,7 +169,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 {
                     requestParameters.RequestContext.Logger.Error(
                         "[CertificateAndClaimsClientCredential] Certificate from provider does not have a private key.");
-     
+
                     throw new MsalClientException(
                         MsalError.CertWithoutPrivateKey,
                         MsalErrorMessage.CertMustHavePrivateKey(certificate.FriendlyName));
@@ -165,7 +179,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 requestParameters.RequestContext.Logger.Error(
                     "[CertificateAndClaimsClientCredential] A cryptographic error occurred while accessing the certificate.");
- 
+
                 throw new MsalClientException(
                     MsalError.CryptographicError,
                     MsalErrorMessage.CryptographicError,
