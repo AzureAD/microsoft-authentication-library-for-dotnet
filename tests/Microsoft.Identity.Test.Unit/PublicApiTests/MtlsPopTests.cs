@@ -667,18 +667,14 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [DataTestMethod]
-        [DataRow("https://login.microsoftonline.com", TestConstants.Common, "Public Cloud")]
-        [DataRow("https://login.microsoftonline.com", TestConstants.Organizations, "Public Cloud")]
-        [DataRow("https://login.microsoftonline.us", TestConstants.Common, "Azure Government")]
-        [DataRow("https://login.microsoftonline.us", TestConstants.Organizations, "Azure Government")]
-        [DataRow("https://login.partner.microsoftonline.cn", TestConstants.Common, "Azure China")]
-        [DataRow("https://login.partner.microsoftonline.cn", TestConstants.Organizations, "Azure China")]
-        [DataRow("https://login.sovcloud-identity.fr", TestConstants.Common, "Azure Sovereign - France Bleu")]
-        [DataRow("https://login.sovcloud-identity.fr", TestConstants.Organizations, "Azure Sovereign - France Bleu")]
-        [DataRow("https://login.sovcloud-identity.de", TestConstants.Common, "Azure Sovereign - Germany Delos")]
-        [DataRow("https://login.sovcloud-identity.de", TestConstants.Organizations, "Azure Sovereign - Germany Delos")]
-        [DataRow("https://login.sovcloud-identity.sg", TestConstants.Common, "Azure Sovereign - Singapore Gov SG")]
-        [DataRow("https://login.sovcloud-identity.sg", TestConstants.Organizations, "Azure Sovereign - Singapore Gov SG")]
+        [DataRow("login.microsoftonline.com", "mtlsauth.microsoft.com")]
+        [DataRow("login.microsoftonline.us", "mtlsauth.microsoftonline.us")]
+        [DataRow("login.usgovcloudapi.net", "mtlsauth.microsoftonline.us")]
+        [DataRow("login.partner.microsoftonline.cn", "mtlsauth.partner.microsoftonline.cn")]
+        [DataRow("login.chinacloudapi.cn", "mtlsauth.partner.microsoftonline.cn")]
+        [DataRow("login.sovcloud-identity.fr", "mtlsauth.login.sovcloud-identity.fr")]
+        [DataRow("login.sovcloud-identity.de", "mtlsauth.login.sovcloud-identity.de")]
+        [DataRow("login.sovcloud-identity.sg", "mtlsauth.login.sovcloud-identity.sg")]
         public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
         {
             // Append the input environment to create the authority URL
