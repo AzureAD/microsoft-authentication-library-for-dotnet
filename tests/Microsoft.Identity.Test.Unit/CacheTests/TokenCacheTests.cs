@@ -1088,6 +1088,38 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory(TestCategories.TokenCacheTests)]
+        public async Task SaveAccessAndRefreshTokenWithNoClientInfoAsync()
+        {
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+            MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
+
+            var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
+            requestParams.AuthorityManager = new AuthorityManager(
+                requestParams.RequestContext,
+                Authority.CreateAuthorityWithTenant(
+                    requestParams.AuthorityInfo,
+                    TestConstants.Utid));
+            AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);
+
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
+
+            requestParams.Account = new Account(_homeAccountId, null, null);
+            response.IdToken = null;
+            response.ClientInfo = null;
+            response.AccessToken = "access-token-2";
+            response.RefreshToken = "refresh-token-2";
+
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
+
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual("refresh-token-2", (cache.Accessor.GetAllRefreshTokens()).First().Secret);
+            Assert.AreEqual("access-token-2", (cache.Accessor.GetAllAccessTokens()).First().Secret);
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void CacheAdfsTokenTest()
         {
             using (var harness = CreateTestHarness())
