@@ -74,13 +74,13 @@ namespace Microsoft.Identity.Client.Region
             // Block mTLS for unsupported sovereign hosts
             if (requestContext.MtlsCertificate != null)
             {
-                if (host == "login.usgovcloudapi.net")
+                if (string.Equals(host, "login.usgovcloudapi.net", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopNotSupportedForEnvironment,
                         MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage);
                 }
-                if (host == "login.chinacloudapi.cn")
+                if (string.Equals(host, "login.chinacloudapi.cn", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopNotSupportedForEnvironment,
