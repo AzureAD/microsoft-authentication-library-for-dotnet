@@ -672,9 +672,9 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("login.usgovcloudapi.net", "mtlsauth.microsoftonline.us")]
         [DataRow("login.partner.microsoftonline.cn", "mtlsauth.partner.microsoftonline.cn")]
         [DataRow("login.chinacloudapi.cn", "mtlsauth.partner.microsoftonline.cn")]
-        [DataRow("login.sovcloud-identity.fr", "mtlsauth.login.sovcloud-identity.fr")]
-        [DataRow("login.sovcloud-identity.de", "mtlsauth.login.sovcloud-identity.de")]
-        [DataRow("login.sovcloud-identity.sg", "mtlsauth.login.sovcloud-identity.sg")]
+        [DataRow("login.sovcloud-identity.fr", "mtlsauth.sovcloud-identity.fr")]
+        [DataRow("login.sovcloud-identity.de", "mtlsauth.sovcloud-identity.de")]
+        [DataRow("login.sovcloud-identity.sg", "mtlsauth.sovcloud-identity.sg")]
         public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
         {
             // Append the input environment to create the authority URL
