@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -127,6 +128,42 @@ namespace Microsoft.Identity.Client
 
             Config.ClientCredential = new CertificateClientCredential(certificate);
             Config.SendX5C = sendX5C;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the certificate associated with the application.
+        /// Applicable to first-party applications only, this method also allows to specify 
+        /// if the <see href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.7">x5c claim</see> should be sent to Azure AD.
+        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
+        /// this method will send the certificate chain to Azure AD along with the token request,
+        /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
+        /// This saves the application admin from the need to explicitly manage the certificate rollover
+        /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
+        /// </summary>
+        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        /// <param name="certificateOptions">Configuration options for certificate handling. See <see cref="CertificateOptions"/> for more information.</param>
+        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, CertificateOptions certificateOptions)
+        {
+            if (certificate == null)
+            {
+                throw new ArgumentNullException(nameof(certificate));
+            }
+
+            if (!certificate.HasPrivateKey)
+            {
+                throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificate)));
+            }
+
+            if (certificateOptions?.AssociateTokensWithCertificate ?? false)
+            {
+                Config.CertificateIdToAssociateWithToken = certificate.SerialNumber;
+            }
+
+            Config.ClientCredential = new CertificateClientCredential(certificate);
+            Config.SendX5C = certificateOptions?.SendX5C ?? false;
+            
             return this;
         }
 
