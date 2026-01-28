@@ -151,32 +151,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsFalse(KnownMetadataProvider.IsPublicEnvironment("login.sovcloud-identity.sg"));
         }
 
-        [TestMethod]
-        public void KnownMetadataProvider_NewSovereignClouds()
+        [DataTestMethod]
+        [DataRow("login.sovcloud-identity.fr")]
+        [DataRow("login.sovcloud-identity.de")]
+        [DataRow("login.sovcloud-identity.sg")]
+        public void KnownMetadataProvider_NewSovereignClouds(string host)
         {
             // Arrange
             KnownMetadataProvider knownMetadataProvider = new KnownMetadataProvider();
 
-            // Test Bleu cloud
-            InstanceDiscoveryMetadataEntry result = knownMetadataProvider.GetMetadata(
-                "login.sovcloud-identity.fr", null, _logger);
-            Assert.IsNotNull(result);
-            Assert.AreEqual("login.sovcloud-identity.fr", result.PreferredNetwork);
-            Assert.AreEqual("login.sovcloud-identity.fr", result.PreferredCache);
+            // Act
+            InstanceDiscoveryMetadataEntry result = knownMetadataProvider.GetMetadata(host, null, _logger);
 
-            // Test Delos cloud
-            result = knownMetadataProvider.GetMetadata(
-                "login.sovcloud-identity.de", null, _logger);
+            // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual("login.sovcloud-identity.de", result.PreferredNetwork);
-            Assert.AreEqual("login.sovcloud-identity.de", result.PreferredCache);
-
-            // Test GovSG cloud
-            result = knownMetadataProvider.GetMetadata(
-                "login.sovcloud-identity.sg", null, _logger);
-            Assert.IsNotNull(result);
-            Assert.AreEqual("login.sovcloud-identity.sg", result.PreferredNetwork);
-            Assert.AreEqual("login.sovcloud-identity.sg", result.PreferredCache);
+            Assert.AreEqual(host, result.PreferredNetwork);
+            Assert.AreEqual(host, result.PreferredCache);
+            CollectionAssert.Contains(result.Aliases, host);
         }
     }
 }
