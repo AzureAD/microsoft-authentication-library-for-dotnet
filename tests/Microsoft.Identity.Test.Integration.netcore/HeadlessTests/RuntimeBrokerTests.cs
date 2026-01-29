@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestCleanup]
         public void TestCleanup()
         {
-            if (_logger != null && TestContext.CurrentTestOutcome != UnitTestOutcome.Passed)
+            if (_logger != null && TestContext != null && TestContext.CurrentTestOutcome != UnitTestOutcome.Passed)
             {
                 _logger.DumpLogsToTestContext(TestContext);
             }
