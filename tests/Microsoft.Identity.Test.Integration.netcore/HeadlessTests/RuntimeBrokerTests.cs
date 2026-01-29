@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -29,11 +30,57 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.Utils;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
 namespace Microsoft.Identity.Test.Integration.Broker
 {
+    /// <summary>
+    /// Buffered logger that captures MSAL logs in memory and writes them to TestContext on failure
+    /// </summary>
+    internal class BufferedTestLogger : IIdentityLogger
+    {
+        private readonly List<string> _logBuffer = new List<string>();
+        private readonly object _lockObject = new object();
+
+        public bool IsEnabled(EventLogLevel eventLogLevel) => true;
+
+        public void Log(LogEntry entry)
+        {
+            lock (_lockObject)
+            {
+                string logMessage = $"[{entry.EventLogLevel}] {entry.Message}";
+                _logBuffer.Add(logMessage);
+            }
+        }
+
+        public void DumpLogsToTestContext(TestContext testContext)
+        {
+            lock (_lockObject)
+            {
+                if (_logBuffer.Count > 0)
+                {
+                    var sb = new StringBuilder();
+                    sb.AppendLine("=== MSAL Logs ===");
+                    foreach (var logMessage in _logBuffer)
+                    {
+                        sb.AppendLine(logMessage);
+                    }
+                    testContext.WriteLine(sb.ToString());
+                }
+            }
+        }
+
+        public void Clear()
+        {
+            lock (_lockObject)
+            {
+                _logBuffer.Clear();
+            }
+        }
+    }
+
     [TestClass]
     public class RuntimeBrokerTests
     {
@@ -43,6 +90,27 @@ namespace Microsoft.Identity.Test.Integration.Broker
         private string[] _SSH_scopes = new[] { "https://pas.windows.net/CheckMyAccess/Linux/user_impersonation" };
 
         private BrokerOptions _brokerOptions = TestUtils.GetPlatformBroker();
+        private BufferedTestLogger _logger;
+
+        /// <summary>
+        /// Initialized by MSTest (do not make private or readonly)
+        /// </summary>
+        public TestContext TestContext { get; set; }
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _logger = new BufferedTestLogger();
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            if (TestContext.CurrentTestOutcome != UnitTestOutcome.Passed)
+            {
+                _logger.DumpLogsToTestContext(TestContext);
+            }
+        }
 
         private string CreateJwk()
         {
@@ -222,7 +290,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(app.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(app.Authority, "organizations")
-               .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+               .WithLogging(_logger, enablePiiLogging: true)
                .WithBroker(_brokerOptions)
                .Build();
 
@@ -320,7 +388,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(app.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(app.Authority, "organizations")
-               .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+               .WithLogging(_logger, enablePiiLogging: true)
                .WithBroker(_brokerOptions)
                .Build();
 
