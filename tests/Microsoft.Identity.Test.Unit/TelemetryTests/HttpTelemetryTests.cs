@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -13,23 +14,22 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Test.Unit.Throttling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
-using System.Collections.Generic;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
@@ -502,6 +502,34 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
+        [DataTestMethod]
+        [DataRow("1")]
+        [DataRow("0")]
+        public async Task ManagedCert_AppearsInTelemetry_AndNotSentToAAD_TestAsync(string managedCertValue)
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = CreateConfidentialClientApp();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, (string, bool)> {
+                        { Constants.ManagedCertKey, (managedCertValue, false) } })
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(
+                    requestHandler.ActualRequestMessage,
+                    ApiIds.AcquireTokenForClient,
+                    CacheRefreshReason.NoCachedAccessToken,
+                    managedCert: managedCertValue[0]);
+
+                Assert.IsFalse(requestHandler.ActualRequestPostData.ContainsKey(Constants.ManagedCertKey), 
+                    "ManagedCert should not be sent to AAD in the request body");
+            }
+        }
+
         private PublicClientApplication CreatePublicClientApp(bool isLegacyCacheEnabled = true)
         {
             return PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -733,7 +761,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             bool isCacheSerialized = false,
             bool isLegacyCacheEnabled = true,
             string callerSdkId = "",
-            string callerSdkVersion = "")
+            string callerSdkVersion = "",
+            char managedCert = '\0')
         {
             string[] telemetryCategories = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single().Split('|');
@@ -741,7 +770,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(3, telemetryCategories.Length);
             Assert.AreEqual(1, telemetryCategories[0].Split(',').Length); // version
             Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.AreEqual(5, telemetryCategories[2].Split(',').Length); // platform_fields
+            Assert.AreEqual(6, telemetryCategories[2].Split(',').Length); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 
@@ -760,6 +789,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(callerSdkId, telemetryCategories[2].Split(',')[3]);
 
             Assert.AreEqual(callerSdkVersion, telemetryCategories[2].Split(',')[4]);
+
+            string expectedManagedCert = managedCert == '\0' ? string.Empty : managedCert.ToString();
+            Assert.AreEqual(expectedManagedCert, telemetryCategories[2].Split(',')[5]);
         }
     }
 }
