@@ -16,6 +16,14 @@ namespace Microsoft.Identity.Client.Region
         public const string PublicEnvForRegional = "login.microsoft.com";
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
+        // Map of unsupported sovereign cloud hosts for mTLS PoP to their error messages
+        private static readonly System.Collections.Generic.Dictionary<string, string> UnsupportedMtlsHosts = 
+            new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage },
+                { "login.chinacloudapi.cn", MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage }
+            };
+
         public RegionAndMtlsDiscoveryProvider(IHttpManager httpManager)
         {
             _regionManager = new RegionManager(httpManager);
@@ -23,6 +31,19 @@ namespace Microsoft.Identity.Client.Region
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
+            // Fail fast: Check for unsupported mTLS hosts before any region discovery
+            if (requestContext.MtlsCertificate != null)
+            {
+                string host = authority.Host;
+                if (UnsupportedMtlsHosts.TryGetValue(host, out string errorMessage))
+                {
+                    requestContext.Logger.Error($"[Region discovery] mTLS PoP is not supported for host: {host}");
+                    throw new MsalClientException(
+                        MsalError.MtlsPopNotSupportedForEnvironment,
+                        errorMessage);
+                }
+            }
+
             string region = null;
             bool isMtlsEnabled = requestContext.MtlsCertificate != null;
 
@@ -70,23 +91,6 @@ namespace Microsoft.Identity.Client.Region
         private static string GetRegionalizedEnvironment(Uri authority, string region, RequestContext requestContext)
         {
             string host = authority.Host;
-
-            // Block mTLS for unsupported sovereign hosts
-            if (requestContext.MtlsCertificate != null)
-            {
-                if (string.Equals(host, "login.usgovcloudapi.net", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsPopNotSupportedForEnvironment,
-                        MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage);
-                }
-                if (string.Equals(host, "login.chinacloudapi.cn", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsPopNotSupportedForEnvironment,
-                        MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage);
-                }
-            }
 
             if (KnownMetadataProvider.IsPublicEnvironment(host))
             {
