@@ -57,6 +57,11 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         public void DumpLogsToTestContext(TestContext testContext)
         {
+            if (testContext == null)
+            {
+                return;
+            }
+
             lock (_lockObject)
             {
                 if (_logBuffer.Count > 0)
@@ -69,14 +74,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     }
                     testContext.WriteLine(sb.ToString());
                 }
-            }
-        }
-
-        public void Clear()
-        {
-            lock (_lockObject)
-            {
-                _logBuffer.Clear();
             }
         }
     }
@@ -106,7 +103,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestCleanup]
         public void TestCleanup()
         {
-            if (TestContext.CurrentTestOutcome != UnitTestOutcome.Passed)
+            if (_logger != null && TestContext.CurrentTestOutcome != UnitTestOutcome.Passed)
             {
                 _logger.DumpLogsToTestContext(TestContext);
             }
