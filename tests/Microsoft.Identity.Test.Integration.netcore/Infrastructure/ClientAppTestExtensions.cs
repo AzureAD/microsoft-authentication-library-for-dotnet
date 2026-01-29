@@ -13,6 +13,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             var httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
+                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false)
                 .WithHttpClientFactory(httpClientFactory);
 
         }
@@ -22,6 +23,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             var httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
+                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false)
                 .WithHttpClientFactory(httpClientFactory);            
         }
 
@@ -30,6 +32,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
+                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false)
                 .WithHttpClientFactory(httpClientFactory);
 
         }
@@ -39,6 +42,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
+                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false)
                 .WithHttpClientFactory(httpClientFactory);
         }
     }
