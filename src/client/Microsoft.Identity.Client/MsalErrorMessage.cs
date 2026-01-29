@@ -444,8 +444,9 @@ namespace Microsoft.Identity.Client
         public const string MtlsNotSupportedForManagedIdentityMessage = "IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform.";
         public const string MtlsNotSupportedForNonWindowsMessage = "mTLS PoP with Managed Identity is not supported on this OS. See https://aka.ms/msal-net-pop.";
         public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. mTLS Proof-of-Possession requires a region to be specified, as there is no global endpoint for mTLS. See https://aka.ms/msal-net-pop for details.";
-        internal const string MtlsPopNotSupportedForUsGovCloudApiMessage = "login.usgovcloudapi.net is not supported for mTLS PoP, please use login.microsoftonline.us";
-        internal const string MtlsPopNotSupportedForChinaCloudApiMessage = "login.chinacloudapi.cn is not supported for mTLS PoP, please use login.partner.microsoftonline.cn";
+        public const string MtlsPopNotSupportedForUsGovCloudApiMessage = "login.usgovcloudapi.net is not supported for mTLS PoP, please use login.microsoftonline.us";
+        public const string MtlsPopNotSupportedForChinaCloudApiMessage = "login.chinacloudapi.cn is not supported for mTLS PoP, please use login.partner.microsoftonline.cn";
+        public const string MtlsPopNotSupportedForNonLoginHostMessage = "mTLS PoP is only supported for hosts that start with 'login.'. The provided authority host does not meet this requirement. See https://aka.ms/msal-net-pop for details.";
         public const string ForceRefreshAndTokenHasNotCompatible = "Cannot specify ForceRefresh and AccessTokenSha256ToRefresh in the same request.";
         public const string RequestTimeOut = "Request to the endpoint timed out.";
         public const string MalformedOidcAuthorityFormat = "Possible cause: When using Entra External ID, you didn't append /v2.0, for example {0}/v2.0\"";

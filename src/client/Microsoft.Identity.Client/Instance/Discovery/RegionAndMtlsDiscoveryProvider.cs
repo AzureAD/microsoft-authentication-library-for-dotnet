@@ -35,12 +35,23 @@ namespace Microsoft.Identity.Client.Region
             if (requestContext.MtlsCertificate != null)
             {
                 string host = authority.Host;
+                
+                // Check if host is in the unsupported list
                 if (UnsupportedMtlsHosts.TryGetValue(host, out string errorMessage))
                 {
                     requestContext.Logger.Error($"[Region discovery] mTLS PoP is not supported for host: {host}");
                     throw new MsalClientException(
                         MsalError.MtlsPopNotSupportedForEnvironment,
                         errorMessage);
+                }
+                
+                // Check if host starts with "login."
+                if (!host.StartsWith("login.", StringComparison.OrdinalIgnoreCase))
+                {
+                    requestContext.Logger.Error($"[Region discovery] mTLS PoP requires hosts to start with 'login.': {host}");
+                    throw new MsalClientException(
+                        MsalError.MtlsPopNotSupportedForEnvironment,
+                        MsalErrorMessage.MtlsPopNotSupportedForNonLoginHostMessage);
                 }
             }
 

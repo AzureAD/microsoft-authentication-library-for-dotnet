@@ -758,6 +758,44 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [DataTestMethod]
+        [DataRow("mtlsauth.microsoft.com")]
+        [DataRow("sts.windows.net")]
+        [DataRow("graph.microsoft.com")]
+        public async Task NonLoginHosts_ThrowsMsalClientException_Async(string nonLoginHost)
+        {
+            // Arrange
+            string authorityUrl = $"https://{nonLoginHost}/17b189bc-2b81-4ec5-aa51-3e628cbc931b";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var app = ConfidentialClientApplicationBuilder
+                                        .Create(TestConstants.ClientId)
+                                        .WithAuthority(authorityUrl)
+                                        .WithHttpManager(harness.HttpManager)
+                                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                        .WithCertificate(s_testCertificate)
+                                        .Build();
+
+                    // Act & Assert
+                    var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    {
+                        await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+                    }).ConfigureAwait(false);
+
+                    Assert.AreEqual(MsalError.MtlsPopNotSupportedForEnvironment, exception.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.MtlsPopNotSupportedForNonLoginHostMessage, exception.Message);
+                }
+            }
+        }
+
         [TestMethod]
         public async Task AcquireTokenForClient_WithMtlsPop_NonStandardCloudAsync()
         {
