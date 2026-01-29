@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Diagnostics;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 
@@ -14,7 +13,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             var httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
-                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
                 .WithHttpClientFactory(httpClientFactory);
 
         }
@@ -24,7 +22,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             var httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
-                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
                 .WithHttpClientFactory(httpClientFactory);            
         }
 
@@ -33,7 +30,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
-                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
                 .WithHttpClientFactory(httpClientFactory);
 
         }
@@ -43,7 +39,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
-                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
                 .WithHttpClientFactory(httpClientFactory);
         }
     }
