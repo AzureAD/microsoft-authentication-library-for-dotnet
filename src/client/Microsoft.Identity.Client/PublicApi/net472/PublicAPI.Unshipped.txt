@@ -10,6 +10,3 @@ static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuil
 static Microsoft.Identity.Client.ManagedIdentityPopExtensions.WithMtlsProofOfPossession(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAttributes(string attributeJson) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 const Microsoft.Identity.Client.MsalError.MtlsPopNotSupportedForEnvironment = "mtls_pop_not_supported_for_environment" -> string
-const Microsoft.Identity.Client.MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage = "login.chinacloudapi.cn is not supported for mTLS PoP, please use login.partner.microsoftonline.cn" -> string
-const Microsoft.Identity.Client.MsalErrorMessage.MtlsPopNotSupportedForNonLoginHostMessage = "mTLS PoP is only supported for hosts that start with 'login.'. The provided authority host does not meet this requirement. See https://aka.ms/msal-net-pop for details." -> string
-const Microsoft.Identity.Client.MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage = "login.usgovcloudapi.net is not supported for mTLS PoP, please use login.microsoftonline.us" -> string
