@@ -35,11 +35,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     {
         [DataTestMethod]
         [DataRow("login.microsoftonline.com", DisplayName = "Public")]
+        [DataRow("login.microsoftonline.us", DisplayName = "UsGov")]
         [DataRow("login.microsoftonline.de", DisplayName = "GermanyLegacy")]
         [DataRow("login.partner.microsoftonline.cn", DisplayName = "China")]
-        [DataRow("login.sovcloud-identity.fr", DisplayName = "Bleu")]
-        [DataRow("login.sovcloud-identity.de", DisplayName = "Delos")]
-        [DataRow("login.sovcloud-identity.sg", DisplayName = "SG")]
+        [DataRow("login.sovcloud-identity.fr", DisplayName = "Fr")]
+        [DataRow("login.sovcloud-identity.de", DisplayName = "De")]
+        [DataRow("login.sovcloud-identity.sg", DisplayName = "Sg")]
         public async Task InstanceDiscoveryHappensOnKnownCloud(string discoveryHost)
         {
             using (var httpManager = new MockHttpManager())
