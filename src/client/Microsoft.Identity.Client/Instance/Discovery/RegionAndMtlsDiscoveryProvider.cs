@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -17,8 +18,8 @@ namespace Microsoft.Identity.Client.Region
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
         // Map of unsupported sovereign cloud hosts for mTLS PoP to their error messages
-        private static readonly System.Collections.Generic.Dictionary<string, string> s_unsupportedMtlsHosts = 
-            new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> s_unsupportedMtlsHosts = 
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage },
                 { "login.chinacloudapi.cn", MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage }
