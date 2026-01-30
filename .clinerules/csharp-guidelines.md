@@ -1,117 +1,146 @@
 # C# Development Guidelines
 
-These guidelines define how to write and modify C# code in this repo. They apply to both humans and coding agents.
+These guidelines define how to write and modify C# code in this repo.
+They apply to both humans and coding agents.
 
-## General
+> Note: Some rules are repeated intentionally (Quick rules + Detailed rules) to reduce “agent drift”
+> and prevent hallucinated changes. The Detailed rules are the source of truth.
 
-- Use the C# language version and SDK **as configured by the repo**.
-  - Do **not** change `global.json` unless explicitly asked to.
-- Keep changes **minimal and scoped** to the request.
-  - Avoid drive-by refactors, renames, and reformatting unrelated code.
+## Quick rules (read first)
+
+- Use the C# language version configured by the repo/tooling. Do not “upgrade” language features by editing build files.
+- Keep changes minimal and scoped to the request. Avoid drive-by refactors and style-only churn.
 - Never change these unless explicitly asked to:
   - `global.json`
   - `package.json` / `package-lock.json`
   - `NuGet.config`
+- **No reflection in product code** (`/src`). (See “Reflection” section.)
+- Follow `.editorconfig` formatting.
+- Static fields must be `s_camelCase`. (Match local style for other fields.)
+- Prefer ordinal string comparisons for protocol/host/cache keys.
+- Nullability: prefer non-nullable, validate at boundaries, use `is null` / `is not null`.
+- Tests: MSTest SDK v3 + AAA comments + NSubstitute.
+
+---
+
+## General (Detailed rules)
+
+### Language / tooling
+- Prefer modern C# features **when supported by the repo’s configured language version**.
+- Do not change `global.json` unless explicitly asked to.
+- Do not change repo/tooling versions or build configuration unless explicitly asked.
+
+### File / dependency hygiene
+- Never change these unless explicitly asked to:
+  - `global.json`
+  - `package.json` / `package-lock.json`
+  - `NuGet.config`
+- Avoid adding/removing dependencies unless the task explicitly requires it.
 - Do not commit build/test artifacts:
-  - `bin/`, `obj/`, `TestResults/`, coverage outputs, temporary logs/dumps, etc.
-- Do not suppress analyzers/warnings (`#pragma warning disable`) unless:
-  - There is no viable alternative, AND
-  - The suppression is narrow, documented, and consistent with nearby code.
+  - `bin/`, `obj/`, `TestResults/`, coverage outputs, temporary logs/dumps.
+
+### “Don’t hallucinate” guardrails (for agents)
+- Do not invent new repo conventions. If unsure, follow nearby code patterns.
+- Do not introduce new abstractions/helpers unless there is an existing pattern in the repo.
+- Prefer small, reviewable commits and changes.
+
+---
 
 ## Formatting
 
-- Follow `.editorconfig` exactly.
-- Prefer file-scoped namespaces where the file/project uses them.
-- Prefer single-line `using` directives.
-- Avoid formatting churn:
-  - Only reformat lines you touch unless explicitly asked to run a formatter on the file.
-- Braces:
-  - Insert a newline before the opening `{` for any code block (`if`, `for`, `while`, `foreach`, `using`, `try`, `catch`, etc.).
-- Returns:
-  - Ensure the final return statement of a method is on its own line.
-- Prefer clarity over cleverness:
-  - Use pattern matching / switch expressions when they reduce complexity and improve readability.
+- Apply code-formatting style defined in `.editorconfig`.
+- Prefer file-scoped namespace declarations (when consistent with the file/project).
+- Prefer single-line using directives (when consistent with the file/project).
+- Insert a newline before the opening curly brace of any code block:
+  - `if`, `for`, `while`, `foreach`, `using`, `try`, `catch`, `finally`, etc.
+- Ensure that the final return statement of a method is on its own line.
+- Use pattern matching and switch expressions when they improve clarity (do not refactor solely to use them).
+- Use `nameof` instead of string literals when referring to member names.
+
+---
 
 ## Naming & Style
 
-- Follow existing naming patterns in the file and folder.
-- `nameof(...)`:
-  - Use `nameof` instead of string literals when referring to member/parameter names.
-- Constants:
-  - Use `PascalCase` for const fields.
-- Fields:
-  - **Private static fields must be `s_camelCase`** (including `static readonly`).
-  - Private instance fields should match local convention (commonly `_camelCase`).
-- Avoid introducing new abbreviations unless they are established MSAL terms.
+- Follow naming conventions used in the same file/folder unless explicitly overridden here.
 
-## Nullability & Guard Clauses
+### Fields
+- **Private static fields must be `s_camelCase`** (including `static readonly`).
+  - Example: `private static readonly IDictionary<string, string> s_knownHosts = ...;`
+- Private instance fields: follow local style (commonly `_camelCase`).
 
-- Default to **non-nullable** types.
-- Validate at entry points:
-  - Check for `null` at public or boundary methods (inputs, external data, deserialization, etc.).
-- Use pattern checks:
-  - Always use `is null` / `is not null`, not `== null` / `!= null`.
-- Trust nullability annotations:
-  - Don’t add redundant null checks when the type system guarantees non-null.
-- Prefer fail-fast:
-  - Validate early and return/throw before doing non-trivial work.
+### Constants
+- Use `PascalCase` for constants (unless the file uses a different established convention).
 
-## Exceptions & Error Handling
+---
 
-- Throw the most specific exception you can:
+## Reflection & dynamic code (Product code)
+
+**Do not use reflection in product code (`/src`)** unless explicitly requested or there is an established existing pattern in the same area that requires it.
+
+Avoid introducing any of the following in product code:
+- `System.Reflection` APIs (e.g., `GetMethod`, `GetProperty`, `Invoke`, `BindingFlags`, etc.)
+- `Activator.CreateInstance(...)`
+- `Assembly.Load(...)` / dynamic assembly loading
+- `dynamic` dispatch used as a substitute for strong typing
+- `System.Reflection.Emit` / runtime IL generation
+
+If an exception is unavoidable (rare):
+- Prefer a compile-time alternative first (generics, interfaces, explicit mappings).
+- Add a short comment explaining why reflection is required and what alternatives were rejected.
+- Keep reflection usage localized and test-covered.
+
+Reflection is acceptable in:
+- Tests, tooling, benchmarks, or dev apps (unless those areas have their own constraints).
+
+---
+
+## Nullable Reference Types
+
+- Declare variables non-nullable by default, and validate `null` at entry points.
+- Always use `is null` or `is not null` instead of `== null` or `!= null`.
+- Trust C# null annotations and avoid redundant null checks when the type system guarantees non-null.
+
+---
+
+## Exceptions & error handling
+
+- Validate inputs at method boundaries (fail fast).
+- Throw the most specific exception type possible:
   - `ArgumentNullException`, `ArgumentException`, `InvalidOperationException`, etc.
-- Don’t swallow exceptions unless:
-  - You can recover safely, AND
-  - The behavior is expected and documented.
-- Exception messages:
-  - Do not include secrets, tokens, credentials, or PII.
-  - Avoid logging full URLs if they can contain sensitive query parameters.
+- Do not swallow exceptions unless the behavior is expected and documented.
+- Do not include secrets/tokens/PII in exception messages or logs.
 
-## Strings, Comparisons, and Culture
+---
 
-- Use **ordinal** comparisons for protocol values, identifiers, hostnames, headers, cache keys:
+## Strings, comparisons, and culture
+
+- Prefer ordinal comparisons for protocol values, identifiers, hostnames, headers, and cache keys:
   - `StringComparison.Ordinal` / `StringComparison.OrdinalIgnoreCase`
   - `StringComparer.Ordinal` / `StringComparer.OrdinalIgnoreCase`
-- Use culture-aware comparisons only for genuinely user-facing text (rare in libraries).
+- Avoid culture-sensitive comparisons unless the string is user-facing (rare in libraries).
 
-## Collections & Performance
-
-- Prefer `TryGetValue` for dictionary lookups.
-- Prefer `IReadOnly*` where mutation isn’t required.
-- Avoid LINQ in hot paths if nearby code avoids it.
-- Avoid unnecessary allocations in frequently-used code paths (especially authentication/token acquisition).
-
-## Async & Concurrency
-
-- Do not block on async (`.Result`, `.Wait()`).
-- Prefer async all the way through when interacting with async APIs.
-- Cancellation:
-  - Accept and pass through `CancellationToken` when patterns exist nearby.
-- ConfigureAwait:
-  - Follow the repo’s local convention (don’t introduce inconsistency).
+---
 
 ## Documentation
 
-- Public APIs require XML doc comments.
-  - When useful, include `<example>` and `<code>`.
-- Comments should explain **why**, not **what**.
-- Public API lifecycle/tracking is documented separately:
-  - If you touched public surface area, follow the repo’s **Public API guidelines doc**.
+- Ensure that XML doc comments are created for any public APIs.
+  - When applicable, include `<example>` and `<code>` documentation in the comments.
+- Public API tracking rules exist in a separate guideline doc—follow that doc when public surface area changes.
+
+---
 
 ## Testing
 
-- Use MSTest SDK v3.
-- Use AAA comments:
-  - `// Arrange`, `// Act`, `// Assert`
-- Use NSubstitute for mocking.
-- Match local conventions for:
-  - Test naming, casing, and structure.
-- Keep tests deterministic:
-  - Avoid timing flakiness and environment coupling.
-- If you fix a bug, add a regression test that fails before the fix and passes after.
+- We use MSTest SDK v3 for tests.
+- Emit `// Arrange`, `// Act`, `// Assert` comments.
+- Use NSubstitute for mocking in tests.
+- Copy existing style in nearby files for test method names and capitalization.
+- Prefer deterministic tests (avoid timing flakiness, environment dependence).
 
-## Running Tests
+---
 
-- Use the repo’s recommended build/test approach.
-- As a general quick check, `dotnet test` is acceptable when it works for the project/solution you changed.
-- If the repo uses solution-specific or `msbuild` workflows, follow those for “official” validation.
+## Running tests
+
+- To build and run tests in the repo, run `dotnet test`.
+  - You need one solution open, or specify the solution explicitly.
+- If the repo uses solution-specific or `msbuild` workflows for official validation, follow those.
