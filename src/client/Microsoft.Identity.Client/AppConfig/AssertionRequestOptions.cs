@@ -76,5 +76,11 @@ namespace Microsoft.Identity.Client
         /// FMI path to be used for client assertion. Tokens are associated with this path in the cache.
         /// </summary>
         public string ClientAssertionFmiPath { get; set; }
+
+        /// <summary>
+        /// Indicates whether MTLS Proof-of-Possession is requested for this authentication operation.
+        /// When true, the certificate (if provided) will be used for TLS binding rather than just JWT signing.
+        /// </summary>
+        public bool IsMtlsPopRequested { get; set; }
     }
 }

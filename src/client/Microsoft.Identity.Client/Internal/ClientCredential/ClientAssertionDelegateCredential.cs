@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     /// Handles client assertions supplied via a delegate that returns an
     /// <see cref="ClientSignedAssertion"/> (JWT + optional certificate bound for mTLS‑PoP).
     /// </summary>
-    internal sealed class ClientAssertionDelegateCredential : IClientCredential
+    internal sealed class ClientAssertionDelegateCredential : IClientCredential, IClientCertificateProvider
     {
         private readonly Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> _provider;
 
@@ -81,6 +81,29 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, resp.Assertion);
+        }
+
+        public async Task<ClientCertificateContext> GetCertificateAsync(
+            AssertionRequestOptions options,
+            CancellationToken cancellationToken)
+        {
+            // Call the assertion provider to get the signed assertion
+            ClientSignedAssertion assertion = await _provider(options, cancellationToken)
+                .ConfigureAwait(false);
+
+            // If no TokenBindingCertificate, return null (no certificate provided)
+            if (assertion?.TokenBindingCertificate == null)
+            {
+                return null;
+            }
+
+            // TokenBindingCertificate is ALWAYS for MTLS binding (by definition)
+            // It's not used for JWT signing - it's for TLS channel binding
+            return new ClientCertificateContext
+            {
+                Certificate = assertion.TokenBindingCertificate,
+                Usage = ClientCertificateUsage.MtlsBinding
+            };
         }
     }
 }

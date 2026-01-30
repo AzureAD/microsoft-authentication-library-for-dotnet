@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -111,15 +112,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Guid CorrelationId => _commonParameters.CorrelationId;
 
-        public X509Certificate2 MtlsCertificate => _commonParameters.MtlsCertificate;
-
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
 
         /// <summary>
-        /// The certificate resolved and used for client authentication (if certificate-based authentication was used).
-        /// This is set during the token request when the certificate is resolved.
+        /// The certificate context containing the resolved certificate and its usage type.
+        /// This is set during the token request when the certificate is resolved via the orchestrator.
         /// </summary>
-        public X509Certificate2 ResolvedCertificate { get; set; }
+        public ClientCertificateContext CertificateContext { get; set; }
 
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities

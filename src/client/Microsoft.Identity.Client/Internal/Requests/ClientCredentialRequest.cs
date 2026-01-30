@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
@@ -271,7 +272,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     Successful = false,
                     Result = null,
                     Exception = serviceException,
-                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
+                    ClientCertificate = AuthenticationRequestParameters.CertificateContext?.Certificate
                 };
                 
                 bool shouldRetry = await AuthenticationRequestParameters.AppConfig
@@ -319,7 +320,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     Successful = authResult != null,
                     Result = authResult,
                     Exception = exception,
-                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
+                    ClientCertificate = AuthenticationRequestParameters.CertificateContext?.Certificate
                 };
                 
                 await AuthenticationRequestParameters.AppConfig
@@ -396,12 +397,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return false;
             }
 
-            // 2) If an mTLS cert is supplied for THIS request, reuse cache only if
+            // 2) If an mTLS cert is used for token binding (not just JWT signing), reuse cache only if
             //    the cached token's KeyId matches the one provided in the request.
-            X509Certificate2 requestCert = AuthenticationRequestParameters.MtlsCertificate;
-            
-            if (requestCert != null)
+            if (AuthenticationRequestParameters.CertificateContext?.Usage == ClientCertificateUsage.MtlsBinding)
             {
+                X509Certificate2 requestCert = AuthenticationRequestParameters.CertificateContext.Certificate;
                 string expectedKid = CoreHelpers.ComputeX5tS256KeyId(requestCert);
 
                 // If the certificate cannot produce a valid KeyId (SPKI-SHA256), expectedKid will be null or empty.
@@ -409,12 +409,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (!string.Equals(cacheItem.KeyId, expectedKid, StringComparison.Ordinal))
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
-                    "[ClientCredentialRequest] Cached token KeyId does not match request certificate (SPKI-SHA256 mismatch). Bypassing cache.");
+                    "[ClientCredentialRequest] Cached token KeyId does not match MTLS binding certificate (SPKI-SHA256 mismatch). Bypassing cache.");
                     return false;
                 }
                 
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
-                "[ClientCredentialRequest] Cached token KeyId matches request certificate (SPKI-SHA256). Using cached token.");
+                "[ClientCredentialRequest] Cached token KeyId matches MTLS binding certificate (SPKI-SHA256). Using cached token.");
             }
 
             // 3) If the token's hash matches AccessTokenHashToRefresh, ignore it
