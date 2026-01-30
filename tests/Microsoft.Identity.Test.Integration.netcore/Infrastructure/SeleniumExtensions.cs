@@ -59,9 +59,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         : ChromeDriverService.CreateDefaultService(driverDir);
 
                     service.HideCommandPromptWindow = true;
-                    var enableVerbose =
-                        string.Equals(Environment.GetEnvironmentVariable("MSAL_TEST_LOGGING"), "true", StringComparison.OrdinalIgnoreCase) ||
-                        Environment.GetEnvironmentVariable("MSAL_TEST_LOGGING") == "1";
+                    var enableVerbose = Environment.GetEnvironmentVariable("MSAL_TEST_LOGGING") != null;
 
                     service.EnableVerboseLogging = enableVerbose;
                     

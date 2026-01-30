@@ -15,12 +15,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         private static bool IsEnabled(string envVar)
         {
-            var value = Environment.GetEnvironmentVariable(envVar);
-            return value != null &&
-                   (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
-                    value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
-                    value.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
-                    value.Equals("on", StringComparison.OrdinalIgnoreCase));
+            return Environment.GetEnvironmentVariable(envVar) != null;
         }
 
         private static void LogCallback(LogLevel level, string message, bool containsPii)
