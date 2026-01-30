@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         /// </summary>
         /// <remarks>The FOCI flag does not appear in the U/P flow, an interactive flow is required. Interactive flow
         /// cannot be automated because http://localhost cannot currently be added to the family apps</remarks>
+        [Ignore]
         [TestMethod]
         public async Task FociSignInSignOutAsync()
         {

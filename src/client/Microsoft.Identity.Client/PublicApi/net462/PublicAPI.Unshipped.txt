@@ -1,3 +1,4 @@
+const Microsoft.Identity.Client.MsalError.MtlsBearerWithoutRegion = "mtls_bearer_without_region" -> string
 Microsoft.Identity.Client.AppConfig.CertificateOptions
 Microsoft.Identity.Client.AppConfig.CertificateOptions.AssociateTokensWithCertificate.get -> bool
 Microsoft.Identity.Client.AppConfig.CertificateOptions.AssociateTokensWithCertificate.init -> void

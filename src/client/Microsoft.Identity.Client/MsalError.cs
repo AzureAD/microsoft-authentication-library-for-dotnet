@@ -1191,6 +1191,12 @@ namespace Microsoft.Identity.Client
         public const string MtlsPopWithoutRegion = "mtls_pop_without_region";
 
         /// <summary>
+        /// <para>What happened?</para>mTLS Bearer is configured but a region was not specified.
+        /// <para>Mitigation</para>Ensure that the AzureRegion configuration is set when using mTLS Bearer as it requires a regional endpoint.
+        /// </summary>
+        public const string MtlsBearerWithoutRegion = "mtls_bearer_without_region";
+
+        /// <summary>
         /// <para>What happened?</para> mTLS Proof of Possession (mTLS PoP) is configured but a certificate was not provided.
         /// <para>Mitigation</para> Ensure that a valid certificate is provided in the configuration when using mTLS PoP as it is required for secure authentication.
         /// </summary>

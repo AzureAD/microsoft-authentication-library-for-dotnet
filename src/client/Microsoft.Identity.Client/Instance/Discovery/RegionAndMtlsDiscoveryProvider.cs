@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Region
             }
 
             string region = null;
-            bool isMtlsEnabled = requestContext.MtlsCertificate != null;
+            bool isMtlsEnabled = requestContext.IsMtlsRequested;
 
             if (requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (KnownMetadataProvider.IsPublicEnvironment(host))
             {
-                if (requestContext.MtlsCertificate != null)
+                if (requestContext.IsMtlsRequested)
                 {
                     requestContext.Logger.Info(() => $"[Region discovery] Using MTLS regional environment: {region}.{PublicEnvForRegionalMtlsAuth}");
                     return $"{region}.{PublicEnvForRegionalMtlsAuth}";
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Region
                 host = preferredNetworkEnv;
             }
 
-            if (requestContext.MtlsCertificate != null)
+            if (requestContext.IsMtlsRequested)
             {
                 // Modify the host to replace "login" with "mtlsauth" for mTLS scenarios
                 if (host.StartsWith("login"))

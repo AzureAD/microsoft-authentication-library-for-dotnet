@@ -274,12 +274,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientAssertionDelegate));
             }
 
+            // String assertion => cannot return TokenBindingCertificate => use string credential
             return WithClientAssertionInternal(
-                (opts, ct) =>
-                    Task.FromResult(new ClientSignedAssertion
-                    {
-                        Assertion = clientAssertionDelegate()   // bearer
-                    }));
+                (opts, ct) => Task.FromResult(clientAssertionDelegate()));
         }
 
         /// <summary>
@@ -297,12 +294,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
             }
 
+            // String assertion => cannot return TokenBindingCertificate => use string credential
             return WithClientAssertionInternal(
-                async (opts, ct) =>
-                {
-                    string jwt = await clientAssertionAsyncDelegate(ct).ConfigureAwait(false);
-                    return new ClientSignedAssertion { Assertion = jwt };    // bearer
-                });
+                (opts, ct) => clientAssertionAsyncDelegate(ct));
         }
 
         /// <summary>
@@ -319,12 +313,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
             }
 
+            // String assertion => cannot return TokenBindingCertificate => use string credential
             return WithClientAssertionInternal(
-                async (opts, _) =>
-                {
-                    string jwt = await clientAssertionAsyncDelegate(opts).ConfigureAwait(false);
-                    return new ClientSignedAssertion { Assertion = jwt };    // bearer
-                });
+                (opts, ct) => clientAssertionAsyncDelegate(opts));
         }
 
         /// <summary>
@@ -343,7 +334,8 @@ namespace Microsoft.Identity.Client
             CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
             ValidateUseOfExperimentalFeature();
-            return WithClientAssertionInternal(clientSignedAssertionProvider);
+            return WithClientAssertionInternal(
+                clientSignedAssertionProvider: clientSignedAssertionProvider);
         }
 
         /// <summary>
@@ -355,6 +347,18 @@ namespace Microsoft.Identity.Client
             Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
             Config.ClientCredential = new ClientAssertionDelegateCredential(clientSignedAssertionProvider);
+            return this;
+        }
+
+        /// <summary>
+        /// Internal helper to set the client assertion provider that returns a string.
+        /// </summary>
+        /// <param name="clientAssertionProvider"></param>
+        /// <returns></returns>
+        internal ConfidentialClientApplicationBuilder WithClientAssertionInternal(
+            Func<AssertionRequestOptions, CancellationToken, Task<string>> clientAssertionProvider)
+        {
+            Config.ClientCredential = new ClientAssertionStringDelegateCredential(clientAssertionProvider);
             return this;
         }
 
