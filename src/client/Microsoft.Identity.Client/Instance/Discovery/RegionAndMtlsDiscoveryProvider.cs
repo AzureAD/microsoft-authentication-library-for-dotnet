@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Region
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
         // Map of unsupported sovereign cloud hosts for mTLS PoP to their error messages
-        private static readonly System.Collections.Generic.Dictionary<string, string> UnsupportedMtlsHosts = 
+        private static readonly System.Collections.Generic.Dictionary<string, string> s_unsupportedMtlsHosts = 
             new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage },
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Region
                 string host = authority.Host;
                 
                 // Check if host is in the unsupported list
-                if (UnsupportedMtlsHosts.TryGetValue(host, out string errorMessage))
+                if (s_unsupportedMtlsHosts.TryGetValue(host, out string errorMessage))
                 {
                     requestContext.Logger.Error($"[Region discovery] mTLS PoP is not supported for host: {host}");
                     throw new MsalClientException(
