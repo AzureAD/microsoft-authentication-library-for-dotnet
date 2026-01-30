@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
-    internal class CertificateAndClaimsClientCredential : IClientCredential
+    internal class CertificateAndClaimsClientCredential : IClientCredential, IClientCertificateProvider
     {
         private readonly IDictionary<string, string> _claimsToSign;
         private readonly bool _appendDefaultClaims = true;
@@ -60,16 +60,42 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             // Log the incoming request parameters for diagnostic purposes
             requestParameters.RequestContext.Logger.Verbose(() => $"Building assertion from certificate with clientId: {clientId} at endpoint: {tokenEndpoint}");
 
-            if (requestParameters.MtlsCertificate == null)
+            // Resolve certificate if not already resolved by orchestrator
+            // Orchestrator sets CertificateContext when MTLS is requested, but this method is also called
+            // in non-MTLS scenarios where cert needs to be resolved for JWT signing
+            if (requestParameters.CertificateContext == null)
+            {
+                requestParameters.RequestContext.Logger.Verbose(() => "Certificate not yet resolved. Resolving from provider for JWT signing.");
+
+                // Build options for certificate resolution
+                var options = new AssertionRequestOptions(
+                    requestParameters.AppConfig, 
+                    tokenEndpoint,
+                    requestParameters.AuthorityManager.Authority.TenantId)
+                {
+                    Claims = requestParameters.Claims,
+                    ClientCapabilities = requestParameters.AppConfig.ClientCapabilities,
+                    IsMtlsPopRequested = false,  // Non-MTLS path - cert used for JWT signing
+                    CancellationToken = cancellationToken
+                };
+
+                // Resolve certificate context via interface method
+                ClientCertificateContext certContext = await GetCertificateAsync(options, cancellationToken).ConfigureAwait(false);
+
+                // Validate the resolved certificate (GetCertificateAsync returns null if provider returns null)
+                ValidateCertificate(certContext?.Certificate, requestParameters.RequestContext.Logger);
+
+                requestParameters.CertificateContext = certContext;
+            }
+
+            // Check if MTLS PoP is being used (cert already in context with MTLS usage)
+            bool isMtlsPoP = requestParameters.CertificateContext.Usage == ClientCertificateUsage.MtlsBinding;
+
+            if (!isMtlsPoP)
             {
                 requestParameters.RequestContext.Logger.Verbose(() => "Proceeding with JWT token creation and adding client assertion.");
 
-                // Resolve the certificate via the provider
-                X509Certificate2 certificate = await ResolveCertificateAsync(requestParameters, tokenEndpoint, cancellationToken).ConfigureAwait(false);
-
-                // Store the resolved certificate in request parameters for later use (e.g., ExecutionResult)
-                requestParameters.ResolvedCertificate = certificate;
-
+                X509Certificate2 certificate = requestParameters.CertificateContext.Certificate;
                 bool useSha2 = requestParameters.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported;
 
                 JsonWebToken jwtToken;
@@ -101,48 +127,21 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 // Log that MTLS PoP is required and JWT token creation is skipped
                 requestParameters.RequestContext.Logger.Verbose(() => "MTLS PoP Client credential request. Skipping client assertion.");
-                
-                // Store the mTLS certificate in request parameters for later use (e.g., ExecutionResult)
-                requestParameters.ResolvedCertificate = requestParameters.MtlsCertificate;
             }
         }
 
         /// <summary>
-        /// Resolves the certificate to use for signing the client assertion.
-        /// Invokes the certificate provider delegate to get the certificate.
+        /// Validates that a certificate is suitable for use in authentication.
         /// </summary>
-        /// <param name="requestParameters">The authentication request parameters containing app config</param>
-        /// <param name="tokenEndpoint">The token endpoint URL</param>
-        /// <param name="cancellationToken">Cancellation token for the async operation</param>
-        /// <returns>The X509Certificate2 to use for signing</returns>
-        /// <exception cref="MsalClientException">Thrown if the certificate provider returns null or an invalid certificate</exception>
-        private async Task<X509Certificate2> ResolveCertificateAsync(
-            AuthenticationRequestParameters requestParameters,
-            string tokenEndpoint,
-            CancellationToken cancellationToken)
+        /// <param name="certificate">The certificate to validate</param>
+        /// <param name="logger">Logger for diagnostic messages</param>
+        /// <exception cref="MsalClientException">Thrown if certificate is null or invalid</exception>
+        private static void ValidateCertificate(X509Certificate2 certificate, ILoggerAdapter logger)
         {
-            requestParameters.RequestContext.Logger.Verbose(
-                () => "[CertificateAndClaimsClientCredential] Resolving certificate from provider.");
-
-            // Create AssertionRequestOptions for the callback
-            var options = new AssertionRequestOptions(
-                requestParameters.AppConfig, 
-                tokenEndpoint,
-                requestParameters.AuthorityManager.Authority.TenantId)
-            {
-                Claims = requestParameters.Claims,
-                ClientCapabilities = requestParameters.AppConfig.ClientCapabilities,
-                CancellationToken = cancellationToken
-            };
-
-            // Invoke the provider to get the certificate
-            X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
-
             // Validate the certificate returned by the provider
             if (certificate == null)
             {
-                requestParameters.RequestContext.Logger.Error(
-                    "[CertificateAndClaimsClientCredential] Certificate provider returned null.");
+                logger.Error("[CertificateAndClaimsClientCredential] Certificate provider returned null.");
  
                 throw new MsalClientException(
                     MsalError.InvalidClientAssertion,
@@ -153,8 +152,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 if (!certificate.HasPrivateKey)
                 {
-                    requestParameters.RequestContext.Logger.Error(
-                        "[CertificateAndClaimsClientCredential] Certificate from provider does not have a private key.");
+                    logger.Error("[CertificateAndClaimsClientCredential] Certificate does not have a private key.");
      
                     throw new MsalClientException(
                         MsalError.CertWithoutPrivateKey,
@@ -163,8 +161,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
             catch (System.Security.Cryptography.CryptographicException ex)
             {
-                requestParameters.RequestContext.Logger.Error(
-                    "[CertificateAndClaimsClientCredential] A cryptographic error occurred while accessing the certificate.");
+                logger.Error("[CertificateAndClaimsClientCredential] A cryptographic error occurred while accessing the certificate.");
  
                 throw new MsalClientException(
                     MsalError.CryptographicError,
@@ -172,11 +169,32 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     ex);
             }
 
-            requestParameters.RequestContext.Logger.Info(
-                () => $"[CertificateAndClaimsClientCredential] Successfully resolved certificate from provider. " +
-                      $"Thumbprint: {certificate.Thumbprint}");
+            logger.Info(() => $"[CertificateAndClaimsClientCredential] Successfully validated certificate. Thumbprint: {certificate.Thumbprint}");
+        }
 
-            return certificate;
+        public async Task<ClientCertificateContext> GetCertificateAsync(
+            AssertionRequestOptions options,
+            CancellationToken cancellationToken)
+        {
+            // Resolve the certificate via the provider delegate
+            X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
+
+            if (certificate == null)
+            {
+                return null;
+            }
+
+            // Determine usage based on whether MTLS PoP is requested
+            // Same certificate can be used for either JWT signing OR MTLS binding
+            var usage = options.IsMtlsPopRequested
+                ? ClientCertificateUsage.MtlsBinding
+                : ClientCertificateUsage.Assertion;
+
+            return new ClientCertificateContext
+            {
+                Certificate = certificate,
+                Usage = usage
+            };
         }
     }
 }

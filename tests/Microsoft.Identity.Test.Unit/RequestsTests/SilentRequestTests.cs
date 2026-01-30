@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     AuthorityOverride = authorityOverride
                 };
 
-                var requestContext = new RequestContext(ServiceBundle, Guid.NewGuid(), commonParameters.MtlsCertificate);
+                var requestContext = new RequestContext(ServiceBundle, Guid.NewGuid(), null);
 
                 var authority = Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
                     requestContext,

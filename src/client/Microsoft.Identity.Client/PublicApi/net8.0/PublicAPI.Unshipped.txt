@@ -3,6 +3,8 @@ Microsoft.Identity.Client.AppConfig.CertificateOptions.AssociateTokensWithCertif
 Microsoft.Identity.Client.AppConfig.CertificateOptions.AssociateTokensWithCertificate.init -> void
 Microsoft.Identity.Client.AppConfig.CertificateOptions.SendX5C.get -> bool
 Microsoft.Identity.Client.AppConfig.CertificateOptions.SendX5C.init -> void
+Microsoft.Identity.Client.AssertionRequestOptions.IsMtlsPopRequested.get -> bool
+Microsoft.Identity.Client.AssertionRequestOptions.IsMtlsPopRequested.set -> void
 Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, Microsoft.Identity.Client.AppConfig.CertificateOptions certificateOptions) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2>> certificateProvider, Microsoft.Identity.Client.AppConfig.CertificateOptions certificateOptions) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithExtraClientAssertionClaims<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, string clientAssertionClaims) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>

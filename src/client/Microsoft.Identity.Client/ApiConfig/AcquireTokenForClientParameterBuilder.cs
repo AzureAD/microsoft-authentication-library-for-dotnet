@@ -94,24 +94,16 @@ namespace Microsoft.Identity.Client
         /// For more information, refer to the <see href="https://aka.ms/mtls-pop">Proof-of-Possession documentation</see>.
         /// </summary>
         /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
+        /// <remarks>
+        /// The application must be configured with a certificate credential (via WithCertificate) or a client assertion
+        /// that provides a TokenBindingCertificate. Certificate validation and MTLS setup will be performed during token acquisition.
+        /// </remarks>
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
         {
-            if (ServiceBundle.Config.ClientCredential is CertificateClientCredential certificateCredential)
-            {
-                if (certificateCredential.Certificate == null)
-                {
-                    throw new MsalClientException(
-                    MsalError.MtlsCertificateNotProvided,
-                    MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-                }
-
-                CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
-                CommonParameters.MtlsCertificate = certificateCredential.Certificate;               
-            }
-
             CommonParameters.IsMtlsPopRequested = true;
             return this;
         }
+
 
         /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
@@ -193,21 +185,51 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="ConfidentialClientApplicationBuilder.Validate"/> for a comment inside this function for AzureRegion.
         protected override void Validate()
         {
-            if (CommonParameters.MtlsCertificate != null)
+            base.Validate();
+
+            // MTLS PoP validation
+            if (CommonParameters.IsMtlsPopRequested)
             {
-                // Check for Azure region only if the authority is AAD
-                // AzureRegion is by default set to null or set to null when the application is created
-                // with region set to DisableForceRegion (see ConfidentialClientApplicationBuilder.Validate)
-                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                    ServiceBundle.Config.AzureRegion == null)
+                var credential = ServiceBundle.Config.ClientCredential;
+                
+                // Check 1: Credential type - only specific types support MTLS
+                // CertificateAndClaimsClientCredential (WithClientClaims) does NOT support MTLS
+                bool supportsMtls = credential is CertificateClientCredential || 
+                                   credential is ClientAssertionDelegateCredential;
+
+                if (!supportsMtls)
                 {
                     throw new MsalClientException(
-                        MsalError.MtlsPopWithoutRegion,
-                        MsalErrorMessage.MtlsPopWithoutRegion);
+                        MsalError.MtlsCertificateNotProvided,
+                        "MTLS Proof-of-Possession requires a certificate-based credential. " +
+                        "Use WithCertificate() to configure a certificate, or use WithClientAssertion() with a TokenBindingCertificate. " +
+                        "WithClientClaims() is not supported for MTLS PoP.");
                 }
-            }
 
-            base.Validate();
+                // Check 2: For CertificateClientCredential, validate cert and region now (fail-fast)
+                // For ClientAssertionDelegateCredential, defer to runtime (can't check TokenBindingCertificate synchronously)
+                if (credential is CertificateClientCredential certCred)
+                {
+                    // Validate cert is provided
+                    if (certCred.Certificate == null)
+                    {
+                        throw new MsalClientException(
+                            MsalError.MtlsCertificateNotProvided,
+                            "MTLS Proof-of-Possession requires a certificate, but WithCertificate() was called with a null certificate.");
+                    }
+
+                    // For AAD, validate region is configured
+                    if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
+                        ServiceBundle.Config.AzureRegion == null)
+                    {
+                        throw new MsalClientException(
+                            MsalError.MtlsPopWithoutRegion,
+                            MsalErrorMessage.MtlsPopWithoutRegion);
+                    }
+                }
+                // Note: For ClientAssertionDelegateCredential, cert availability and region checks
+                // happen at runtime in orchestrator (need to call GetAssertionAsync to check TokenBindingCertificate)
+            }
 
             // Force refresh + AccessTokenHashToRefresh APIs cannot be used together
             if (Parameters.ForceRefresh && !string.IsNullOrEmpty(Parameters.AccessTokenHashToRefresh))
