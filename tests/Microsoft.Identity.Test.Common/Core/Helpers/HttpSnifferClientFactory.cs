@@ -27,23 +27,25 @@ namespace Microsoft.Identity.Test.Common
 
             var recordingHandler = new RecordingHandler((req, res) =>
             {
+                // Always record so tests can assert on traffic
+                RequestsAndResponses.Add((req, res));
+            
+                // Only capture body when explicitly enabled (optional but recommended)
+                if (Environment.GetEnvironmentVariable("MSAL_TEST_PII_LOGGING") != null &&
+                    req.Content != null)
+                {
+                    req.Content.LoadIntoBufferAsync().GetAwaiter().GetResult();
+                    LastHttpContentData = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                }
+            
+                // Only print when logging enabled
                 if (Environment.GetEnvironmentVariable("MSAL_TEST_LOGGING") != null)
                 {
-                    if (req.Content != null)
-                    {
-                        req.Content.LoadIntoBufferAsync().GetAwaiter().GetResult();
-                        LastHttpContentData = req.Content
-                            .ReadAsStringAsync()
-                            .GetAwaiter()
-                            .GetResult();
-                    }
-
-                    RequestsAndResponses.Add((req, res));
-
                     Trace.WriteLine($"[MSAL][HTTP Request]: {req}");
                     Trace.WriteLine($"[MSAL][HTTP Response]: {res}");
                 }
             });
+
             recordingHandler.InnerHandler = new HttpClientHandler();
             _httpClient = new HttpClient(recordingHandler);
         }
