@@ -11,3 +11,4 @@ Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAttributes(s
 static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2>> certificateProvider, Microsoft.Identity.Client.AppConfig.CertificateOptions certificateOptions) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 Microsoft.Identity.Client.AssertionRequestOptions.IsMtlsPopRequested.get -> bool
 Microsoft.Identity.Client.AssertionRequestOptions.IsMtlsPopRequested.set -> void
+const Microsoft.Identity.Client.MsalError.MtlsPopNotSupportedForEnvironment = "mtls_pop_not_supported_for_environment" -> string
