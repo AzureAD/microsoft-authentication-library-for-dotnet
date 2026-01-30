@@ -669,9 +669,7 @@ namespace Microsoft.Identity.Test.Unit
         [DataTestMethod]
         [DataRow("login.microsoftonline.com", "mtlsauth.microsoft.com")]
         [DataRow("login.microsoftonline.us", "mtlsauth.microsoftonline.us")]
-        [DataRow("login.usgovcloudapi.net", "mtlsauth.microsoftonline.us")]
         [DataRow("login.partner.microsoftonline.cn", "mtlsauth.partner.microsoftonline.cn")]
-        [DataRow("login.chinacloudapi.cn", "mtlsauth.partner.microsoftonline.cn")]
         [DataRow("login.sovcloud-identity.fr", "mtlsauth.sovcloud-identity.fr")]
         [DataRow("login.sovcloud-identity.de", "mtlsauth.sovcloud-identity.de")]
         [DataRow("login.sovcloud-identity.sg", "mtlsauth.sovcloud-identity.sg")]
@@ -728,6 +726,81 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                     Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
                     Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+                }
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage)]
+        [DataRow("login.chinacloudapi.cn", MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage)]
+        public async Task UnsupportedSovereignHosts_ThrowsMsalClientException_Async(string unsupportedHost, string expectedErrorMessage)
+        {
+            // Arrange
+            string authorityUrl = $"https://{unsupportedHost}/17b189bc-2b81-4ec5-aa51-3e628cbc931b";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var app = ConfidentialClientApplicationBuilder
+                                        .Create(TestConstants.ClientId)
+                                        .WithAuthority(authorityUrl)
+                                        .WithHttpManager(harness.HttpManager)
+                                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                        .WithCertificate(s_testCertificate)
+                                        .Build();
+
+                    // Act & Assert
+                    var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    {
+                        await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+                    }).ConfigureAwait(false);
+
+                    Assert.AreEqual(MsalError.MtlsPopNotSupportedForEnvironment, exception.ErrorCode);
+                    Assert.AreEqual(expectedErrorMessage, exception.Message);
+                }
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("mtlsauth.microsoft.com")]
+        [DataRow("sts.windows.net")]
+        [DataRow("graph.microsoft.com")]
+        public async Task NonLoginHosts_ThrowsMsalClientException_Async(string nonLoginHost)
+        {
+            // Arrange
+            string authorityUrl = $"https://{nonLoginHost}/17b189bc-2b81-4ec5-aa51-3e628cbc931b";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var app = ConfidentialClientApplicationBuilder
+                                        .Create(TestConstants.ClientId)
+                                        .WithAuthority(authorityUrl)
+                                        .WithHttpManager(harness.HttpManager)
+                                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                        .WithCertificate(s_testCertificate)
+                                        .Build();
+
+                    // Act & Assert
+                    var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    {
+                        await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+                    }).ConfigureAwait(false);
+
+                    Assert.AreEqual(MsalError.MtlsPopNotSupportedForEnvironment, exception.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.MtlsPopNotSupportedForNonLoginHostMessage, exception.Message);
                 }
             }
         }

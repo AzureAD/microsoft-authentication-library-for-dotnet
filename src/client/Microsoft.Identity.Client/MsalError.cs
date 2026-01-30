@@ -1208,6 +1208,12 @@ namespace Microsoft.Identity.Client
         public const string MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity";
 
         /// <summary>
+        /// <para>What happened?</para> mTLS Proof of Possession (mTLS PoP) is not supported for the specified sovereign cloud environment.
+        /// <para>Mitigation:</para> Use the supported alternative endpoint for the sovereign cloud environment.
+        /// </summary>
+        public const string MtlsPopNotSupportedForEnvironment = "mtls_pop_not_supported_for_environment";
+
+        /// <summary>
         /// <para>What happened?</para> The operation attempted to force a token refresh while also using a token hash. 
         /// These two options are incompatible because forcing a refresh bypasses token caching, 
         /// which conflicts with token hash validation.
