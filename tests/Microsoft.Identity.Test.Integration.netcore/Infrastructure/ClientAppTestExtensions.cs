@@ -16,30 +16,21 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         internal static ConfidentialClientApplicationBuilder WithTestLogging(this ConfidentialClientApplicationBuilder builder)
         {
-            var httpClientFactory = new HttpSnifferClientFactory();
-
             return builder
-                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false)
-                .WithHttpClientFactory(httpClientFactory);            
+                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false);
         }
 
         internal static PublicClientApplicationBuilder WithTestLogging(this PublicClientApplicationBuilder builder, out HttpSnifferClientFactory httpClientFactory)
         {
-            httpClientFactory = new HttpSnifferClientFactory();
-
             return builder
-                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false)
-                .WithHttpClientFactory(httpClientFactory);
+                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false);
 
         }
 
         internal static ConfidentialClientApplicationBuilder WithTestLogging(this ConfidentialClientApplicationBuilder builder, out HttpSnifferClientFactory httpClientFactory)
         {
-            httpClientFactory = new HttpSnifferClientFactory();
-
             return builder
-                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false)
-                .WithHttpClientFactory(httpClientFactory);
+                .WithLogging((lvl, msg, pii) => { }, LogLevel.Verbose, enablePiiLogging: false, enableDefaultPlatformLogging: false);
         }
     }
 }
