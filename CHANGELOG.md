@@ -1,3 +1,17 @@
+4.82.0
+======
+
+### Features
+* Added CertificateOptions and updated WithCertificate APIs to use CertificateOptions. See <a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5655">#5655</a>
+* Added sovereign cloud support for Bleu, Delos, and GovSG. See <a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5671">#5671</a>
+* Added WithExtraClientAssertionClaims API. See <a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5650">#5650</a>
+* Added mTLS PoP validation for unsupported and non-login hosts. See <a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5684">#5684</a>
+* Added form_post response mode support for system browser authentication. See <a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5678">#5678</a>
+* MSI POP Attestation. See <a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5512">#5512</a>
+
+### Changes
+* Renamed Microsoft.Identity.Client.MtlsPop project to Microsoft.Identity.Client.KeyAttestation. See <a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5653">#5653</a>
+
 4.81.0
 ======
 
