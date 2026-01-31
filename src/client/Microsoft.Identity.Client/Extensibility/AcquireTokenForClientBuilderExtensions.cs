@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,6 +71,45 @@ namespace Microsoft.Identity.Client.Extensibility
             });
 
             builder.WithAdditionalCacheKeyComponents(extrabodyparams);
+            return builder;
+        }
+
+        /// <summary>
+        /// Add extra body parameters to the token request (synchronous version). 
+        /// These parameters are added to the cache key to associate these parameters with the acquired token.
+        /// Use this overload when parameters are known synchronously to avoid async overhead.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="extrabodyparams">Dictionary of additional body parameters with static values</param>
+        /// <returns></returns>
+        public static AcquireTokenForClientParameterBuilder WithExtraBodyParameters(
+            this AcquireTokenForClientParameterBuilder builder,
+            Dictionary<string, string> extrabodyparams)
+        {
+            builder.ValidateUseOfExperimentalFeature();
+            if (extrabodyparams == null || extrabodyparams.Count == 0)
+            {
+                return builder;
+            }
+
+            builder.OnBeforeTokenRequest((data) =>
+            {
+                foreach (var param in extrabodyparams)
+                {
+                    if (param.Value != null)
+                    {
+                        data.BodyParameters.Add(param.Key, param.Value);
+                    }
+                }
+                return Task.CompletedTask;
+            });
+
+            // Convert to async dictionary for cache key component compatibility
+            var asyncParams = extrabodyparams.ToDictionary(
+                kvp => kvp.Key,
+                kvp => new Func<CancellationToken, Task<string>>(_ => Task.FromResult(kvp.Value))
+            );
+            builder.WithAdditionalCacheKeyComponents(asyncParams);
             return builder;
         }
     }
