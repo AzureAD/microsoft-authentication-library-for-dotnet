@@ -17,6 +17,11 @@ namespace Microsoft.Identity.Client.KeyAttestation
     internal static class PopKeyAttestor
     {
         /// <summary>
+        /// Test hook: if set, bypasses the native AttestationClient and uses this function instead.
+        /// Only for unit testing—allows tests to avoid loading the native DLL.
+        /// </summary>
+        internal static Func<string, SafeHandle, string, CancellationToken, Task<AttestationResult>> s_testAttestationOverride;
+        /// <summary>
         /// Asynchronously attests a Credential Guard/CNG key with the remote attestation service and returns a JWT.
         /// Wraps the synchronous <see cref="AttestationClient.Attest"/> in a Task.Run so callers can
         /// avoid blocking. Cancellation only applies before the native call starts.
@@ -44,6 +49,12 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 ?? throw new ArgumentException("keyHandle must be a SafeNCryptKeyHandle. Only Windows CNG keys are supported.", nameof(keyHandle));
 
             cancellationToken.ThrowIfCancellationRequested();
+
+            // Test hook: if set, use the test override instead of the real AttestationClient.
+            if (s_testAttestationOverride != null)
+            {
+                return s_testAttestationOverride(endpoint, safeNCryptKeyHandle, clientId, cancellationToken);
+            }
 
             return Task.Run(() =>
             {

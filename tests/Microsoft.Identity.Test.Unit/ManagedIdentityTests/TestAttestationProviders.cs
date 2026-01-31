@@ -5,6 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.KeyAttestation.Attestation;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -21,6 +22,25 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
             {
                 return Task.FromResult("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.attestation.sig");
+            };
+        }
+
+        /// <summary>
+        /// Creates a fake attestation result provider that returns a successful AttestationResult.
+        /// This is used to mock PopKeyAttestor.AttestCredentialGuardAsync() behavior.
+        /// </summary>
+        public static Func<string, SafeHandle, string, CancellationToken, Task<AttestationResult>> CreateFakeAttestationResultProvider()
+        {
+            return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
+            {
+                // Return a successful AttestationResult with a mock JWT token
+                var result = new AttestationResult(
+                    AttestationStatus.Success,
+                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.attestation.sig",
+                    0, // NativeErrorCode = 0 means success
+                    string.Empty // No error message
+                );
+                return Task.FromResult(result);
             };
         }
 
