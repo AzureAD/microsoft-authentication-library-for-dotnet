@@ -20,6 +20,10 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// Test hook to inject a mock attestation provider for unit testing.
         /// When set, this delegate is called instead of loading the native DLL.
         /// </summary>
+        /// <remarks>
+        /// This field is internal and accessible only via InternalsVisibleTo for test assemblies.
+        /// Tests should not run in parallel when using this hook to avoid race conditions.
+        /// </remarks>
         internal static Func<string, SafeHandle, string, CancellationToken, Task<AttestationResult>> s_testAttestationOverride;
         /// <summary>
         /// Asynchronously attests a Credential Guard/CNG key with the remote attestation service and returns a JWT.

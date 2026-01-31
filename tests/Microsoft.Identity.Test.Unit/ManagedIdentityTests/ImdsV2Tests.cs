@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void ImdsV2Tests_Cleanup()
         {
             // Cleanup handled automatically with delegate-based approach
-            
+
             // Reset test override to ensure clean state for other tests
             PopKeyAttestor.s_testAttestationOverride = null;
         }
