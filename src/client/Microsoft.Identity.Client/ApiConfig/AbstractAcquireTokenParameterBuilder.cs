@@ -341,9 +341,12 @@ namespace Microsoft.Identity.Client
             return this as T;
         }
 
-        internal /* for testing */ T WithAuthenticationOperation(IAuthenticationOperation authOperation)
+        internal /* for testing */ T WithAuthenticationOperation(IAuthenticationOperation authOperation, bool skipExperimentalValidation = false)
         {
-            ValidateUseOfExperimentalFeature();
+            if (!skipExperimentalValidation)
+            {
+                ValidateUseOfExperimentalFeature();
+            }
             CommonParameters.AuthenticationOperation = authOperation ?? throw new ArgumentNullException(nameof(authOperation));
             return this as T;
         }

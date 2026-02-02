@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Extensibility
             }
 
             if (authenticationExtension.AuthenticationOperation != null)
-                builder.WithAuthenticationOperation(authenticationExtension.AuthenticationOperation);
+                builder.WithAuthenticationOperation(authenticationExtension.AuthenticationOperation, skipExperimentalValidation: true);
 
             if (authenticationExtension.AdditionalCacheParameters != null)
                 builder.WithAdditionalCacheParameters(authenticationExtension.AdditionalCacheParameters);
