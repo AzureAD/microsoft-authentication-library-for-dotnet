@@ -180,6 +180,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         {
                             retryCount++;
                             logger.Info($"[ClientCredentialRequest] OnMsalServiceFailure returned true. Retrying token request (Retry #{retryCount}).");
+                            
+                            // Clear certificate context to force re-resolution on retry
+                            // This enables certificate rotation scenarios where provider returns different cert on retry
+                            AuthenticationRequestParameters.CertificateContext = null;
+                            
                             continue; // Retry the loop
                         }
                         
