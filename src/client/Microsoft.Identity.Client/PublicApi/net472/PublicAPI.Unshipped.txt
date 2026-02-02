@@ -11,3 +11,4 @@ static Microsoft.Identity.Client.ManagedIdentityPopExtensions.WithMtlsProofOfPos
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAttributes(string attributeJson) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.AssertionRequestOptions.IsMtlsPopRequested.get -> bool
 Microsoft.Identity.Client.AssertionRequestOptions.IsMtlsPopRequested.set -> void
+const Microsoft.Identity.Client.MsalError.MtlsPopNotSupportedForEnvironment = "mtls_pop_not_supported_for_environment" -> string
