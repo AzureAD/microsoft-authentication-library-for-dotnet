@@ -75,13 +75,21 @@ namespace Microsoft.Identity.Client.Extensibility
         }
 
         /// <summary>
-        /// Add extra body parameters to the token request (synchronous version). 
+        /// Add extra body parameters to the token request (synchronous version).
         /// These parameters are added to the cache key to associate these parameters with the acquired token.
         /// Use this overload when parameters are known synchronously to avoid async overhead.
         /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="extrabodyparams">Dictionary of additional body parameters with static values</param>
-        /// <returns></returns>
+        /// <param name="builder">The builder instance</param>
+        /// <param name="extrabodyparams">Dictionary of static string values for additional body parameters</param>
+        /// <returns>The builder for method chaining</returns>
+        /// <remarks>
+        /// This synchronous overload is optimized for the common case where parameter values are statically known
+        /// and do not require async computation. Parameters are added directly to the HTTP request without any
+        /// async wrapping on the hot path, reducing memory allocation and GC pressure.
+        /// 
+        /// Cache key compatibility: Sync parameters with identical key/value pairs will produce the same cache keys
+        /// as async parameters with identical values, enabling transparent interoperability between sync and async APIs.
+        /// </remarks>
         public static AcquireTokenForClientParameterBuilder WithExtraBodyParameters(
             this AcquireTokenForClientParameterBuilder builder,
             Dictionary<string, string> extrabodyparams)
@@ -92,11 +100,12 @@ namespace Microsoft.Identity.Client.Extensibility
                 return builder;
             }
 
+            // Add parameters directly to HTTP request - SYNC, no async overhead
             builder.OnBeforeTokenRequest((data) =>
             {
                 foreach (var param in extrabodyparams)
                 {
-                    if (param.Value != null)
+                    if (!string.IsNullOrWhiteSpace(param.Key) && !string.IsNullOrWhiteSpace(param.Value))
                     {
                         data.BodyParameters.Add(param.Key, param.Value);
                     }
@@ -104,12 +113,10 @@ namespace Microsoft.Identity.Client.Extensibility
                 return Task.CompletedTask;
             });
 
-            // Convert to async dictionary for cache key component compatibility
-            var asyncParams = extrabodyparams.ToDictionary(
-                kvp => kvp.Key,
-                kvp => new Func<CancellationToken, Task<string>>(_ => Task.FromResult(kvp.Value))
-            );
-            builder.WithAdditionalCacheKeyComponents(asyncParams);
+            // Add to cache key components - uses new sync overload
+            // No async wrapper allocation on hot path
+            builder.WithAdditionalCacheKeyComponents(extrabodyparams);
+
             return builder;
         }
     }

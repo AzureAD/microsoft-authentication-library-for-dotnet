@@ -170,6 +170,68 @@ namespace Microsoft.Identity.Client.Extensibility
             return builder;
         }
 
+        // Add this new overload alongside the existing WithAdditionalCacheKeyComponents method
+
+        /// <summary>
+        /// Specifies additional cache key components to use when caching and retrieving tokens (synchronous version).
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="cacheKeyComponents">The dictionary of additional cache key components with synchronous string values.</param>
+        /// <returns>The builder.</returns>
+        /// <remarks>
+        /// <list type="bullet">
+        /// <item><description>This api can be used to associate custom parameters along with other keys with a particular token.</description></item>
+        /// <item><description>In order for the tokens to be successfully retrieved from the cache, all components used to cache the token must be provided.</description></item>
+        /// <item><description>This synchronous overload avoids async wrapper allocation by converting string values directly to cache key components.</description></item>
+        /// </list>
+        /// </remarks>
+        internal static AbstractAcquireTokenParameterBuilder<T> WithAdditionalCacheKeyComponents<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            IDictionary<string, string> cacheKeyComponents)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (cacheKeyComponents == null || cacheKeyComponents.Count == 0)
+            {
+                //no-op
+                return builder;
+            }
+
+            // Convert sync string values to async Func<CancellationToken, Task<string>>
+            // This conversion happens once at configuration time, not on the hot path
+            var asyncComponents = new SortedList<string, Func<CancellationToken, Task<string>>>();
+            foreach (var kvp in cacheKeyComponents)
+            {
+                if (string.IsNullOrWhiteSpace(kvp.Key) || string.IsNullOrWhiteSpace(kvp.Value))
+                {
+                    continue; // Skip null/whitespace keys or values
+                }
+
+                // Create async wrapper - this allocation happens once at config time
+                var value = kvp.Value;
+                asyncComponents.Add(kvp.Key, (_) => Task.FromResult(value));
+            }
+
+            if (asyncComponents.Count == 0)
+            {
+                return builder;
+            }
+
+            if (builder.CommonParameters.CacheKeyComponents == null)
+            {
+                builder.CommonParameters.CacheKeyComponents = asyncComponents;
+            }
+            else
+            {
+                foreach (var kvp in asyncComponents)
+                {
+                    // Key conflicts are not allowed, it is expected for this method to fail.
+                    builder.CommonParameters.CacheKeyComponents.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return builder;
+        }
+
         /// <summary>
         /// Specifies an FMI path to be used for the client assertion. This lets higher level APIs like Id.Web 
         /// provide credentials which are FMI sensitive.

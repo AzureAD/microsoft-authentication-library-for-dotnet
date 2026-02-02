@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                                         .WithForceRefresh(true)
-                                        .WithAdditionalCacheKeyComponents(null)
+                                        .WithAdditionalCacheKeyComponents((IDictionary<string, string>)null)
                                         .ExecuteAsync(CancellationToken.None)
                                         .ConfigureAwait(false);
 
