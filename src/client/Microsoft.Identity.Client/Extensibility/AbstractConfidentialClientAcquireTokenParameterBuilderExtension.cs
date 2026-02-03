@@ -117,8 +117,6 @@ namespace Microsoft.Identity.Client.Extensibility
                 return builder;
             }
 
-            builder.ValidateUseOfExperimentalFeature();
-
             //Check if the cache parameters are already initialized, if so, add to the existing list
             if (builder.CommonParameters.AdditionalCacheParameters != null)
             {
