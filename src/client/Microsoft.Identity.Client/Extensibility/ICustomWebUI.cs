@@ -7,6 +7,20 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
+    /// <remarks>
+    /// <format type="text/markdown">
+    /// <![CDATA[
+    /// > [!CAUTION]
+    /// > **ICustomWebUi is not recommended for production use due to security risks and current service limitations, and is on a deprecation path.**
+    /// >
+    /// > This pattern introduces security risks and is not supported by Entra ID cloud services. Using native client redirect URIs (like `https://login.microsoftonline.com/common/oauth2/nativeclient`) with custom web UI implementations typically requires users to manually copy the authorization code from the URL—an anti-pattern most commonly seen with the `nativeclient` URI. This pattern will not work in most configurations and poses security risks.
+    /// >
+    /// > - **Recommended Alternatives**: 
+    /// >   - **Use [Broker authentication (WAM)](https://learn.microsoft.com/entra/msal/dotnet/acquiring-tokens/desktop-mobile/wam)** for Windows 10+ applications - provides the best security and user experience
+    /// >   - **Use embedded browser flow** as described in [Using web browsers](https://learn.microsoft.com/entra/msal/dotnet/acquiring-tokens/using-web-browsers)
+    /// ]]>
+    /// </format>
+    /// </remarks>
     /// <summary>
     /// Interface that an MSAL.NET extender can implement to provide their own web UI in public client applications
     /// to sign-in user and have them consented part of the Authorization code flow.
