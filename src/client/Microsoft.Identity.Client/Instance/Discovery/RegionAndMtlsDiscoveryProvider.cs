@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Region
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
         // Map of unsupported sovereign cloud hosts for mTLS PoP to their error messages
-        private static readonly Dictionary<string, string> s_unsupportedMtlsHosts = 
+        private static readonly Dictionary<string, string> s_unsupportedMtlsHosts =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage },
@@ -33,10 +33,10 @@ namespace Microsoft.Identity.Client.Region
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             // Fail fast: Check for unsupported mTLS hosts before any region discovery
-            if (requestContext.MtlsCertificate != null)
+            if (requestContext.IsMtlsRequested)
             {
                 string host = authority.Host;
-                
+
                 // Check if host is in the unsupported list
                 if (s_unsupportedMtlsHosts.TryGetValue(host, out string errorMessage))
                 {
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Region
                         MsalError.MtlsPopNotSupportedForEnvironment,
                         errorMessage);
                 }
-                
+
                 // Check if host starts with "login."
                 if (!host.StartsWith("login.", StringComparison.OrdinalIgnoreCase))
                 {
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Region
             }
 
             string region = null;
-            bool isMtlsEnabled = requestContext.MtlsCertificate != null;
+            bool isMtlsEnabled = requestContext.IsMtlsRequested;
 
             if (requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
@@ -88,7 +88,6 @@ namespace Microsoft.Identity.Client.Region
             string regionalEnv = GetRegionalizedEnvironment(authority, region, requestContext);
             return CreateEntry(authority.Host, regionalEnv);
         }
-        
 
         private static InstanceDiscoveryMetadataEntry CreateEntry(string originalEnv, string regionalEnv)
         {
@@ -106,7 +105,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (KnownMetadataProvider.IsPublicEnvironment(host))
             {
-                if (requestContext.MtlsCertificate != null)
+                if (requestContext.IsMtlsRequested)
                 {
                     requestContext.Logger.Info(() => $"[Region discovery] Using MTLS regional environment: {region}.{PublicEnvForRegionalMtlsAuth}");
                     return $"{region}.{PublicEnvForRegionalMtlsAuth}";
@@ -125,7 +124,7 @@ namespace Microsoft.Identity.Client.Region
                 host = preferredNetworkEnv;
             }
 
-            if (requestContext.MtlsCertificate != null)
+            if (requestContext.IsMtlsRequested)
             {
                 // Modify the host to replace "login" with "mtlsauth" for mTLS scenarios
                 if (host.StartsWith("login"))

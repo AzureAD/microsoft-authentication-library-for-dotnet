@@ -1,1 +1,1 @@
-
+const Microsoft.Identity.Client.MsalError.MtlsBearerWithoutRegion = "mtls_bearer_without_region" -> string
