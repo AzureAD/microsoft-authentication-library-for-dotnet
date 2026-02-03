@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Extensibility
     /// > [!CAUTION]
     /// > **ICustomWebUi is not recommended for production use due to security risks and current service limitations, and is on a deprecation path.**
     /// >
-    /// > This pattern introduces security risks and is not supported by Entra ID cloud services. Using native client redirect URIs (like `https://login.microsoftonline.com/common/oauth2/nativeclient`) with custom web UI implementations typically requires users to manually copy the authorization code from the URL—an anti-pattern most commonly seen with the `nativeclient` URI. This pattern will not work in most configurations and poses security risks.
+    /// > This pattern introduces security risks and is not supported by Entra ID cloud services. Using native client redirect URIs (like `https://login.microsoftonline.com/common/oauth2/nativeclient`) with custom web UI implementations typically requires users to manually copy the authorization code from the URL—an anti-pattern most commonly seen with the `nativeclient` URI. This pattern will not work in most configurations.
     /// >
     /// > - **Recommended Alternatives**: 
     /// >   - **Use [Broker authentication (WAM)](https://learn.microsoft.com/entra/msal/dotnet/acquiring-tokens/desktop-mobile/wam)** for Windows 10+ applications - provides the best security and user experience
