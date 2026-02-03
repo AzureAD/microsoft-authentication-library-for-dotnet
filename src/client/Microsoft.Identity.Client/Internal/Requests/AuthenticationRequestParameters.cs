@@ -119,8 +119,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
 
-        internal bool UseClientAssertionJwtPop => IsMtlsPopRequested || MtlsCertificate != null;
-
         /// <summary>
         /// The certificate resolved and used for client authentication (if certificate-based authentication was used).
         /// This is set during the token request when the certificate is resolved.

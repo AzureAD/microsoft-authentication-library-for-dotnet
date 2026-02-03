@@ -37,11 +37,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// We may still need mTLS transport if the credential can return a TokenBindingCertificate.
         /// </summary>
         private static async Task TryInitImplicitBearerOverMtlsAsync(
-            AcquireTokenCommonParameters p,
+            AcquireTokenCommonParameters tokenParameters,
             IServiceBundle serviceBundle,
             CancellationToken ct)
         {
-            if (p.MtlsCertificate != null)
+            if (tokenParameters.MtlsCertificate != null)
             {
                 ThrowIfRegionMissingForImplicitMtls(serviceBundle);
                 return;
@@ -50,14 +50,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             // Only cert-capable credentials implement this capability interface.
             if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
             {
-                var opts = CreateAssertionRequestOptions(p, serviceBundle, ct);
+                var opts = CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct);
 
                 ClientSignedAssertion ar =
                     await signedProvider.GetAssertionAsync(opts, ct).ConfigureAwait(false);
 
                 if (ar?.TokenBindingCertificate != null)
                 {
-                    p.MtlsCertificate = ar.TokenBindingCertificate;
+                    tokenParameters.MtlsCertificate = ar.TokenBindingCertificate;
                     ThrowIfRegionMissingForImplicitMtls(serviceBundle);
                 }
             }

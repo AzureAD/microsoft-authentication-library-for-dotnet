@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Region
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
         // Map of unsupported sovereign cloud hosts for mTLS PoP to their error messages
-        private static readonly Dictionary<string, string> s_unsupportedMtlsHosts = 
+        private static readonly Dictionary<string, string> s_unsupportedMtlsHosts =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage },
@@ -33,10 +33,10 @@ namespace Microsoft.Identity.Client.Region
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             // Fail fast: Check for unsupported mTLS hosts before any region discovery
-            if (requestContext.MtlsCertificate != null)
+            if (requestContext.IsMtlsRequested)
             {
                 string host = authority.Host;
-                
+
                 // Check if host is in the unsupported list
                 if (s_unsupportedMtlsHosts.TryGetValue(host, out string errorMessage))
                 {
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Region
                         MsalError.MtlsPopNotSupportedForEnvironment,
                         errorMessage);
                 }
-                
+
                 // Check if host starts with "login."
                 if (!host.StartsWith("login.", StringComparison.OrdinalIgnoreCase))
                 {
@@ -88,7 +88,6 @@ namespace Microsoft.Identity.Client.Region
             string regionalEnv = GetRegionalizedEnvironment(authority, region, requestContext);
             return CreateEntry(authority.Host, regionalEnv);
         }
-        
 
         private static InstanceDiscoveryMetadataEntry CreateEntry(string originalEnv, string regionalEnv)
         {
