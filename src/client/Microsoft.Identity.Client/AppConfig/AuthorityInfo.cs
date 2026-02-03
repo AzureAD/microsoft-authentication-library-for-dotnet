@@ -261,6 +261,12 @@ namespace Microsoft.Identity.Client
                     return "https://login.microsoftonline.de";
                 case AzureCloudInstance.AzureUsGovernment:
                     return "https://login.microsoftonline.us";
+                case AzureCloudInstance.AzureBleu:
+                    return "https://login.sovcloud-identity.fr";
+                case AzureCloudInstance.AzureDelos:
+                    return "https://login.sovcloud-identity.de";
+                case AzureCloudInstance.AzureGovSG:
+                    return "https://login.sovcloud-identity.sg";
                 default:
                     throw new ArgumentException(nameof(azureCloudInstance));
             }
