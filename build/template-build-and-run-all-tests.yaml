@@ -123,7 +123,7 @@ jobs: #Build and stage projects
   displayName: 'Managed Identity E2E Tests – VM / IMDS'
   dependsOn: ['BuildAndStageProjects']
   pool:
-    name: 'ID4SMSIHostedAgent'
+    name: 'MSALMSIV2'
   condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
 
   steps:
