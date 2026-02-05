@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -865,20 +866,38 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [TestMethod]
-        public async Task EnsureCertificateSerialNumberIsAddedToCacheKeyTestAsync()
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task EnsureCertificateSerialNumberIsAddedToCacheKeyTestAsync(bool useCertificateOptions)
         {
             using (var httpManager = new MockHttpManager())
             {
                 var certificate = CertHelper.GetOrCreateTestCert();
 
-                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                               .WithRedirectUri(TestConstants.RedirectUri)
-                                              .WithCertificate(certificate, true, true)
                                               .WithHttpManager(httpManager)
-                                              .WithExperimentalFeatures()
-                                              .BuildConcrete();
+                                              .WithExperimentalFeatures();
+
+                if (useCertificateOptions)
+                {
+                    CertificateOptions certificateOptions = new CertificateOptions()
+                    {
+                        SendX5C = true,
+                        AssociateTokensWithCertificate = true
+                    };
+
+                    builder.WithCertificate(certificate, certificateOptions);
+                }
+                else
+                {
+                    builder.WithCertificate(certificate, true, true);
+                }
+
+                var app = builder.BuildConcrete();
 
                 app.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
                 app.AppTokenCache.SetAfterAccess(AfterCacheAccess);
@@ -965,8 +984,10 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [TestMethod]
-        public async Task EnsureDefaultCacheKeyBehaviorWhenCertSerialNumberIsNotUsedTestAsync()
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task EnsureDefaultCacheKeyBehaviorWhenCertSerialNumberIsNotUsedTestAsync(bool useCertificateOptions)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -980,6 +1001,9 @@ namespace Microsoft.Identity.Test.Unit
                                               .WithHttpManager(httpManager)
                                               .WithExperimentalFeatures()
                                               .BuildConcrete();
+
+
+
 
                 app.AppTokenCache.SetBeforeAccess(BeforeCacheAccess);
                 app.AppTokenCache.SetAfterAccess(AfterCacheAccess);

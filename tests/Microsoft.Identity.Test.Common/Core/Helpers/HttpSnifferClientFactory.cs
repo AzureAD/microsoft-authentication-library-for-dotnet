@@ -25,18 +25,26 @@ namespace Microsoft.Identity.Test.Common
         {
             RequestsAndResponses = new List<(HttpRequestMessage, HttpResponseMessage)>();
 
-            var recordingHandler = new RecordingHandler((req, res) => {
+            var recordingHandler = new RecordingHandler((req, res) =>
+            {
+                // Always capture body so tests that assert on it don't break
                 if (req.Content != null)
                 {
                     req.Content.LoadIntoBufferAsync().GetAwaiter().GetResult();
                     LastHttpContentData = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 }
-
+            
+                // Always record so tests can assert on traffic
                 RequestsAndResponses.Add((req, res));
-                
-                Trace.WriteLine($"[MSAL][HTTP Request]: {req}");
-                Trace.WriteLine($"[MSAL][HTTP Response]: {res}");
+            
+                // Only print when MSAL_TEST_LOGGING is set
+                if (Environment.GetEnvironmentVariable("MSAL_TEST_LOGGING") != null)
+                {
+                    Trace.WriteLine($"[MSAL][HTTP Request]: {req}");
+                    Trace.WriteLine($"[MSAL][HTTP Response]: {res}");
+                }
             });
+
             recordingHandler.InnerHandler = new HttpClientHandler();
             _httpClient = new HttpClient(recordingHandler);
         }

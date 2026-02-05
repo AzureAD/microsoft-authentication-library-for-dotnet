@@ -399,8 +399,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // 2) If an mTLS cert is supplied for THIS request, reuse cache only if
             //    the cached token's KeyId matches the one provided in the request.
             X509Certificate2 requestCert = AuthenticationRequestParameters.MtlsCertificate;
-            
-            if (requestCert != null)
+
+            if (requestCert != null && AuthenticationRequestParameters.IsMtlsPopRequested)
             {
                 string expectedKid = CoreHelpers.ComputeX5tS256KeyId(requestCert);
 

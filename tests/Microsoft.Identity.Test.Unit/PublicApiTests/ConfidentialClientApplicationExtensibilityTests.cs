@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -17,11 +18,201 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [DeploymentItem(@"Resources\testCert.crtfile")]
     public class ConfidentialClientApplicationExtensibilityTests : TestBase
     {
+        private CertificateOptions _certificateOptions = new CertificateOptions();
+
         [TestInitialize]
         public override void TestInitialize()
         {
             base.TestInitialize();
         }
+
+        #region CertificateOptions Tests
+
+        [TestMethod]
+        [Description("WithCertificate with CertificateOptions SendX5C=false stores options correctly")]
+        public void WithCertificate_CertificateOptions_SendX5C_False()
+        {
+            // Arrange
+            var certificate = CertHelper.GetOrCreateTestCert();
+            var certificateOptions = new CertificateOptions { SendX5C = false };
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithCertificate((AssertionRequestOptions options) =>
+                {
+                    return Task.FromResult(certificate);
+                }, certificateOptions)
+                .BuildConcrete();
+
+            // Assert
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).SendX5C, "SendX5C should be false when CertificateOptions.SendX5C is false");
+        }
+
+        [TestMethod]
+        [Description("WithCertificate with CertificateOptions SendX5C=true stores options correctly")]
+        public void WithCertificate_CertificateOptions_SendX5C_True()
+        {
+            // Arrange
+            var certificate = CertHelper.GetOrCreateTestCert();
+            var certificateOptions = new CertificateOptions { SendX5C = true };
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithCertificate((AssertionRequestOptions options) =>
+                {
+                    return Task.FromResult(certificate);
+                }, certificateOptions)
+                .BuildConcrete();
+
+            // Assert
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).SendX5C, "SendX5C should be true when CertificateOptions.SendX5C is true");
+        }
+
+        [TestMethod]
+        [Description("WithCertificate with null CertificateOptions defaults SendX5C to false")]
+        public void WithCertificate_NullCertificateOptions_DefaultsToFalse()
+        {
+            // Arrange
+            var certificate = CertHelper.GetOrCreateTestCert();
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithCertificate((AssertionRequestOptions options) =>
+                {
+                    return Task.FromResult(certificate);
+                }, null)
+                .BuildConcrete();
+
+            // Assert
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).SendX5C, "SendX5C should default to false when CertificateOptions is null");
+        }
+
+        [TestMethod]
+        [Description("CertificateOptions with SendX5C=true works in full token acquisition flow")]
+        public async Task CertificateOptions_SendX5C_True_InTokenAcquisitionAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var certificateOptions = new CertificateOptions { SendX5C = true };
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate((AssertionRequestOptions options) =>
+                    {
+                        return Task.FromResult(certificate);
+                    }, certificateOptions)
+                    .Build();
+
+                harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(sendX5C: true);
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        [Description("CertificateOptions with SendX5C=false works in full token acquisition flow")]
+        public async Task CertificateOptions_SendX5C_False_InTokenAcquisitionAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var certificateOptions = new CertificateOptions { SendX5C = false };
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate((AssertionRequestOptions options) =>
+                    {
+                        return Task.FromResult(certificate);
+                    }, certificateOptions)
+                    .Build();
+
+                harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        [Description("CertificateOptions works with retry scenario")]
+        public async Task CertificateOptions_WorksWithRetryScenarioAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var certificateOptions = new CertificateOptions { SendX5C = true };
+                int retryCount = 0;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate((AssertionRequestOptions options) =>
+                    {
+                        return Task.FromResult(certificate);
+                    }, certificateOptions)
+                    .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
+                    {
+                        retryCount++;
+                        return Task.FromResult(retryCount < 2);
+                    })
+                    .Build();
+
+                // Mock: fail once, then succeed
+                harness.HttpManager.AddFailureTokenEndpointResponse("request_failed");
+                harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(sendX5C: true);
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(1, retryCount, "Should have retried once");
+            }
+        }
+
+        #endregion
 
         #region WithCertificate (Dynamic Provider) Integration Tests
 
@@ -54,7 +245,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNotNull(options.TokenEndpoint);
                         
                         return Task.FromResult(certificate);
-                    })
+                    }, _certificateOptions)
                     .Build();
 
                 harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
@@ -89,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithCertificate((AssertionRequestOptions options) =>
                     {
                         return Task.FromResult<System.Security.Cryptography.X509Certificates.X509Certificate2>(null); // Provider returns null
-                    })
+                    }, _certificateOptions)
                     .Build();
 
                 // Act & Assert
@@ -224,7 +415,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithCertificate((AssertionRequestOptions options) =>
                     {
                         return Task.FromResult<System.Security.Cryptography.X509Certificates.X509Certificate2>(null); // Will cause MsalClientException
-                    })
+                    }, _certificateOptions)
                     .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         callbackInvoked = true;
@@ -442,7 +633,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in cert provider");
                         return Task.FromResult(certificate);
-                    })
+                    }, _certificateOptions)
                     .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         retryCallbackCount++;
@@ -508,7 +699,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         certProviderCount++;
                         // Return different cert on retry
                         return Task.FromResult(certProviderCount == 1 ? cert1 : cert2);
-                    })
+                    }, _certificateOptions)
                     .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
                     {
                         // Validate ExecutionResult

@@ -67,7 +67,8 @@ namespace Microsoft.Identity.Client
         /// The string needs to be properly URL-encoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// </param>
         /// <returns>The builder to chain .With methods.</returns>
-        [Obsolete("This method is deprecated. Please use the WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
+        [Obsolete("This method is deprecated. Please use the " +
+            "WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
         public T WithExtraQueryParameters(string extraQueryParameters)
         {
             if (!string.IsNullOrWhiteSpace(extraQueryParameters))
@@ -342,7 +343,6 @@ namespace Microsoft.Identity.Client
 
         internal /* for testing */ T WithAuthenticationOperation(IAuthenticationOperation authOperation)
         {
-            ValidateUseOfExperimentalFeature();
             CommonParameters.AuthenticationOperation = authOperation ?? throw new ArgumentNullException(nameof(authOperation));
             return this as T;
         }

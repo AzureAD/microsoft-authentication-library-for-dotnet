@@ -20,8 +20,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
     public class AuthorityTests : TestBase
     {
         private static readonly Authority s_commonAuthority = Authority.CreateAuthority(TestConstants.AuthorityCommonTenant, true);
-        private static readonly string s_ppeCommonUri = $@"https://{TestConstants.PpeEnvironment}/{TestConstants.TenantId}";
-        private static readonly Authority s_ppeAuthority = Authority.CreateAuthority(s_ppeCommonUri, true);
         private static readonly string s_ppeOrgCommonUri = $@"https://{TestConstants.PpeOrgEnvironment}/{TestConstants.TenantId}";
         private static readonly Authority s_ppeOrgAuthority = Authority.CreateAuthority(s_ppeOrgCommonUri, true);
         private static readonly Authority s_utidAuthority = Authority.CreateAuthority(TestConstants.AuthorityUtidTenant, true);
