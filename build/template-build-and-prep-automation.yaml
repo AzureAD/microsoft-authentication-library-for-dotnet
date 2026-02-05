@@ -121,11 +121,12 @@ steps:
 
         # Managed Identity app runtime DLL check
         $managedIdentityFolder = Join-Path $(Build.SourcesDirectory) 'ManagedIdentityAppVM'
-        $managedIdentityDll = Join-Path $managedIdentityFolder 'bin\Release\net8.0\AttestationClientLib.dll'
-        Write-Host $managedIdentityDll
-        if (-not(Test-Path -Path $managedIdentityDll -PathType Leaf))
+        $managedIdentityDll = Join-Path $managedIdentityFolder 'bin\Release\net8.0\runtimes\win-x64\native\AttestationClientLib.dll'
+        
+        Write-Host "Checking: $managedIdentityDll"
+        if (-not (Test-Path -Path $managedIdentityDll -PathType Leaf))
         {
-            $errors += "Failed to find AttestationClientLib.dll in : " + $managedIdentityFolder + "`n";
+            $errors += "Failed to find AttestationClientLib.dll at: $managedIdentityDll`n"
         }
 
         #exit if there are errors
