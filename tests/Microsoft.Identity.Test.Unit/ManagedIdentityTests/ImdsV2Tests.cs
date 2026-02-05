@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             // Inject mock attestation provider to avoid loading native DLL in tests
-            PopKeyAttestor.s_testAttestationOverride = TestAttestationProviders.CreateFakeAttestationResultProvider();
+            PopKeyAttestor.s_testAttestationProvider = TestAttestationProviders.CreateFakeAttestationResultProvider();
         }
 
         [TestCleanup]
@@ -63,8 +63,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             // Cleanup handled automatically with delegate-based approach
 
-            // Reset test override to ensure clean state for other tests
-            PopKeyAttestor.s_testAttestationOverride = null;
+            // Reset test provider to ensure clean state for other tests
+            PopKeyAttestor.s_testAttestationProvider = null;
         }
 
         private void AddMocksToGetEntraToken(

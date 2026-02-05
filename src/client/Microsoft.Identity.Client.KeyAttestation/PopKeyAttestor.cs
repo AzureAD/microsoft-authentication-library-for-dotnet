@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// This field is internal and accessible only via InternalsVisibleTo for test assemblies.
         /// Tests should not run in parallel when using this hook to avoid race conditions.
         /// </remarks>
-        internal static Func<string, SafeHandle, string, CancellationToken, Task<AttestationResult>> s_testAttestationOverride;
+        internal static Func<string, SafeHandle, string, CancellationToken, Task<AttestationResult>> s_testAttestationProvider;
         /// <summary>
         /// Asynchronously attests a Credential Guard/CNG key with the remote attestation service and returns a JWT.
         /// Wraps the synchronous <see cref="AttestationClient.Attest"/> in a Task.Run so callers can
@@ -54,10 +54,10 @@ namespace Microsoft.Identity.Client.KeyAttestation
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Check for test override to avoid loading native DLL in unit tests
-            if (s_testAttestationOverride != null)
+            // Check for test provider to avoid loading native DLL in unit tests
+            if (s_testAttestationProvider != null)
             {
-                return s_testAttestationOverride(endpoint, keyHandle, clientId, cancellationToken);
+                return s_testAttestationProvider(endpoint, keyHandle, clientId, cancellationToken);
             }
 
             return Task.Run(() =>

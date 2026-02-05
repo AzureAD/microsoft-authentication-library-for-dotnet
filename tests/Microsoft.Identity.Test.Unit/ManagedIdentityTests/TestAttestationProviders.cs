@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         /// <summary>
         /// Creates a fake attestation provider delegate that returns a mock AttestationResult.
-        /// This is used with PopKeyAttestor.s_testAttestationOverride for unit testing.
+        /// This is used with PopKeyAttestor.s_testAttestationProvider for unit testing.
         /// </summary>
         public static Func<string, SafeHandle, string, CancellationToken, Task<AttestationResult>> CreateFakeAttestationResultProvider()
         {
