@@ -27,11 +27,6 @@
     <Product>Microsoft Authentication Library</Product>
   </PropertyGroup>
 
-  <!-- ─── Credential Guard package directory ────────────────────────────── -->
-  <PropertyGroup>
-    <_KeyGuardPkgDir>$(NuGetPackageRoot)microsoft.azure.security.keyguardattestation\1.1.4\</_KeyGuardPkgDir>
-  </PropertyGroup>
-
   <!-- ─── File inclusions ───────────────────────────────────────────────── -->
   <ItemGroup>
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
@@ -48,16 +43,6 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <PackageReference Include="System.Security.Cryptography.Cng" />
-  </ItemGroup>
-
-  <!-- ─── Native DLL handling ────────────────────────────────────────────── -->
-  <ItemGroup Condition="'$(OS)' == 'Windows_NT' and Exists('$(_KeyGuardPkgDir)build\native\lib\x64\AttestationClientLib.dll')">
-    <None Include="$(_KeyGuardPkgDir)build\native\lib\x64\AttestationClientLib.dll">
-      <TargetPath>AttestationClientLib.dll</TargetPath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Visible>false</Visible>
-    </None>
   </ItemGroup>
 
   <ItemGroup Label="For public api analyzer support">
