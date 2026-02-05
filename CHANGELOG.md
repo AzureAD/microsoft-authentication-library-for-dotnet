@@ -1,3 +1,15 @@
+4.82.1
+======
+
+### Bug Fixes
+
+* Remove experimental flag requirement from IAuthenticationOperation [#5699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5699)
+* Add security warning to ICustomWebUi documentation [#5704](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5704)
+
+### Changes
+
+* Adds support for implicit mTLS (Mutual TLS) transport for client assertion delegates [#5670](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5670)
+
 4.82.0
 ======
 
