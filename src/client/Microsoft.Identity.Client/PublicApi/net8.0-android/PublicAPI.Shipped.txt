@@ -1048,6 +1048,7 @@ Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithExtraQueryParameters
 Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, (string Value, bool IncludeInCacheKey)> extraQueryParameters) -> T
 const Microsoft.Identity.Client.MsalError.CannotSwitchBetweenImdsVersionsForPreview = "cannot_switch_between_imds_versions_for_preview" -> string
 const Microsoft.Identity.Client.MsalError.InvalidCertificate = "invalid_certificate" -> string
+const Microsoft.Identity.Client.MsalError.MtlsBearerWithoutRegion = "mtls_bearer_without_region" -> string
 const Microsoft.Identity.Client.MsalError.MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity" -> string
 const Microsoft.Identity.Client.MsalError.MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1" -> string
 Microsoft.Identity.Client.IMsalMtlsHttpClientFactory
