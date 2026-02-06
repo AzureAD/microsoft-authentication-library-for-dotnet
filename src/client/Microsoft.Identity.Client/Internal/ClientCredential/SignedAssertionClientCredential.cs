@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _signedAssertion = signedAssertion;
         }
 
-        public Task AddConfidentialClientParametersAsync(
+        public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
             AuthenticationRequestParameters requestParameters,
             ICryptographyManager cryptographyManager, 
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         {
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, _signedAssertion);
-            return Task.CompletedTask;
+            return Task.FromResult(ClientCredentialApplicationResult.None);
         }
     }
 }

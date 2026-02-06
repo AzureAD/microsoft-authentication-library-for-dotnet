@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         AssertionType AssertionType { get; }
 
-        Task AddConfidentialClientParametersAsync(
+        Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
               OAuth2Client oAuth2Client,
               AuthenticationRequestParameters authenticationRequestParameters,
               ICryptographyManager cryptographyManager,

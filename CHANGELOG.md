@@ -1,3 +1,31 @@
+4.82.1
+======
+
+### Bug Fixes
+
+* Remove experimental flag requirement from IAuthenticationOperation [#5699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5699)
+* Add security warning to ICustomWebUi documentation [#5704](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5704)
+
+### Changes
+
+* Adds support for implicit mTLS (Mutual TLS) transport for client assertion delegates [#5670](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5670)
+
+4.82.0
+======
+
+### Highlights
+This release expands extensibility for confidential-client authentication (certificates + client assertions), adds additional sovereign cloud environments, and hardens security-sensitive flows (mTLS PoP and system browser auth) with clearer validation and safer defaults.
+
+### Features
+* **Certificate-based confidential client extensibility:** Introduced `CertificateOptions` and updated `WithCertificate` extensibility APIs to accept it, including support for passing `sendX5C` configuration through the options model. ([#5655](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5655))
+* **Sovereign cloud support:** Added instance discovery / authority validation support for Bleu (France), Delos (Germany), and GovSG (Singapore) cloud environments. ([#5671](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5671))
+* **Client assertion customization:** Added `WithExtraClientAssertionClaims` on `AcquireTokenForClientParameterBuilder` to enable supplying additional signed claims in client assertions (intended for advanced scenarios and higher-level libraries). ([#5650](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5650))
+* **mTLS PoP guardrails:** Added validation and explicit error handling when mTLS PoP is requested for unsupported environments and/or non-`login.*` hosts. ([#5684](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5684))
+* **System browser hardening:** Added `response_mode=form_post` support for the default system browser (loopback) flow. MSAL will enforce `form_post` and process the authorization response from POST data. ([#5678](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5678))
+
+### Changes
+* **Key Attestation packaging rename:** `Microsoft.Identity.Client.MtlsPop` renamed to `Microsoft.Identity.Client.KeyAttestation` (assembly/package naming update). ([#5653](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5653))
+
 4.81.0
 ======
 
@@ -27,6 +55,21 @@
 * Bump winsdk dependency  [#5575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5575)
 * ImdsV2 probe does not fire when .WithMtlsProofOfPossesstion is not used [#5579](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5579)
 * Downgrade System.Formats.Asn1 to match ID web [#5583](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5583)
+
+4.79.1
+======
+
+### Dependency Update
+
+This hotfix release addresses compatibility between MSAL.NET and Microsoft.Identity.Web by **downgrading the System.Formats.Asn1 dependency** from version 9.0.8 to 8.0.1.
+
+#### What Changed
+* **System.Formats.Asn1 downgraded to v8.0.1** ([#5583](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5583))
+  - Ensures compatibility with Microsoft.Identity.Web and other dependencies
+
+#### Why This Release
+
+MSAL.NET 4.79.0 introduced a dependency on System.Formats.Asn1 9.0.8, which created version conflicts with Microsoft.Identity.Web and other packages that require System.Formats.Asn1 8.0.1. This hotfix resolves those conflicts to maintain ecosystem compatibility.
 
 4.79.0
 ======

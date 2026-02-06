@@ -32,6 +32,8 @@ namespace Microsoft.Identity.Client.Internal
         public X509Certificate2 MtlsCertificate { get; }
 
         public bool IsAttestationRequested { get; set; }
+        
+        public bool IsMtlsRequested { get; set; }
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken cancellationToken = default)
         {
@@ -39,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal
             Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
-            MtlsCertificate = mtlsCertificate;
+            IsMtlsRequested = mtlsCertificate != null;
         }
     }
 }
