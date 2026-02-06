@@ -192,5 +192,132 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             return certificate;
         }
+
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var startTime = System.Diagnostics.Stopwatch.StartNew();
+
+            // Resolve the certificate via the provider
+            var options = new AssertionRequestOptions
+            {
+                ClientID = requestContext.ClientId,
+                TokenEndpoint = requestContext.TokenEndpoint,
+                TenantId = requestContext.TenantId,
+                Claims = requestContext.Claims,
+                ClientCapabilities = requestContext.ClientCapabilities,
+                CancellationToken = cancellationToken
+            };
+
+            X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
+
+            // Validate the certificate returned by the provider
+            if (certificate is null)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
+            }
+
+            try
+            {
+                if (!certificate.HasPrivateKey)
+                {
+                    throw new MsalClientException(
+                        MsalError.CertWithoutPrivateKey,
+                        MsalErrorMessage.CertMustHavePrivateKey(certificate.FriendlyName));
+                }
+            }
+            catch (System.Security.Cryptography.CryptographicException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.CryptographicError,
+                    MsalErrorMessage.CryptographicError,
+                    ex);
+            }
+
+            startTime.Stop();
+
+            // If mTLS cert is already set for the request, return it without creating JWT assertion
+            if (requestContext.MtlsRequired)
+            {
+                var mtlsMaterial = new CredentialMaterial
+                {
+                    TokenRequestParameters = new Dictionary<string, string>(),
+                    MtlsCertificate = certificate,
+                    Metadata = new CredentialMaterialMetadata
+                    {
+                        CredentialType = AssertionType.CertificateWithoutSni,
+                        CredentialSource = Certificate != null ? "static" : "callback",
+                        MtlsCertificateRequested = true,
+                        MtlsCertificateIdHashPrefix = GetCertificateIdHashPrefix(certificate),
+                        ResolutionTimeMs = startTime.ElapsedMilliseconds
+                    }
+                };
+
+                return mtlsMaterial;
+            }
+
+            // JWT bearer client assertion path
+            JsonWebToken jwtToken;
+            if (!string.IsNullOrEmpty(requestContext.Claims))
+            {
+                jwtToken = new JsonWebToken(
+                    requestContext.CryptographyManager,
+                    requestContext.ClientId,
+                    requestContext.TokenEndpoint,
+                    requestContext.Claims,
+                    _appendDefaultClaims);
+            }
+            else
+            {
+                jwtToken = new JsonWebToken(
+                    requestContext.CryptographyManager,
+                    requestContext.ClientId,
+                    requestContext.TokenEndpoint,
+                    _claimsToSign,
+                    _appendDefaultClaims);
+            }
+
+            string assertion = jwtToken.Sign(certificate, requestContext.SendX5C, requestContext.UseSha2);
+
+            var parameters = new Dictionary<string, string>
+            {
+                [OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer,
+                [OAuth2Parameter.ClientAssertion] = assertion
+            };
+
+            var material = new CredentialMaterial
+            {
+                TokenRequestParameters = parameters,
+                MtlsCertificate = null,
+                Metadata = new CredentialMaterialMetadata
+                {
+                    CredentialType = AssertionType.CertificateWithoutSni,
+                    CredentialSource = Certificate != null ? "static" : "callback",
+                    MtlsCertificateRequested = requestContext.MtlsRequired,
+                    ResolutionTimeMs = startTime.ElapsedMilliseconds
+                }
+            };
+
+            return material;
+        }
+
+        private static string GetCertificateIdHashPrefix(X509Certificate2 certificate)
+        {
+            if (certificate is null)
+            {
+                return null;
+            }
+
+            // Compute SHA-256 of the certificate's raw data and return first 16 hex chars
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] hash = sha256.ComputeHash(certificate.RawData);
+                string fullHash = BitConverter.ToString(hash).Replace("-", string.Empty);
+                return fullHash.Substring(0, Math.Min(16, fullHash.Length));
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -57,6 +58,55 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
 
             return ClientCredentialApplicationResult.None;
+        }
+
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var startTime = System.Diagnostics.Stopwatch.StartNew();
+
+            var opts = new AssertionRequestOptions
+            {
+                CancellationToken = cancellationToken,
+                ClientID = requestContext.ClientId,
+                TokenEndpoint = requestContext.TokenEndpoint,
+                TenantId = requestContext.TenantId,
+                ClientCapabilities = requestContext.ClientCapabilities,
+                Claims = requestContext.Claims
+            };
+
+            string assertion = await _provider(opts, cancellationToken).ConfigureAwait(false);
+
+            startTime.Stop();
+
+            if (string.IsNullOrWhiteSpace(assertion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    MsalErrorMessage.InvalidClientAssertionEmpty);
+            }
+
+            var parameters = new Dictionary<string, string>
+            {
+                [OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer,
+                [OAuth2Parameter.ClientAssertion] = assertion
+            };
+
+            var material = new CredentialMaterial
+            {
+                TokenRequestParameters = parameters,
+                MtlsCertificate = null,
+                Metadata = new CredentialMaterialMetadata
+                {
+                    CredentialType = AssertionType.ClientAssertion,
+                    CredentialSource = "callback",
+                    MtlsCertificateRequested = requestContext.MtlsRequired,
+                    ResolutionTimeMs = startTime.ElapsedMilliseconds
+                }
+            };
+
+            return material;
         }
     }
 }

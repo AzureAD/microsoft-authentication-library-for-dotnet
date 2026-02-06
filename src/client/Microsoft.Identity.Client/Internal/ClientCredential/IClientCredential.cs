@@ -27,5 +27,13 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
               ICryptographyManager cryptographyManager,
               string tokenEndpoint,
               CancellationToken cancellationToken);
+
+        /// <summary>
+        /// New Phase 1 method: resolves credential material in normalized form.
+        /// Returns credential parameters, optional mTLS certificate, and metadata.
+        /// </summary>
+        Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken);
     }
 }
