@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Test.E2E
     public class ManagedIdentityImdsV2Tests
     {
         private const string ArmScope = "https://management.azure.com";
+        private const string KeyguardNotAvailableErrorCode = "keyguard_not_available";
 
         private static IManagedIdentityApplication BuildMi(
            string userAssignedId = null,
@@ -172,7 +173,7 @@ namespace Microsoft.Identity.Test.E2E
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
-            catch (MsalClientException ex) when (ex.ErrorCode == "keyguard_not_available")
+            catch (MsalClientException ex) when (ex.ErrorCode == KeyguardNotAvailableErrorCode)
             {
                 Assert.Inconclusive("Credential Guard is not available on this machine. Test skipped.");
                 return;
@@ -224,7 +225,7 @@ namespace Microsoft.Identity.Test.E2E
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
-            catch (MsalClientException ex) when (ex.ErrorCode == "keyguard_not_available" ||
+            catch (MsalClientException ex) when (ex.ErrorCode == KeyguardNotAvailableErrorCode ||
                                                    ex.Message.Contains("Credential Guard", StringComparison.OrdinalIgnoreCase))
             {
                 attestationUnavailable = true;
@@ -268,7 +269,7 @@ namespace Microsoft.Identity.Test.E2E
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
-            catch (MsalClientException ex) when (ex.ErrorCode == "keyguard_not_available")
+            catch (MsalClientException ex) when (ex.ErrorCode == KeyguardNotAvailableErrorCode)
             {
                 Assert.Inconclusive("Credential Guard is not available. Cannot verify RSACng key properties.");
                 return;
