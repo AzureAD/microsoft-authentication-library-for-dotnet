@@ -40,6 +40,17 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
+        // TODO: Full implementation in later phase - need to handle JWT-PoP selection based on MtlsRequired
+        // For Phase 1, throw NotImplementedException to indicate this path is not ready yet
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException(
+                "GetCredentialMaterialAsync for ClientAssertionDelegateCredential will be implemented in a future phase. " +
+                "Currently, only the legacy AddConfidentialClientParametersAsync path is supported.");
+        }
+
         // ──────────────────────────────────
         //  Main hook for token requests
         // ──────────────────────────────────

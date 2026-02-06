@@ -21,6 +21,16 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         AssertionType AssertionType { get; }
 
+        /// <summary>
+        /// Resolves credential material (auth params + optional mTLS certificate).
+        /// Called EXACTLY ONCE per logical token request.
+        /// Must not return null; return empty TokenRequestParameters if no auth params.
+        /// Metadata must not contain secrets or PII.
+        /// </summary>
+        Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken);
+
         Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
               OAuth2Client oAuth2Client,
               AuthenticationRequestParameters authenticationRequestParameters,
