@@ -495,6 +495,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.ClientInfo] = "2"
             };
 
+            // Phase 1: If orchestrator has resolved the credential material, apply it here
+            if (AuthenticationRequestParameters.ResolvedCredentialMaterial != null)
+            {
+                var material = AuthenticationRequestParameters.ResolvedCredentialMaterial;
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose(
+                    () => "[ClientCredentialRequest] Using resolved credential material from orchestrator.");
+
+                if (material.TokenRequestParameters != null)
+                {
+                    foreach (var kvp in material.TokenRequestParameters)
+                    {
+                        dict[kvp.Key] = kvp.Value;
+                    }
+                }
+            }
+
             return dict;
         }
 

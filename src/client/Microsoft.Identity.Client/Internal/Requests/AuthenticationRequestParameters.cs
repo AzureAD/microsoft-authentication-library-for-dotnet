@@ -126,6 +126,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public X509Certificate2 ResolvedCertificate { get; set; }
 
         /// <summary>
+        /// Phase 1: Resolved credential material from the orchestrator.
+        /// Contains auth parameters, optional mTLS cert, and metadata.
+        /// Set once per logical token request and reused for retries.
+        /// </summary>
+        public Internal.ClientCredential.CredentialMaterial ResolvedCredentialMaterial { get; set; }
+
+        /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>
         /// <remarks>If user configured claims, request should bypass cache</remarks>

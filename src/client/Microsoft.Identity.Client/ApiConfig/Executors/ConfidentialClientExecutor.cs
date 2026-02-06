@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
@@ -72,12 +74,61 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
        
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
 
+            // Phase 1: Invoke orchestrator to resolve credential material once
+            if (ServiceBundle.Config.ClientCredential != null)
+            {
+                await ResolveCredentialMaterialAsync(requestParams, cancellationToken).ConfigureAwait(false);
+            }
+
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
                 requestParams,
                 clientParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task ResolveCredentialMaterialAsync(
+            AuthenticationRequestParameters requestParams,
+            CancellationToken cancellationToken)
+        {
+            var tokenEndpoint = await requestParams.Authority.GetTokenEndpointAsync(requestParams.RequestContext)
+                .ConfigureAwait(false);
+
+            // Build CredentialRequestContext
+            var credentialRequestContext = new CredentialRequestContext
+            {
+                ClientId = ServiceBundle.Config.ClientId,
+                TokenEndpoint = tokenEndpoint,
+                Claims = requestParams.ClaimsAndClientCapabilities,
+                ClientCapabilities = ServiceBundle.Config.ClientCapabilities?.ToList(),
+                MtlsRequired = requestParams.IsMtlsPopRequested,
+                CancellationToken = cancellationToken,
+                CryptographyManager = ServiceBundle.PlatformProxy.CryptographyManager,
+                UseSha2 = true,
+                SendX5C = requestParams.SendX5C,
+                TenantId = requestParams.Authority.TenantId
+            };
+
+            // Build MtlsValidationContext
+            var mtlsValidationContext = new MtlsValidationContext
+            {
+                AuthorityType = requestParams.Authority.AuthorityInfo.AuthorityType,
+                AzureRegion = ServiceBundle.Config.AzureRegion
+            };
+
+            // Invoke orchestrator once
+            var orchestrator = new CredentialMaterialOrchestrator(
+                ServiceBundle.Config.ClientCredential,
+                requestParams.RequestContext.Logger);
+
+            CredentialMaterial material = await orchestrator.GetValidatedMaterialAsync(
+                credentialRequestContext,
+                mtlsValidationContext,
+                cancellationToken).ConfigureAwait(false);
+
+            // Store result for use in ClientCredentialRequest
+            requestParams.ResolvedCredentialMaterial = material;
         }
 
         public async Task<AuthenticationResult> ExecuteAsync(

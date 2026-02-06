@@ -129,7 +129,10 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
-            if (_serviceBundle.Config.ClientCredential != null)
+            // Phase 1: If credential material is resolved, skip the old path
+            bool useResolvedMaterial = _requestParams.ResolvedCredentialMaterial != null;
+
+            if (_serviceBundle.Config.ClientCredential != null && !useResolvedMaterial)
             {
                 _requestParams.RequestContext.Logger.Verbose(
                     () => "[TokenClient] Before adding the client assertion / secret");
@@ -145,6 +148,11 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 _requestParams.RequestContext.Logger.Verbose(
                     () => "[TokenClient] After adding the client assertion / secret");
+            }
+            else if (useResolvedMaterial)
+            {
+                _requestParams.RequestContext.Logger.Verbose(
+                    () => "[TokenClient] Using resolved credential material from orchestrator.");
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
