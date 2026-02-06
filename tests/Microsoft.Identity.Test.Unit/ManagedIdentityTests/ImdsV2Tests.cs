@@ -53,12 +53,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // A broad sweep is simplest and safe for our fake endpoints/certs
                 ImdsV2TestStoreCleaner.RemoveAllTestArtifacts();
             }
+
+            // Inject mock attestation provider to avoid loading native DLL in tests
+            PopKeyAttestor.s_testAttestationProvider = TestAttestationProviders.CreateFakeAttestationResultProvider();
         }
 
         [TestCleanup]
         public void ImdsV2Tests_Cleanup()
         {
             // Cleanup handled automatically with delegate-based approach
+
+            // Reset test provider to ensure clean state for other tests
+            PopKeyAttestor.s_testAttestationProvider = null;
         }
 
         private void AddMocksToGetEntraToken(
