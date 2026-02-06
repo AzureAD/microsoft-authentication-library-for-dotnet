@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
@@ -21,6 +22,27 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public SecretStringClientCredential(string secret)
         {
             Secret = secret;
+        }
+
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var parameters = new Dictionary<string, string>
+            {
+                [OAuth2Parameter.ClientSecret] = Secret
+            };
+
+            var metadata = new CredentialMaterialMetadata(
+                credentialType: TelemetryCore.CredentialType.Secret,
+                credentialSource: "static");
+
+            var material = new CredentialMaterial(
+                tokenRequestParameters: parameters,
+                mtlsCertificate: null,
+                metadata: metadata);
+
+            return Task.FromResult(material);
         }
 
         public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(

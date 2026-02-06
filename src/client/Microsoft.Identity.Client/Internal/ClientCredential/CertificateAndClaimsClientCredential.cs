@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -11,6 +13,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
@@ -19,6 +22,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         private readonly IDictionary<string, string> _claimsToSign;
         private readonly bool _appendDefaultClaims = true;
         private readonly Func<AssertionRequestOptions, Task<X509Certificate2>> _certificateProvider;
+        private ICryptographyManager _cryptographyManager; // Injected during first use
 
         public AssertionType AssertionType => AssertionType.CertificateWithoutSni;
 
@@ -27,6 +31,129 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// This is used for backward compatibility with the Certificate property on ConfidentialClientApplication.
         /// </summary>
         public X509Certificate2 Certificate { get; }
+
+        /// <summary>
+        /// Gets credential material (auth parameters + optional mTLS certificate).
+        /// Certificate credential ALWAYS produces client_assertion + client_assertion_type (for OAuth2 auth).
+        /// Additionally returns the certificate for TLS binding when available and appropriate.
+        /// 
+        /// NOTE: Phase 1 implementation uses adapter pattern - delegates to existing logic
+        /// until full refactoring is complete in later phases.
+        /// </summary>
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            // Resolve certificate via provider
+            var options = new AssertionRequestOptions
+            {
+                ClientID = requestContext.ClientId,
+                TokenEndpoint = requestContext.TokenEndpoint,
+                Claims = requestContext.Claims,
+                ClientCapabilities = requestContext.ClientCapabilities,
+                CancellationToken = cancellationToken
+            };
+
+            X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
+
+            if (certificate == null)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
+            }
+
+            if (!certificate.HasPrivateKey)
+            {
+                throw new MsalClientException(
+                    MsalError.CertWithoutPrivateKey,
+                    MsalErrorMessage.CertMustHavePrivateKey(certificate.FriendlyName));
+            }
+
+            // For Phase 1, we'll create assertion using inline crypto
+            // This will be refactored in later phases
+            var jwtToken = CreateJwtToken(requestContext, certificate);
+            string assertion = SignJwt(jwtToken, certificate);
+
+            stopwatch.Stop();
+
+            // Build OAuth2 parameters - certificate credential ALWAYS returns auth params
+            var parameters = new Dictionary<string, string>
+            {
+                [OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer,
+                [OAuth2Parameter.ClientAssertion] = assertion
+            };
+
+            // Build metadata
+            var metadata = new CredentialMaterialMetadata(
+                credentialType: TelemetryCore.CredentialType.Certificate,
+                credentialSource: Certificate != null ? "static" : "provider",
+                mtlsCertificateIdHashPrefix: CredentialMaterialHelper.GetCertificateIdHashPrefix(certificate),
+                mtlsCertificateRequested: requestContext.MtlsRequired,
+                resolutionTimeMs: stopwatch.ElapsedMilliseconds);
+
+            // Return material with BOTH auth params AND certificate
+            // Auth params are used for OAuth2 client authentication
+            // Certificate is additionally used for TLS channel binding
+            return new CredentialMaterial(
+                tokenRequestParameters: parameters,
+                mtlsCertificate: certificate,
+                metadata: metadata);
+        }
+
+        private string CreateJwtToken(CredentialRequestContext requestContext, X509Certificate2 certificate)
+        {
+            long validFrom = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long validTo = validFrom + (60 * 10); // 10 minutes
+
+            var payload = new Dictionary<string, object>
+            {
+                ["aud"] = requestContext.TokenEndpoint,
+                ["iss"] = requestContext.ClientId,
+                ["sub"] = requestContext.ClientId,
+                ["nbf"] = validFrom,
+                ["exp"] = validTo,
+                ["jti"] = Guid.NewGuid().ToString()
+            };
+
+            // Add custom claims if provided
+            if (_claimsToSign != null && _appendDefaultClaims)
+            {
+                foreach (var claim in _claimsToSign)
+                {
+                    payload[claim.Key] = claim.Value;
+                }
+            }
+
+            return JsonHelper.SerializeToJson(payload);
+        }
+
+        private string SignJwt(string payload, X509Certificate2 certificate)
+        {
+            // Create JWT header
+            var header = new Dictionary<string, object>
+            {
+                ["alg"] = "RS256",
+                ["typ"] = "JWT"
+            };
+
+            // Base64URL encode header and payload
+            string encodedHeader = Base64UrlHelpers.Encode(JsonHelper.SerializeToJson(header));
+            string encodedPayload = Base64UrlHelpers.Encode(payload);
+            string message = $"{encodedHeader}.{encodedPayload}";
+
+            // Sign using RSA
+            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            using (RSA rsa = certificate.GetRSAPrivateKey())
+            {
+                byte[] signatureBytes = rsa.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                string encodedSignature = Base64UrlHelpers.Encode(signatureBytes);
+                
+                return $"{message}.{encodedSignature}";
+            }
+        }
 
         /// <summary>
         /// Constructor that accepts a certificate provider delegate.
