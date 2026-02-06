@@ -5,6 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.KeyAttestation.Attestation;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -14,13 +15,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     internal static class TestAttestationProviders
     {
         /// <summary>
-        /// Creates a fake attestation provider delegate that returns a mock JWT.
+        /// Creates a fake attestation provider delegate that returns a mock AttestationResult.
+        /// This is used with PopKeyAttestor.s_testAttestationProvider for unit testing.
         /// </summary>
-        public static Func<string, SafeHandle, string, CancellationToken, Task<string>> CreateFakeProvider()
+        public static Func<string, SafeHandle, string, CancellationToken, Task<AttestationResult>> CreateFakeAttestationResultProvider()
         {
             return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
             {
-                return Task.FromResult("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.attestation.sig");
+                var fakeJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.attestation.sig";
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, fakeJwt, 0, string.Empty));
             };
         }
 
