@@ -338,7 +338,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task Metadata_TracksMtlsCertificateRequested_WhenMtlsRequired_Async()
         {
             // Arrange
-            var credential = new SecretStringClientCredential("test-secret");
+            using var cert = CreateSelfSignedCert(TimeSpan.FromDays(1));
+            var credential = new CertificateClientCredential(cert);
             var requestContext = CreateRequestContext(mtlsRequired: true);
 
             // Act
