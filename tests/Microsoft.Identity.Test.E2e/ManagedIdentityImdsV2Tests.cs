@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.E2E
         [TestCategory("MI_E2E_ImdsV2_Attested")]
         [DataTestMethod]
         [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_MtlsPop_WithAttestation_Succeeds-SAMI")]
-        [DataRow("8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7", "clientid", DisplayName = "AcquireToken_OnImdsV2_MtlsPop_WithAttestation_Succeeds-UAMI")]
+        [DataRow("6325cd32-9911-41f3-819c-416cdf9104e7", "clientid", DisplayName = "AcquireToken_OnImdsV2_MtlsPop_WithAttestation_Succeeds-UAMI")]
         public async Task AcquireToken_OnImdsV2_MtlsPop_WithAttestation_Succeeds(string id, string idType)
         {
             if (!OperatingSystem.IsWindows())
