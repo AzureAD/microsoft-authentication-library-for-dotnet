@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#nullable enable
+
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
@@ -14,19 +16,19 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// <summary>
         /// Initializes a new instance of the <see cref="CredentialMaterialMetadata"/> class.
         /// </summary>
-        /// <param name="credentialType">The type of credential used</param>
+        /// <param name="assertionType">The type of assertion/credential used</param>
         /// <param name="credentialSource">Optional source of the credential (e.g., "static", "delegate", "provider")</param>
         /// <param name="mtlsCertificateIdHashPrefix">Optional prefix of the certificate ID hash (for token binding)</param>
         /// <param name="mtlsCertificateRequested">Whether an mTLS certificate was requested</param>
         /// <param name="resolutionTimeMs">Time taken to resolve the credential in milliseconds</param>
         public CredentialMaterialMetadata(
-            CredentialType credentialType,
+            AssertionType assertionType,
             string? credentialSource = null,
             string? mtlsCertificateIdHashPrefix = null,
             bool mtlsCertificateRequested = false,
             long resolutionTimeMs = 0)
         {
-            CredentialType = credentialType;
+            AssertionType = assertionType;
             CredentialSource = credentialSource;
             MtlsCertificateIdHashPrefix = mtlsCertificateIdHashPrefix;
             MtlsCertificateRequested = mtlsCertificateRequested;
@@ -34,9 +36,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         /// <summary>
-        /// Gets the type of credential used.
+        /// Gets the type of assertion/credential used.
         /// </summary>
-        public CredentialType CredentialType { get; }
+        public AssertionType AssertionType { get; }
 
         /// <summary>
         /// Gets the optional source of the credential (e.g., "static", "delegate", "provider").
@@ -60,3 +62,5 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public long ResolutionTimeMs { get; }
     }
 }
+
+#nullable restore

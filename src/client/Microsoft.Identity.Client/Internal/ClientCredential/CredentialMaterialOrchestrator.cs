@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
@@ -44,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 }
 
                 // Validate: AAD + mTLS requires region
-                if (mtlsValidationContext.AuthorityType == Instance.AuthorityType.Aad &&
+                if (mtlsValidationContext.AuthorityType == AuthorityType.Aad &&
                     mtlsValidationContext.AzureRegion is null)
                 {
                     throw new MsalClientException(

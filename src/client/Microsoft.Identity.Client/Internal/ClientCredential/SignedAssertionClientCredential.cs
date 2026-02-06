@@ -23,6 +23,17 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _signedAssertion = signedAssertion;
         }
 
+        // TODO: Full implementation in later phase
+        // For Phase 1, throw NotImplementedException to indicate this path is not ready yet
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException(
+                "GetCredentialMaterialAsync for SignedAssertionClientCredential will be implemented in a future phase. " +
+                "Currently, only the legacy AddConfidentialClientParametersAsync path is supported.");
+        }
+
         public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
             AuthenticationRequestParameters requestParameters,

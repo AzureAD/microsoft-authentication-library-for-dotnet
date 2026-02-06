@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Instance;
+#nullable enable
+
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
@@ -32,3 +34,5 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public string? AzureRegion { get; }
     }
 }
+
+#nullable restore

@@ -22,7 +22,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         private readonly IDictionary<string, string> _claimsToSign;
         private readonly bool _appendDefaultClaims = true;
         private readonly Func<AssertionRequestOptions, Task<X509Certificate2>> _certificateProvider;
-        private ICryptographyManager _cryptographyManager; // Injected during first use
 
         public AssertionType AssertionType => AssertionType.CertificateWithoutSni;
 
@@ -88,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             // Build metadata
             var metadata = new CredentialMaterialMetadata(
-                credentialType: TelemetryCore.CredentialType.Certificate,
+                assertionType: AssertionType.CertificateWithoutSni,
                 credentialSource: Certificate != null ? "static" : "provider",
                 mtlsCertificateIdHashPrefix: CredentialMaterialHelper.GetCertificateIdHashPrefix(certificate),
                 mtlsCertificateRequested: requestContext.MtlsRequired,

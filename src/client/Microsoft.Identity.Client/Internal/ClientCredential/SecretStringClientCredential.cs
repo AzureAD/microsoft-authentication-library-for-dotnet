@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             };
 
             var metadata = new CredentialMaterialMetadata(
-                credentialType: TelemetryCore.CredentialType.Secret,
+                assertionType: AssertionType.Secret,
                 credentialSource: "static");
 
             var material = new CredentialMaterial(
