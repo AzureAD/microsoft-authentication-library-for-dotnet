@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.E2E
         {
             // Per RFC 8705 Section 3.1: x5t#S256 is the SHA-256 hash of the DER-encoded certificate
             // Must use certificate.RawData (full DER encoding), not just the public key
-            using (var sha256 = SHA256.Create())
+            using (SHA256 sha256 = SHA256.Create())
             {
                 byte[] hash = sha256.ComputeHash(certificate.RawData);
                 return Base64UrlEncode(hash);
@@ -248,11 +248,12 @@ namespace Microsoft.Identity.Test.E2E
             Assert.IsNotNull(certificate, "Certificate should not be null.");
 
             // Extract the RSA key and validate it's a CNG key
+            // Note: RSA instance is obtained from certificate and should not be disposed independently
+            // as it may dispose the underlying key handle that belongs to the certificate. The RSA
+            // instance's lifetime is tied to the certificate, and cleanup is handled by the certificate.
             RSA rsa = certificate.GetRSAPrivateKey();
             Assert.IsNotNull(rsa, "Certificate should have an RSA private key.");
 
-            // Note: Do not dispose RSA with 'using' as it may dispose the underlying key handle
-            // that belongs to the certificate
             try
             {
                 var rsaCng = rsa as RSACng;
@@ -331,7 +332,7 @@ namespace Microsoft.Identity.Test.E2E
         public void ValidateX5tS256ThumbprintComputation()
         {
             // Create a self-signed certificate for testing
-            using (var rsa = RSA.Create(2048))
+            using (RSA rsa = RSA.Create(2048))
             {
                 var request = new CertificateRequest(
                     "CN=Test Certificate",
