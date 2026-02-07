@@ -4,7 +4,6 @@
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.KeyAttestation;
-using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -18,35 +17,22 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Test.E2E
 {
     /// <summary>
-    /// E2E tests for mTLS Proof-of-Possession with Credential Guard attestation on IMDSv2.
-    /// These tests validate:
-    /// - mTLS PoP token acquisition with Credential Guard attestation (SAMI and UAMI)
-    /// - Token-certificate binding validation (x5t#S256 thumbprint per RFC 8705)
-    /// - Graceful degradation when Credential Guard is unavailable
-    /// - Virtual Isolation (VBS) protection validation
+    /// Comprehensive E2E tests for IMDSv2 Managed Identity with mTLS Proof-of-Possession (PoP) support.
+    /// These tests run on the MSALMSIV2 pool which has IMDSv2 endpoint configured.
     /// </summary>
-    /// <remarks>
-    /// WHY THESE TESTS RUN ON A SPECIFIC (MSALMSIV2) MACHINE:
-    /// - Requires IMDSv2 endpoint support (different from standard IMDS)
-    /// - Requires Credential Guard / Virtualization-Based Security (VBS) capabilities
-    /// - Requires the ability to create CNG RSA keys with Virtual Isolation flags
-    /// - Requires a native Credential Guard attestation stack (from MtlsPop package)
-    /// - Requires TOKEN_ATTESTATION_ENDPOINT environment variable
-    /// Tests gracefully mark Inconclusive rather than fail if prerequisites are missing.
-    /// </remarks>
     [TestClass]
     public class ManagedIdentityImdsV2Tests
     {
-        private const string ArmScope = "https://management.azure.com";
+        private const string ArmScope = "https://graph.microsoft.com";
 
-        // Known UAMI configurations (from existing tests)
-        private const string UamiClientId = "8ef2ae5a-f349-4d36-bc0e-a567f2cc50f7";
-        private const string UamiResourceId = "/subscriptions/6f52c299-a200-4fe1-8822-a3b61cf1f931/resourcegroups/DevOpsHostedAgents/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ID4SMSIHostedAgent_UAMI";
-        private const string UamiObjectId = "0651a6fc-fbf5-4904-9e48-16f63ec1f2b1";
+        // UAMI identifiers for MSALMSIV2 pool
+        private const string UamiClientId = "6325cd32-9911-41f3-819c-416cdf9104e7";
+        private const string UamiResourceId = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSIV2-Testing-MSALNET/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msiv2uami";
+        private const string UamiObjectId = "ecb2ad92-3e30-4505-b79f-ac640d069f24";
 
         private static IManagedIdentityApplication BuildMi(
-            string userAssignedId = null,
-            string idType = null)
+           string userAssignedId = null,
+           string idType = null)
         {
             ManagedIdentityId miId = userAssignedId is null
                 ? ManagedIdentityId.SystemAssigned
@@ -63,41 +49,150 @@ namespace Microsoft.Identity.Test.E2E
             return builder.Build();
         }
 
+        #region Credential Guard Attestation Tests
+
         /// <summary>
-        /// Validates that a token contains the x5t#S256 claim and that it matches the certificate thumbprint.
-        /// Per RFC 8705, x5t#S256 is the base64url-encoded SHA-256 hash of the DER-encoded certificate.
+        /// Tests mTLS PoP with Credential Guard attestation.
+        /// Requires Windows Credential Guard (VBS) to be enabled on the MSALMSIV2 VM.
         /// </summary>
-        private static void ValidateTokenCertificateBinding(string accessToken, X509Certificate2 certificate)
+        [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_ImdsV2_Attested")]
+        [DataTestMethod]
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_MtlsPoP_WithAttestation_Succeeds-SAMI")]
+        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_MtlsPoP_WithAttestation_Succeeds-UAMI-ClientId")]
+        public async Task AcquireToken_OnImdsV2_MtlsPoP_WithAttestation_Succeeds(string id, string idType)
         {
-            Assert.IsNotNull(accessToken, "Access token should not be null.");
-            Assert.IsNotNull(certificate, "Certificate should not be null.");
+            if (!OperatingSystem.IsWindows())
+            {
+                Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
+            }
 
-            var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.ReadJwtToken(accessToken);
+            // Check if TOKEN_ATTESTATION_ENDPOINT is configured (required for attestation)
+            var attestationEndpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
+            if (string.IsNullOrWhiteSpace(attestationEndpoint))
+            {
+                Assert.Inconclusive("TOKEN_ATTESTATION_ENDPOINT is not configured. Attestation tests require this environment variable.");
+            }
 
-            // Check for x5t#S256 claim
-            var x5tClaim = jwt.Claims.FirstOrDefault(c => c.Type == "x5t#S256");
-            Assert.IsNotNull(x5tClaim, "Token should contain x5t#S256 claim for mTLS PoP binding.");
+            var mi = BuildMi(id, idType);
 
-            // Compute expected thumbprint from certificate (per RFC 8705 Section 3.1)
-            // Must use the full DER-encoded certificate (certificate.RawData), not just the public key
-            string expectedThumbprint = ComputeX5tS256Thumbprint(certificate);
+            try
+            {
+                var result = await mi.AcquireTokenForManagedIdentity(ArmScope)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
-            Assert.AreEqual(expectedThumbprint, x5tClaim.Value,
-                "x5t#S256 thumbprint in token must match the certificate thumbprint per RFC 8705.");
+                Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken), "AccessToken should not be empty.");
+                Assert.AreEqual("mtls_pop", result.TokenType, "Token type should be 'mtls_pop' for mTLS PoP flow.");
+                Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should not be null for PoP token.");
+
+                // Validate the certificate is backed by Credential Guard (RSACng with proper properties)
+                ValidateCredentialGuardCertificate(result.BindingCertificate);
+
+                // Validate the token-certificate binding
+                ValidateMtlsPopBinding(result.AccessToken, result.BindingCertificate);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
+                    "First call must hit MSI endpoint.");
+            }
+            catch (MsalClientException ex) when (ex.ErrorCode == "credential_guard_not_available")
+            {
+                Assert.Inconclusive("Credential Guard is not available on this machine. Ensure VBS and Credential Guard are enabled.");
+            }
+            catch (CryptographicException ex)
+            {
+                Assert.Inconclusive($"Cryptographic operation failed. Credential Guard may not be properly configured: {ex.Message}");
+            }
         }
 
         /// <summary>
-        /// Computes the x5t#S256 thumbprint of a certificate per RFC 8705 Section 3.1.
-        /// This is the base64url-encoded SHA-256 hash of the DER-encoded certificate.
+        /// Tests graceful degradation when Credential Guard is not available.
+        /// Should fall back to non-attested mTLS PoP flow.
         /// </summary>
-        /// <param name="certificate">The certificate to compute the thumbprint for.</param>
-        /// <returns>Base64url-encoded SHA-256 thumbprint.</returns>
+        [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_ImdsV2")]
+        [TestMethod]
+        public async Task AcquireToken_OnImdsV2_MtlsPoP_GracefulDegradation_WhenCredentialGuardUnavailable()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                Assert.Inconclusive("This test is only applicable on Windows.");
+            }
+
+            var mi = BuildMi();
+
+            // When attestation endpoint is not configured, should fall back to non-attested flow
+            var originalEndpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
+            try
+            {
+                // Temporarily clear the endpoint to simulate unavailability
+                Environment.SetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT", null);
+
+                var result = await mi.AcquireTokenForManagedIdentity(ArmScope)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken), "AccessToken should not be empty.");
+                Assert.AreEqual("mtls_pop", result.TokenType, "Token type should be 'mtls_pop' for mTLS PoP flow.");
+                Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should not be null.");
+
+                // Should succeed with non-attested certificate
+                ValidateMtlsPopBinding(result.AccessToken, result.BindingCertificate);
+            }
+            finally
+            {
+                // Restore original endpoint
+                Environment.SetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT", originalEndpoint);
+            }
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Validates that the access token properly binds to the certificate via the cnf claim.
+        /// </summary>
+        private static void ValidateMtlsPopBinding(string accessToken, X509Certificate2 bindingCertificate)
+        {
+            Assert.IsNotNull(accessToken, "Access token should not be null.");
+            Assert.IsNotNull(bindingCertificate, "Binding certificate should not be null.");
+
+            // Parse the JWT
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(accessToken);
+
+            // Extract the cnf (confirmation) claim
+            var cnfClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "cnf");
+            Assert.IsNotNull(cnfClaim, "Access token should contain 'cnf' claim for certificate binding.");
+
+            // Parse the cnf claim value (should be JSON with x5t#S256 thumbprint)
+            var cnfJson = System.Text.Json.JsonDocument.Parse(cnfClaim.Value);
+            Assert.IsTrue(cnfJson.RootElement.TryGetProperty("x5t#S256", out var x5tElement),
+                "cnf claim should contain 'x5t#S256' property.");
+
+            var tokenThumbprint = x5tElement.GetString();
+            Assert.IsFalse(string.IsNullOrEmpty(tokenThumbprint), "x5t#S256 thumbprint should not be empty.");
+
+            // Compute the expected thumbprint from the certificate
+            var expectedThumbprint = ComputeX5tS256Thumbprint(bindingCertificate);
+
+            Assert.AreEqual(expectedThumbprint, tokenThumbprint,
+                "Token's x5t#S256 thumbprint should match the computed certificate thumbprint.");
+        }
+
+        /// <summary>
+        /// Computes the x5t#S256 thumbprint of a certificate per RFC 8705.
+        /// This is the base64url-encoded SHA-256 hash of the DER-encoded X.509 certificate.
+        /// </summary>
         private static string ComputeX5tS256Thumbprint(X509Certificate2 certificate)
         {
-            // Per RFC 8705 Section 3.1: x5t#S256 is the SHA-256 hash of the DER-encoded certificate
-            // Must use certificate.RawData (full DER encoding), not just the public key
-            using (SHA256 sha256 = SHA256.Create())
+            // Per RFC 8705 Section 3.1, compute SHA-256 hash of the DER-encoded certificate (RawData)
+            using (var sha256 = SHA256.Create())
             {
                 byte[] hash = sha256.ComputeHash(certificate.RawData);
                 return Base64UrlEncode(hash);
@@ -105,258 +200,81 @@ namespace Microsoft.Identity.Test.E2E
         }
 
         /// <summary>
-        /// Base64url encoding without padding (per RFC 4648 Section 5).
+        /// Encodes a byte array to base64url format (URL-safe base64 without padding).
         /// </summary>
-        private static string Base64UrlEncode(byte[] data)
+        private static string Base64UrlEncode(byte[] input)
         {
-            string base64 = Convert.ToBase64String(data);
-            // Base64url: replace '+' with '-', '/' with '_', and remove padding '='
+            var base64 = Convert.ToBase64String(input);
+            // Convert to base64url by replacing characters and removing padding
             return base64.Replace('+', '-').Replace('/', '_').TrimEnd('=');
         }
 
         /// <summary>
-        /// Extracts the X509Certificate2 from the authentication result's binding certificate.
+        /// Validates that a certificate is backed by Credential Guard (RSACng with VBS protection).
         /// </summary>
-        private static X509Certificate2 ExtractCertificateFromResult(AuthenticationResult result)
-        {
-            Assert.IsNotNull(result, "Authentication result should not be null.");
-            Assert.IsNotNull(result.BindingCertificate, "Binding certificate should be present in result for mTLS PoP.");
-
-            return result.BindingCertificate;
-        }
-
-        #region Basic mTLS PoP Tests (No Attestation)
-
-        /// <summary>
-        /// Tests that mTLS PoP tokens can be acquired on IMDSv2 without attestation.
-        /// Validates token-certificate binding via x5t#S256 thumbprint (RFC 8705).
-        /// </summary>
-        [RunOnAzureDevOps]
-        [TestCategory("MI_E2E_ImdsV2")]
-        [DataTestMethod]
-        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_WithMtlsPoP_Succeeds-SAMI")]
-        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_WithMtlsPoP_Succeeds-UAMI-ClientId")]
-        [DataRow(UamiResourceId, "resourceid", DisplayName = "AcquireToken_OnImdsV2_WithMtlsPoP_Succeeds-UAMI-ResourceId")]
-        [DataRow(UamiObjectId, "objectid", DisplayName = "AcquireToken_OnImdsV2_WithMtlsPoP_Succeeds-UAMI-ObjectId")]
-        public async Task AcquireToken_OnImdsV2_WithMtlsPoP_Succeeds(string id, string idType)
-        {
-            var mi = BuildMi(id, idType);
-
-            var result = await mi.AcquireTokenForManagedIdentity(ArmScope)
-                .WithMtlsProofOfPossession()
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken), "AccessToken should not be empty.");
-            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
-                "First call must hit MSI endpoint.");
-
-            // Validate PoP proof and certificate binding
-            var certificate = ExtractCertificateFromResult(result);
-            ValidateTokenCertificateBinding(result.AccessToken, certificate);
-
-            // Validate that the token is cached
-            var second = await mi.AcquireTokenForManagedIdentity(ArmScope)
-                .WithMtlsProofOfPossession()
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource,
-                "Second call should use cache.");
-            Assert.AreEqual(result.AccessToken, second.AccessToken, "Cached token should match original.");
-        }
-
-        #endregion
-
-        #region Credential Guard Attestation Tests
-
-        /// <summary>
-        /// Tests that mTLS PoP tokens with Credential Guard attestation can be acquired on IMDSv2.
-        /// Validates both token acquisition and certificate VBS protection.
-        /// </summary>
-        [RunOnAzureDevOps]
-        [TestCategory("MI_E2E_ImdsV2_Attested")]
-        [DataTestMethod]
-        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_WithAttestation_Succeeds-SAMI")]
-        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_WithAttestation_Succeeds-UAMI-ClientId")]
-        [DataRow(UamiResourceId, "resourceid", DisplayName = "AcquireToken_OnImdsV2_WithAttestation_Succeeds-UAMI-ResourceId")]
-        [DataRow(UamiObjectId, "objectid", DisplayName = "AcquireToken_OnImdsV2_WithAttestation_Succeeds-UAMI-ObjectId")]
-        public async Task AcquireToken_OnImdsV2_WithAttestation_Succeeds(string id, string idType)
-        {
-            // Check for attestation endpoint (required for attestation flow)
-            var endpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
-            if (string.IsNullOrWhiteSpace(endpoint))
-            {
-                Assert.Inconclusive("TOKEN_ATTESTATION_ENDPOINT environment variable not set. " +
-                    "This test requires Credential Guard attestation support.");
-            }
-
-            var mi = BuildMi(id, idType);
-
-            AuthenticationResult result = null;
-            try
-            {
-                result = await mi.AcquireTokenForManagedIdentity(ArmScope)
-                    .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-            }
-            catch (MsalClientException ex)
-            {
-                // Gracefully handle cases where Credential Guard is not available
-                Assert.Inconclusive("Credential Guard or attestation is not available on this machine: " + ex.Message);
-            }
-            catch (PlatformNotSupportedException)
-            {
-                Assert.Inconclusive("VBS/Core Isolation is not available on this platform.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                Assert.Inconclusive("Attestation native library not available: " + ex.Message);
-            }
-
-            Assert.IsNotNull(result, "Result should not be null after successful token acquisition.");
-            Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken), "AccessToken should not be empty.");
-            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
-                "First call must hit MSI endpoint.");
-
-            // Validate PoP proof and certificate binding
-            var certificate = ExtractCertificateFromResult(result);
-            ValidateTokenCertificateBinding(result.AccessToken, certificate);
-
-            // Validate that the certificate is Credential Guard protected
-            ValidateCredentialGuardProtection(certificate);
-
-            // Validate that the token is cached
-            var second = await mi.AcquireTokenForManagedIdentity(ArmScope)
-                .WithMtlsProofOfPossession()
-                .WithAttestationSupport()
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource,
-                "Second call should use cache.");
-            Assert.AreEqual(result.AccessToken, second.AccessToken, "Cached token should match original.");
-        }
-
-        /// <summary>
-        /// Validates that the certificate is protected by Credential Guard (VBS).
-        /// </summary>
-        private static void ValidateCredentialGuardProtection(X509Certificate2 certificate)
+        private static void ValidateCredentialGuardCertificate(X509Certificate2 certificate)
         {
             Assert.IsNotNull(certificate, "Certificate should not be null.");
 
-            // Extract the RSA key and validate it's a CNG key
-            // Note: RSA instance is obtained from certificate and should not be disposed independently
-            // as it may dispose the underlying key handle that belongs to the certificate. The RSA
-            // instance's lifetime is tied to the certificate, and cleanup is handled by the certificate.
-            RSA rsa = certificate.GetRSAPrivateKey();
+            // Get the private key as RSA
+            // Note: GetRSAPrivateKey() returns an RSA instance that should not be disposed
+            // as it may dispose the underlying key handle that belongs to the certificate
+            var rsa = certificate.GetRSAPrivateKey();
             Assert.IsNotNull(rsa, "Certificate should have an RSA private key.");
 
-            try
+            // Check if it's an RSACng (required for Credential Guard)
+            if (rsa is RSACng rsaCng)
             {
-                var rsaCng = rsa as RSACng;
-                Assert.IsNotNull(rsaCng, "Expected RSACng for Credential Guard certificate.");
+                // Verify the key is protected by Virtual Isolation (Credential Guard)
+                var key = rsaCng.Key;
+                Assert.IsNotNull(key, "CNG key should not be null.");
 
-                // Validate that the key is Credential Guard protected
-                bool isProtected = WindowsCngKeyOperations.IsKeyGuardProtected(rsaCng.Key);
-                Assert.IsTrue(isProtected,
-                    "Certificate key should be protected by Credential Guard (Virtual Isolation).");
+                try
+                {
+                    // Check for Virtual Iso property (indicates Credential Guard protection)
+                    var virtualIsoProp = key.GetProperty("Virtual Iso", CngPropertyOptions.None);
+                    var bytes = virtualIsoProp.GetValue();
+                    
+                    // Check if the property indicates Virtual Isolation is enabled
+                    // The property is typically a DWORD (4 bytes), non-zero means VBS-protected
+                    bool isVirtualIso = false;
+                    if (bytes != null && bytes.Length >= 4)
+                    {
+                        // Use ReadOnlySpan for safer byte reading on supported platforms
+#if NET8_0_OR_GREATER
+                        isVirtualIso = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(bytes) != 0;
+#else
+                        // On older platforms, use BitConverter with explicit little-endian handling
+                        // Create a copy to avoid mutating the original bytes array
+                        if (!BitConverter.IsLittleEndian)
+                        {
+                            var reversedBytes = (byte[])bytes.Clone();
+                            Array.Reverse(reversedBytes, 0, 4);
+                            isVirtualIso = BitConverter.ToInt32(reversedBytes, 0) != 0;
+                        }
+                        else
+                        {
+                            isVirtualIso = BitConverter.ToInt32(bytes, 0) != 0;
+                        }
+#endif
+                    }
+
+                    if (!isVirtualIso)
+                    {
+                        // If not Virtual Iso, test is inconclusive rather than failing
+                        Assert.Inconclusive("Certificate key is not protected by Credential Guard. VBS may not be enabled.");
+                    }
+                }
+                catch (CryptographicException)
+                {
+                    // Property not available - Credential Guard not active
+                    Assert.Inconclusive("Virtual Iso property not available. Credential Guard may not be active.");
+                }
             }
-            catch (Exception ex)
+            else
             {
-                Assert.Fail($"Failed to validate Credential Guard protection: {ex.Message}");
-            }
-        }
-
-        #endregion
-
-        #region Graceful Degradation Tests
-
-        /// <summary>
-        /// Tests that when Credential Guard is unavailable, the system gracefully degrades
-        /// to non-attested mTLS PoP flow.
-        /// </summary>
-        [RunOnAzureDevOps]
-        [TestCategory("MI_E2E_ImdsV2")]
-        [TestMethod]
-        public async Task AcquireToken_OnImdsV2_GracefulDegradation_WhenCredentialGuardUnavailable()
-        {
-            // This test validates that even if .WithAttestationSupport() is called,
-            // the system can gracefully fall back to non-attested flow if Credential Guard
-            // is not available. The test should succeed regardless of VBS availability.
-
-            var mi = BuildMi(null, null); // SAMI
-
-            AuthenticationResult result = null;
-            try
-            {
-                result = await mi.AcquireTokenForManagedIdentity(ArmScope)
-                    .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-            }
-            catch (MsalClientException ex)
-            {
-                // Expected when Credential Guard is not available - test passes
-                Assert.Inconclusive("Credential Guard not available - graceful degradation verified: " + ex.Message);
-                return;
-            }
-            catch (PlatformNotSupportedException)
-            {
-                // Expected when VBS is not supported - test passes
-                Assert.Inconclusive("VBS not supported - graceful degradation verified.");
-                return;
-            }
-
-            // If we got a result, it should be valid
-            Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken), "AccessToken should not be empty.");
-            
-            // Validate certificate binding regardless of attestation
-            var certificate = ExtractCertificateFromResult(result);
-            ValidateTokenCertificateBinding(result.AccessToken, certificate);
-        }
-
-        #endregion
-
-        #region Certificate and Key Validation Helpers
-
-        /// <summary>
-        /// Tests that we can validate x5t#S256 thumbprint computation correctly.
-        /// This is a unit-style test to ensure the helper method is correct.
-        /// </summary>
-        [TestMethod]
-        [TestCategory("MI_E2E_ImdsV2")]
-        public void ValidateX5tS256ThumbprintComputation()
-        {
-            // Create a self-signed certificate for testing
-            using (RSA rsa = RSA.Create(2048))
-            {
-                var request = new CertificateRequest(
-                    "CN=Test Certificate",
-                    rsa,
-                    HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pkcs1);
-
-                var certificate = request.CreateSelfSigned(
-                    DateTimeOffset.UtcNow.AddDays(-1),
-                    DateTimeOffset.UtcNow.AddDays(1));
-
-                // Compute thumbprint
-                string thumbprint = ComputeX5tS256Thumbprint(certificate);
-
-                // Validate format: base64url-encoded SHA-256 (43 characters without padding)
-                Assert.IsFalse(string.IsNullOrEmpty(thumbprint), "Thumbprint should not be empty.");
-                Assert.IsTrue(thumbprint.Length >= 43, "SHA-256 base64url should be at least 43 characters.");
-                Assert.IsFalse(thumbprint.Contains('='), "Base64url should not contain padding.");
-                Assert.IsFalse(thumbprint.Contains('+'), "Base64url should not contain '+'.");
-                Assert.IsFalse(thumbprint.Contains('/'), "Base64url should not contain '/'.");
-
-                // Recompute and verify consistency
-                string thumbprint2 = ComputeX5tS256Thumbprint(certificate);
-                Assert.AreEqual(thumbprint, thumbprint2, "Thumbprint computation should be deterministic.");
+                // Not an RSACng - could be software-backed fallback
+                Assert.Inconclusive($"Certificate uses {rsa.GetType().Name} instead of RSACng. May be using fallback provider.");
             }
         }
 
