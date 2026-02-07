@@ -54,6 +54,8 @@ namespace MsalMtlsPopVanilla
             _httpClient = new HttpClient(handler);
 
             // Set Authorization header with PoP token
+            // Note: The scheme may vary by resource - some use "PoP", others use "Bearer"
+            // Consult the target API documentation for the correct authentication scheme
             _httpClient.DefaultRequestHeaders.Authorization = 
                 new System.Net.Http.Headers.AuthenticationHeaderValue("PoP", _accessToken);
         }

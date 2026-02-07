@@ -148,7 +148,7 @@ Simplified token acquisition wrapper for vanilla flow.
 var acquirer = new MtlsPopTokenAcquirer(
     clientId: "your-client-id",
     tenantId: "your-tenant-id",
-    certificate: yourCertificate,
+    certificate: certificate,
     region: "eastus"
 );
 
