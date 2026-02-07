@@ -145,7 +145,7 @@ public class FicTwoLegPopExample
 ## Complete Working Example
 
 See `ClientCredentialsMtlsPopTests.cs` for a full working test:
-- **Test**: `Sni_AssertionFlow_Uses_JwtPop_And_Succeeds_TestAsync()` (lines 86-178)
+- **Test**: `Sni_AssertionFlow_Uses_JwtPop_And_Succeeds_TestAsync()` (lines 88-178)
 - **Location**: `tests/Microsoft.Identity.Test.Integration.netcore/HeadlessTests/ClientCredentialsMtlsPopTests.cs`
 
 ```csharp
