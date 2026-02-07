@@ -69,13 +69,13 @@ namespace MsalMtlsPopHelpers
 
             if (!response.IsSuccessStatusCode)
             {
-                string errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                string errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 throw new HttpRequestException(
                     $"Resource call failed with status {response.StatusCode}. " +
                     $"Response: {errorBody}");
             }
 
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -110,13 +110,13 @@ namespace MsalMtlsPopHelpers
 
             if (!response.IsSuccessStatusCode)
             {
-                string errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                string errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 throw new HttpRequestException(
                     $"Resource POST failed with status {response.StatusCode}. " +
                     $"Response: {errorBody}");
             }
 
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
