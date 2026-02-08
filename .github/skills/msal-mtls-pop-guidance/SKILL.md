@@ -128,8 +128,8 @@ ManagedIdentityId.WithUserAssignedObjectId("ecb2ad92-3e30-4505-b79f-ac640d069f24
 ### Key Rules
 1. **Leg 1** can use MSI or Confidential Client
 2. **Leg 2 MUST be Confidential Client** - MSI cannot perform assertion-based authentication
-3. Leg 2 can request Bearer OR mTLS PoP final token
-4. If Leg 2 requests mTLS PoP: Use Leg 1's `BindingCertificate` as `TokenBindingCertificate` in `ClientSignedAssertion`
+3. Leg 2 can request ****** mTLS PoP final token
+4. **Always pass Leg 1's certificate**: Include `TokenBindingCertificate = leg1Result.BindingCertificate` in `ClientSignedAssertion` for all scenarios (both ****** PoP Leg 2)
 
 ## Required Namespaces
 

@@ -97,14 +97,15 @@ var leg2App = ConfidentialClientApplicationBuilder
     {
         return Task.FromResult(new ClientSignedAssertion
         {
-            Assertion = leg1Result.AccessToken  // Use Leg 1's token
+            Assertion = leg1Result.AccessToken,  // Use Leg 1's token
+            TokenBindingCertificate = leg1Result.BindingCertificate  // Always pass Leg 1's cert
         });
     })
     .Build();
 
 var leg2Result = await leg2App
     .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
-    .ExecuteAsync();
+    .ExecuteAsync();  // No .WithMtlsProofOfPossession() → Bearer token
 
 Console.WriteLine($"Leg 2 Token Type: {leg2Result.TokenType}");  // "Bearer"
 ```
@@ -186,14 +187,15 @@ var leg2App = ConfidentialClientApplicationBuilder
     {
         return Task.FromResult(new ClientSignedAssertion
         {
-            Assertion = leg1Result.AccessToken
+            Assertion = leg1Result.AccessToken,
+            TokenBindingCertificate = leg1Result.BindingCertificate  // Always pass Leg 1's cert
         });
     })
     .Build();
 
 var leg2Result = await leg2App
     .AcquireTokenForClient(new[] { "https://storage.azure.com/.default" })
-    .ExecuteAsync();
+    .ExecuteAsync();  // No .WithMtlsProofOfPossession() → Bearer token
 
 Console.WriteLine($"Leg 2 Token Type: {leg2Result.TokenType}");  // "Bearer"
 ```
@@ -294,7 +296,7 @@ if (leg2Result.TokenType == "mtls_pop")
 1. **Leg 1 always targets `api://AzureADTokenExchange`**: This is the FIC token exchange endpoint
 2. **Leg 2 MUST be Confidential Client**: MSI does NOT have `WithClientAssertion()` API
 3. **Four valid combinations**: All permutations of MSI/ConfApp Leg 1 × Bearer/PoP Leg 2
-4. **Certificate binding for PoP**: Use Leg 1's `BindingCertificate` as `TokenBindingCertificate` in Leg 2
+4. **Always pass Leg 1's certificate**: Include `TokenBindingCertificate = leg1Result.BindingCertificate` in `ClientSignedAssertion` for all scenarios (both ****** PoP Leg 2)
 5. **Always include `.WithAttestationSupport()`** in Leg 1 for production Credential Guard support
 6. **Test slice region**: Use "westus3" for MSAL.NET integration tests
 
