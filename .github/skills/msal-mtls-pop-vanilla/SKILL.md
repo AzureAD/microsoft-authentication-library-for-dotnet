@@ -60,6 +60,8 @@ Works anywhere with certificate access (local dev, Azure, on-premises).
 
 ```csharp
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -79,12 +81,29 @@ var result = await app
 
 Console.WriteLine($"Token Type: {result.TokenType}");  // "mtls_pop"
 Console.WriteLine($"Certificate Thumbprint: {result.BindingCertificate?.Thumbprint}");
+
+// Configure HttpClient with the binding certificate for mTLS
+var handler = new HttpClientHandler();
+handler.ClientCertificates.Add(result.BindingCertificate);
+
+using var httpClient = new HttpClient(handler);
+httpClient.DefaultRequestHeaders.Authorization =
+    new AuthenticationHeaderValue("mtls_pop", result.AccessToken);
+
+// Call Microsoft Graph
+var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/applications");
+response.EnsureSuccessStatusCode();
+
+string json = await response.Content.ReadAsStringAsync();
+Console.WriteLine(json);
 ```
 
 ### UAMI by Client ID
 
 ```csharp
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -102,21 +121,28 @@ var result = await app
     .WithAttestationSupport()
     .ExecuteAsync();
 
-// Use BindingCertificate for mTLS calls
-using var httpHandler = new HttpClientHandler();
-httpHandler.ClientCertificates.Add(result.BindingCertificate);
+// Configure HttpClient with the binding certificate for mTLS
+var handler = new HttpClientHandler();
+handler.ClientCertificates.Add(result.BindingCertificate);
 
-using var httpClient = new HttpClient(httpHandler);
+using var httpClient = new HttpClient(handler);
 httpClient.DefaultRequestHeaders.Authorization = 
     new AuthenticationHeaderValue("mtls_pop", result.AccessToken);
-    
-var response = await httpClient.GetAsync("https://your-vault.vault.azure.net/secrets/my-secret");
+
+// Call Azure Key Vault
+var response = await httpClient.GetAsync("https://your-vault.vault.azure.net/secrets/my-secret?api-version=7.4");
+response.EnsureSuccessStatusCode();
+
+string json = await response.Content.ReadAsStringAsync();
+Console.WriteLine(json);
 ```
 
 ### UAMI by Resource ID
 
 ```csharp
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -135,14 +161,31 @@ var result = await app
     .WithAttestationSupport()
     .ExecuteAsync();
 
-Console.WriteLine($"Token acquired with Resource ID authentication");
+Console.WriteLine($"Token Type: {result.TokenType}");  // "mtls_pop"
 Console.WriteLine($"Certificate Thumbprint: {result.BindingCertificate?.Thumbprint}");
+
+// Configure HttpClient with the binding certificate for mTLS
+var handler = new HttpClientHandler();
+handler.ClientCertificates.Add(result.BindingCertificate);
+
+using var httpClient = new HttpClient(handler);
+httpClient.DefaultRequestHeaders.Authorization =
+    new AuthenticationHeaderValue("mtls_pop", result.AccessToken);
+
+// Call Azure Storage
+var response = await httpClient.GetAsync("https://your-storage-account.blob.core.windows.net/?comp=list");
+response.EnsureSuccessStatusCode();
+
+string json = await response.Content.ReadAsStringAsync();
+Console.WriteLine(json);
 ```
 
 ### UAMI by Object ID
 
 ```csharp
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -160,14 +203,31 @@ var result = await app
     .WithAttestationSupport()
     .ExecuteAsync();
 
-Console.WriteLine($"Token acquired with Object ID authentication");
+Console.WriteLine($"Token Type: {result.TokenType}");  // "mtls_pop"
 Console.WriteLine($"Certificate Thumbprint: {result.BindingCertificate?.Thumbprint}");
+
+// Configure HttpClient with the binding certificate for mTLS
+var handler = new HttpClientHandler();
+handler.ClientCertificates.Add(result.BindingCertificate);
+
+using var httpClient = new HttpClient(handler);
+httpClient.DefaultRequestHeaders.Authorization =
+    new AuthenticationHeaderValue("mtls_pop", result.AccessToken);
+
+// Call Azure Resource Manager
+var response = await httpClient.GetAsync("https://management.azure.com/subscriptions?api-version=2021-04-01");
+response.EnsureSuccessStatusCode();
+
+string json = await response.Content.ReadAsStringAsync();
+Console.WriteLine(json);
 ```
 
 ### Confidential Client with Certificate (SNI)
 
 ```csharp
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -192,6 +252,21 @@ var result = await app
 
 Console.WriteLine($"Token Type: {result.TokenType}");  // "mtls_pop"
 Console.WriteLine($"Binding Certificate matches SNI cert: {result.BindingCertificate.Thumbprint == cert.Thumbprint}");
+
+// Configure HttpClient with the binding certificate for mTLS
+var handler = new HttpClientHandler();
+handler.ClientCertificates.Add(result.BindingCertificate);
+
+using var httpClient = new HttpClient(handler);
+httpClient.DefaultRequestHeaders.Authorization =
+    new AuthenticationHeaderValue("mtls_pop", result.AccessToken);
+
+// Call Microsoft Graph
+var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/applications");
+response.EnsureSuccessStatusCode();
+
+string json = await response.Content.ReadAsStringAsync();
+Console.WriteLine(json);
 ```
 
 ## Production Helper Classes
