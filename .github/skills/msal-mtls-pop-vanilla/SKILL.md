@@ -108,7 +108,7 @@ httpHandler.ClientCertificates.Add(result.BindingCertificate);
 
 using var httpClient = new HttpClient(httpHandler);
 httpClient.DefaultRequestHeaders.Authorization = 
-    new AuthenticationHeaderValue("PoP", result.AccessToken);
+    new AuthenticationHeaderValue("mtls_pop", result.AccessToken);
     
 var response = await httpClient.GetAsync("https://your-vault.vault.azure.net/secrets/my-secret");
 ```
@@ -232,7 +232,7 @@ if (result.BindingCertificate == null)
 
 // 3. Call resource with mTLS binding
 using var caller = new ResourceCaller(result);
-string response = await caller.CallResourceAsync("https://graph.microsoft.com/v1.0/me");
+string response = await caller.CallResourceAsync("https://graph.microsoft.com/v1.0/applications");
 ```
 
 ## Key Points

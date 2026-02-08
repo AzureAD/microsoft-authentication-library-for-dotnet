@@ -64,9 +64,9 @@ namespace MsalMtlsPop.Vanilla
 
             _httpClient = new HttpClient(handler);
             
-            // Set PoP authorization header
+            // Set mTLS PoP authorization header
             _httpClient.DefaultRequestHeaders.Authorization = 
-                new AuthenticationHeaderValue("PoP", _accessToken);
+                new AuthenticationHeaderValue("mtls_pop", _accessToken);
         }
 
         /// <summary>

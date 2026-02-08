@@ -285,7 +285,7 @@ var leg2Result = await leg2Exchanger.ExchangeTokenAsync(
 if (leg2Result.TokenType == "mtls_pop")
 {
     using var caller = new ResourceCaller(leg2Result);
-    string response = await caller.CallResourceAsync("https://graph.microsoft.com/v1.0/me");
+    string response = await caller.CallResourceAsync("https://graph.microsoft.com/v1.0/applications");
 }
 ```
 
