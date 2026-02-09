@@ -218,7 +218,9 @@ namespace Microsoft.Identity.Client
             }
 
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
-            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
+            // For client credentials flow (and other flows without ID tokens), populate TenantId from the access token cache item
+            // This fixes a race condition where TenantId was missing when using WithTenantIdFromAuthority
+            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId ?? msalAccessTokenCacheItem?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             SpaAuthCode = spaAuthCode;
             _authenticationScheme = authenticationScheme;

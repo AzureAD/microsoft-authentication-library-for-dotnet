@@ -211,6 +211,81 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             );
         }
 
+        /// <summary>
+        /// Regression test for race condition bug where AuthenticationResult.TenantId was missing
+        /// when using WithTenantIdFromAuthority in concurrent client credentials requests.
+        /// See: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/XXXXX
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenForClient_WithTenantIdFromAuthority_TenantIdInResult_Test()
+        {
+            // Arrange: Test with multiple tenants to simulate race condition scenario
+            const int NumberOfTenants = 10;
+            const int RequestsPerTenant = 100;
+
+            var httpManager = new ParallelRequestMockHandler();
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority("https://login.microsoftonline.com/common")
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(httpManager)
+                .Build();
+
+            var tasks = new List<Task<AuthenticationResult>>();
+
+            // Create concurrent requests for multiple tenants
+            for (int tenantIndex = 0; tenantIndex < NumberOfTenants; tenantIndex++)
+            {
+                string tenantId = $"tenant{tenantIndex}";
+                
+                for (int requestIndex = 0; requestIndex < RequestsPerTenant; requestIndex++)
+                {
+                    string localTenantId = tenantId; // Capture for closure
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        string authorityUri = $"https://login.microsoftonline.com/{localTenantId}";
+                        AuthenticationResult result = await cca
+                            .AcquireTokenForClient(TestConstants.s_scope)
+                            .WithTenantIdFromAuthority(new Uri(authorityUri))
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+                        // Critical assertion: TenantId must be populated and match the requested tenant
+                        Assert.IsNotNull(result, $"Result is null for tenant '{localTenantId}'");
+                        Assert.IsFalse(
+                            string.IsNullOrEmpty(result.TenantId),
+                            $"CRITICAL BUG: TenantId is null/empty in AuthenticationResult for tenant '{localTenantId}'. " +
+                            "This indicates a race condition where the TenantId was not properly set from the request authority.");
+                        Assert.AreEqual(
+                            localTenantId,
+                            result.TenantId,
+                            $"CRITICAL BUG: TenantId mismatch! Expected '{localTenantId}' but got '{result.TenantId}'. " +
+                            "This indicates the wrong tenant's token was returned due to a race condition.");
+
+                        // Additional validations
+                        Assert.AreEqual($"token_{localTenantId}", result.AccessToken,
+                            $"AccessToken mismatch for tenant '{localTenantId}'");
+                        Assert.IsTrue(
+                            result.AuthenticationResultMetadata.TokenEndpoint.Contains(localTenantId),
+                            $"TokenEndpoint doesn't contain tenant ID '{localTenantId}'");
+
+                        return result;
+                    }));
+                }
+            }
+
+            // Act & Assert: All tasks should complete without assertion failures
+            AuthenticationResult[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            // Verify all results have correct TenantId
+            Assert.AreEqual(NumberOfTenants * RequestsPerTenant, results.Length);
+            foreach (var result in results)
+            {
+                Assert.IsFalse(string.IsNullOrEmpty(result.TenantId),
+                    "At least one result has missing TenantId after the race condition test");
+            }
+        }
+
         [TestMethod]
         public async Task AcquireTokenSilent_ValidATs_ParallelRequests_Async()
         {
