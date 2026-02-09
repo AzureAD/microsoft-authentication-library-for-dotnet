@@ -94,7 +94,7 @@ httpClient.DefaultRequestHeaders.Authorization =
     new AuthenticationHeaderValue("mtls_pop", result.AccessToken);
 
 // Call Microsoft Graph
-var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/applications");
+var response = await httpClient.GetAsync("https://mtlstb.graph.microsoft.com/v1.0/applications");
 response.EnsureSuccessStatusCode();
 
 string json = await response.Content.ReadAsStringAsync();
@@ -277,7 +277,7 @@ httpClient.DefaultRequestHeaders.Authorization =
     new AuthenticationHeaderValue("mtls_pop", result.AccessToken);
 
 // Call Microsoft Graph
-var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/applications");
+var response = await httpClient.GetAsync("https://mtlstb.graph.microsoft.com/v1.0/applications");
 response.EnsureSuccessStatusCode();
 
 string json = await response.Content.ReadAsStringAsync();
@@ -322,7 +322,7 @@ if (result.BindingCertificate == null)
 
 // 3. Call resource with mTLS binding
 using var caller = new ResourceCaller(result);
-string response = await caller.CallResourceAsync("https://graph.microsoft.com/v1.0/applications");
+string response = await caller.CallResourceAsync("https://mtlstb.graph.microsoft.com/v1.0/applications");
 ```
 
 ## Key Points
