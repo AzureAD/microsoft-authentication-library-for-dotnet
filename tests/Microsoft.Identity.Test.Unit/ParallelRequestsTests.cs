@@ -214,7 +214,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         /// <summary>
         /// Regression test for race condition bug where AuthenticationResult.TenantId was missing
         /// when using WithTenantIdFromAuthority in concurrent client credentials requests.
-        /// See: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/XXXXX
         /// </summary>
         [TestMethod]
         public async Task AcquireTokenForClient_WithTenantIdFromAuthority_TenantIdInResult_Test()
@@ -234,16 +233,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var tasks = new List<Task<AuthenticationResult>>();
 
             // Create concurrent requests for multiple tenants
-            for (int tenantIndex = 0; tenantIndex < NumberOfTenants; tenantIndex++)
+            for (int tenantNumber = 0; tenantNumber < NumberOfTenants; tenantNumber++)
             {
-                string tenantId = $"tenant{tenantIndex}";
+                string tenantId = $"tenant{tenantNumber}";
                 
                 for (int requestIndex = 0; requestIndex < RequestsPerTenant; requestIndex++)
                 {
-                    string localTenantId = tenantId; // Capture for closure
                     tasks.Add(Task.Run(async () =>
                     {
-                        string authorityUri = $"https://login.microsoftonline.com/{localTenantId}";
+                        string authorityUri = $"https://login.microsoftonline.com/{tenantId}";
                         AuthenticationResult result = await cca
                             .AcquireTokenForClient(TestConstants.s_scope)
                             .WithTenantIdFromAuthority(new Uri(authorityUri))
@@ -251,23 +249,23 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                             .ConfigureAwait(false);
 
                         // Critical assertion: TenantId must be populated and match the requested tenant
-                        Assert.IsNotNull(result, $"Result is null for tenant '{localTenantId}'");
+                        Assert.IsNotNull(result, $"Result is null for tenant '{tenantId}'");
                         Assert.IsFalse(
                             string.IsNullOrEmpty(result.TenantId),
-                            $"CRITICAL BUG: TenantId is null/empty in AuthenticationResult for tenant '{localTenantId}'. " +
+                            $"CRITICAL BUG: TenantId is null/empty in AuthenticationResult for tenant '{tenantId}'. " +
                             "This indicates a race condition where the TenantId was not properly set from the request authority.");
                         Assert.AreEqual(
-                            localTenantId,
+                            tenantId,
                             result.TenantId,
-                            $"CRITICAL BUG: TenantId mismatch! Expected '{localTenantId}' but got '{result.TenantId}'. " +
+                            $"CRITICAL BUG: TenantId mismatch! Expected '{tenantId}' but got '{result.TenantId}'. " +
                             "This indicates the wrong tenant's token was returned due to a race condition.");
 
                         // Additional validations
-                        Assert.AreEqual($"token_{localTenantId}", result.AccessToken,
-                            $"AccessToken mismatch for tenant '{localTenantId}'");
+                        Assert.AreEqual($"token_{tenantId}", result.AccessToken,
+                            $"AccessToken mismatch for tenant '{tenantId}'");
                         Assert.IsTrue(
-                            result.AuthenticationResultMetadata.TokenEndpoint.Contains(localTenantId),
-                            $"TokenEndpoint doesn't contain tenant ID '{localTenantId}'");
+                            result.AuthenticationResultMetadata.TokenEndpoint.Contains(tenantId),
+                            $"TokenEndpoint doesn't contain tenant ID '{tenantId}'");
 
                         return result;
                     }));
