@@ -76,7 +76,7 @@ var app = ManagedIdentityApplicationBuilder.Create(
 var result = await app
     .AcquireTokenForManagedIdentity("https://graph.microsoft.com")
     .WithMtlsProofOfPossession()
-    .WithAttestationSupport()  // ← Credential Guard support
+    .WithAttestationSupport()  // ← Credential Guard attestation
     .ExecuteAsync();
 
 Console.WriteLine($"Token Type: {result.TokenType}");  // "mtls_pop"
@@ -84,7 +84,10 @@ Console.WriteLine($"Certificate Thumbprint: {result.BindingCertificate?.Thumbpri
 
 // Configure HttpClient with the binding certificate for mTLS
 var handler = new HttpClientHandler();
-handler.ClientCertificates.Add(result.BindingCertificate);
+if (result.BindingCertificate != null)
+{
+    handler.ClientCertificates.Add(result.BindingCertificate);
+}
 
 using var httpClient = new HttpClient(handler);
 httpClient.DefaultRequestHeaders.Authorization =
@@ -123,7 +126,10 @@ var result = await app
 
 // Configure HttpClient with the binding certificate for mTLS
 var handler = new HttpClientHandler();
-handler.ClientCertificates.Add(result.BindingCertificate);
+if (result.BindingCertificate != null)
+{
+    handler.ClientCertificates.Add(result.BindingCertificate);
+}
 
 using var httpClient = new HttpClient(handler);
 httpClient.DefaultRequestHeaders.Authorization = 
@@ -166,7 +172,10 @@ Console.WriteLine($"Certificate Thumbprint: {result.BindingCertificate?.Thumbpri
 
 // Configure HttpClient with the binding certificate for mTLS
 var handler = new HttpClientHandler();
-handler.ClientCertificates.Add(result.BindingCertificate);
+if (result.BindingCertificate != null)
+{
+    handler.ClientCertificates.Add(result.BindingCertificate);
+}
 
 using var httpClient = new HttpClient(handler);
 httpClient.DefaultRequestHeaders.Authorization =
@@ -208,7 +217,10 @@ Console.WriteLine($"Certificate Thumbprint: {result.BindingCertificate?.Thumbpri
 
 // Configure HttpClient with the binding certificate for mTLS
 var handler = new HttpClientHandler();
-handler.ClientCertificates.Add(result.BindingCertificate);
+if (result.BindingCertificate != null)
+{
+    handler.ClientCertificates.Add(result.BindingCertificate);
+}
 
 using var httpClient = new HttpClient(handler);
 httpClient.DefaultRequestHeaders.Authorization =
@@ -255,7 +267,10 @@ Console.WriteLine($"Binding Certificate matches SNI cert: {result.BindingCertifi
 
 // Configure HttpClient with the binding certificate for mTLS
 var handler = new HttpClientHandler();
-handler.ClientCertificates.Add(result.BindingCertificate);
+if (result.BindingCertificate != null)
+{
+    handler.ClientCertificates.Add(result.BindingCertificate);
+}
 
 using var httpClient = new HttpClient(handler);
 httpClient.DefaultRequestHeaders.Authorization =

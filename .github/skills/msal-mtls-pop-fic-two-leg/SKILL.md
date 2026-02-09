@@ -93,6 +93,7 @@ Console.WriteLine($"Leg 1 Token Type: {leg1Result.TokenType}");  // "mtls_pop"
 var leg2App = ConfidentialClientApplicationBuilder
     .Create("your-leg2-client-id")
     .WithAuthority("https://login.microsoftonline.com/your-tenant-id")
+    .WithAzureRegion("westus3")  // Specify region of your Azure resource
     .WithClientAssertion((options, ct) => 
     {
         return Task.FromResult(new ClientSignedAssertion
@@ -135,6 +136,7 @@ var leg1Result = await leg1App
 var leg2App = ConfidentialClientApplicationBuilder
     .Create("your-leg2-client-id")
     .WithAuthority("https://login.microsoftonline.com/your-tenant-id")
+    .WithAzureRegion("westus3")  // Specify region of your Azure resource
     .WithClientAssertion((options, ct) => 
     {
         return Task.FromResult(new ClientSignedAssertion
@@ -183,6 +185,7 @@ var leg1Result = await leg1App
 var leg2App = ConfidentialClientApplicationBuilder
     .Create("your-leg2-client-id")
     .WithAuthority("https://login.microsoftonline.com/your-tenant-id")
+    .WithAzureRegion("westus3")  // Specify region of your Azure resource
     .WithClientAssertion((options, ct) => 
     {
         return Task.FromResult(new ClientSignedAssertion
@@ -229,6 +232,7 @@ var leg1Result = await leg1App
 var leg2App = ConfidentialClientApplicationBuilder
     .Create("your-leg2-client-id")
     .WithAuthority("https://login.microsoftonline.com/your-tenant-id")
+    .WithAzureRegion("westus3")  // Specify region of your Azure resource
     .WithClientAssertion((options, ct) => 
     {
         return Task.FromResult(new ClientSignedAssertion
