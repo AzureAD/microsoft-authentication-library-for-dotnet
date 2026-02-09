@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 catch (Exception ex)
                 {
                     // Map any managed exception to AttestationStatus.Exception for consistency.
-                    return new AttestationResult(AttestationStatus.Exception, string.Empty, -1, ex.Message);
+                    return new AttestationResult(AttestationStatus.Exception, null, string.Empty, -1, ex.Message);
                 }
             }, cancellationToken);
         }
