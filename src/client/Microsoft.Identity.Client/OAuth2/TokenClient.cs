@@ -150,7 +150,8 @@ namespace Microsoft.Identity.Client.OAuth2
                     SendX5C = _requestParams.SendX5C,
                     UseSha2 = _requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
                     ExtraClientAssertionClaims = _requestParams.ExtraClientAssertionClaims,
-                    ClientAssertionFmiPath = _requestParams.ClientAssertionFmiPath
+                    ClientAssertionFmiPath = _requestParams.ClientAssertionFmiPath,
+                    MtlsBearerMode = _requestParams.MtlsCertificate != null
                 };
 
                 // Build mTLS validation context

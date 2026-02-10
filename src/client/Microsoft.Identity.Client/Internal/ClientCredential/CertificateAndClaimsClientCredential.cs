@@ -81,6 +81,21 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     MsalErrorMessage.CertMustHavePrivateKey(cert.FriendlyName));
             }
 
+            // If in mTLS bearer mode, skip JWT assertion - certificate will be used for TLS client auth only
+            if (requestContext.MtlsBearerMode)
+            {
+                sw.Stop();
+                return new CredentialMaterial(
+                    tokenRequestParameters: new Dictionary<string, string>(), // Empty - no client_assertion
+                    mtlsCertificate: cert,
+                    metadata: new CredentialMaterialMetadata(
+                        credentialType: CredentialType.ClientCertificate,
+                        credentialSource: Certificate == null ? "dynamic" : "static",
+                        mtlsCertificateIdHashPrefix: CredentialMaterialHelper.GetCertificateIdHashPrefix(cert),
+                        mtlsCertificateRequested: requestContext.MtlsRequired,
+                        resolutionTimeMs: sw.ElapsedMilliseconds));
+            }
+
             // Build JWT assertion
             JsonWebToken jwtToken;
             if (!string.IsNullOrEmpty(requestContext.ExtraClientAssertionClaims))

@@ -72,5 +72,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// FMI path for client assertion (Federated Managed Identity).
         /// </summary>
         public string ClientAssertionFmiPath { get; init; }
+
+        /// <summary>
+        /// When true, certificate should be used for TLS client auth only (mTLS bearer mode).
+        /// No JWT client_assertion should be sent.
+        /// </summary>
+        public bool MtlsBearerMode { get; init; }
     }
 }
