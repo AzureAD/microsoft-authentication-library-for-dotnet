@@ -74,11 +74,22 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
             }
 
-            if (!cert.HasPrivateKey)
+            // Validate certificate has private key (may throw CryptographicException if cert is disposed)
+            try
+            {
+                if (!cert.HasPrivateKey)
+                {
+                    throw new MsalClientException(
+                        MsalError.CertWithoutPrivateKey,
+                        MsalErrorMessage.CertMustHavePrivateKey(cert.FriendlyName));
+                }
+            }
+            catch (System.Security.Cryptography.CryptographicException ex)
             {
                 throw new MsalClientException(
-                    MsalError.CertWithoutPrivateKey,
-                    MsalErrorMessage.CertMustHavePrivateKey(cert.FriendlyName));
+                    MsalError.CryptographicError,
+                    MsalErrorMessage.CryptographicError,
+                    ex);
             }
 
             // If in mTLS bearer mode, skip JWT assertion - certificate will be used for TLS client auth only
