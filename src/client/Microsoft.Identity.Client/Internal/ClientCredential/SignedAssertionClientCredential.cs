@@ -23,6 +23,35 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _signedAssertion = signedAssertion;
         }
 
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            var tokenParams = new System.Collections.Generic.Dictionary<string, string>
+            {
+                [OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer,
+                [OAuth2Parameter.ClientAssertion] = _signedAssertion
+            };
+
+            sw.Stop();
+
+            var metadata = new CredentialMaterialMetadata(
+                credentialType: CredentialType.ClientAssertion,
+                credentialSource: "pre-signed",
+                mtlsCertificateIdHashPrefix: null,
+                mtlsCertificateRequested: requestContext.MtlsRequired,
+                resolutionTimeMs: sw.ElapsedMilliseconds);
+
+            var material = new CredentialMaterial(
+                tokenRequestParameters: tokenParams,
+                mtlsCertificate: null,
+                metadata: metadata);
+
+            return Task.FromResult(material);
+        }
+
         public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
             AuthenticationRequestParameters requestParameters,

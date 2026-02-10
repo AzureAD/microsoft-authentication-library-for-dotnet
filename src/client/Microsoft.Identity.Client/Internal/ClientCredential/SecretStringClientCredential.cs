@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -21,6 +23,34 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public SecretStringClientCredential(string secret)
         {
             Secret = secret;
+        }
+
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var sw = Stopwatch.StartNew();
+
+            var tokenParams = new Dictionary<string, string>
+            {
+                [OAuth2Parameter.ClientSecret] = Secret
+            };
+
+            sw.Stop();
+
+            var metadata = new CredentialMaterialMetadata(
+                credentialType: CredentialType.ClientSecret,
+                credentialSource: "static-secret",
+                mtlsCertificateIdHashPrefix: null,
+                mtlsCertificateRequested: requestContext.MtlsRequired,
+                resolutionTimeMs: sw.ElapsedMilliseconds);
+
+            var material = new CredentialMaterial(
+                tokenRequestParameters: tokenParams,
+                mtlsCertificate: null,
+                metadata: metadata);
+
+            return Task.FromResult(material);
         }
 
         public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(

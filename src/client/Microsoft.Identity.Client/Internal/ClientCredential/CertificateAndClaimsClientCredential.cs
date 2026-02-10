@@ -48,6 +48,16 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             Certificate = certificate;
         }
 
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            // TODO: Implement full credential material pattern with cryptography manager injection
+            throw new NotImplementedException(
+                "CertificateAndClaimsClientCredential.GetCredentialMaterialAsync requires cryptography manager integration. " +
+                "This will be implemented in a follow-up commit with proper DI.");
+        }
+
         public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
             AuthenticationRequestParameters requestParameters,

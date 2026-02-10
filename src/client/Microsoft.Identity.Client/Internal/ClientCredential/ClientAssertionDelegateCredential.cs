@@ -40,6 +40,16 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            // TODO: Implement full credential material pattern
+            throw new System.NotImplementedException(
+                "ClientAssertionDelegateCredential.GetCredentialMaterialAsync is not yet implemented. " +
+                "This will be added in a subsequent commit.");
+        }
+
         // ──────────────────────────────────
         //  Main hook for token requests
         // ──────────────────────────────────

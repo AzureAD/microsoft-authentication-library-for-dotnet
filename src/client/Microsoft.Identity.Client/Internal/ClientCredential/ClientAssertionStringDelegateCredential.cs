@@ -27,6 +27,51 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            var opts = new AssertionRequestOptions
+            {
+                CancellationToken = cancellationToken,
+                ClientID = requestContext.ClientId,
+                TokenEndpoint = requestContext.TokenEndpoint,
+                ClientCapabilities = requestContext.ClientCapabilities,
+                Claims = requestContext.Claims
+            };
+
+            string assertion = await _provider(opts, cancellationToken).ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(assertion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    MsalErrorMessage.InvalidClientAssertionEmpty);
+            }
+
+            sw.Stop();
+
+            var tokenParams = new System.Collections.Generic.Dictionary<string, string>
+            {
+                [OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer,
+                [OAuth2Parameter.ClientAssertion] = assertion
+            };
+
+            var metadata = new CredentialMaterialMetadata(
+                credentialType: CredentialType.ClientAssertion,
+                credentialSource: "string-delegate",
+                mtlsCertificateIdHashPrefix: null,
+                mtlsCertificateRequested: requestContext.MtlsRequired,
+                resolutionTimeMs: sw.ElapsedMilliseconds);
+
+            return new CredentialMaterial(
+                tokenRequestParameters: tokenParams,
+                mtlsCertificate: null,
+                metadata: metadata);
+        }
+
         public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
             AuthenticationRequestParameters p,

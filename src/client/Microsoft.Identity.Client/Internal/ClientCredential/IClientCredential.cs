@@ -21,6 +21,26 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         AssertionType AssertionType { get; }
 
+        /// <summary>
+        /// Produces credential material (auth parameters + optional mTLS certificate).
+        /// Called EXACTLY ONCE per logical token request.
+        /// 
+        /// Must return a valid CredentialMaterial or throw.
+        /// TokenRequestParameters may be empty (e.g., bearer token flow).
+        /// MtlsCertificate is optional.
+        /// Metadata must not contain secrets, PII, or full thumbprints.
+        /// </summary>
+        /// <param name="requestContext">Minimal per-request context for credential resolution.</param>
+        /// <param name="cancellationToken">Cancellation token for the operation.</param>
+        /// <returns>Credential material containing OAuth2 parameters and optional certificate.</returns>
+        Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Legacy method for backward compatibility.
+        /// New code should use GetCredentialMaterialAsync instead.
+        /// </summary>
         Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
               OAuth2Client oAuth2Client,
               AuthenticationRequestParameters authenticationRequestParameters,
