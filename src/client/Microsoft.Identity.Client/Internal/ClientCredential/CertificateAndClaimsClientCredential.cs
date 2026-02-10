@@ -82,14 +82,39 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             // Build JWT assertion
-            var jwtToken = new JsonWebToken(
-                requestContext.CryptographyManager,
-                requestContext.ClientId,
-                requestContext.TokenEndpoint,
-                _claimsToSign,
-                _appendDefaultClaims);
+            JsonWebToken jwtToken;
+            if (!string.IsNullOrEmpty(requestContext.ExtraClientAssertionClaims))
+            {
+                // ExtraClientAssertionClaims takes precedence (e.g., for cache key binding)
+                jwtToken = new JsonWebToken(
+                    requestContext.CryptographyManager,
+                    requestContext.ClientId,
+                    requestContext.TokenEndpoint,
+                    requestContext.ExtraClientAssertionClaims,
+                    _appendDefaultClaims);
+            }
+            else
+            {
+                jwtToken = new JsonWebToken(
+                    requestContext.CryptographyManager,
+                    requestContext.ClientId,
+                    requestContext.TokenEndpoint,
+                    _claimsToSign,
+                    _appendDefaultClaims);
+            }
 
-            string assertion = jwtToken.Sign(cert, requestContext.SendX5C, requestContext.UseSha2);
+            string assertion;
+            try
+            {
+                assertion = jwtToken.Sign(cert, requestContext.SendX5C, requestContext.UseSha2);
+            }
+            catch (System.Security.Cryptography.CryptographicException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.CryptographicError,
+                    MsalErrorMessage.CryptographicError,
+                    ex);
+            }
 
             sw.Stop();
 

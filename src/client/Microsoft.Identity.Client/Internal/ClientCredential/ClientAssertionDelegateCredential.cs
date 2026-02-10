@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 TokenEndpoint = requestContext.TokenEndpoint,
                 ClientCapabilities = requestContext.ClientCapabilities,
                 Claims = requestContext.Claims,
-                ClientAssertionFmiPath = null // Will be set by caller if needed
+                ClientAssertionFmiPath = requestContext.ClientAssertionFmiPath
             };
 
             ClientSignedAssertion resp = await GetAssertionAsync(opts, cancellationToken)

@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 ClientID = requestContext.ClientId,
                 TokenEndpoint = requestContext.TokenEndpoint,
                 ClientCapabilities = requestContext.ClientCapabilities,
-                Claims = requestContext.Claims
+                Claims = requestContext.Claims,
+                ClientAssertionFmiPath = requestContext.ClientAssertionFmiPath
             };
 
             string assertion = await _provider(opts, cancellationToken)

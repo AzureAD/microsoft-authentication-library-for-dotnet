@@ -148,7 +148,9 @@ namespace Microsoft.Identity.Client.OAuth2
                     CancellationToken = cancellationToken,
                     CryptographyManager = _serviceBundle.PlatformProxy.CryptographyManager,
                     SendX5C = _requestParams.SendX5C,
-                    UseSha2 = _requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported
+                    UseSha2 = _requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
+                    ExtraClientAssertionClaims = _requestParams.ExtraClientAssertionClaims,
+                    ClientAssertionFmiPath = _requestParams.ClientAssertionFmiPath
                 };
 
                 // Build mTLS validation context

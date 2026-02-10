@@ -61,5 +61,16 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// Whether the authority supports SHA-2 credentials.
         /// </summary>
         public bool UseSha2 { get; init; }
+
+        /// <summary>
+        /// Extra claims to include in client assertion (takes precedence over regular Claims).
+        /// Used for scenarios like cache key binding.
+        /// </summary>
+        public string ExtraClientAssertionClaims { get; init; }
+
+        /// <summary>
+        /// FMI path for client assertion (Federated Managed Identity).
+        /// </summary>
+        public string ClientAssertionFmiPath { get; init; }
     }
 }
