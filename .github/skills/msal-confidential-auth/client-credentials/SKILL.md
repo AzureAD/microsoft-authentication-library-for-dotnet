@@ -22,15 +22,13 @@ Client Credentials Flow is used for service-to-service authentication without us
 Agent can show code for each credential type:
 - Standard Certificate: [with-certificate.cs](../shared/code-examples/with-certificate.cs)
 - Certificate with SNI: [with-certificate-sni.cs](../shared/code-examples/with-certificate-sni.cs)
-- System-Assigned MI: [with-managed-identity-system.cs](../shared/code-examples/with-managed-identity-system.cs)
-- User-Assigned MI: [with-managed-identity-user.cs](../shared/code-examples/with-managed-identity-user.cs)
+- Federated Identity Credentials: [with-federated-identity-credentials.cs](../shared/code-examples/with-federated-identity-credentials.cs)
 
 ### Setup Guidance
 Reference appropriate credential setup:
 - [Certificate Setup](../shared/credential-setup/certificate-setup.md)
 - [Certificate with SNI](../shared/credential-setup/certificate-sni-setup.md)
-- [System-Assigned Identity](../shared/credential-setup/managed-identity-system.md)
-- [User-Assigned Identity](../shared/credential-setup/managed-identity-user.md)
+- [Federated Identity Credentials](../shared/credential-setup/federated-identity-credentials.md)
 
 ### Example: Service with Certificate
 ```csharp
@@ -41,11 +39,12 @@ public class TokenAcquisitionService
 
     public TokenAcquisitionService(string clientId, X509Certificate2 cert)
     {
-        // See: with-certificate.cs for credential setup
+        // For complete example with static token caching, see: with-certificate.cs
         _app = ConfidentialClientApplicationBuilder
             .Create(clientId)
             .WithCertificate(cert)
             .WithAuthority($"https://login.microsoftonline.com/{tenantId}/v2.0")
+            .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)  // Enable static token caching
             .Build();
     }
 
@@ -64,11 +63,12 @@ public class TokenAcquisitionService
 Refer to [Troubleshooting Guide](../shared/patterns/troubleshooting.md)
 
 ### Best Practices
-- Use [Token Caching Strategies](../shared/patterns/token-caching-strategies.md) to optimize performance
+- Use [Token Caching Strategies](../shared/patterns/token-caching-strategies.md) - enable static token caching with `.WithCacheOptions(CacheOptions.EnableSharedCacheOptions)` for optimal performance
 - Implement [Error Handling Patterns](../shared/patterns/error-handling-patterns.md) 
-- Monitor token acquisition metrics
-- Rotate certificates periodically
-- Use managed identity in Azure for automatic credential management
+- Monitor token acquisition using `AuthenticationResultMetadata` for cache hit ratios
+- Rotate certificates periodically (if using certificate-based auth)
+- Use Federated Identity Credentials with Managed Identity for keyless authentication
+- For additional caching options and strategies, see [Token cache serialization documentation](https://learn.microsoft.com/en-us/entra/msal/dotnet/how-to/token-cache-serialization?tabs=msal)
 
 ### Explain the Flow
 1. **Credential Submission**: Service authenticates directly with AAD using certificate or MI

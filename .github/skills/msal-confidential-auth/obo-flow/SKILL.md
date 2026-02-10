@@ -25,15 +25,13 @@ ID tokens are for authentication; access tokens are for authorization and API ac
 Agent can show code for each credential type:
 - Standard Certificate: [with-certificate.cs](../shared/code-examples/with-certificate.cs)
 - Certificate with SNI: [with-certificate-sni.cs](../shared/code-examples/with-certificate-sni.cs)
-- System-Assigned MI: [with-managed-identity-system.cs](../shared/code-examples/with-managed-identity-system.cs)
-- User-Assigned MI: [with-managed-identity-user.cs](../shared/code-examples/with-managed-identity-user.cs)
+- Federated Identity Credentials: [with-federated-identity-credentials.cs](../shared/code-examples/with-federated-identity-credentials.cs)
 
 ### Setup Guidance
 Reference appropriate credential setup:
 - [Certificate Setup](../shared/credential-setup/certificate-setup.md)
 - [Certificate with SNI](../shared/credential-setup/certificate-sni-setup.md)
-- [System-Assigned Identity](../shared/credential-setup/managed-identity-system.md)
-- [User-Assigned Identity](../shared/credential-setup/managed-identity-user.md)
+- [Federated Identity Credentials](../shared/credential-setup/federated-identity-credentials.md)
 
 ### Example: Web API with Certificate
 ```csharp
@@ -73,10 +71,11 @@ Refer to [Troubleshooting Guide](../shared/patterns/troubleshooting.md)
 - Invalid token: Verify access token (not ID token) is passed
 
 ### Best Practices
-- Use [Token Caching Strategies](../shared/patterns/token-caching-strategies.md)
+- Use [Token Caching Strategies](../shared/patterns/token-caching-strategies.md) for optimal session-based token caching
 - Implement [Error Handling Patterns](../shared/patterns/error-handling-patterns.md)
 - Always validate incoming token before using in OBO
 - Extract `tid` claim from user token for guest user scenarios—use tenant-specific authority, not /common
+- For multi-instance deployments and advanced caching, see [Token cache serialization documentation](https://learn.microsoft.com/en-us/entra/msal/dotnet/how-to/token-cache-serialization?tabs=msal)
 
 ### Explain the Flow
 1. **Token Reception**: Web API receives user's access token from client

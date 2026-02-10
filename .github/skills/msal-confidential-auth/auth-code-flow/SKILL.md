@@ -22,15 +22,13 @@ Authorization Code Flow is used by web applications to authenticate users and ob
 Agent can show code snippets for each credential type:
 - Standard Certificate: [with-certificate.cs](../shared/code-examples/with-certificate.cs)
 - Certificate with SNI: [with-certificate-sni.cs](../shared/code-examples/with-certificate-sni.cs)
-- System-Assigned MI: [with-managed-identity-system.cs](../shared/code-examples/with-managed-identity-system.cs)
-- User-Assigned MI: [with-managed-identity-user.cs](../shared/code-examples/with-managed-identity-user.cs)
+- Federated Identity Credentials: [with-federated-identity-credentials.cs](../shared/code-examples/with-federated-identity-credentials.cs)
 
 ### Setup Guidance
 Reference appropriate credential setup:
 - [Certificate Setup](../shared/credential-setup/certificate-setup.md)
 - [Certificate with SNI](../shared/credential-setup/certificate-sni-setup.md)
-- [System-Assigned Identity](../shared/credential-setup/managed-identity-system.md)
-- [User-Assigned Identity](../shared/credential-setup/managed-identity-user.md)
+- [Federated Identity Credentials](../shared/credential-setup/federated-identity-credentials.md)
 
 ### Example: Web Application with Certificate
 ```csharp
@@ -59,10 +57,11 @@ public async Task HandleCallback(string code, string state)
 Refer to [Troubleshooting Guide](../shared/patterns/troubleshooting.md)
 
 ### Best Practices
-- Use [Token Caching Strategies](../shared/patterns/token-caching-strategies.md)
+- Use [Token Caching Strategies](../shared/patterns/token-caching-strategies.md) for optimal token acquisition
 - Implement [Error Handling Patterns](../shared/patterns/error-handling-patterns.md)
 - Store refresh tokens securely
 - Use PKCE for native clients
+- For advanced caching options including distributed caches for multi-instance deployments, see [Token cache serialization documentation](https://learn.microsoft.com/en-us/entra/msal/dotnet/how-to/token-cache-serialization?tabs=msal)
 
 ### Explain the Flow
 1. **Initiation**: Redirect to `https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize?client_id=...&redirect_uri=...`

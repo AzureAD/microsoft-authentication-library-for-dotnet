@@ -30,13 +30,11 @@ msal-confidential-auth/
     ├── code-examples/        # Reusable code snippets
     │   ├── with-certificate.cs
     │   ├── with-certificate-sni.cs
-    │   ├── with-managed-identity-system.cs
-    │   └── with-managed-identity-user.cs
+    │   └── with-federated-identity-credentials.cs
     ├── credential-setup/     # Setup guides for each credential type
     │   ├── certificate-setup.md
     │   ├── certificate-sni-setup.md
-    │   ├── managed-identity-system.md
-    │   └── managed-identity-user.md
+    │   └── federated-identity-credentials.md
     └── patterns/             # Common patterns and best practices
         ├── token-caching-strategies.md
         ├── error-handling-patterns.md
@@ -67,8 +65,7 @@ For each flow, agents can help with:
 
 - **Standard Certificate** → [Certificate Setup](shared/credential-setup/certificate-setup.md)
 - **Certificate with SNI** → [Certificate with SNI Setup](shared/credential-setup/certificate-sni-setup.md)
-- **System-Assigned MI** → [System-Assigned Identity Setup](shared/credential-setup/managed-identity-system.md)
-- **User-Assigned MI** → [User-Assigned Identity Setup](shared/credential-setup/managed-identity-user.md)
+- **Federated Identity Credentials** → [Federated Identity Credentials Setup](shared/credential-setup/federated-identity-credentials.md)
 
 ### Common Challenges
 
