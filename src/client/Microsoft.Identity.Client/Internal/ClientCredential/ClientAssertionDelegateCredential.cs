@@ -70,8 +70,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             sw.Stop();
 
-            // JWT-PoP ONLY if explicitly requested, not inferred from cert presence
-            string assertionType = requestContext.MtlsRequired && resp.TokenBindingCertificate != null
+            // Use jwt-pop if TokenBindingCertificate is present (assertion contains confirmation claim)
+            // AAD requires jwt-pop when confirmation claim exists, regardless of MtlsRequired flag
+            string assertionType = resp.TokenBindingCertificate != null
                 ? OAuth2AssertionType.JwtPop
                 : OAuth2AssertionType.JwtBearer;
 
