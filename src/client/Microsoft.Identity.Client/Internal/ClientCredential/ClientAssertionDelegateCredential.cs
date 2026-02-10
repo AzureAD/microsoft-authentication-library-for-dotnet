@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -39,6 +41,58 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             GetAssertionAsync(options, cancellationToken);
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
+
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var sw = Stopwatch.StartNew();
+
+            var opts = new AssertionRequestOptions
+            {
+                CancellationToken = cancellationToken,
+                ClientID = requestContext.ClientId,
+                TokenEndpoint = requestContext.TokenEndpoint,
+                ClientCapabilities = requestContext.ClientCapabilities,
+                Claims = requestContext.Claims,
+                ClientAssertionFmiPath = null // Will be set by caller if needed
+            };
+
+            ClientSignedAssertion resp = await GetAssertionAsync(opts, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(resp?.Assertion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    MsalErrorMessage.InvalidClientAssertionEmpty);
+            }
+
+            sw.Stop();
+
+            // JWT-PoP ONLY if explicitly requested, not inferred from cert presence
+            string assertionType = requestContext.MtlsRequired && resp.TokenBindingCertificate != null
+                ? OAuth2AssertionType.JwtPop
+                : OAuth2AssertionType.JwtBearer;
+
+            var tokenParameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, assertionType },
+                { OAuth2Parameter.ClientAssertion, resp.Assertion }
+            };
+
+            return new CredentialMaterial(
+                tokenRequestParameters: tokenParameters,
+                mtlsCertificate: resp.TokenBindingCertificate,
+                metadata: new CredentialMaterialMetadata(
+                    credentialType: CredentialType.ClientAssertion,
+                    credentialSource: "callback",
+                    mtlsCertificateIdHashPrefix: resp.TokenBindingCertificate != null
+                        ? CredentialMaterialHelper.GetCertificateIdHashPrefix(resp.TokenBindingCertificate)
+                        : null,
+                    mtlsCertificateRequested: requestContext.MtlsRequired,
+                    resolutionTimeMs: sw.ElapsedMilliseconds));
+        }
 
         // ──────────────────────────────────
         //  Main hook for token requests

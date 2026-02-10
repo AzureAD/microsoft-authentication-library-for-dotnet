@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,6 +47,67 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _claimsToSign = claimsToSign;
             _appendDefaultClaims = appendDefaultClaims;
             Certificate = certificate;
+        }
+
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var sw = Stopwatch.StartNew();
+
+            // Resolve the certificate via the provider
+            var opts = new AssertionRequestOptions
+            {
+                CancellationToken = cancellationToken,
+                ClientID = requestContext.ClientId,
+                TokenEndpoint = requestContext.TokenEndpoint,
+                ClientCapabilities = requestContext.ClientCapabilities,
+                Claims = requestContext.Claims
+            };
+
+            X509Certificate2 cert = await _certificateProvider(opts).ConfigureAwait(false);
+
+            if (cert == null)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
+            }
+
+            if (!cert.HasPrivateKey)
+            {
+                throw new MsalClientException(
+                    MsalError.CertWithoutPrivateKey,
+                    MsalErrorMessage.CertMustHavePrivateKey(cert.FriendlyName));
+            }
+
+            // Build JWT assertion
+            var jwtToken = new JsonWebToken(
+                requestContext.CryptographyManager,
+                requestContext.ClientId,
+                requestContext.TokenEndpoint,
+                _claimsToSign,
+                _appendDefaultClaims);
+
+            string assertion = jwtToken.Sign(cert, requestContext.SendX5C, requestContext.UseSha2);
+
+            sw.Stop();
+
+            var tokenParameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                { OAuth2Parameter.ClientAssertion, assertion }
+            };
+
+            return new CredentialMaterial(
+                tokenRequestParameters: tokenParameters,
+                mtlsCertificate: cert,
+                metadata: new CredentialMaterialMetadata(
+                    credentialType: CredentialType.ClientCertificate,
+                    credentialSource: Certificate == null ? "dynamic" : "static",
+                    mtlsCertificateIdHashPrefix: CredentialMaterialHelper.GetCertificateIdHashPrefix(cert),
+                    mtlsCertificateRequested: requestContext.MtlsRequired,
+                    resolutionTimeMs: sw.ElapsedMilliseconds));
         }
 
         public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(

@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -21,6 +22,27 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public SecretStringClientCredential(string secret)
         {
             Secret = secret;
+        }
+
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var tokenParameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientSecret, Secret }
+            };
+
+            var material = new CredentialMaterial(
+                tokenRequestParameters: tokenParameters,
+                mtlsCertificate: null,
+                metadata: new CredentialMaterialMetadata(
+                    credentialType: CredentialType.ClientSecret,
+                    credentialSource: "static",
+                    mtlsCertificateRequested: requestContext.MtlsRequired,
+                    resolutionTimeMs: 0));
+
+            return Task.FromResult(material);
         }
 
         public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(

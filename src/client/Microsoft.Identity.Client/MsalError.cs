@@ -1209,6 +1209,12 @@ namespace Microsoft.Identity.Client
         public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
 
         /// <summary>
+        /// <para>What happened?</para> A credential produced invalid material during resolution.
+        /// <para>Mitigation:</para> Ensure the credential implementation returns valid material with proper structure and no reserved OAuth2 parameters.
+        /// </summary>
+        public const string InvalidCredentialMaterial = "invalid_credential_material";
+
+        /// <summary>
         /// <para>What happened?</para> mTLS is not supported for managed identity authentication.
         /// </summary>
         public const string MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity";

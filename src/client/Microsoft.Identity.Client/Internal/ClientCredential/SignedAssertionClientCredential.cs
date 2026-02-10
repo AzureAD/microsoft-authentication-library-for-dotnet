@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -21,6 +22,35 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public SignedAssertionClientCredential(string signedAssertion)
         {
             _signedAssertion = signedAssertion;
+        }
+
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(_signedAssertion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    MsalErrorMessage.InvalidClientAssertionEmpty);
+            }
+
+            var tokenParameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                { OAuth2Parameter.ClientAssertion, _signedAssertion }
+            };
+
+            var material = new CredentialMaterial(
+                tokenRequestParameters: tokenParameters,
+                mtlsCertificate: null,
+                metadata: new CredentialMaterialMetadata(
+                    credentialType: CredentialType.ClientAssertion,
+                    credentialSource: "static",
+                    mtlsCertificateRequested: requestContext.MtlsRequired,
+                    resolutionTimeMs: 0));
+
+            return Task.FromResult(material);
         }
 
         public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(

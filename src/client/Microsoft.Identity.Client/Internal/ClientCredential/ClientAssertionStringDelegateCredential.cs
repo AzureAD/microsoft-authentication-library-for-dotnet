@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -26,6 +28,49 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
+
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialRequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            var sw = Stopwatch.StartNew();
+
+            var opts = new AssertionRequestOptions
+            {
+                CancellationToken = cancellationToken,
+                ClientID = requestContext.ClientId,
+                TokenEndpoint = requestContext.TokenEndpoint,
+                ClientCapabilities = requestContext.ClientCapabilities,
+                Claims = requestContext.Claims
+            };
+
+            string assertion = await _provider(opts, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(assertion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    MsalErrorMessage.InvalidClientAssertionEmpty);
+            }
+
+            sw.Stop();
+
+            var tokenParameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                { OAuth2Parameter.ClientAssertion, assertion }
+            };
+
+            return new CredentialMaterial(
+                tokenRequestParameters: tokenParameters,
+                mtlsCertificate: null,
+                metadata: new CredentialMaterialMetadata(
+                    credentialType: CredentialType.ClientAssertion,
+                    credentialSource: "callback",
+                    mtlsCertificateRequested: requestContext.MtlsRequired,
+                    resolutionTimeMs: sw.ElapsedMilliseconds));
+        }
 
         public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
             OAuth2Client oAuth2Client,
