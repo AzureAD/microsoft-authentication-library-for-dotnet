@@ -22,22 +22,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         AssertionType AssertionType { get; }
 
         /// <summary>
-        /// New Phase 1 method: Resolve credential material.
+        /// Resolve credential material.
         /// Returns structured output containing OAuth2 parameters and optional mTLS certificate.
         /// </summary>
         Task<CredentialMaterial> GetCredentialMaterialAsync(
             CredentialRequestContext requestContext,
             CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Legacy method: Add parameters directly to OAuth2Client.
-        /// Kept for backward compatibility. Will be removed in Phase 2.
-        /// </summary>
-        Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-              OAuth2Client oAuth2Client,
-              AuthenticationRequestParameters authenticationRequestParameters,
-              ICryptographyManager cryptographyManager,
-              string tokenEndpoint,
-              CancellationToken cancellationToken);
     }
 }

@@ -71,37 +71,5 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     mtlsCertificateRequested: requestContext.MtlsRequired,
                     resolutionTimeMs: sw.ElapsedMilliseconds));
         }
-
-        public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters p,
-            ICryptographyManager _,
-            string tokenEndpoint,
-            CancellationToken ct)
-        {
-            var opts = new AssertionRequestOptions
-            {
-                CancellationToken = ct,
-                ClientID = p.AppConfig.ClientId,
-                TokenEndpoint = tokenEndpoint,
-                ClientCapabilities = p.RequestContext.ServiceBundle.Config.ClientCapabilities,
-                Claims = p.Claims,
-                ClientAssertionFmiPath = p.ClientAssertionFmiPath
-            };
-
-            string assertion = await _provider(opts, ct).ConfigureAwait(false);
-
-            if (string.IsNullOrWhiteSpace(assertion))
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidClientAssertion,
-                    MsalErrorMessage.InvalidClientAssertionEmpty);
-            }
-
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
-
-            return ClientCredentialApplicationResult.None;
-        }
     }
 }

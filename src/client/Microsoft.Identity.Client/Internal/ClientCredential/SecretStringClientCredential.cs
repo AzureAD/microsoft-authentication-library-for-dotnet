@@ -44,16 +44,5 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             return Task.FromResult(material);
         }
-
-        public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters requestParameters,
-            ICryptographyManager cryptographyManager, 
-            string tokenEndpoint, 
-            CancellationToken cancellationToken)
-        {
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientSecret, Secret);
-            return Task.FromResult(ClientCredentialApplicationResult.None);
-        }
     }
 }
