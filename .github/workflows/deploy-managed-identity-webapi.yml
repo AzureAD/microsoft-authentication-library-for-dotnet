@@ -43,10 +43,12 @@ jobs:
       - name: Test deployed endpoint - Get Token
         run: |
           echo "Testing token endpoint..."
-          RESPONSE=$(curl -s -X GET "https://msalmsi-buaxcubfa5a9drf9.azurewebsites.net/appservice?resourceuri=https://management.azure.com")
+          RESPONSE=$(curl -s -X GET "https://msalmsi-buaxcubfa5a9drf9.westus3-01.azurewebsites.net/AppService?resourceuri=https://vault.azure.net")
           echo "Response: $RESPONSE"
-          if echo "$RESPONSE" | grep -q "Access token"; then
+          if echo "$RESPONSE" | grep -q "Access token received"; then
             echo "✅ Successfully retrieved access token"
+            exit 0
           else
             echo "⚠️ Response received but may need review: $RESPONSE"
+            exit 0
           fi
