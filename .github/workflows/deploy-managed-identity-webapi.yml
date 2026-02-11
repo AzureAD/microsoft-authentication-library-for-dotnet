@@ -7,8 +7,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'tests/devapps/Managed Identity apps/ManagedIdentityWebApi/**'
 
 jobs:
   build-and-deploy:
