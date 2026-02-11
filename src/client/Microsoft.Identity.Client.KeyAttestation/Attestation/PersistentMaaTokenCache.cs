@@ -7,14 +7,13 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
+#if NET8_0_OR_GREATER
 using System.Text.Json;
 using System.Text.Json.Nodes;
 #else
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 #endif
 
 namespace Microsoft.Identity.Client.KeyAttestation.Attestation
@@ -69,10 +68,11 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
             string filePath = Path.Combine(s_cacheDirectory, fileName);
 
             bool success = false;
+            MaaTokenCacheEntry localEntry = null;
 
-            // Use InterprocessLock with short timeout for cross-process coordination
-            InterprocessLock.TryWithAliasLock(
-                alias: cacheKey,
+            // Use MaaInterprocessLock with short timeout for cross-process coordination
+            MaaInterprocessLock.TryWithLock(
+                key: cacheKey,
                 timeout: s_operationTimeout,
                 action: () =>
                 {
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                             return;
                         }
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
+#if NET8_0_OR_GREATER
                         var jsonObj = JsonNode.Parse(json)?.AsObject();
                         if (jsonObj == null)
                         {
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                         // Only return if not expired
                         if (expiresAt > DateTimeOffset.UtcNow)
                         {
-                            entry = new MaaTokenCacheEntry(token, issuedAt, expiresAt);
+                            localEntry = new MaaTokenCacheEntry(token, issuedAt, expiresAt);
                             success = true;
                             logVerbose?.Invoke($"[MaaTokenCache] Successfully read from persistent cache: {fileName}");
                         }
@@ -155,6 +155,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                 },
                 logVerbose: s => logVerbose?.Invoke(s));
 
+            entry = localEntry;
             return success;
         }
 
@@ -171,8 +172,8 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
             string fileName = GetCacheFileName(cacheKey);
             string filePath = Path.Combine(s_cacheDirectory, fileName);
 
-            InterprocessLock.TryWithAliasLock(
-                alias: cacheKey,
+            MaaInterprocessLock.TryWithLock(
+                key: cacheKey,
                 timeout: s_operationTimeout,
                 action: () =>
                 {
@@ -182,7 +183,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                         Directory.CreateDirectory(s_cacheDirectory);
 
                         // Create JSON representation
-#if SUPPORTS_SYSTEM_TEXT_JSON
+#if NET8_0_OR_GREATER
                         var jsonObj = new JsonObject
                         {
                             ["token"] = entry.Token,
@@ -223,8 +224,8 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                 return;
             }
 
-            InterprocessLock.TryWithAliasLock(
-                alias: cacheKey,
+            MaaInterprocessLock.TryWithLock(
+                key: cacheKey,
                 timeout: s_operationTimeout,
                 action: () =>
                 {
@@ -243,7 +244,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                             {
                                 string json = File.ReadAllText(file, Encoding.UTF8);
                                 
-#if SUPPORTS_SYSTEM_TEXT_JSON
+#if NET8_0_OR_GREATER
                                 var jsonObj = JsonNode.Parse(json)?.AsObject();
                                 if (jsonObj != null && jsonObj.TryGetPropertyValue("expiresAt", out var expNode))
                                 {

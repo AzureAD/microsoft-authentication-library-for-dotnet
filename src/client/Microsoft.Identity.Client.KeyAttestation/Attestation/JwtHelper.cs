@@ -4,11 +4,11 @@
 using System;
 using System.Text;
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
+#if NET8_0_OR_GREATER
 using System.Text.Json;
 using System.Text.Json.Nodes;
 #else
-using Microsoft.Identity.Json.Linq;
+using Newtonsoft.Json.Linq;
 #endif
 
 namespace Microsoft.Identity.Client.KeyAttestation.Attestation
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                 if (string.IsNullOrWhiteSpace(payload))
                     return false;
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
+#if NET8_0_OR_GREATER
                 var jsonPayload = JsonNode.Parse(payload)?.AsObject();
                 if (jsonPayload == null)
                     return false;

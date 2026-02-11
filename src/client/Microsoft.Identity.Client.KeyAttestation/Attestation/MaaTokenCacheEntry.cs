@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
             var remainingLifetime = ExpiresAt - now;
 
             // Refresh if less than 50% lifetime remains
-            return remainingLifetime < (totalLifetime / 2);
+            return remainingLifetime.TotalSeconds < (totalLifetime.TotalSeconds / 2);
         }
 
         /// <summary>
