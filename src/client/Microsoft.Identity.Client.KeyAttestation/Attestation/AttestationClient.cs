@@ -143,14 +143,15 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 
         /// <summary>
         /// Builds a cache key from the attestation parameters.
-        /// The key handle pointer is used as a unique identifier for the key.
+        /// Uses endpoint and clientId as the primary cache key components.
+        /// Note: The key handle pointer is NOT used as it's not stable across process restarts.
         /// </summary>
         private static string BuildCacheKey(string endpoint, SafeNCryptKeyHandle keyHandle, string clientId)
         {
-            // Use the handle pointer as part of the cache key
-            // This ensures different keys get different cache entries
-            string keyId = keyHandle.DangerousGetHandle().ToString("X");
-            return $"{endpoint}|{clientId}|{keyId}";
+            // Use endpoint and clientId as cache key components
+            // We don't include key handle pointer as it's not stable across restarts
+            // Each unique endpoint + clientId combination gets its own cached token
+            return $"{endpoint}|{clientId}";
         }
 
         /// <summary>

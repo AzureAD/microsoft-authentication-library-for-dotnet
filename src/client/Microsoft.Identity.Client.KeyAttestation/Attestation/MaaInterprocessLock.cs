@@ -119,16 +119,23 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 
         private static string HashKey(string s)
         {
+            // SHA-256 produces 64 hex characters; truncate to 32 for mutex name length limits
+            const int MutexNameHashLength = 32;
+
             try
             {
                 using var sha256 = SHA256.Create();
                 byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(s));
                 string hex = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                // Truncate to 32 chars to fit mutex name length limits
-                return hex.Length > 32 ? hex.Substring(0, 32) : hex;
+                
+                // Truncate to fit mutex name length limits while maintaining uniqueness
+                return hex.Length > MutexNameHashLength 
+                    ? hex.Substring(0, MutexNameHashLength) 
+                    : hex;
             }
             catch
             {
+                // Fallback to simple hash code on error
                 return Math.Abs(s.GetHashCode()).ToString();
             }
         }

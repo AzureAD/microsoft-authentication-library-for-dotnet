@@ -86,9 +86,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void NeedsRefresh_WithExactly50PercentRemaining_ReturnsTrue()
+        public void NeedsRefresh_WithExactly50PercentRemaining_ReturnsFalse()
         {
             // Arrange - Token valid for 1 hour, check after exactly 30 minutes (50% remaining)
+            // At exactly 50%, the token does NOT need refresh yet (only when < 50%)
             var issuedAt = DateTimeOffset.UtcNow.AddMinutes(-30);
             var expiresAt = issuedAt.AddHours(1);
             var entry = new MaaTokenCacheEntry("test-token", issuedAt, expiresAt);
@@ -98,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             bool needsRefresh = entry.NeedsRefresh(now);
 
             // Assert
-            Assert.IsFalse(needsRefresh, "Token with exactly 50% lifetime remaining should not need refresh");
+            Assert.IsFalse(needsRefresh, "Token with exactly 50% lifetime remaining should NOT need refresh (only <50% triggers refresh)");
         }
 
         [TestMethod]

@@ -291,15 +291,24 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 
         /// <summary>
         /// Generates a safe file name from the cache key using SHA-256 hash.
+        /// SHA-256 produces 64 hex characters; we truncate to 32 for file name safety.
         /// </summary>
         private static string GetCacheFileName(string cacheKey)
         {
+            const int FileNameHashLength = 32;
+
             try
             {
                 using var sha256 = SHA256.Create();
                 byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(cacheKey));
                 string hashHex = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                return $"maa_{hashHex.Substring(0, 32)}.json";
+                
+                // Truncate to reasonable file name length while maintaining uniqueness
+                string truncatedHash = hashHex.Length > FileNameHashLength 
+                    ? hashHex.Substring(0, FileNameHashLength) 
+                    : hashHex;
+                
+                return $"maa_{truncatedHash}.json";
             }
             catch
             {
