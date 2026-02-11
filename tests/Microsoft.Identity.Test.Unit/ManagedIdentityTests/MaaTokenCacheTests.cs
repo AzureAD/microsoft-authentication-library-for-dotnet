@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             // Act
-            var token = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            var token = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
 
             // Assert
             Assert.IsTrue(factoryCalled);
@@ -75,10 +75,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             // Act - First call
-            var token1 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            var token1 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
 
             // Act - Second call (should use cache)
-            var token2 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            var token2 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
 
             // Assert
             Assert.AreEqual(1, factoryCallCount, "Factory should only be called once");
@@ -109,10 +109,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             // Act - First call with expired token
-            var token1 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            var token1 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
 
             // Act - Second call (should call factory again due to expiration)
-            var token2 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            var token2 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
 
             // Assert
             Assert.AreEqual(2, factoryCallCount, "Factory should be called twice (expired + refresh)");
@@ -143,10 +143,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             // Act - First call with token needing refresh
-            var token1 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            var token1 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
 
             // Act - Second call (should call factory due to 50% threshold)
-            var token2 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            var token2 = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
 
             // Assert
             Assert.AreEqual(2, factoryCallCount, "Factory should be called twice (initial + refresh)");
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             persistentCache.TryWrite("test-key", entry, null);
 
             // Act
-            var token = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            var token = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
 
             // Assert
             Assert.AreEqual(0, factoryCallCount, "Factory should not be called (persistent cache hit)");
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             // Act
-            var token = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            var token = await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
 
             // Assert
             Assert.AreEqual("test-key", persistentCache.LastWriteKey);
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var cache = new MaaTokenCache(null);
 
             // Act
-            await cache.GetOrCreateAsync("", () => Task.FromResult(new AttestationResult(AttestationStatus.Success, "jwt", 0, null)), CancellationToken.None);
+            await cache.GetOrCreateAsync("", () => Task.FromResult(new AttestationResult(AttestationStatus.Success, "jwt", 0, null)), CancellationToken.None).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var cache = new MaaTokenCache(null);
 
             // Act
-            await cache.GetOrCreateAsync("test-key", null, CancellationToken.None);
+            await cache.GetOrCreateAsync("test-key", null, CancellationToken.None).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             // Act
-            await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
+            await cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             async Task<AttestationResult> Factory()
             {
                 Interlocked.Increment(ref factoryCallCount);
-                await Task.Delay(factoryDelay);
+                await Task.Delay(factoryDelay).ConfigureAwait(false);
                 string jwt = CreateTestJwt(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddHours(1));
                 return new AttestationResult(AttestationStatus.Success, jwt, 0, null);
             }
@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 tasks[i] = cache.GetOrCreateAsync("test-key", Factory, CancellationToken.None);
             }
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
 
             // Assert
             Assert.AreEqual(1, factoryCallCount, "Factory should only be called once despite concurrent calls");
