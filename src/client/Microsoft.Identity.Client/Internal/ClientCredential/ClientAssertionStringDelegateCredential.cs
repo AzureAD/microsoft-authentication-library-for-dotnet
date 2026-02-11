@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -33,8 +32,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialRequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            var sw = Stopwatch.StartNew();
-
             var opts = new AssertionRequestOptions
             {
                 CancellationToken = cancellationToken,
@@ -55,8 +52,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     MsalErrorMessage.InvalidClientAssertionEmpty);
             }
 
-            sw.Stop();
-
             var tokenParameters = new Dictionary<string, string>
             {
                 { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
@@ -70,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     credentialType: CredentialType.ClientAssertion,
                     credentialSource: "callback",
                     mtlsCertificateRequested: requestContext.MtlsRequired,
-                    resolutionTimeMs: sw.ElapsedMilliseconds));
+                    resolutionTimeMs: 0));
         }
     }
 }

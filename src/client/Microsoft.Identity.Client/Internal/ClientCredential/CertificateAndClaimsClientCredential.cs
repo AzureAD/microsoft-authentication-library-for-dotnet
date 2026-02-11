@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,8 +52,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialRequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            var sw = Stopwatch.StartNew();
-
             // Resolve the certificate via the provider
             var opts = new AssertionRequestOptions
             {
@@ -95,7 +92,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             // If in mTLS bearer mode, skip JWT assertion - certificate will be used for TLS client auth only
             if (requestContext.MtlsBearerMode)
             {
-                sw.Stop();
                 return new CredentialMaterial(
                     tokenRequestParameters: new Dictionary<string, string>(), // Empty - no client_assertion
                     mtlsCertificate: cert,
@@ -104,7 +100,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                         credentialSource: Certificate == null ? "dynamic" : "static",
                         mtlsCertificateIdHashPrefix: CredentialMaterialHelper.GetCertificateIdHashPrefix(cert),
                         mtlsCertificateRequested: requestContext.MtlsRequired,
-                        resolutionTimeMs: sw.ElapsedMilliseconds));
+                        resolutionTimeMs: 0));
             }
 
             // Build JWT assertion
@@ -142,8 +138,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     ex);
             }
 
-            sw.Stop();
-
             var tokenParameters = new Dictionary<string, string>
             {
                 { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
@@ -158,7 +152,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     credentialSource: Certificate == null ? "dynamic" : "static",
                     mtlsCertificateIdHashPrefix: CredentialMaterialHelper.GetCertificateIdHashPrefix(cert),
                     mtlsCertificateRequested: requestContext.MtlsRequired,
-                    resolutionTimeMs: sw.ElapsedMilliseconds));
+                    resolutionTimeMs: 0));
         }
     }
 }

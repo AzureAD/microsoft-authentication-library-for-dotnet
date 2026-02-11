@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -46,8 +45,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialRequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            var sw = Stopwatch.StartNew();
-
             var opts = new AssertionRequestOptions
             {
                 CancellationToken = cancellationToken,
@@ -67,8 +64,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     MsalError.InvalidClientAssertion,
                     MsalErrorMessage.InvalidClientAssertionEmpty);
             }
-
-            sw.Stop();
 
             // Use jwt-pop if TokenBindingCertificate is present (assertion contains confirmation claim)
             // AAD requires jwt-pop when confirmation claim exists, regardless of MtlsRequired flag
@@ -92,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                         ? CredentialMaterialHelper.GetCertificateIdHashPrefix(resp.TokenBindingCertificate)
                         : null,
                     mtlsCertificateRequested: requestContext.MtlsRequired,
-                    resolutionTimeMs: sw.ElapsedMilliseconds));
+                    resolutionTimeMs: 0));
         }
     }
 }

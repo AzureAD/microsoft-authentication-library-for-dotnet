@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -31,15 +30,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             if (credential == null)
                 throw new ArgumentNullException(nameof(credential));
 
-            var sw = Stopwatch.StartNew();
-
             // Invoke credential exactly once
             var material = await credential.GetCredentialMaterialAsync(
                 requestContext, 
                 cancellationToken)
                 .ConfigureAwait(false);
-
-            sw.Stop();
 
             // Validate structure
             if (material == null)
