@@ -23,7 +23,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
             {
                 var fakeJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.attestation.sig";
-                return Task.FromResult(new AttestationResult(AttestationStatus.Success, fakeJwt, 0, string.Empty));
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
             };
         }
 
