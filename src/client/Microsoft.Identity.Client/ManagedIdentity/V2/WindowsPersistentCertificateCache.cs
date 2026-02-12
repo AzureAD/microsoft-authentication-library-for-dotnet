@@ -100,6 +100,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                 if (best != null)
                 {
+                    // Validate that the private key is actually accessible (not just referenced).
+                    // KeyGuard-backed keys may become inaccessible after machine restart or VBS failure.
+                    if (!CertificatePrivateKeyValidator.IsPrivateKeyAccessible(best, logger))
+                    {
+                        best.Dispose();
+                        logger.Verbose(() => "[PersistentCert] Selected entry has inaccessible private key; skipping.");
+                        return false;
+                    }
+
                     // CN (GUID) → canonical client_id
                     string cn = null;
                     try

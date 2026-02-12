@@ -62,13 +62,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             // 1) In-memory cache first
             if (_memory.TryGet(cacheKey, out var cachedEntry, logger))
             {
-                logger.Verbose(() =>
-                    $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
+                if (CertificatePrivateKeyValidator.IsPrivateKeyAccessible(cachedEntry.Certificate, logger))
+                {
+                    logger.Verbose(() =>
+                        $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
 
-                return new MtlsBindingInfo(
-                    cachedEntry.Certificate,
-                    cachedEntry.Endpoint,
-                    cachedEntry.ClientId);
+                    return new MtlsBindingInfo(
+                        cachedEntry.Certificate,
+                        cachedEntry.Endpoint,
+                        cachedEntry.ClientId);
+                }
+
+                // Key inaccessible – evict from in-memory cache and fall through
+                cachedEntry.Certificate.Dispose();
+                _memory.Remove(cacheKey, logger);
+                logger.Verbose(() =>
+                    "[PersistentCert] Evicted cert with inaccessible private key from memory cache.");
             }
 
             // 2) Per-key gate (dedupe concurrent mint)
@@ -79,13 +88,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // Re-check after acquiring the gate
                 if (_memory.TryGet(cacheKey, out cachedEntry, logger))
                 {
-                    logger.Verbose(() =>
-                        $"[PersistentCert] mTLS binding cache HIT (memory-after-gate) for '{cacheKey}'.");
+                    if (CertificatePrivateKeyValidator.IsPrivateKeyAccessible(cachedEntry.Certificate, logger))
+                    {
+                        logger.Verbose(() =>
+                            $"[PersistentCert] mTLS binding cache HIT (memory-after-gate) for '{cacheKey}'.");
 
-                    return new MtlsBindingInfo(
-                        cachedEntry.Certificate,
-                        cachedEntry.Endpoint,
-                        cachedEntry.ClientId);
+                        return new MtlsBindingInfo(
+                            cachedEntry.Certificate,
+                            cachedEntry.Endpoint,
+                            cachedEntry.ClientId);
+                    }
+
+                    // Key inaccessible – evict from in-memory cache and fall through
+                    cachedEntry.Certificate.Dispose();
+                    _memory.Remove(cacheKey, logger);
+                    logger.Verbose(() =>
+                        "[PersistentCert] Evicted cert with inaccessible private key from memory cache (after gate).");
                 }
 
                 // 3) Persistent cache (best-effort)
@@ -94,7 +112,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     logger.Verbose(() =>
                         $"[PersistentCert] mTLS binding cache HIT (persistent) for '{cacheKey}'.");
 
-                    if (persistedEntry.Certificate.HasPrivateKey)
+                    if (persistedEntry.Certificate.HasPrivateKey &&
+                        CertificatePrivateKeyValidator.IsPrivateKeyAccessible(persistedEntry.Certificate, logger))
                     {
                         var memoryEntry = new CertificateCacheValue(
                             persistedEntry.Certificate,
@@ -112,7 +131,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     // Defensive: persisted entry is unusable; dispose and mint new
                     persistedEntry.Certificate.Dispose();
                     logger.Verbose(() =>
-                        "[PersistentCert] Skipping persisted cert without private key; minting new.");
+                        "[PersistentCert] Skipping persisted cert with inaccessible or missing private key; minting new.");
                 }
 
                 // 4) Mint + back-fill mem + best-effort persist + prune
