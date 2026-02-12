@@ -374,19 +374,23 @@ namespace Microsoft.Identity.Client.OAuth2
                 string trimmedKey = responseHeaderKey.Trim();
                 if (string.Compare(trimmedKey, OAuth2Header.CorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    string correlationIdHeader = headers[trimmedKey].Trim();
-                    if (string.Compare(
-                            correlationIdHeader,
-                            requestContext.CorrelationId.ToString(),
-                            StringComparison.OrdinalIgnoreCase) != 0)
+                    // Use the original key to safely access the dictionary value
+                    if (headers.TryGetValue(responseHeaderKey, out string headerValue) && !string.IsNullOrEmpty(headerValue))
                     {
-                        requestContext.Logger.WarningPii(
-                            string.Format(
-                                CultureInfo.InvariantCulture,
-                                "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
+                        string correlationIdHeader = headerValue.Trim();
+                        if (string.Compare(
                                 correlationIdHeader,
-                                requestContext.CorrelationId),
-                            "Returned correlation id does not match the sent correlation id");
+                                requestContext.CorrelationId.ToString(),
+                                StringComparison.OrdinalIgnoreCase) != 0)
+                        {
+                            requestContext.Logger.WarningPii(
+                                string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
+                                    correlationIdHeader,
+                                    requestContext.CorrelationId),
+                                "Returned correlation id does not match the sent correlation id");
+                        }
                     }
 
                     break;
