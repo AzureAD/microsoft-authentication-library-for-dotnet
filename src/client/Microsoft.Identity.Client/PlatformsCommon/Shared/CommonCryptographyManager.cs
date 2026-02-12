@@ -172,19 +172,17 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             // Create a new RSACryptoServiceProvider with the correct key size
             int keySize = parameters.Modulus.Length * 8;
-            using (var rsaProvider = new RSACryptoServiceProvider(keySize))
-            {
-                // Import the parameters into the new provider
-                rsaProvider.ImportParameters(parameters);
 
-                // Create a new certificate instance from the raw data
-                var certWithPrivateKey = new X509Certificate2(certificate.RawData);
+            // Do NOT dispose rsaProvider here: the certificate takes ownership of
+            // the key container.  Disposing the provider destroys the ephemeral
+            // key container and makes the certificate's private key inaccessible.
+            var rsaProvider = new RSACryptoServiceProvider(keySize);
+            rsaProvider.ImportParameters(parameters);
 
-                // Assign the private key using the legacy property
-                certWithPrivateKey.PrivateKey = rsaProvider;
+            var certWithPrivateKey = new X509Certificate2(certificate.RawData);
+            certWithPrivateKey.PrivateKey = rsaProvider;
 
-                return certWithPrivateKey;
-            }
+            return certWithPrivateKey;
         }
 #endif
     }

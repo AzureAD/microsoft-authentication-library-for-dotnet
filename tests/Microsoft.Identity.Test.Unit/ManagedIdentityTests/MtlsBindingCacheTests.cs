@@ -72,27 +72,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task GetOrCreateAsync_MemoryCacheHit_InvalidKey_EvictsAndMintsNew()
+        public async Task GetOrCreateAsync_MemoryCacheHit_ReturnsCachedCert()
         {
-            // Arrange
+            // Arrange – in-memory certs are always trusted (freshly minted or validated
+            // from the persistent cache), so the cache returns them without re-validation.
             var memory = new InMemoryCertificateCache();
             var persisted = new NoOpPersistentCertificateCache();
             var cache = new MtlsBindingCache(memory, persisted);
 
-            // Create a public-only cert (no private key) to simulate inaccessible key
-            using var fullCert = CreateSelfSignedCert(TimeSpan.FromDays(2));
-            byte[] publicOnly = fullCert.Export(X509ContentType.Cert);
-            using var pubCert = new X509Certificate2(publicOnly);
+            using var cert = CreateSelfSignedCert(TimeSpan.FromDays(2));
 
-            const string key = "invalid-key";
+            const string key = "mem-hit";
             const string ep = "https://mtls.endpoint";
             const string cid = "22222222-2222-2222-2222-222222222222";
 
-            memory.Set(key, new CertificateCacheValue(pubCert, ep, cid));
+            memory.Set(key, new CertificateCacheValue(cert, ep, cid));
 
-            using var freshCert = CreateSelfSignedCert(TimeSpan.FromDays(2), "CN=Fresh");
-            const string freshEp = "https://mtls.fresh";
-            const string freshCid = "33333333-3333-3333-3333-333333333333";
             int factoryCalls = 0;
 
             // Act
@@ -101,16 +96,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 () =>
                 {
                     factoryCalls++;
-                    return Task.FromResult(new MtlsBindingInfo(freshCert, freshEp, freshCid));
+                    return Task.FromResult(new MtlsBindingInfo(cert, ep, cid));
                 },
                 CancellationToken.None,
                 Logger).ConfigureAwait(false);
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(freshEp, result.Endpoint);
-            Assert.AreEqual(freshCid, result.ClientId);
-            Assert.AreEqual(1, factoryCalls, "Factory should be called once after evicting invalid cert.");
+            Assert.AreEqual(ep, result.Endpoint);
+            Assert.AreEqual(cid, result.ClientId);
+            Assert.AreEqual(0, factoryCalls, "Factory should not be called on in-memory cache hit.");
+
+            result.Certificate.Dispose();
         }
 
         [TestMethod]
