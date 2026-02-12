@@ -60,19 +60,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             // 1) In-memory cache first
-            // Note: in-memory certs are always trustworthy – they were either freshly
-            // minted by the factory or already validated when promoted from the
-            // persistent cache.  Private-key validation is only needed for
-            // persistent-cache entries whose KeyGuard handles may be stale.
             if (_memory.TryGet(cacheKey, out var cachedEntry, logger))
             {
-                logger.Verbose(() =>
-                    $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
+                if (CertificatePrivateKeyValidator.IsPrivateKeyAccessible(cachedEntry.Certificate, logger))
+                {
+                    logger.Verbose(() =>
+                        $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
 
-                return new MtlsBindingInfo(
-                    cachedEntry.Certificate,
-                    cachedEntry.Endpoint,
-                    cachedEntry.ClientId);
+                    return new MtlsBindingInfo(
+                        cachedEntry.Certificate,
+                        cachedEntry.Endpoint,
+                        cachedEntry.ClientId);
+                }
+
+                // Key inaccessible (e.g. KeyGuard became unavailable after VBS failure).
+                // Evict and fall through to mint a fresh cert.
+                cachedEntry.Certificate.Dispose();
+                _memory.Remove(cacheKey, logger);
+                logger.Verbose(() =>
+                    $"[PersistentCert] Evicted in-memory cert with inaccessible private key for '{cacheKey}'.");
             }
 
             // 2) Per-key gate (dedupe concurrent mint)
@@ -83,13 +89,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // Re-check after acquiring the gate
                 if (_memory.TryGet(cacheKey, out cachedEntry, logger))
                 {
-                    logger.Verbose(() =>
-                        $"[PersistentCert] mTLS binding cache HIT (memory-after-gate) for '{cacheKey}'.");
+                    if (CertificatePrivateKeyValidator.IsPrivateKeyAccessible(cachedEntry.Certificate, logger))
+                    {
+                        logger.Verbose(() =>
+                            $"[PersistentCert] mTLS binding cache HIT (memory-after-gate) for '{cacheKey}'.");
 
-                    return new MtlsBindingInfo(
-                        cachedEntry.Certificate,
-                        cachedEntry.Endpoint,
-                        cachedEntry.ClientId);
+                        return new MtlsBindingInfo(
+                            cachedEntry.Certificate,
+                            cachedEntry.Endpoint,
+                            cachedEntry.ClientId);
+                    }
+
+                    // Key inaccessible; evict and fall through to persistent/mint.
+                    cachedEntry.Certificate.Dispose();
+                    _memory.Remove(cacheKey, logger);
+                    logger.Verbose(() =>
+                        $"[PersistentCert] Evicted in-memory cert with inaccessible private key (after gate) for '{cacheKey}'.");
                 }
 
                 // 3) Persistent cache (best-effort)
@@ -147,12 +162,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 _gates.Release(cacheKey);
             }
-        }
-
-        /// <inheritdoc />
-        public void Remove(string cacheKey, ILoggerAdapter logger)
-        {
-            _memory.Remove(cacheKey, logger);
         }
     }
 }

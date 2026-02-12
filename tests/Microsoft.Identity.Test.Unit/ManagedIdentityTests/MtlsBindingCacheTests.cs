@@ -74,8 +74,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetOrCreateAsync_MemoryCacheHit_ReturnsCachedCert()
         {
-            // Arrange – in-memory certs are always trusted (freshly minted or validated
-            // from the persistent cache), so the cache returns them without re-validation.
+            // Arrange – in-memory certs with accessible keys are returned directly.
             var memory = new InMemoryCertificateCache();
             var persisted = new NoOpPersistentCertificateCache();
             var cache = new MtlsBindingCache(memory, persisted);
@@ -156,6 +155,48 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual(freshEp, result.Endpoint);
             Assert.AreEqual(freshCid, result.ClientId);
             Assert.AreEqual(1, factoryCalls, "Factory should be called when persisted cert has inaccessible key.");
+        }
+
+        [TestMethod]
+        public async Task GetOrCreateAsync_MemoryCacheHit_InaccessibleKey_EvictsAndMintsNew()
+        {
+            // Arrange – seed the in-memory cache with a public-only cert (no private key).
+            // The cache should detect the key is inaccessible, evict it, and call the factory.
+            var memory = new InMemoryCertificateCache();
+            var persisted = new NoOpPersistentCertificateCache();
+            var cache = new MtlsBindingCache(memory, persisted);
+
+            using var fullCert = CreateSelfSignedCert(TimeSpan.FromDays(2));
+            byte[] publicOnly = fullCert.Export(X509ContentType.Cert);
+            using var pubCert = new X509Certificate2(publicOnly);
+
+            const string key = "invalid-mem-key";
+            const string ep = "https://mtls.endpoint";
+            const string cid = "77777777-7777-7777-7777-777777777777";
+
+            memory.Set(key, new CertificateCacheValue(pubCert, ep, cid));
+
+            using var freshCert = CreateSelfSignedCert(TimeSpan.FromDays(2), "CN=Fresh");
+            const string freshEp = "https://mtls.fresh";
+            const string freshCid = "88888888-8888-8888-8888-888888888888";
+            int factoryCalls = 0;
+
+            // Act
+            var result = await cache.GetOrCreateAsync(
+                key,
+                () =>
+                {
+                    factoryCalls++;
+                    return Task.FromResult(new MtlsBindingInfo(freshCert, freshEp, freshCid));
+                },
+                CancellationToken.None,
+                Logger).ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(freshEp, result.Endpoint);
+            Assert.AreEqual(freshCid, result.ClientId);
+            Assert.AreEqual(1, factoryCalls, "Factory should be called when in-memory cert has inaccessible key.");
         }
 
         [TestMethod]

@@ -175,30 +175,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             // Capture the attestation token provider delegate before calling base
             _attestationTokenProvider = parameters.AttestationTokenProvider;
-
-            try
-            {
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
-            }
-            catch (MsalServiceException ex) when (
-                parameters.IsMtlsPopRequested &&
-                string.Equals(ex.ErrorCode, MsalError.ManagedIdentityUnreachableNetwork, StringComparison.Ordinal))
-            {
-                // The mTLS token request failed with a connection error (e.g. SocketException 10054).
-                // This typically means the cached certificate's private key is no longer usable
-                // at the OS/SChannel level (KeyGuard became inaccessible, VBS failure, etc.).
-                // Invalidate the cached cert and retry once with a freshly provisioned cert.
-                string cacheKey = GetMtlsCertCacheKey();
-                _requestContext.Logger.Warning(
-                    $"[ImdsV2] mTLS connection failed; invalidating cached cert for '{cacheKey}'" +
-                    $" and retrying with fresh certificate. Original error: {ex.Message}");
-
-                _mtlsCache.Remove(cacheKey, _requestContext.Logger);
-
-                // Retry once. If this also fails the exception propagates normally,
-                // preserving full diagnostics for the caller.
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
-            }
+            return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
