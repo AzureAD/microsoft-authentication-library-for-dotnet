@@ -17,6 +17,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// </summary>
     internal static class CertificatePrivateKeyValidator
     {
+        // Minimal payload for the signing validation; the content is irrelevant –
+        // only the ability to sign matters.
         private static readonly byte[] s_testData = new byte[32];
 
         /// <summary>

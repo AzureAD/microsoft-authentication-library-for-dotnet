@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var persisted = Substitute.For<IPersistentCertificateCache>();
             using var fullCert = CreateSelfSignedCert(TimeSpan.FromDays(2));
             byte[] publicOnly = fullCert.Export(X509ContentType.Cert);
-            var pubCert = new X509Certificate2(publicOnly);
+            using var pubCert = new X509Certificate2(publicOnly);
 
             const string key = "persist-invalid";
             const string ep = "https://mtls.endpoint";
