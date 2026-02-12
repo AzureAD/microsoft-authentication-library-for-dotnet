@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             string subjectCn = "CN=CacheTest")
         {
             using var rsa = RSA.Create(2048);
-            var req = new CertificateRequest(
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
                 new X500DistinguishedName(subjectCn),
                 rsa,
                 HashAlgorithmName.SHA256,
