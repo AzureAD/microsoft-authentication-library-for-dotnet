@@ -148,5 +148,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 _gates.Release(cacheKey);
             }
         }
+
+        /// <inheritdoc />
+        public void Remove(string cacheKey, ILoggerAdapter logger)
+        {
+            _memory.Remove(cacheKey, logger);
+        }
     }
 }

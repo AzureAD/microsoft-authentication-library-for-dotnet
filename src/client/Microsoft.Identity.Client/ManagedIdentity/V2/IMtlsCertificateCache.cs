@@ -23,5 +23,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             Func<Task<MtlsBindingInfo>> factory,
             CancellationToken cancellationToken,
             ILoggerAdapter logger);
+
+        /// <summary>
+        /// Removes the cached binding for the given <paramref name="cacheKey"/> from
+        /// the in-memory cache. Used to invalidate a cert that caused an mTLS failure.
+        /// </summary>
+        void Remove(string cacheKey, ILoggerAdapter logger);
     }
 }
