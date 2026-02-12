@@ -190,10 +190,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // Invalidate the cached cert and retry once with a freshly provisioned cert.
                 string cacheKey = GetMtlsCertCacheKey();
                 _requestContext.Logger.Warning(
-                    "[ImdsV2] mTLS connection failed; invalidating cached cert for '" + cacheKey +
-                    "' and retrying with fresh certificate. Error: " + ex.Message);
+                    $"[ImdsV2] mTLS connection failed; invalidating cached cert for '{cacheKey}'" +
+                    $" and retrying with fresh certificate. Original error: {ex.Message}");
 
                 _mtlsCache.Remove(cacheKey, _requestContext.Logger);
+
+                // Retry once. If this also fails the exception propagates normally,
+                // preserving full diagnostics for the caller.
                 return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
             }
         }
