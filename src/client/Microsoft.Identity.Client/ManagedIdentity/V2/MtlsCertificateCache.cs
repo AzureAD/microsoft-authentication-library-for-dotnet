@@ -75,8 +75,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                 // Key inaccessible (e.g. KeyGuard became unavailable after VBS failure).
                 // Evict and fall through to mint a fresh cert.
-                cachedEntry.Certificate.Dispose();
+                // Remove before dispose to prevent another thread from reading a disposed cert.
                 _memory.Remove(cacheKey, logger);
+                cachedEntry.Certificate.Dispose();
                 logger.Verbose(() =>
                     $"[PersistentCert] Evicted in-memory cert with inaccessible private key for '{cacheKey}'.");
             }
@@ -101,8 +102,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     }
 
                     // Key inaccessible; evict and fall through to persistent/mint.
-                    cachedEntry.Certificate.Dispose();
+                    // Remove before dispose to prevent another thread from reading a disposed cert.
                     _memory.Remove(cacheKey, logger);
+                    cachedEntry.Certificate.Dispose();
                     logger.Verbose(() =>
                         $"[PersistentCert] Evicted in-memory cert with inaccessible private key (after gate) for '{cacheKey}'.");
                 }
