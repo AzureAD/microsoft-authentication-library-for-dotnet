@@ -53,6 +53,13 @@ steps:
     Contents: '**/bin/**/**'
     TargetFolder: '$(Build.SourcesDirectory)/WAM'
 
+- task: CopyFiles@2
+  displayName: 'Copy Managed Identity DevApp Dlls'
+  inputs:
+    SourceFolder: 'tests\devapps\Managed Identity apps\ManagedIdentityAppVM'
+    Contents: '**\bin\**\*'
+    TargetFolder: '$(Build.SourcesDirectory)/ManagedIdentityAppVM'
+
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
   inputs:
@@ -112,6 +119,16 @@ steps:
             $errors += "Failed to find Linux runtime files in : " + $SearchInFolder + $app + "`n";
         }
 
+        # Managed Identity app runtime DLL check
+        $managedIdentityFolder = Join-Path $(Build.SourcesDirectory) 'ManagedIdentityAppVM'
+        $managedIdentityDll = Join-Path $managedIdentityFolder 'bin\Release\net8.0\runtimes\win-x64\native\AttestationClientLib.dll'
+        
+        Write-Host "Checking: $managedIdentityDll"
+        if (-not (Test-Path -Path $managedIdentityDll -PathType Leaf))
+        {
+            $errors += "Failed to find AttestationClientLib.dll at: $managedIdentityDll`n"
+        }
+
         #exit if there are errors
         IF (![string]::IsNullOrWhitespace($errors))
         {
@@ -123,6 +140,3 @@ steps:
         {
             Write-Host "File check complete. All msalruntime dlls are present."
         }
-
-
-
