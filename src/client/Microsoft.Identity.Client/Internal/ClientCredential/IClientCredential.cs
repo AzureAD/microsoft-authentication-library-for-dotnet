@@ -21,11 +21,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         AssertionType AssertionType { get; }
 
-        Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-              OAuth2Client oAuth2Client,
-              AuthenticationRequestParameters authenticationRequestParameters,
-              ICryptographyManager cryptographyManager,
-              string tokenEndpoint,
-              CancellationToken cancellationToken);
+        /// <summary>
+        /// Resolve credential material.
+        /// Returns structured output containing OAuth2 parameters and optional mTLS certificate.
+        /// </summary>
+        Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken);
     }
 }

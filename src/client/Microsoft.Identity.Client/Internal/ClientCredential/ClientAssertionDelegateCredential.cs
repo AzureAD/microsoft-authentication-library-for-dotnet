@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -40,27 +41,22 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
-        // ──────────────────────────────────
-        //  Main hook for token requests
-        // ──────────────────────────────────
-        public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters p,
-            ICryptographyManager _,
-            string tokenEndpoint,
-            CancellationToken ct)
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken)
         {
             var opts = new AssertionRequestOptions
             {
-                CancellationToken = ct,
-                ClientID = p.AppConfig.ClientId,
-                TokenEndpoint = tokenEndpoint,
-                ClientCapabilities = p.RequestContext.ServiceBundle.Config.ClientCapabilities,
-                Claims = p.Claims,
-                ClientAssertionFmiPath = p.ClientAssertionFmiPath
+                CancellationToken = cancellationToken,
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                ClientCapabilities = context.ClientCapabilities,
+                Claims = context.Claims,
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath
             };
 
-            ClientSignedAssertion resp = await GetAssertionAsync(opts, ct).ConfigureAwait(false);
+            ClientSignedAssertion resp = await GetAssertionAsync(opts, cancellationToken)
+                .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(resp?.Assertion))
             {
@@ -69,30 +65,39 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     MsalErrorMessage.InvalidClientAssertionEmpty);
             }
 
-            bool hasCert = resp.TokenBindingCertificate != null;
+            bool hasCertificate = resp.TokenBindingCertificate != null;
 
-            // If PoP was explicitly requested, we must have a certificate.
-            // (Preflight should enforce this too, but keep this defensive.)
-            if (p.IsMtlsPopRequested && !hasCert)
+            // Per canonical matrix: enforce supported combinations
+            if (context.Mode == ClientAuthMode.Regular && hasCertificate)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    "Client assertion with TokenBindingCertificate (jwt+cert) is only supported in mTLS mode. Use .WithMtlsProofOfPossession() or don't return a certificate in your callback.");
+            }
+
+            if (context.Mode == ClientAuthMode.MtlsMode && !hasCertificate)
             {
                 throw new MsalClientException(
                     MsalError.MtlsCertificateNotProvided,
-                    MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+                    "mTLS mode requires TokenBindingCertificate in ClientSignedAssertion. Your callback must return a certificate.");
             }
 
-            // JWT-PoP if explicit PoP was requested OR delegate returned a cert (implicit bearer-over-mTLS)
-            bool useJwtPop = p.IsMtlsPopRequested || hasCert;
+            // Use jwt-pop if TokenBindingCertificate is present (assertion contains confirmation claim)
+            // AAD requires jwt-pop when confirmation claim exists
+            string assertionType = hasCertificate
+                ? OAuth2AssertionType.JwtPop
+                : OAuth2AssertionType.JwtBearer;
 
-            oAuth2Client.AddBodyParameter(
-                OAuth2Parameter.ClientAssertionType,
-                useJwtPop ? OAuth2AssertionType.JwtPop : OAuth2AssertionType.JwtBearer);
+            var tokenParameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, assertionType },
+                { OAuth2Parameter.ClientAssertion, resp.Assertion }
+            };
 
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, resp.Assertion);
-
-            // Only return a cert if we actually have one.
-            return hasCert
-                ? new ClientCredentialApplicationResult(useJwtPopClientAssertion: useJwtPop, mtlsCertificate: resp.TokenBindingCertificate)
-                : ClientCredentialApplicationResult.None;
+            return new CredentialMaterial(
+                tokenRequestParameters: tokenParameters,
+                source: CredentialSource.Callback,
+                resolvedCertificate: resp.TokenBindingCertificate);
         }
     }
 }

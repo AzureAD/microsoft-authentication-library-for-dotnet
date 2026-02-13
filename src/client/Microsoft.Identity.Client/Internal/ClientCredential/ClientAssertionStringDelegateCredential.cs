@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -27,24 +28,22 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
-        public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters p,
-            ICryptographyManager _,
-            string tokenEndpoint,
-            CancellationToken ct)
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken)
         {
             var opts = new AssertionRequestOptions
             {
-                CancellationToken = ct,
-                ClientID = p.AppConfig.ClientId,
-                TokenEndpoint = tokenEndpoint,
-                ClientCapabilities = p.RequestContext.ServiceBundle.Config.ClientCapabilities,
-                Claims = p.Claims,
-                ClientAssertionFmiPath = p.ClientAssertionFmiPath
+                CancellationToken = cancellationToken,
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                ClientCapabilities = context.ClientCapabilities,
+                Claims = context.Claims,
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath
             };
 
-            string assertion = await _provider(opts, ct).ConfigureAwait(false);
+            string assertion = await _provider(opts, cancellationToken)
+                .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(assertion))
             {
@@ -53,10 +52,15 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     MsalErrorMessage.InvalidClientAssertionEmpty);
             }
 
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
+            var tokenParameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                { OAuth2Parameter.ClientAssertion, assertion }
+            };
 
-            return ClientCredentialApplicationResult.None;
+            return new CredentialMaterial(
+                tokenRequestParameters: tokenParameters,
+                source: CredentialSource.Callback);
         }
     }
 }

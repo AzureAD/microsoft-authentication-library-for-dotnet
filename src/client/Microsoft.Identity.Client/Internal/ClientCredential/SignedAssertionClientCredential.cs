@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -23,16 +24,36 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _signedAssertion = signedAssertion;
         }
 
-        public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters requestParameters,
-            ICryptographyManager cryptographyManager, 
-            string tokenEndpoint,
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
             CancellationToken cancellationToken)
         {
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, _signedAssertion);
-            return Task.FromResult(ClientCredentialApplicationResult.None);
+            // Per canonical matrix: jwt credential doesn't support MtlsMode
+            if (context.Mode == ClientAuthMode.MtlsMode)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    "Signed assertion credential cannot be used in mTLS mode. Use WithClientAssertion callback that returns ClientSignedAssertion with TokenBindingCertificate instead.");
+            }
+
+            if (string.IsNullOrWhiteSpace(_signedAssertion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    MsalErrorMessage.InvalidClientAssertionEmpty);
+            }
+
+            var tokenParameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                { OAuth2Parameter.ClientAssertion, _signedAssertion }
+            };
+
+            var material = new CredentialMaterial(
+                tokenRequestParameters: tokenParameters,
+                source: CredentialSource.Static);
+
+            return Task.FromResult(material);
         }
     }
 }

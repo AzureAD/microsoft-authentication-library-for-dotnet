@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -23,15 +24,28 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             Secret = secret;
         }
 
-        public Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters requestParameters,
-            ICryptographyManager cryptographyManager, 
-            string tokenEndpoint, 
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
             CancellationToken cancellationToken)
         {
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientSecret, Secret);
-            return Task.FromResult(ClientCredentialApplicationResult.None);
+            // Client secret doesn't support mTLS mode
+            if (context.Mode == ClientAuthMode.MtlsMode)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    "Client secret credential cannot be used in mTLS mode.");
+            }
+
+            var tokenParameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientSecret, Secret }
+            };
+
+            var material = new CredentialMaterial(
+                tokenRequestParameters: tokenParameters,
+                source: CredentialSource.Static);
+
+            return Task.FromResult(material);
         }
     }
 }

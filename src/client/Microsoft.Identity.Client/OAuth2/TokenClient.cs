@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.OAuth2.Throttling;
@@ -132,19 +133,50 @@ namespace Microsoft.Identity.Client.OAuth2
             if (_serviceBundle.Config.ClientCredential != null)
             {
                 _requestParams.RequestContext.Logger.Verbose(
-                    () => "[TokenClient] Before adding the client assertion / secret");
+                    () => "[TokenClient] Before resolving credential material");
 
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
-                await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
-                    _oAuth2Client,
-                    _requestParams,
-                    _serviceBundle.PlatformProxy.CryptographyManager,
-                    tokenEndpoint,
+                // Build credential context
+                var credentialContext = new CredentialContext
+                {
+                    ClientId = _requestParams.AppConfig.ClientId,
+                    TokenEndpoint = tokenEndpoint,
+                    Claims = _requestParams.Claims,
+                    ClientCapabilities = _serviceBundle.Config.ClientCapabilities?.ToList(),
+                    Mode = _requestParams.MtlsCertificate != null ? ClientAuthMode.MtlsMode : ClientAuthMode.Regular,
+                    CryptographyManager = _serviceBundle.PlatformProxy.CryptographyManager,
+                    SendX5C = _requestParams.SendX5C,
+                    UseSha2 = _requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
+                    ExtraClientAssertionClaims = _requestParams.ExtraClientAssertionClaims,
+                    ClientAssertionFmiPath = _requestParams.ClientAssertionFmiPath,
+                    AuthorityType = _requestParams.Authority.AuthorityInfo.AuthorityType,
+                    AzureRegion = _serviceBundle.Config.AzureRegion
+                };
+
+                // Resolve credential material via resolver
+                var material = await CredentialMaterialResolver.ResolveAsync(
+                    _serviceBundle.Config.ClientCredential,
+                    credentialContext,
                     cancellationToken).ConfigureAwait(false);
 
+                // Store resolved material for later use
+                _requestParams.ResolvedCredentialMaterial = material;
+
+                // Apply token request parameters
+                foreach (var kvp in material.TokenRequestParameters)
+                {
+                    _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
+                }
+
+                // Store resolved certificate if present
+                if (material.ResolvedCertificate != null)
+                {
+                    _requestParams.ResolvedCertificate = material.ResolvedCertificate;
+                }
+
                 _requestParams.RequestContext.Logger.Verbose(
-                    () => "[TokenClient] After adding the client assertion / secret");
+                    () => "[TokenClient] After resolving credential material");
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
