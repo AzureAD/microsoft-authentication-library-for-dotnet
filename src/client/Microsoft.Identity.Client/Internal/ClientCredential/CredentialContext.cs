@@ -1,19 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Threading;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     /// <summary>
-    /// Minimal per-request context passed to credentials.
-    /// Contains only what credentials need to produce material.
+    /// Context for credential resolution.
+    /// Contains all information credentials need to produce material.
     /// Immutable by design.
     /// </summary>
-    internal readonly record struct CredentialRequestContext
+    internal readonly record struct CredentialContext
     {
         /// <summary>
         /// Application's client ID.
@@ -26,6 +25,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public string TokenEndpoint { get; init; }
 
         /// <summary>
+        /// Client authentication mode (Regular or MtlsMode).
+        /// Determines what authentication material to produce.
+        /// </summary>
+        public ClientAuthMode Mode { get; init; }
+
+        /// <summary>
         /// Additional claims to include in assertions (if supported by credential).
         /// </summary>
         public string Claims { get; init; }
@@ -34,17 +39,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// Client capabilities (for client assertion JWT generation).
         /// </summary>
         public IReadOnlyCollection<string> ClientCapabilities { get; init; }
-
-        /// <summary>
-        /// True when mTLS proof-of-possession is required.
-        /// Constraint: if true, credential MUST return MtlsCertificate.
-        /// </summary>
-        public bool MtlsRequired { get; init; }
-
-        /// <summary>
-        /// Cancellation token for async operations.
-        /// </summary>
-        public CancellationToken CancellationToken { get; init; }
 
         /// <summary>
         /// Cryptography manager for signing operations (JWT, etc.).
@@ -74,9 +68,15 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public string ClientAssertionFmiPath { get; init; }
 
         /// <summary>
-        /// When true, certificate should be used for TLS client auth only (mTLS bearer mode).
-        /// No JWT client_assertion should be sent.
+        /// Authority type (AAD, B2C, ADFS, etc.).
+        /// Used for mTLS validation - some authority types have mTLS restrictions.
         /// </summary>
-        public bool MtlsBearerMode { get; init; }
+        public AuthorityType AuthorityType { get; init; }
+
+        /// <summary>
+        /// Azure region configured for this client.
+        /// Required when using mTLS mode with AAD.
+        /// </summary>
+        public string AzureRegion { get; init; }
     }
 }

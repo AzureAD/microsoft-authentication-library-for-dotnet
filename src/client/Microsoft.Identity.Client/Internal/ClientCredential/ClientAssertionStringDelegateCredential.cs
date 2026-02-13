@@ -29,17 +29,17 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
         public async Task<CredentialMaterial> GetCredentialMaterialAsync(
-            CredentialRequestContext requestContext,
+            CredentialContext context,
             CancellationToken cancellationToken)
         {
             var opts = new AssertionRequestOptions
             {
                 CancellationToken = cancellationToken,
-                ClientID = requestContext.ClientId,
-                TokenEndpoint = requestContext.TokenEndpoint,
-                ClientCapabilities = requestContext.ClientCapabilities,
-                Claims = requestContext.Claims,
-                ClientAssertionFmiPath = requestContext.ClientAssertionFmiPath
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                ClientCapabilities = context.ClientCapabilities,
+                Claims = context.Claims,
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath
             };
 
             string assertion = await _provider(opts, cancellationToken)
@@ -60,12 +60,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             return new CredentialMaterial(
                 tokenRequestParameters: tokenParameters,
-                mtlsCertificate: null,
-                metadata: new CredentialMaterialMetadata(
-                    credentialType: CredentialType.ClientAssertion,
-                    credentialSource: "callback",
-                    mtlsCertificateRequested: requestContext.MtlsRequired,
-                    resolutionTimeMs: 0));
+                source: CredentialSource.Callback);
         }
     }
 }

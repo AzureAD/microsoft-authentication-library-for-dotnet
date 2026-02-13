@@ -25,9 +25,17 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         public Task<CredentialMaterial> GetCredentialMaterialAsync(
-            CredentialRequestContext requestContext,
+            CredentialContext context,
             CancellationToken cancellationToken)
         {
+            // Client secret doesn't support mTLS mode
+            if (context.Mode == ClientAuthMode.MtlsMode)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    "Client secret credential cannot be used in mTLS mode.");
+            }
+
             var tokenParameters = new Dictionary<string, string>
             {
                 { OAuth2Parameter.ClientSecret, Secret }
@@ -35,12 +43,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             var material = new CredentialMaterial(
                 tokenRequestParameters: tokenParameters,
-                mtlsCertificate: null,
-                metadata: new CredentialMaterialMetadata(
-                    credentialType: CredentialType.ClientSecret,
-                    credentialSource: "static",
-                    mtlsCertificateRequested: requestContext.MtlsRequired,
-                    resolutionTimeMs: 0));
+                source: CredentialSource.Static);
 
             return Task.FromResult(material);
         }

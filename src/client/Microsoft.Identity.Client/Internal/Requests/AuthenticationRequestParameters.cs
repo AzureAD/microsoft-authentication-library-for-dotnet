@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <summary>
         /// Resolved credential material from Phase 1 credential system.
         /// Contains OAuth2 parameters, optional mTLS certificate, and metadata.
-        /// Set once per request by CredentialMaterialOrchestrator.
+        /// Set once per request by CredentialMaterialResolver.
         /// </summary>
         public ClientCredential.CredentialMaterial ResolvedCredentialMaterial { get; set; }
 

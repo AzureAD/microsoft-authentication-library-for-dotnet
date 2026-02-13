@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// Returns structured output containing OAuth2 parameters and optional mTLS certificate.
         /// </summary>
         Task<CredentialMaterial> GetCredentialMaterialAsync(
-            CredentialRequestContext requestContext,
+            CredentialContext context,
             CancellationToken cancellationToken);
     }
 }

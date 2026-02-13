@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         public Task<CredentialMaterial> GetCredentialMaterialAsync(
-            CredentialRequestContext requestContext,
+            CredentialContext context,
             CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(_signedAssertion))
@@ -43,12 +43,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             var material = new CredentialMaterial(
                 tokenRequestParameters: tokenParameters,
-                mtlsCertificate: null,
-                metadata: new CredentialMaterialMetadata(
-                    credentialType: CredentialType.ClientAssertion,
-                    credentialSource: "static",
-                    mtlsCertificateRequested: requestContext.MtlsRequired,
-                    resolutionTimeMs: 0));
+                source: CredentialSource.Static);
 
             return Task.FromResult(material);
         }

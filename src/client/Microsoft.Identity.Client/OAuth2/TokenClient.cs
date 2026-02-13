@@ -137,35 +137,27 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
-                // Build credential request context
-                var credentialContext = new CredentialRequestContext
+                // Build credential context
+                var credentialContext = new CredentialContext
                 {
                     ClientId = _requestParams.AppConfig.ClientId,
                     TokenEndpoint = tokenEndpoint,
                     Claims = _requestParams.Claims,
                     ClientCapabilities = _serviceBundle.Config.ClientCapabilities?.ToList(),
-                    MtlsRequired = _requestParams.IsMtlsPopRequested,
-                    CancellationToken = cancellationToken,
+                    Mode = _requestParams.MtlsCertificate != null ? ClientAuthMode.MtlsMode : ClientAuthMode.Regular,
                     CryptographyManager = _serviceBundle.PlatformProxy.CryptographyManager,
                     SendX5C = _requestParams.SendX5C,
                     UseSha2 = _requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
                     ExtraClientAssertionClaims = _requestParams.ExtraClientAssertionClaims,
                     ClientAssertionFmiPath = _requestParams.ClientAssertionFmiPath,
-                    MtlsBearerMode = _requestParams.MtlsCertificate != null
-                };
-
-                // Build mTLS validation context
-                var mtlsContext = new MtlsValidationContext
-                {
                     AuthorityType = _requestParams.Authority.AuthorityInfo.AuthorityType,
                     AzureRegion = _serviceBundle.Config.AzureRegion
                 };
 
-                // Resolve credential material via orchestrator
-                var material = await CredentialMaterialOrchestrator.ResolveAsync(
+                // Resolve credential material via resolver
+                var material = await CredentialMaterialResolver.ResolveAsync(
                     _serviceBundle.Config.ClientCredential,
                     credentialContext,
-                    mtlsContext,
                     cancellationToken).ConfigureAwait(false);
 
                 // Store resolved material for later use
@@ -178,9 +170,9 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
 
                 // Store resolved certificate if present
-                if (material.MtlsCertificate != null)
+                if (material.ResolvedCertificate != null)
                 {
-                    _requestParams.ResolvedCertificate = material.MtlsCertificate;
+                    _requestParams.ResolvedCertificate = material.ResolvedCertificate;
                 }
 
                 _requestParams.RequestContext.Logger.Verbose(

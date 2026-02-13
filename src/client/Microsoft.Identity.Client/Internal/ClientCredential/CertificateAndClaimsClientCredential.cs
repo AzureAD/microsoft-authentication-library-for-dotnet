@@ -49,17 +49,17 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         public async Task<CredentialMaterial> GetCredentialMaterialAsync(
-            CredentialRequestContext requestContext,
+            CredentialContext context,
             CancellationToken cancellationToken)
         {
             // Resolve the certificate via the provider
             var opts = new AssertionRequestOptions
             {
                 CancellationToken = cancellationToken,
-                ClientID = requestContext.ClientId,
-                TokenEndpoint = requestContext.TokenEndpoint,
-                ClientCapabilities = requestContext.ClientCapabilities,
-                Claims = requestContext.Claims
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                ClientCapabilities = context.ClientCapabilities,
+                Claims = context.Claims
             };
 
             X509Certificate2 cert = await _certificateProvider(opts).ConfigureAwait(false);
@@ -90,37 +90,32 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             // If in mTLS bearer mode, skip JWT assertion - certificate will be used for TLS client auth only
-            if (requestContext.MtlsBearerMode)
+            if (context.Mode == ClientAuthMode.MtlsMode)
             {
                 return new CredentialMaterial(
                     tokenRequestParameters: new Dictionary<string, string>(), // Empty - no client_assertion
-                    mtlsCertificate: cert,
-                    metadata: new CredentialMaterialMetadata(
-                        credentialType: CredentialType.ClientCertificate,
-                        credentialSource: Certificate == null ? "dynamic" : "static",
-                        mtlsCertificateIdHashPrefix: CredentialMaterialHelper.GetCertificateIdHashPrefix(cert),
-                        mtlsCertificateRequested: requestContext.MtlsRequired,
-                        resolutionTimeMs: 0));
+                    source: Certificate == null ? CredentialSource.Callback : CredentialSource.Static,
+                    resolvedCertificate: cert);
             }
 
             // Build JWT assertion
             JsonWebToken jwtToken;
-            if (!string.IsNullOrEmpty(requestContext.ExtraClientAssertionClaims))
+            if (!string.IsNullOrEmpty(context.ExtraClientAssertionClaims))
             {
                 // ExtraClientAssertionClaims takes precedence (e.g., for cache key binding)
                 jwtToken = new JsonWebToken(
-                    requestContext.CryptographyManager,
-                    requestContext.ClientId,
-                    requestContext.TokenEndpoint,
-                    requestContext.ExtraClientAssertionClaims,
+                    context.CryptographyManager,
+                    context.ClientId,
+                    context.TokenEndpoint,
+                    context.ExtraClientAssertionClaims,
                     _appendDefaultClaims);
             }
             else
             {
                 jwtToken = new JsonWebToken(
-                    requestContext.CryptographyManager,
-                    requestContext.ClientId,
-                    requestContext.TokenEndpoint,
+                    context.CryptographyManager,
+                    context.ClientId,
+                    context.TokenEndpoint,
                     _claimsToSign,
                     _appendDefaultClaims);
             }
@@ -128,7 +123,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string assertion;
             try
             {
-                assertion = jwtToken.Sign(cert, requestContext.SendX5C, requestContext.UseSha2);
+                assertion = jwtToken.Sign(cert, context.SendX5C, context.UseSha2);
             }
             catch (System.Security.Cryptography.CryptographicException ex)
             {
@@ -146,13 +141,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             return new CredentialMaterial(
                 tokenRequestParameters: tokenParameters,
-                mtlsCertificate: cert,
-                metadata: new CredentialMaterialMetadata(
-                    credentialType: CredentialType.ClientCertificate,
-                    credentialSource: Certificate == null ? "dynamic" : "static",
-                    mtlsCertificateIdHashPrefix: CredentialMaterialHelper.GetCertificateIdHashPrefix(cert),
-                    mtlsCertificateRequested: requestContext.MtlsRequired,
-                    resolutionTimeMs: 0));
+                source: Certificate == null ? CredentialSource.Callback : CredentialSource.Static,
+                resolvedCertificate: cert);
         }
     }
 }

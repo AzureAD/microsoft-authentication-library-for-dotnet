@@ -8,6 +8,22 @@ using System.Security.Cryptography.X509Certificates;
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     /// <summary>
+    /// Where credential material was sourced from.
+    /// </summary>
+    internal enum CredentialSource
+    {
+        /// <summary>
+        /// Credential was provided statically at app construction time.
+        /// </summary>
+        Static,
+
+        /// <summary>
+        /// Credential was resolved dynamically via a callback/delegate.
+        /// </summary>
+        Callback
+    }
+
+    /// <summary>
     /// Normalized output of credential resolution.
     /// Decouples "what a credential produces" from "how it's used".
     /// Immutable by design.
@@ -19,15 +35,15 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// </summary>
         public CredentialMaterial(
             IReadOnlyDictionary<string, string> tokenRequestParameters,
-            X509Certificate2 mtlsCertificate = null,
-            CredentialMaterialMetadata metadata = null)
+            CredentialSource source,
+            X509Certificate2 resolvedCertificate = null)
         {
             if (tokenRequestParameters == null)
                 throw new ArgumentNullException(nameof(tokenRequestParameters));
 
             TokenRequestParameters = tokenRequestParameters;
-            MtlsCertificate = mtlsCertificate;
-            Metadata = metadata;
+            Source = source;
+            ResolvedCertificate = resolvedCertificate;
         }
 
         /// <summary>
@@ -37,72 +53,13 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public IReadOnlyDictionary<string, string> TokenRequestParameters { get; }
 
         /// <summary>
+        /// Where the credential material was sourced from (Static or Callback).
+        /// </summary>
+        public CredentialSource Source { get; }
+
+        /// <summary>
         /// Optional X.509 certificate for mTLS proof-of-possession / TLS channel binding.
         /// </summary>
-        public X509Certificate2 MtlsCertificate { get; }
-
-        /// <summary>
-        /// Optional metadata for telemetry (credential type, source, timing, cert correlation).
-        /// Must not contain secrets or PII.
-        /// </summary>
-        public CredentialMaterialMetadata Metadata { get; }
-    }
-
-    /// <summary>
-    /// Telemetry-safe metadata about resolved credential material.
-    /// Immutable by design.
-    /// </summary>
-    internal sealed class CredentialMaterialMetadata
-    {
-        public CredentialMaterialMetadata(
-            CredentialType credentialType,
-            string credentialSource = null,
-            string mtlsCertificateIdHashPrefix = null,
-            bool mtlsCertificateRequested = false,
-            long resolutionTimeMs = 0)
-        {
-            CredentialType = credentialType;
-            CredentialSource = credentialSource;
-            MtlsCertificateIdHashPrefix = mtlsCertificateIdHashPrefix;
-            MtlsCertificateRequested = mtlsCertificateRequested;
-            ResolutionTimeMs = resolutionTimeMs;
-        }
-
-        /// <summary>
-        /// Type of credential (Secret, Certificate, Assertion, etc.).
-        /// </summary>
-        public CredentialType CredentialType { get; }
-
-        /// <summary>
-        /// Where the credential came from (e.g., "callback", "cert-store", "key-vault").
-        /// Must not include sensitive identifiers or URLs.
-        /// </summary>
-        public string CredentialSource { get; }
-
-        /// <summary>
-        /// Hash prefix of mTLS certificate (first 8-16 chars of SHA-256 hash of RawData).
-        /// Not full thumbprint; used for correlation only.
-        /// </summary>
-        public string MtlsCertificateIdHashPrefix { get; }
-
-        /// <summary>
-        /// Whether mTLS binding was requested (MtlsRequired in context).
-        /// </summary>
-        public bool MtlsCertificateRequested { get; }
-
-        /// <summary>
-        /// Time to resolve credential material (milliseconds).
-        /// Includes all signing/encryption operations.
-        /// </summary>
-        public long ResolutionTimeMs { get; }
-    }
-
-    internal enum CredentialType
-    {
-        ClientSecret,
-        ClientCertificate,
-        ClientAssertion,
-        FederatedIdentityCredential,
-        ManagedIdentity
+        public X509Certificate2 ResolvedCertificate { get; }
     }
 }

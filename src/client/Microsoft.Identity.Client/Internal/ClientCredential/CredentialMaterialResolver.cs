@@ -9,13 +9,13 @@ using Microsoft.Identity.Client.Core;
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     /// <summary>
-    /// Central orchestrator for credential material resolution.
+    /// Central resolver for credential material resolution.
     /// Single authority for:
     /// - Invoking credentials (exactly once per logical request)
     /// - Validating material structure
     /// - Enforcing mTLS constraints
     /// </summary>
-    internal static class CredentialMaterialOrchestrator
+    internal static class CredentialMaterialResolver
     {
         /// <summary>
         /// Resolves credential material with full validation.
@@ -23,8 +23,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// </summary>
         public static async Task<CredentialMaterial> ResolveAsync(
             IClientCredential credential,
-            CredentialRequestContext requestContext,
-            MtlsValidationContext mtlsValidationContext,
+            CredentialContext context,
             CancellationToken cancellationToken)
         {
             if (credential == null)
@@ -32,33 +31,27 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             // Invoke credential exactly once
             var material = await credential.GetCredentialMaterialAsync(
-                requestContext, 
+                context, 
                 cancellationToken)
                 .ConfigureAwait(false);
 
-            // Validate structure
+            // Validate structure - these are invariant violations
             if (material == null)
             {
-                throw new MsalClientException(
-                    MsalError.InvalidCredentialMaterial,
+                throw new InvalidOperationException(
                     "Credential returned null material.");
             }
 
             if (material.TokenRequestParameters == null)
             {
-                throw new MsalClientException(
-                    MsalError.InvalidCredentialMaterial,
+                throw new InvalidOperationException(
                     "Credential material TokenRequestParameters cannot be null.");
             }
 
-            // Validate no reserved key collisions
-            CredentialMaterialHelper.ValidateTokenParametersNoReservedKeys(
-                material.TokenRequestParameters);
-
             // Validate mTLS constraints
-            if (requestContext.MtlsRequired)
+            if (context.Mode == ClientAuthMode.MtlsMode)
             {
-                if (material.MtlsCertificate is null)
+                if (material.ResolvedCertificate is null)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsCertificateNotProvided,
@@ -66,8 +59,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 }
 
                 // AAD requires region when using mTLS PoP
-                if (mtlsValidationContext.AuthorityType == AuthorityType.Aad &&
-                    mtlsValidationContext.AzureRegion is null)
+                if (context.AuthorityType == AuthorityType.Aad &&
+                    context.AzureRegion is null)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsPopWithoutRegion,

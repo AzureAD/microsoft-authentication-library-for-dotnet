@@ -42,17 +42,17 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
         public async Task<CredentialMaterial> GetCredentialMaterialAsync(
-            CredentialRequestContext requestContext,
+            CredentialContext context,
             CancellationToken cancellationToken)
         {
             var opts = new AssertionRequestOptions
             {
                 CancellationToken = cancellationToken,
-                ClientID = requestContext.ClientId,
-                TokenEndpoint = requestContext.TokenEndpoint,
-                ClientCapabilities = requestContext.ClientCapabilities,
-                Claims = requestContext.Claims,
-                ClientAssertionFmiPath = requestContext.ClientAssertionFmiPath
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                ClientCapabilities = context.ClientCapabilities,
+                Claims = context.Claims,
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath
             };
 
             ClientSignedAssertion resp = await GetAssertionAsync(opts, cancellationToken)
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             // Use jwt-pop if TokenBindingCertificate is present (assertion contains confirmation claim)
-            // AAD requires jwt-pop when confirmation claim exists, regardless of MtlsRequired flag
+            // AAD requires jwt-pop when confirmation claim exists
             string assertionType = resp.TokenBindingCertificate != null
                 ? OAuth2AssertionType.JwtPop
                 : OAuth2AssertionType.JwtBearer;
@@ -79,15 +79,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             return new CredentialMaterial(
                 tokenRequestParameters: tokenParameters,
-                mtlsCertificate: resp.TokenBindingCertificate,
-                metadata: new CredentialMaterialMetadata(
-                    credentialType: CredentialType.ClientAssertion,
-                    credentialSource: "callback",
-                    mtlsCertificateIdHashPrefix: resp.TokenBindingCertificate != null
-                        ? CredentialMaterialHelper.GetCertificateIdHashPrefix(resp.TokenBindingCertificate)
-                        : null,
-                    mtlsCertificateRequested: requestContext.MtlsRequired,
-                    resolutionTimeMs: 0));
+                source: CredentialSource.Callback,
+                resolvedCertificate: resp.TokenBindingCertificate);
         }
     }
 }
