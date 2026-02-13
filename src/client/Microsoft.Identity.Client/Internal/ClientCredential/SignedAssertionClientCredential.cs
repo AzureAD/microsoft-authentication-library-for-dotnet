@@ -28,6 +28,14 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialContext context,
             CancellationToken cancellationToken)
         {
+            // Per canonical matrix: jwt credential doesn't support MtlsMode
+            if (context.Mode == ClientAuthMode.MtlsMode)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    "Signed assertion credential cannot be used in mTLS mode. Use WithClientAssertion callback that returns ClientSignedAssertion with TokenBindingCertificate instead.");
+            }
+
             if (string.IsNullOrWhiteSpace(_signedAssertion))
             {
                 throw new MsalClientException(

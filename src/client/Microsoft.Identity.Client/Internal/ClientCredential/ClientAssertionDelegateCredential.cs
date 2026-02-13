@@ -65,9 +65,26 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     MsalErrorMessage.InvalidClientAssertionEmpty);
             }
 
+            bool hasCertificate = resp.TokenBindingCertificate != null;
+
+            // Per canonical matrix: enforce supported combinations
+            if (context.Mode == ClientAuthMode.Regular && hasCertificate)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    "Client assertion with TokenBindingCertificate (jwt+cert) is only supported in mTLS mode. Use .WithMtlsProofOfPossession() or don't return a certificate in your callback.");
+            }
+
+            if (context.Mode == ClientAuthMode.MtlsMode && !hasCertificate)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsCertificateNotProvided,
+                    "mTLS mode requires TokenBindingCertificate in ClientSignedAssertion. Your callback must return a certificate.");
+            }
+
             // Use jwt-pop if TokenBindingCertificate is present (assertion contains confirmation claim)
             // AAD requires jwt-pop when confirmation claim exists
-            string assertionType = resp.TokenBindingCertificate != null
+            string assertionType = hasCertificate
                 ? OAuth2AssertionType.JwtPop
                 : OAuth2AssertionType.JwtBearer;
 
