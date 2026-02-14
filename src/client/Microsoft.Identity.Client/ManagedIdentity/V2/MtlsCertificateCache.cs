@@ -143,5 +143,31 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 _gates.Release(cacheKey);
             }
         }
+
+        /// <summary>
+        /// Removes a certificate from both in-memory and persistent cache when SCHANNEL rejects it.
+        /// </summary>
+        public void RemoveBadCert(string cacheKey, ILoggerAdapter logger)
+        {
+            try
+            {
+                _memory.Remove(cacheKey, logger);
+                logger?.Verbose(() => $"[PersistentCert] Removed bad cert from memory cache for '{cacheKey}'");
+            }
+            catch (Exception ex)
+            {
+                logger?.Verbose(() => $"[PersistentCert] Error removing from memory cache: {ex.Message}");
+            }
+
+            try
+            {
+                _persisted.DeleteAllForAlias(cacheKey, logger);
+                logger?.Verbose(() => $"[PersistentCert] Removed bad cert from persistent cache for '{cacheKey}'");
+            }
+            catch (Exception ex)
+            {
+                logger?.Verbose(() => $"[PersistentCert] Error removing from persistent cache: {ex.Message}");
+            }
+        }
     }
 }

@@ -2,11 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -618,6 +623,223 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsFalse(_cache.Read(alias, out _, Logger),
                     $"Alias '{alias ?? "<null>"}' should not be persisted.");
             }
+        }
+
+        #endregion
+
+        #region //MTLS specific tests 
+
+        [TestMethod]
+        public void DeleteAllForAlias_Removes_All_Certificates_For_Alias()
+        {
+            WindowsOnly();
+
+            var alias = "alias-delall-" + Guid.NewGuid().ToString("N");
+            var ep = "https://fake_mtls/delall";
+            var logger = Logger;
+
+            try
+            {
+                // Write 3 certs with increasing NotAfter so all 3 are added (policy only skips older/equal)
+                using var c1 = CreateSelfSignedWithKey("CN=" + Guid.NewGuid().ToString("D"), TimeSpan.FromDays(2));
+                using var c2 = CreateSelfSignedWithKey("CN=" + Guid.NewGuid().ToString("D"), TimeSpan.FromDays(3));
+                using var c3 = CreateSelfSignedWithKey("CN=" + Guid.NewGuid().ToString("D"), TimeSpan.FromDays(4));
+
+                _cache.Write(alias, c1, ep, logger);
+                _cache.Write(alias, c2, ep, logger);
+                _cache.Write(alias, c3, ep, logger);
+
+                Assert.IsTrue(WaitForFind(alias, out _), "Expected at least one persisted entry.");
+                Assert.IsTrue(CountAliasInStore(alias) >= 2, "Expected multiple certs persisted for alias.");
+
+                // Act
+                _cache.DeleteAllForAlias(alias, logger);
+
+                // Assert: store should have 0 for alias
+                Assert.IsTrue(WaitForAliasCount(alias, expected: 0), "Expected all certs for alias to be deleted.");
+                Assert.IsFalse(_cache.Read(alias, out _, logger), "Read should return false after DeleteAllForAlias.");
+            }
+            finally
+            {
+                RemoveAliasFromStore(alias);
+            }
+        }
+
+        [TestMethod]
+        public void DeleteAllForAlias_Does_Not_Remove_Other_Aliases()
+        {
+            WindowsOnly();
+
+            var alias1 = "alias-delall-a-" + Guid.NewGuid().ToString("N");
+            var alias2 = "alias-delall-b-" + Guid.NewGuid().ToString("N");
+            var ep1 = "https://fake_mtls/a";
+            var ep2 = "https://fake_mtls/b";
+            var logger = Logger;
+
+            try
+            {
+                using var c1 = CreateSelfSignedWithKey("CN=" + Guid.NewGuid().ToString("D"), TimeSpan.FromDays(3));
+                using var c2 = CreateSelfSignedWithKey("CN=" + Guid.NewGuid().ToString("D"), TimeSpan.FromDays(3));
+
+                _cache.Write(alias1, c1, ep1, logger);
+                _cache.Write(alias2, c2, ep2, logger);
+
+                Assert.IsTrue(WaitForFind(alias1, out _));
+                Assert.IsTrue(WaitForFind(alias2, out _));
+                Assert.AreEqual(1, CountAliasInStore(alias1));
+                Assert.AreEqual(1, CountAliasInStore(alias2));
+
+                // Act
+                _cache.DeleteAllForAlias(alias1, logger);
+
+                // Assert
+                Assert.IsTrue(WaitForAliasCount(alias1, expected: 0), "alias1 should be removed.");
+                Assert.AreEqual(1, CountAliasInStore(alias2), "alias2 must remain.");
+                Assert.IsTrue(_cache.Read(alias2, out var v2, logger), "Read(alias2) should still succeed.");
+
+                // caller owns returned cert
+                v2.Certificate.Dispose();
+            }
+            finally
+            {
+                RemoveAliasFromStore(alias1);
+                RemoveAliasFromStore(alias2);
+            }
+        }
+
+        [TestMethod]
+        public void RemoveBadCert_Removes_From_Memory_And_Calls_Persistent_DeleteAll()
+        {
+            var memory = new InMemoryCertificateCache();
+            var persisted = Substitute.For<IPersistentCertificateCache>();
+            var logger = Substitute.For<ILoggerAdapter>();
+
+            var cache = new MtlsBindingCache(memory, persisted);
+
+            const string alias = "alias-remove-bad-cert";
+            const string ep = "https://fake_mtls/ep";
+            const string cid = "11111111-1111-1111-1111-111111111111";
+
+            using var cert = CreateSelfSignedCert(TimeSpan.FromDays(2));
+            memory.Set(alias, new CertificateCacheValue(cert, ep, cid));
+
+            // Sanity: should be present
+            Assert.IsTrue(memory.TryGet(alias, out var before));
+            before.Certificate.Dispose();
+
+            // Act
+            cache.RemoveBadCert(alias, logger);
+
+            // Assert: memory entry gone
+            Assert.IsFalse(memory.TryGet(alias, out _), "Expected memory cache eviction.");
+
+            // Assert: persistent delete-all invoked
+            persisted.Received(1).DeleteAllForAlias(alias, logger);
+        }
+
+        [TestMethod]
+        public void RemoveBadCert_Is_BestEffort_DoesNotThrow_When_Persistent_Throws()
+        {
+            var memory = new InMemoryCertificateCache();
+            var persisted = Substitute.For<IPersistentCertificateCache>();
+            var logger = Substitute.For<ILoggerAdapter>();
+
+            persisted
+                .When(p => p.DeleteAllForAlias(Arg.Any<string>(), Arg.Any<ILoggerAdapter>()))
+                .Do(_ => throw new InvalidOperationException("boom"));
+
+            var cache = new MtlsBindingCache(memory, persisted);
+
+            // Should not throw
+            cache.RemoveBadCert("alias", logger);
+        }
+
+        [TestMethod]
+        public void IsSchanelFailure_ReturnsTrue_For_SocketException_10054_Chain()
+        {
+            // Build exception chain like your logs
+            var sock = new SocketException(10054);
+            var io = new IOException("Unable to write data to the transport connection: An existing connection was forcibly closed by the remote host.", sock);
+            var http = new HttpRequestException("An error occurred while sending the request.", io);
+
+            // ErrorCode must be managed_identity_unreachable_network for the catch filter,
+            // but the private method only checks ToString() content.
+            var msal = new MsalServiceException(MsalError.ManagedIdentityUnreachableNetwork, "An error occurred while sending the request.", http);
+
+            // Invoke private static bool IsSchanelFailure(MsalServiceException ex)
+            var mi = typeof(ImdsV2ManagedIdentitySource)
+                .GetMethod("IsSchanelFailure", BindingFlags.NonPublic | BindingFlags.Static);
+
+            Assert.IsNotNull(mi, "Could not find IsSchanelFailure via reflection.");
+
+            var result = (bool)mi.Invoke(null, new object[] { msal });
+
+            Assert.IsTrue(result, "Expected 10054 chain to be detected as SCHANNEL failure.");
+        }
+
+        private static X509Certificate2 CreateSelfSignedCert(TimeSpan lifetime, string subjectCn = "CN=RemoveBadCertTest")
+        {
+            using var rsa = RSA.Create(2048);
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                new X500DistinguishedName(subjectCn),
+                rsa,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            var notBefore = DateTimeOffset.UtcNow.AddMinutes(-2);
+            var notAfter = notBefore.Add(lifetime);
+            return req.CreateSelfSigned(notBefore, notAfter);
+        }
+
+        private static int CountAliasInStore(string alias)
+        {
+            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.OpenExistingOnly | OpenFlags.ReadOnly);
+
+            X509Certificate2[] items;
+            try
+            {
+                items = new X509Certificate2[store.Certificates.Count];
+                store.Certificates.CopyTo(items, 0);
+            }
+            catch
+            {
+                items = store.Certificates.Cast<X509Certificate2>().ToArray();
+            }
+
+            int count = 0;
+            foreach (var cert in items)
+            {
+                try
+                {
+                    if (MsiCertificateFriendlyNameEncoder.TryDecode(cert.FriendlyName, out var decodedAlias, out _)
+                        && StringComparer.Ordinal.Equals(decodedAlias, alias))
+                    {
+                        count++;
+                    }
+                }
+                finally
+                {
+                    cert.Dispose();
+                }
+            }
+
+            return count;
+        }
+
+        private static bool WaitForAliasCount(string alias, int expected, int retries = 20, int delayMs = 50)
+        {
+            for (int i = 0; i < retries; i++)
+            {
+                if (CountAliasInStore(alias) == expected)
+                {
+                    return true;
+                }
+
+                Thread.Sleep(delayMs);
+            }
+
+            return false;
         }
 
         #endregion
