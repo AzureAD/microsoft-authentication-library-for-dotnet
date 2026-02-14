@@ -32,5 +32,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// latest valid binding for the alias in place.
         /// </summary>
         void Delete(string alias, ILoggerAdapter logger);
+
+        /// <summary>
+        /// Deletes all entries for the alias (best-effort).
+        /// Implementations should remove all bindings for the alias.
+        /// </summary>
+        /// <param name="alias"></param>
+        /// <param name="logger"></param>
+        void DeleteAllForAlias(string alias, ILoggerAdapter logger);
     }
 }
