@@ -183,6 +183,92 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Configures a request-level client assertion for this specific token request.
+        /// The assertion is invoked only when a token cannot be retrieved from the cache.
+        /// This overrides any app-level client assertion configured on the ConfidentialClientApplicationBuilder.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientAssertionDelegate">An async delegate that returns the client assertion as a string. 
+        /// The assertion lifetime is the responsibility of the caller.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>
+        /// This request-level assertion takes precedence over any app-level assertion.
+        /// Callers can use this mechanism to customize assertions per request or to cache their assertions.
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithClientAssertion(
+            Func<AssertionRequestOptions, Task<string>> clientAssertionDelegate)
+        {
+            if (clientAssertionDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(clientAssertionDelegate));
+            }
+
+            // Wrap the delegate to match the internal signature
+            CommonParameters.RequestLevelClientCredential = new ClientAssertionStringDelegateCredential(
+                (opts, ct) => clientAssertionDelegate(opts));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Configures a request-level client assertion for this specific token request.
+        /// The assertion is invoked only when a token cannot be retrieved from the cache.
+        /// This overrides any app-level client assertion configured on the ConfidentialClientApplicationBuilder.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientAssertionDelegate">An async delegate that returns the client assertion as a string.
+        /// The assertion lifetime is the responsibility of the caller.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>
+        /// This request-level assertion takes precedence over any app-level assertion.
+        /// Callers can use this mechanism to customize assertions per request or to cache their assertions.
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithClientAssertion(
+            Func<AssertionRequestOptions, CancellationToken, Task<string>> clientAssertionDelegate)
+        {
+            if (clientAssertionDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(clientAssertionDelegate));
+            }
+
+            CommonParameters.RequestLevelClientCredential = new ClientAssertionStringDelegateCredential(
+                clientAssertionDelegate);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Configures a request-level client assertion for this specific token request.
+        /// The assertion is invoked only when a token cannot be retrieved from the cache.
+        /// This overrides any app-level client assertion configured on the ConfidentialClientApplicationBuilder.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientSignedAssertionProvider">A delegate that asynchronously provides a <see cref="ClientSignedAssertion"/>
+        /// based on the given <see cref="AssertionRequestOptions"/> and <see cref="CancellationToken"/>.
+        /// This delegate must not be null.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>
+        /// This request-level assertion takes precedence over any app-level assertion.
+        /// This overload allows returning a <see cref="ClientSignedAssertion"/> which can include an optional
+        /// <see cref="ClientSignedAssertion.TokenBindingCertificate"/> for mTLS scenarios.
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithClientAssertion(
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
+        {
+            if (clientSignedAssertionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(clientSignedAssertionProvider));
+            }
+
+            ValidateUseOfExperimentalFeature();
+
+            CommonParameters.RequestLevelClientCredential = new ClientAssertionDelegateCredential(
+                clientSignedAssertionProvider);
+
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

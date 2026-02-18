@@ -1255,5 +1255,10 @@ namespace Microsoft.Identity.Client
         /// Represents the error code returned when an IMDS operation fails.
         /// </summary>
         public const string ImdsServiceError = "imds_service_error";
+
+        /// <summary>
+        /// Represents the error code returned when credential material is invalid or incomplete.
+        /// </summary>
+        public const string InvalidCredentialMaterial = "invalid_credential_material";
     }
 }

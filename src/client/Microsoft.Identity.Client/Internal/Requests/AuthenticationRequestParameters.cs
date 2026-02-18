@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -206,6 +207,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         #endregion
 
         public string ExtraClientAssertionClaims => _commonParameters.ExtraClientAssertionClaims;
+
+        public IClientCredential RequestLevelClientCredential => _commonParameters.RequestLevelClientCredential;
 
         public void LogParameters()
         {

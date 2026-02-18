@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -57,6 +58,43 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
 
             return ClientCredentialApplicationResult.None;
+        }
+
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken)
+        {
+            var opts = new AssertionRequestOptions
+            {
+                CancellationToken = cancellationToken,
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                ClientCapabilities = context.ClientCapabilities,
+                Claims = context.Claims,
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath
+            };
+
+            string assertion = await _provider(opts, cancellationToken).ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(assertion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    MsalErrorMessage.InvalidClientAssertionEmpty);
+            }
+
+            var parameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                { OAuth2Parameter.ClientAssertion, assertion }
+            };
+
+            var material = new CredentialMaterial(
+                tokenRequestParameters: parameters,
+                credentialSource: CredentialSource.Callback,
+                resolvedCertificate: null);
+
+            return material;
         }
     }
 }

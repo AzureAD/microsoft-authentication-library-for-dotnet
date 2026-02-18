@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -93,6 +94,48 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             return hasCert
                 ? new ClientCredentialApplicationResult(useJwtPopClientAssertion: useJwtPop, mtlsCertificate: resp.TokenBindingCertificate)
                 : ClientCredentialApplicationResult.None;
+        }
+
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken)
+        {
+            var opts = new AssertionRequestOptions
+            {
+                CancellationToken = cancellationToken,
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                ClientCapabilities = context.ClientCapabilities,
+                Claims = context.Claims,
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath
+            };
+
+            ClientSignedAssertion resp = await GetAssertionAsync(opts, cancellationToken).ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(resp?.Assertion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    MsalErrorMessage.InvalidClientAssertionEmpty);
+            }
+
+            bool hasCert = resp.TokenBindingCertificate != null;
+
+            // Determine assertion type based on mode and certificate presence
+            bool useJwtPop = context.Mode == ClientAuthMode.MtlsMode || hasCert;
+
+            var parameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, useJwtPop ? OAuth2AssertionType.JwtPop : OAuth2AssertionType.JwtBearer },
+                { OAuth2Parameter.ClientAssertion, resp.Assertion }
+            };
+
+            var material = new CredentialMaterial(
+                tokenRequestParameters: parameters,
+                credentialSource: CredentialSource.Callback,
+                resolvedCertificate: resp.TokenBindingCertificate);
+
+            return material;
         }
     }
 }
