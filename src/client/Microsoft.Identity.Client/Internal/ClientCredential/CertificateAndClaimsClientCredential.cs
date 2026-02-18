@@ -192,5 +192,130 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             return certificate;
         }
+
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken)
+        {
+            // For mTLS mode, we don't generate a client assertion - just return the certificate
+            if (context.Mode == ClientAuthMode.MtlsMode)
+            {
+                // Resolve the certificate for mTLS
+                var options = new AssertionRequestOptions
+                {
+                    ClientID = context.ClientId,
+                    TokenEndpoint = context.TokenEndpoint,
+                    Claims = context.Claims,
+                    ClientCapabilities = context.ClientCapabilities,
+                    CancellationToken = cancellationToken
+                };
+
+                X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
+
+                if (certificate == null)
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidClientAssertion,
+                        "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
+                }
+
+                try
+                {
+                    if (!certificate.HasPrivateKey)
+                    {
+                        throw new MsalClientException(
+                            MsalError.CertWithoutPrivateKey,
+                            MsalErrorMessage.CertMustHavePrivateKey(certificate.FriendlyName));
+                    }
+                }
+                catch (System.Security.Cryptography.CryptographicException ex)
+                {
+                    throw new MsalClientException(
+                        MsalError.CryptographicError,
+                        MsalErrorMessage.CryptographicError,
+                        ex);
+                }
+
+                // For mTLS, return empty parameters but include the certificate
+                var material = new CredentialMaterial(
+                    tokenRequestParameters: new Dictionary<string, string>(),
+                    credentialSource: Certificate != null ? CredentialSource.Static : CredentialSource.Callback,
+                    resolvedCertificate: certificate);
+
+                return material;
+            }
+
+            // Regular mode: generate a JWT client assertion
+            var opts = new AssertionRequestOptions
+            {
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                Claims = context.Claims,
+                ClientCapabilities = context.ClientCapabilities,
+                CancellationToken = cancellationToken
+            };
+
+            X509Certificate2 cert = await _certificateProvider(opts).ConfigureAwait(false);
+
+            if (cert == null)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
+            }
+
+            try
+            {
+                if (!cert.HasPrivateKey)
+                {
+                    throw new MsalClientException(
+                        MsalError.CertWithoutPrivateKey,
+                        MsalErrorMessage.CertMustHavePrivateKey(cert.FriendlyName));
+                }
+            }
+            catch (System.Security.Cryptography.CryptographicException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.CryptographicError,
+                    MsalErrorMessage.CryptographicError,
+                    ex);
+            }
+
+            // Build the JWT token
+            JsonWebToken jwtToken;
+            if (!string.IsNullOrEmpty(context.ExtraClientAssertionClaims))
+            {
+                jwtToken = new JsonWebToken(
+                    context.CryptographyManager,
+                    context.ClientId,
+                    context.TokenEndpoint,
+                    context.ExtraClientAssertionClaims,
+                    _appendDefaultClaims);
+            }
+            else
+            {
+                jwtToken = new JsonWebToken(
+                    context.CryptographyManager,
+                    context.ClientId,
+                    context.TokenEndpoint,
+                    _claimsToSign,
+                    _appendDefaultClaims);
+            }
+
+            string assertion = jwtToken.Sign(cert, context.SendX5C ?? false, context.UseSha2);
+
+            var parameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                { OAuth2Parameter.ClientAssertion, assertion }
+            };
+
+            var result = new CredentialMaterial(
+                tokenRequestParameters: parameters,
+                credentialSource: Certificate != null ? CredentialSource.Static : CredentialSource.Callback,
+                resolvedCertificate: cert);
+
+            return result;
+        }
     }
 }

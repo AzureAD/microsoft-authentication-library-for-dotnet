@@ -27,5 +27,16 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
               ICryptographyManager cryptographyManager,
               string tokenEndpoint,
               CancellationToken cancellationToken);
+
+        /// <summary>
+        /// New credential resolution method that returns normalized credential material.
+        /// This replaces AddConfidentialClientParametersAsync for the new credential system.
+        /// </summary>
+        /// <param name="context">Immutable context containing all credential parameters.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Normalized credential material.</returns>
+        Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken);
     }
 }
