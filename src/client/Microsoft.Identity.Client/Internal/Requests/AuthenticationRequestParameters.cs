@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -210,6 +211,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string FmiPathSuffix => _commonParameters.FmiPathSuffix;
 
         public string ClientAssertionFmiPath => _commonParameters.ClientAssertionFmiPath;
+
+        public IClientCredential RequestLevelClientCredential => _commonParameters.RequestLevelClientCredential;
         #endregion
 
         public string ExtraClientAssertionClaims => _commonParameters.ExtraClientAssertionClaims;

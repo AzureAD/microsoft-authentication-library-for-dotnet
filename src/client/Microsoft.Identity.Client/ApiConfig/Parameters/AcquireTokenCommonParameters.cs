@@ -44,6 +44,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string ExtraClientAssertionClaims { get; internal set; }
 
         /// <summary>
+        /// Optional request-level client credential that overrides the app-level credential for this specific request.
+        /// Set by .WithClientAssertion() on the request builder.
+        /// </summary>
+        public IClientCredential RequestLevelClientCredential { get; internal set; }
+
+        /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
         /// Set by the KeyAttestation package via .WithAttestationSupport().
         /// Returns null for non-attested flows.

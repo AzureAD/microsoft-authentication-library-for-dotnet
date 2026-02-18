@@ -130,10 +130,14 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
-            if (_serviceBundle.Config.ClientCredential != null)
+            // Determine which credential to use: request-level takes priority over app-level
+            IClientCredential credentialToUse = _requestParams.RequestLevelClientCredential 
+                ?? _serviceBundle.Config.ClientCredential;
+
+            if (credentialToUse != null)
             {
                 _requestParams.RequestContext.Logger.Verbose(
-                    () => "[TokenClient] Before resolving credential material");
+                    () => $"[TokenClient] Before resolving credential material (using {(_requestParams.RequestLevelClientCredential != null ? "request-level" : "app-level")} credential)");
 
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
@@ -156,7 +160,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 // Resolve credential material via resolver
                 var material = await CredentialMaterialResolver.ResolveAsync(
-                    _serviceBundle.Config.ClientCredential,
+                    credentialToUse,
                     credentialContext,
                     cancellationToken).ConfigureAwait(false);
 

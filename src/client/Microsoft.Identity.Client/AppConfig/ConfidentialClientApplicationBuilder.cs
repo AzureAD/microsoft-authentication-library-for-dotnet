@@ -266,7 +266,8 @@ namespace Microsoft.Identity.Client
         /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]        
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("Configuring client assertions at the application level is deprecated. Use WithClientAssertion on the request builder (e.g., AcquireTokenForClient) instead. This provides better access to request-specific context and ensures single invocation per request. See https://aka.ms/msal-net-client-assertion", false)]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<string> clientAssertionDelegate)
         {
             if (clientAssertionDelegate == null)
@@ -286,7 +287,8 @@ namespace Microsoft.Identity.Client
         /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]        
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("Configuring client assertions at the application level is deprecated. Use WithClientAssertion on the request builder (e.g., AcquireTokenForClient) instead. This provides better access to request-specific context and ensures single invocation per request. See https://aka.ms/msal-net-client-assertion", false)]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate)
         {
             if (clientAssertionAsyncDelegate == null)
@@ -306,6 +308,7 @@ namespace Microsoft.Identity.Client
         /// <param name="clientAssertionAsyncDelegate">An async delegate that returns the client assertion. Assertion lifetime is the responsibility of the caller.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
+        [Obsolete("Configuring client assertions at the application level is deprecated. Use WithClientAssertion on the request builder (e.g., AcquireTokenForClient) instead. This provides better access to request-specific context and ensures single invocation per request. See https://aka.ms/msal-net-client-assertion", false)]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions, Task<string>> clientAssertionAsyncDelegate)
         {
             if (clientAssertionAsyncDelegate == null)
@@ -330,6 +333,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The <see cref="ConfidentialClientApplicationBuilder"/> instance configured with the specified client
         /// assertion.</returns>
         /// <exception cref="MsalClientException">Thrown if <paramref name="clientSignedAssertionProvider"/> is <see langword="null"/>.</exception>
+        [Obsolete("Configuring client assertions at the application level is deprecated. Use WithClientAssertion on the request builder (e.g., AcquireTokenForClient) instead. This provides better access to request-specific context and ensures single invocation per request. See https://aka.ms/msal-net-client-assertion", false)]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions,
             CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {

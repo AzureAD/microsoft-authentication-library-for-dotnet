@@ -183,6 +183,98 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Configures a request-level client assertion delegate that will be invoked for this specific token request.
+        /// This overrides any application-level client assertion for this request only.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientAssertionDelegate">An async delegate that returns the client assertion.
+        /// The delegate receives <see cref="AssertionRequestOptions"/> containing request-specific context
+        /// (ClientID, TokenEndpoint, Claims, FMI path, etc.).</param>
+        /// <returns>The builder to chain method calls</returns>
+        /// <remarks>
+        /// Request-level assertions have access to request-specific parameters and are invoked exactly once per request.
+        /// They take priority over application-level assertions configured in ConfidentialClientApplicationBuilder.
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithClientAssertion(Func<AssertionRequestOptions, Task<string>> clientAssertionDelegate)
+        {
+            if (clientAssertionDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(clientAssertionDelegate));
+            }
+
+            // Wrap to match the full signature expected by ClientAssertionDelegateCredential
+            CommonParameters.RequestLevelClientCredential = new ClientAssertionDelegateCredential(
+                async (opts, ct) =>
+                {
+                    string assertion = await clientAssertionDelegate(opts).ConfigureAwait(false);
+                    return new ClientSignedAssertion { Assertion = assertion };
+                });
+
+            return this;
+        }
+
+        /// <summary>
+        /// Configures a request-level client assertion delegate that will be invoked for this specific token request.
+        /// This overrides any application-level client assertion for this request only.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientAssertionDelegate">An async delegate that returns the client assertion.
+        /// The delegate receives <see cref="AssertionRequestOptions"/> containing request-specific context
+        /// (ClientID, TokenEndpoint, Claims, FMI path, etc.) and a <see cref="CancellationToken"/>.</param>
+        /// <returns>The builder to chain method calls</returns>
+        /// <remarks>
+        /// Request-level assertions have access to request-specific parameters and are invoked exactly once per request.
+        /// They take priority over application-level assertions configured in ConfidentialClientApplicationBuilder.
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithClientAssertion(Func<AssertionRequestOptions, CancellationToken, Task<string>> clientAssertionDelegate)
+        {
+            if (clientAssertionDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(clientAssertionDelegate));
+            }
+
+            // Wrap to match the full signature expected by ClientAssertionDelegateCredential
+            CommonParameters.RequestLevelClientCredential = new ClientAssertionDelegateCredential(
+                async (opts, ct) =>
+                {
+                    string assertion = await clientAssertionDelegate(opts, ct).ConfigureAwait(false);
+                    return new ClientSignedAssertion { Assertion = assertion };
+                });
+
+            return this;
+        }
+
+        /// <summary>
+        /// Configures a request-level client assertion delegate that will be invoked for this specific token request.
+        /// This overrides any application-level client assertion for this request only.
+        /// See https://aka.ms/msal-net-client-assertion
+        /// </summary>
+        /// <param name="clientSignedAssertionProvider">An async delegate that returns a <see cref="ClientSignedAssertion"/>
+        /// containing the JWT assertion and optionally a certificate for mTLS PoP scenarios.
+        /// The delegate receives <see cref="AssertionRequestOptions"/> containing request-specific context
+        /// (ClientID, TokenEndpoint, Claims, FMI path, etc.) and a <see cref="CancellationToken"/>.</param>
+        /// <returns>The builder to chain method calls</returns>
+        /// <remarks>
+        /// Request-level assertions have access to request-specific parameters and are invoked exactly once per request.
+        /// They take priority over application-level assertions configured in ConfidentialClientApplicationBuilder.
+        /// Use this overload when you need to return both a JWT assertion and a certificate for mTLS PoP scenarios.
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithClientAssertion(
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
+        {
+            if (clientSignedAssertionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(clientSignedAssertionProvider));
+            }
+
+            ValidateUseOfExperimentalFeature();
+
+            CommonParameters.RequestLevelClientCredential = new ClientAssertionDelegateCredential(clientSignedAssertionProvider);
+
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
