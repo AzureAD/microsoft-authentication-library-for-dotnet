@@ -186,15 +186,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Configures a request-level client assertion for this specific token request.
         /// The assertion is invoked only when a token cannot be retrieved from the cache.
-        /// This overrides any app-level client assertion configured on the <see cref="ConfidentialClientApplicationBuilder"/>.
+        /// This overrides any app-level client assertion configured on the ConfidentialClientApplicationBuilder.
         /// See https://aka.ms/msal-net-client-assertion
         /// </summary>
         /// <param name="clientAssertionDelegate">An async delegate that returns the client assertion as a string. 
         /// The assertion lifetime is the responsibility of the caller.</param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <remarks>
-        /// This request-level assertion takes precedence over any app-level assertion configured via 
-        /// <see cref="ConfidentialClientApplicationBuilder.WithClientAssertion"/>.
+        /// This request-level assertion takes precedence over any app-level assertion.
         /// Callers can use this mechanism to customize assertions per request or to cache their assertions.
         /// </remarks>
         public AcquireTokenForClientParameterBuilder WithClientAssertion(
@@ -215,15 +214,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Configures a request-level client assertion for this specific token request.
         /// The assertion is invoked only when a token cannot be retrieved from the cache.
-        /// This overrides any app-level client assertion configured on the <see cref="ConfidentialClientApplicationBuilder"/>.
+        /// This overrides any app-level client assertion configured on the ConfidentialClientApplicationBuilder.
         /// See https://aka.ms/msal-net-client-assertion
         /// </summary>
         /// <param name="clientAssertionDelegate">An async delegate that returns the client assertion as a string.
         /// The assertion lifetime is the responsibility of the caller.</param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <remarks>
-        /// This request-level assertion takes precedence over any app-level assertion configured via 
-        /// <see cref="ConfidentialClientApplicationBuilder.WithClientAssertion"/>.
+        /// This request-level assertion takes precedence over any app-level assertion.
         /// Callers can use this mechanism to customize assertions per request or to cache their assertions.
         /// </remarks>
         public AcquireTokenForClientParameterBuilder WithClientAssertion(
@@ -243,7 +241,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Configures a request-level client assertion for this specific token request.
         /// The assertion is invoked only when a token cannot be retrieved from the cache.
-        /// This overrides any app-level client assertion configured on the <see cref="ConfidentialClientApplicationBuilder"/>.
+        /// This overrides any app-level client assertion configured on the ConfidentialClientApplicationBuilder.
         /// See https://aka.ms/msal-net-client-assertion
         /// </summary>
         /// <param name="clientSignedAssertionProvider">A delegate that asynchronously provides a <see cref="ClientSignedAssertion"/>
@@ -251,8 +249,7 @@ namespace Microsoft.Identity.Client
         /// This delegate must not be null.</param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <remarks>
-        /// This request-level assertion takes precedence over any app-level assertion configured via 
-        /// <see cref="ConfidentialClientApplicationBuilder.WithClientAssertion"/>.
+        /// This request-level assertion takes precedence over any app-level assertion.
         /// This overload allows returning a <see cref="ClientSignedAssertion"/> which can include an optional
         /// <see cref="ClientSignedAssertion.TokenBindingCertificate"/> for mTLS scenarios.
         /// </remarks>
