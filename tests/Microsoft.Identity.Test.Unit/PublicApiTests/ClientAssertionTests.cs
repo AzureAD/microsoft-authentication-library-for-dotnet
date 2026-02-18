@@ -24,6 +24,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
+#pragma warning disable 0618 // Type or member is obsolete - testing backward compatibility
     [TestClass]
     public class ClientAssertionTests : TestBase
     {
@@ -1051,6 +1052,254 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        #region Request-Level WithClientAssertion Tests
+
+        [TestMethod]
+        public async Task RequestLevel_WithClientAssertion_String_NoAppLevelCredential_Test()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                int invocationCount = 0;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                // Act - Use request-level assertion
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        invocationCount++;
+                        Assert.AreEqual(TestConstants.ClientId, options.ClientID);
+                        Assert.IsNotNull(options.TokenEndpoint);
+                        return await Task.FromResult("request_level_assertion").ConfigureAwait(false);
+                    })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(1, invocationCount, "Request-level assertion should be invoked exactly once");
+                Assert.IsTrue(handler.ActualRequestPostData.ContainsKey(OAuth2Parameter.ClientAssertion));
+                Assert.AreEqual("request_level_assertion", handler.ActualRequestPostData[OAuth2Parameter.ClientAssertion]);
+            }
+        }
+
+        [TestMethod]
+        public async Task RequestLevel_WithClientAssertion_OverridesAppLevel_Test()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                int appLevelInvocationCount = 0;
+                int requestLevelInvocationCount = 0;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        appLevelInvocationCount++;
+                        return await Task.FromResult("app_level_assertion").ConfigureAwait(false);
+                    })
+                    .Build();
+
+                // Act - Use request-level assertion which should override app-level
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        requestLevelInvocationCount++;
+                        return await Task.FromResult("request_level_assertion").ConfigureAwait(false);
+                    })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(0, appLevelInvocationCount, "App-level assertion should NOT be invoked when request-level is present");
+                Assert.AreEqual(1, requestLevelInvocationCount, "Request-level assertion should be invoked exactly once");
+                Assert.AreEqual("request_level_assertion", handler.ActualRequestPostData[OAuth2Parameter.ClientAssertion]);
+            }
+        }
+
+        [TestMethod]
+        public async Task RequestLevel_WithClientAssertion_WithCancellationToken_Test()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                int invocationCount = 0;
+                CancellationToken receivedToken = default;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                var cts = new CancellationTokenSource();
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options, CancellationToken ct) =>
+                    {
+                        invocationCount++;
+                        receivedToken = ct;
+                        return await Task.FromResult("request_level_assertion_with_ct").ConfigureAwait(false);
+                    })
+                    .ExecuteAsync(cts.Token)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(1, invocationCount, "Request-level assertion should be invoked exactly once");
+                Assert.AreEqual(cts.Token, receivedToken, "CancellationToken should be passed through to assertion delegate");
+                Assert.AreEqual("request_level_assertion_with_ct", handler.ActualRequestPostData[OAuth2Parameter.ClientAssertion]);
+            }
+        }
+
+        [TestMethod]
+        public async Task RequestLevel_WithClientAssertion_ClientSignedAssertion_Test()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                int invocationCount = 0;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .Build();
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options, CancellationToken ct) =>
+                    {
+                        invocationCount++;
+                        return await Task.FromResult(new ClientSignedAssertion
+                        {
+                            Assertion = "signed_assertion_jwt"
+                        }).ConfigureAwait(false);
+                    })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(1, invocationCount, "Request-level assertion should be invoked exactly once");
+                Assert.AreEqual("signed_assertion_jwt", handler.ActualRequestPostData[OAuth2Parameter.ClientAssertion]);
+                Assert.AreEqual(OAuth2AssertionType.JwtBearer, handler.ActualRequestPostData[OAuth2Parameter.ClientAssertionType]);
+            }
+        }
+
+        [TestMethod]
+        public async Task RequestLevel_WithClientAssertion_ReceivesFmiPath_Test()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    expectedPostData: new Dictionary<string, string>() { { OAuth2Parameter.FmiPath, "test-fmi-path" } });
+
+                string receivedFmiPath = null;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .Build();
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        receivedFmiPath = options.ClientAssertionFmiPath;
+                        return await Task.FromResult("assertion_with_fmi").ConfigureAwait(false);
+                    })
+                    .WithFmiPath("test-fmi-path") // Adds fmi_path to the token request
+                    .WithFmiPathForClientAssertion("test-fmi-path") // Passes fmi_path to assertion delegate
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual("test-fmi-path", receivedFmiPath, "FMI path should be passed to assertion delegate");
+            }
+        }
+
+        [TestMethod]
+        public async Task RequestLevel_WithClientAssertion_SingleInvocationAcrossRequests_Test()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                int firstRequestInvocationCount = 0;
+                int secondRequestInvocationCount = 0;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                // Act - First request
+                var result1 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        firstRequestInvocationCount++;
+                        return await Task.FromResult("first_request_assertion").ConfigureAwait(false);
+                    })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Act - Second request (different assertion)
+                var result2 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        secondRequestInvocationCount++;
+                        return await Task.FromResult("second_request_assertion").ConfigureAwait(false);
+                    })
+                    .WithForceRefresh(true) // Force refresh to ensure new token request
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result1);
+                Assert.IsNotNull(result2);
+                Assert.AreEqual(1, firstRequestInvocationCount, "First request assertion should be invoked exactly once");
+                Assert.AreEqual(1, secondRequestInvocationCount, "Second request assertion should be invoked exactly once");
+            }
+        }
+
+        #endregion
+
         #region Helper ---------------------------------------------------------------
         private static Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>>
         BearerDelegate(string jwt = "fake_jwt") =>
@@ -1090,4 +1339,5 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
         #endregion
     }
+#pragma warning restore 0618 // Type or member is obsolete
 }

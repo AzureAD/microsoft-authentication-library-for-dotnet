@@ -24,6 +24,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
 {
+#pragma warning disable 0618 // Type or member is obsolete - testing backward compatibility
     [TestClass]
     public class MtlsPopTests : TestBase
     {
@@ -972,4 +973,5 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
     }
+#pragma warning restore 0618 // Type or member is obsolete
 }

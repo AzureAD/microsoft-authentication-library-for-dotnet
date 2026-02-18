@@ -30,6 +30,7 @@ using System.Text;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
+#pragma warning disable 0618 // Type or member is obsolete - testing backward compatibility
     [TestClass]
     [DeploymentItem(@"Resources\valid.crtfile")]
     [DeploymentItem("Resources\\OpenidConfiguration-QueryParams-B2C.json")]
@@ -2360,4 +2361,5 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             return cryptoMgr.CreateSha256HashHex(token);
         }
     }
+#pragma warning restore 0618 // Type or member is obsolete
 }

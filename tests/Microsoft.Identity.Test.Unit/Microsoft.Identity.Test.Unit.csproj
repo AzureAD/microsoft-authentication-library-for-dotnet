@@ -10,6 +10,8 @@
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
 
     <Platforms>AnyCPU;x64</Platforms>
+    <!-- Allow obsolete API usage for backward compatibility testing -->
+    <NoWarn>$(NoWarn);0618</NoWarn>
 </PropertyGroup>
 
   <ItemGroup>
