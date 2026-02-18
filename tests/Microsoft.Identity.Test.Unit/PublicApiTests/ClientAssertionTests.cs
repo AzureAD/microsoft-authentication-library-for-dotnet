@@ -1088,6 +1088,133 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var notAfter = notBefore.Add(lifetime);
             return req.CreateSelfSigned(notBefore, notAfter);
         }
+
+        [TestMethod]
+        [Description("Test that request-level WithClientAssertion overrides app-level assertion")]
+        public async Task RequestLevel_WithClientAssertion_OverridesAppLevel_AsyncTask()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                bool appLevelCalled = false;
+                bool requestLevelCalled = false;
+
+                // Create app with app-level assertion
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTestTenant)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        appLevelCalled = true;
+                        return await Task.FromResult("app_level_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                // Make request with request-level assertion override
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        requestLevelCalled = true;
+                        return await Task.FromResult("request_level_assertion").ConfigureAwait(false);
+                    })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Verify request-level was called, not app-level
+                Assert.IsTrue(requestLevelCalled, "Request-level assertion should have been called");
+                Assert.IsFalse(appLevelCalled, "App-level assertion should NOT have been called");
+                Assert.IsNotNull(result);
+                
+                // Verify the correct assertion was sent
+                Assert.IsTrue(handler.ActualRequestPostData.ContainsKey("client_assertion"));
+                // Note: We can't easily verify the exact assertion value in the mock, but we verified the right delegate was called
+            }
+        }
+
+        [TestMethod]
+        [Description("Test request-level WithClientAssertion with CancellationToken")]
+        public async Task RequestLevel_WithClientAssertion_WithCancellationToken_AsyncTask()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                bool assertionCalled = false;
+                CancellationToken receivedToken = default;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTestTenant)
+                    .WithHttpManager(httpManager)
+                    .WithClientSecret("app_secret") // Provide app-level credential
+                    .BuildConcrete();
+
+                var cts = new CancellationTokenSource();
+
+                // Make request with request-level assertion that accepts CancellationToken
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options, CancellationToken ct) =>
+                    {
+                        assertionCalled = true;
+                        receivedToken = ct;
+                        return await Task.FromResult("request_assertion").ConfigureAwait(false);
+                    })
+                    .ExecuteAsync(cts.Token)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(assertionCalled, "Request-level assertion should have been called");
+                Assert.AreEqual(cts.Token, receivedToken, "CancellationToken should have been passed to assertion delegate");
+                Assert.IsNotNull(result);
+            }
+        }
+
+        [TestMethod]
+        [Description("Test request-level WithClientAssertion with ClientSignedAssertion")]
+        public async Task RequestLevel_WithClientAssertion_ClientSignedAssertion_AsyncTask()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedPostData = new Dictionary<string, string>();
+
+                bool assertionCalled = false;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTestTenant)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .WithClientSecret("app_secret")
+                    .BuildConcrete();
+
+                // Make request with request-level ClientSignedAssertion
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClientAssertion(async (AssertionRequestOptions options, CancellationToken ct) =>
+                    {
+                        assertionCalled = true;
+                        return await Task.FromResult(new ClientSignedAssertion
+                        {
+                            Assertion = "signed_assertion_jwt",
+                            TokenBindingCertificate = null
+                        }).ConfigureAwait(false);
+                    })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(assertionCalled, "Request-level assertion provider should have been called");
+                Assert.IsNotNull(result);
+            }
+        }
         #endregion
     }
 }
