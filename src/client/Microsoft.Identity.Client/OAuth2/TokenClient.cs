@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.OAuth2.Throttling;
@@ -129,14 +130,21 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
-            if (_serviceBundle.Config.ClientCredential != null)
+            // Prioritize request-level credential over app-level credential
+            IClientCredential credentialToUse = _requestParams.RequestLevelClientCredential 
+                ?? _serviceBundle.Config.ClientCredential;
+
+            if (credentialToUse != null)
             {
+                _requestParams.RequestContext.Logger.Verbose(
+                    () => $"[TokenClient] Using {(_requestParams.RequestLevelClientCredential != null ? "request-level" : "app-level")} credential");
+
                 _requestParams.RequestContext.Logger.Verbose(
                     () => "[TokenClient] Before adding the client assertion / secret");
 
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
-                await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
+                await credentialToUse.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
                     _requestParams,
                     _serviceBundle.PlatformProxy.CryptographyManager,

@@ -45,8 +45,9 @@ namespace Microsoft.Identity.Client
         /// <exception cref="MsalClientException"></exception>
         protected override void Validate()
         {
-            // Confidential client must have a credential
+            // Confidential client must have a credential (either at app-level or request-level)
             if (ServiceBundle?.Config.ClientCredential == null &&
+                CommonParameters.RequestLevelClientCredential == null &&
                 CommonParameters.OnBeforeTokenRequestHandler == null &&
                 ServiceBundle?.Config.AppTokenProvider == null
                 )

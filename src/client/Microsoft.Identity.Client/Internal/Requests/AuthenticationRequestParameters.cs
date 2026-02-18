@@ -207,6 +207,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string ExtraClientAssertionClaims => _commonParameters.ExtraClientAssertionClaims;
 
+        public IClientCredential RequestLevelClientCredential => _commonParameters.RequestLevelClientCredential;
+
         public void LogParameters()
         {
             var logger = RequestContext.Logger;
