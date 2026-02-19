@@ -570,5 +570,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.RegionUsed,
                 apiEvent.RegionDiscoveryFailureReason);
         }
+
+        /// <summary>
+        /// Validates a cached access token using the authentication operation, if the scheme implements <see cref="IAuthenticationOperation2"/>.
+        /// Returns the original cache item if validation passes or is not applicable, or null if validation fails.
+        /// </summary>
+        internal static async Task<MsalAccessTokenCacheItem> ValidateCachedAccessTokenAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {
+            if (cachedAccessTokenItem != null &&
+                authenticationRequestParameters.AuthenticationScheme is IAuthenticationOperation2 authOp2)
+            {
+                var cacheValidationData = new MsalCacheValidationData();
+                cacheValidationData.PersistedCacheParameters = cachedAccessTokenItem.PersistedCacheParameters;
+
+                if (!await authOp2.ValidateCachedTokenAsync(cacheValidationData).ConfigureAwait(false))
+                {
+                    authenticationRequestParameters.RequestContext.Logger.Info(
+                        "Cached token failed authentication operation validation.");
+                    return null;
+                }
+            }
+
+            return cachedAccessTokenItem;
+        }
     }
 }

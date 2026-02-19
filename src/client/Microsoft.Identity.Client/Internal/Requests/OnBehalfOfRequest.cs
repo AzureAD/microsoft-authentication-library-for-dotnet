@@ -71,6 +71,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     cachedAccessToken = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 }
 
+                cachedAccessToken = await ValidateCachedAccessTokenAsync(
+                    AuthenticationRequestParameters, cachedAccessToken).ConfigureAwait(false);
+
                 if (cachedAccessToken != null)
                 {
                     var cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);

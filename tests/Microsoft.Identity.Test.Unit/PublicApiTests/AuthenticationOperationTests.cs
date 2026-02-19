@@ -460,9 +460,208 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert - validation was never called because no cached token existed
                 await authScheme.DidNotReceive().ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
                     .ConfigureAwait(false);
-                
+
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateCachedTokenAsync_OBO_WhenValidationFails_CacheIsIgnoredAsync()
+        {
+            // Arrange
+            var authScheme = Substitute.For<IAuthenticationOperation2>();
+            authScheme.AuthorizationHeaderPrefix.Returns("CustomToken");
+            authScheme.AccessTokenType.Returns("bearer");
+            authScheme.KeyId.Returns("keyid");
+            authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
+
+            authScheme.WhenForAnyArgs(x => x.FormatResultAsync(default, default))
+                .Do(x => ((AuthenticationResult)x[0]).AccessToken = "validated_" + ((AuthenticationResult)x[0]).AccessToken);
+
+            // Validation fails - cached token should be ignored
+            authScheme.ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                .Returns(Task.FromResult(false));
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // First request - acquire initial token via OBO
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                var result1 = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .WithAuthenticationOperation(authScheme)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result1);
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                // Second request - validation fails, so a new token should be acquired
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                var result2 = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .WithAuthenticationOperation(authScheme)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+                await authScheme.Received(1).ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                    .ConfigureAwait(false);
+                Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateCachedTokenAsync_OBO_WhenValidationSucceeds_CacheIsUsedAsync()
+        {
+            // Arrange
+            var authScheme = Substitute.For<IAuthenticationOperation2>();
+            authScheme.AuthorizationHeaderPrefix.Returns("CustomToken");
+            authScheme.AccessTokenType.Returns("bearer");
+            authScheme.KeyId.Returns("keyid");
+            authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
+
+            authScheme.WhenForAnyArgs(x => x.FormatResultAsync(default, default))
+                .Do(x => ((AuthenticationResult)x[0]).AccessToken = "validated_" + ((AuthenticationResult)x[0]).AccessToken);
+
+            // Validation succeeds - cached token should be used
+            authScheme.ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                .Returns(Task.FromResult(true));
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // First request - acquire initial token via OBO
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                var result1 = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .WithAuthenticationOperation(authScheme)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result1);
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                // Second request - validation succeeds, cached token should be returned
+                var result2 = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .WithAuthenticationOperation(authScheme)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
+                await authScheme.Received(1).ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                    .ConfigureAwait(false);
+                Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateCachedTokenAsync_Silent_WhenValidationFails_CacheIsIgnoredAsync()
+        {
+            // Arrange
+            var authScheme = Substitute.For<IAuthenticationOperation2>();
+            authScheme.AuthorizationHeaderPrefix.Returns("CustomToken");
+            authScheme.AccessTokenType.Returns("bearer");
+            authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
+
+            authScheme.WhenForAnyArgs(x => x.FormatResultAsync(default, default))
+                .Do(x => ((AuthenticationResult)x[0]).AccessToken = "validated_" + ((AuthenticationResult)x[0]).AccessToken);
+
+            // Validation fails - cached token should be ignored
+            authScheme.ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                .Returns(Task.FromResult(false));
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // Populate user token cache with a valid access token and refresh token
+                TokenCacheHelper.PopulateCache(cca.UserTokenCacheInternal.Accessor, addSecondAt: false);
+
+                // Silent request - validation should fail, so RT refresh should occur
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityTestTenant);
+
+                var account = (await cca.GetAccountsAsync().ConfigureAwait(false)).Single();
+
+                var result = await cca.AcquireTokenSilent(TestConstants.s_scope, account)
+                    .WithAuthenticationOperation(authScheme)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert - validation was called and failed, token was refreshed via RT
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                await authScheme.Received(1).ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                    .ConfigureAwait(false);
+                Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateCachedTokenAsync_Silent_WhenValidationSucceeds_CacheIsUsedAsync()
+        {
+            // Arrange
+            var authScheme = Substitute.For<IAuthenticationOperation2>();
+            authScheme.AuthorizationHeaderPrefix.Returns("CustomToken");
+            authScheme.AccessTokenType.Returns("bearer");
+            authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
+
+            authScheme.WhenForAnyArgs(x => x.FormatResultAsync(default, default))
+                .Do(x => ((AuthenticationResult)x[0]).AccessToken = "validated_" + ((AuthenticationResult)x[0]).AccessToken);
+
+            // Validation succeeds - cached token should be used
+            authScheme.ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                .Returns(Task.FromResult(true));
+
+            using (var httpManager = new MockHttpManager())
+            {
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // Populate user token cache with a valid access token and refresh token
+                TokenCacheHelper.PopulateCache(cca.UserTokenCacheInternal.Accessor, addSecondAt: false);
+
+                var account = (await cca.GetAccountsAsync().ConfigureAwait(false)).Single();
+
+                // Silent request - validation succeeds, cached token should be returned
+                var result = await cca.AcquireTokenSilent(TestConstants.s_scope, account)
+                    .WithAuthenticationOperation(authScheme)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert - validation was called and succeeded, cached token was returned
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                await authScheme.Received(1).ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                    .ConfigureAwait(false);
             }
         }
     }

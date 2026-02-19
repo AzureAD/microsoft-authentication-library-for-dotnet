@@ -48,6 +48,9 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
+                cachedAccessTokenItem = await RequestBase.ValidateCachedAccessTokenAsync(
+                    AuthenticationRequestParameters, cachedAccessTokenItem).ConfigureAwait(false);
+
                 if (cachedAccessTokenItem != null)
                 {
                     logger.Info("Returning access token found in cache. RefreshOn exists ? "
