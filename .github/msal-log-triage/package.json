@@ -1,0 +1,15 @@
+{
+  "name": "msal-log-triage",
+  "version": "1.0.0",
+  "description": "MSAL MSI v2 log triage analyzer",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+  },
+  "dependencies": {
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

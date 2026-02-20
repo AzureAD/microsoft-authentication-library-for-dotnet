@@ -1,0 +1,144 @@
+# MSI v2 failure classification rules
+# Each rule must have: id, stage, description, confidence, conditions (all/any), nextSteps
+rules:
+
+  - id: mtls_schannel_failure
+    stage: MIv2.STS.mTLS.Token
+    description: mTLS STS token request failed with TLS/SCHANNEL error
+    confidence: high
+    conditions:
+      all:
+        - field: bindingCertificate
+          equals: true
+      any:
+        - field: message
+          contains: SslStream
+        - field: message
+          contains: AuthenticationException
+        - field: message
+          contains: "SocketException(10054)"
+        - field: message
+          contains: "SocketException"
+        - field: message
+          contains: SCHANNEL
+        - field: message
+          contains: TlsException
+        - field: message
+          contains: "The SSL connection could not be established"
+    nextSteps:
+      - "Confirm cert was reused from cache: Look for `[PersistentCert] Reused certificate...`"
+      - "If KeyGuard-backed certs involved, validate private key accessibility"
+      - "Try diagnostic: `MSAL_MI_DISABLE_PERSISTENT_CERT_CACHE=true`"
+    whatItMeans:
+      - "The STS mTLS call failed before/while sending data."
+      - "Common causes: TLS/SCHANNEL handshake failure or inaccessible client certificate private key."
+
+  - id: imds_getplatformmetadata_failure
+    stage: MIv2.IMDS.GetPlatformMetadata
+    description: IMDS get-platform-metadata request failed
+    confidence: high
+    conditions:
+      all:
+        - field: uri
+          contains: /metadata/identity/getplatformmetadata
+      any:
+        - field: statusCode
+          notEquals: 200
+        - field: message
+          contains: Exception
+        - field: message
+          contains: failed
+        - field: message
+          contains: error
+    nextSteps:
+      - "Verify the VM supports MSI v2 (mTLS PoP flow)"
+      - "Check network connectivity to IMDS endpoint (169.254.169.254)"
+      - "Confirm instance metadata service is enabled on the VM"
+    whatItMeans:
+      - "The IMDS platform metadata request failed."
+      - "Common causes: VM does not support MSI v2, network issues, or IMDS unavailable."
+
+  - id: imds_issuecredential_failure
+    stage: MIv2.IMDS.IssueCredential
+    description: IMDS issue-credential request failed
+    confidence: high
+    conditions:
+      all:
+        - field: uri
+          contains: /metadata/identity/issuecredential
+      any:
+        - field: statusCode
+          notEquals: 200
+        - field: message
+          contains: Exception
+        - field: message
+          contains: failed
+        - field: message
+          contains: error
+    nextSteps:
+      - "Verify the managed identity is correctly configured on the VM"
+      - "Check IMDS availability and permissions for the managed identity"
+      - "Review IMDS response body for specific error codes"
+    whatItMeans:
+      - "The IMDS credential issuance request failed."
+      - "Common causes: misconfigured managed identity, quota limits, or IMDS errors."
+
+  - id: attestation_failed
+    stage: MIv2.MAA.Attestation
+    description: MAA attestation step failed
+    confidence: medium
+    conditions:
+      any:
+        - field: message
+          contains: "Attestation token provider"
+        - field: message
+          contains: attestation
+        - field: uri
+          contains: attest
+      all:
+        - field: message
+          contains: Exception
+    nextSteps:
+      - "Check MAA endpoint accessibility"
+      - "Verify VM attestation status and TPM availability"
+      - "Review attestation token claims for validity"
+    whatItMeans:
+      - "The MAA attestation step encountered an error."
+      - "Common causes: TPM unavailable, attestation policy rejection, or network issues."
+
+  - id: attestation_missing
+    stage: MIv2.MAA.Attestation
+    description: Non-attested flow detected (attestation step skipped)
+    confidence: low
+    conditions:
+      any:
+        - field: message
+          contains: non-attested
+        - field: message
+          contains: "attestation skipped"
+    nextSteps:
+      - "Determine if attestation is required for this environment"
+      - "Check if the VM supports TPM-backed attestation"
+    whatItMeans:
+      - "The flow is running without attestation."
+      - "This may be expected in some environments but could indicate missing configuration."
+
+  - id: keyguard_unavailable
+    stage: MIv2.KeyGuard.KeyCreation
+    description: KeyGuard key creation failed or unavailable
+    confidence: high
+    conditions:
+      any:
+        - field: message
+          contains: KeyGuard
+        - field: message
+          contains: mtls_pop_requires_keyguard
+        - field: message
+          contains: "KeyGuard error"
+    nextSteps:
+      - "Verify KeyGuard service is running and accessible"
+      - "Check VM security profile for Trusted Launch / Secure Boot settings"
+      - "Review KeyGuard event logs for detailed error information"
+    whatItMeans:
+      - "KeyGuard key creation failed or is unavailable."
+      - "Common causes: KeyGuard service not running, Trusted Launch not enabled, or access denied."
