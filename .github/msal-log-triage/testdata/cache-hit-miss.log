@@ -1,0 +1,16 @@
+[MSAL] [2024-01-15T10:23:01Z] ManagedIdentityClient init - MSI v2
+[CertCache] HIT - valid certificate found, thumbprint: <thumb>, expires: 2024-02-15T10:23:01Z
+[PersistentCert] Reused certificate from persistent cache, thumbprint: <thumb>
+[MSAL] mTLS binding cache HIT (memory) - skipping issuecredential
+[HttpManager] POST https://login.microsoftonline.com/common/oauth2/v2.0/token
+[HttpManager] Binding Certificate: True
+[HttpManager] Response 200 - token acquired successfully
+
+[MSAL] [2024-01-15T11:00:00Z] ManagedIdentityClient - token expired, refreshing
+[CertCache] MISS - certificate expired or not found
+[ImdsV2] POST https://169.254.169.254/metadata/identity/issuecredential correlation_id: b2c3d4e5-f6a7-8901-bcde-f12345678901
+[ImdsV2] POST https://169.254.169.254/metadata/identity/issuecredential Response 200
+[CertCache] SET - new certificate stored
+[HttpManager] POST https://login.microsoftonline.com/common/oauth2/v2.0/token
+[HttpManager] Binding Certificate: True
+[HttpManager] Response 200 - token acquired successfully

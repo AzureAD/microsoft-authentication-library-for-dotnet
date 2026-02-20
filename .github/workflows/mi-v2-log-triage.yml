@@ -48,17 +48,20 @@ jobs:
       - name: Run log triage analyzer
         id: analyzer
         uses: actions/github-script@v7
+        env:
+          ISSUE_BODY: ${{ toJSON(github.event.issue.body) }}
+          COMMENT_BODIES_JSON: ${{ steps.fetch_comments.outputs.result }}
+          ISSUE_LABELS: ${{ toJSON(github.event.issue.labels) }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { analyze } = require('./.github/msal-log-triage/index.js');
 
-            const issueBody = context.payload.issue.body || '';
-            const labels = (context.payload.issue.labels || []).map(l => l.name);
-            const commentBodiesJson = '${{ steps.fetch_comments.outputs.result }}';
+            const issueBody = JSON.parse(process.env.ISSUE_BODY || '""') || '';
+            const labels = (JSON.parse(process.env.ISSUE_LABELS || '[]') || []).map(l => l.name);
             let commentBodies = [];
             try {
-              commentBodies = JSON.parse(commentBodiesJson);
+              commentBodies = JSON.parse(process.env.COMMENT_BODIES_JSON || '[]');
             } catch (_) {}
 
             const result = analyze({
@@ -98,10 +101,12 @@ jobs:
       - name: Post or update triage comment
         if: steps.analyzer.outputs.should_comment == 'true'
         uses: actions/github-script@v7
+        env:
+          TRIAGE_COMMENT_BODY: ${{ steps.analyzer.outputs.comment_body }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const commentBody = `${{ steps.analyzer.outputs.comment_body }}`;
+            const commentBody = process.env.TRIAGE_COMMENT_BODY;
             const existingCommentId = ${{ steps.find_comment.outputs.result }};
 
             if (existingCommentId) {
@@ -125,10 +130,12 @@ jobs:
       - name: Apply MSI v2 stage label
         if: steps.analyzer.outputs.should_comment == 'true' && steps.analyzer.outputs.stage != ''
         uses: actions/github-script@v7
+        env:
+          TRIAGE_STAGE: ${{ steps.analyzer.outputs.stage }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const stage = '${{ steps.analyzer.outputs.stage }}';
+            const stage = process.env.TRIAGE_STAGE;
             // Map stage to label
             const stageToLabel = {
               'MIv2.STS.mTLS.Token': 'mi-v2:mtls',

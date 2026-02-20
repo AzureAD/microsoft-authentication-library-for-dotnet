@@ -1,0 +1,6 @@
+[MSAL] [2024-01-15T10:23:01Z] ManagedIdentityClient init - MSI v2 (mTLS PoP flow)
+[ImdsV2] GET https://169.254.169.254/metadata/identity/getplatformmetadata correlation_id: c3d4e5f6-a7b8-9012-cdef-123456789012
+[MSAL] System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found)
+[ImdsV2] GET https://169.254.169.254/metadata/identity/getplatformmetadata Response 404
+[MSAL] IMDS getplatformmetadata failed with status code 404 - VM may not support MSI v2
+[MSAL] MsalServiceException: managed_identity_request_failed - IMDS endpoint returned 404

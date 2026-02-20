@@ -1,0 +1,16 @@
+[MSAL] [2024-01-15T10:23:01Z] ManagedIdentityClient created for MSI v2 (mTLS PoP flow)
+[ImdsV2] GET https://169.254.169.254/metadata/identity/getplatformmetadata correlation_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+[ImdsV2] GET https://169.254.169.254/metadata/identity/getplatformmetadata Response 200
+[ImdsV2] Attestation token provider - acquiring attestation token
+[ImdsV2] POST https://sharedeus2.eus2.attest.azure.net/attest/SgxEnclave Response 200
+[CertCache] MISS - no valid certificate found in persistent store
+[ImdsV2] POST https://169.254.169.254/metadata/identity/issuecredential correlation_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+[ImdsV2] POST https://169.254.169.254/metadata/identity/issuecredential Response 200
+[CertCache] SET - certificate stored, thumbprint: <thumb>
+[PersistentCert] Reused certificate from persistent cache
+[HttpManager] POST https://login.microsoftonline.com/common/oauth2/v2.0/token correlation_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+[HttpManager] Binding Certificate: True
+[MSAL] System.Security.Authentication.AuthenticationException: The SSL connection could not be established, see inner exception.
+[MSAL] System.Net.Sockets.SocketException(10054): An existing connection was forcibly closed by the remote host
+[MSAL] SslStream threw exception during TLS handshake
+[MSAL] SCHANNEL error: SEC_E_ILLEGAL_MESSAGE

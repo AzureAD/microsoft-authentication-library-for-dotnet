@@ -9,6 +9,7 @@ const YAML = require('yaml');
 
 const MAX_LOG_CHARS = 250_000;
 const TRIAGE_MARKER = '<!-- msal-log-triage:';
+const GUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
 
 // Log-line heuristic prefixes that indicate MSI v2 / MSAL logs
 const MSI_LOG_HEURISTICS = [
@@ -153,7 +154,7 @@ function parseLine(line) {
   if (tsMatch) event.timestamp = tsMatch[1];
 
   // Extract correlation ID (GUID pattern) from log lines like: correlationId=GUID or correlation_id: GUID
-  const corrMatch = line.match(/correlat[io]+n[_\s-]?[Ii][Dd][\s:=]+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+  const corrMatch = line.match(/correlation[_\s-]?[Ii][Dd][\s:=]+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
   if (corrMatch) event.correlationId = corrMatch[1];
 
   // Parse HttpManager: method, URI, status
@@ -366,7 +367,7 @@ function buildEvidence(events, matchedEvents) {
   // Last HTTP request
   const lastHttpEvent = [...events].reverse().find(e => e.uri && e.method);
   if (lastHttpEvent) {
-    const maskedUri = lastHttpEvent.uri.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '<guid>');
+    const maskedUri = lastHttpEvent.uri.replace(new RegExp(GUID_PATTERN.source, 'gi'), '<guid>');
     evidence.push(`Last request: \`${lastHttpEvent.method} ${maskedUri}\``);
   }
 
@@ -494,7 +495,7 @@ function analyze(options) {
   const classification = classifyFailure(events, rules);
 
   const evidence = buildEvidence(events, classification ? classification.matchedEvents : []);
-  const inputHash = crypto.createHash('md5').update(logText).digest('hex').slice(0, 8);
+  const inputHash = crypto.createHash('sha256').update(logText).digest('hex').slice(0, 8);
   const comment = formatComment(classification, detectedStages, evidence, inputHash);
 
   return {

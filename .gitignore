@@ -91,8 +91,9 @@ artifacts/
 *.svclog
 *.scc
 
-# Chutzpah Test files
-_Chutzpah*
+# Allow test data log files for the MSAL log triage tool
+!.github/msal-log-triage/testdata/*.log
+
 
 # Visual C++ cache files
 ipch/
