@@ -39,7 +39,7 @@ $ErrorActionPreference = 'Stop'
   - Schannel/WinHTTP/.NET TLS: Actually presents the cert in the TLS handshake.
 
 .NOTES
-  - Works in Windows PowerShell 5.1 and pwsh. If System.Formats.Asn1 is missing, it falls back to hand DER encoding
+  - Works only on Windows PowerShell 7+ (pwsh). If System.Formats.Asn1 is missing, it falls back to hand DER encoding
     for the single UTF8String(JSON) attribute value.
   - Your Graph call may return 403 until you grant permissions/admin consent — that part is expected.
 #>
