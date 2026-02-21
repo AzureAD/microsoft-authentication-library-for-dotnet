@@ -36,7 +36,7 @@ High-level steps:
 ## Prereqs
 
 - Windows VM/VMSS that supports MSI v2 (IMDS `/issuecredential`)
-- Windows PowerShell 5.1 **or** PowerShell 7+
+- PowerShell 7+ (must)
 - Network access to IMDS (`169.254.169.254`) and to the mTLS token endpoint returned by IMDS
 - **Native attestation DLL** available locally:
   - `AttestationClientLib.dll`
