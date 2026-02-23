@@ -48,7 +48,7 @@ High-level steps:
 Put `AttestationClientLib.dll` in **one** of these locations (the script searches in this order):
 
 1. `.
-ative\AttestationClientLib.dll` ✅ recommended
+native\AttestationClientLib.dll` ✅ recommended
 2. `.\AttestationClientLib.dll`
 3. `%USERPROFILE%\Downloads\AttestationClientLib.dll`
 
@@ -74,19 +74,19 @@ From the folder containing the script:
 Custom resource scope:
 
 ```powershell
-.\get-msiv2-token.ps1 -Scope "https://management.azure.com/.default"
+.\get-token.ps1 -Scope "https://management.azure.com/.default"
 ```
 
 Call a different resource URL:
 
 ```powershell
-.\get-msiv2-token.ps1 -ResourceUrl "https://mtlstb.graph.microsoft.com/v1.0/applications?`$top=5"
+.\get-token.ps1 -ResourceUrl "https://mtlstb.graph.microsoft.com/v1.0/applications?`$top=5"
 ```
 
 Disable extra logging:
 
 ```powershell
-.\get-msiv2-token.ps1 -VerboseLogging:$false
+.\get-token.ps1 -VerboseLogging:$false
 ```
 
 > Note: You may get `403 Insufficient privileges` when calling Graph until the identity has the required Graph permissions/admin consent.
