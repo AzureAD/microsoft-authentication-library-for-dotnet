@@ -345,6 +345,29 @@ namespace Microsoft.Identity.Client
         #endregion Multi Scheme Api
 
         /// <summary>
+        /// Gets the tenant ID from HTTP response headers.
+        /// Supports both AAD and DSTS endpoint formats.
+        /// </summary>
+        /// <param name="httpResponseHeaders">The HTTP response headers.</param>
+        /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
+        /// <returns>The tenant ID if found, otherwise null.</returns>
+        public static string GetTenantIdFromResponseHeaders(
+            HttpResponseHeaders httpResponseHeaders,
+            string scheme = Constants.BearerAuthHeaderPrefix)
+        {
+            WwwAuthenticateParameters parameters = CreateFromAuthenticationHeaders(
+                httpResponseHeaders,
+                scheme);
+
+            if (string.IsNullOrEmpty(parameters.Authority))
+            {
+                return null;
+            }
+
+            return parameters.GetTenantId();
+        }
+
+        /// <summary>
         /// Gets the claim challenge from HTTP header.
         /// Used, for example, for Conditional Access (CA).
         /// </summary>

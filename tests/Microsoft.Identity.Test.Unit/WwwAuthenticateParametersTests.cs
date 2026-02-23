@@ -592,6 +592,140 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", header.Authority);
         }
 
+        [TestMethod]
+        public void GetTenantIdFromResponseHeaders_WithAuthorizationParameter_ReturnsCorrectTenantId()
+        {
+            // Arrange
+            string tenantId = Guid.NewGuid().ToString();
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer authorization=\"https://login.windows.net/{tenantId}\", resource=\"https://vault.azure.net\"");
+
+            // Act
+            string result = WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.AreEqual(tenantId, result);
+        }
+
+        [TestMethod]
+        public void GetTenantIdFromResponseHeaders_WithAuthorizationUriParameter_ReturnsCorrectTenantId()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, "Bearer realm=\"\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", client_id=\"00000003-0000-0000-c000-000000000000\"");
+
+            // Act
+            string result = WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.AreEqual("common", result);
+        }
+
+        [TestMethod]
+        public void GetTenantIdFromResponseHeaders_WithDstsFormat_ReturnsCorrectTenantId()
+        {
+            // Arrange
+            string tenantId = "d01e93db-8e88-4f53-b4fc-8cf680ccf3d1";
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer authorization=\"https://uswest2-passive-dsts.dsts.core.windows.net/dstsv2/{tenantId}/oauth2/authorize\"");
+
+            // Act
+            string result = WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.AreEqual(tenantId, result);
+        }
+
+        [TestMethod]
+        public void GetTenantIdFromResponseHeaders_WithCommonAuthority_ReturnsCommon()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, "Bearer authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\"");
+
+            // Act
+            string result = WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.AreEqual("common", result);
+        }
+
+        [TestMethod]
+        public void GetTenantIdFromResponseHeaders_WithB2CEndpoint_ReturnsCorrectTenantId()
+        {
+            // Arrange
+            const string tenant = "mytenant";
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://{tenant}.b2clogin.com/{tenant}/oauth2/v2.0/authorize\"");
+
+            // Act
+            string result = WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.AreEqual(tenant, result);
+        }
+
+        [TestMethod]
+        [DataRow(TestConstants.ADFSAuthority)]
+        [DataRow(TestConstants.ADFSAuthority2)]
+        public void GetTenantIdFromResponseHeaders_WithADFS_ReturnsNull(string adfsAuthority)
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer authority=\"{adfsAuthority}\"");
+
+            // Act
+            string result = WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void GetTenantIdFromResponseHeaders_WithMultipleSchemes_ReturnsCorrectTenantId()
+        {
+            // Arrange
+            string tenantId = Guid.NewGuid().ToString();
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://login.microsoftonline.com/{tenantId}/oauth2/authorize\"");
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, "PoP nonce=\"someNonce\"");
+
+            // Act - only Bearer scheme is processed by default
+            string result = WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.AreEqual(tenantId, result);
+        }
+
+        [TestMethod]
+        public void GetTenantIdFromResponseHeaders_WithMissingHeaders_ReturnsNull()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+
+            // Act
+            string result = WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void GetTenantIdFromResponseHeaders_WithCustomScheme_ReturnsCorrectTenantId()
+        {
+            // Arrange
+            string tenantId = Guid.NewGuid().ToString();
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://login.microsoftonline.com/{tenantId}/oauth2/authorize\"");
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, "PoP nonce=\"someNonce\"");
+
+            // Act - explicitly requesting Bearer scheme by name
+            string result = WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(httpResponse.Headers, "Bearer");
+
+            // Assert
+            Assert.AreEqual(tenantId, result);
+        }
+
         private static HttpResponseMessage CreateClaimsHttpResponse(string claims)
         {
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
