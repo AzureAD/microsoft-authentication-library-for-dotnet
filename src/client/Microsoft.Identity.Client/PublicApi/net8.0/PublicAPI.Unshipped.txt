@@ -1,0 +1,1 @@
+static Microsoft.Identity.Client.WwwAuthenticateParameters.GetTenantIdFromResponseHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders, string scheme = "Bearer") -> string
