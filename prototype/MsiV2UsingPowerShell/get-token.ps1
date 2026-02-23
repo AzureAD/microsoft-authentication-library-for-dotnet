@@ -39,7 +39,7 @@ $ErrorActionPreference = 'Stop'
   - Schannel/WinHTTP/.NET TLS: Actually presents the cert in the TLS handshake.
 
 .NOTES
-  - Works only on Windows PowerShell 7+ (pwsh). If System.Formats.Asn1 is missing, it falls back to hand DER encoding
+  - Works in Windows PowerShell 5.1 and pwsh. If System.Formats.Asn1 is missing, it falls back to hand DER encoding
     for the single UTF8String(JSON) attribute value.
   - Your Graph call may return 403 until you grant permissions/admin consent — that part is expected.
 #>
@@ -452,8 +452,7 @@ function Get-Token {
   )
 
   Log-Info "Step [6/7]: Acquiring access token from ESTS (mTLS PoP)"
-  try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
-
+  
   $body = @{
     grant_type = "client_credentials"
     client_id  = $ClientId
@@ -542,8 +541,6 @@ function Invoke-MtlsResourceCall {
     Dump-IfVerbose "Token claims (decoded payload)" $claims
   }
 
-  try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
-
   $handler = New-Object System.Net.Http.HttpClientHandler
   $handler.ClientCertificateOptions = [System.Net.Http.ClientCertificateOption]::Manual
   [void]$handler.ClientCertificates.Add($Cert)
@@ -593,6 +590,8 @@ try {
 
   Setup-DLL
   Define-Types
+
+  try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
 
   $overall = [System.Diagnostics.Stopwatch]::StartNew()
 
