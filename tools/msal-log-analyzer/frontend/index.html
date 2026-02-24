@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSAL Log Analyzer</title>
+  <!-- Vendor scripts (local) -->
+  <script src="/vendor/chart.min.js"></script>
+  <script src="/vendor/mermaid.min.js"></script>
+  <style>
+/* ══════════════════════════════════════════════════════════════
+   MSAL Log Analyzer  ·  Self-contained stylesheet
+   ══════════════════════════════════════════════════════════════ */
+
+/* ─── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+button { cursor: pointer; border: none; background: none; font: inherit; }
+a { color: inherit; text-decoration: none; }
+input[type=text], input[type=search] { font: inherit; }
+
+/* ─── Theme variables ────────────────────────────────────────── */
+:root {
+  --bg:         #f1f5f9;
+  --surface:    #ffffff;
+  --border:     #e2e8f0;
+  --text:       #1e293b;
+  --muted:      #64748b;
+  --accent:     #6366f1;
+  --accent2:    #4f46e5;
+  --success:    #10b981;
+  --warning:    #f59e0b;
+  --danger:     #ef4444;
+  --shadow:     0 1px 3px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:  0 4px 6px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.06);
+  --radius:     12px;
+  --radius-sm:  8px;
+  --radius-lg:  16px;
+}
+[data-theme="dark"] {
+  --bg:         #0f172a;
+  --surface:    #1e293b;
+  --border:     #334155;
+  --text:       #f1f5f9;
+  --muted:      #94a3b8;
+  --accent:     #818cf8;
+  --accent2:    #6366f1;
+  --shadow:     0 1px 3px rgba(0,0,0,.4);
+  --shadow-md:  0 4px 6px rgba(0,0,0,.35);
+}
+
+/* ─── Base ───────────────────────────────────────────────────── */
+html { font-size: 15px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ─── Layout helpers ─────────────────────────────────────────── */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.flex       { display: flex; }
+.flex-col   { flex-direction: column; }
+.items-center { align-items: center; }
+.items-start  { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.justify-center  { justify-content: center; }
+.gap-2  { gap: 8px; }
+.gap-3  { gap: 12px; }
+.gap-4  { gap: 16px; }
+.gap-6  { gap: 24px; }
+.flex-1 { flex: 1; }
+.flex-wrap { flex-wrap: wrap; }
+.min-w-0   { min-width: 0; }
+.flex-shrink-0 { flex-shrink: 0; }
+
+/* ─── Grid ───────────────────────────────────────────────────── */
+.grid   { display: grid; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.grid-8 { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 900px) {
+  .grid-8 { grid-template-columns: repeat(4, 1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .grid-8 { grid-template-columns: repeat(4, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr; }
+  .hide-mobile { display: none; }
+}
+@media (max-width: 380px) {
+  .grid-8 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ─── Card ───────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card:hover { box-shadow: var(--shadow-md); }
+
+/* ─── Typography ─────────────────────────────────────────────── */
+h1 { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
+h2 { font-size: 1.35rem; font-weight: 600; line-height: 1.3; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+.text-sm   { font-size: .85rem; }
+.text-xs   { font-size: .75rem; }
+.text-lg   { font-size: 1.1rem; }
+.text-xl   { font-size: 1.25rem; }
+.text-2xl  { font-size: 1.5rem; }
+.text-3xl  { font-size: 1.875rem; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+.font-mono { font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace; }
+.text-muted  { color: var(--muted); }
+.text-accent { color: var(--accent); }
+.text-success { color: var(--success); }
+.text-danger  { color: var(--danger); }
+.text-warning { color: var(--warning); }
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.break-all { word-break: break-all; }
+
+/* ─── Spacing ────────────────────────────────────────────────── */
+.p-3  { padding: 12px; }
+.p-4  { padding: 16px; }
+.p-5  { padding: 20px; }
+.p-6  { padding: 24px; }
+.px-3 { padding-left: 12px; padding-right: 12px; }
+.px-4 { padding-left: 16px; padding-right: 16px; }
+.py-1 { padding-top: 4px; padding-bottom: 4px; }
+.py-2 { padding-top: 8px; padding-bottom: 8px; }
+.py-3 { padding-top: 12px; padding-bottom: 12px; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.mb-8 { margin-bottom: 32px; }
+.mr-1 { margin-right: 4px; }
+.mr-2 { margin-right: 8px; }
+.ml-1 { margin-left: 4px; }
+.ml-2 { margin-left: 8px; }
+
+/* ─── Sizing ─────────────────────────────────────────────────── */
+.w-full  { width: 100%; }
+.h-full  { height: 100%; }
+.w-36    { width: 144px; }
+.h-2     { height: 8px; }
+.h-4     { height: 16px; }
+.min-h-screen { min-height: 100vh; }
+.overflow-hidden { overflow: hidden; }
+.overflow-auto   { overflow: auto; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+.max-h-timeline  { max-height: 600px; }
+
+/* ─── Display ────────────────────────────────────────────────── */
+.hidden       { display: none !important; }
+.block        { display: block; }
+.inline-block { display: inline-block; }
+.relative     { position: relative; }
+.sticky       { position: sticky; }
+.fixed        { position: fixed; }
+.top-0        { top: 0; }
+.z-50         { z-index: 50; }
+.pointer-events-none { pointer-events: none; }
+
+/* ─── Border ─────────────────────────────────────────────────── */
+.border-b  { border-bottom: 1px solid var(--border); }
+.border-l  { border-left: 2px solid var(--border); }
+.rounded   { border-radius: var(--radius-sm); }
+.rounded-lg { border-radius: var(--radius); }
+.rounded-xl { border-radius: var(--radius-lg); }
+.rounded-2xl { border-radius: 20px; }
+.rounded-full { border-radius: 9999px; }
+
+/* ─── Navigation ─────────────────────────────────────────────── */
+.navbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 56px;
+}
+.navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; font-weight: 700; }
+.brand-icon { font-size: 1.5rem; }
+
+/* ─── Buttons ────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: .85rem;
+  font-weight: 500;
+  transition: all .15s;
+}
+.btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-ghost { background: transparent; color: var(--text); }
+.btn-ghost:hover { background: rgba(99,102,241,.08); }
+.btn-ghost.active { color: var(--accent); font-weight: 600; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-outline { border: 1px solid var(--border); background: var(--surface); }
+.btn-icon { padding: 8px; border-radius: var(--radius-sm); }
+
+/* ─── Drop Zone ──────────────────────────────────────────────── */
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: transparent;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(99,102,241,.04);
+}
+.drop-zone-icon { font-size: 3.5rem; margin-bottom: 12px; }
+
+/* ─── Progress ───────────────────────────────────────────────── */
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width .3s ease;
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.progress-bar.indeterminate {
+  background: linear-gradient(90deg, var(--accent) 25%, #a5b4fc 50%, var(--accent) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  width: 100% !important;
+}
+
+/* ─── Metric cards ───────────────────────────────────────────── */
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 10px;
+  text-align: center;
+  transition: box-shadow .15s;
+}
+.metric-card:hover { box-shadow: var(--shadow-md); }
+.metric-icon  { font-size: 1.4rem; margin-bottom: 4px; }
+.metric-value { font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+.metric-label { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+
+/* ─── Tabs ───────────────────────────────────────────────────── */
+.tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+.tab-btn {
+  padding: 10px 18px;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all .15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ─── Module bars ────────────────────────────────────────────── */
+.module-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.module-name { width: 160px; font-size: .8rem; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.module-track { flex: 1; height: 14px; background: rgba(99,102,241,.12); border-radius: 3px; overflow: hidden; }
+.module-fill  { height: 100%; background: var(--accent); border-radius: 3px; transition: width .6s ease; min-width: 4px; }
+.module-count { font-size: .75rem; color: var(--muted); width: 50px; text-align: right; }
+
+/* ─── Timeline ───────────────────────────────────────────────── */
+.tl-item { border-left: 2px solid var(--border); padding-left: 10px; padding-top: 2px; padding-bottom: 2px; }
+.tl-item.ERROR   { border-left-color: var(--danger); }
+.tl-item.WARNING { border-left-color: var(--warning); }
+.tl-item.INFO    { border-left-color: var(--success); }
+.tl-item.VERBOSE { border-left-color: var(--muted); }
+.tl-level { font-weight: 700; }
+.tl-ts    { color: var(--muted); margin: 0 6px; }
+
+/* ─── Error items ────────────────────────────────────────────── */
+.error-item {
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-size: .78rem;
+  font-family: 'SF Mono', Consolas, monospace;
+  word-break: break-all;
+}
+.error-item.error   { background: rgba(239,68,68,.08);  border: 1px solid rgba(239,68,68,.2);  color: #dc2626; }
+.error-item.warning { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.2); color: #d97706; }
+.error-item.exception { background: rgba(249,115,22,.08); border: 1px solid rgba(249,115,22,.2); color: #ea580c; }
+[data-theme="dark"] .error-item.error    { color: #fca5a5; }
+[data-theme="dark"] .error-item.warning  { color: #fcd34d; }
+[data-theme="dark"] .error-item.exception { color: #fdba74; }
+
+/* ─── History card ───────────────────────────────────────────── */
+.history-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+}
+.history-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.history-card .delete-btn {
+  position: absolute;
+  top: 10px; right: 10px;
+  opacity: 0;
+  color: var(--danger);
+  font-size: .8rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: opacity .15s;
+}
+.history-card:hover .delete-btn { opacity: 1; }
+.history-stats { display: flex; gap: 16px; margin-top: 12px; }
+.history-stat  { text-align: center; flex: 1; }
+.history-stat-v { font-size: .9rem; font-weight: 700; }
+.history-stat-l { font-size: .7rem; color: var(--muted); }
+
+/* ─── Summary table ──────────────────────────────────────────── */
+.summary-row { display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+.summary-row:last-child { border-bottom: none; }
+.summary-key { font-weight: 500; color: var(--muted); width: 120px; flex-shrink: 0; font-size: .83rem; }
+.summary-val { font-size: .83rem; word-break: break-all; }
+
+/* ─── Mermaid ────────────────────────────────────────────────── */
+.mermaid-container { overflow-x: auto; padding: 12px 0; }
+.mermaid-container svg { max-width: 100%; height: auto !important; }
+
+/* ─── Inputs ─────────────────────────────────────────────────── */
+.input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  font-size: .85rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+  width: 100%;
+}
+.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+
+/* ─── Toast ──────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+}
+#toast.show { opacity: 1; pointer-events: auto; }
+.toast-body {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .85rem;
+  font-weight: 500;
+}
+
+/* ─── Fade in ────────────────────────────────────────────────── */
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.fade-in { animation: fadeIn .25s ease forwards; }
+
+/* ─── Pagination ─────────────────────────────────────────────── */
+.page-btn {
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: .85rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all .15s;
+}
+.page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.page-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+/* ─── Empty state ────────────────────────────────────────────── */
+.empty-state { text-align: center; padding: 80px 24px; color: var(--muted); }
+.empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <div class="brand"><span class="brand-icon">🔍</span> MSAL Log Analyzer</div>
+    <div class="flex gap-2 items-center">
+      <button class="btn btn-ghost active" id="nav-upload" onclick="showView('upload')">Upload</button>
+      <button class="btn btn-ghost" id="nav-history" onclick="showView('history')">History</button>
+      <button class="btn btn-icon btn-ghost" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Toast ────────────────────────────────────────────────────────────────── -->
+<div id="toast"><div class="toast-body" id="toast-body"></div></div>
+
+<!-- ── Main ─────────────────────────────────────────────────────────────────── -->
+<main style="max-width:1200px;margin:0 auto;padding:32px 16px;">
+
+  <!-- ══ Upload View ══════════════════════════════════════════════════════ -->
+  <div id="view-upload" class="fade-in">
+    <div class="mb-8">
+      <h1>Analyze MSAL Logs</h1>
+      <p class="text-muted mt-1">Upload MSAL .NET debug log files for metrics, flow diagrams, and insights.</p>
+    </div>
+
+    <div class="drop-zone mb-6" id="drop-zone"
+      onclick="document.getElementById('file-input').click()"
+      ondragover="handleDragOver(event)"
+      ondragleave="handleDragLeave(event)"
+      ondrop="handleDrop(event)">
+      <div class="drop-zone-icon">📄</div>
+      <p class="font-semibold mb-1">Drop log files here</p>
+      <p class="text-muted text-sm">or click to browse — .log and .txt files, up to 50 MB</p>
+      <input id="file-input" type="file" accept=".log,.txt,.text" multiple style="display:none" onchange="handleFileSelect(event)">
+    </div>
+
+    <label class="flex items-center gap-2 text-sm font-medium mb-6" style="cursor:pointer;">
+      <input type="checkbox" id="batch-mode" style="width:15px;height:15px;accent-color:var(--accent);">
+      Batch mode — analyze multiple files at once
+    </label>
+
+    <!-- Progress area -->
+    <div id="progress-area" class="hidden card p-4 mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-medium" id="progress-label">Analyzing...</span>
+        <span class="text-sm text-muted" id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Recent analyses -->
+    <div id="recent-area" class="hidden">
+      <h2 class="mb-4">Recent Analyses</h2>
+      <div class="grid-3" id="recent-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ Results View ═════════════════════════════════════════════════════ -->
+  <div id="view-results" class="hidden fade-in">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-6 flex-wrap gap-3">
+      <div class="min-w-0">
+        <button class="btn btn-ghost text-sm mb-1" onclick="showView('upload')" style="padding-left:0;">← Back</button>
+        <h1 class="truncate" id="result-filename" style="max-width:600px;">Analysis</h1>
+        <p class="text-muted text-sm mt-1" id="result-meta"></p>
+      </div>
+      <div class="flex gap-2">
+        <button id="fav-btn" class="btn btn-outline" onclick="toggleFavorite()">⭐ Favorite</button>
+        <button class="btn btn-primary" onclick="exportHtml()">⬇ Export HTML</button>
+      </div>
+    </div>
+
+    <!-- Metrics grid -->
+    <div class="grid-8 mb-6" id="metrics-grid"></div>
+
+    <!-- Tabs -->
+    <div class="tab-bar mb-6">
+      <button class="tab-btn active" data-tab="overview"  onclick="switchTab('overview')">Overview</button>
+      <button class="tab-btn"        data-tab="flow"      onclick="switchTab('flow')">Flow</button>
+      <button class="tab-btn"        data-tab="sequence"  onclick="switchTab('sequence')">Sequence</button>
+      <button class="tab-btn"        data-tab="timeline"  onclick="switchTab('timeline')">Timeline</button>
+      <button class="tab-btn"        data-tab="errors"    onclick="switchTab('errors')">Errors</button>
+    </div>
+
+    <!-- Overview tab -->
+    <div id="tab-overview" class="tab-content">
+      <div class="grid-2">
+        <div class="card p-5"><h3 class="mb-4">Module Activity</h3><div id="module-bars"></div></div>
+        <div class="card p-5"><h3 class="mb-4">Log Level Distribution</h3><canvas id="level-chart"></canvas></div>
+        <div class="card p-5"><h3 class="mb-4">Duration Buckets</h3><canvas id="duration-chart"></canvas></div>
+        <div class="card p-5"><h3 class="mb-4">Session Details</h3><div id="summary-table"></div></div>
+      </div>
+    </div>
+
+    <!-- Flow tab -->
+    <div id="tab-flow" class="tab-content hidden">
+      <div class="card p-5">
+        <h3 class="mb-4">Module Flow Diagram</h3>
+        <div class="mermaid-container"><div id="flow-diagram" class="mermaid"></div></div>
+      </div>
+    </div>
+
+    <!-- Sequence tab -->
+    <div id="tab-sequence" class="tab-content hidden">
+      <div class="card p-5">
+        <h3 class="mb-4">Authentication Sequence Diagram</h3>
+        <div class="mermaid-container"><div id="sequence-diagram" class="mermaid"></div></div>
+      </div>
+    </div>
+
+    <!-- Timeline tab -->
+    <div id="tab-timeline" class="tab-content hidden">
+      <div class="card p-5">
+        <h3 class="mb-4">Event Timeline</h3>
+        <div id="timeline-list" class="font-mono text-xs overflow-y-auto max-h-timeline" style="max-height:600px;"></div>
+      </div>
+    </div>
+
+    <!-- Errors tab -->
+    <div id="tab-errors" class="tab-content hidden">
+      <div class="card p-5">
+        <h3 class="mb-4">Errors &amp; Warnings</h3>
+        <div id="errors-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ History View ═════════════════════════════════════════════════════ -->
+  <div id="view-history" class="hidden fade-in">
+    <div class="flex justify-between items-start mb-6">
+      <div>
+        <h1>Analysis History</h1>
+        <p class="text-muted mt-1">Browse, search, and manage past analyses.</p>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mb-6 flex-wrap">
+      <input type="text" id="history-search" placeholder="Search by filename…" class="input" style="max-width:320px;" oninput="debounceLoadHistory()">
+      <label class="flex items-center gap-2 text-sm font-medium btn btn-outline" style="cursor:pointer;">
+        <input type="checkbox" id="fav-filter" onchange="loadHistory()" style="accent-color:var(--accent);">
+        Favorites only
+      </label>
+    </div>
+
+    <div id="history-list" class="grid-3"></div>
+    <div id="history-empty" class="hidden empty-state">
+      <div class="empty-state-icon">📂</div>
+      <p class="font-semibold">No analyses found</p>
+      <p class="text-sm mt-1">Upload a log file to get started</p>
+    </div>
+    <div id="pagination-area" class="flex justify-center gap-2 mt-6"></div>
+  </div>
+
+</main>
+
+<!-- ── JavaScript ────────────────────────────────────────────────────────────── -->
+<script>
+'use strict';
+
+// ─── State ──────────────────────────────────────────────────────────────────
+const API = '/api';
+let currentAnalysisId = null;
+let levelChart = null;
+let durationChart = null;
+let historyOffset = 0;
+const HISTORY_LIMIT = 12;
+
+// ─── Theme ───────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('msal-theme', next);
+}
+function applyTheme() {
+  const saved = localStorage.getItem('msal-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('theme-btn').textContent = saved === 'dark' ? '☀️' : '🌙';
+}
+
+// ─── Views ───────────────────────────────────────────────────────────────────
+function showView(name) {
+  ['upload','results','history'].forEach(v => {
+    document.getElementById(`view-${v}`).classList.toggle('hidden', v !== name);
+  });
+  document.querySelectorAll('[id^="nav-"]').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById(`nav-${name}`);
+  if (nb) nb.classList.add('active');
+  if (name === 'history') loadHistory();
+  if (name === 'upload')  loadRecent();
+}
+
+// ─── Toast ───────────────────────────────────────────────────────────────────
+let toastTmr = null;
+function showToast(msg, type = 'info') {
+  const icons = { info:'ℹ️', error:'❌', success:'✅' };
+  const colors = { info:'', error:'color:var(--danger)', success:'color:var(--success)' };
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-body').innerHTML =
+    `<span>${icons[type]}</span><span style="${colors[type]}">${escHtml(msg)}</span>`;
+  toast.classList.add('show');
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// ─── Drag & Drop ─────────────────────────────────────────────────────────────
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function handleDragLeave() { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const files = Array.from(e.dataTransfer.files).filter(f => /\.(log|txt|text)$/i.test(f.name) || f.type.startsWith('text/'));
+  if (!files.length) { showToast('Only .log and .txt files are accepted', 'error'); return; }
+  uploadFiles(files);
+}
+function handleFileSelect(e) {
+  const files = Array.from(e.target.files);
+  if (files.length) uploadFiles(files);
+  e.target.value = '';
+}
+
+// ─── Upload ───────────────────────────────────────────────────────────────────
+async function uploadFiles(files) {
+  const batch = document.getElementById('batch-mode').checked || files.length > 1;
+  try {
+    if (batch && files.length > 1) await uploadBatch(files);
+    else await uploadSingle(files[0]);
+  } catch (err) {
+    hideProgress();
+    showToast(err.message || 'Upload failed', 'error');
+  }
+}
+
+async function uploadSingle(file) {
+  showProgress(`Analyzing ${file.name}…`, 30);
+  const fd = new FormData();
+  fd.append('logFile', file);
+  const res = await fetch(`${API}/analyze`, { method:'POST', body:fd });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || res.statusText); }
+  showProgress('Processing…', 80);
+  const data = await res.json();
+  showProgress('Done!', 100);
+  setTimeout(hideProgress, 600);
+  saveToRecent(data.id, file.name, data.analysis.summary);
+  showResults(data.id, file.name, data.analysis);
+  showToast('Analysis complete', 'success');
+}
+
+async function uploadBatch(files) {
+  showProgress(`Analyzing ${files.length} files…`, 30, true);
+  const fd = new FormData();
+  files.forEach(f => fd.append('logFiles', f));
+  const res = await fetch(`${API}/analyze/batch`, { method:'POST', body:fd });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || res.statusText); }
+  const data = await res.json();
+  hideProgress();
+  const ok  = data.results.filter(r => r.status === 'success').length;
+  const err = data.results.filter(r => r.status === 'error').length;
+  showToast(`${ok} analyzed${err ? `, ${err} failed` : ''}`, ok > 0 ? 'success' : 'error');
+  showView('history');
+}
+
+// ─── Progress ─────────────────────────────────────────────────────────────────
+function showProgress(label, pct, indeterminate = false) {
+  document.getElementById('progress-area').classList.remove('hidden');
+  document.getElementById('progress-label').textContent = label;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  const bar = document.getElementById('progress-bar');
+  bar.style.width = `${pct}%`;
+  bar.classList.toggle('indeterminate', indeterminate);
+}
+function hideProgress() { document.getElementById('progress-area').classList.add('hidden'); }
+
+// ─── Results ──────────────────────────────────────────────────────────────────
+function showResults(id, filename, analysis) {
+  currentAnalysisId = id;
+  document.getElementById('result-filename').textContent = filename;
+  const s = analysis.summary;
+  document.getElementById('result-meta').textContent =
+    `${s.totalLines} lines · ${fmtDuration(s.totalDurationMs)} · ${new Date().toLocaleString()}`;
+
+  renderMetrics(s);
+  renderModuleBars(analysis.modules);
+  renderCharts(analysis.performanceData);
+  renderSummaryTable(s);
+  renderTimeline(analysis.timeline);
+  renderErrors(analysis.errors, analysis.warnings, analysis.exceptions);
+  renderDiagrams(analysis.diagrams);
+
+  showView('results');
+  switchTab('overview');
+}
+
+function renderMetrics(s) {
+  const items = [
+    { v: fmtDuration(s.totalDurationMs), l:'Duration',    i:'⏱' },
+    { v: s.cacheHits,    l:'Cache Hits',  i:'✅', c:'--success' },
+    { v: s.cacheMisses,  l:'Cache Misses', i:'❌', c:'--danger' },
+    { v: s.httpCalls,    l:'HTTP Calls',  i:'🌐' },
+    { v: s.errorCount,   l:'Errors',      i:'🔴', c: s.errorCount>0 ? '--danger':'' },
+    { v: s.warningCount, l:'Warnings',    i:'🟡', c:'--warning' },
+    { v: s.modulesCount, l:'Modules',     i:'📦' },
+    { v: s.totalLines,   l:'Lines',       i:'📄' },
+  ];
+  document.getElementById('metrics-grid').innerHTML = items.map(i =>
+    `<div class="metric-card">
+      <div class="metric-icon">${i.i}</div>
+      <div class="metric-value" ${i.c ? `style="color:var(${i.c})"` : ''}>${i.v ?? '—'}</div>
+      <div class="metric-label">${i.l}</div>
+    </div>`
+  ).join('');
+}
+
+function renderModuleBars(modules) {
+  const el = document.getElementById('module-bars');
+  if (!modules || !modules.length) { el.innerHTML = '<p class="text-muted text-sm">No modules detected</p>'; return; }
+  const max = Math.max(...modules.map(m => m.count));
+  el.innerHTML = modules.slice(0,12).map(m => {
+    const pct = Math.round(m.count / max * 100);
+    return `<div class="module-row">
+      <span class="module-name" title="${escHtml(m.name)}">${escHtml(m.name)}</span>
+      <div class="module-track"><div class="module-fill" style="width:${pct}%"></div></div>
+      <span class="module-count">${m.count}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderCharts(perf) {
+  if (!perf) return;
+  if (levelChart)    { levelChart.destroy();    levelChart    = null; }
+  if (durationChart) { durationChart.destroy(); durationChart = null; }
+
+  if (perf.levelCounts) {
+    levelChart = new Chart(document.getElementById('level-chart'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(perf.levelCounts),
+        datasets: [{ data: Object.values(perf.levelCounts),
+          backgroundColor: ['#10b981','#f59e0b','#ef4444','#6366f1'], borderWidth: 2 }]
+      },
+      options: { plugins:{ legend:{ labels:{ color: getCSSVar('--text') }}}, responsive:true }
+    });
+  }
+
+  if (perf.durationBuckets) {
+    durationChart = new Chart(document.getElementById('duration-chart'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(perf.durationBuckets),
+        datasets: [{ label:'Operations', data: Object.values(perf.durationBuckets),
+          backgroundColor:'#6366f1', borderRadius:6 }]
+      },
+      options: {
+        plugins:{ legend:{ display:false } },
+        scales: {
+          x:{ ticks:{ color: getCSSVar('--muted') }},
+          y:{ ticks:{ color: getCSSVar('--muted') }}
+        },
+        responsive: true
+      }
+    });
+  }
+}
+
+function getCSSVar(v) {
+  return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+}
+
+function renderSummaryTable(s) {
+  const rows = [
+    ['Correlation ID', s.correlationId],
+    ['Client ID',      s.clientId],
+    ['Tenant',         s.tenant],
+    ['Authority',      s.authority],
+    ['Scopes',         s.scopes && s.scopes.length ? s.scopes.slice(0,4).join(', ') : null],
+  ].filter(([,v]) => v);
+  const el = document.getElementById('summary-table');
+  if (!rows.length) { el.innerHTML = '<p class="text-muted text-sm">No session details extracted</p>'; return; }
+  el.innerHTML = rows.map(([k,v]) =>
+    `<div class="summary-row"><span class="summary-key">${k}</span><span class="summary-val">${escHtml(v)}</span></div>`
+  ).join('');
+}
+
+function renderTimeline(timeline) {
+  const el = document.getElementById('timeline-list');
+  if (!timeline || !timeline.length) { el.innerHTML = '<p class="text-muted text-sm">No timeline data</p>'; return; }
+  const lvlColors = { ERROR:'color:var(--danger)', WARNING:'color:var(--warning)', VERBOSE:'color:var(--muted)', INFO:'color:var(--success)' };
+  el.innerHTML = timeline.map(e =>
+    `<div class="tl-item ${e.level}">
+      <span style="${lvlColors[e.level]||''}" class="tl-level">[${e.level}]</span>
+      ${e.timestamp ? `<span class="tl-ts">${e.timestamp.slice(11,23)}</span>` : ''}
+      <span>${escHtml(e.text.slice(0,200))}</span>
+    </div>`
+  ).join('');
+}
+
+function renderErrors(errors, warnings, exceptions) {
+  const el = document.getElementById('errors-list');
+  const items = [
+    ...(errors||[]).map(e=>({type:'error', text:e.text, line:e.line})),
+    ...(warnings||[]).map(e=>({type:'warning', text:e.text, line:e.line})),
+    ...(exceptions||[]).map(e=>({type:'exception', text:`${e.type}: ${e.message}`, line:e.line})),
+  ];
+  if (!items.length) { el.innerHTML = '<p class="text-muted">No errors or warnings 🎉</p>'; return; }
+  el.innerHTML = items.slice(0,100).map(i =>
+    `<div class="error-item ${i.type}"><strong>Line ${i.line}:</strong> ${escHtml(i.text)}</div>`
+  ).join('');
+}
+
+function renderDiagrams(diagrams) {
+  if (!diagrams) return;
+  document.getElementById('flow-diagram').textContent = diagrams.flow || '';
+  document.getElementById('sequence-diagram').textContent = diagrams.sequence || '';
+}
+
+// ─── Tabs ──────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === name);
+  });
+  document.getElementById(`tab-${name}`).classList.remove('hidden');
+
+  // Render Mermaid lazily
+  if (name === 'flow' || name === 'sequence') {
+    const id = name === 'flow' ? 'flow-diagram' : 'sequence-diagram';
+    const el = document.getElementById(id);
+    if (el && el.textContent.trim() && !el.getAttribute('data-rendered')) {
+      el.setAttribute('data-rendered', '1');
+      if (typeof mermaid !== 'undefined') mermaid.run({ nodes:[el] });
+    }
+  }
+}
+
+// ─── Favorite ─────────────────────────────────────────────────────────────────
+async function toggleFavorite() {
+  if (!currentAnalysisId) return;
+  try {
+    const res = await fetch(`${API}/reports/${currentAnalysisId}/favorite`, { method:'PATCH' });
+    const data = await res.json();
+    document.getElementById('fav-btn').textContent = data.is_favorite ? '★ Favorited' : '⭐ Favorite';
+    showToast(data.is_favorite ? 'Added to favorites' : 'Removed from favorites', 'success');
+  } catch { showToast('Could not update favorite', 'error'); }
+}
+
+// ─── Export ────────────────────────────────────────────────────────────────────
+function exportHtml() {
+  if (currentAnalysisId) window.open(`${API}/reports/${currentAnalysisId}/html`, '_blank');
+}
+
+// ─── History ──────────────────────────────────────────────────────────────────
+let hDebounce = null;
+function debounceLoadHistory() { clearTimeout(hDebounce); hDebounce = setTimeout(()=>loadHistory(), 400); }
+
+async function loadHistory(offset = 0) {
+  historyOffset = offset;
+  const search = document.getElementById('history-search').value.trim();
+  const fav    = document.getElementById('fav-filter').checked;
+  const params = new URLSearchParams({ limit:HISTORY_LIMIT, offset, ...(search&&{search}), ...(fav&&{favorite:'true'}) });
+  try {
+    const res  = await fetch(`${API}/reports?${params}`);
+    const data = await res.json();
+    renderHistory(data.reports, data.total, offset);
+  } catch { showToast('Failed to load history', 'error'); }
+}
+
+function renderHistory(reports, total, offset) {
+  const list  = document.getElementById('history-list');
+  const empty = document.getElementById('history-empty');
+  if (!reports.length) { list.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  list.innerHTML = reports.map(r => {
+    const statColor = r.error_count > 0 ? 'var(--danger)' : 'var(--text)';
+    return `<div class="history-card" onclick="loadReport('${r.id}')">
+      <button class="delete-btn" onclick="event.stopPropagation();deleteReport('${r.id}',this)">✕</button>
+      <div style="padding-right:24px">
+        <p class="font-medium truncate">${escHtml(r.filename)}</p>
+        <p class="text-xs text-muted mt-1">${new Date(r.created_at).toLocaleString()}</p>
+      </div>
+      ${r.is_favorite ? '<span style="position:absolute;top:10px;right:30px;font-size:.8rem;">★</span>' : ''}
+      <div class="history-stats">
+        <div class="history-stat"><div class="history-stat-v text-accent">${fmtDuration(r.duration_ms)}</div><div class="history-stat-l">Duration</div></div>
+        <div class="history-stat"><div class="history-stat-v" style="color:var(--success)">${r.cache_hits??0}</div><div class="history-stat-l">Cache Hits</div></div>
+        <div class="history-stat"><div class="history-stat-v" style="color:${statColor}">${r.error_count??0}</div><div class="history-stat-l">Errors</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const pages = Math.ceil(total / HISTORY_LIMIT);
+  const cur   = Math.floor(offset / HISTORY_LIMIT);
+  const pEl   = document.getElementById('pagination-area');
+  pEl.innerHTML = pages <= 1 ? '' : Array.from({length:pages},(_,i)=>
+    `<button class="page-btn${i===cur?' active':''}" onclick="loadHistory(${i*HISTORY_LIMIT})">${i+1}</button>`
+  ).join('');
+}
+
+async function loadReport(id) {
+  showToast('Loading…', 'info');
+  try {
+    const res  = await fetch(`${API}/reports/${id}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Not found');
+    if (data.analysis) showResults(id, data.filename, data.analysis);
+  } catch (e) { showToast('Failed to load report', 'error'); }
+}
+
+async function deleteReport(id, btn) {
+  if (!confirm('Delete this analysis?')) return;
+  try {
+    await fetch(`${API}/reports/${id}`, { method:'DELETE' });
+    loadHistory(historyOffset);
+    showToast('Deleted', 'success');
+  } catch { showToast('Failed to delete', 'error'); }
+}
+
+// ─── Recent (localStorage) ────────────────────────────────────────────────────
+function saveToRecent(id, filename, summary) {
+  const recent = JSON.parse(localStorage.getItem('msal-recent')||'[]');
+  recent.unshift({ id, filename, summary, at: Date.now() });
+  localStorage.setItem('msal-recent', JSON.stringify(recent.slice(0, 8)));
+}
+
+function loadRecent() {
+  const recent = JSON.parse(localStorage.getItem('msal-recent')||'[]');
+  const area   = document.getElementById('recent-area');
+  if (!recent.length) { area.classList.add('hidden'); return; }
+  area.classList.remove('hidden');
+  document.getElementById('recent-list').innerHTML = recent.map(r => `
+    <div class="history-card" onclick="loadReport('${r.id}')">
+      <p class="font-medium truncate">${escHtml(r.filename)}</p>
+      <p class="text-xs text-muted mt-1">${new Date(r.at).toLocaleString()}</p>
+      <div class="history-stats">
+        <div class="history-stat"><div class="history-stat-v text-accent">${fmtDuration(r.summary&&r.summary.totalDurationMs)}</div><div class="history-stat-l">Duration</div></div>
+        <div class="history-stat"><div class="history-stat-v" style="color:var(--success)">${r.summary&&r.summary.cacheHits!=null?r.summary.cacheHits:'?'}</div><div class="history-stat-l">Hits</div></div>
+        <div class="history-stat"><div class="history-stat-v" style="color:var(--danger)">${r.summary&&r.summary.errorCount!=null?r.summary.errorCount:'?'}</div><div class="history-stat-l">Errors</div></div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function fmtDuration(ms) {
+  if (!ms) return '—';
+  return ms < 1000 ? `${ms}ms` : `${(ms/1000).toFixed(1)}s`;
+}
+function escHtml(s) {
+  if (s==null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({ startOnLoad:false, theme:'default', securityLevel:'loose' });
+  }
+  showView('upload');
+});
+</script>
+</body>
+</html>

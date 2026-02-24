@@ -1,0 +1,27 @@
+services:
+  msal-log-analyzer:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: msal-log-analyzer
+    ports:
+      - "3001:3001"
+    volumes:
+      - msal-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_DIR=/app/data
+      # Optional: Claude AI integration
+      # - ANTHROPIC_API_KEY=your_api_key_here
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  msal-data:
+    driver: local

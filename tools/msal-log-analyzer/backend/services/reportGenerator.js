@@ -1,0 +1,135 @@
+'use strict';
+
+/**
+ * Report Generator Service
+ * Generates HTML and JSON reports from parsed MSAL log data.
+ */
+
+const { generateFlowDiagram, generateSequenceDiagram } = require('./diagramGenerator');
+
+/**
+ * Generate an HTML report from parsed log data.
+ * @param {object} analysis  Full analysis record from DB
+ * @returns {string}         HTML string
+ */
+function generateHtmlReport(analysis) {
+  const parsedData = typeof analysis.parsed_data === 'string'
+    ? JSON.parse(analysis.parsed_data)
+    : analysis.parsed_data;
+
+  const { summary } = parsedData;
+  const flowDiagram = generateFlowDiagram(parsedData);
+  const sequenceDiagram = generateSequenceDiagram(parsedData);
+  const createdAt = new Date(analysis.created_at).toLocaleString();
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSAL Log Analysis Report - ${escapeHtml(analysis.filename)}</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- Note: This exported report uses Mermaid.js from CDN for diagram rendering.
+       Internet access is required to view diagrams. -->
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f5f5f5; color: #333; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { color: #1a237e; border-bottom: 3px solid #3f51b5; padding-bottom: 10px; }
+    h2 { color: #283593; margin-top: 30px; }
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
+    .metric { background: #e8eaf6; border-radius: 8px; padding: 15px; text-align: center; }
+    .metric-value { font-size: 28px; font-weight: bold; color: #3f51b5; }
+    .metric-label { font-size: 13px; color: #666; margin-top: 5px; }
+    .mermaid { overflow: auto; }
+    .error-item { background: #ffebee; border-left: 4px solid #f44336; padding: 8px 12px; margin: 5px 0; border-radius: 0 4px 4px 0; font-size: 13px; font-family: monospace; word-break: break-all; }
+    .module-bar { height: 20px; background: #7986cb; border-radius: 3px; margin: 3px 0; transition: width 0.3s; }
+    .module-row { display: flex; align-items: center; gap: 10px; margin: 5px 0; }
+    .module-name { width: 180px; font-size: 13px; flex-shrink: 0; }
+    .module-count { font-size: 12px; color: #666; width: 60px; }
+    footer { margin-top: 40px; text-align: center; color: #999; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 MSAL Log Analysis Report</h1>
+    <div class="card">
+      <strong>File:</strong> ${escapeHtml(analysis.filename)} &nbsp;
+      <strong>Generated:</strong> ${createdAt} &nbsp;
+      ${summary.correlationId ? `<strong>Correlation ID:</strong> ${escapeHtml(summary.correlationId)}` : ''}
+    </div>
+
+    <h2>Key Metrics</h2>
+    <div class="card">
+      <div class="metrics">
+        <div class="metric"><div class="metric-value">${formatDuration(summary.totalDurationMs)}</div><div class="metric-label">Total Duration</div></div>
+        <div class="metric"><div class="metric-value">${summary.cacheHits}</div><div class="metric-label">Cache Hits</div></div>
+        <div class="metric"><div class="metric-value">${summary.cacheMisses}</div><div class="metric-label">Cache Misses</div></div>
+        <div class="metric"><div class="metric-value">${summary.httpCalls}</div><div class="metric-label">HTTP Calls</div></div>
+        <div class="metric"><div class="metric-value">${summary.errorCount}</div><div class="metric-label">Errors</div></div>
+        <div class="metric"><div class="metric-value">${summary.warningCount}</div><div class="metric-label">Warnings</div></div>
+        <div class="metric"><div class="metric-value">${summary.modulesCount}</div><div class="metric-label">Modules</div></div>
+        <div class="metric"><div class="metric-value">${summary.totalLines}</div><div class="metric-label">Log Lines</div></div>
+      </div>
+    </div>
+
+    ${summary.authority ? `<div class="card"><strong>Authority:</strong> ${escapeHtml(summary.authority)}</div>` : ''}
+
+    <h2>Module Activity</h2>
+    <div class="card">
+      ${buildModuleBars(parsedData.modules)}
+    </div>
+
+    <h2>Flow Diagram</h2>
+    <div class="card">
+      <div class="mermaid">${escapeHtml(flowDiagram)}</div>
+    </div>
+
+    <h2>Sequence Diagram</h2>
+    <div class="card">
+      <div class="mermaid">${escapeHtml(sequenceDiagram)}</div>
+    </div>
+
+    ${parsedData.errors && parsedData.errors.length > 0 ? `
+    <h2>Errors (${parsedData.errors.length})</h2>
+    <div class="card">
+      ${parsedData.errors.slice(0, 50).map(e => `<div class="error-item">Line ${e.line}: ${escapeHtml(e.text)}</div>`).join('')}
+    </div>` : ''}
+
+    <footer>Generated by MSAL Log Analyzer &bull; ${new Date().toUTCString()}</footer>
+  </div>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'default' });</script>
+</body>
+</html>`;
+}
+
+function buildModuleBars(modules) {
+  if (!modules || modules.length === 0) return '<em>No modules detected</em>';
+  const maxCount = Math.max(...modules.map(m => m.count));
+  return modules.slice(0, 12).map(m => {
+    const pct = Math.round((m.count / maxCount) * 100);
+    return `<div class="module-row">
+      <div class="module-name">${escapeHtml(m.name)}</div>
+      <div style="flex:1"><div class="module-bar" style="width:${pct}%"></div></div>
+      <div class="module-count">${m.count} lines</div>
+    </div>`;
+  }).join('');
+}
+
+function formatDuration(ms) {
+  if (!ms || ms === 0) return '—';
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+module.exports = { generateHtmlReport };
