@@ -27,15 +27,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         void Write(string alias, X509Certificate2 cert, string endpointBase, ILoggerAdapter logger);
 
         /// <summary>
-        /// Prunes expired entries for the alias (best-effort).
-        /// Implementations should remove stale/expired entries while leaving the
-        /// latest valid binding for the alias in place.
+        /// Deletes expired certificate entries for the alias (best-effort),
+        /// leaving the latest valid binding for the alias in place (if any).
+        /// Write calls DeleteAllForAlias, so this method is only expected to be called 
+        /// by implementations of Write. 
         /// </summary>
         void Delete(string alias, ILoggerAdapter logger);
 
         /// <summary>
-        /// Deletes all entries for the alias (best-effort).
-        /// Implementations should remove all bindings for the alias.
+        /// Deletes ALL certificate entries for the alias (best-effort), including non-expired ones.
+        /// Intended for "reset/evict" scenarios (e.g., SCHANNEL rejects the cached cert) to force a 
+        /// re-mint. When a machine restarts the key becomes inaccessible and the cached certs should 
+        /// be cleared to allow a new cert to be minted.
         /// </summary>
         /// <param name="alias"></param>
         /// <param name="logger"></param>

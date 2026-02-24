@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         private readonly KeyedSemaphorePool _gates = new();
         private readonly ICertificateCache _memory;
         private readonly IPersistentCertificateCache _persisted;
+        private readonly ConcurrentDictionary<string, byte> _forceMint = new();
 
         /// <summary>
         /// Inject both caches to avoid global state and enable testing.
@@ -59,8 +61,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 throw new ArgumentNullException(nameof(factory));
             }
 
+            bool forceMint = _forceMint.ContainsKey(cacheKey);
+
             // 1) In-memory cache first
-            if (_memory.TryGet(cacheKey, out var cachedEntry, logger))
+            if (!forceMint && _memory.TryGet(cacheKey, out var cachedEntry, logger))
             {
                 logger.Verbose(() =>
                     $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
@@ -76,8 +80,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             try
             {
+                forceMint = _forceMint.ContainsKey(cacheKey);
+
                 // Re-check after acquiring the gate
-                if (_memory.TryGet(cacheKey, out cachedEntry, logger))
+                if (!forceMint && _memory.TryGet(cacheKey, out cachedEntry, logger))
                 {
                     logger.Verbose(() =>
                         $"[PersistentCert] mTLS binding cache HIT (memory-after-gate) for '{cacheKey}'.");
@@ -89,7 +95,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
 
                 // 3) Persistent cache (best-effort)
-                if (_persisted.Read(cacheKey, out var persistedEntry, logger))
+                if (!forceMint && _persisted.Read(cacheKey, out var persistedEntry, logger))
                 {
                     logger.Verbose(() =>
                         $"[PersistentCert] mTLS binding cache HIT (persistent) for '{cacheKey}'.");
@@ -135,6 +141,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // This is also best-effort and must not throw.
                 _persisted.Delete(cacheKey, logger);
 
+                if (forceMint)
+                {
+                    _forceMint.TryRemove(cacheKey, out _);
+                }
+
                 // Pass through the factory result (already an MtlsBindingInfo)
                 return mintedBinding;
             }
@@ -149,6 +160,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// </summary>
         public void RemoveBadCert(string cacheKey, ILoggerAdapter logger)
         {
+            if (cacheKey != null)
+            {
+                _forceMint[cacheKey] = 0;
+            }
+
             try
             {
                 _memory.Remove(cacheKey, logger);

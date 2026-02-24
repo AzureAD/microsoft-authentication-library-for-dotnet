@@ -316,8 +316,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                                 existing.Dispose();
                             }
                         }
-
-                        logger?.Verbose(() => $"[PersistentCert] DeleteAllForAlias completed for alias '{alias}'. Removed={removed}.");
                     }
                     catch (Exception ex)
                     {
