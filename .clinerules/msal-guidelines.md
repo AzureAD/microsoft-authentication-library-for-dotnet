@@ -46,7 +46,7 @@ Through its comprehensive feature set and proven reliability, MSAL.NET simplifie
 - Implement proper error handling and retry logic
 - Keep dependencies minimal and well-justified
 - Document security considerations thoroughly
-- Avoid using reflection in source code and tests when possible
+- Do not use reflection in source code and tests.
 
 ### Authentication Best Practices
 - Use certificate-based authentication over client secrets when possible
