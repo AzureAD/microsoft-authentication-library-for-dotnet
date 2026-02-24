@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Test.E2E
     /// These tests run on the MSALMSIV2 pool which has IMDSv2 endpoint configured.
     /// </summary>
     [TestClass]
+    [DoNotParallelize]
     public class ManagedIdentityImdsV2Tests
     {
         private const string ArmScope = "https://graph.microsoft.com";
