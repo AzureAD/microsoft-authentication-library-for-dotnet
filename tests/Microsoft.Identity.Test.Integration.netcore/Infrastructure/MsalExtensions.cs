@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -53,24 +55,35 @@ namespace Microsoft.Identity.Test.Integration
                 throw new ArgumentNullException(nameof(popCredentials));
             }
 
-            var rsaKey = popCredentials.Key as RsaSecurityKey;
-            if (rsaKey == null)
+            RSAParameters parameters;
+
+            if (popCredentials.Key is RsaSecurityKey rsaKey)
             {
-                throw new NotImplementedException("Only RSA POP keys are supported"); // TODO: support for other crypto?
+                parameters = rsaKey.Rsa == null ? rsaKey.Parameters : rsaKey.Rsa.ExportParameters(false);
+            }
+            else if (popCredentials.Key is X509SecurityKey x509Key)
+            {
+                var rsa = x509Key.Certificate.GetRSAPublicKey();
+                if (rsa == null)
+                {
+                    throw new NotSupportedException("Only certificates with RSA keys are supported");
+                }
+                parameters = rsa.ExportParameters(false);
+            }
+            else
+            {
+                throw new NotImplementedException("Only RSA and X509 POP keys are supported");
             }
 
-            CannonicalPublicKeyJwk = CreateJwkClaim(rsaKey, popCredentials.Algorithm);
+            CannonicalPublicKeyJwk = CreateJwkClaim(parameters);
             CryptographicAlgorithm = popCredentials.Algorithm;
             _popCredentials = popCredentials;
             _assertNotSigned = assertNotSigned;
         }
 
-        private string CreateJwkClaim(RsaSecurityKey key, string algorithm)
+        private string CreateJwkClaim(RSAParameters parameters)
         {
-            var parameters = key.Rsa == null ? key.Parameters : key.Rsa.ExportParameters(false);
-            //return "{\"kty\":\"RSA\",\"n\":\"" + Base64UrlEncoder.Encode(parameters.Modulus) + "\",\"e\":\"" + Base64UrlEncoder.Encode(parameters.Exponent) + "\",\"alg\":\"" + algorithm + "\"}";
             return $@"{{""e"":""{Base64UrlHelpers.Encode(parameters.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlHelpers.Encode(parameters.Modulus)}""}}";
-
         }
 
         public string CannonicalPublicKeyJwk { get; }
