@@ -662,6 +662,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 await authScheme.Received(1).ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
                     .ConfigureAwait(false);
+                Assert.AreEqual(0, httpManager.QueueSize);
             }
         }
     }
