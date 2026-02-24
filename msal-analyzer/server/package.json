@@ -15,7 +15,7 @@
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.0.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
