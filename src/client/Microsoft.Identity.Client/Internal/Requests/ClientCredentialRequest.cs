@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
             cachedAccessTokenItem = await ValidateCachedAccessTokenAsync(
-                AuthenticationRequestParameters, cachedAccessTokenItem).ConfigureAwait(false);
+                AuthenticationRequestParameters, cachedAccessTokenItem, nameof(ClientCredentialRequest)).ConfigureAwait(false);
 
             // No access token or cached access token needs to be refreshed 
             if (cachedAccessTokenItem != null)

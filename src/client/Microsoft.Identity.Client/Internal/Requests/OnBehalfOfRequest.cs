@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
 
                 cachedAccessToken = await ValidateCachedAccessTokenAsync(
-                    AuthenticationRequestParameters, cachedAccessToken).ConfigureAwait(false);
+                    AuthenticationRequestParameters, cachedAccessToken, nameof(OnBehalfOfRequest)).ConfigureAwait(false);
 
                 if (cachedAccessToken != null)
                 {

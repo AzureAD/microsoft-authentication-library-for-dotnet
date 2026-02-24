@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
                 cachedAccessTokenItem = await RequestBase.ValidateCachedAccessTokenAsync(
-                    AuthenticationRequestParameters, cachedAccessTokenItem).ConfigureAwait(false);
+                    AuthenticationRequestParameters, cachedAccessTokenItem, nameof(CacheSilentStrategy)).ConfigureAwait(false);
 
                 if (cachedAccessTokenItem != null)
                 {

@@ -577,7 +577,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// </summary>
         internal static async Task<MsalAccessTokenCacheItem> ValidateCachedAccessTokenAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
-            MsalAccessTokenCacheItem cachedAccessTokenItem)
+            MsalAccessTokenCacheItem cachedAccessTokenItem,
+            string requestType)
         {
             if (cachedAccessTokenItem != null &&
                 authenticationRequestParameters.AuthenticationScheme is IAuthenticationOperation2 authOp2)
@@ -588,7 +589,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (!await authOp2.ValidateCachedTokenAsync(cacheValidationData).ConfigureAwait(false))
                 {
                     authenticationRequestParameters.RequestContext.Logger.Info(
-                        "Cached token failed authentication operation validation.");
+                        $"[{requestType}] Cached token failed authentication operation validation.");
                     return null;
                 }
             }
