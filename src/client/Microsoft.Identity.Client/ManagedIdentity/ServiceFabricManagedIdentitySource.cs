@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class ServiceFabricManagedIdentitySource : AbstractManagedIdentity
     {
-        private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
+        private const string ServiceFabricMsiApiVersion = "2020-05-01";
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
 
