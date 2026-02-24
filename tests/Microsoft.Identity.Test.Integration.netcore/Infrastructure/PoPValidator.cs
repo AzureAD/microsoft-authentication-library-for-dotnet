@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             VerifyPoPToken(clientId, requestUri, method, result.AccessToken, result.TokenType);
         }
 
-        public static void VerifyPoPToken(
+        public static ClaimsPrincipal VerifyPoPToken(
             string clientId, 
             string requestUri, 
             HttpMethod method, 
@@ -61,6 +61,8 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             ClaimsPrincipal innerTokenClaims = IdToken.Parse(assertionWithoutShr).ClaimsPrincipal;
             string reqCnf = innerTokenClaims.FindFirst("cnf").Value;
             Assert.IsNotNull(reqCnf);
+
+            return popClaims;
         }
 
         public static async Task VerifyPopNonceAsync(string nonce)
