@@ -61,7 +61,7 @@ app.get('/api/health', (req, res) => {
     status: 'healthy',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
-    aiEnabled: !!process.env.ANTHROPIC_API_KEY,
+    aiEnabled: !!(process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY),
   });
 });
 
@@ -90,7 +90,7 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`✅ MSAL Log Analyzer server running on port ${PORT}`);
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   AI enabled: ${!!process.env.ANTHROPIC_API_KEY}`);
+  console.log(`   AI enabled: ${!!(process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY)}`);
   if (process.env.NODE_ENV !== 'production') {
     console.log(`   API: http://localhost:${PORT}/api`);
     console.log(`   Health: http://localhost:${PORT}/api/health`);

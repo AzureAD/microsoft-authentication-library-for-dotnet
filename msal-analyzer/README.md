@@ -2,10 +2,12 @@
 
 A powerful web application for analyzing Microsoft Authentication Library (MSAL) logs with AI-powered insights, interactive visualizations, and professional reporting.
 
+> **Important:** This application uses **Azure OpenAI** (a Microsoft-approved AI service) to analyze MSAL logs. Third-party AI services such as Anthropic Claude or OpenAI.com must **not** be used, because MSAL logs contain Microsoft business-sensitive data (tenant IDs, client IDs, account identifiers, correlation IDs, token metadata) that may not be transferred to non-Microsoft AI services under Microsoft policy.
+
 ## Features
 
 - 📤 **Drag-and-drop log upload** - Easy file upload with real-time progress
-- 🤖 **AI-powered analysis** - Claude AI integration for intelligent log parsing
+- 🤖 **AI-powered analysis** - Azure OpenAI integration for intelligent log parsing
 - 📊 **Performance metrics** - Total duration, HTTP calls, cache hits, token source
 - 🔄 **Interactive flow diagrams** - Mermaid-based module interaction visualizations
 - 📋 **Module details** - Tabular view of all modules with timings and status
@@ -21,11 +23,10 @@ A powerful web application for analyzing Microsoft Authentication Library (MSAL)
 - Tailwind CSS
 - Mermaid.js (diagrams)
 - React Dropzone (file upload)
-- Recharts (metrics visualization)
 
 ### Backend
 - Express.js
-- Claude AI (Anthropic)
+- Azure OpenAI (Microsoft-approved AI service)
 - Multer (file handling)
 - Helmet (security headers)
 - CORS
@@ -35,7 +36,7 @@ A powerful web application for analyzing Microsoft Authentication Library (MSAL)
 ### Prerequisites
 - Node.js 18+
 - npm 9+
-- Anthropic API key (for Claude AI)
+- An [Azure OpenAI resource](https://portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI) with a deployed model (e.g. `gpt-4o`)
 
 ### Installation
 
@@ -49,7 +50,7 @@ npm run install:all
 
 # Configure environment
 cp server/.env.example server/.env
-# Edit server/.env and add your ANTHROPIC_API_KEY
+# Edit server/.env and fill in your Azure OpenAI credentials
 ```
 
 ### Development
@@ -79,7 +80,7 @@ npm start
 ```bash
 # Copy and configure environment
 cp server/.env.example server/.env
-# Edit server/.env and add your ANTHROPIC_API_KEY
+# Edit server/.env and fill in your Azure OpenAI credentials
 
 # Build and start
 docker-compose -f docker/docker-compose.yml up --build
@@ -91,17 +92,26 @@ docker-compose -f docker/docker-compose.yml up --build
 
 ```bash
 docker build -f docker/Dockerfile -t msal-analyzer .
-docker run -p 3001:3001 -e ANTHROPIC_API_KEY=your_key msal-analyzer
+docker run -p 3001:3001 \
+  -e AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com/ \
+  -e AZURE_OPENAI_API_KEY=your_key \
+  -e AZURE_OPENAI_DEPLOYMENT=gpt-4o \
+  msal-analyzer
 ```
 
 ## Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ANTHROPIC_API_KEY` | Your Claude AI API key | Required |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI resource endpoint URL | Required for AI |
+| `AZURE_OPENAI_API_KEY` | Azure OpenAI API key | Required for AI |
+| `AZURE_OPENAI_DEPLOYMENT` | Model deployment name | `gpt-4o` |
+| `AZURE_OPENAI_API_VERSION` | Azure OpenAI API version | `2024-10-21` |
 | `PORT` | Server port | `3001` |
 | `NODE_ENV` | Environment | `development` |
 | `MAX_FILE_SIZE` | Max upload size in bytes | `10485760` (10MB) |
+
+> **Note:** Azure OpenAI credentials are optional — the application falls back to rule-based regex parsing when they are not configured.
 
 ## Usage
 

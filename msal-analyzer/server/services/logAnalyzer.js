@@ -1,20 +1,28 @@
 /**
  * MSAL Log Analyzer - Core Log Analysis Service
- * Parses MSAL log files and uses Claude AI for intelligent insights
+ * Parses MSAL log files and uses Azure OpenAI for intelligent insights.
+ *
+ * Azure OpenAI is a Microsoft-approved AI service and is safe to use with
+ * Microsoft business data such as MSAL logs. Third-party AI services (e.g.
+ * Anthropic Claude, OpenAI.com) must NOT be used because MSAL logs contain
+ * Microsoft business-sensitive data including tenant IDs, client IDs, account
+ * identifiers, and token acquisition metadata.
  */
 
-const Anthropic = require('@anthropic-ai/sdk');
+const { AzureOpenAI } = require('@azure/openai');
 
-// Initialize Anthropic client (lazy - only when API key is present)
-let anthropicClient = null;
+// Initialize Azure OpenAI client (lazy - only when credentials are present)
+let azureOpenAIClient = null;
 
-function getAnthropicClient() {
-  if (!anthropicClient && process.env.ANTHROPIC_API_KEY) {
-    anthropicClient = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+function getAzureOpenAIClient() {
+  if (!azureOpenAIClient && process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY) {
+    azureOpenAIClient = new AzureOpenAI({
+      endpoint: process.env.AZURE_OPENAI_ENDPOINT,
+      apiKey: process.env.AZURE_OPENAI_API_KEY,
+      apiVersion: process.env.AZURE_OPENAI_API_VERSION || '2024-10-21',
     });
   }
-  return anthropicClient;
+  return azureOpenAIClient;
 }
 
 /**
@@ -29,9 +37,9 @@ async function analyzeLogContent(logContent, fileName) {
   // Phase 1: Rule-based parsing (always runs)
   const parsed = parseLogStructure(logContent);
 
-  // Phase 2: AI-powered insights (runs if API key is configured)
+  // Phase 2: AI-powered insights (runs if Azure OpenAI credentials are configured)
   let aiInsights = null;
-  const client = getAnthropicClient();
+  const client = getAzureOpenAIClient();
   if (client) {
     try {
       aiInsights = await getAiInsights(client, logContent, parsed);
@@ -320,8 +328,11 @@ function extractLogLevel(line) {
 // ─── AI-Powered Analysis ──────────────────────────────────────────────────────
 
 /**
- * Calls Claude AI to extract additional insights from the log.
+ * Calls Azure OpenAI to extract additional insights from the log.
  * Truncates the log to fit within token limits.
+ *
+ * Uses Azure OpenAI (Microsoft-approved) — do NOT replace with Anthropic,
+ * OpenAI.com, or any other third-party AI service.
  */
 async function getAiInsights(client, logContent, parsed) {
   // Prepare a compact summary for the AI to reduce token usage
@@ -329,7 +340,12 @@ async function getAiInsights(client, logContent, parsed) {
     ? logContent.substring(0, 4000) + '\n...[truncated]...\n' + logContent.substring(logContent.length - 4000)
     : logContent;
 
-  const prompt = `You are an expert in Microsoft Authentication Library (MSAL) for .NET. Analyze this MSAL log and provide structured insights.
+  const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o';
+
+  const systemPrompt = 'You are an expert in Microsoft Authentication Library (MSAL) for .NET. ' +
+    'Analyze MSAL log files and return structured JSON insights.';
+
+  const userPrompt = `Analyze this MSAL log and provide structured insights.
 
 Log file content:
 \`\`\`
@@ -381,15 +397,19 @@ Focus on:
 4. Token cache behavior
 5. Security observations`;
 
-  const message = await client.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
+  const response = await client.chat.completions.create({
+    model: deploymentName,
     max_tokens: 2000,
-    messages: [{ role: 'user', content: prompt }],
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ],
   });
 
-  const responseText = message.content[0].text;
+  const responseText = response.choices[0].message.content;
 
-  // Extract JSON from response (handle markdown code blocks)
+  // Extract JSON from response (handle any markdown code block wrapping)
   const jsonMatch = responseText.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error('AI response did not contain valid JSON');

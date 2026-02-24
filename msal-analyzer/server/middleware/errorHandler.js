@@ -43,10 +43,10 @@ function errorHandler(err, req, res, next) {
     });
   }
 
-  // Anthropic API errors
-  if (err.name === 'APIError' || err.name === 'AuthenticationError') {
+  // Azure OpenAI API errors
+  if (err.name === 'APIError' || err.name === 'AuthenticationError' || err.code === 'DeploymentNotFound') {
     return res.status(502).json({
-      error: 'AI service error. Log analysis completed without AI insights.',
+      error: 'Azure OpenAI service error. Log analysis completed without AI insights.',
       code: 'AI_SERVICE_ERROR',
     });
   }
