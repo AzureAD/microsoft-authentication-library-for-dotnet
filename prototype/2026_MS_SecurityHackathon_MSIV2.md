@@ -9,7 +9,7 @@
 
 This hackathon project successfully demonstrates the capability of **GitHub Copilot** to generate production-ready code across multiple programming languages for advanced Azure cloud authentication scenarios. We created comprehensive implementations of **Managed Identity v2 (MSI v2)** with **mTLS Proof-of-Possession (PoP)** token support in both PowerShell and Python.
 
-**Key Achievement:** Copilot generated a complete, production-ready Python implementation from requirements and context provided by an existing PowerShell implementation, which is now **published and available on PyPI** as the `msal-msiv2` package version **1.35.0rc2**.
+**Key Achievement:** Copilot generated a complete, production-ready Python implementation from requirements and context provided by an existing PowerShell implementation, which is now **published and available on PyPI** as the `msal-msiv2` package version **1.35.0rc3**.
 
 ---
 
@@ -162,7 +162,7 @@ Updated main pipeline orchestration:
 - Job Status: ✅ **PASSED**
 - Duration: 44 seconds
 - Pool: MSALMSIV2 (Windows 2022)
-- Package Tested: `msal-msiv2==1.35.0rc2` (from PyPI)
+- Package Tested: `msal-msiv2==1.35.0rc3` (from PyPI)
 - Full Build Duration: 13m 55s
 
 ---
@@ -332,7 +332,7 @@ Environment: MSALMSIV2 pool (Windows 2022 VM)
 ### PyPI Publication
 ```
 📦 Package Name: msal-msiv2
-🔗 PyPI URL: https://pypi.org/project/msal-msiv2/1.35.0rc2/
+🔗 PyPI URL: https://pypi.org/project/msal-msiv2/1.35.0rc3/
 📥 Installation: pip install msal-msiv2==1.35.0rc2
 ✅ Status: Release Candidate
 🌍 Availability: Public (worldwide access)
@@ -468,4 +468,4 @@ print(f"Thumbprint: {result['cert_thumbprint_sha256']}")
 
 **Date:** February 25, 2026
 **Status:** ✅ COMPLETE & PUBLISHED
-**Package:** msal-msiv2==1.35.0rc2
+**Package:** msal-msiv2==1.35.0rc3
