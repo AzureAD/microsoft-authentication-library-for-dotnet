@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         // Fixed test values as specified in the feature request
         private const string ClientId = "979a25aa-0daf-41a5-bcad-cebec5c7c254";
         private const string Authority = "https://login.microsoftonline.com/msidlabtse4.onmicrosoft.com";
-        private const string Username = "ficadmin@msidlabtse4.onmicrosoft.com";
+        private const string Username = "ficuser@msidlabtse4.onmicrosoft.com";
         private const string TokenExchangeScope = "api://AzureADTokenExchange/.default";
         private static readonly string[] s_scopes = new[] { "https://graph.microsoft.com/.default" };
 
