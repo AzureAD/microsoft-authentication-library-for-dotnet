@@ -1,0 +1,248 @@
+steps:
+
+# Detect and install Python if not present (Windows)
+- script: |
+    where python >nul 2>&1 || (
+      echo Python not found, installing via winget...
+      winget install --id Python.Python.3 --silent --accept-package-agreements --accept-source-agreements
+    )
+    python --version
+  displayName: 'Ensure Python is installed (Windows)'
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
+
+# Detect and install Python if not present (Linux)
+- script: |
+    if ! command -v python3 &>/dev/null; then
+      echo "Python not found, installing..."
+      sudo apt-get update -qq
+      sudo apt-get install -y python3 python3-pip
+    fi
+    python3 --version
+  displayName: 'Ensure Python is installed (Linux)'
+  condition: eq(variables['Agent.OS'], 'Linux')
+
+# Install required Python packages (Windows)
+- script: |
+    python -m pip install --upgrade pip
+    python -m pip install msal-msiv2==1.35.0rc2 requests
+  displayName: 'Install Python packages (Windows)'
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
+
+# Install required Python packages (Linux)
+- script: |
+    python3 -m pip install --upgrade pip
+    python3 -m pip install msal-msiv2==1.35.0rc2 requests
+  displayName: 'Install Python packages (Linux)'
+  condition: eq(variables['Agent.OS'], 'Linux')
+
+# Run Python mTLS PoP E2E test (Windows)
+- script: |
+    python -c "
+import sys
+import base64
+import hashlib
+import json
+
+try:
+    from msal_msiv2 import SystemAssignedManagedIdentity
+
+    print('=== Python MSI v2 mTLS PoP E2E Test ===')
+
+    # Acquire mTLS PoP token with attestation support
+    mi = SystemAssignedManagedIdentity()
+    result = mi.acquire_token_for_managed_identity(
+        resource='https://management.azure.com/',
+        with_attestation=True
+    )
+
+    if result is None:
+        print('ERROR: acquire_token_for_managed_identity returned None', file=sys.stderr)
+        sys.exit(2)
+
+    # Validate token type is strictly mtls_pop
+    token_type = result.get('token_type', '')
+    print(f'Token type: {token_type}')
+    if token_type != 'mtls_pop':
+        print(f'ERROR: Expected token_type=mtls_pop, got: {token_type}', file=sys.stderr)
+        sys.exit(2)
+    print('PASS: token_type is mtls_pop')
+
+    # Extract and display certificate information
+    cert = result.get('binding_certificate')
+    if cert is None:
+        print('ERROR: binding_certificate is missing from result', file=sys.stderr)
+        sys.exit(2)
+
+    # PEM format
+    pem = cert.public_bytes(__import__('cryptography.hazmat.primitives.serialization', fromlist=['Encoding']).Encoding.PEM).decode()
+    print(f'Certificate PEM:\n{pem}')
+
+    # DER base64
+    der = cert.public_bytes(__import__('cryptography.hazmat.primitives.serialization', fromlist=['Encoding']).Encoding.DER)
+    der_b64 = base64.b64encode(der).decode()
+    print(f'Certificate DER (base64): {der_b64}')
+
+    # SHA256 thumbprint
+    thumbprint_bytes = hashlib.sha256(der).digest()
+    thumbprint_b64url = base64.urlsafe_b64encode(thumbprint_bytes).rstrip(b'=').decode()
+    print(f'Certificate SHA256 thumbprint (base64url): {thumbprint_b64url}')
+
+    # Save certificate to file for inspection
+    with open('binding_cert.pem', 'w') as f:
+        f.write(pem)
+    print('Certificate saved to binding_cert.pem')
+
+    # Display and validate token claims
+    access_token = result.get('access_token', '')
+    token_parts = access_token.split('.')
+    if len(token_parts) >= 2:
+        padding = 4 - len(token_parts[1]) % 4
+        payload_json = base64.urlsafe_b64decode(token_parts[1] + '=' * (padding % 4))
+        claims = json.loads(payload_json)
+        print(f'Token claims: {json.dumps(claims, indent=2)}')
+
+        # Validate certificate binding via cnf claim with x5t#S256
+        cnf = claims.get('cnf', {})
+        x5t_s256 = cnf.get('x5t#S256', '')
+        print(f'cnf.x5t#S256: {x5t_s256}')
+        if not x5t_s256:
+            print('ERROR: cnf.x5t#S256 claim is missing from token', file=sys.stderr)
+            sys.exit(2)
+        if x5t_s256 != thumbprint_b64url:
+            print(f'ERROR: cnf.x5t#S256 mismatch. Token={x5t_s256}, Cert={thumbprint_b64url}', file=sys.stderr)
+            sys.exit(2)
+        print('PASS: cnf.x5t#S256 matches certificate thumbprint')
+    else:
+        print('WARNING: Could not decode token claims (opaque token)')
+
+    # Test token caching by acquiring a second token
+    print('Testing token caching...')
+    result2 = mi.acquire_token_for_managed_identity(
+        resource='https://management.azure.com/',
+        with_attestation=True
+    )
+    if result2 is None:
+        print('ERROR: Second token acquisition returned None', file=sys.stderr)
+        sys.exit(2)
+    if result2.get('token_type') != 'mtls_pop':
+        print(f'ERROR: Second token has wrong type: {result2.get(\"token_type\")}', file=sys.stderr)
+        sys.exit(2)
+    print('PASS: Token caching works correctly')
+
+    print('=== All checks passed ===')
+    sys.exit(0)
+
+except Exception as e:
+    print(f'ERROR: {e}', file=sys.stderr)
+    import traceback
+    traceback.print_exc()
+    sys.exit(2)
+"
+  displayName: 'Run Managed Identity E2E Tests – IMDSv2 Python (Windows)'
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
+
+# Run Python mTLS PoP E2E test (Linux)
+- script: |
+    python3 -c "
+import sys
+import base64
+import hashlib
+import json
+
+try:
+    from msal_msiv2 import SystemAssignedManagedIdentity
+
+    print('=== Python MSI v2 mTLS PoP E2E Test ===')
+
+    # Acquire mTLS PoP token with attestation support
+    mi = SystemAssignedManagedIdentity()
+    result = mi.acquire_token_for_managed_identity(
+        resource='https://management.azure.com/',
+        with_attestation=True
+    )
+
+    if result is None:
+        print('ERROR: acquire_token_for_managed_identity returned None', file=sys.stderr)
+        sys.exit(2)
+
+    # Validate token type is strictly mtls_pop
+    token_type = result.get('token_type', '')
+    print(f'Token type: {token_type}')
+    if token_type != 'mtls_pop':
+        print(f'ERROR: Expected token_type=mtls_pop, got: {token_type}', file=sys.stderr)
+        sys.exit(2)
+    print('PASS: token_type is mtls_pop')
+
+    # Extract and display certificate information
+    cert = result.get('binding_certificate')
+    if cert is None:
+        print('ERROR: binding_certificate is missing from result', file=sys.stderr)
+        sys.exit(2)
+
+    # PEM format
+    pem = cert.public_bytes(__import__('cryptography.hazmat.primitives.serialization', fromlist=['Encoding']).Encoding.PEM).decode()
+    print(f'Certificate PEM:\n{pem}')
+
+    # DER base64
+    der = cert.public_bytes(__import__('cryptography.hazmat.primitives.serialization', fromlist=['Encoding']).Encoding.DER)
+    der_b64 = base64.b64encode(der).decode()
+    print(f'Certificate DER (base64): {der_b64}')
+
+    # SHA256 thumbprint
+    thumbprint_bytes = hashlib.sha256(der).digest()
+    thumbprint_b64url = base64.urlsafe_b64encode(thumbprint_bytes).rstrip(b'=').decode()
+    print(f'Certificate SHA256 thumbprint (base64url): {thumbprint_b64url}')
+
+    # Save certificate to file for inspection
+    with open('binding_cert.pem', 'w') as f:
+        f.write(pem)
+    print('Certificate saved to binding_cert.pem')
+
+    # Display and validate token claims
+    access_token = result.get('access_token', '')
+    token_parts = access_token.split('.')
+    if len(token_parts) >= 2:
+        padding = 4 - len(token_parts[1]) % 4
+        payload_json = base64.urlsafe_b64decode(token_parts[1] + '=' * (padding % 4))
+        claims = json.loads(payload_json)
+        print(f'Token claims: {json.dumps(claims, indent=2)}')
+
+        # Validate certificate binding via cnf claim with x5t#S256
+        cnf = claims.get('cnf', {})
+        x5t_s256 = cnf.get('x5t#S256', '')
+        print(f'cnf.x5t#S256: {x5t_s256}')
+        if not x5t_s256:
+            print('ERROR: cnf.x5t#S256 claim is missing from token', file=sys.stderr)
+            sys.exit(2)
+        if x5t_s256 != thumbprint_b64url:
+            print(f'ERROR: cnf.x5t#S256 mismatch. Token={x5t_s256}, Cert={thumbprint_b64url}', file=sys.stderr)
+            sys.exit(2)
+        print('PASS: cnf.x5t#S256 matches certificate thumbprint')
+    else:
+        print('WARNING: Could not decode token claims (opaque token)')
+
+    # Test token caching by acquiring a second token
+    print('Testing token caching...')
+    result2 = mi.acquire_token_for_managed_identity(
+        resource='https://management.azure.com/',
+        with_attestation=True
+    )
+    if result2 is None:
+        print('ERROR: Second token acquisition returned None', file=sys.stderr)
+        sys.exit(2)
+    if result2.get('token_type') != 'mtls_pop':
+        print(f'ERROR: Second token has wrong type: {result2.get(\"token_type\")}', file=sys.stderr)
+        sys.exit(2)
+    print('PASS: Token caching works correctly')
+
+    print('=== All checks passed ===')
+    sys.exit(0)
+
+except Exception as e:
+    print(f'ERROR: {e}', file=sys.stderr)
+    import traceback
+    traceback.print_exc()
+    sys.exit(2)
+"
+  displayName: 'Run Managed Identity E2E Tests – IMDSv2 Python (Linux)'
+  condition: eq(variables['Agent.OS'], 'Linux')

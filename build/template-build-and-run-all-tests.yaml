@@ -144,3 +144,13 @@ jobs: #Build and stage projects
     parameters:
       BuildConfiguration: 'Release'
       TargetFramework:   'net8.0'
+
+- job: 'RunManagedIdentityE2ETestsOnImdsV2Python'
+  displayName: 'Managed Identity E2E Tests – VM / IMDS V2 (Python)'
+  dependsOn: ['BuildAndStageProjects']
+  pool:
+    name: 'MSALMSIV2'
+  condition: and(succeeded(), eq(variables['RunManagedIdentityE2EImdsV2PythonTests'], 'true'))
+
+  steps:
+  - template: template-run-mi-e2e-imdsv2-python.yaml
