@@ -4,7 +4,7 @@ steps:
 # pip install and script execution are combined in one step so both use the same python binary.
 - script: |
     python -m pip install --upgrade pip
-    python -m pip install msal-msiv2==1.35.0rc2 requests
+    python -m pip install msal requests
     python build\test_mtls_pop_imdsv2.py
   displayName: 'Run Managed Identity E2E Tests – IMDSv2 Python (Windows)'
   condition: eq(variables['Agent.OS'], 'Windows_NT')
@@ -13,7 +13,7 @@ steps:
 # pip install and script execution are combined in one step so both use the same python3 binary.
 - script: |
     python3 -m pip install --upgrade pip
-    python3 -m pip install msal-msiv2==1.35.0rc2 requests
+    python3 -m pip install msal requests
     python3 build/test_mtls_pop_imdsv2.py
   displayName: 'Run Managed Identity E2E Tests – IMDSv2 Python (Linux)'
   condition: eq(variables['Agent.OS'], 'Linux')
