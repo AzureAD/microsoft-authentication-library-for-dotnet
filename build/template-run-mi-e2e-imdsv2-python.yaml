@@ -1,46 +1,19 @@
 steps:
 
-# Detect and install Python if not present (Windows)
-- script: |
-    where python >nul 2>&1 || (
-      echo Python not found, installing via winget...
-      winget install --id Python.Python.3 --silent --accept-package-agreements --accept-source-agreements
-    )
-    python --version
-  displayName: 'Ensure Python is installed (Windows)'
-  condition: eq(variables['Agent.OS'], 'Windows_NT')
-
-# Detect and install Python if not present (Linux)
-- script: |
-    if ! command -v python3 &>/dev/null; then
-      echo "Python not found, installing..."
-      sudo apt-get update -qq
-      sudo apt-get install -y python3 python3-pip
-    fi
-    python3 --version
-  displayName: 'Ensure Python is installed (Linux)'
-  condition: eq(variables['Agent.OS'], 'Linux')
-
-# Install required Python packages (Windows)
+# Install packages and run Python mTLS PoP E2E test (Windows)
+# pip install and script execution are combined in one step so both use the same python binary.
 - script: |
     python -m pip install --upgrade pip
     python -m pip install msal-msiv2==1.35.0rc2 requests
-  displayName: 'Install Python packages (Windows)'
-  condition: eq(variables['Agent.OS'], 'Windows_NT')
-
-# Install required Python packages (Linux)
-- script: |
-    python3 -m pip install --upgrade pip
-    python3 -m pip install msal-msiv2==1.35.0rc2 requests
-  displayName: 'Install Python packages (Linux)'
-  condition: eq(variables['Agent.OS'], 'Linux')
-
-# Run Python mTLS PoP E2E test (Windows)
-- script: python build\test_mtls_pop_imdsv2.py
+    python build\test_mtls_pop_imdsv2.py
   displayName: 'Run Managed Identity E2E Tests – IMDSv2 Python (Windows)'
   condition: eq(variables['Agent.OS'], 'Windows_NT')
 
-# Run Python mTLS PoP E2E test (Linux)
-- script: python3 build/test_mtls_pop_imdsv2.py
+# Install packages and run Python mTLS PoP E2E test (Linux)
+# pip install and script execution are combined in one step so both use the same python3 binary.
+- script: |
+    python3 -m pip install --upgrade pip
+    python3 -m pip install msal-msiv2==1.35.0rc2 requests
+    python3 build/test_mtls_pop_imdsv2.py
   displayName: 'Run Managed Identity E2E Tests – IMDSv2 Python (Linux)'
   condition: eq(variables['Agent.OS'], 'Linux')
