@@ -39,6 +39,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             InitiateLongRunningObo = 1017,
             AcquireTokenInLongRunningObo = 1018,
 
+            // User FIC flow
+            AcquireTokenByUserFederatedIdentityCredential = 1019,
+
             // "2002" is reserved for 1p OTEL signal that telemetry is disabled
         }
 

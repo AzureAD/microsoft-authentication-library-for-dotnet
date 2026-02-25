@@ -1,1 +1,6 @@
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.cancellationToken.get -> System.Threading.CancellationToken
+Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
+Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
+Microsoft.Identity.Client.IByUserFederatedIdentityCredential
+Microsoft.Identity.Client.IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(System.Collections.Generic.IEnumerable<string> scopes, string username, System.Func<System.Threading.Tasks.Task<string>> assertionCallback, string tokenExchangeScope = "api://AzureADTokenExchange/.default") -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
