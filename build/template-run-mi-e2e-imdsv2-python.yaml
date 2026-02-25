@@ -1,19 +1,8 @@
 steps:
 
 # Install packages and run Python mTLS PoP E2E test (Windows)
-# pip install and script execution are combined in one step so both use the same python binary.
 - script: |
     python -m pip install --upgrade pip
-    python -m pip install msal-msiv2==1.35.0rc2 requests cryptography
+    python -m pip install msal-msiv2==1.35.0rc3 requests cryptography
     python build\test_mtls_pop_imdsv2.py
-  displayName: 'Run Managed Identity E2E Tests – IMDSv2 Python (Windows)'
-  condition: eq(variables['Agent.OS'], 'Windows_NT')
-
-# Install packages and run Python mTLS PoP E2E test (Linux)
-# pip install and script execution are combined in one step so both use the same python3 binary.
-- script: |
-    python3 -m pip install --upgrade pip
-    python3 -m pip install msal-msiv2==1.35.0rc3 requests cryptography
-    python3 build/test_mtls_pop_imdsv2.py
-  displayName: 'Run Managed Identity E2E Tests – IMDSv2 Python (Linux)'
-  condition: eq(variables['Agent.OS'], 'Linux')
+  displayName: 'Run Managed Identity E2E Tests – IMDSv2 Python'
