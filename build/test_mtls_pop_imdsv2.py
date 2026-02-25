@@ -35,7 +35,7 @@ try:
         print(f"ERROR: Expected token_type=mtls_pop, got: {result.get('token_type')}", file=sys.stderr)
         print(f"Full result: {json.dumps(result, indent=2)}", file=sys.stderr)
         sys.exit(2)
-    print("✓ PASS: token_type is mtls_pop")
+    print("[PASS] token_type is mtls_pop")
 
     # Extract and display certificate information
     cert_pem = result.get("cert_pem")
@@ -52,7 +52,7 @@ try:
     
     with open("binding_cert.pem", "w") as f:
         f.write(cert_pem)
-    print("✓ Certificate saved to binding_cert.pem")
+    print("[OK] Certificate saved to binding_cert.pem")
 
     if cert_der_b64:
         print(f"\nCertificate DER (base64): {cert_der_b64[:100]}...")
@@ -97,7 +97,7 @@ try:
                 print(f"  Certificate has: {cert_thumbprint}", file=sys.stderr)
                 sys.exit(2)
             
-            print("✓ PASS: cnf.x5t#S256 matches certificate thumbprint")
+            print("[PASS] cnf.x5t#S256 matches certificate thumbprint")
         except Exception as e:
             print(f"ERROR: Could not decode token claims: {e}", file=sys.stderr)
             import traceback
