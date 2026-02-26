@@ -1,34 +1,36 @@
-# Authority Refactoring Design Document
+# Authority Refactoring Design Document  
 
-## Introduction
-This document outlines the design for refactoring the Authority in the Microsoft Authentication Library (MSAL) for .NET.
+## Introduction  
+This document outlines the design for refactoring the authority handling within the Microsoft Authentication Library for .NET. The goal is to improve maintainability, scalability, and usability of authority-related functionalities.
 
-## Goals
-- Improve flexibility in handling different types of authority.
-- Simplify the code structure for authority management.
-- Ensure backward compatibility where necessary.
+## Background  
+The current implementation of authority handling in the library has grown complex over time. This design aims to simplify this implementation by introducing a more modular architecture.
 
-## Current State
-The existing implementation has several hard-coded values and assumptions about authority types. This limits the extensibility of the library.
+## Objectives  
+1. Improve code quality and maintainability.  
+2. Ensure backward compatibility with existing functionalities.  
+3. Enhance scalability for future requirements.
 
-## Proposed Changes
-1. **Introduce Authority Base Class**: Create a base class for different authority types.
-2. **Specific Authority Types**: Implement derived classes for different authority types (e.g., AzureCloudAuthority, B2CAuthority).
-3. **Configuration**: Allow configuration of authority types through app settings or through SDK parameters.
-4. **Testing**: Develop unit tests for each authority type to ensure correct behavior.
+## Proposed Changes  
+### 1. Modular Authority Components  
+- Break down the authority handling into modular components that can be reused across different authentication scenarios.
 
-## Benefits
-- Easier maintenance and extension of the authority handling code.
-- More robust handling of authority types leading to fewer bugs.
+### 2. Unified Authority Interface  
+- Create a unified interface for different authority types, allowing easier swapping and management of authorities.
 
-## Risks
-- Need to ensure backward compatibility.
-- Increased complexity in the code base; requires thorough testing.
+### 3. Enhanced Configuration Options  
+- Provide more robust configuration options for users to define their authorities without changing the core library code.
 
-## Timeline
-- Drafting design: 2026-02-26
-- Implementation: TBD
-- Testing: TBD
+## Implementation Plan  
+1. Identify key areas in the current codebase that require refactoring.  
+2. Establish a timeline for phased implementation.  
+3. Develop unit tests for new components to maintain code coverage.  
+4. Document the new architecture for developers.
 
-## Conclusion
-This refactoring aims to strengthen the foundation of the MSAL library by making authority management more efficient and adaptable.
+## Timeline  
+- Phase 1: Research and Design – 2 weeks  
+- Phase 2: Initial Development – 4 weeks  
+- Phase 3: Testing and Refinement – 2 weeks
+
+## Conclusion  
+This authority refactoring design sets the foundation for a more robust and maintainable library that aligns with future requirements and user needs.
