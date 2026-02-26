@@ -20,6 +20,8 @@ tags:
 
 This skill covers direct mTLS Proof-of-Possession (PoP) token acquisition for target resources without intermediate token exchanges. Use this when you need to acquire an mTLS PoP token directly for a resource like Microsoft Graph, Azure Key Vault, or custom APIs.
 
+> **Note:** This skill focuses on mTLS PoP-specific APIs and patterns. For general credential setup (certificates, FIC, etc.), see the [Confidential Auth Skill](../msal-confidential-auth/shared/credential-setup/) for reusable, granularized patterns.
+
 ## What is Vanilla Flow?
 
 **Vanilla flow** is a single-step, direct token acquisition from Azure AD for a target resource:
@@ -245,10 +247,10 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.KeyAttestation;
 
-// Load certificate from Windows Certificate Store
+// Load certificate - see ../msal-confidential-auth/shared/credential-setup/certificate-setup.md for details
 var cert = GetCertificateFromStore("CN=MyAppCertificate");
 
-// Build Confidential Client with SNI
+// Build Confidential Client with SNI - see ../msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md
 var app = ConfidentialClientApplicationBuilder
     .Create("your-client-id")
     .WithAuthority("https://login.microsoftonline.com/your-tenant-id")
@@ -337,6 +339,8 @@ string response = await caller.CallResourceAsync("https://mtlstb.graph.microsoft
 
 ## Troubleshooting
 
+### mTLS PoP-Specific Issues
+
 | Error/Issue | Solution |
 |-------------|----------|
 | `ManagedIdentityId` is not defined | Add `using Microsoft.Identity.Client.AppConfig;` |
@@ -345,7 +349,15 @@ string response = await caller.CallResourceAsync("https://mtlstb.graph.microsoft
 | `WithAttestationSupport()` not found | Add NuGet: `Microsoft.Identity.Client.KeyAttestation` |
 | "Timeout calling IMDS endpoint" (local) | SAMI doesn't work locally. Use UAMI or Confidential Client |
 | "Unable to get UAMI token" | Check: UAMI exists, assigned to resource, correct ID type used |
-| Certificate not found in store | Verify certificate is in Current User or Local Machine store |
+
+### General Credential and Authentication Issues
+
+For certificate loading, token caching, error handling, and general troubleshooting, see:
+- [Certificate Setup](../msal-confidential-auth/shared/credential-setup/certificate-setup.md) - Loading certificates from file, store, or Key Vault
+- [Certificate SNI Setup](../msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md) - SNI configuration details
+- [Error Handling Patterns](../msal-confidential-auth/shared/patterns/error-handling-patterns.md) - Common error scenarios
+- [Troubleshooting](../msal-confidential-auth/shared/patterns/troubleshooting.md) - Comprehensive troubleshooting guide
+- [Token Caching Strategies](../msal-confidential-auth/shared/patterns/token-caching-strategies.md) - Cache management best practices
 
 ## Additional Resources
 

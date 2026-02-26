@@ -234,6 +234,8 @@ For MSAL.NET integration tests, the test slice region is **westus3**.
 
 ## Troubleshooting Quick Reference
 
+### mTLS PoP-Specific Issues
+
 | Error/Issue | Solution |
 |-------------|----------|
 | `ManagedIdentityId` is not defined | Add `using Microsoft.Identity.Client.AppConfig;` |
@@ -242,6 +244,14 @@ For MSAL.NET integration tests, the test slice region is **westus3**.
 | `WithAttestationSupport()` not found | Add `Microsoft.Identity.Client.KeyAttestation` NuGet |
 | IMDS timeout (local machine) | Use UAMI or Confidential Client for local dev |
 | Unable to get UAMI token | Check UAMI exists, assigned to resource, correct ID type |
+
+### General Credential and Authentication Issues
+
+For comprehensive troubleshooting, certificate setup, error handling, and token caching guidance, see:
+- [Troubleshooting Guide](../msal-confidential-auth/shared/patterns/troubleshooting.md) - Comprehensive troubleshooting for all credential types
+- [Certificate Setup](../msal-confidential-auth/shared/credential-setup/certificate-setup.md) - Certificate loading and validation
+- [Error Handling Patterns](../msal-confidential-auth/shared/patterns/error-handling-patterns.md) - Common error scenarios and solutions
+- [Token Caching Strategies](../msal-confidential-auth/shared/patterns/token-caching-strategies.md) - Cache management best practices
 
 ## Additional Resources
 
