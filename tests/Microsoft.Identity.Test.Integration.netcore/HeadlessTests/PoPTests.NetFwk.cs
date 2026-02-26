@@ -38,6 +38,8 @@ using System.Security.Claims;
 using System.Net.Sockets;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.ConstrainedExecution;
+using System.Collections.Generic;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -76,12 +78,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.HttpMethod = HttpMethod.Get;
 
             var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            string secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
+            var clientCertificate = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(appConfig.AppId)
                 .WithAuthority(appConfig.Authority)
-                .WithClientSecret(secret)
+                .WithCertificate(clientCertificate, sendX5C: true)
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
@@ -334,30 +336,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
         [TestMethod]
-        public async Task PopTest_ExternalWilsonSigning_Async()
+        public async Task PopTest_WithCustomClaims_Async()
         {
             var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            string secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
+            var clientCertificate = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(appConfig.AppId)
                 .WithAuthority(appConfig.Authority)
-                .WithClientSecret(secret)
+                .WithCertificate(clientCertificate)
                 .WithExperimentalFeatures(true)
                 .Build();
 
-            // Create an RSA key Wilson style (SigningCredentials)
-            var key = CreateRsaSecurityKey();
-            var popCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
-
+            // Use the client certificate to create signing credentials. This avoids maintaining 2 keys (client cert and POP key) and provides good security.
+            // it also helps cache the POP tokens, since the same key can be used on multiple machines.
+            // But a separate key can be used.
+            
+            var popCredentials = new SigningCredentials(new X509SecurityKey(clientCertificate), SecurityAlgorithms.RsaSha256);
             var popConfig = new PoPAuthenticationConfiguration()
             {
                 PopCryptoProvider = new SigningCredentialsToPopCryptoProviderAdapter(popCredentials, true),
                 SignHttpRequest = false,
             };
 
+            // this fetches the POP assertion, i.e. an incomplete POP token. The client still needs to add SHR and to sign it.
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
                 .WithSignedHttpRequestProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
@@ -375,23 +378,35 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Check the algorithm
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
 
+            // Create custom SHR with additional claims.
             SignedHttpRequestDescriptor signedHttpRequestDescriptor =
                 new SignedHttpRequestDescriptor(
                     result.AccessToken,
                     new IdentityModel.Protocols.HttpRequestData()
                     {
                         Uri = new Uri(ProtectedUrl),
-                        Method = HttpMethod.Post.ToString()
+                        Method = HttpMethod.Post.ToString(),                         
                     },
-                    popCredentials);
-            var signedHttpRequestHandler = new SignedHttpRequestHandler();
-            string req = signedHttpRequestHandler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
+                    popCredentials)
+                {
+                    AdditionalPayloadClaims = new Dictionary<string, object>()
+                    {
+                        { "custom_parameter", "custom_value" }
+                    }
+                };
 
-            PoPValidator.VerifyPoPToken(
+            var signedHttpRequestHandler = new SignedHttpRequestHandler();
+            string finalPopToken = signedHttpRequestHandler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
+
+            var claims = PoPValidator.VerifyPoPToken(
                 appConfig.AppId,
                 ProtectedUrl,
                 HttpMethod.Post,
-                req, "pop");
+                finalPopToken, "pop");
+
+            Claim customClaim = claims.FindFirst("custom_parameter");
+            Assert.IsNotNull(customClaim, "custom_parameter claim should be present in the token");
+            Assert.AreEqual("custom_value", customClaim.Value, "custom_parameter claim should have the expected value");
 
             var result2 = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
              .WithSignedHttpRequestProofOfPossession(popConfig)
