@@ -510,7 +510,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 case ManagedIdentitySource.ServiceFabric:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedRequestHeaders.Add("secret", "secret");
-                    expectedQueryParams.Add("api-version", "2019-07-01-preview");
+                    expectedQueryParams.Add("api-version", "2020-05-01");
                     expectedQueryParams.Add("resource", resource);
                     break;
                 case ManagedIdentitySource.MachineLearning:

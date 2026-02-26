@@ -218,7 +218,9 @@ namespace Microsoft.Identity.Client
             }
 
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
-            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
+            // For client credentials flow, ID token is not available, so fall back to access token's tenant
+            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5743
+            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId ?? msalAccessTokenCacheItem?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             SpaAuthCode = spaAuthCode;
             _authenticationScheme = authenticationScheme;
