@@ -26,5 +26,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             // no-op
         }
+
+        public void DeleteAllForAlias(string alias, ILoggerAdapter logger)
+        {
+            // no-op
+        }
     }
 }

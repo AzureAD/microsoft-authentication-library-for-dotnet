@@ -270,6 +270,61 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 logVerbose: s => logger.Verbose(() => s));
         }
 
+        public void DeleteAllForAlias(string alias, ILoggerAdapter logger)
+        {
+            // Best-effort: short, non-configurable timeout.
+            InterprocessLock.TryWithAliasLock(
+                alias,
+                timeout: TimeSpan.FromMilliseconds(300),
+                action: () =>
+                {
+                    try
+                    {
+                        using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                        store.Open(OpenFlags.ReadWrite);
+
+                        X509Certificate2[] items;
+                        try
+                        {
+                            items = new X509Certificate2[store.Certificates.Count];
+                            store.Certificates.CopyTo(items, 0);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Verbose(() => "[PersistentCert] Store snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
+                            items = store.Certificates.Cast<X509Certificate2>().ToArray();
+                        }
+
+                        int removed = 0;
+
+                        foreach (var existing in items)
+                        {
+                            try
+                            {
+                                if (!MsiCertificateFriendlyNameEncoder.TryDecode(existing.FriendlyName, out var decodedAlias, out _))
+                                    continue;
+                                if (!StringComparer.Ordinal.Equals(decodedAlias, alias))
+                                    continue;
+
+                                // Delete ALL certs for this alias
+                                store.Remove(existing);
+                                removed++;
+                                logger?.Verbose(() => $"[PersistentCert] Deleted certificate from store for alias '{alias}'");
+                            }
+                            finally
+                            {
+                                existing.Dispose();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Verbose(() => "[PersistentCert] DeleteAllForAlias failed: " + ex.Message);
+                    }
+                },
+                logVerbose: s => logger.Verbose(() => s));
+        }
+
         /// <summary>
         /// Deletes only certificates that are actually expired (NotAfter &lt; nowUtc),
         /// scoped to the given alias (cache key) via FriendlyName.
