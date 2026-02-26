@@ -41,20 +41,7 @@ namespace Microsoft.Identity.Client.Instance.Registrations
         /// </summary>
         private static bool IsB2C(Uri uri)
         {
-            string host = uri.Host;
-            if (host.Contains(".b2clogin.com"))
-            {
-                return true;
-            }
-
-            string path = uri.AbsolutePath;
-            if (path.StartsWith("/" + B2CAuthority.Prefix + "/", StringComparison.OrdinalIgnoreCase) ||
-                path.IndexOf("/b2c_1_", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return true;
-            }
-
-            return false;
+            return AuthorityDetectionHelpers.IsB2CUri(uri);
         }
     }
 }

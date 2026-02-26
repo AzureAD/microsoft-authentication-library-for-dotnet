@@ -94,10 +94,11 @@ namespace Microsoft.Identity.Client.Instance
             AuthorityInfo mergedInfo;
             if (configAuthority != null)
             {
-                bool isMsaPassthrough = _requestContext.ServiceBundle?.Config?.BrokerOptions?.MsaPassthrough == true
-                    && _requestContext.ServiceBundle?.Config?.IsBrokerEnabled == true;
+                var appConfig = _requestContext.ServiceBundle?.Config;
+                bool isMsaPassthrough = appConfig?.IsBrokerEnabled == true
+                    && appConfig?.BrokerOptions?.MsaPassthrough == true;
 
-                bool multiCloudSupportEnabled = _requestContext.ServiceBundle?.Config?.MultiCloudSupportEnabled == true;
+                bool multiCloudSupportEnabled = appConfig?.MultiCloudSupportEnabled == true;
 
                 mergedInfo = await AuthorityMerger.MergeAsync(
                     configAuthority,

@@ -46,28 +46,23 @@ namespace Microsoft.Identity.Client.Instance.Registrations
         /// </summary>
         private static bool IsAad(Uri uri)
         {
-            string host = uri.Host;
-
             // Exclude authorities handled by more-specific registrations
-            if (host.EndsWith(Internal.Constants.CiamAuthorityHostSuffix, StringComparison.OrdinalIgnoreCase))
+            if (uri.Host.EndsWith(Internal.Constants.CiamAuthorityHostSuffix, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
 
-            string path = uri.AbsolutePath;
-            if (path.StartsWith("/adfs", StringComparison.OrdinalIgnoreCase))
+            if (uri.AbsolutePath.StartsWith("/adfs", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
 
-            if (host.Contains("dstsv2") || host.EndsWith(".dsts.core.windows.net", StringComparison.OrdinalIgnoreCase))
+            if (AuthorityDetectionHelpers.IsDstsUri(uri))
             {
                 return false;
             }
 
-            // B2C path prefix
-            if (path.StartsWith("/" + B2CAuthority.Prefix + "/", StringComparison.OrdinalIgnoreCase) ||
-                path.IndexOf("/b2c_1_", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (AuthorityDetectionHelpers.IsB2CUri(uri))
             {
                 return false;
             }

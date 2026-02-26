@@ -47,4 +47,38 @@ namespace Microsoft.Identity.Client.Instance.Registrations
             return new AuthorityInfo(_authorityType, authorityUri, _validateAuthority);
         }
     }
+
+    /// <summary>
+    /// Shared detection helper methods used across multiple authority type registrations.
+    /// Centralizes common pattern-matching logic to avoid duplication.
+    /// </summary>
+    internal static class AuthorityDetectionHelpers
+    {
+        /// <summary>
+        /// Returns <see langword="true"/> if the URI represents a B2C authority,
+        /// based on the host or path pattern.
+        /// </summary>
+        internal static bool IsB2CUri(Uri uri)
+        {
+            if (uri.Host.Contains(".b2clogin.com"))
+            {
+                return true;
+            }
+
+            string path = uri.AbsolutePath;
+            return path.StartsWith("/" + B2CAuthority.Prefix + "/", StringComparison.OrdinalIgnoreCase) ||
+                   path.IndexOf("/b2c_1_", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the URI represents a DSTS authority,
+        /// based on the host pattern.
+        /// </summary>
+        internal static bool IsDstsUri(Uri uri)
+        {
+            string host = uri.Host;
+            return host.Contains("dstsv2") ||
+                   host.EndsWith(".dsts.core.windows.net", StringComparison.OrdinalIgnoreCase);
+        }
+    }
 }

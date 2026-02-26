@@ -40,9 +40,7 @@ namespace Microsoft.Identity.Client.Instance.Registrations
         /// </summary>
         private static bool IsDsts(Uri uri)
         {
-            string host = uri.Host;
-            return host.Contains("dstsv2") ||
-                   host.EndsWith(".dsts.core.windows.net", StringComparison.OrdinalIgnoreCase);
+            return AuthorityDetectionHelpers.IsDstsUri(uri);
         }
     }
 }
