@@ -19,6 +19,14 @@ const { requestLogger } = require('./middleware/requestLogger');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// ─── Proxy Trust ──────────────────────────────────────────────────────────────
+// Azure App Service (and similar PaaS platforms) terminates TLS and forwards
+// requests through a single internal proxy that injects X-Forwarded-For.
+// Setting trust proxy to 1 tells Express to trust exactly one hop, which
+// lets express-rate-limit correctly identify client IPs from that header
+// instead of throwing a ValidationError about the unexpected header.
+app.set('trust proxy', 1);
+
 // ─── Security Middleware ──────────────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: {
