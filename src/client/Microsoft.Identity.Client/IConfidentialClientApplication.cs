@@ -87,6 +87,38 @@ namespace Microsoft.Identity.Client
         GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
 
         /// <summary>
+        /// Acquires an app-only token for an agent identity using Federated Managed Identity (FMI).
+        /// Internally, this method:
+        /// <list type="number">
+        /// <item>Obtains an FMI credential (FIC) from the token exchange endpoint using the current CCA's credential.</item>
+        /// <item>Uses the FIC as a client assertion to acquire a token for the requested scopes on behalf of the agent.</item>
+        /// </list>
+        /// </summary>
+        /// <param name="agentId">The FMI path or client ID of the agent identity.</param>
+        /// <param name="scopes">Scopes requested to access a protected API, e.g., <c>https://graph.microsoft.com/.default</c>.</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request.</returns>
+        AcquireTokenForAgentParameterBuilder AcquireTokenForAgent(string agentId, IEnumerable<string> scopes);
+
+        /// <summary>
+        /// Acquires a user-delegated token for an agent identity, acting on behalf of the specified user,
+        /// using Federated Managed Identity (FMI) and the <c>user_fic</c> grant type.
+        /// Internally, this method:
+        /// <list type="number">
+        /// <item>Obtains an FMI credential (FIC) from the token exchange endpoint using the current CCA's credential.</item>
+        /// <item>Obtains a User FIC for the agent identity.</item>
+        /// <item>Exchanges the User FIC for a user-delegated token via the <c>user_fic</c> grant type.</item>
+        /// </list>
+        /// After a successful acquisition, use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+        /// with the returned account for subsequent cached token lookups.
+        /// </summary>
+        /// <param name="agentId">The FMI path or client ID of the agent identity.</param>
+        /// <param name="scopes">Scopes requested to access a protected API, e.g., <c>https://graph.microsoft.com/.default</c>.</param>
+        /// <param name="userPrincipalName">The UPN of the user on whose behalf the agent is acting, e.g., <c>user@contoso.com</c>.</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request.</returns>
+        AcquireTokenForAgentOnBehalfOfUserParameterBuilder AcquireTokenForAgentOnBehalfOfUser(
+            string agentId, IEnumerable<string> scopes, string userPrincipalName);
+
+        /// <summary>
         /// In confidential client apps use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> instead.
         /// </summary>
         [Obsolete("In confidential client apps use AcquireTokenSilent(scopes, account) instead.")]

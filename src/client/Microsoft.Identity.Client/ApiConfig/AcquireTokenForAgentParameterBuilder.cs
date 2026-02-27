@@ -9,14 +9,16 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Builder for acquiring an app-only token for an agent identity.
-    /// Use <see cref="IAgenticApplication.AcquireTokenForAgent(IEnumerable{string})"/> to create this builder.
+    /// Builder for acquiring an app-only token for an agent identity via a
+    /// <see cref="IConfidentialClientApplication"/>.
+    /// Use <see cref="IConfidentialClientApplication.AcquireTokenForAgent(string, IEnumerable{string})"/>
+    /// to create this builder.
     /// </summary>
     /// <remarks>
     /// This flow internally:
     /// <list type="number">
-    /// <item>Obtains an FMI credential from the platform using the platform certificate.</item>
-    /// <item>Uses the FMI credential as a client assertion to acquire a token for the requested scopes.</item>
+    /// <item>Obtains an FMI credential (FIC) from the token exchange endpoint using the CCA's credential.</item>
+    /// <item>Uses the FIC as a client assertion to acquire a token for the requested scopes.</item>
     /// </list>
     /// </remarks>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
@@ -24,14 +26,17 @@ namespace Microsoft.Identity.Client
 #endif
     public sealed class AcquireTokenForAgentParameterBuilder
     {
-        private readonly AgenticApplication _app;
+        private readonly ConfidentialClientApplication _app;
+        private readonly string _agentId;
         private readonly IEnumerable<string> _scopes;
         private bool _forceRefresh;
         private Guid? _correlationId;
 
-        internal AcquireTokenForAgentParameterBuilder(AgenticApplication app, IEnumerable<string> scopes)
+        internal AcquireTokenForAgentParameterBuilder(
+            ConfidentialClientApplication app, string agentId, IEnumerable<string> scopes)
         {
             _app = app ?? throw new ArgumentNullException(nameof(app));
+            _agentId = agentId ?? throw new ArgumentNullException(nameof(agentId));
             _scopes = scopes ?? throw new ArgumentNullException(nameof(scopes));
         }
 
@@ -65,7 +70,7 @@ namespace Microsoft.Identity.Client
         public Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken = default)
         {
             return _app.ExecuteAgentTokenAcquisitionAsync(
-                _scopes, _forceRefresh, _correlationId, cancellationToken);
+                _agentId, _scopes, _forceRefresh, _correlationId, cancellationToken);
         }
     }
 }

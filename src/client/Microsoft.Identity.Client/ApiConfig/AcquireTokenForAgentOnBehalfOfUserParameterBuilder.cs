@@ -10,33 +10,39 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Builder for acquiring a user-delegated token for an agent identity, acting on behalf of a specified user.
-    /// Use <see cref="IAgenticApplication.AcquireTokenForAgentOnBehalfOfUser(IEnumerable{string}, string)"/> to create this builder.
+    /// Use <see cref="IConfidentialClientApplication.AcquireTokenForAgentOnBehalfOfUser(string, IEnumerable{string}, string)"/>
+    /// to create this builder.
     /// </summary>
     /// <remarks>
     /// This flow internally:
     /// <list type="number">
-    /// <item>Obtains an FMI credential from the platform using the platform certificate.</item>
+    /// <item>Obtains an FMI credential (FIC) from the token exchange endpoint using the CCA's credential.</item>
     /// <item>Obtains a User Federated Identity Credential (User FIC) for the agent.</item>
     /// <item>Exchanges the User FIC for a user-delegated token via the <c>user_fic</c> grant type.</item>
     /// </list>
-    /// After a successful acquisition, you can use <see cref="IAgenticApplication.AcquireTokenSilent"/> with the
-    /// returned account for subsequent cached token lookups.
+    /// After a successful acquisition, you can use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+    /// with the returned account for subsequent cached token lookups.
     /// </remarks>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
     public sealed class AcquireTokenForAgentOnBehalfOfUserParameterBuilder
     {
-        private readonly AgenticApplication _app;
+        private readonly ConfidentialClientApplication _app;
+        private readonly string _agentId;
         private readonly IEnumerable<string> _scopes;
         private readonly string _userPrincipalName;
         private bool _forceRefresh;
         private Guid? _correlationId;
 
         internal AcquireTokenForAgentOnBehalfOfUserParameterBuilder(
-            AgenticApplication app, IEnumerable<string> scopes, string userPrincipalName)
+            ConfidentialClientApplication app,
+            string agentId,
+            IEnumerable<string> scopes,
+            string userPrincipalName)
         {
             _app = app ?? throw new ArgumentNullException(nameof(app));
+            _agentId = agentId ?? throw new ArgumentNullException(nameof(agentId));
             _scopes = scopes ?? throw new ArgumentNullException(nameof(scopes));
             _userPrincipalName = userPrincipalName ?? throw new ArgumentNullException(nameof(userPrincipalName));
         }
@@ -71,7 +77,7 @@ namespace Microsoft.Identity.Client
         public Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken = default)
         {
             return _app.ExecuteAgentOnBehalfOfUserAsync(
-                _scopes, _userPrincipalName, _forceRefresh, _correlationId, cancellationToken);
+                _agentId, _scopes, _userPrincipalName, _forceRefresh, _correlationId, cancellationToken);
         }
     }
 }

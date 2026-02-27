@@ -1,0 +1,34 @@
+{
+  "aud": "https://graph.microsoft.com",
+  "iss": "https://sts.windows.net/10c419d4-4a50-45b2-aa4e-919fb84df24f/",
+  "iat": 1772116820,
+  "nbf": 1772116820,
+  "exp": 1772120720,
+  "aio": "k2ZgYNB+d4klYinL6VXezG8Kv0XOv6CfvZtv7csMlcCaaNU/3xIA",
+  "app_displayname": "agent identity1",
+  "appid": "ab18ca07-d139-4840-8b3b-4be9610c6ed5",
+  "appidacr": "2",
+  "idp": "https://sts.windows.net/10c419d4-4a50-45b2-aa4e-919fb84df24f/",
+  "idtyp": "app",
+  "oid": "ab18ca07-d139-4840-8b3b-4be9610c6ed5",
+  "rh": "1.AXEB1BnEEFBKskWqTpGfuE3yTwMAAAAAAAAAwAAAAAAAAAAAAABxAQ.",
+  "roles": [
+    "Application.Read.All"
+  ],
+  "sub": "ab18ca07-d139-4840-8b3b-4be9610c6ed5",
+  "tenant_region_scope": "NA",
+  "tid": "10c419d4-4a50-45b2-aa4e-919fb84df24f",
+  "uti": "IYGgzr8M10aNw3nANQ54AA",
+  "ver": "1.0",
+  "wids": [
+    "0997a1d0-0d1d-4acb-b408-d5ca73121e90"
+  ],
+  "xms_act_fct": "3 11 9",
+  "xms_ftd": "sw2pKG6aFqnm6r73WSeCHfTFQuXdVSMGGhwt6ZXNZc0BdXNlYXN0LWRzbXM",
+  "xms_idrel": "7 24",
+  "xms_par_app_azp": "aab5089d-e764-47e3-9f28-cc11c2513821",
+  "xms_rd": "0.42LjYBJi-sgkJMLBLiSwXPdScKJQr_NWO_4eqyYDb6Aop5BACO8aMca9x723774btjW2UgsoyiEkwMwAAQegNFCUW0jg2WZn59bGuydzGyIX-4RWM0jxcXAJcRmamxsZGppZGFoCAA",
+  "xms_sub_fct": "3 11 9",
+  "xms_tcdt": 1753717349,
+  "xms_tnt_fct": "3 12"
+}
