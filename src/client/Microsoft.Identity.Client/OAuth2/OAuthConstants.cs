@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string SpaCode = "return_spa_code"; // not a standard OAuth2 param
         public const string FmiPath = "fmi_path"; // not a standard OAuth2 param
         public const string Attributes = "attributes"; // not a standard OAuth2 param
+        public const string UserFederatedIdentityCredential = "user_federated_identity_credential"; // not a standard OAuth2 param
     }
 
     internal static class OAuth2GrantType
@@ -58,6 +59,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string JwtBearer = "urn:ietf:params:oauth:grant-type:jwt-bearer";
         public const string Password = "password";
         public const string DeviceCode = "device_code";
+        public const string UserFic = "user_fic";
     }
 
     internal static class OAuth2ResponseType
