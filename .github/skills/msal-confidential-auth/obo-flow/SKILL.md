@@ -23,15 +23,15 @@ ID tokens are for authentication; access tokens are for authorization and API ac
 
 ### Generate Code Snippet
 Agent can show code for each credential type:
-- Standard Certificate: [with-certificate.cs](../shared/code-examples/with-certificate.cs)
-- Certificate with SNI: [with-certificate-sni.cs](../shared/code-examples/with-certificate-sni.cs)
-- Federated Identity Credentials: [with-federated-identity-credentials.cs](../shared/code-examples/with-federated-identity-credentials.cs)
+- Standard Certificate: [with-certificate.cs](../../msal-shared/code-examples/with-certificate.cs)
+- Certificate with SNI: [with-certificate-sni.cs](../../msal-shared/code-examples/with-certificate-sni.cs)
+- Federated Identity Credentials: [with-federated-identity-credentials.cs](../../msal-shared/code-examples/with-federated-identity-credentials.cs)
 
 ### Setup Guidance
 Reference appropriate credential setup:
-- [Certificate Setup](../shared/credential-setup/certificate-setup.md)
-- [Certificate with SNI](../shared/credential-setup/certificate-sni-setup.md)
-- [Federated Identity Credentials](../shared/credential-setup/federated-identity-credentials.md)
+- [Certificate Setup](../../msal-shared/credential-setup/certificate-setup.md)
+- [Certificate with SNI](../../msal-shared/credential-setup/certificate-sni-setup.md)
+- [Federated Identity Credentials](../../msal-shared/credential-setup/federated-identity-credentials.md)
 
 ### Example: Web API with Certificate
 ```csharp
@@ -64,15 +64,15 @@ public async Task<IActionResult> GetData()
 ```
 
 ### Error Resolution
-Refer to [Troubleshooting Guide](../shared/patterns/troubleshooting.md)
+Refer to [Troubleshooting Guide](../../msal-shared/patterns/troubleshooting.md)
 
 **Common OBO errors:**
 - `MsalUiRequiredException`: MFA or conditional access required—requires client re-authentication
 - Invalid token: Verify access token (not ID token) is passed
 
 ### Best Practices
-- Use [Token Caching Strategies](../shared/patterns/token-caching-strategies.md) for optimal session-based token caching
-- Implement [Error Handling Patterns](../shared/patterns/error-handling-patterns.md)
+- Use [Token Caching Strategies](../../msal-shared/patterns/token-caching-strategies.md) for optimal session-based token caching
+- Implement [Error Handling Patterns](../../msal-shared/patterns/error-handling-patterns.md)
 - Always validate incoming token before using in OBO
 - Extract `tid` claim from user token for guest user scenarios—use tenant-specific authority, not /common
 - For multi-instance deployments and advanced caching, see [Token cache serialization documentation](https://learn.microsoft.com/en-us/entra/msal/dotnet/how-to/token-cache-serialization?tabs=msal)

@@ -20,15 +20,15 @@ Authorization Code Flow is used by web applications to authenticate users and ob
 
 ### Generate Code Snippet
 Agent can show code snippets for each credential type:
-- Standard Certificate: [with-certificate.cs](../shared/code-examples/with-certificate.cs)
-- Certificate with SNI: [with-certificate-sni.cs](../shared/code-examples/with-certificate-sni.cs)
-- Federated Identity Credentials: [with-federated-identity-credentials.cs](../shared/code-examples/with-federated-identity-credentials.cs)
+- Standard Certificate: [with-certificate.cs](../../msal-shared/code-examples/with-certificate.cs)
+- Certificate with SNI: [with-certificate-sni.cs](../../msal-shared/code-examples/with-certificate-sni.cs)
+- Federated Identity Credentials: [with-federated-identity-credentials.cs](../../msal-shared/code-examples/with-federated-identity-credentials.cs)
 
 ### Setup Guidance
 Reference appropriate credential setup:
-- [Certificate Setup](../shared/credential-setup/certificate-setup.md)
-- [Certificate with SNI](../shared/credential-setup/certificate-sni-setup.md)
-- [Federated Identity Credentials](../shared/credential-setup/federated-identity-credentials.md)
+- [Certificate Setup](../../msal-shared/credential-setup/certificate-setup.md)
+- [Certificate with SNI](../../msal-shared/credential-setup/certificate-sni-setup.md)
+- [Federated Identity Credentials](../../msal-shared/credential-setup/federated-identity-credentials.md)
 
 ### Example: Web Application with Certificate
 ```csharp
@@ -54,11 +54,11 @@ public async Task HandleCallback(string code, string state)
 ```
 
 ### Error Resolution
-Refer to [Troubleshooting Guide](../shared/patterns/troubleshooting.md)
+Refer to [Troubleshooting Guide](../../msal-shared/patterns/troubleshooting.md)
 
 ### Best Practices
-- Use [Token Caching Strategies](../shared/patterns/token-caching-strategies.md) for optimal token acquisition
-- Implement [Error Handling Patterns](../shared/patterns/error-handling-patterns.md)
+- Use [Token Caching Strategies](../../msal-shared/patterns/token-caching-strategies.md) for optimal token acquisition
+- Implement [Error Handling Patterns](../../msal-shared/patterns/error-handling-patterns.md)
 - Store refresh tokens securely
 - Use PKCE for native clients
 - For advanced caching options including distributed caches for multi-instance deployments, see [Token cache serialization documentation](https://learn.microsoft.com/en-us/entra/msal/dotnet/how-to/token-cache-serialization?tabs=msal)

@@ -15,8 +15,6 @@ GitHub Copilot Agent Skills are specialized knowledge modules that help Copilot 
 
 ### 1. Confidential Client Authentication (`msal-confidential-auth/`)
 
-> **📖 [Full documentation](msal-confidential-auth/README.md)**
-
 A comprehensive skill set for confidential client authentication patterns in MSAL.NET, covering three core flows with granularized, reusable credential setup patterns.
 
 #### Authentication Flows
@@ -30,19 +28,19 @@ A comprehensive skill set for confidential client authentication patterns in MSA
 All skills reference these granularized patterns:
 
 **Credential Setup:**
-- [Certificate Setup](msal-confidential-auth/shared/credential-setup/certificate-setup.md) - Load from file, store, or Key Vault
-- [Certificate SNI Setup](msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md) - Subject Name Identifier configuration
-- [Federated Identity Credentials](msal-confidential-auth/shared/credential-setup/federated-identity-credentials.md) - Keyless authentication
+- [Certificate Setup](msal-shared/credential-setup/certificate-setup.md) - Load from file, store, or Key Vault
+- [Certificate SNI Setup](msal-shared/credential-setup/certificate-sni-setup.md) - Subject Name Identifier configuration
+- [Federated Identity Credentials](msal-shared/credential-setup/federated-identity-credentials.md) - Keyless authentication
 
 **Patterns & Best Practices:**
-- [Token Caching Strategies](msal-confidential-auth/shared/patterns/token-caching-strategies.md) - Cache management
-- [Error Handling Patterns](msal-confidential-auth/shared/patterns/error-handling-patterns.md) - Common error scenarios
-- [Troubleshooting Guide](msal-confidential-auth/shared/patterns/troubleshooting.md) - Comprehensive troubleshooting
+- [Token Caching Strategies](msal-shared/patterns/token-caching-strategies.md) - Cache management
+- [Error Handling Patterns](msal-shared/patterns/error-handling-patterns.md) - Common error scenarios
+- [Troubleshooting Guide](msal-shared/patterns/troubleshooting.md) - Comprehensive troubleshooting
 
 **Code Examples:**
-- [with-certificate.cs](msal-confidential-auth/shared/code-examples/with-certificate.cs) - Standard certificate authentication
-- [with-certificate-sni.cs](msal-confidential-auth/shared/code-examples/with-certificate-sni.cs) - Certificate with SNI
-- [with-federated-identity-credentials.cs](msal-confidential-auth/shared/code-examples/with-federated-identity-credentials.cs) - FIC authentication
+- [with-certificate.cs](msal-shared/code-examples/with-certificate.cs) - Standard certificate authentication
+- [with-certificate-sni.cs](msal-shared/code-examples/with-certificate-sni.cs) - Certificate with SNI
+- [with-federated-identity-credentials.cs](msal-shared/code-examples/with-federated-identity-credentials.cs) - FIC authentication
 
 #### Agent Capabilities
 
@@ -66,7 +64,7 @@ For each flow, agents can help with:
 
 ### 2. mTLS Proof-of-Possession (PoP) Skills
 
-Specialized skills for mTLS PoP authentication with Managed Identity and Confidential Client support. These skills **reference the shared patterns** from `msal-confidential-auth/shared/` for DRY compliance.
+Specialized skills for mTLS PoP authentication with Managed Identity and Confidential Client support. These skills **reference the shared patterns** from `msal-shared/` for DRY compliance.
 
 #### `msal-mtls-pop-guidance/`
 
@@ -106,7 +104,7 @@ Specialized skills for mTLS PoP authentication with Managed Identity and Confide
 
 **When to use:** Acquire an mTLS PoP token directly for a target resource (Microsoft Graph, Azure Key Vault, Azure Storage, custom APIs).
 
-**References:** [Certificate Setup](msal-confidential-auth/shared/credential-setup/certificate-setup.md), [Certificate SNI Setup](msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md), [Troubleshooting](msal-confidential-auth/shared/patterns/troubleshooting.md)
+**References:** [Certificate Setup](msal-shared/credential-setup/certificate-setup.md), [Certificate SNI Setup](msal-shared/credential-setup/certificate-sni-setup.md), [Troubleshooting](msal-shared/patterns/troubleshooting.md)
 
 **📄 [View Skill](msal-mtls-pop-vanilla/SKILL.md)**
 
@@ -131,7 +129,7 @@ Specialized skills for mTLS PoP authentication with Managed Identity and Confide
 
 **When to use:** Workload identity federation scenarios requiring two-leg token exchange (Kubernetes workload identity, multi-tenant authentication chains, cross-tenant scenarios).
 
-**References:** [Federated Identity Credentials Setup](msal-confidential-auth/shared/credential-setup/federated-identity-credentials.md), [Certificate Setup](msal-confidential-auth/shared/credential-setup/certificate-setup.md), [Troubleshooting](msal-confidential-auth/shared/patterns/troubleshooting.md)
+**References:** [Federated Identity Credentials Setup](msal-shared/credential-setup/federated-identity-credentials.md), [Certificate Setup](msal-shared/credential-setup/certificate-setup.md), [Troubleshooting](msal-shared/patterns/troubleshooting.md)
 
 **📄 [View Skill](msal-mtls-pop-fic-two-leg/SKILL.md)**
 
@@ -153,9 +151,9 @@ Specialized skills for mTLS PoP authentication with Managed Identity and Confide
 
 | Credential Type | Setup Guide |
 |-----------------|-------------|
-| Standard Certificate | [Certificate Setup](msal-confidential-auth/shared/credential-setup/certificate-setup.md) |
-| Certificate with SNI | [Certificate SNI Setup](msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md) |
-| Federated Identity Credentials | [FIC Setup](msal-confidential-auth/shared/credential-setup/federated-identity-credentials.md) |
+| Standard Certificate | [Certificate Setup](msal-shared/credential-setup/certificate-setup.md) |
+| Certificate with SNI | [Certificate SNI Setup](msal-shared/credential-setup/certificate-sni-setup.md) |
+| Federated Identity Credentials | [FIC Setup](msal-shared/credential-setup/federated-identity-credentials.md) |
 | System-Assigned Managed Identity | [Vanilla mTLS PoP](msal-mtls-pop-vanilla/SKILL.md) (Azure only) |
 | User-Assigned Managed Identity | [Vanilla mTLS PoP](msal-mtls-pop-vanilla/SKILL.md) (3 ID types) |
 
@@ -215,7 +213,7 @@ Each skill includes production-ready C# helper classes following MSAL.NET conven
 ### DRY Principle
 
 Skills follow the **Don't Repeat Yourself (DRY)** principle:
-- **Shared patterns** live in `msal-confidential-auth/shared/` (single source of truth)
+- **Shared patterns** live in `msal-shared/` (single source of truth)
 - **Individual skills** reference shared patterns via links (no duplication)
 - **Updates** to credential setup, error handling, or troubleshooting happen once
 - **Composition** is easy - mix and match patterns from multiple skills
@@ -232,16 +230,19 @@ skill-name/
 
 #### Skill Sets with Shared Resources
 ```
-skill-set-name/
-├── README.md                 # Skill set-specific overview
-├── flow1/
-│   └── SKILL.md              # Flow-specific documentation
-├── flow2/
-│   └── SKILL.md
-└── shared/                   # Reusable patterns (referenced by all)
-    ├── code-examples/        # Copy-paste code snippets
-    ├── credential-setup/     # Setup guides by credential type
-    └── patterns/             # Common patterns, troubleshooting
+.github/skills/
+├── msal-shared/                  # Shared resources for all skill sets (DRY)
+│   ├── code-examples/            # Copy-paste code snippets
+│   ├── credential-setup/         # Setup guides by credential type
+│   └── patterns/                 # Common patterns, troubleshooting
+├── skill-set-name/
+│   ├── flow1/
+│   │   └── SKILL.md              # Flow-specific documentation
+│   └── flow2/
+│       └── SKILL.md
+└── individual-skill-name/
+    ├── SKILL.md                  # Main documentation with YAML frontmatter
+    └── HelperClass.cs            # Optional production helper class
 ```
 
 ### YAML Frontmatter Format
@@ -273,7 +274,7 @@ When adding new skills:
 5. **Document requirements** - List NuGet packages, MSAL versions, target frameworks
 6. **Use real IDs** - When applicable, use example IDs from E2E tests
 7. **Follow conventions** - Adhere to MSAL.NET coding conventions in helper classes
-8. **Reference shared patterns** - Link to `msal-confidential-auth/shared/` instead of duplicating content (DRY principle)
+8. **Reference shared patterns** - Link to `msal-shared/` instead of duplicating content (DRY principle)
 9. **Update catalog** - Add new skills to this README for discoverability
 
 ## Additional Resources
