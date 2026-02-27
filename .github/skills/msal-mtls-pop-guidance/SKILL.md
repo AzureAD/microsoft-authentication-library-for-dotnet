@@ -248,10 +248,10 @@ For MSAL.NET integration tests, the test slice region is **westus3**.
 ### General Credential and Authentication Issues
 
 For comprehensive troubleshooting, certificate setup, error handling, and token caching guidance, see:
-- [Troubleshooting Guide](../msal-confidential-auth/shared/patterns/troubleshooting.md) - Comprehensive troubleshooting for all credential types
-- [Certificate Setup](../msal-confidential-auth/shared/credential-setup/certificate-setup.md) - Certificate loading and validation
-- [Error Handling Patterns](../msal-confidential-auth/shared/patterns/error-handling-patterns.md) - Common error scenarios and solutions
-- [Token Caching Strategies](../msal-confidential-auth/shared/patterns/token-caching-strategies.md) - Cache management best practices
+- [Troubleshooting Guide](../msal-shared/patterns/troubleshooting.md) - Comprehensive troubleshooting for all credential types
+- [Certificate Setup](../msal-shared/credential-setup/certificate-setup.md) - Certificate loading and validation
+- [Error Handling Patterns](../msal-shared/patterns/error-handling-patterns.md) - Common error scenarios and solutions
+- [Token Caching Strategies](../msal-shared/patterns/token-caching-strategies.md) - Cache management best practices
 
 ## Additional Resources
 

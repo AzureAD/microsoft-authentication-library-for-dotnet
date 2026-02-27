@@ -22,7 +22,7 @@ tags:
 
 This skill covers Federated Identity Credential (FIC) token exchange using assertions with mTLS Proof-of-Possession. Use this for workload identity federation scenarios in Kubernetes, multi-tenant authentication chains, or any case requiring token exchange.
 
-> **Note:** This skill focuses on FIC two-leg flow patterns with mTLS PoP. For general credential setup (certificates, FIC configuration, etc.), see the [Confidential Auth Skill](../msal-confidential-auth/shared/) for reusable patterns. For FIC Azure Portal configuration, see [Federated Identity Credentials Setup](../msal-confidential-auth/shared/credential-setup/federated-identity-credentials.md).
+> **Note:** This skill focuses on FIC two-leg flow patterns with mTLS PoP. For general credential setup (certificates, FIC configuration, etc.), see the [Shared Resources](../msal-shared/) for reusable patterns. For FIC Azure Portal configuration, see [Federated Identity Credentials Setup](../msal-shared/credential-setup/federated-identity-credentials.md).
 
 ## What is FIC Two-Leg Flow?
 
@@ -167,13 +167,13 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
 
-// Load certificate for Leg 1 - see ../msal-confidential-auth/shared/credential-setup/certificate-setup.md
+// Load certificate for Leg 1 - see ../msal-shared/credential-setup/certificate-setup.md
 var leg1Cert = GetCertificateFromStore("CN=Leg1Certificate");
 
 // Leg 1: Confidential Client acquires token for api://AzureADTokenExchange
 // For certificate and SNI setup details, see:
-// - ../msal-confidential-auth/shared/credential-setup/certificate-setup.md
-// - ../msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md
+// - ../msal-shared/credential-setup/certificate-setup.md
+// - ../msal-shared/credential-setup/certificate-sni-setup.md
 var leg1App = ConfidentialClientApplicationBuilder
     .Create("your-leg1-client-id")
     .WithAuthority("https://login.microsoftonline.com/your-tenant-id")
@@ -217,13 +217,13 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
 
-// Load certificate for Leg 1 - see ../msal-confidential-auth/shared/credential-setup/certificate-setup.md
+// Load certificate for Leg 1 - see ../msal-shared/credential-setup/certificate-setup.md
 var leg1Cert = GetCertificateFromStore("CN=Leg1Certificate");
 
 // Leg 1: Confidential Client acquires token for api://AzureADTokenExchange
 // For certificate and SNI setup details, see:
-// - ../msal-confidential-auth/shared/credential-setup/certificate-setup.md
-// - ../msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md
+// - ../msal-shared/credential-setup/certificate-setup.md
+// - ../msal-shared/credential-setup/certificate-sni-setup.md
 var leg1App = ConfidentialClientApplicationBuilder
     .Create("your-leg1-client-id")
     .WithAuthority("https://login.microsoftonline.com/your-tenant-id")
@@ -336,12 +336,12 @@ The `IManagedIdentityApplication` interface does NOT provide a `WithClientAssert
 ### General Credential and Authentication Issues
 
 For certificate loading, FIC setup, token caching, error handling, and general troubleshooting, see:
-- [Certificate Setup](../msal-confidential-auth/shared/credential-setup/certificate-setup.md) - Loading certificates from file, store, or Key Vault
-- [Certificate SNI Setup](../msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md) - SNI configuration details
-- [Federated Identity Credentials Setup](../msal-confidential-auth/shared/credential-setup/federated-identity-credentials.md) - FIC configuration in Azure Portal
-- [Error Handling Patterns](../msal-confidential-auth/shared/patterns/error-handling-patterns.md) - Common error scenarios
-- [Troubleshooting](../msal-confidential-auth/shared/patterns/troubleshooting.md) - Comprehensive troubleshooting guide
-- [Token Caching Strategies](../msal-confidential-auth/shared/patterns/token-caching-strategies.md) - Cache management best practices
+- [Certificate Setup](../msal-shared/credential-setup/certificate-setup.md) - Loading certificates from file, store, or Key Vault
+- [Certificate SNI Setup](../msal-shared/credential-setup/certificate-sni-setup.md) - SNI configuration details
+- [Federated Identity Credentials Setup](../msal-shared/credential-setup/federated-identity-credentials.md) - FIC configuration in Azure Portal
+- [Error Handling Patterns](../msal-shared/patterns/error-handling-patterns.md) - Common error scenarios
+- [Troubleshooting](../msal-shared/patterns/troubleshooting.md) - Comprehensive troubleshooting guide
+- [Token Caching Strategies](../msal-shared/patterns/token-caching-strategies.md) - Cache management best practices
 
 ## Additional Resources
 

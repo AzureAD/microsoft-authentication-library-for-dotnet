@@ -20,7 +20,7 @@ tags:
 
 This skill covers direct mTLS Proof-of-Possession (PoP) token acquisition for target resources without intermediate token exchanges. Use this when you need to acquire an mTLS PoP token directly for a resource like Microsoft Graph, Azure Key Vault, or custom APIs.
 
-> **Note:** This skill focuses on mTLS PoP-specific APIs and patterns. For general credential setup (certificates, FIC, etc.), see the [Confidential Auth Skill](../msal-confidential-auth/shared/credential-setup/) for reusable, granularized patterns.
+> **Note:** This skill focuses on mTLS PoP-specific APIs and patterns. For general credential setup (certificates, FIC, etc.), see the [Shared Resources](../msal-shared/credential-setup/) for reusable, granularized patterns.
 
 ## What is Vanilla Flow?
 
@@ -247,10 +247,10 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.KeyAttestation;
 
-// Load certificate - see ../msal-confidential-auth/shared/credential-setup/certificate-setup.md for details
+// Load certificate - see ../msal-shared/credential-setup/certificate-setup.md for details
 var cert = GetCertificateFromStore("CN=MyAppCertificate");
 
-// Build Confidential Client with SNI - see ../msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md
+// Build Confidential Client with SNI - see ../msal-shared/credential-setup/certificate-sni-setup.md
 var app = ConfidentialClientApplicationBuilder
     .Create("your-client-id")
     .WithAuthority("https://login.microsoftonline.com/your-tenant-id")
@@ -353,11 +353,11 @@ string response = await caller.CallResourceAsync("https://mtlstb.graph.microsoft
 ### General Credential and Authentication Issues
 
 For certificate loading, token caching, error handling, and general troubleshooting, see:
-- [Certificate Setup](../msal-confidential-auth/shared/credential-setup/certificate-setup.md) - Loading certificates from file, store, or Key Vault
-- [Certificate SNI Setup](../msal-confidential-auth/shared/credential-setup/certificate-sni-setup.md) - SNI configuration details
-- [Error Handling Patterns](../msal-confidential-auth/shared/patterns/error-handling-patterns.md) - Common error scenarios
-- [Troubleshooting](../msal-confidential-auth/shared/patterns/troubleshooting.md) - Comprehensive troubleshooting guide
-- [Token Caching Strategies](../msal-confidential-auth/shared/patterns/token-caching-strategies.md) - Cache management best practices
+- [Certificate Setup](../msal-shared/credential-setup/certificate-setup.md) - Loading certificates from file, store, or Key Vault
+- [Certificate SNI Setup](../msal-shared/credential-setup/certificate-sni-setup.md) - SNI configuration details
+- [Error Handling Patterns](../msal-shared/patterns/error-handling-patterns.md) - Common error scenarios
+- [Troubleshooting](../msal-shared/patterns/troubleshooting.md) - Comprehensive troubleshooting guide
+- [Token Caching Strategies](../msal-shared/patterns/token-caching-strategies.md) - Cache management best practices
 
 ## Additional Resources
 
