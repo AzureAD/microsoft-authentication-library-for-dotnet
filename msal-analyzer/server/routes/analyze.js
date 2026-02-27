@@ -19,6 +19,9 @@ const analyzeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
   message: { error: 'Too many analysis requests. Please try again later.' },
+  // Strip any trailing :PORT from req.ip (e.g. "20.110.218.7:35473" → "20.110.218.7")
+  // so the limiter always keys on the IP address alone.
+  keyGenerator: (req) => (req.ip || '').replace(/:\d+$/, ''),
   standardHeaders: true,
   legacyHeaders: false,
 });

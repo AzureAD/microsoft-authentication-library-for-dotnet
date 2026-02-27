@@ -9,19 +9,32 @@
  * identifiers, and token acquisition metadata.
  */
 
-const { AzureOpenAI } = require('@azure/openai');
-
-// Initialize Azure OpenAI client (lazy - only when credentials are present)
+// Initialize Azure OpenAI client lazily.
+// The `openai` package is ESM-only from v4+, so we use dynamic import() inside
+// an async function to load it from this CommonJS module.
 let azureOpenAIClient = null;
+let AzureOpenAIClass = null;
 
-function getAzureOpenAIClient() {
-  if (!azureOpenAIClient && process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY) {
-    azureOpenAIClient = new AzureOpenAI({
+async function getAzureOpenAIClient() {
+  if (!process.env.AZURE_OPENAI_ENDPOINT || !process.env.AZURE_OPENAI_API_KEY) return null;
+
+  if (!AzureOpenAIClass) {
+    const mod = await import('openai');
+    AzureOpenAIClass = mod.AzureOpenAI;
+  }
+
+  if (!azureOpenAIClient) {
+    const deployment = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o';
+    const apiVersion = process.env.AZURE_OPENAI_API_VERSION || '2024-10-21';
+
+    azureOpenAIClient = new AzureOpenAIClass({
       endpoint: process.env.AZURE_OPENAI_ENDPOINT,
       apiKey: process.env.AZURE_OPENAI_API_KEY,
-      apiVersion: process.env.AZURE_OPENAI_API_VERSION || '2024-10-21',
+      deployment,
+      apiVersion,
     });
   }
+
   return azureOpenAIClient;
 }
 
@@ -39,7 +52,7 @@ async function analyzeLogContent(logContent, fileName) {
 
   // Phase 2: AI-powered insights (runs if Azure OpenAI credentials are configured)
   let aiInsights = null;
-  const client = getAzureOpenAIClient();
+  const client = await getAzureOpenAIClient();
   if (client) {
     try {
       aiInsights = await getAiInsights(client, logContent, parsed);
