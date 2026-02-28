@@ -54,7 +54,7 @@ function UploadPage({ onAnalysisComplete }) {
       // Brief pause to show 100%
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      onAnalysisComplete(response.data);
+      onAnalysisComplete(data);
     } catch (err) {
       const message = err.response?.data?.error || err.message || 'Analysis failed. Please try again.';
       setError(message);
