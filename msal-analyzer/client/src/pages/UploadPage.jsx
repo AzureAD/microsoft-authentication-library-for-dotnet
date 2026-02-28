@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import axios from 'axios';
 import FileUploadZone from '../components/FileUploadZone';
 import ProgressIndicator from '../components/ProgressIndicator';
 
@@ -34,10 +33,19 @@ function UploadPage({ onAnalysisComplete }) {
       // Simulate progress stages
       const progressTimer = simulateProgress(setProgress, setStatusMessage);
 
-      const response = await axios.post('/api/analyze', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 120000, // 2 minutes for AI analysis
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        body: formData,
+        referrerPolicy: 'same-origin',
+        signal: AbortSignal.timeout(120000),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
 
       clearInterval(progressTimer);
       setProgress(100);
