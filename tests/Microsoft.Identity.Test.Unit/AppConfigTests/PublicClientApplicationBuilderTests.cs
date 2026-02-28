@@ -358,6 +358,15 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [DataRow(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, "https://login.chinacloudapi.cn/organizations/", DisplayName = "AzureChina + AzureAdMultipleOrgs")]
         [DataRow(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, "https://login.chinacloudapi.cn/common/", DisplayName = "AzureChina + AzureAdAndPersonalMicrosoftAccount")]
         [DataRow(AzureCloudInstance.AzureChina, AadAuthorityAudience.PersonalMicrosoftAccount, "https://login.chinacloudapi.cn/consumers/", DisplayName = "AzureChina + PersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzureBleu, AadAuthorityAudience.AzureAdMultipleOrgs, "https://login.sovcloud-identity.fr/organizations/", DisplayName = "AzureBleu + AzureAdMultipleOrgs")]
+        [DataRow(AzureCloudInstance.AzureBleu, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, "https://login.sovcloud-identity.fr/common/", DisplayName = "AzureBleu + AzureAdAndPersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzureBleu, AadAuthorityAudience.PersonalMicrosoftAccount, "https://login.sovcloud-identity.fr/consumers/", DisplayName = "AzureBleu + PersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzureDelos, AadAuthorityAudience.AzureAdMultipleOrgs, "https://login.sovcloud-identity.de/organizations/", DisplayName = "AzureDelos + AzureAdMultipleOrgs")]
+        [DataRow(AzureCloudInstance.AzureDelos, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, "https://login.sovcloud-identity.de/common/", DisplayName = "AzureDelos + AzureAdAndPersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzureDelos, AadAuthorityAudience.PersonalMicrosoftAccount, "https://login.sovcloud-identity.de/consumers/", DisplayName = "AzureDelos + PersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzureGovSG, AadAuthorityAudience.AzureAdMultipleOrgs, "https://login.sovcloud-identity.sg/organizations/", DisplayName = "AzureGovSG + AzureAdMultipleOrgs")]
+        [DataRow(AzureCloudInstance.AzureGovSG, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, "https://login.sovcloud-identity.sg/common/", DisplayName = "AzureGovSG + AzureAdAndPersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzureGovSG, AadAuthorityAudience.PersonalMicrosoftAccount, "https://login.sovcloud-identity.sg/consumers/", DisplayName = "AzureGovSG + PersonalMicrosoftAccount")]
         public void TestAuthorityPermutations(
             AzureCloudInstance cloudInstance,
             AadAuthorityAudience audience,
