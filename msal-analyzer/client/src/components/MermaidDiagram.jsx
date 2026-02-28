@@ -1,69 +1,81 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
 
-// Ensure mermaid is initialized once
 let mermaidInitialized = false;
 
-/**
- * Renders a Mermaid diagram from a diagram string.
- * Handles initialization, rendering, and error display.
- */
 function MermaidDiagram({ diagram, darkMode }) {
   const containerRef = useRef(null);
   const [error, setError] = useState(null);
+  const [svgContent, setSvgContent] = useState(null);
   const [rendered, setRendered] = useState(false);
 
   useEffect(() => {
     if (!mermaidInitialized) {
       mermaid.initialize({
         startOnLoad: false,
-        theme: 'default',
+        theme: darkMode ? 'dark' : 'default',
         securityLevel: 'loose',
         fontFamily: 'ui-sans-serif, system-ui, sans-serif',
         sequence: {
-          diagramMarginX: 20,
-          diagramMarginY: 20,
-          actorMargin: 50,
-          noteMargin: 10,
-          messageMargin: 35,
+          diagramMarginX: 50,
+          diagramMarginY: 50,
+          actorMargin: 100,
+          noteMargin: 20,
+          messageMargin: 50,
           mirrorActors: false,
-          boxTextMargin: 5,
+          boxTextMargin: 10,
+          charLimit: 50,
         },
       });
       mermaidInitialized = true;
     }
-  }, []);
+  }, [darkMode]);
 
   useEffect(() => {
-    if (!diagram || !containerRef.current) return;
+    if (!diagram) return;
 
     setError(null);
     setRendered(false);
+    setSvgContent(null);
 
     const id = `mermaid-${Date.now()}`;
-    const container = containerRef.current;
 
-    // Clean up previous render
-    container.innerHTML = '';
-
-    // Re-initialize theme when darkMode changes
     mermaid.initialize({
       startOnLoad: false,
       theme: darkMode ? 'dark' : 'default',
       securityLevel: 'loose',
+      sequence: {
+        diagramMarginX: 50,
+        diagramMarginY: 50,
+        actorMargin: 100,
+        noteMargin: 20,
+        messageMargin: 50,
+        mirrorActors: false,
+        boxTextMargin: 10,
+        charLimit: 50,
+      },
     });
 
-    mermaid.render(id, diagram)
-      .then(({ svg }) => {
-        container.innerHTML = svg;
-        setRendered(true);
-      })
-      .catch((err) => {
+    (async () => {
+      try {
+        const result = await mermaid.render(id, diagram);
+
+        if (result && result.svg) {
+          // Scale up the SVG
+          const scaledSvg = result.svg.replace(
+            '<svg',
+            '<svg style="transform: scale(1.3); transform-origin: top left; max-width: 100%;"'
+          );
+          setSvgContent(scaledSvg);
+          setRendered(true);
+        } else {
+          setError('Mermaid returned no SVG content');
+        }
+      } catch (err) {
         console.error('Mermaid render error:', err);
-        setError('Failed to render diagram. The diagram syntax may be invalid.');
-        // Show the raw diagram text as fallback
-        container.innerHTML = `<pre class="text-xs text-left p-4 bg-gray-50 dark:bg-gray-900 rounded overflow-auto">${diagram}</pre>`;
-      });
+        setError(`Failed to render diagram: ${err.message}`);
+      }
+    })();
   }, [diagram, darkMode]);
 
   if (!diagram) {
@@ -84,11 +96,16 @@ function MermaidDiagram({ diagram, darkMode }) {
       )}
       <div
         ref={containerRef}
-        className="mermaid-container overflow-x-auto min-h-32 flex items-center justify-center
-          bg-white dark:bg-gray-900 rounded-xl p-4"
+        className="mermaid-container overflow-auto bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+        style={{ minHeight: '500px', maxHeight: '700px' }}
       >
-        {!rendered && !error && (
-          <div className="flex items-center gap-2 text-gray-400">
+        {svgContent ? (
+          <div 
+            className="flex justify-center items-start"
+            dangerouslySetInnerHTML={{ __html: svgContent }} 
+          />
+        ) : !rendered && !error ? (
+          <div className="flex items-center justify-center h-full gap-2 text-gray-400">
             <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor"
@@ -96,7 +113,7 @@ function MermaidDiagram({ diagram, darkMode }) {
             </svg>
             Rendering diagram...
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
