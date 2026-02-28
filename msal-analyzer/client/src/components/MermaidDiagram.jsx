@@ -17,13 +17,14 @@ function MermaidDiagram({ diagram, darkMode }) {
         securityLevel: 'loose',
         fontFamily: 'ui-sans-serif, system-ui, sans-serif',
         sequence: {
-          diagramMarginX: 20,
-          diagramMarginY: 20,
-          actorMargin: 50,
-          noteMargin: 10,
-          messageMargin: 35,
+          diagramMarginX: 50,
+          diagramMarginY: 50,
+          actorMargin: 100,
+          noteMargin: 20,
+          messageMargin: 50,
           mirrorActors: false,
-          boxTextMargin: 5,
+          boxTextMargin: 10,
+          charLimit: 50,
         },
       });
       mermaidInitialized = true;
@@ -39,11 +40,20 @@ function MermaidDiagram({ diagram, darkMode }) {
 
     const id = `mermaid-${Date.now()}`;
 
-    // Re-initialize theme
     mermaid.initialize({
       startOnLoad: false,
       theme: darkMode ? 'dark' : 'default',
       securityLevel: 'loose',
+      sequence: {
+        diagramMarginX: 50,
+        diagramMarginY: 50,
+        actorMargin: 100,
+        noteMargin: 20,
+        messageMargin: 50,
+        mirrorActors: false,
+        boxTextMargin: 10,
+        charLimit: 50,
+      },
     });
 
     (async () => {
@@ -51,8 +61,12 @@ function MermaidDiagram({ diagram, darkMode }) {
         const result = await mermaid.render(id, diagram);
 
         if (result && result.svg) {
-          // Use state instead of direct innerHTML
-          setSvgContent(result.svg);
+          // Scale up the SVG
+          const scaledSvg = result.svg.replace(
+            '<svg',
+            '<svg style="transform: scale(1.3); transform-origin: top left; max-width: 100%;"'
+          );
+          setSvgContent(scaledSvg);
           setRendered(true);
         } else {
           setError('Mermaid returned no SVG content');
@@ -82,13 +96,16 @@ function MermaidDiagram({ diagram, darkMode }) {
       )}
       <div
         ref={containerRef}
-        className="mermaid-container overflow-x-auto min-h-32 flex items-center justify-center
-          bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+        className="mermaid-container overflow-auto bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+        style={{ minHeight: '500px', maxHeight: '700px' }}
       >
         {svgContent ? (
-          <div dangerouslySetInnerHTML={{ __html: svgContent }} />
+          <div 
+            className="flex justify-center items-start"
+            dangerouslySetInnerHTML={{ __html: svgContent }} 
+          />
         ) : !rendered && !error ? (
-          <div className="flex items-center gap-2 text-gray-400">
+          <div className="flex items-center justify-center h-full gap-2 text-gray-400">
             <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor"
