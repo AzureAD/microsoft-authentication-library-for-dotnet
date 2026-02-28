@@ -1,5 +1,5 @@
 # ─── Stage 1: Build React Frontend ───────────────────────────────────────────
-FROM node:18-alpine AS client-builder
+FROM msalloggercontainer.azurecr.io/dockerhub/library/node:18-alpine AS client-builder
 
 WORKDIR /app/client
 
@@ -12,7 +12,7 @@ COPY client/ ./
 RUN npm run build
 
 # ─── Stage 2: Production Server ───────────────────────────────────────────────
-FROM node:18-alpine AS production
+FROM msalloggercontainer.azurecr.io/dockerhub/library/node:18-alpine AS production
 
 # Add security: run as non-root user
 RUN addgroup -g 1001 -S nodejs && \
