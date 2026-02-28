@@ -17,7 +17,7 @@ function MermaidDiagram({ diagram, darkMode }) {
     if (!mermaidInitialized) {
       mermaid.initialize({
         startOnLoad: false,
-        theme: 'default',
+        theme: darkMode ? 'dark' : 'default',
         securityLevel: 'loose',
         fontFamily: 'ui-sans-serif, system-ui, sans-serif',
         sequence: {
@@ -32,7 +32,7 @@ function MermaidDiagram({ diagram, darkMode }) {
       });
       mermaidInitialized = true;
     }
-  }, []);
+  }, [darkMode]);
 
   useEffect(() => {
     if (!diagram || !containerRef.current) return;
@@ -40,8 +40,8 @@ function MermaidDiagram({ diagram, darkMode }) {
     setError(null);
     setRendered(false);
 
-    const id = `mermaid-${Date.now()}`;
     const container = containerRef.current;
+    const id = `mermaid-${Date.now()}`;
 
     // Clean up previous render
     container.innerHTML = '';
@@ -53,17 +53,30 @@ function MermaidDiagram({ diagram, darkMode }) {
       securityLevel: 'loose',
     });
 
-    mermaid.render(id, diagram)
-      .then(({ svg }) => {
-        container.innerHTML = svg;
-        setRendered(true);
-      })
-      .catch((err) => {
+    (async () => {
+      try {
+        // Use contentLoaded hook for cleaner rendering
+        const { svg } = await mermaid.render(id, diagram);
+        
+        if (container && svg) {
+          container.innerHTML = svg;
+          setRendered(true);
+        }
+      } catch (err) {
         console.error('Mermaid render error:', err);
-        setError('Failed to render diagram. The diagram syntax may be invalid.');
+        setError(`Failed to render diagram: ${err.message}`);
+        
         // Show the raw diagram text as fallback
-        container.innerHTML = `<pre class="text-xs text-left p-4 bg-gray-50 dark:bg-gray-900 rounded overflow-auto">${diagram}</pre>`;
-      });
+        if (container) {
+          container.innerHTML = `
+            <div class="text-xs text-left p-4 bg-gray-50 dark:bg-gray-900 rounded overflow-auto font-mono">
+              <div class="text-red-600 dark:text-red-400 mb-2">Diagram Syntax Error:</div>
+              <pre>${diagram}</pre>
+            </div>
+          `;
+        }
+      }
+    })();
   }, [diagram, darkMode]);
 
   if (!diagram) {
