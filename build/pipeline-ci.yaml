@@ -9,6 +9,7 @@ variables:
   BuildConfiguration: 'Release'
   #intended for running all ui automation tests as one to reduce time
   ConsolidateAppCenterTests: true
+  RunManagedIdentityE2EImdsV2PythonTests: 'true'
 #BUILD PHASE 
 stages:
 - stage: MSALBuildAndTest
