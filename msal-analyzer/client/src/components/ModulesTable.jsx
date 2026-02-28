@@ -15,7 +15,7 @@ const getStatus = (mod) => {
 };
 
 /**
- * Sortable, filterable table of MSAL modules with details.
+ * Sortable, filterable table of log modules with details.
  */
 function ModulesTable({ modules }) {
   const [sortField, setSortField] = useState('name');

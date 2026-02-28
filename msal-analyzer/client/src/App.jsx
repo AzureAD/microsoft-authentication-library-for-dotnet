@@ -9,8 +9,14 @@ import Header from './components/Header';
  */
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
-    // Persist theme preference in localStorage
-    const saved = localStorage.getItem('msal-analyzer-theme');
+    // Persist theme preference in localStorage.
+    // Migrate from the old key used before the app was genericised.
+    const legacy = localStorage.getItem('msal-analyzer-theme');
+    if (legacy) {
+      localStorage.setItem('log-analyzer-theme', legacy);
+      localStorage.removeItem('msal-analyzer-theme');
+    }
+    const saved = localStorage.getItem('log-analyzer-theme');
     if (saved) return saved === 'dark';
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
@@ -21,7 +27,7 @@ function App() {
   // Apply dark mode class to html element
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('msal-analyzer-theme', darkMode ? 'dark' : 'light');
+    localStorage.setItem('log-analyzer-theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
   const handleAnalysisComplete = (result) => {

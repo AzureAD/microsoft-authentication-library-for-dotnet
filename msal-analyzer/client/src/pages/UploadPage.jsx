@@ -93,10 +93,10 @@ function UploadPage({ onAnalysisComplete }) {
           </svg>
         </div>
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-          Analyze Your MSAL Logs
+          Analyze Your Logs
         </h2>
         <p className="text-gray-500 dark:text-gray-400 text-lg max-w-lg mx-auto">
-          Upload an MSAL log file to get AI-powered insights, performance metrics,
+          Upload a log file to get AI-powered insights, performance metrics,
           and interactive flow diagrams.
         </p>
       </div>
@@ -174,7 +174,7 @@ function UploadPage({ onAnalysisComplete }) {
       {/* Feature highlights */}
       <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { icon: '🤖', label: 'AI Analysis', desc: 'Claude-powered insights' },
+          { icon: '🤖', label: 'AI Analysis', desc: 'AI-powered insights' },
           { icon: '📊', label: 'Metrics', desc: 'Performance data' },
           { icon: '🔄', label: 'Flow Diagrams', desc: 'Module interactions' },
           { icon: '📄', label: 'Export', desc: 'HTML reports' },

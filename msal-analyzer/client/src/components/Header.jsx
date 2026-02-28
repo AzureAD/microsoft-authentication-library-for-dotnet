@@ -18,10 +18,10 @@ function Header({ darkMode, onToggleDark, onNewAnalysis }) {
             </div>
             <div>
               <h1 className="font-bold text-gray-900 dark:text-white text-lg leading-none">
-                MSAL Log Analyzer
+                Log Analyzer
               </h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                AI-powered authentication log insights
+                AI-powered log insights
               </p>
             </div>
           </div>

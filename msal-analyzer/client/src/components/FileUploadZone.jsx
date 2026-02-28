@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 
 /**
  * Drag-and-drop file upload zone component.
- * Accepts MSAL log files (.log, .txt) up to 10MB.
+ * Accepts log files (.log, .txt) up to 10MB.
  */
 function FileUploadZone({ onFileSelected, isLoading, disabled }) {
   const [dragError, setDragError] = useState(null);
@@ -91,7 +91,7 @@ function FileUploadZone({ onFileSelected, isLoading, disabled }) {
         ) : (
           <>
             <p className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              Drop your MSAL log file here
+              Drop your log file here
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               or <span className="text-blue-600 dark:text-blue-400 font-medium">click to browse</span>

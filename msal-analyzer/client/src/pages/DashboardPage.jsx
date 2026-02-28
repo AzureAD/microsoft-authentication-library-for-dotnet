@@ -41,7 +41,7 @@ function DashboardPage({ result, onNewAnalysis }) {
       const url = URL.createObjectURL(response.data);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `msal-report-${Date.now()}.html`;
+      link.download = `log-report-${Date.now()}.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -210,7 +210,7 @@ function DashboardPage({ result, onNewAnalysis }) {
           {activeTab === 'flow' && (
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Interactive sequence diagram showing module interactions during authentication.
+                Interactive sequence diagram showing module interactions.
               </p>
               <MermaidDiagram diagram={report.mermaidDiagram} darkMode={darkMode} />
             </div>
@@ -260,7 +260,7 @@ function OverviewTab({ report }) {
         {totalCache > 0 && (
           <div className="bg-gray-50 dark:bg-gray-700/40 rounded-xl p-5">
             <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-              <span>🗄️</span> Token Cache
+              <span>🗄️</span> Cache
             </h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
