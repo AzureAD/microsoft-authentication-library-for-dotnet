@@ -259,3 +259,4 @@ package-lock.json
 
 # ignore JetBrains Rider files
 .idea/
+/tests/devapps/Managed Identity apps/ManagedIdentityWebApi_SF/pkg/ManagedIdentityWebApi_SFType
