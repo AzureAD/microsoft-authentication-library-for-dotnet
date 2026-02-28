@@ -1,31 +1,49 @@
-async handleAnalyze() {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
+import React, { useState } from 'react';
 
-    try {
-        const response = await fetch('/api/analyze', {
-            method: 'POST',
-            referrerPolicy: 'same-origin',
-            signal: controller.signal,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ /* your request payload here */ }),
-        });
+const UploadPage = () => {
+    const [file, setFile] = useState(null);
+    const [message, setMessage] = useState('');
 
-        if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.statusText);
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]);
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        if (!file) {
+            setMessage('Please select a file to upload.');
+            return;
         }
 
-        const data = await response.json();
-        // Handle the response data
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            console.error('Fetch operation timed out');
-        } else {
-            console.error('Fetch error: ', error);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('your-upload-url-here', {
+                method: 'POST',
+                body: formData,
+                referrerPolicy: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error('File upload failed.');
+            }
+            setMessage('File uploaded successfully!');
+        } catch (error) {
+            setMessage(`Error: ${error.message}`);
         }
-    } finally {
-        clearTimeout(timeoutId);
-    }
-}
+    };
+
+    return (
+        <div>
+            <h1>Upload Page</h1>
+            <form onSubmit={handleSubmit}>
+                <input type="file" onChange={handleFileChange} />
+                <button type="submit">Upload</button>
+            </form>
+            {message && <p>{message}</p>}
+        </div>
+    );
+};
+
+export default UploadPage;
