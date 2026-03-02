@@ -24,7 +24,7 @@ az identity create --resource-group <resource-group> --name <identity-name>
 # Get the client ID
 az identity show --resource-group <resource-group> --name <identity-name> --query clientId -o tsv
 
-# Get the principal ID (objec tId)
+# Get the principal ID (object ID)
 az identity show --resource-group <resource-group> --name <identity-name> --query principalId -o tsv
 
 # Get the tenant ID
