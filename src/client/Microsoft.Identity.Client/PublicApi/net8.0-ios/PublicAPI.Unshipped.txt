@@ -1,2 +1,3 @@
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.cancellationToken.get -> System.Threading.CancellationToken
 Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken, bool probe = false) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult>
+*REMOVED*Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult>
