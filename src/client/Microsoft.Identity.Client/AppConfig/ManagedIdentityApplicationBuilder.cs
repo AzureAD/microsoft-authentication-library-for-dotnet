@@ -132,6 +132,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Resets the static managed identity source cache, the preview mode fallback flag,
+        /// and the certificate cache.
+        /// This API is intended to be used by other SDKs that build on top of MSAL, and only in test scenarios.
+        /// </summary>
+        public static void ResetStaticCache()
+        {
+            ManagedIdentityClient.ResetSourceForTest();
+        }
+
+        /// <summary>
         /// Builds an instance of <see cref="IManagedIdentityApplication"/> 
         /// from the parameters set in the <see cref="ManagedIdentityApplicationBuilder"/>.
         /// </summary>
