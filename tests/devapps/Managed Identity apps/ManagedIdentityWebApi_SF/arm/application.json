@@ -43,13 +43,6 @@
         "description": "Full resource ID of the user-assigned managed identity (required when identityType is UserAssigned). Example: /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<name>"
       }
     },
-    "uamiPrincipalId": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Principal ID (object ID) of the user-assigned managed identity (required when identityType is UserAssigned). Copy from the UAMI Overview blade."
-      }
-    },
     "instanceCount": {
       "type": "int",
       "defaultValue": -1,
@@ -74,7 +67,7 @@
     "userManagedIdentities": [
       {
         "name": "userAssignedIdentity",
-        "principalId": "[parameters('uamiPrincipalId')]"
+        "principalId": "[reference(parameters('uamiResourceId'), '2018-11-30').principalId]"
       }
     ]
   },
@@ -100,7 +93,7 @@
       }
     },
     {
-      "comments": "Deploy the application as an ARM resource so it can carry a managed identity. The identity section and managedIdentities property array wire the Azure identity to the alias names declared in ApplicationManifest.xml <Principals>.",
+      "comments": "Deploy the application as an ARM resource so it can carry a managed identity. The identity section and managedIdentities property array wire the Azure identity to the alias names declared in ApplicationManifest.xml <Principals>. For system-assigned identity the managedIdentities array is empty because the runtime auto-discovers the single system identity. For user-assigned identity the array maps the manifest alias name to the UAMI's principal ID (looked up from uamiResourceId via reference()).",
       "type": "Microsoft.ServiceFabric/managedClusters/applications",
       "apiVersion": "2022-01-01",
       "name": "[concat(parameters('clusterName'), '/', variables('appName'))]",

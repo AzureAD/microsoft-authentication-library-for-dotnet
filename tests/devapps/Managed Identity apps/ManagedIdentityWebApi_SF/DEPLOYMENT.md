@@ -366,26 +366,21 @@ $packageUrl = az storage blob generate-sas `
 Write-Host "Package URL: $packageUrl"
 ```
 
-#### A-2) Get UAMI principal ID
+#### A-2) Get UAMI resource ID
 
 ```powershell
-$uamiPrincipalId = az identity show `
-  --resource-group "<rg>" `
-  --name "<uamiName>" `
-  --query principalId `
-  --output tsv
-
 $uamiResourceId = az identity show `
   --resource-group "<rg>" `
   --name "<uamiName>" `
   --query id `
   --output tsv
 
-Write-Host "Principal ID : $uamiPrincipalId"
-Write-Host "Resource ID  : $uamiResourceId"
+Write-Host "Resource ID: $uamiResourceId"
 ```
 
 #### A-3) Deploy via ARM template
+
+The template automatically looks up the UAMI's principal ID from `uamiResourceId` using an ARM `reference()` expression, so you only need to pass the resource ID.
 
 ```powershell
 az deployment group create `
@@ -395,8 +390,7 @@ az deployment group create `
     clusterName="<clusterName>" `
     appPackageUrl="$packageUrl" `
     identityType="UserAssigned" `
-    uamiResourceId="$uamiResourceId" `
-    uamiPrincipalId="$uamiPrincipalId"
+    uamiResourceId="$uamiResourceId"
 ```
 
 For a **system-assigned** identity instead:
