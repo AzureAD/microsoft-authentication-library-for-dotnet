@@ -307,7 +307,128 @@ Get-ServiceFabricClusterHealth
 
 ---
 
-## D2) Deploy / upgrade the application
+## D2) Deploy the application
+
+> ### ⚠️ Two deployment models – choose the right one
+>
+> | Model | How | Managed identity source | When to use |
+> |-------|-----|------------------------|-------------|
+> | **A – ARM application resource** | `az deployment group create` / ARM template | **SF application managed identity** (bound to the app via `arm/application.json`) | When you want a proper SF application MI that is scoped to the app |
+> | **B – Classic PowerShell** | `New-ServiceFabricApplication` | **Node-level identity** (VMSS/node identity assigned in Part A4) | Simpler; works for testing if the UAMI is already on the VMSS |
+>
+> **Microsoft's requirement for SF application managed identity on managed clusters**: the application must be deployed as an Azure Resource Manager resource (`Microsoft.ServiceFabric/managedClusters/applications`). Classic PowerShell deployments (`New-ServiceFabricApplication`) cannot carry an SF application managed identity; they rely entirely on the node's VMSS identity.
+
+---
+
+### Option A – ARM deployment (SF application managed identity)
+
+This is the recommended approach for proper Service Fabric application managed identity.
+The ARM template at `arm/application.json` registers the application type and version, and
+deploys the application as an Azure resource with the managed identity attached.
+
+**Prerequisites**
+
+- Application package uploaded to Azure Blob Storage (see step below)
+- Azure CLI installed (`az --version`)
+
+#### A-1) Upload the application package to Azure Blob Storage
+
+```powershell
+# Create a storage account and container (skip if you already have one)
+$storageRg  = "<rg>"
+$storageName = "<storageAccountName>"   # globally unique, lowercase
+$container  = "sfpackages"
+
+az storage account create --name $storageName --resource-group $storageRg --sku Standard_LRS
+az storage container create --name $container --account-name $storageName --public-access off
+
+# Zip the package
+$pkgPath = (Resolve-Path ".\pkg\ManagedIdentityWebApi_SFType").Path
+Compress-Archive -Path "$pkgPath\*" -DestinationPath ".\pkg\ManagedIdentityWebApi_SFType.zip" -Force
+
+# Upload and generate SAS URL (valid 2 hours)
+az storage blob upload `
+  --account-name $storageName `
+  --container-name $container `
+  --file ".\pkg\ManagedIdentityWebApi_SFType.zip" `
+  --name "ManagedIdentityWebApi_SFType.zip"
+
+$expiry = (Get-Date).AddHours(2).ToString("yyyy-MM-ddTHH:mmZ")
+$packageUrl = az storage blob generate-sas `
+  --account-name $storageName `
+  --container-name $container `
+  --name "ManagedIdentityWebApi_SFType.zip" `
+  --permissions r `
+  --expiry $expiry `
+  --full-uri `
+  --output tsv
+
+Write-Host "Package URL: $packageUrl"
+```
+
+#### A-2) Get UAMI principal ID
+
+```powershell
+$uamiPrincipalId = az identity show `
+  --resource-group "<rg>" `
+  --name "<uamiName>" `
+  --query principalId `
+  --output tsv
+
+$uamiResourceId = az identity show `
+  --resource-group "<rg>" `
+  --name "<uamiName>" `
+  --query id `
+  --output tsv
+
+Write-Host "Principal ID : $uamiPrincipalId"
+Write-Host "Resource ID  : $uamiResourceId"
+```
+
+#### A-3) Deploy via ARM template
+
+```powershell
+az deployment group create `
+  --resource-group "<rg>" `
+  --template-file "arm\application.json" `
+  --parameters `
+    clusterName="<clusterName>" `
+    appPackageUrl="$packageUrl" `
+    identityType="UserAssigned" `
+    uamiResourceId="$uamiResourceId" `
+    uamiPrincipalId="$uamiPrincipalId"
+```
+
+For a **system-assigned** identity instead:
+
+```powershell
+az deployment group create `
+  --resource-group "<rg>" `
+  --template-file "arm\application.json" `
+  --parameters `
+    clusterName="<clusterName>" `
+    appPackageUrl="$packageUrl" `
+    identityType="SystemAssigned"
+```
+
+#### A-4) Verify deployment
+
+```powershell
+az sf managed-cluster application show `
+  --cluster-name "<clusterName>" `
+  --resource-group "<rg>" `
+  --application-name "ManagedIdentityWebApi_SF"
+```
+
+The output should show `"provisioningState": "Succeeded"` and an `identity` block.
+
+---
+
+### Option B – Classic PowerShell deployment (node-level identity)
+
+> **Note:** This deployment does **not** assign an SF application managed identity to the app.
+> Token acquisition works because the VMSS node itself carries the UAMI (Part A4).
+> The `<Principals>` and `<IdentityBindingPolicy>` in the manifests are ignored when using this path.
 
 Run from the app folder that contains `.\pkg\ManagedIdentityWebApi_SFType`:
 
@@ -406,8 +527,12 @@ Expected:
 - Fix Part A5
 
 ## 5) App reachable but MI fails: `IMDS invalid_request Identity not found`
-- The UAMI is not assigned to the node type / VMSS
-- Fix Part A4 (Option B is fastest)
+- **With classic PowerShell deployment (Option B):** The UAMI is not assigned to the node type / VMSS. Fix Part A4 (Option B is fastest).
+- **With ARM deployment (Option A):** The `managedIdentities` array in the ARM template must map the friendly name (`userAssignedIdentity`) to the correct UAMI principal ID. Verify the `uamiPrincipalId` parameter value matches the UAMI's object ID.
+
+## 6) App reachable but MI fails: `managed_identity_unreachable_network`
+- The Managed Identity Token Service sidecar is not running on the SF node.
+- For SF application managed identity (ARM deployment), ensure the managed cluster has the Managed Identity Token Service enabled. Contact Microsoft support if the sidecar is missing.
 
 ---
 
@@ -415,12 +540,34 @@ Expected:
 
 ## Remove the app
 
+**ARM deployment (Option A):**
+
+```powershell
+az sf managed-cluster application delete `
+  --cluster-name "<clusterName>" `
+  --resource-group "<rg>" `
+  --application-name "ManagedIdentityWebApi_SF"
+
+az sf managed-cluster application-type version delete `
+  --cluster-name "<clusterName>" `
+  --resource-group "<rg>" `
+  --application-type-name "ManagedIdentityWebApi_SFType" `
+  --version "1.0.0"
+
+az sf managed-cluster application-type delete `
+  --cluster-name "<clusterName>" `
+  --resource-group "<rg>" `
+  --application-type-name "ManagedIdentityWebApi_SFType"
+```
+
+**Classic PowerShell deployment (Option B):**
+
 ```powershell
 $appName = "fabric:/ManagedIdentityWebApi_SF"
 Remove-ServiceFabricApplication -ApplicationName $appName -Force
 ```
 
-## Unregister application type (optional)
+## Unregister application type (optional, classic PowerShell only)
 
 ```powershell
 # List types

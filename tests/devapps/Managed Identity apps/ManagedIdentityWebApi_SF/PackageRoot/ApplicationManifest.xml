@@ -13,7 +13,28 @@
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="ManagedIdentityWebApi_SFPkg" ServiceManifestVersion="1.0.0" />
     <ConfigOverrides />
+    <Policies>
+      <!-- Bind the service-level identity name (ServiceManifest) to the application-level principal (Principals below).
+           When the ARM application resource carries a system-assigned identity, reference "systemAssignedIdentity".
+           When the ARM application resource carries a user-assigned identity, reference "userAssignedIdentity". -->
+      <IdentityBindingPolicy ServiceIdentityRef="systemAssignedRef" ApplicationIdentityRef="systemAssignedIdentity" />
+      <IdentityBindingPolicy ServiceIdentityRef="userAssignedRef"   ApplicationIdentityRef="userAssignedIdentity" />
+    </Policies>
   </ServiceManifestImport>
+
+  <!-- Declare the managed identities this application may carry.
+       The Name values here must match the ApplicationIdentityRef values in IdentityBindingPolicy above,
+       and must also match the "managedIdentities[].name" values in the ARM application resource properties
+       (arm/application.json) so the SF runtime can resolve the correct token endpoint. -->
+  <Principals>
+    <ManagedIdentities>
+      <!-- Maps to the application's system-assigned Azure managed identity -->
+      <ManagedIdentity Name="systemAssignedIdentity" />
+      <!-- Maps to a user-assigned Azure managed identity bound via the ARM template -->
+      <ManagedIdentity Name="userAssignedIdentity" />
+    </ManagedIdentities>
+  </Principals>
+
   <DefaultServices>
     <!-- The section below creates instances of service types, when an instance of this
          application type is created. You can also create one or more instances of service type using the

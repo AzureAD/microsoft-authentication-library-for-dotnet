@@ -1,0 +1,127 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "clusterName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the existing Service Fabric managed cluster."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region. Defaults to the resource group location."
+      }
+    },
+    "appPackageUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "SAS URL to the application package zip uploaded to Azure Blob Storage."
+      }
+    },
+    "appTypeVersion": {
+      "type": "string",
+      "defaultValue": "1.0.0",
+      "metadata": {
+        "description": "Application type version matching ApplicationManifest.xml ApplicationTypeVersion."
+      }
+    },
+    "identityType": {
+      "type": "string",
+      "defaultValue": "UserAssigned",
+      "allowedValues": [ "SystemAssigned", "UserAssigned" ],
+      "metadata": {
+        "description": "Whether to use a system-assigned or user-assigned managed identity."
+      }
+    },
+    "uamiResourceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Full resource ID of the user-assigned managed identity (required when identityType is UserAssigned). Example: /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<name>"
+      }
+    },
+    "uamiPrincipalId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Principal ID (object ID) of the user-assigned managed identity (required when identityType is UserAssigned). Copy from the UAMI Overview blade."
+      }
+    },
+    "instanceCount": {
+      "type": "int",
+      "defaultValue": -1,
+      "metadata": {
+        "description": "Number of service instances. -1 means one per node."
+      }
+    }
+  },
+  "variables": {
+    "appTypeName": "ManagedIdentityWebApi_SFType",
+    "appName": "ManagedIdentityWebApi_SF",
+    "systemIdentity": {
+      "type": "SystemAssigned"
+    },
+    "userIdentity": {
+      "type": "UserAssigned",
+      "userAssignedIdentities": {
+        "[parameters('uamiResourceId')]": {}
+      }
+    },
+    "systemManagedIdentities": [],
+    "userManagedIdentities": [
+      {
+        "name": "userAssignedIdentity",
+        "principalId": "[parameters('uamiPrincipalId')]"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "comments": "Register the application type on the managed cluster.",
+      "type": "Microsoft.ServiceFabric/managedClusters/applicationTypes",
+      "apiVersion": "2022-01-01",
+      "name": "[concat(parameters('clusterName'), '/', variables('appTypeName'))]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "comments": "Register the application type version and point it to the uploaded package.",
+      "type": "Microsoft.ServiceFabric/managedClusters/applicationTypes/versions",
+      "apiVersion": "2022-01-01",
+      "name": "[concat(parameters('clusterName'), '/', variables('appTypeName'), '/', parameters('appTypeVersion'))]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceFabric/managedClusters/applicationTypes', parameters('clusterName'), variables('appTypeName'))]"
+      ],
+      "properties": {
+        "applicationPackageUrl": "[parameters('appPackageUrl')]"
+      }
+    },
+    {
+      "comments": "Deploy the application as an ARM resource so it can carry a managed identity. The identity section and managedIdentities property array wire the Azure identity to the alias names declared in ApplicationManifest.xml <Principals>.",
+      "type": "Microsoft.ServiceFabric/managedClusters/applications",
+      "apiVersion": "2022-01-01",
+      "name": "[concat(parameters('clusterName'), '/', variables('appName'))]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceFabric/managedClusters/applicationTypes/versions', parameters('clusterName'), variables('appTypeName'), parameters('appTypeVersion'))]"
+      ],
+      "identity": "[if(equals(parameters('identityType'), 'SystemAssigned'), variables('systemIdentity'), variables('userIdentity'))]",
+      "properties": {
+        "version": "[resourceId('Microsoft.ServiceFabric/managedClusters/applicationTypes/versions', parameters('clusterName'), variables('appTypeName'), parameters('appTypeVersion'))]",
+        "parameters": {
+          "ManagedIdentityWebApi_SF_InstanceCount": "[string(parameters('instanceCount'))]"
+        },
+        "managedIdentities": "[if(equals(parameters('identityType'), 'SystemAssigned'), variables('systemManagedIdentities'), variables('userManagedIdentities'))]"
+      }
+    }
+  ],
+  "outputs": {
+    "applicationResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ServiceFabric/managedClusters/applications', parameters('clusterName'), variables('appName'))]"
+    }
+  }
+}

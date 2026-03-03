@@ -10,6 +10,15 @@
     <StatelessServiceType ServiceTypeName="ManagedIdentityWebApi_SFType" UseImplicitHost="false" />
   </ServiceTypes>
 
+  <!-- Declare the managed identity names used by this service package.
+       These names are referenced as ServiceIdentityRef in ApplicationManifest.xml's IdentityBindingPolicy,
+       which maps them to the application-level principal identities declared in <Principals>.
+       DefaultIdentity is the identity the SF runtime uses when no specific name is requested. -->
+  <ManagedIdentities DefaultIdentity="systemAssignedRef">
+    <ManagedIdentity Name="systemAssignedRef" Description="System-assigned managed identity for MSI token acquisition" />
+    <ManagedIdentity Name="userAssignedRef"   Description="User-assigned managed identity for MSI token acquisition" />
+  </ManagedIdentities>
+
   <!-- Code package is your service executable. -->
   <CodePackage Name="Code" Version="1.0.0">
     <EntryPoint>
