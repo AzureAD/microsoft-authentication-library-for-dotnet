@@ -56,9 +56,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
-        public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
+        public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken, bool probe = false)
         {
-            if (ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None)
+            // Return the cached source unless it is the no-probe sentinel and the caller requests an explicit probe.
+#pragma warning disable CS0618 // DefaultToImds is intentionally used as an internal sentinel
+            bool isCachedSentinel = ManagedIdentityClient.s_sourceName == ManagedIdentitySource.DefaultToImds;
+#pragma warning restore CS0618
+            bool hasConcreteCachedSource = ManagedIdentityClient.s_sourceName != ManagedIdentitySource.None && !isCachedSentinel;
+            if (hasConcreteCachedSource || (isCachedSentinel && !probe))
             {
                 return new ManagedIdentitySourceResult(ManagedIdentityClient.s_sourceName);
             }
@@ -66,8 +71,7 @@ namespace Microsoft.Identity.Client
             // Create a temporary RequestContext for the logger and the IMDS probe request.
             var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
 
-            // GetManagedIdentitySourceAsync might return ImdsV2 = true, but it still requires .WithMtlsProofOfPossesion on the Managed Identity Application object to hit the ImdsV2 flow
-            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested: true, cancellationToken).ConfigureAwait(false);
+            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, probe, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
