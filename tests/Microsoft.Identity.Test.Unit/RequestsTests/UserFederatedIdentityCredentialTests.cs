@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             // Token should be stored in user token cache
             var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
-            var account = accounts.GetEnumerator().Current;
+            Assert.IsNotNull(accounts, "Accounts should not be null after token is stored in user cache.");
         }
 
         [TestMethod]
