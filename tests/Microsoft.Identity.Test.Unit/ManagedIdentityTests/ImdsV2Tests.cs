@@ -146,6 +146,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             IManagedIdentityKeyProvider managedIdentityKeyProvider = null;
             if (managedIdentityKeyType == ManagedIdentityKeyType.KeyGuard)
             {
+                // KeyGuard tests require Windows CNG (RSACng), so skip gracefully on non-Windows.
+                if (!ImdsV2TestStoreCleaner.IsWindows)
+                {
+                    Assert.Inconclusive("Windows-only: KeyGuard keys require Windows CNG (RSACng). mTLS PoP is not supported on this platform.");
+                }
+
                 // Force KeyGuard keys to deterministically exercise the attestation path.
                 managedIdentityKeyProvider = new TestKeyGuardManagedIdentityKeyProvider();
             }
