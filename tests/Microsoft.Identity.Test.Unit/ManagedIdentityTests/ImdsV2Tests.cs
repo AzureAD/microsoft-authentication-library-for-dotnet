@@ -423,6 +423,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
+            if (!ImdsV2TestStoreCleaner.IsWindows)
+            {
+                Assert.Inconclusive("Windows-only: WithMtlsProofOfPossession() requires Windows CNG. mTLS PoP is not supported on this platform.");
+            }
+
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
@@ -638,6 +643,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithMissingServerHeader()
         {
+            if (!ImdsV2TestStoreCleaner.IsWindows)
+            {
+                Assert.Inconclusive("Windows-only: WithMtlsProofOfPossession() requires Windows CNG. mTLS PoP is not supported on this platform.");
+            }
+
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
@@ -660,6 +670,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithInvalidFormat()
         {
+            if (!ImdsV2TestStoreCleaner.IsWindows)
+            {
+                Assert.Inconclusive("Windows-only: WithMtlsProofOfPossession() requires Windows CNG. mTLS PoP is not supported on this platform.");
+            }
+
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
@@ -684,6 +699,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void TestCsrGeneration_OnlyVmId()
         {
+            if (!ImdsV2TestStoreCleaner.IsWindows)
+            {
+                Assert.Inconclusive("Windows-only: RSA key creation via CNG is required for CSR generation tests on this TFM.");
+            }
+
             var cuid = new CuidInfo
             {
                 VmId = TestConstants.VmId
@@ -697,6 +717,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void TestCsrGeneration_VmIdAndVmssId()
         {
+            if (!ImdsV2TestStoreCleaner.IsWindows)
+            {
+                Assert.Inconclusive("Windows-only: RSA key creation via CNG is required for CSR generation tests on this TFM.");
+            }
+
             var cuid = new CuidInfo
             {
                 VmId = TestConstants.VmId,
@@ -831,6 +856,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task mTLSPop_RequestedWithoutKeyGuard_ThrowsClientException()
         {
+            if (!ImdsV2TestStoreCleaner.IsWindows)
+            {
+                Assert.Inconclusive("Windows-only: WithMtlsProofOfPossession() requires Windows CNG. mTLS PoP is not supported on this platform.");
+            }
+
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
