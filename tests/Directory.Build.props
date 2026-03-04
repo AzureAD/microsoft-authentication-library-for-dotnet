@@ -6,7 +6,9 @@
   <PropertyGroup Condition="'$(PipelineType)' == 'OneBranch'">
     <DefineConstants>$(DefineConstants);ONEBRANCH_BUILD</DefineConstants>
   </PropertyGroup>
+  <!-- ADFS tests are enabled by default. Uncomment to allow pipeline to skip them via MSAL_SKIP_FEDERATED_TESTS=True.
   <PropertyGroup Condition="'$(MSAL_SKIP_FEDERATED_TESTS)' == 'True'">
     <DefineConstants>$(DefineConstants);IGNORE_FEDERATED</DefineConstants>
   </PropertyGroup>
+  -->
 </Project>
