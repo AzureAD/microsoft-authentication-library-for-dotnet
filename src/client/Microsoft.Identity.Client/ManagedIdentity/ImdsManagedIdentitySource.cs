@@ -277,11 +277,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             var queryParams = ImdsQueryParamsHelper(requestContext, apiVersionQueryParam, imdsApiVersion);
 
-            // probe omits the "Metadata: true" header and then treats 400 Bad Request as success
+            // For IMDSv1: omit the "Metadata: true" header and treat 400 Bad Request as success
+            // (IMDS returns 400 on any VM when the header is absent, confirming reachability).
+            // For IMDSv2: include "Metadata: true" so IMDS routes the request to the actual
+            // endpoint. IMDSv1-only VMs return 404 for the unknown CSR metadata path (correct
+            // failure signal), while IMDSv2-capable VMs return 200 (success).
             var headers = new Dictionary<string, string>
             {
                 { OAuth2Header.XMsCorrelationId, requestContext.CorrelationId.ToString() }
             };
+
+            if (imdsVersion == ImdsVersion.V2)
+            {
+                headers.Add("Metadata", "true");
+            }
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.ImdsProbe);
@@ -310,8 +319,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return (false, failureMessage);
             }
 
-            // probe omits the "Metadata: true" header and then treats 400 Bad Request as success
-            if (response.StatusCode == HttpStatusCode.BadRequest)
+            // IMDSv1 probe: 400 = IMDS is reachable (header missing check fires before routing)
+            // IMDSv2 probe: 200 = endpoint exists and responded correctly
+            bool probeSuccess = imdsVersion == ImdsVersion.V2
+                ? response.StatusCode == HttpStatusCode.OK
+                : response.StatusCode == HttpStatusCode.BadRequest;
+
+            if (probeSuccess)
             {
                 requestContext.Logger.Info(() => $"[Managed Identity] {imdsStringHelper} managed identity is available.");
                 return (true, null);

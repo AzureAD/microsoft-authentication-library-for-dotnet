@@ -602,31 +602,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        // On an IMDSv1-only VM, the IMDSv2 probe returns 400 (IMDS is reachable but Metadata header is missing),
-        // so the source is cached as ImdsV2.  When MSAL then calls GetCsrMetadataAsync with Metadata:true,
-        // the CSR metadata endpoint doesn't exist and returns 404.  We must turn that into a
-        // MsalClientException(MtlsPopTokenNotSupportedinImdsV1) rather than a MsalServiceException.
-        [TestMethod]
-        public async Task GetCsrMetadataAsync_Returns404_ThrowsMsalClientException()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager).ConfigureAwait(false);
-
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(statusCode: System.Net.HttpStatusCode.NotFound));
-
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
-            }
-        }
         #endregion CSR Metadata Tests
 
         #region CSR Generation Tests

@@ -645,20 +645,25 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             HttpStatusCode statusCode;
 
-            if (success)
+            if (imdsVersion == ImdsVersion.V2)
             {
-                statusCode = HttpStatusCode.BadRequest; // IMDS probe success returns 400 Bad Request
+                // IMDSv2 probe includes "Metadata: true" header.
+                // Success = 200 OK (endpoint exists on IMDSv2-capable VM).
+                // Failure = 404 Not Found (endpoint absent on IMDSv1-only VM).
+                // Retriable failure = 500 InternalServerError (transient error).
+                if (success)
+                    statusCode = HttpStatusCode.OK;
+                else
+                    statusCode = retry ? HttpStatusCode.InternalServerError : HttpStatusCode.NotFound;
             }
             else
             {
-                if (retry)
-                {
-                    statusCode = HttpStatusCode.InternalServerError;
-                }
+                // IMDSv1 probe omits "Metadata: true"; success = 400 Bad Request
+                // (IMDS checks the header before routing — 400 confirms reachability).
+                if (success)
+                    statusCode = HttpStatusCode.BadRequest;
                 else
-                {
-                    statusCode = HttpStatusCode.NotFound;
-                }
+                    statusCode = retry ? HttpStatusCode.InternalServerError : HttpStatusCode.NotFound;
             }
 
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
@@ -667,6 +672,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 {
                     OAuth2Header.XMsCorrelationId
                 };
+
+            // IMDSv2 probe sends with Metadata header; IMDSv1 probe omits it.
+            if (imdsVersion == ImdsVersion.V2)
+            {
+                expectedRequestHeaders.Add("Metadata", "true");
+            }
 
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {

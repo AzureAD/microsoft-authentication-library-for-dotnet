@@ -75,18 +75,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     ex);
             }
 
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                // A 404 on the CSR metadata endpoint means this VM only supports IMDSv1.
-                // The IMDSv2 probe can incorrectly succeed on such VMs (the probe omits the
-                // "Metadata: true" header, and IMDS returns 400 on any VM when that header is
-                // absent — IMDSv1 and IMDSv2 alike). The probe therefore cannot distinguish
-                // between the two; the 404 here is the definitive signal that IMDSv2 is absent.
-                throw new MsalClientException(
-                    MsalError.MtlsPopTokenNotSupportedinImdsV1,
-                    MsalErrorMessage.MtlsPopTokenNotSupportedinImdsV1);
-            }
-
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 ThrowCsrMetadataRequestException(
