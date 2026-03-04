@@ -1,0 +1,111 @@
+parameters:
+- name: ImdsResource
+  type: string
+  default: 'https://management.azure.com/'
+
+# Optional: if you want to force a specific User Assigned MI
+- name: UserAssignedClientId
+  type: string
+  default: ''
+
+# Optional: IMDS api-version (keep default unless you have a reason)
+- name: ImdsApiVersion
+  type: string
+  default: '2018-02-01'
+
+steps:
+- powershell: |
+    $ErrorActionPreference = 'Stop'
+    $ProgressPreference = 'SilentlyContinue'
+
+    Write-Host "============================================================"
+    Write-Host "IMDS Token Smoke Test (PowerShell only) - SAFE LOGGING"
+    Write-Host "============================================================"
+
+    $imdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token"
+    $apiVersion   = "${{ parameters.ImdsApiVersion }}"
+    $resource     = "${{ parameters.ImdsResource }}"
+    $clientId     = "${{ parameters.UserAssignedClientId }}"
+
+    # Build query string
+    $query = "api-version=$apiVersion&resource=$([System.Uri]::EscapeDataString($resource))"
+
+    if (![string]::IsNullOrWhiteSpace($clientId)) {
+      $query += "&client_id=$([System.Uri]::EscapeDataString($clientId))"
+      Write-Host "Identity mode: User-Assigned (client_id is present; value hidden) ✅"
+    } else {
+      Write-Host "Identity mode: System-Assigned / Default ✅"
+    }
+
+    $uri = "$imdsEndpoint?$query"
+
+    # Log non-secret request context
+    Write-Host "IMDS endpoint: $imdsEndpoint"
+    Write-Host "api-version:    $apiVersion"
+    Write-Host "resource:       $resource"
+    Write-Host "request (safe): $imdsEndpoint?api-version=$apiVersion&resource=<urlencoded>$([string]::IsNullOrWhiteSpace($clientId) ? '' : '&client_id=<hidden>')"
+
+    $headers = @{ Metadata = "true" }
+
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+
+    try {
+      # Invoke-WebRequest so we can log status + headers
+      $resp = Invoke-WebRequest -Method GET -Uri $uri -Headers $headers -TimeoutSec 15 -UseBasicParsing
+      $sw.Stop()
+
+      Write-Host "------------------------------------------------------------"
+      Write-Host "HTTP Status:  $($resp.StatusCode) $($resp.StatusDescription)"
+      Write-Host "Duration:     $($sw.ElapsedMilliseconds) ms"
+      Write-Host "------------------------------------------------------------"
+
+      $json = $resp.Content | ConvertFrom-Json
+
+      if ($null -eq $json.access_token -or [string]::IsNullOrWhiteSpace($json.access_token)) {
+        throw "IMDS returned success but access_token is missing/empty."
+      }
+
+      # SAFE outputs only
+      Write-Host "Token acquisition: SUCCESS ✅"
+      Write-Host "token_type:  $($json.token_type)"
+      Write-Host "resource:    $($json.resource)"
+      Write-Host "expires_in:  $($json.expires_in)"
+      Write-Host "expires_on:  $($json.expires_on)"
+      Write-Host "not_before:  $($json.not_before)"
+      Write-Host "token_length:$($json.access_token.Length) (token NOT printed)"
+
+      Write-Host "------------------------------------------------------------"
+      Write-Host "Response headers (sanitized):"
+      foreach ($k in $resp.Headers.Keys) {
+        if ($k -match 'Authorization|Set-Cookie|Cookie') { continue }
+        Write-Host "  $k: $($resp.Headers[$k])"
+      }
+      Write-Host "------------------------------------------------------------"
+
+    } catch {
+      $sw.Stop()
+
+      Write-Host "------------------------------------------------------------"
+      Write-Host "Token acquisition: FAILED ❌"
+      Write-Host "Duration: $($sw.ElapsedMilliseconds) ms"
+      Write-Host "Error: $($_.Exception.Message)"
+      Write-Host "------------------------------------------------------------"
+
+      # If there's an HTTP response body, print it (safe; IMDS usually returns JSON error)
+      if ($_.Exception.Response -ne $null) {
+        try {
+          $statusCode = $_.Exception.Response.StatusCode.value__
+          Write-Host "HTTP StatusCode: $statusCode"
+
+          $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+          $body = $reader.ReadToEnd()
+          Write-Host "Response body:"
+          Write-Host $body
+        } catch {
+          Write-Host "Unable to read error response body."
+        }
+      }
+
+      throw
+    }
+  displayName: 'IMDS: Acquire token (PS only, safe logs)'
