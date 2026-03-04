@@ -1,0 +1,20 @@
+parameters:
+  DataFileDirectory: 'Release'
+
+# NOTE: This pool runs on our VM-based hosted agents where IMDS v1 is available/configured.
+# Do not switch pools unless the replacement VM image is known to support IMDS v1 MI E2E flows.
+
+jobs:
+- job: 'RunManagedIdentityE2ETestsOnImds'
+  displayName: 'Managed Identity E2E Tests – VM / IMDS - V1'
+  pool:
+    name: 'ID4SMSIHostedAgent' # this is an IMDS V1 hosted agent
+  variables:
+    runCodesignValidationInjection: false
+    Codeql.SkipTaskAutoInjection: true
+
+  steps:
+  - template: template-run-mi-e2e-imds.yaml
+    parameters:
+      BuildConfiguration: 'Release'
+      TargetFramework: 'net8.0'
