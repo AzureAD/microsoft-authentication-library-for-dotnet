@@ -14,18 +14,27 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     /// <summary>
     /// Integration tests for the User Federated Identity Credential (UserFIC) flow.
-    /// Uses confidential client app ID 979a25aa-0daf-41a5-bcad-cebec5c7c254 and user ficuser@msidlabtse4.onmicrosoft.com.
     /// The same app ID is used to both acquire the assertion token and the final user token.
+    /// Tenant and user UPN are retrieved from Key Vault secrets at class initialization.
     /// </summary>
     [TestClass]
     public class UserFederatedIdentityCredentialIntegrationTests
     {
         private const string ClientId = "979a25aa-0daf-41a5-bcad-cebec5c7c254";
-        private const string Tenant = "msidlabtse4.onmicrosoft.com";
-        private const string Authority = "https://login.microsoftonline.com/" + Tenant;
-        private const string UserUpn = "ficuser@msidlabtse4.onmicrosoft.com";
         private static readonly string[] s_scopes = { "User.Read" };
         private const string TokenExchangeAudience = "api://AzureADTokenExchange/.default";
+
+        private static string s_tenant;
+        private static string s_authority;
+        private static string s_userUpn;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext _)
+        {
+            s_tenant = LabResponseHelper.FetchSecretString("TSETenantDomain", LabResponseHelper.KeyVaultSecretsProviderMsid);
+            s_userUpn = LabResponseHelper.FetchSecretString("FicUserUsername", LabResponseHelper.KeyVaultSecretsProviderMsid);
+            s_authority = "https://login.microsoftonline.com/" + s_tenant;
+        }
 
         [TestInitialize]
         public void TestInitialize()
@@ -45,23 +54,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Assertion app: same app ID, used to acquire the user_fic assertion
             var assertionApp = ConfidentialClientApplicationBuilder
                 .Create(ClientId)
-                .WithAuthority(Authority)
-                .WithCertificate(cert, sendX5C: true)
+                .WithAuthority(s_authority)
+                .WithCertificate(cert)
                 .WithTestLogging()
                 .Build();
 
             // Main app: same app ID, acquires the final user token via user_fic grant
             var app = ConfidentialClientApplicationBuilder
                 .Create(ClientId)
-                .WithAuthority(Authority)
-                .WithCertificate(cert, sendX5C: true)
+                .WithAuthority(s_authority)
+                .WithCertificate(cert)
                 .WithTestLogging()
                 .Build();
 
             var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(assertionApp, TokenExchangeAudience);
 
             var result = await (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, UserUpn, assertionProvider)
+                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertionProvider)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -70,8 +79,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(result.Account);
             Assert.IsTrue(
-                string.Equals(UserUpn, result.Account.Username, System.StringComparison.OrdinalIgnoreCase),
-                $"Expected username '{UserUpn}' but got '{result.Account.Username}'");
+                string.Equals(s_userUpn, result.Account.Username, System.StringComparison.OrdinalIgnoreCase),
+                $"Expected username '{s_userUpn}' but got '{result.Account.Username}'");
         }
 
         /// <summary>
@@ -85,14 +94,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var assertionApp = ConfidentialClientApplicationBuilder
                 .Create(ClientId)
-                .WithAuthority(Authority)
+                .WithAuthority(s_authority)
                 .WithCertificate(cert, sendX5C: true)
                 .WithTestLogging()
                 .Build();
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(ClientId)
-                .WithAuthority(Authority)
+                .WithAuthority(s_authority)
                 .WithCertificate(cert, sendX5C: true)
                 .WithTestLogging()
                 .Build();
@@ -101,7 +110,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Step 1: Acquire token from identity provider
             var firstResult = await (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, UserUpn, assertionProvider)
+                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertionProvider)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -132,14 +141,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var assertionApp = ConfidentialClientApplicationBuilder
                 .Create(ClientId)
-                .WithAuthority(Authority)
+                .WithAuthority(s_authority)
                 .WithCertificate(cert, sendX5C: true)
                 .WithTestLogging()
                 .Build();
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(ClientId)
-                .WithAuthority(Authority)
+                .WithAuthority(s_authority)
                 .WithCertificate(cert, sendX5C: true)
                 .WithTestLogging()
                 .Build();
@@ -148,7 +157,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Step 1: Initial acquisition from identity provider
             var firstResult = await (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, UserUpn, assertionProvider)
+                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertionProvider)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -156,7 +165,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Step 2: Force refresh - should go to identity provider again
             var forceRefreshResult = await (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, UserUpn, assertionProvider)
+                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertionProvider)
                 .WithForceRefresh(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
