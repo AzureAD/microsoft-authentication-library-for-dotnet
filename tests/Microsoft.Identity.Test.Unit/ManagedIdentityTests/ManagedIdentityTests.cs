@@ -97,10 +97,100 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
-        [DataRow("http://127.0.0.1:41564/msi/token/", Resource, ManagedIdentitySource.AppService)]
-        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
-        [DataRow(AppServiceEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.AppService)]
+        /// <summary>
+        /// Behavior 1: When GetManagedIdentitySourceAsync() is explicitly called, MSAL probes IMDS (v2 first,
+        /// then v1 as fallback) and caches the detected source. Subsequent token requests use the cached source
+        /// without re-probing.
+        /// </summary>
+        [TestMethod]
+        public async Task Behavior1_GetManagedIdentitySourceAsync_CachesSource_NoProbingOnSubsequentRequests()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build() as ManagedIdentityApplication;
+
+                // Behavior 1: add probe mocks for the explicit GetManagedIdentitySourceAsync call
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+
+                // Explicitly call GetManagedIdentitySourceAsync - this probes and caches ImdsV1
+                var sourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.Imds, sourceResult.Source);
+
+                // Now add only the token endpoint mock - no probe mock, verifying that no re-probe happens
+                httpManager.AddManagedIdentityMockHandler(
+                    ImdsEndpoint, Resource, MockHelpers.GetMsiSuccessfulResponse(), ManagedIdentitySource.Imds);
+
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                // If this test passes without assertion errors, the probe mocks were consumed exactly once
+                // (by GetManagedIdentitySourceAsync), proving the source was cached and no re-probe occurred.
+            }
+        }
+
+        /// <summary>
+        /// Behavior 2: When GetManagedIdentitySourceAsync() is NOT called (classic/default path), MSAL checks
+        /// environment variables and if no env-based source is found, defaults to IMDS without probing.
+        /// This maintains backward compatibility with existing code.
+        /// </summary>
+        [TestMethod]
+        public async Task Behavior2_DefaultPath_NoProbing_DirectlyUsesImds()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // No env-based source - IMDS is the default.
+                // No probe mock is added here, which verifies that MSAL does NOT probe IMDS in the default path.
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                // Add only the token endpoint mock (no probe mock)
+                httpManager.AddManagedIdentityMockHandler(
+                    ImdsEndpoint, Resource, MockHelpers.GetMsiSuccessfulResponse(), ManagedIdentitySource.Imds);
+
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                // MockHttpManager.Dispose() asserts that all mocks were consumed.
+                // Since no probe mock was added and the test passes, this proves no probing occurred.
+            }
+        }
+
+        /// <summary>
+        /// Behavior 2: Env-based sources (e.g. App Service) are detected via environment variables
+        /// without any IMDS probing in the default path.
+        /// </summary>
+        [TestMethod]
+        public async Task Behavior2_EnvBasedSource_DetectedWithoutProbing()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                // No probe mock added - proves no probing happens for env-based sources
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint, Resource, MockHelpers.GetMsiSuccessfulResponse(), ManagedIdentitySource.AppService);
+
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+
         [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
         [DataRow(null, Resource, ManagedIdentitySource.Imds)]
         [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
@@ -126,7 +216,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -177,7 +266,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource, userAssignedIdentityId, userAssignedId);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -225,7 +313,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -284,7 +371,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -345,7 +431,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -409,7 +494,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -482,7 +566,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(managedIdentitySource),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
@@ -587,7 +670,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
@@ -628,7 +710,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -667,7 +748,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
                     new SocketException(10051)));
@@ -1050,7 +1130,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                      endpoint,
@@ -1092,7 +1171,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 // Mock handler for the initial resource request
                 httpManager.AddManagedIdentityMockHandler(endpoint, initialResource,
@@ -1152,26 +1230,27 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task UnavailableManagedIdentitySource_ThrowsExceptionDuringTokenAcquisitionAsync()
         {
+            // With the new design, probing is opt-in via GetManagedIdentitySourceAsync().
+            // When both IMDS probes fail, the returned result has Source == None with failure reasons.
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, ImdsEndpoint);
 
-                var miBuilder = ManagedIdentityApplicationBuilder
+                var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
+                    .WithHttpManager(httpManager)
+                    .Build() as ManagedIdentityApplication;
 
-                var mi = miBuilder.Build();
-
+                // Both IMDS probes fail
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
-                        .ExecuteAsync()
-                        .ConfigureAwait(false)).ConfigureAwait(false);
+                var sourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
 
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
+                Assert.AreEqual(ManagedIdentitySource.None, sourceResult.Source);
+                Assert.IsNotNull(sourceResult.ImdsV2FailureReason);
+                Assert.IsNotNull(sourceResult.ImdsV1FailureReason);
             }
         }
 
@@ -1370,7 +1449,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,

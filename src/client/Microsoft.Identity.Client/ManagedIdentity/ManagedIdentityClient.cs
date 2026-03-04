@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
-        private async Task<AbstractManagedIdentity> GetOrSelectManagedIdentitySourceAsync(
+        private Task<AbstractManagedIdentity> GetOrSelectManagedIdentitySourceAsync(
             RequestContext requestContext,
             bool isMtlsPopRequested,
             CancellationToken cancellationToken)
@@ -58,20 +58,45 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source if not cached. Cached value is {s_sourceName} ");
 
-                ManagedIdentitySourceResult sourceResult = null;
                 ManagedIdentitySource source;
 
-                // If the source is not already set, determine it
-                if (s_sourceName == ManagedIdentitySource.None)
+                if (s_sourceName != ManagedIdentitySource.None)
                 {
-                    // First invocation: detect and cache
-                    sourceResult = await GetManagedIdentitySourceAsync(requestContext, isMtlsPopRequested, cancellationToken).ConfigureAwait(false);
-                    source = sourceResult.Source;
+                    // Reuse cached value (set by a prior GetManagedIdentitySourceAsync call or env-var detection)
+                    source = s_sourceName;
                 }
                 else
                 {
-                    // Reuse cached value
-                    source = s_sourceName;
+                    // Not yet cached. Check environment variables first — no network call required.
+                    ManagedIdentitySource envSource = GetManagedIdentitySourceNoImds(requestContext.Logger);
+
+                    if (envSource != ManagedIdentitySource.None)
+                    {
+                        // Env-based source found (App Service, Service Fabric, Azure Arc, Cloud Shell, Machine Learning).
+                        // Cache it so future requests skip the env-var check.
+                        s_sourceName = envSource;
+                        source = envSource;
+                    }
+                    else if (isMtlsPopRequested)
+                    {
+                        // Behavior 3: WithMtlsProofOfPossession() called without a prior GetManagedIdentitySourceAsync()
+                        // call. Assume IMDSv2 is available and attempt it directly without probing.
+                        // We do NOT cache here so that an explicit GetManagedIdentitySourceAsync() call can still
+                        // probe and set the authoritative cached value.
+                        requestContext.Logger.Info("[Managed Identity] mTLS PoP requested; assuming IMDSv2 is available without probing. " +
+                            "Call GetManagedIdentitySourceAsync() first to probe and cache the actual source.");
+                        source = ManagedIdentitySource.ImdsV2;
+                    }
+                    else
+                    {
+                        // Behavior 2: Classic default — no environment-based source and mTLS PoP not requested.
+                        // Fall back to IMDS v1 without probing, exactly as MSAL has always behaved.
+                        // We do NOT cache here so that an explicit GetManagedIdentitySourceAsync() call can still
+                        // probe and set the authoritative cached value.
+                        requestContext.Logger.Info("[Managed Identity] No environment-based managed identity source detected. " +
+                            "Defaulting to IMDS. Call GetManagedIdentitySourceAsync() first to probe and cache the actual source.");
+                        source = ManagedIdentitySource.Imds;
+                    }
                 }
 
                 // If the source has already been set to ImdsV2 (via this method, or GetManagedIdentitySourceAsync in ManagedIdentityApplication.cs)
@@ -106,7 +131,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         MsalErrorMessage.MtlsPopTokenNotSupportedinImdsV1);
                 }
 
-                return source switch
+                return Task.FromResult(source switch
                 {
                     ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
@@ -115,8 +140,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.ImdsV2 => ImdsV2ManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.Imds => ImdsManagedIdentitySource.Create(requestContext),
-                    _ => throw CreateManagedIdentityUnavailableException(sourceResult)
-                };
+                    _ => throw CreateManagedIdentityUnavailableException(null)
+                });
             }
         }
 

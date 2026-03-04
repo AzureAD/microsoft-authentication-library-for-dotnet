@@ -123,6 +123,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, userAssignedIdentityId, userAssignedId));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
+
+                // Behavior 1: explicitly call GetManagedIdentitySourceAsync() to probe and cache ImdsV1.
+                var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
+
                 return managedIdentityApp;
             }
 
@@ -162,6 +167,73 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             return managedIdentityApp;
         }
+
+        #region Source Detection Behavior Tests
+
+        /// <summary>
+        /// Behavior 3: When WithMtlsProofOfPossession() is used without a prior GetManagedIdentitySourceAsync()
+        /// call, MSAL assumes IMDSv2 endpoints exist without probing and attempts v2 directly.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
+        public async Task Behavior3_MtlsPopWithoutExplicitSourceDetection_AssumesImdsV2WithoutProbing(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            if (!ImdsV2TestStoreCleaner.IsWindows)
+            {
+                Assert.Inconclusive("Windows-only: WithMtlsProofOfPossession() requires Windows CNG.");
+            }
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder;
+                if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+                {
+                    miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
+                }
+                else
+                {
+                    miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+                }
+
+                miBuilder
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .WithCsrFactory(_testCsrFactory);
+
+                var managedIdentityApp = miBuilder.Build();
+
+                // Set up the key provider for this test
+                var managedIdentityKeyProvider = new InMemoryManagedIdentityKeyProvider();
+                var platformProxy = Substitute.For<IPlatformProxy>();
+                platformProxy.ManagedIdentityKeyProvider.Returns(managedIdentityKeyProvider);
+                (managedIdentityApp as ManagedIdentityApplication)
+                    .ServiceBundle.SetPlatformProxyForTest(platformProxy);
+
+                // Add ImdsV2 token acquisition mocks — NO probe mocks, proving no probing happens.
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
+
+                // Call AcquireTokenForManagedIdentity with WithMtlsProofOfPossession() WITHOUT calling
+                // GetManagedIdentitySourceAsync() first — Behavior 3: assumes ImdsV2 without probing.
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                // MockHttpManager.Dispose() verifies all mocks were consumed. Since no probe mock was added,
+                // this proves MSAL did NOT probe before attempting ImdsV2 (Behavior 3).
+            }
+        }
+
+        #endregion Source Detection Behavior Tests
 
         #region Acceptance Tests
         [DataTestMethod]
