@@ -126,6 +126,8 @@ namespace Microsoft.Identity.Client
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
         public string CertificateIdToAssociateWithToken { get; set; }
 
+        public string FederatedCredentialAudience { get; internal set; } = "api://AzureADTokenExchange/.default";
+
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
         internal IRetryPolicyFactory RetryPolicyFactory { get; set; }
