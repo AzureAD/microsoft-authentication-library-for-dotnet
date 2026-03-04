@@ -3,12 +3,10 @@ parameters:
   type: string
   default: 'https://management.azure.com/'
 
-# Optional: if you want to force a specific User Assigned MI
 - name: UserAssignedClientId
   type: string
   default: ''
 
-# Optional: IMDS api-version (keep default unless you have a reason)
 - name: ImdsApiVersion
   type: string
   default: '2018-02-01'
@@ -32,7 +30,7 @@ steps:
 
     if (![string]::IsNullOrWhiteSpace($clientId)) {
       $query += "&client_id=$([System.Uri]::EscapeDataString($clientId))"
-      Write-Host "Identity mode: User-Assigned (client_id is present; value hidden) ✅"
+      Write-Host "Identity mode: User-Assigned (client_id present; value hidden) ✅"
     } else {
       Write-Host "Identity mode: System-Assigned / Default ✅"
     }
@@ -43,7 +41,12 @@ steps:
     Write-Host "IMDS endpoint: $imdsEndpoint"
     Write-Host "api-version:    $apiVersion"
     Write-Host "resource:       $resource"
-    Write-Host "request (safe): $imdsEndpoint?api-version=$apiVersion&resource=<urlencoded>$([string]::IsNullOrWhiteSpace($clientId) ? '' : '&client_id=<hidden>')"
+
+    $safeRequest = "$imdsEndpoint?api-version=$apiVersion&resource=<urlencoded>"
+    if (![string]::IsNullOrWhiteSpace($clientId)) {
+      $safeRequest += "&client_id=<hidden>"
+    }
+    Write-Host "request (safe): $safeRequest"
 
     $headers = @{ Metadata = "true" }
 
@@ -67,18 +70,18 @@ steps:
 
       # SAFE outputs only
       Write-Host "Token acquisition: SUCCESS ✅"
-      Write-Host "token_type:  $($json.token_type)"
-      Write-Host "resource:    $($json.resource)"
-      Write-Host "expires_in:  $($json.expires_in)"
-      Write-Host "expires_on:  $($json.expires_on)"
-      Write-Host "not_before:  $($json.not_before)"
-      Write-Host "token_length:$($json.access_token.Length) (token NOT printed)"
+      Write-Host "token_type:   $($json.token_type)"
+      Write-Host "resource:     $($json.resource)"
+      Write-Host "expires_in:   $($json.expires_in)"
+      Write-Host "expires_on:   $($json.expires_on)"
+      Write-Host "not_before:   $($json.not_before)"
+      Write-Host "token_length: $($json.access_token.Length) (token NOT printed)"
 
       Write-Host "------------------------------------------------------------"
       Write-Host "Response headers (sanitized):"
       foreach ($k in $resp.Headers.Keys) {
         if ($k -match 'Authorization|Set-Cookie|Cookie') { continue }
-        Write-Host "  $k: $($resp.Headers[$k])"
+        Write-Host ("  {0}: {1}" -f $k, $resp.Headers[$k])
       }
       Write-Host "------------------------------------------------------------"
 
@@ -91,7 +94,6 @@ steps:
       Write-Host "Error: $($_.Exception.Message)"
       Write-Host "------------------------------------------------------------"
 
-      # If there's an HTTP response body, print it (safe; IMDS usually returns JSON error)
       if ($_.Exception.Response -ne $null) {
         try {
           $statusCode = $_.Exception.Response.StatusCode.value__
