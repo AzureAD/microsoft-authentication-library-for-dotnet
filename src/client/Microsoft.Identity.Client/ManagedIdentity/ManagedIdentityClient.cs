@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     else
                     {
                         // Behavior 2: Classic default — no environment-based source and mTLS PoP not requested.
-                        // Fall back to IMDS v1 without probing, exactly as MSAL has always behaved.
+                        // Fall back to IMDSv1 without probing, exactly as MSAL has always behaved.
                         // We do NOT cache here so that an explicit GetManagedIdentitySourceAsync() call can still
                         // probe and set the authoritative cached value.
                         requestContext.Logger.Info("[Managed Identity] No environment-based managed identity source detected. " +
@@ -140,6 +140,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.ImdsV2 => ImdsV2ManagedIdentitySource.Create(requestContext),
                     ManagedIdentitySource.Imds => ImdsManagedIdentitySource.Create(requestContext),
+                    // This path is only reachable if s_sourceName is set to an unexpected value
+                    // (e.g., via a race condition or test manipulation). In normal execution,
+                    // source is always one of the above values after the selection logic above.
                     _ => throw CreateManagedIdentityUnavailableException(null)
                 });
             }

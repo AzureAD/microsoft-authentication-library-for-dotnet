@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, userAssignedIdentityId, userAssignedId));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
 
-                // Behavior 1: explicitly call GetManagedIdentitySourceAsync() to probe and cache ImdsV1.
+                // Behavior 1: explicitly call GetManagedIdentitySourceAsync() to probe and cache IMDSv1.
                 var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
 

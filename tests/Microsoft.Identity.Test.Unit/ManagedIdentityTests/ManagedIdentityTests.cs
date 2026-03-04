@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         /// <summary>
         /// Behavior 2: When GetManagedIdentitySourceAsync() is NOT called (classic/default path), MSAL checks
-        /// environment variables and if no env-based source is found, defaults to IMDS without probing.
+        /// environment variables and if no env-based source is found, defaults to IMDSv1 without probing.
         /// This maintains backward compatibility with existing code.
         /// </summary>
         [TestMethod]
