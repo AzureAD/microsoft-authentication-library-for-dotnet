@@ -51,23 +51,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            // Assertion app: same app ID, used to acquire the user_fic assertion
-            var assertionApp = ConfidentialClientApplicationBuilder
-                .Create(ClientId)
-                .WithAuthority(s_authority)
-                .WithCertificate(cert)
-                .WithTestLogging()
-                .Build();
-
-            // Main app: same app ID, acquires the final user token via user_fic grant
+            // Single app used for both the assertion source and the user token acquisition
             var app = ConfidentialClientApplicationBuilder
                 .Create(ClientId)
                 .WithAuthority(s_authority)
-                .WithCertificate(cert)
+                .WithCertificate(cert, sendX5C: true)
                 .WithTestLogging()
                 .Build();
 
-            var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(assertionApp, TokenExchangeAudience);
+            var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(app, TokenExchangeAudience);
 
             var result = await (app as IByUserFederatedIdentityCredential)
                 .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertionProvider)
@@ -92,13 +84,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            var assertionApp = ConfidentialClientApplicationBuilder
-                .Create(ClientId)
-                .WithAuthority(s_authority)
-                .WithCertificate(cert, sendX5C: true)
-                .WithTestLogging()
-                .Build();
-
+            // Single app used for both the assertion source and the user token acquisition
             var app = ConfidentialClientApplicationBuilder
                 .Create(ClientId)
                 .WithAuthority(s_authority)
@@ -106,7 +92,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(assertionApp, TokenExchangeAudience);
+            var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(app, TokenExchangeAudience);
 
             // Step 1: Acquire token from identity provider
             var firstResult = await (app as IByUserFederatedIdentityCredential)
@@ -139,13 +125,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            var assertionApp = ConfidentialClientApplicationBuilder
-                .Create(ClientId)
-                .WithAuthority(s_authority)
-                .WithCertificate(cert, sendX5C: true)
-                .WithTestLogging()
-                .Build();
-
+            // Single app used for both the assertion source and the user token acquisition
             var app = ConfidentialClientApplicationBuilder
                 .Create(ClientId)
                 .WithAuthority(s_authority)
@@ -153,7 +133,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(assertionApp, TokenExchangeAudience);
+            var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(app, TokenExchangeAudience);
 
             // Step 1: Initial acquisition from identity provider
             var firstResult = await (app as IByUserFederatedIdentityCredential)
