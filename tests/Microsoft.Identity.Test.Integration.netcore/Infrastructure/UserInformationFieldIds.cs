@@ -64,14 +64,16 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         private void DetermineFieldIds()
         {
-            if (_user.UserType == LabConstants.UserTypeFederated)
+            // Use case-insensitive comparison: KeyVault stores "federated" (lowercase)
+            // but LabConstants.UserTypeFederated is "Federated".
+            if (string.Equals(_user.UserType, LabConstants.UserTypeFederated, StringComparison.OrdinalIgnoreCase))
             {
                 _passwordInputId = CoreUiTestConstants.AdfsV4WebPasswordId;
                 _passwordSignInButtonId = CoreUiTestConstants.AdfsV4WebSubmitId;
                 return;
             }
 
-            if (_user.UserType == LabConstants.UserTypeB2C)
+            if (string.Equals(_user.UserType, LabConstants.UserTypeB2C, StringComparison.OrdinalIgnoreCase))
             {
                 DetermineB2CFieldIds();
                 return;

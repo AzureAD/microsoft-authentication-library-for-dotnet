@@ -222,9 +222,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
             else
             {
+                // Use a dynamic port to avoid conflicts when this test runs in parallel with Interactive_Adfs_DirectAsync,
+                // which also listens on http://localhost:52073. AAD public client apps accept any http://localhost:{port}.
                 pca = PublicClientApplicationBuilder
                     .Create(app.AppId)
-                    .WithRedirectUri("http://localhost:52073")
+                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .WithAuthority(app.Authority + "common")
                     .WithTestLogging(out factory)
                     .Build();
