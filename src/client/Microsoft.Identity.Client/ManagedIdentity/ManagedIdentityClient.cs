@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 ManagedIdentitySource source;
 
-                if (s_isSourceDiscoveryCached)
+                if (s_isSourceDiscoveryCached && s_cachedSourceResult != null)
                 {
                     // Use the cached explicit discovery result (including NoneFound)
                     source = s_cachedSourceResult.Source;
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             CancellationToken cancellationToken)
         {
             // Return cached result if explicit discovery already ran
-            if (s_isSourceDiscoveryCached)
+            if (s_isSourceDiscoveryCached && s_cachedSourceResult != null)
             {
                 return s_cachedSourceResult;
             }

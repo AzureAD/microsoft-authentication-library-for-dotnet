@@ -1139,6 +1139,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build() as ManagedIdentityApplication;
+                Assert.IsNotNull(mi, "Build() should return a ManagedIdentityApplication instance.");
 
                 // Explicit discovery: V1 probe fails, then V2 probe also fails → NoneFound cached
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));

@@ -548,7 +548,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task ImdsV2ProbeFailsMaxRetries_FallsBackToNoneFound()
+        public async Task BothImdsProbesFailMaxRetries_ReturnsNoneFound()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())

@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
         {
-            if (ManagedIdentityClient.s_isSourceDiscoveryCached)
+            if (ManagedIdentityClient.s_isSourceDiscoveryCached && ManagedIdentityClient.s_cachedSourceResult != null)
             {
                 return ManagedIdentityClient.s_cachedSourceResult;
             }
