@@ -24,6 +24,8 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Http.Retry;
+using Microsoft.Identity.Test.Unit.Helpers;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -158,29 +160,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [DataTestMethod]
-        [DataRow(HttpStatusCode.NotFound, DisplayName = "404")]
-        [DataRow(HttpStatusCode.BadGateway, DisplayName = "502")]
+        [DataRow(HttpStatusCode.NotFound, 1, DisplayName = "404 - no retry")]
+        [DataRow(HttpStatusCode.BadGateway, 2, DisplayName = "502 - 1 retry")]
         [WorkItem(5804)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5804
-        public async Task InstanceDiscoveryFailure_IsCached_NotRetriedOnSubsequentCalls_Async(HttpStatusCode errorStatusCode)
+        public async Task InstanceDiscoveryFailure_IsCached_NotRetriedOnSubsequentCalls_Async(
+            HttpStatusCode errorStatusCode, int expectedDiscoveryCalls)
         {
-            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            using (var httpManager = new MockHttpManager())
             {
                 // Arrange - use an authority unknown to MSAL so instance discovery goes to the network
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithAuthority(TestConstants.AuthorityNotKnownTenanted)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
+                                                              .WithRetryPolicyFactory(new TestRetryPolicyFactory())
                                                               .BuildConcrete();
 
-                // First call: instance discovery returns an HTTP error, then token endpoint succeeds
-                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                // First call: instance discovery returns an HTTP error, then token endpoint succeeds.
+                // 404 is not retried; 502 (5xx) is retried once by the STS retry policy.
+                for (int i = 0; i < expectedDiscoveryCalls; i++)
                 {
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = new HttpResponseMessage(errorStatusCode)
+                    httpManager.AddMockHandler(new MockHttpMessageHandler()
                     {
-                        Content = new StringContent("error")
-                    }
-                });
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(errorStatusCode)
+                        {
+                            Content = new StringContent("error")
+                        }
+                    });
+                }
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var result1 = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
