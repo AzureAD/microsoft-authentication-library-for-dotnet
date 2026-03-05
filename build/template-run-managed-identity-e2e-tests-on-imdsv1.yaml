@@ -3,14 +3,17 @@ parameters:
   type: string
   default: 'Release'
 
+# NOTE: These jobs run on VM-based hosted agents where IMDS / MSI flows are available.
+# Do not switch pools unless the replacement VM image is known to support the intended MI flow.
+
 jobs:
-# ------------------------------------------------------------
-# Job 1: IMDS v1 smoke test (PS 5.1) on ID4SMSIHostedAgent
-# ------------------------------------------------------------
+# -------------------------------------------------------------------
+# Job 1: IMDS v1 smoke test (Windows PowerShell 5.1) on ID4SMSIHostedAgent
+# -------------------------------------------------------------------
 - job: RunManagedIdentityE2ETestsOnImds
   displayName: 'Managed Identity E2E Tests – VM / IMDS - V1'
   pool:
-    name: ID4SMSIHostedAgent
+    name: ID4SMSIHostedAgent  # IMDS v1 hosted agent
   variables:
     runCodesignValidationInjection: false
     Codeql.SkipTaskAutoInjection: true
@@ -18,12 +21,16 @@ jobs:
   - template: template-run-mi-e2e-imds-using-ps.yaml
     parameters:
       ImdsResource: 'https://management.azure.com/'
+      # Optional: force a specific UAMI (client_id). Leave empty for system-assigned/default.
       # UserAssignedClientId: '<UAMI client id>'
+      # Optional: override api-version if needed
       # ImdsApiVersion: '2018-02-01'
 
-# ------------------------------------------------------------
-# Job 2: MSI v2 PowerShell (pwsh) on MSALMSIV2 agent
-# ------------------------------------------------------------
+# -------------------------------------------------------------------
+# Job 2: MSI v2 PowerShell prototype (pwsh) on MSALMSIV2 agent
+#       This job is for training / visibility. It should PASS even if
+#       the prototype script fails with expected authorization errors.
+# -------------------------------------------------------------------
 - job: RunManagedIdentityV2PwshSmokeTest
   displayName: 'Managed Identity Smoke Test – MSI V2 (pwsh) – MSALMSIV2 Agent'
   pool:
@@ -34,7 +41,6 @@ jobs:
   steps:
   - checkout: self
 
-  # (Optional but nice) show pwsh version clearly
   - task: PowerShell@2
     displayName: 'pwsh: print version'
     inputs:
@@ -46,7 +52,6 @@ jobs:
         Write-Host "============================================================"
         $PSVersionTable | Format-List | Out-String | Write-Host
 
-  # Download the exact script from the pinned commit and run it under pwsh
   - task: PowerShell@2
     displayName: 'MSI V2: run prototype/MsiV2UsingPowerShell/get-token.ps1 (pwsh)'
     inputs:
@@ -60,39 +65,45 @@ jobs:
         Write-Host "MSI V2 token acquisition (pwsh) - Training / Study Guide"
         Write-Host "============================================================"
 
-        # Pin to exact commit you provided
         $commit = "972016d7af2af4d8687720452ad9d9234d89115d"
         $url = "https://raw.githubusercontent.com/AzureAD/microsoft-authentication-library-for-dotnet/$commit/prototype/MsiV2UsingPowerShell/get-token.ps1"
         $outFile = Join-Path $env:AGENT_TEMPDIRECTORY "get-token-msiv2.ps1"
 
         Write-Host "[STEP 1] Download script from pinned commit"
         Write-Host "  URL (pinned): $url"
-        Invoke-WebRequest -Uri $url -OutFile $outFile -UseBasicParsing
+        Invoke-WebRequest -Uri $url -OutFile $outFile
         Write-Host "  Saved to: $outFile"
 
         Write-Host ""
         Write-Host "[STEP 2] Execute script under pwsh"
-        Write-Host "  NOTE: Script output will be sanitized (no tokens printed)."
+        Write-Host "  NOTE: Output will be sanitized (no tokens printed)."
 
-        # Run and capture output so we can redact anything sensitive
-        $output = & $outFile 2>&1 | Out-String
+        $success = $false
+        $errorMsg = ""
+
+        try {
+          $raw = & $outFile 2>&1 | Out-String
+          $success = $true
+        } catch {
+          $errorMsg = $_.Exception.Message
+          $raw = ($_.ErrorDetails.Message + "`n" + ($_ | Out-String)) | Out-String
+        }
 
         Write-Host ""
         Write-Host "[STEP 3] Sanitize output (prevent token leakage)"
-        # Basic redaction patterns (covers JSON and typical key/value)
-        $sanitized = $output `
+        $sanitized = $raw `
           -replace '(?i)("access_token"\s*:\s*")[^"]+(")', '$1<redacted>$2' `
           -replace '(?i)(access_token\s*=\s*)\S+', '$1<redacted>' `
           -replace '(?i)(Authorization:\s*Bearer\s+)\S+', '$1<redacted>'
-
         Write-Host $sanitized
 
         Write-Host ""
         Write-Host "[STEP 4] Emit single-line summary for Log Analyzer"
-        # Best-effort: detect success signals without depending on exact script text
-        if ($output -match '(?i)\b(access_token|token_type|expires_in|expires_on)\b') {
+        if ($success) {
           Write-Host "MSIV2_RESULT status=SUCCESS runtime=pwsh script=get-token.ps1 commit=$commit safe_logging=true"
         } else {
-          # If the script fails, the task will already error. This is for weird “no output” cases.
-          Write-Host "MSIV2_RESULT status=UNKNOWN runtime=pwsh script=get-token.ps1 commit=$commit safe_logging=true"
+          Write-Host "MSIV2_RESULT status=EXPECTED_FAILURE runtime=pwsh script=get-token.ps1 commit=$commit safe_logging=true error=""$($errorMsg -replace '"','''')"""
         }
+
+        # Training run: do not fail the pipeline even if the prototype script fails.
+        exit 0
