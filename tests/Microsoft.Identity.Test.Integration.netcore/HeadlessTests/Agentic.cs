@@ -79,20 +79,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .Build();
 
             // Assertion provider using the assertion app with FMI path
-            Func<AssertionRequestOptions, Task<string>> assertionProvider = async (options) =>
-            {
-                var result = await assertionApp
-                    .AcquireTokenForClient([TokenExchangeUrl])
-                    .WithFmiPathForClientAssertion(AgentIdentity)
-                    .ExecuteAsync(options.CancellationToken)
-                    .ConfigureAwait(false);
+            var assertionResult = await assertionApp
+                .AcquireTokenForClient([TokenExchangeUrl])
+                .WithFmiPathForClientAssertion(AgentIdentity)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
-                Trace.WriteLine($"User FIC credential from : {result.AuthenticationResultMetadata.TokenSource}");
-                return result.AccessToken;
-            };
+            Trace.WriteLine($"User FIC credential from : {assertionResult.AuthenticationResultMetadata.TokenSource}");
+            string assertion = assertionResult.AccessToken;
 
             var result = await (cca as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential([Scope], UserUpn, assertionProvider)
+                .AcquireTokenByUserFederatedIdentityCredential([Scope], UserUpn, assertion)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     /// <summary>
     /// Integration tests for the User Federated Identity Credential (UserFIC) flow.
     /// The same app ID is used to both acquire the assertion token and the final user token.
+    /// The developer acquires the assertion manually and passes it as a plain string.
     /// Tenant and user UPN are retrieved from Key Vault secrets at class initialization.
     /// </summary>
     [TestClass]
@@ -22,7 +23,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private const string ClientId = "979a25aa-0daf-41a5-bcad-cebec5c7c254";
         private static readonly string[] s_scopes = { "User.Read" };
-        private const string TokenExchangeAudience = "api://AzureADTokenExchange/.default";
+        private static readonly string[] s_tokenExchangeScopes = { "api://AzureADTokenExchange/.default" };
 
         private static string s_tenant;
         private static string s_authority;
@@ -42,6 +43,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ApplicationBase.ResetStateForTest();
         }
 
+        private static IConfidentialClientApplication BuildApp(X509Certificate2 cert)
+        {
+            return ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority(s_authority)
+                .WithCertificate(cert, sendX5C: true)
+                .WithTestLogging()
+                .Build();
+        }
+
+        private static async Task<string> AcquireAssertionAsync(IConfidentialClientApplication app)
+        {
+            var assertionResult = await app
+                .AcquireTokenForClient(s_tokenExchangeScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            return assertionResult.AccessToken;
+        }
+
         /// <summary>
         /// Tests that the initial UserFIC token acquisition goes to the identity provider.
         /// </summary>
@@ -50,19 +71,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task UserFic_InitialAcquisition_FromIdentityProvider_Async()
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            var app = BuildApp(cert);
 
-            // Single app used for both the assertion source and the user token acquisition
-            var app = ConfidentialClientApplicationBuilder
-                .Create(ClientId)
-                .WithAuthority(s_authority)
-                .WithCertificate(cert, sendX5C: true)
-                .WithTestLogging()
-                .Build();
-
-            var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(app, TokenExchangeAudience);
+            string assertion = await AcquireAssertionAsync(app).ConfigureAwait(false);
 
             var result = await (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertionProvider)
+                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertion)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -83,20 +97,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task UserFic_SilentCacheHit_ReturnsFromCache_Async()
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            var app = BuildApp(cert);
 
-            // Single app used for both the assertion source and the user token acquisition
-            var app = ConfidentialClientApplicationBuilder
-                .Create(ClientId)
-                .WithAuthority(s_authority)
-                .WithCertificate(cert, sendX5C: true)
-                .WithTestLogging()
-                .Build();
-
-            var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(app, TokenExchangeAudience);
+            string assertion = await AcquireAssertionAsync(app).ConfigureAwait(false);
 
             // Step 1: Acquire token from identity provider
             var firstResult = await (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertionProvider)
+                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertion)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -124,28 +131,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task UserFic_ForceRefresh_AcquiresFromIdentityProvider_Async()
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            var app = BuildApp(cert);
 
-            // Single app used for both the assertion source and the user token acquisition
-            var app = ConfidentialClientApplicationBuilder
-                .Create(ClientId)
-                .WithAuthority(s_authority)
-                .WithCertificate(cert, sendX5C: true)
-                .WithTestLogging()
-                .Build();
-
-            var assertionProvider = FederatedCredentialProvider.FromConfidentialClient(app, TokenExchangeAudience);
+            string assertion = await AcquireAssertionAsync(app).ConfigureAwait(false);
 
             // Step 1: Initial acquisition from identity provider
             var firstResult = await (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertionProvider)
+                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertion)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, firstResult.AuthenticationResultMetadata.TokenSource);
 
-            // Step 2: Force refresh - should go to identity provider again
+            // Step 2: Re-acquire a fresh assertion and force refresh the user token
+            string freshAssertion = await AcquireAssertionAsync(app).ConfigureAwait(false);
             var forceRefreshResult = await (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, assertionProvider)
+                .AcquireTokenByUserFederatedIdentityCredential(s_scopes, s_userUpn, freshAssertion)
                 .WithForceRefresh(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);

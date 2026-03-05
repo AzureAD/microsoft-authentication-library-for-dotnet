@@ -4,13 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -62,23 +60,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             var app = BuildCCA(httpManager);
 
-            bool assertionProviderCalled = false;
             var result = await (app as IByUserFederatedIdentityCredential)
                 .AcquireTokenByUserFederatedIdentityCredential(
                     TestConstants.s_scope,
                     FakeUsername,
-                    async (options) =>
-                    {
-                        assertionProviderCalled = true;
-                        await Task.Yield();
-                        return FakeAssertion;
-                    })
+                    FakeAssertion)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            Assert.IsTrue(assertionProviderCalled, "AssertionProvider delegate should have been invoked.");
         }
 
         [TestMethod]
@@ -94,7 +85,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .AcquireTokenByUserFederatedIdentityCredential(
                     TestConstants.s_scope,
                     FakeUsername,
-                    (options) => Task.FromResult(FakeAssertion))
+                    FakeAssertion)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -108,76 +99,39 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenByUserFic_WithForceRefresh_InvokesAssertionProvider_Async()
+        public async Task AcquireTokenByUserFic_WithForceRefresh_CallsIdentityProvider_Async()
         {
             using var httpManager = new MockHttpManager();
             httpManager.AddInstanceDiscoveryMockHandler();
 
-            // First call
+            // Two mock handlers are added; MockHttpManager verifies both are consumed,
+            // confirming that two separate calls to the identity provider were made.
             AddMockHandlerForUserFic(httpManager);
             var app = BuildCCA(httpManager);
-
-            int assertionCallCount = 0;
-            Task<string> assertionProvider(AssertionRequestOptions options)
-            {
-                assertionCallCount++;
-                return Task.FromResult(FakeAssertion);
-            }
 
             var firstResult = await (app as IByUserFederatedIdentityCredential)
                 .AcquireTokenByUserFederatedIdentityCredential(
                     TestConstants.s_scope,
                     FakeUsername,
-                    assertionProvider)
+                    FakeAssertion)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(1, assertionCallCount);
             Assert.AreEqual(TokenSource.IdentityProvider, firstResult.AuthenticationResultMetadata.TokenSource);
 
-            // Second call with ForceRefresh - should re-invoke the assertion provider
+            // Second call with ForceRefresh - should call the identity provider again
             AddMockHandlerForUserFic(httpManager);
 
             var secondResult = await (app as IByUserFederatedIdentityCredential)
                 .AcquireTokenByUserFederatedIdentityCredential(
                     TestConstants.s_scope,
                     FakeUsername,
-                    assertionProvider)
+                    FakeAssertion)
                 .WithForceRefresh(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(2, assertionCallCount, "AssertionProvider should be called again with ForceRefresh.");
             Assert.AreEqual(TokenSource.IdentityProvider, secondResult.AuthenticationResultMetadata.TokenSource);
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenByUserFic_PassesCancellationTokenToAssertionProvider_Async()
-        {
-            using var httpManager = new MockHttpManager();
-            httpManager.AddInstanceDiscoveryMockHandler();
-            AddMockHandlerForUserFic(httpManager);
-
-            var app = BuildCCA(httpManager);
-
-            CancellationToken capturedToken = default;
-            using var cts = new CancellationTokenSource();
-
-            var result = await (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(
-                    TestConstants.s_scope,
-                    FakeUsername,
-                    (options) =>
-                    {
-                        capturedToken = options.CancellationToken;
-                        return Task.FromResult(FakeAssertion);
-                    })
-                .ExecuteAsync(cts.Token)
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(result);
-            // CancellationToken should be propagated to the assertion options
-            Assert.AreEqual(cts.Token, capturedToken);
         }
 
         [TestMethod]
@@ -191,12 +145,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .AcquireTokenByUserFederatedIdentityCredential(
                     TestConstants.s_scope,
                     username: null,
-                    assertionProvider: (options) => Task.FromResult(FakeAssertion));
+                    assertion: FakeAssertion);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void AcquireTokenByUserFic_NullAssertionProvider_ThrowsArgumentNullException()
+        public void AcquireTokenByUserFic_NullAssertion_ThrowsArgumentNullException()
         {
             using var httpManager = new MockHttpManager();
             var app = BuildCCA(httpManager);
@@ -205,44 +159,21 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .AcquireTokenByUserFederatedIdentityCredential(
                     TestConstants.s_scope,
                     username: FakeUsername,
-                    assertionProvider: null);
+                    assertion: null);
         }
 
         [TestMethod]
-        public void FederatedCredentialProvider_FromConfidentialClient_NullCca_ThrowsArgumentNullException()
-        {
-            Assert.ThrowsException<ArgumentNullException>(
-                () => FederatedCredentialProvider.FromConfidentialClient(null));
-        }
-
-        [TestMethod]
-        public void FederatedCredentialProvider_FromManagedIdentity_NullId_ThrowsArgumentNullException()
-        {
-            Assert.ThrowsException<ArgumentNullException>(
-                () => FederatedCredentialProvider.FromManagedIdentity(null));
-        }
-
-        [TestMethod]
-        public void FederatedCredentialProvider_FromConfidentialClient_ReturnsDelegate()
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void AcquireTokenByUserFic_EmptyAssertion_ThrowsArgumentNullException()
         {
             using var httpManager = new MockHttpManager();
-            var cca = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .WithHttpManager(httpManager)
-                .Build();
+            var app = BuildCCA(httpManager);
 
-            var provider = FederatedCredentialProvider.FromConfidentialClient(cca);
-
-            Assert.IsNotNull(provider);
-        }
-
-        [TestMethod]
-        public void FederatedCredentialProvider_FromManagedIdentity_ReturnsDelegate()
-        {
-            var provider = FederatedCredentialProvider.FromManagedIdentity(ManagedIdentityId.SystemAssigned);
-
-            Assert.IsNotNull(provider);
+            _ = (app as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential(
+                    TestConstants.s_scope,
+                    username: FakeUsername,
+                    assertion: string.Empty);
         }
     }
 }

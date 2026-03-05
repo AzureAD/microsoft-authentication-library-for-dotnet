@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,14 +27,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            var assertionRequestOptions = new AssertionRequestOptions
-            {
-                CancellationToken = cancellationToken
-            };
-
-            string assertion = await _userFicParameters.AssertionProvider(assertionRequestOptions).ConfigureAwait(false);
-
-            var additionalBodyParameters = GetAdditionalBodyParameters(assertion);
+            var additionalBodyParameters = GetAdditionalBodyParameters(_userFicParameters.Assertion);
             MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(additionalBodyParameters, cancellationToken).ConfigureAwait(false);
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);

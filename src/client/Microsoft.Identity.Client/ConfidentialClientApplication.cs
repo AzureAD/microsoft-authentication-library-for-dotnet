@@ -188,13 +188,13 @@ namespace Microsoft.Identity.Client
         AcquireTokenByUserFederatedIdentityCredentialParameterBuilder IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(
             IEnumerable<string> scopes,
             string username,
-            Func<AssertionRequestOptions, Task<string>> assertionProvider)
+            string assertion)
         {
             return AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.Create(
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes,
                 username,
-                assertionProvider);
+                assertion);
         }
 
         AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(

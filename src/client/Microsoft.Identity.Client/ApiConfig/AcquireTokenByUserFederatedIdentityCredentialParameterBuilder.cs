@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Parameter builder for the <see cref="IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(IEnumerable{string}, string, Func{AssertionRequestOptions, Task{string}})"/>
+    /// Parameter builder for the <see cref="IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(IEnumerable{string}, string, string)"/>
     /// operation.
     /// </summary>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
@@ -26,31 +26,31 @@ namespace Microsoft.Identity.Client
         internal AcquireTokenByUserFederatedIdentityCredentialParameterBuilder(
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             string username,
-            Func<AssertionRequestOptions, Task<string>> assertionProvider)
+            string assertion)
             : base(confidentialClientApplicationExecutor)
         {
             Parameters.Username = username;
-            Parameters.AssertionProvider = assertionProvider;
+            Parameters.Assertion = assertion;
         }
 
         internal static AcquireTokenByUserFederatedIdentityCredentialParameterBuilder Create(
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes,
             string username,
-            Func<AssertionRequestOptions, Task<string>> assertionProvider)
+            string assertion)
         {
             if (string.IsNullOrEmpty(username))
             {
                 throw new ArgumentNullException(nameof(username));
             }
 
-            if (assertionProvider == null)
+            if (string.IsNullOrEmpty(assertion))
             {
-                throw new ArgumentNullException(nameof(assertionProvider));
+                throw new ArgumentNullException(nameof(assertion));
             }
 
             return new AcquireTokenByUserFederatedIdentityCredentialParameterBuilder(
-                confidentialClientApplicationExecutor, username, assertionProvider)
+                confidentialClientApplicationExecutor, username, assertion)
                 .WithScopes(scopes);
         }
 
