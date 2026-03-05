@@ -96,6 +96,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             Exception ex = null,
             int? statusCode = null)
         {
+            // A 404 from the IMDSv2 CSR endpoint indicates that the host supports only IMDSv1.
+            // This happens when WithMtlsProofOfPossession() is used without a prior
+            // GetManagedIdentitySourceAsync() call: MSAL routes directly to IMDSv2, and
+            // on an IMDSv1-only host the /getplatformmetadata endpoint does not exist.
+            // Translate to a client error so callers know mTLS PoP is not supported here.
+            if (statusCode == (int)HttpStatusCode.NotFound)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsPopTokenNotSupportedinImdsV1,
+                    MsalErrorMessage.MtlsPopTokenNotSupportedinImdsV1);
+            }
+
             throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                 MsalError.ManagedIdentityRequestFailed,
                 $"[ImdsV2] {errorMessage}",

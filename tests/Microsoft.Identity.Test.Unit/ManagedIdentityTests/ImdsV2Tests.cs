@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -360,6 +361,62 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, imdsVersion: ImdsVersion.V1).ConfigureAwait(false);
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when <c>WithMtlsProofOfPossession()</c> is used without a prior
+        /// <c>GetManagedIdentitySourceAsync()</c> call (the E2E scenario), MSAL routes directly to
+        /// IMDSv2 and translates an HTTP 404 from the CSR metadata endpoint into
+        /// <see cref="MsalClientException"/> with error code
+        /// <see cref="MsalError.MtlsPopTokenNotSupportedinImdsV1"/>.
+        /// A 404 indicates the host is IMDSv1-only and the /getplatformmetadata endpoint does not exist.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        public async Task MtlsPopWithoutPriorDiscovery_CsrEndpointReturns404_ThrowsClientException(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+
+                // No explicit GetManagedIdentitySourceAsync() call; standard acquisition path routes
+                // directly to IMDSv2 when WithMtlsProofOfPossession() is used.
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder;
+                if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+                {
+                    miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
+                }
+                else
+                {
+                    miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
+                }
+
+                miBuilder.WithHttpManager(httpManager)
+                         .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                         .WithCsrFactory(_testCsrFactory);
+
+                var managedIdentityApp = miBuilder.Build();
+
+                // Simulate an IMDSv1-only host: the IMDSv2 CSR metadata endpoint does not exist
+                // and returns 404 Not Found.
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(HttpStatusCode.NotFound));
 
                 var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
