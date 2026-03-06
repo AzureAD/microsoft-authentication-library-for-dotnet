@@ -160,9 +160,8 @@ classDiagram
     }
 
     class AuthorityCreationPipeline {
-        -_discoveryManager : IInstanceDiscoveryManager
-        -_requestContext : RequestContext
-        +CreateAsync(string, AuthorityInfo, AuthorityOverride) Task~Authority~
+        <<static>>
+        +CreateAsync(string, AuthorityInfo, AuthorityOverride, IInstanceDiscoveryManager, RequestContext) Task~Authority~$
     }
 
     class IAuthorityNormalizer {

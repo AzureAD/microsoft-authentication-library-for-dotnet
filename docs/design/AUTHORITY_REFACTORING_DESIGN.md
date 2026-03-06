@@ -206,15 +206,14 @@ public static class AuthorityRegistry
 | 6 | **Construct** | Call `registration.Factory(normalizedInfo)` to produce the `Authority` instance |
 
 ```csharp
-public sealed class AuthorityCreationPipeline
+public static class AuthorityCreationPipeline
 {
-    private readonly IInstanceDiscoveryManager _discoveryManager;
-    private readonly RequestContext _requestContext;
-
-    public async Task<Authority> CreateAsync(
+    public static async Task<Authority> CreateAsync(
         string rawAuthorityUri,
         AuthorityInfo configAuthority,
-        AuthorityOverride requestOverride)
+        AuthorityOverride requestOverride,
+        IInstanceDiscoveryManager discoveryManager,
+        RequestContext requestContext)
     {
         // Step 1: Parse
         var uri = ParseUri(rawAuthorityUri);
@@ -229,7 +228,7 @@ public sealed class AuthorityCreationPipeline
         var merged = AuthorityMerger.Merge(configAuthority, normalized, requestOverride);
 
         // Step 5: Validate
-        await registration.Validator.ValidateAsync(merged, _discoveryManager, _requestContext)
+        await registration.Validator.ValidateAsync(merged, discoveryManager, requestContext)
             .ConfigureAwait(false);
 
         // Step 6: Construct
@@ -289,10 +288,12 @@ public async Task<Authority> GetRequestAuthorityAsync()
 // After
 public async Task<Authority> GetRequestAuthorityAsync()
 {
-    return await _pipeline.CreateAsync(
+    return await AuthorityCreationPipeline.CreateAsync(
         _initialAuthority.CanonicalAuthority.ToString(),
         _appConfig.Authority,
-        _requestOverride).ConfigureAwait(false);
+        _requestOverride,
+        _instanceDiscoveryManager,
+        _requestContext).ConfigureAwait(false);
 }
 ```
 
