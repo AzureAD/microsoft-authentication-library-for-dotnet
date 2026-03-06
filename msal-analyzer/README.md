@@ -1,6 +1,6 @@
 # MSAL Log Analyzer
 
-A powerful web application for analyzing Microsoft Authentication Library (MSAL) logs with AI-powered insights, interactive visualizations, and professional reporting.
+A prototype web application for analyzing Microsoft Authentication Library (MSAL) logs with AI-powered insights, interactive visualizations, and reporting.
 
 > **Important:** This application uses **Azure OpenAI** (a Microsoft-approved AI service) to analyze MSAL logs. Third-party AI services such as Anthropic Claude or OpenAI.com must **not** be used, because MSAL logs contain Microsoft business-sensitive data (tenant IDs, client IDs, account identifiers, correlation IDs, token metadata) that may not be transferred to non-Microsoft AI services under Microsoft policy.
 
