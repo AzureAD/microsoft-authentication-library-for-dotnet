@@ -202,7 +202,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 requestContext.Logger.Error($"[Instance Discovery] Instance discovery failed - invalid instance! ");
                 throw;
             }
-            catch (Exception e) 
+            catch (OperationCanceledException) when (requestContext.UserCancellationToken.IsCancellationRequested)
+            {
+                requestContext.Logger.Info("[Instance Discovery] Instance discovery was canceled by the caller. ");
+                throw;
+            }
+            catch (Exception e)
             { 
                 requestContext.Logger.Warning(
                     $"[Instance Discovery] Instance Discovery failed. MSAL will continue without instance metadata. \n\r" +
