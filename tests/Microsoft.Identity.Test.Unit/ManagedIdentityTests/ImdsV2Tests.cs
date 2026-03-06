@@ -151,11 +151,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             IManagedIdentityKeyProvider managedIdentityKeyProvider = null;
             if (managedIdentityKeyType == ManagedIdentityKeyType.KeyGuard)
             {
-                if (!ImdsV2TestStoreCleaner.IsWindows)
-                {
-                    Assert.Inconclusive("Windows-only: KeyGuard requires RSACng (Windows CNG cryptography) which is not available on other platforms.");
-                }
-
                 // Force KeyGuard keys to deterministically exercise the attestation path.
                 managedIdentityKeyProvider = new TestKeyGuardManagedIdentityKeyProvider();
             }
@@ -360,11 +355,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
-            if (!ImdsV2TestStoreCleaner.IsWindows)
-            {
-                Assert.Inconclusive("Windows-only: mTLS PoP with Managed Identity requires RSACng (Windows CNG cryptography) which is not available on other platforms.");
-            }
-
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
@@ -399,11 +389,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
-            if (!ImdsV2TestStoreCleaner.IsWindows)
-            {
-                Assert.Inconclusive("Windows-only: mTLS PoP with Managed Identity requires RSACng (Windows CNG cryptography) which is not available on other platforms.");
-            }
-
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
@@ -649,11 +634,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithMissingServerHeader()
         {
-            if (!ImdsV2TestStoreCleaner.IsWindows)
-            {
-                Assert.Inconclusive("Windows-only: mTLS PoP with Managed Identity requires RSACng (Windows CNG cryptography) which is not available on other platforms.");
-            }
-
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
@@ -676,11 +656,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithInvalidFormat()
         {
-            if (!ImdsV2TestStoreCleaner.IsWindows)
-            {
-                Assert.Inconclusive("Windows-only: mTLS PoP with Managed Identity requires RSACng (Windows CNG cryptography) which is not available on other platforms.");
-            }
-
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
@@ -852,11 +827,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task mTLSPop_RequestedWithoutKeyGuard_ThrowsClientException()
         {
-            if (!ImdsV2TestStoreCleaner.IsWindows)
-            {
-                Assert.Inconclusive("Windows-only: mTLS PoP with Managed Identity requires RSACng (Windows CNG cryptography) which is not available on other platforms.");
-            }
-
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
