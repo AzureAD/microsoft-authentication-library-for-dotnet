@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         //  - Broad test scenarios
         public const string AppS2S = "App-S2S-Config";
         public const string AppPCAClient = "App-PCAClient-Config";
+        public const string AppAdfsNativeClient = "App-AdfsNativeClient-Config";
         public const string AppWebApi = "App-WebApi-Config";
         //  - More specific test scenarios, edge cases, etc.
         public const string B2CAppIdLabsAppB2C = "MSAL-App-B2C-JSON";

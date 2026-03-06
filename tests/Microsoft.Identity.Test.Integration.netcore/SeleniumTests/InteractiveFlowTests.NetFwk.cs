@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task Interactive_Adfs_DirectAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppAdfsNativeClient).ConfigureAwait(false);
             await RunTestForUserAsync(user, app, true).ConfigureAwait(false);
         }      
 

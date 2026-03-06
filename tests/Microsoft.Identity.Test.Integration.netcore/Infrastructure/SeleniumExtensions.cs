@@ -318,33 +318,10 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Trace.WriteLine("Logging in ... Entering password");
             string password = user.GetOrFetchPassword();
             string passwordField = fields.GetPasswordInputId();
-            string signInButton = fields.GetPasswordSignInButtonId();
-
-            // Try the configured field with a short timeout first. If the browser was redirected
-            // to an ADFS login page (e.g. federated user whose UserType is not set to "Federated"),
-            // the ADFS page uses different element IDs than AAD. Fall back to ADFS field IDs.
-            var pwdElement = driver.WaitForElementToBeVisibleAndEnabled(
-                By.Id(passwordField),
-                waitTime: ShortExplicitTimespan,
-                ignoreFailures: true);
-
-            if (pwdElement == null && passwordField != CoreUiTestConstants.AdfsV4WebPasswordId)
-            {
-                Trace.WriteLine($"Password field '{passwordField}' not found, falling back to ADFS field IDs");
-                passwordField = CoreUiTestConstants.AdfsV4WebPasswordId;
-                signInButton = CoreUiTestConstants.AdfsV4WebSubmitId;
-                pwdElement = driver.WaitForElementToBeVisibleAndEnabled(By.Id(passwordField));
-            }
-            else if (pwdElement == null)
-            {
-                // Already using ADFS IDs but element still not found — re-wait to surface the timeout exception
-                pwdElement = driver.WaitForElementToBeVisibleAndEnabled(By.Id(passwordField));
-            }
-
-            pwdElement.SendKeys(password);
+            driver.WaitForElementToBeVisibleAndEnabled(By.Id(passwordField)).SendKeys(password);
 
             Trace.WriteLine("Logging in ... Clicking next after password");
-            driver.WaitForElementToBeVisibleAndEnabled(By.Id(signInButton)).Click();
+            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordSignInButtonId())).Click();
         }
 
         private static void EnterUsername(IWebDriver driver, UserConfig user, bool withLoginHint, bool adfsOnly, UserInformationFieldIds fields)
