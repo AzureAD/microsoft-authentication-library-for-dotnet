@@ -58,11 +58,6 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
         {
-            if (ManagedIdentityClient.s_isSourceDiscoveryCached && ManagedIdentityClient.s_cachedSourceResult != null)
-            {
-                return ManagedIdentityClient.s_cachedSourceResult;
-            }
-
             // Create a temporary RequestContext for the logger and the IMDS probe request.
             var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
 

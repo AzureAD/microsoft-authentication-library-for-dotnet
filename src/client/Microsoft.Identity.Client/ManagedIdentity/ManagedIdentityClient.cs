@@ -25,10 +25,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // Preview guard: once we fall back to IMDSv1 while IMDSv2 is cached,
         // disallow switching to IMDSv2 PoP in the same process (preview behavior).
         internal static bool s_imdsV1UsedForPreview = false;
-        // True only after the explicit discovery API (GetManagedIdentitySourceAsync) runs.
-        // This allows caching "NoneFound" without confusing it with "not discovered yet".
-        internal static bool s_isSourceDiscoveryCached = false;
-        internal static ManagedIdentitySourceResult s_cachedSourceResult = null;
+        // Non-null only after the explicit discovery API (GetManagedIdentitySourceAsync) runs.
+        // Allows caching "NoneFound" (Source=None) without confusing it with "not discovered yet".
+        private static ManagedIdentitySourceResult s_cachedSourceResult = null;
 
         // Holds the most recently minted mTLS binding certificate for this application instance.
         private X509Certificate2 _runtimeMtlsBindingCertificate;
@@ -37,7 +36,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal static void ResetSourceForTest()
         {
             s_sourceName = ManagedIdentitySource.None;
-            s_isSourceDiscoveryCached = false;
             s_cachedSourceResult = null;
             s_imdsV1UsedForPreview = false;
 
@@ -64,11 +62,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             using (requestContext.Logger.LogMethodDuration())
             {
-                requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source. Discovery cached: {s_isSourceDiscoveryCached}");
+                requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source. " + 
+                    $"Discovery cached: {s_cachedSourceResult != null}");
 
                 ManagedIdentitySource source;
 
-                if (s_isSourceDiscoveryCached && s_cachedSourceResult != null)
+                if (s_cachedSourceResult != null)
                 {
                     // Use the cached explicit discovery result (including NoneFound)
                     source = s_cachedSourceResult.Source;
@@ -150,7 +149,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             s_sourceName = result.Source;
             s_cachedSourceResult = result;
-            s_isSourceDiscoveryCached = true;
             return result;
         }
 
@@ -162,7 +160,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             CancellationToken cancellationToken)
         {
             // Return cached result if explicit discovery already ran
-            if (s_isSourceDiscoveryCached && s_cachedSourceResult != null)
+            if (s_cachedSourceResult != null)
             {
                 return s_cachedSourceResult;
             }
