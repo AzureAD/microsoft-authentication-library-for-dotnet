@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -373,10 +372,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
-        /// mtls pop token request should succeed with IMDSv2 even without prior discovery 
-        /// since the app will attempt to use IMDSv2 first before falling back to IMDSv1, 
-        /// and the presence of mtls-specific headers in the request will signal to IMDS 
-        /// that it's an mtls request and IMDS should respond accordingly.
+        /// mTLS PoP token request should succeed with IMDSv2 even without prior discovery.
+        /// When .WithMtlsProofOfPossession() is used, MSAL routes directly to IMDSv2 (no probing,
+        /// and no fallback to IMDSv1, which does not support mTLS PoP). The presence of mTLS-specific
+        /// headers in the request signals to IMDS that it's an mTLS request and IMDS should respond accordingly.
         /// </summary>
         /// <param name="userAssignedIdentityId"></param>
         /// <param name="userAssignedId"></param>

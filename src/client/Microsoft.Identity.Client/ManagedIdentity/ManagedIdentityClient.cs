@@ -65,6 +65,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source. " + 
                     $"Discovery cached: {s_cachedSourceResult != null}");
 
+                // Check for cancellation before potentially expensive operations
+                // (e.g., network calls in token acquisition) to fail fast if the
+                // caller has already requested cancellation.
+                cancellationToken.ThrowIfCancellationRequested();
+
                 ManagedIdentitySource source;
 
                 if (s_cachedSourceResult != null)
@@ -167,6 +172,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             // First check env vars to avoid the probe if possible
             ManagedIdentitySource source = GetManagedIdentitySourceNoImds(requestContext.Logger);
+            
             if (source != ManagedIdentitySource.None)
             {
                 return CacheDiscoveryResult(new ManagedIdentitySourceResult(source));
