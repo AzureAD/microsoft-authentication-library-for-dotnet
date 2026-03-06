@@ -557,7 +557,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                     break;
                 case CredentialType.ClientAssertion_Manual:
 
-                    var aud = authority.Contains("/adfs/") ?
+                    var aud = authority.Contains("/adfs") ?
                         authority + "/oauth2/token" :
                         authority + "/oauth2/v2.0/token";
 
@@ -569,7 +569,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                     break;
 
                 case CredentialType.ClientAssertion_Wilson:
-                    var aud2 = authority.Contains("/adfs/") ?
+                    var aud2 = authority.Contains("/adfs") ?
                        authority + "/oauth2/token" :
                        authority + "/oauth2/v2.0/token";
 
