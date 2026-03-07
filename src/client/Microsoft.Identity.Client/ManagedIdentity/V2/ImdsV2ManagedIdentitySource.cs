@@ -175,7 +175,58 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             // Capture the attestation token provider delegate before calling base
             _attestationTokenProvider = parameters.AttestationTokenProvider;
-            return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+            }
+            catch (MsalServiceException ex) when (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex))
+            {
+                _requestContext.Logger.Verbose(() =>
+                    "[ImdsV2] SCHANNEL mTLS failure detected. Removing bad persisted cert and retrying with fresh mint.");
+
+                // Remove the bad cert from both caches
+                string certCacheKey = GetMtlsCertCacheKey();
+                try
+                {
+                    if (_mtlsCache is MtlsBindingCache mtlsCache)
+                    {
+                        mtlsCache.RemoveBadCert(certCacheKey, _requestContext.Logger);
+                    }
+                }
+                catch (Exception removalEx)
+                {
+                    _requestContext.Logger.Verbose(() => $"[ImdsV2] Error removing bad cert: {removalEx.Message}");
+                }
+
+                // Retry - will mint fresh cert since we just deleted the bad one
+                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Detects if the exception was caused by a SCHANNEL failure during mTLS authentication, 
+        /// which can occur if the client certificate becomes invalid.
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <returns></returns>
+        private static bool IsSchanelFailure(MsalServiceException ex)
+        {
+            for (Exception e = ex; e != null; e = e.InnerException)
+            {
+                if (e is System.Net.Sockets.SocketException se &&
+                    (se.ErrorCode == 10054 || se.SocketErrorCode == System.Net.Sockets.SocketError.ConnectionReset))
+                {
+                    return true;
+                }
+
+                if (e is System.Security.Authentication.AuthenticationException)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(

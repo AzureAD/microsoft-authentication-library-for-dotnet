@@ -109,6 +109,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             get => IsLegacyCacheEnabled ? TelemetryConstants.One : TelemetryConstants.Zero;
         }
 
+        public char IsManagedCertUsed { get; set; }
+
         private CacheRefreshReason? _cacheInfo;
         public CacheRefreshReason CacheInfo
         {

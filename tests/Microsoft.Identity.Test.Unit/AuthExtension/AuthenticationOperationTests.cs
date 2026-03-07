@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -78,7 +77,6 @@ namespace Microsoft.Identity.Test.Unit
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -158,7 +156,6 @@ namespace Microsoft.Identity.Test.Unit
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));

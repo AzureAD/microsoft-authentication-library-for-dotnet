@@ -6,10 +6,10 @@ steps:
 
 # Ensure the exact SDK is available on the agent
 - task: UseDotNet@2
-  displayName: 'Install .NET SDK 8.0.415'
+  displayName: 'Install .NET SDK 8.0.418'
   inputs:
     packageType: 'sdk'
-    version: '8.0.415'
+    version: '8.0.418'
     includePreviewVersions: false
     performMultiLevelLookup: true
 

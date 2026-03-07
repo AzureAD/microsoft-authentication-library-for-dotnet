@@ -13,6 +13,7 @@
     <SignAssembly>true</SignAssembly>
     <DelaySign>false</DelaySign>
     <TargetFrameworkProfile />
+    <CompilerGeneratedFilesOutputPath>$(IntermediateOutputPath)generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>

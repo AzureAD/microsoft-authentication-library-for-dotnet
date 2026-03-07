@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
 {
     /// <summary>
     /// Managed façade for <c>AttestationClientLib.dll</c>. Holds initialization state,
-    /// does ref-count hygiene on <see cref="SafeNCryptKeyHandle"/>, and returns a JWT.
+    /// does ref-count hygiene on <see cref="SafeNCryptKeyHandle"/>, and returns a JWT with expiry information.
     /// </summary>
     internal sealed class AttestationClient : IDisposable
     {
@@ -37,14 +37,14 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
         }
 
         /// <summary>
-        /// Calls the native <c>AttestKeyGuardImportKey</c> and returns a structured result.
+        /// Calls the native <c>AttestKeyGuardImportKey</c> and returns a structured result with expiry information.
         /// </summary>
         public AttestationResult Attest(string endpoint,
                                         SafeNCryptKeyHandle keyHandle,
                                         string clientId)
         {
             if (!_initialized)
-                return new(AttestationStatus.NotInitialized, null, -1,
+                return new(AttestationStatus.NotInitialized, null, null, -1,
                     "Native library not initialized.");
 
             IntPtr buf = IntPtr.Zero;
@@ -58,33 +58,38 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                     endpoint, null, null, keyHandle, out buf, clientId);
 
                 if (rc != 0)
-                    return new(AttestationStatus.NativeError, null, rc, null);
+                    return new(AttestationStatus.NativeError, null, null, rc, null);
 
                 if (buf == IntPtr.Zero)
-                    return new(AttestationStatus.TokenEmpty, null, 0,
+                    return new(AttestationStatus.TokenEmpty, null, null, 0,
                         "rc==0 but token buffer was null.");
 
                 string jwt = Marshal.PtrToStringAnsi(buf)!;
-                return new(AttestationStatus.Success, jwt, 0, null);
+
+                // Extract expiry from JWT payload
+                JwtClaimExtractor.TryExtractExpirationClaim(jwt, out DateTimeOffset expiresOn);
+
+                var token = new AttestationToken(jwt, expiresOn);
+                return new(AttestationStatus.Success, token, jwt, 0, null);
             }
             catch (DllNotFoundException ex)
             {
-                return new(AttestationStatus.Exception, null, -1,
+                return new(AttestationStatus.Exception, null, null, -1,
                     $"Native DLL not found: {ex.Message}");
             }
             catch (BadImageFormatException ex)
             {
-                return new(AttestationStatus.Exception, null, -1,
+                return new(AttestationStatus.Exception, null, null, -1,
                     $"Architecture mismatch (x86/x64) or corrupted DLL: {ex.Message}");
             }
             catch (SEHException ex)
             {
-                return new(AttestationStatus.Exception, null, -1,
+                return new(AttestationStatus.Exception, null, null, -1,
                     $"Native library raised SEHException: {ex.Message}");
             }
             catch (Exception ex)
             {
-                return new(AttestationStatus.Exception, null, -1, ex.Message);
+                return new(AttestationStatus.Exception, null, null, -1, ex.Message);
             }
             finally
             {

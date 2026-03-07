@@ -123,6 +123,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.microsoftonline.de"));
             Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.microsoftonline.de"));
+            
+            // New sovereign clouds
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.sovcloud-identity.fr"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.sovcloud-identity.fr"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.sovcloud-identity.de"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.sovcloud-identity.de"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.sovcloud-identity.sg"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.sovcloud-identity.sg"));
         }
 
         [TestMethod]
@@ -136,6 +144,30 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsTrue(KnownMetadataProvider.IsPublicEnvironment("login.microsoft.com"));
             Assert.IsTrue(KnownMetadataProvider.IsPublicEnvironment("login.microsoftonline.com"));
             Assert.IsTrue(KnownMetadataProvider.IsPublicEnvironment("Login.microsoftonline.com"));
+            
+            // New sovereign clouds should NOT be public environments
+            Assert.IsFalse(KnownMetadataProvider.IsPublicEnvironment("login.sovcloud-identity.fr"));
+            Assert.IsFalse(KnownMetadataProvider.IsPublicEnvironment("login.sovcloud-identity.de"));
+            Assert.IsFalse(KnownMetadataProvider.IsPublicEnvironment("login.sovcloud-identity.sg"));
+        }
+
+        [DataTestMethod]
+        [DataRow("login.sovcloud-identity.fr")]
+        [DataRow("login.sovcloud-identity.de")]
+        [DataRow("login.sovcloud-identity.sg")]
+        public void KnownMetadataProvider_NewSovereignClouds(string host)
+        {
+            // Arrange
+            KnownMetadataProvider knownMetadataProvider = new KnownMetadataProvider();
+
+            // Act
+            InstanceDiscoveryMetadataEntry result = knownMetadataProvider.GetMetadata(host, null, _logger);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(host, result.PreferredNetwork);
+            Assert.AreEqual(host, result.PreferredCache);
+            CollectionAssert.Contains(result.Aliases, host);
         }
     }
 }

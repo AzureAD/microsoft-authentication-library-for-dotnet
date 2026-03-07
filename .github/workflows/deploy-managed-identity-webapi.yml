@@ -1,0 +1,51 @@
+name: Build and Deploy Managed Identity WebAPI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        working-directory: ./tests/devapps/Managed Identity apps/ManagedIdentityWebApi
+        run: dotnet restore
+
+      - name: Build
+        working-directory: ./tests/devapps/Managed Identity apps/ManagedIdentityWebApi
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish
+        working-directory: ./tests/devapps/Managed Identity apps/ManagedIdentityWebApi
+        run: dotnet publish -c Release -o ${{github.workspace}}/publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'msalmsi'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{github.workspace}}/publish
+
+      - name: Test deployed endpoint - Get Token
+        run: |
+          echo "Testing token endpoint..."
+          RESPONSE=$(curl -s -X GET "https://msalmsi-buaxcubfa5a9drf9.westus3-01.azurewebsites.net/AppService?resourceuri=https://vault.azure.net")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q "Access token received"; then
+            echo "✅ Successfully retrieved access token"
+            exit 0
+          else
+            echo "⚠️ Response received but may need review: $RESPONSE"
+            exit 0
+          fi

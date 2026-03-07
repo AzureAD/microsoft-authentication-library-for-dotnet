@@ -33,6 +33,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class InstanceDiscoveryTests : TestBase
     {
+        [DataTestMethod]
+        [DataRow("login.microsoftonline.com", DisplayName = "Public")]
+        [DataRow("login.microsoftonline.us", DisplayName = "UsGov")]
+        [DataRow("login.microsoftonline.de", DisplayName = "GermanyLegacy")]
+        [DataRow("login.partner.microsoftonline.cn", DisplayName = "China")]
+        [DataRow("login.sovcloud-identity.fr", DisplayName = "Fr")]
+        [DataRow("login.sovcloud-identity.de", DisplayName = "De")]
+        [DataRow("login.sovcloud-identity.sg", DisplayName = "Sg")]
+        public async Task InstanceDiscoveryHappensOnKnownCloud(string discoveryHost)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority($"https://{discoveryHost}/tenant")
+                                                              .WithRedirectUri(TestConstants.RedirectUri)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)                                      
+                                                              .BuildConcrete();
+
+                Uri expectedDiscoveryEndpoint = new Uri($"https://{discoveryHost}/tenant/discovery/instance");
+                httpManager.AddInstanceDiscoveryMockHandler(customDiscoveryEndpoint: expectedDiscoveryEndpoint);
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedUrl = $"https://{discoveryHost}/tenant/oauth2/v2.0/token";
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                
+            }
+        }
+
         [TestMethod]
         public async Task ConfidentialClientUsingSecretNoInstanceDiscoveryTestAsync()
         {

@@ -55,6 +55,11 @@ namespace Microsoft.Identity.Client.Internal
         public const string CertSerialNumber = "cert_sn";
         public const string FmiNodeClientId = "urn:microsoft:identity:fmi";
 
+        // Telemetry query parameter keys
+        public const string CallerSdkIdKey = "caller-sdk-id";
+        public const string CallerSdkVersionKey = "caller-sdk-ver";
+        public const string ManagedCertKey = "ManagedCert";
+
         public const int CallerSdkIdMaxLength = 10;
         public const int CallerSdkVersionMaxLength = 20;
 
