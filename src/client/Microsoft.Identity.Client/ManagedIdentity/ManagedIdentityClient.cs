@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
-        internal static ManagedIdentitySource s_sourceName = ManagedIdentitySource.None;
+
         // Preview guard: once we fall back to IMDSv1 while IMDSv2 is cached,
         // disallow switching to IMDSv2 PoP in the same process (preview behavior).
         internal static bool s_imdsV1UsedForPreview = false;
@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         internal static void ResetSourceForTest()
         {
-            s_sourceName = ManagedIdentitySource.None;
             s_cachedSourceResult = null;
             s_imdsV1UsedForPreview = false;
 
@@ -152,7 +151,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private static ManagedIdentitySourceResult CacheDiscoveryResult(ManagedIdentitySourceResult result)
         {
-            s_sourceName = result.Source;
             s_cachedSourceResult = result;
             return result;
         }
