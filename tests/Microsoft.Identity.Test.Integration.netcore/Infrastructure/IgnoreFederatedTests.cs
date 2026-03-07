@@ -21,10 +21,10 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
         }
 
-        public override async Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
+        public override Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
 #if IGNORE_FEDERATED
-            return new[]
+            return Task.FromResult(new[]
             {
                     new TestResult
                     {
@@ -32,9 +32,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         TestFailureException = new AssertInconclusiveException(
                             $"Skipped on OneBranch pipeline")
                     }
-                };
+                });
 #else
-            return await base.ExecuteAsync(testMethod).ConfigureAwait(false);
+            return base.ExecuteAsync(testMethod);
 #endif
         }
     }
