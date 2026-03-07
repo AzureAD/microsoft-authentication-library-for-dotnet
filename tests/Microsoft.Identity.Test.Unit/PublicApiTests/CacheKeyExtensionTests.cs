@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 if (expectedCacheKeyHash != null)
                 {
-                    Assert.Contains(expectedCacheKeyHash, args.SuggestedCacheKey);
+                    Assert.IsTrue(args.SuggestedCacheKey.Contains(expectedCacheKeyHash));
                 }
             });
 

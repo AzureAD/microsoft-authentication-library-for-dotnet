@@ -934,10 +934,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsFalse(tenantProfile2.IsHomeTenant);
 
             Assert.IsNotNull(tenantProfile1.ClaimsPrincipal);
-            Assert.IsGreaterThan(0, tenantProfile1.ClaimsPrincipal.Claims.Count());
+            Assert.IsTrue(tenantProfile1.ClaimsPrincipal.Claims.Count() > 0);
 
             Assert.IsNotNull(tenantProfile2.ClaimsPrincipal);
-            Assert.IsGreaterThan(0, tenantProfile2.ClaimsPrincipal.Claims.Count());
+            Assert.IsTrue(tenantProfile2.ClaimsPrincipal.Claims.Count() > 0);
         }
 
         /// <summary>

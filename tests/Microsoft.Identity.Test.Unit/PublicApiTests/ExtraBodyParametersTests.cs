@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Assert
                 Assert.IsNotNull(authResult);
-                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource  );
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
 
                 //Ensure the same extra body parameters are needed get the cache key
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(

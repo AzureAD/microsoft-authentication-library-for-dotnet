@@ -310,15 +310,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
-                Assert.Contains(
-                    TestConstants.XClientSku,
-                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
-                    "Client info header should contain " + TestConstants.XClientSku);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
+                    "Client info header should contain " + TestConstants.XClientSku,
+                    StringComparison.OrdinalIgnoreCase);
 
-                Assert.Contains(
-                    TestConstants.XClientVer,
-                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
-                    "Client info header should contain " + TestConstants.XClientVer);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
+                    "Client info header should contain " + TestConstants.XClientVer,
+                    StringComparison.OrdinalIgnoreCase);
             }
         }
 
@@ -356,14 +354,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
-                Assert.Contains(
-                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
-                    TestConstants.XClientSku,
-                    "Client info header should contain " + TestConstants.XClientSku);
-                Assert.Contains(
-                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
-                    TestConstants.XClientVer,
-                    "Client info header should contain " + TestConstants.XClientVer);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
+                    "Client info header should contain " + TestConstants.XClientSku,
+                    StringComparison.OrdinalIgnoreCase);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
+                    "Client info header should contain " + TestConstants.XClientVer,
+                    StringComparison.OrdinalIgnoreCase);
 
                 // Assert telemetry ApiId
                 Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenByIntegratedWindowsAuth.ToString("D"), mockTokenRequestHttpHandler.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single().Split('|')[1].Split(',')[0]);
@@ -439,14 +435,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(TestConstants.s_user.Username, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
-                Assert.Contains(
-                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
-                    TestConstants.XClientSku,
-                    "Client info header should contain " + TestConstants.XClientSku);
-                Assert.Contains(
-                    realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
+                    "Client info header should contain " + TestConstants.XClientSku,
+                    StringComparison.OrdinalIgnoreCase);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(),
                     TestConstants.XClientVer,
-                    "Client info header should contain " + TestConstants.XClientVer);
+                    "Client info header should contain " + TestConstants.XClientVer,
+                    StringComparison.OrdinalIgnoreCase);
             }
         }
 

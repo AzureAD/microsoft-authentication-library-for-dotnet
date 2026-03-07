@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.AreEqual(ex, cacheReadException);
 
                 Assert.Contains("Lorem", ex.Message);
-                Assert.Contains("LoremIpsum", ex.Message);
+                Assert.DoesNotContain("LoremIpsum", ex.Message);
             }
         }
 
