@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         [TestCategory("CryptographyTests")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
-        public void SignWithNonRsaCertificate_ThrowsException()
+        public void SignWithNonRsaCertificate_ThrowsExactly()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
@@ -48,8 +48,8 @@ namespace Microsoft.Identity.Test.Unit
                 crypto.SignWithCertificate("TEST", cert, RSASignaturePadding.Pkcs1);
             });
 
-            Assert.AreEqual(ex.ErrorCode, MsalError.CertificateNotRsa);
-            Assert.AreEqual(ex.Message, MsalErrorMessage.CertMustBeRsa(cert.PublicKey.Oid.FriendlyName));
+            Assert.AreEqual(MsalError.CertificateNotRsa, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.CertMustBeRsa(cert.PublicKey.Oid.FriendlyName), ex.Message);
         }
     }
 }

@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             };
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityTenanted)]
         public async Task DstsClientCredentialSuccessfulTestAsync(string authority)
@@ -54,7 +54,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(httpManager)
-                    .WithAuthority(authority)
+                    .WithAuthority("https://some.url.dsts.core.azure-test.net/dstsv2/")
+                    .WithTenantId(TestConstants.TenantId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
@@ -153,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(TestConstants.TenantId2, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityTenanted)]
         public void DstsEndpointsTest(string authority)

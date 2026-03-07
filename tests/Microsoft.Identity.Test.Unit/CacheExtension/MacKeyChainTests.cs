@@ -167,11 +167,11 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
 
         private void VerifyKeyIsNull(string serviceName, string accountName)
         {
-            if (_macOSKeychain.Get(serviceName, accountName) != null)
+            var credential = _macOSKeychain.Get(serviceName, accountName);
+            if (credential != null)
             {
                 Assert.Fail(
-                    "key exists when it shouldn't be. keychainData=\"{0}\"",
-                    _macOSKeychain.Get(serviceName, accountName).Password);
+                    $"key exists when it shouldn't be. keychainData=\"{Encoding.UTF8.GetString(credential.Password)}\"");
             }
         }
     }

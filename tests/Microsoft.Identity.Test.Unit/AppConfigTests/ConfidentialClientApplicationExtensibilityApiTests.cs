@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void WithCertificate_ThrowsOnNullCallback()
         {
             // Act & Assert
-            var ex = Assert.ThrowsException<ArgumentNullException>(() =>
+            var ex = Assert.ThrowsExactly<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void OnMsalServiceFailure_ThrowsOnNullCallback()
         {
             // Act & Assert
-            var ex = Assert.ThrowsException<ArgumentNullException>(() =>
+            var ex = Assert.ThrowsExactly<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void OnSuccess_ThrowsOnNullCallback()
         {
             // Act & Assert
-            var ex = Assert.ThrowsException<ArgumentNullException>(() =>
+            var ex = Assert.ThrowsExactly<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()

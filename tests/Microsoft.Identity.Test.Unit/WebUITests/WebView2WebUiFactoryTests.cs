@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Assert.IsTrue(webUIFactory.IsSystemWebViewAvailable);
         }
 
-        [DataRow()]
+        [TestMethod]
         public void WebViewTypeNotConfigured_AAD_WebView1()
         {
             // Arrange

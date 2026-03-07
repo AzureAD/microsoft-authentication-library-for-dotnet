@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -66,14 +67,12 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(MsalClientException).Name),
-                "The pii message should contain the exception type");
-            Assert.IsTrue(piiMessage.Contains(ExCode));
-            Assert.IsFalse(piiMessage.Contains(ExMessage));
+            Assert.Contains(typeof(MsalClientException).Name, piiMessage, "The pii message should contain the exception type");
+            StringAssert.Contains(piiMessage, ExCode);
+            StringAssert.DoesNotMatch(piiMessage, new Regex(Regex.Escape(ExMessage)));
         }
 
-        [TestMethod]        
+        [TestMethod]
         public void IsRetryable()
         {
             MsalClientException msalClientException = new MsalClientException("code");
@@ -153,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse);
 
             Assert.AreEqual(ExCode, msalException.ErrorCode);
-            Assert.IsTrue(msalException.Message.Contains(ExMessage));
+            StringAssert.Contains(msalException.Message, ExMessage);
             Assert.AreEqual("some_claims", msalException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalException.CorrelationId);
             Assert.AreEqual(suberror ?? "", msalException.SubError);
@@ -173,8 +172,8 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             string msalProductName = PlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
             string msalVersion = MsalIdHelper.GetMsalVersion();
 
-            Assert.IsTrue(exceptionString.Contains(msalProductName), "Exception should contain the msalProductName");
-            Assert.IsTrue(exceptionString.Contains(msalVersion), "Exception should contain the msalVersion");
+            StringAssert.Contains(exceptionString, msalProductName, "Exception should contain the msalProductName");
+            StringAssert.Contains(exceptionString, msalVersion, "Exception should contain the msalVersion");
         }
 
         [TestMethod]
@@ -199,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("some_suberror", msalServiceException.SubError);
 
             ValidateExceptionProductInformation(msalException);
-        }      
+        }
 
         [TestMethod]
         public void InvalidClientException_IsRepackaged()
@@ -217,7 +216,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             // Assert
             var msalServiceException = msalException;
             Assert.AreEqual(MsalError.InvalidClient, msalServiceException.ErrorCode);
-            Assert.IsTrue(msalServiceException.Message.Contains(MsalErrorMessage.InvalidClient));
+            StringAssert.Contains(msalServiceException.Message, MsalErrorMessage.InvalidClient);
             ValidateExceptionProductInformation(msalException);
         }
 
@@ -275,17 +274,21 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(MsalClaimsChallengeException).Name),
+            StringAssert.Contains(
+                piiMessage,
+                typeof(MsalClaimsChallengeException).Name,
                 "The pii message should contain the exception type");
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(NotImplementedException).Name),
-                "The pii message should have the inner exception type");
-            Assert.IsTrue(piiMessage.Contains(ExCode));
-            Assert.IsTrue(piiMessage.Contains("6347d33d-941a-4c35-9912-a9cf54fb1b3e")); // Correlation Id
 
-            Assert.IsFalse(piiMessage.Contains(ExMessage));
-            Assert.IsFalse(piiMessage.Contains(innerExMsg));
+            StringAssert.Contains(
+                piiMessage,
+                typeof(NotImplementedException).Name,
+                "The pii message should have the inner exception type");
+
+            StringAssert.Contains(piiMessage, ExCode);
+            StringAssert.Contains(piiMessage, "6347d33d-941a-4c35-9912-a9cf54fb1b3e"); // Correlation Id
+
+            StringAssert.DoesNotMatch(piiMessage, new Regex(Regex.Escape(ExMessage)));
+            StringAssert.DoesNotMatch(piiMessage, new Regex(Regex.Escape(innerExMsg)));
         }
 
         [TestMethod]
@@ -317,15 +320,17 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(MsalUiRequiredException).Name),
+            StringAssert.Contains(
+                piiMessage,
+                typeof(MsalUiRequiredException).Name,
                 "The pii message should contain the exception type");
-            Assert.IsTrue(
-                piiMessage.Contains(typeof(NotImplementedException).Name),
+            StringAssert.Contains(
+                piiMessage,
+                typeof(NotImplementedException).Name,
                 "The pii message should have the inner exception type");
-            Assert.IsTrue(piiMessage.Contains(ExCode));
-            Assert.IsFalse(piiMessage.Contains(ExMessage));
-            Assert.IsFalse(piiMessage.Contains(innerExMsg));
+            StringAssert.Contains(piiMessage, ExCode);
+            StringAssert.DoesNotMatch(piiMessage, new Regex(Regex.Escape(ExMessage)));
+            StringAssert.DoesNotMatch(piiMessage, new Regex(Regex.Escape(innerExMsg)));
         }
 
         [TestMethod]
@@ -386,9 +391,9 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var innerException = new InvalidOperationException("innerMsg");
             MsalException ex = new MsalException("errCode", "errMessage", innerException);
 
-            Assert.IsTrue(ex.ToString().Contains("errCode"));
-            Assert.IsTrue(ex.ToString().Contains("errMessage"));
-            Assert.IsTrue(ex.ToString().Contains("innerMsg"));
+            StringAssert.Contains(ex.ToString(), "errCode");
+            StringAssert.Contains(ex.ToString(), "errMessage");
+            StringAssert.Contains(ex.ToString(), "innerMsg");
 
             ValidateExceptionProductInformation(ex);
         }
@@ -417,13 +422,13 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 "errMessage", httpResponse, innerException);
 
             // Assert
-            Assert.IsTrue(ex.ToString().Contains("errCode"));
-            Assert.IsTrue(ex.ToString().Contains("errMessage"));
-            Assert.IsTrue(ex.ToString().Contains("innerExMsg"));
-            Assert.IsTrue(ex.ToString().Contains("invalid_tenant"));
-            Assert.IsTrue(ex.ToString().Contains("MySuberror"));
-            Assert.IsTrue(ex.ToString().Contains("some_claims"));
-            Assert.IsTrue(ex.ToString().Contains("AADSTS90002"));
+            StringAssert.Contains(ex.ToString(), "errCode");
+            StringAssert.Contains(ex.ToString(), "errMessage");
+            StringAssert.Contains(ex.ToString(), "innerExMsg");
+            StringAssert.Contains(ex.ToString(), "invalid_tenant");
+            StringAssert.Contains(ex.ToString(), "MySuberror");
+            StringAssert.Contains(ex.ToString(), "some_claims");
+            StringAssert.Contains(ex.ToString(), "AADSTS90002");
             Assert.IsFalse(ex is MsalUiRequiredException);
 
             ValidateExceptionProductInformation(ex);
@@ -450,18 +455,18 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             string exceptionString = ex.ToString();
 
             // Assert - Headers should NOT be in ToString()
-            Assert.IsFalse(exceptionString.Contains("X-Custom-Header"), "Headers should not be included in ToString()");
-            Assert.IsFalse(exceptionString.Contains("SensitiveValue"), "Header values should not be included in ToString()");
-            Assert.IsFalse(exceptionString.Contains("RetryAfter"), "RetryAfter header should not be included in ToString()");
-            
+            StringAssert.DoesNotMatch(exceptionString, new Regex(Regex.Escape("X-Custom-Header")), "Headers should not be included in ToString()");
+            StringAssert.DoesNotMatch(exceptionString, new Regex(Regex.Escape("SensitiveValue")), "Header values should not be included in ToString()");
+            StringAssert.DoesNotMatch(exceptionString, new Regex(Regex.Escape("RetryAfter")), "RetryAfter header should not be included in ToString()");
+
             // Assert - Headers property should still be accessible
             Assert.IsNotNull(ex.Headers, "Headers property should still be accessible");
             Assert.IsNotNull(ex.Headers.RetryAfter, "RetryAfter header should be accessible via Headers property");
             Assert.AreEqual(TimeSpan.FromSeconds(120), ex.Headers.RetryAfter.Delta, "RetryAfter value should be preserved");
-            
+
             // Assert - Other information should still be in ToString()
-            Assert.IsTrue(exceptionString.Contains("errCode"), "Error code should be in ToString()");
-            Assert.IsTrue(exceptionString.Contains("StatusCode"), "Status code label should be in ToString()");
+            StringAssert.Contains(exceptionString, "errCode", "Error code should be in ToString()");
+            StringAssert.Contains(exceptionString, "StatusCode", "Status code label should be in ToString()");
         }
 
         [TestMethod]
@@ -480,9 +485,9 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                         .WithDefaultRedirectUri()
                         .Build();
             var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () =>
-                {
-                    await app.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.s_user).ExecuteAsync().ConfigureAwait(false);
-                }
+            {
+                await app.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.s_user).ExecuteAsync().ConfigureAwait(false);
+            }
             ).ConfigureAwait(false);
 
             Assert.IsFalse(string.IsNullOrEmpty(ex.CorrelationId));
@@ -490,9 +495,9 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             Guid guid = Guid.NewGuid();
             ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () =>
-                {
-                    await app.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.s_user).WithCorrelationId(guid).ExecuteAsync().ConfigureAwait(false);
-                }
+            {
+                await app.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.s_user).WithCorrelationId(guid).ExecuteAsync().ConfigureAwait(false);
+            }
             ).ConfigureAwait(false);
 
             Assert.AreEqual(guid.ToString(), ex.CorrelationId);
@@ -519,7 +524,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                         .BuildConcrete();
                 }
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
@@ -564,15 +569,15 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                     .WithCertificate(certificate)
                     .BuildConcrete();
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
                              .ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains("Authority used: https://login.microsoftonline.com/common/"));
-                Assert.IsTrue(ex.Message.Contains("Token Endpoint: https://login.microsoftonline.com/common/oauth2/v2.0/token"));
+                StringAssert.Contains(ex.Message, "Authority used: https://login.microsoftonline.com/common/");
+                StringAssert.Contains(ex.Message, "Token Endpoint: https://login.microsoftonline.com/common/oauth2/v2.0/token");
 
                 //Validate that the authority is not appended with extra query parameters
                 //Validate that the region is also captured
@@ -597,9 +602,9 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                                                  .ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains("Authority used: https://sts.access.edu/my-utid/"));
-                Assert.IsTrue(ex.Message.Contains("Token Endpoint: https://centralus.sts.access.edu/my-utid/oauth2/v2.0/token"));
-                Assert.IsTrue(ex.Message.Contains($"Region Used: {TestConstants.Region}"));
+                StringAssert.Contains(ex.Message, "Authority used: https://sts.access.edu/my-utid/");
+                StringAssert.Contains(ex.Message, "Token Endpoint: https://centralus.sts.access.edu/my-utid/oauth2/v2.0/token");
+                StringAssert.Contains(ex.Message, $"Region Used: {TestConstants.Region}");
 
                 //harness.HttpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant + TestConstants.DiscoveryEndPoint));
                 harness.HttpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
@@ -614,9 +619,9 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                                                  .ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.IsFalse(ex.Message.Contains("Authority used:"));
-                Assert.IsFalse(ex.Message.Contains("Token Endpoint:"));
-                Assert.IsFalse(ex.Message.Contains($"Region Used:"));
+                StringAssert.DoesNotMatch(ex.Message, new Regex(Regex.Escape("Authority used:")));
+                StringAssert.DoesNotMatch(ex.Message, new Regex(Regex.Escape("Token Endpoint:")));
+                StringAssert.DoesNotMatch(ex.Message, new Regex(Regex.Escape($"Region Used:")));
             }
         }
 

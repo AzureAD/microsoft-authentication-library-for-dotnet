@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Arrange - important for test
                 requestParams.AppConfig.IsBrokerEnabled = false;
-                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code= "some_auth_code" }, "pkce_verifier");
+                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
 
@@ -79,8 +79,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - common stuff
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count);
+                Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
+                Assert.HasCount(1, cache.Accessor.GetAllAccessTokens());
 
                 // Assert - orchestration
                 Received.InOrder(() =>
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - common stuff
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
+                Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
 
                 // Assert - orchestration
                 await _brokerExchangeComponentOverride
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _brokerExchangeComponentOverride
                     .FetchTokensAsync(default)
                     .Returns((MsalTokenResponse)null);
-                
+
                 // web UI can deal with this
                 var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
@@ -204,8 +204,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Assert - common stuff
                 Assert.IsNotNull(result);
-                Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count);
+                Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
+                Assert.HasCount(1, cache.Accessor.GetAllAccessTokens());
 
                 // Assert - orchestration
 
@@ -268,8 +268,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Assert - common stuff
                 Assert.IsNotNull(result);
-                Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count);
+                Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
+                Assert.IsEmpty(cache.Accessor.GetAllAccessTokens());
 
                 // Assert - orchestration
                 Received.InOrder(() =>

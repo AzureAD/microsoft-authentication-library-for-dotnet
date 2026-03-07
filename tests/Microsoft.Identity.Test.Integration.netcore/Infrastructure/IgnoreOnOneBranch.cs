@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,20 +10,26 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     internal class IgnoreOnOneBranchAttribute : TestMethodAttribute
     {
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public IgnoreOnOneBranchAttribute(
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = -1)
+            : base(callerFilePath, callerLineNumber)
+        {
+        }
+
+        public override Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
 #if ONEBRANCH_BUILD
-            return new[]
+            return Task.FromResult(new[]
             {
-                    new TestResult
-                    {
-                        Outcome = UnitTestOutcome.Inconclusive,
-                        TestFailureException = new AssertInconclusiveException(
-                            $"Skipped on OneBranch pipeline")
-                    }
-                };
+                new TestResult
+                {
+                    Outcome = UnitTestOutcome.Inconclusive,
+                    TestFailureException = new AssertInconclusiveException("Skipped on OneBranch pipeline")
+                }
+            });
 #else
-            return base.Execute(testMethod);
+            return base.ExecuteAsync(testMethod);
 #endif
         }
     }

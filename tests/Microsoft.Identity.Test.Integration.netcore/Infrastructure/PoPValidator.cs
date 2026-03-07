@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             var response = await s_httpClient.GetAsync(
                 $"https://testingsts.azurewebsites.net/servernonce/validate?serverNonce={nonce}").ConfigureAwait(false);
 
-            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
+            Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
 
     }

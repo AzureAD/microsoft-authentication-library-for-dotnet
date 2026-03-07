@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(CacheRefreshReason.NotApplicable, authResult.AuthenticationResultMetadata.CacheRefreshReason);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs < 50);
+            Assert.IsLessThan(authResult.AuthenticationResultMetadata.DurationTotalInMs, 50);
 
             Trace.WriteLine("Update the refresh token in the cache to trigger proactive refresh.");
             TestCommon.UpdateATWithRefreshOn(confidentialApp.AppTokenCacheInternal.Accessor);
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, authResult.AuthenticationResultMetadata.CacheRefreshReason);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs < 50);
+            Assert.IsLessThan(authResult.AuthenticationResultMetadata.DurationTotalInMs, 50);
 
             meterProvider.ForceFlush();
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private long ValidateSuccessMetrics(MeterProvider meterProvider, List<Metric> exportedMetrics)
         {
-            Assert.AreEqual(5, exportedMetrics.Count);
+            Assert.HasCount(5, exportedMetrics);
 
             foreach (var metric in exportedMetrics)
             {

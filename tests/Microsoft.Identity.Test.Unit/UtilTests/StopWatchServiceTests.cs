@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,12 +18,12 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         {
             MeasureDurationResult result = StopwatchService.MeasureCodeBlock(() => Thread.Sleep(50));
 
-            Assert.IsTrue(result.Milliseconds >= 50, "Measured time is less than expected.");
-            Assert.IsTrue(result.Milliseconds < 100, "Measured time is too high.");
+            Assert.IsGreaterThanOrEqualTo(result.Milliseconds, 50, "Measured time is less than expected.");
+            Assert.IsLessThan(result.Milliseconds, 100, "Measured time is too high.");
 
             long diff = result.Microseconds - (result.Milliseconds * 1000);
-            Assert.IsTrue(diff >= -1000, "Microseconds is less than expected.");
-            Assert.IsTrue(diff < 1000, "Microseconds is too high.");
+            Assert.IsGreaterThanOrEqualTo(diff, -1000, "Microseconds is less than expected.");
+            Assert.IsLessThan(diff, 1000, "Microseconds is too high.");
         }
 
         [TestMethod]
@@ -31,12 +34,12 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                 await Task.Delay(50).ConfigureAwait(true);
             }).ConfigureAwait(true);
 
-            Assert.IsTrue(result.Milliseconds >= 50, "Measured time is less than expected.");
-            Assert.IsTrue(result.Milliseconds < 100, "Measured time is too high.");
+            Assert.IsGreaterThanOrEqualTo(result.Milliseconds, 50, "Measured time is less than expected.");
+            Assert.IsLessThan(result.Milliseconds, 100, "Measured time is too high.");
 
             long diff = result.Microseconds - (result.Milliseconds * 1000);
-            Assert.IsTrue(diff >= -1000, "Microseconds is less than expected.");
-            Assert.IsTrue(diff < 1000, "Microseconds is too high.");
+            Assert.IsGreaterThanOrEqualTo(diff, -1000, "Microseconds is less than expected.");
+            Assert.IsLessThan(diff, 1000, "Microseconds is too high.");
         }
 
         [TestMethod]
@@ -49,12 +52,12 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             }).ConfigureAwait(true);
 
             Assert.AreEqual(42, result.Result, "Result is not as expected.");
-            Assert.IsTrue(result.Milliseconds >= 50, "Measured time is less than expected.");
-            Assert.IsTrue(result.Milliseconds < 100, "Measured time is too high.");
+            Assert.IsGreaterThanOrEqualTo(result.Milliseconds, 50, "Measured time is less than expected.");
+            Assert.IsLessThan(result.Milliseconds, 100, "Measured time is too high.");
 
             long diff = result.Microseconds - (result.Milliseconds * 1000);
-            Assert.IsTrue(diff >= -1000, "Microseconds is less than expected.");
-            Assert.IsTrue(diff < 1000, "Microseconds is too high.");
+            Assert.IsGreaterThanOrEqualTo(diff, -1000, "Microseconds is less than expected.");
+            Assert.IsLessThan(diff, 1000, "Microseconds is too high.");
         }
     }
 }

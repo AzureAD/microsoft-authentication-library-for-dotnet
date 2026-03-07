@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert
                 var wamAccountIds = (accounts.Single() as Account).WamAccountIds;
-                Assert.AreEqual(1, wamAccountIds.Count);
+                Assert.HasCount(1, wamAccountIds);
                 Assert.AreEqual("wam1", wamAccountIds[TestConstants.ClientId]);
 
                 var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId2)
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert
                 var wamAccountIds = (accounts1.Single() as Account).WamAccountIds;
-                Assert.AreEqual(2, wamAccountIds.Count);
+                Assert.HasCount(2, wamAccountIds);
                 Assert.AreEqual("wam2", wamAccountIds[TestConstants.ClientId]);
                 Assert.AreEqual("wam3", wamAccountIds[TestConstants.ClientId2]);
                 CoreAssert.AssertDictionariesAreEqual(wamAccountIds, (accounts2.Single() as Account).WamAccountIds, StringComparer.Ordinal);
@@ -156,9 +156,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
                 // Assert
-                Assert.AreEqual(2, accounts.Count());
+                Assert.HasCount(2, accounts);
                 var wamAccountIds = (accounts.Single(acc => acc.HomeAccountId.Identifier == commonAccId) as Account).WamAccountIds;
-                Assert.AreEqual(1, wamAccountIds.Count);
+                Assert.HasCount(1, wamAccountIds);
                 Assert.AreEqual("wam_acc_id", wamAccountIds[TestConstants.ClientId]);
             }
         }

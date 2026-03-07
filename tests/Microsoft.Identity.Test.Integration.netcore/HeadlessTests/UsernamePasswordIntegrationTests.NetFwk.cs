@@ -279,13 +279,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
                 x.Item2.StatusCode == HttpStatusCode.OK);
 
-            Assert.IsTrue(!req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader));
+            bool hasHeader = req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader);
+
+            Assert.IsFalse(
+                hasHeader,
+                $"Did not expect header '{Constants.CcsRoutingHintHeader}'. Actual headers: " +
+                string.Join(", ", req.Headers.Select(h => h.Key)));
         }
 
         private void AssertTenantProfiles(IEnumerable<TenantProfile> tenantProfiles, string tenantId)
         {
             Assert.IsNotNull(tenantProfiles);
-            Assert.IsTrue(tenantProfiles.Count() > 0);
+            Assert.IsGreaterThan(tenantProfiles.Count(), 0);
 
             TenantProfile tenantProfile = tenantProfiles.Single(tp => tp.TenantId == tenantId);
             Assert.IsNotNull(tenantProfile);

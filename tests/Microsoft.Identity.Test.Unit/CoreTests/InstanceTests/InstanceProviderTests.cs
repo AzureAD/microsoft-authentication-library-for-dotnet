@@ -106,11 +106,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsNotNull(result3);
 
             MsalClientException ex;
-            ex = Assert.ThrowsException<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow("non_existent", _logger));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow("non_existent", _logger));
             Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
-            ex = Assert.ThrowsException<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow(null, _logger));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow(null, _logger));
             Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
-            ex = Assert.ThrowsException<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow("", _logger));
+            ex = Assert.ThrowsExactly<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow("", _logger));
             Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
         }
 
