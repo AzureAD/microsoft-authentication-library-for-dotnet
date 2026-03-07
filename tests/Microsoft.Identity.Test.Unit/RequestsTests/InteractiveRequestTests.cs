@@ -344,7 +344,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task WithMultiCloudSupportEnabledAsync(bool multiCloudSupportEnabled)

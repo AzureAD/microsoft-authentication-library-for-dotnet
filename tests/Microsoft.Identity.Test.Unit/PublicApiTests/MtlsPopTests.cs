@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit
 #pragma warning restore CS0618 // Type or member is obsolete
 
             // Expecting an exception because MTLS PoP requires a certificate to sign the claims
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
                    .ExecuteAsync())
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Expecting an exception because MTLS PoP requires a certificate to sign the claims
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
                    .ExecuteAsync())
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public async Task MtlsPop_WithoutRegion_ThrowsException(bool setAzureRegion)
@@ -527,7 +527,7 @@ namespace Microsoft.Identity.Test.Unit
                         .BuildConcrete();
 
                     // Expect an MsalServiceException due to missing region for MTLS POP
-                    MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                         await app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
                             .ExecuteAsync()
@@ -541,7 +541,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DataTestMethod]
         [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(MsalServiceException))]
         [DataRow("https://contoso.adfs.contoso.com/adfs", "ADFS Authority", typeof(HttpRequestException))]
         public async Task MtlsPop_NonAadAuthorityAsync(string authorityUrl, string authorityType, Type expectedException)
@@ -567,7 +566,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://login.microsoftonline.com", TestConstants.Common, "Public Cloud")]
         [DataRow("https://login.microsoftonline.com", TestConstants.Organizations, "Public Cloud")]
         [DataRow("https://login.microsoftonline.us", TestConstants.Common, "Azure Government")]
@@ -598,7 +597,7 @@ namespace Microsoft.Identity.Test.Unit
                         .BuildConcrete();
 
                     // Expect an exception due to using /common or /organizations with MTLS PoP
-                    MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    MsalClientException ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                         await app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
                             .ExecuteAsync()
@@ -666,7 +665,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("login.microsoftonline.com", "mtlsauth.microsoft.com")]
         [DataRow("login.microsoftonline.us", "mtlsauth.microsoftonline.us")]
         [DataRow("login.partner.microsoftonline.cn", "mtlsauth.partner.microsoftonline.cn")]
@@ -730,7 +729,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage)]
         [DataRow("login.chinacloudapi.cn", MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage)]
         public async Task UnsupportedSovereignHosts_ThrowsMsalClientException_Async(string unsupportedHost, string expectedErrorMessage)
@@ -753,7 +752,7 @@ namespace Microsoft.Identity.Test.Unit
                                         .Build();
 
                     // Act & Assert
-                    var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    var exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                     {
                         await app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
@@ -767,7 +766,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("mtlsauth.microsoft.com")]
         [DataRow("sts.windows.net")]
         [DataRow("graph.microsoft.com")]
@@ -791,7 +790,7 @@ namespace Microsoft.Identity.Test.Unit
                                         .Build();
 
                     // Act & Assert
-                    var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    var exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                     {
                         await app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
@@ -909,7 +908,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityOrganizations)]
         public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsyncForDsts_ThrowsException(string authorityUrl)

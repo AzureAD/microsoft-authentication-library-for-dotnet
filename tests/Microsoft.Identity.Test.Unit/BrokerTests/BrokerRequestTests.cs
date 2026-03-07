@@ -445,7 +445,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Assert.AreEqual(null, token.Upn);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(typeof(NullBroker))]
         [DataRow(typeof(IosBrokerMock))]
         [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
@@ -473,7 +473,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(typeof(NullBroker))]
         [DataRow(typeof(IosBrokerMock))]
         [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
@@ -864,7 +864,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual("login.microsoftonline.us", account.Environment);
                 Assert.AreEqual(TestConstants.Utid, result.TenantId);
 
-                await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+                await Assert.ThrowsAsync<MsalUiRequiredException>(
                     async () => await globalPca.AcquireTokenSilent(TestConstants.s_graphScopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
             }
         }

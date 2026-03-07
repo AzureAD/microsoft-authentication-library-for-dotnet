@@ -869,11 +869,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> nullDelegate = null;
 
             // Act &  Assert
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.Throws<ArgumentNullException>(() =>
                 new ClientAssertionDelegateCredential(nullDelegate));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)] // bearer (no cert)
         [DataRow(true)]  // PoP (with cert)
         public void Constructor_ValidDelegate_DoesNotThrow(bool withCert)
@@ -1195,7 +1195,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task AcquireTokenByAuthorizationCode_IgnoresRegion_Async(bool autodetectRegion)
@@ -1992,7 +1992,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void ConfidentialClient_WithEmptyClientSecret_ThrowsException()
         {
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.Throws<ArgumentNullException>(() =>
             {
                 ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithClientSecret(string.Empty) // or null
@@ -2094,7 +2094,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void ConfidentialClient_WithInvalidAuthority_ThrowsArgumentException()
         {
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)

@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails404TwiceThenSucceeds200Async(
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails410FourTimesThenSucceeds200Async(
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails410PermanentlyAsync(
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails504PermanentlyAsync(
@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails400WhichIsNonRetriableAndRetryPolicyIsNotTriggeredAsync(
@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails500AndRetryPolicyIsDisabledAndNotTriggeredAsync(
@@ -380,7 +380,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
 
                 MsalServiceException ex =
-                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await Assert.ThrowsAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .ExecuteAsync()
                         .ConfigureAwait(false))
@@ -400,7 +400,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: HttpStatusCode.GatewayTimeout);
                 }
 
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                 .ExecuteAsync()
                                 .ConfigureAwait(false))
@@ -421,7 +421,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: HttpStatusCode.GatewayTimeout);
                 }
 
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                 .ExecuteAsync()
                                 .ConfigureAwait(false))

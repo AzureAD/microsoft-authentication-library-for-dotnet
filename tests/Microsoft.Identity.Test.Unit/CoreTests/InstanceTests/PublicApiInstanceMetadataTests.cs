@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() => app
+                var ex = await Assert.ThrowsAsync<MsalClientException>(() => app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync(CancellationToken.None))
                     .ConfigureAwait(false);

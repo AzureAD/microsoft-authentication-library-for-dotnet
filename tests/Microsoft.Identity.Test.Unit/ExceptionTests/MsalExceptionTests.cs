@@ -519,7 +519,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                         .BuildConcrete();
                 }
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
@@ -564,7 +564,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                     .WithCertificate(certificate)
                     .BuildConcrete();
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
