@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         $"token_{tid}",
                         result.AccessToken,
                         $"First-pass AccessToken mismatch for TID '{tid}'.");
-                    Assert.Contains(
+                    Assert.IsTrue(
                         result.AuthenticationResultMetadata.TokenEndpoint.Contains(tid),
                         $"First-pass TokenEndpoint '{result.AuthenticationResultMetadata.TokenEndpoint}' does not contain TID '{tid}'.");
 

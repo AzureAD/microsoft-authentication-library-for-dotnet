@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - common stuff
                 Assert.IsNotNull(result);
                 Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
-                Assert.IsEmpty(cache.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cache.Accessor.GetAllAccessTokens());
 
                 // Assert - orchestration
                 Received.InOrder(() =>

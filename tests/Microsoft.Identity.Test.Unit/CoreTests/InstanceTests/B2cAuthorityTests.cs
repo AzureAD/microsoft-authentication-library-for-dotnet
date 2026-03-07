@@ -30,10 +30,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void AuthorityDoesNotUpdateTenant(string authorityUri, string actualTenant)
         {
             Authority authority = Authority.CreateAuthority(authorityUri);
-            Assert.AreEqual(authority.TenantId, actualTenant);
+            Assert.AreEqual(actualTenant, authority.TenantId);
 
             string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id", false);
-            Assert.AreEqual(authority.TenantId, actualTenant);
+            Assert.AreEqual(actualTenant, authority.TenantId);
             Assert.AreEqual(updatedAuthority, authorityUri);
 
             authority = Authority.CreateAuthorityWithTenant(authority.AuthorityInfo, "other_tenant_id_2");
