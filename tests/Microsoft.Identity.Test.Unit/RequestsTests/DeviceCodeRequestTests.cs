@@ -81,10 +81,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var cache = parameters.CacheSessionManager.TokenCacheInternal;
 
                 // Check that cache is empty
-                Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
-                Assert.AreEqual(0, cache.Accessor.GetAllIdTokens().Count());
-                Assert.AreEqual(0, cache.Accessor.GetAllAccounts().Count());
+                Assert.IsEmpty(cache.Accessor.GetAllAccessTokens());
+                Assert.IsEmpty(cache.Accessor.GetAllRefreshTokens());
+                Assert.IsEmpty(cache.Accessor.GetAllIdTokens());
+                Assert.IsEmpty(cache.Accessor.GetAllAccounts());
 
                 DeviceCodeResult actualDeviceCodeResult = null;
 
@@ -113,10 +113,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 CoreAssert.AreScopesEqual(expectedScopes.AsSingleString(), actualDeviceCodeResult.Scopes.AsSingleString());
 
                 // Validate that entries were added to cache
-                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
-                Assert.AreEqual(1, cache.Accessor.GetAllIdTokens().Count());
-                Assert.AreEqual(1, cache.Accessor.GetAllAccounts().Count());
+                Assert.HasCount(1, cache.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cache.Accessor.GetAllRefreshTokens());
+                Assert.HasCount(1, cache.Accessor.GetAllIdTokens());
+                Assert.HasCount(1, cache.Accessor.GetAllAccounts());
             }
         }
 
@@ -175,10 +175,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var cache = parameters.CacheSessionManager.TokenCacheInternal;
 
                 // Check that cache is empty
-                Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(0, cache.Accessor.GetAllAccounts().Count());
-                Assert.AreEqual(0, cache.Accessor.GetAllIdTokens().Count());
-                Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
+                Assert.IsEmpty(cache.Accessor.GetAllAccessTokens());
+                Assert.IsEmpty(cache.Accessor.GetAllAccounts());
+                Assert.IsEmpty(cache.Accessor.GetAllIdTokens());
+                Assert.IsEmpty(cache.Accessor.GetAllRefreshTokens());
 
                 DeviceCodeResult actualDeviceCodeResult = null;
 
@@ -206,10 +206,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(ExpectedAdfsVerificationUrl, actualDeviceCodeResult.VerificationUrl);
                 CoreAssert.AreScopesEqual(expectedScopes.AsSingleString(), actualDeviceCodeResult.Scopes.AsSingleString());
                 // Validate that entries were added to cache
-                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, cache.Accessor.GetAllAccounts().Count());
-                Assert.AreEqual(1, cache.Accessor.GetAllIdTokens().Count());
-                Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+                Assert.HasCount(1, cache.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cache.Accessor.GetAllAccounts());
+                Assert.HasCount(1, cache.Accessor.GetAllIdTokens());
+                Assert.HasCount(1, cache.Accessor.GetAllRefreshTokens());
             }
         }
 
@@ -259,10 +259,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 if (level == LogLevel.Error)
                 {
-                    Assert.Fail(
+                    Assert.Fail(string.Format(
                         "Received an error message {0} and the stack trace is {1}",
                         message,
-                        new StackTrace(true));
+                        new StackTrace(true)));
                 }
 
                 logCallbacks.Add(
@@ -290,17 +290,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
 
                 // Ensure we got logs so the log callback is working.
-                Assert.IsTrue(logCallbacks.Count > 0, "There should be data in logCallbacks");
+                Assert.IsNotEmpty(logCallbacks, "There should be data in logCallbacks");
 
                 // Ensure we have authorization_pending data in the logs
                 List<_LogData> authPendingLogs =
                     logCallbacks.Where(x => x.Message.Contains(OAuth2Error.AuthorizationPending)).ToList();
-                Assert.AreEqual(2, authPendingLogs.Count, "authorization_pending logs should exist");
+                Assert.HasCount(2, authPendingLogs, "authorization_pending logs should exist");
 
                 // Ensure the authorization_pending logs are Info level and not Error
-                Assert.AreEqual(
+                Assert.HasCount(
                     2,
-                    authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList().Count,
+                    authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList(),
                     "authorization_pending logs should be INFO");
 
                 // Ensure we don't have Error level logs in this scenario.
@@ -355,7 +355,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         { OAuth2Parameter.Claims, TestConstants.Claims }
                     },
                     ResponseMessage = isAdfs ? CreateAdfsDeviceCodeResponseSuccessMessage() : CreateDeviceCodeResponseSuccessMessage(),
-                    ExpectedQueryParams = TestConstants.ExtraQueryParameters,                     
+                    ExpectedQueryParams = TestConstants.ExtraQueryParameters,
                 });
 
             for (int i = 0; i < numAuthorizationPendingResults; i++)

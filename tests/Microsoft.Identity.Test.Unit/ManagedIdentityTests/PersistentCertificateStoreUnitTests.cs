@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Selection should return the newer one (by NotAfter)
                 Assert.IsTrue(WaitForFind(alias, out var value), "Expected to find persisted cert.");
                 var delta = Math.Abs((value.Certificate.NotAfter - newer.NotAfter).TotalSeconds);
-                Assert.IsTrue(delta <= 2, "Newest persisted cert should be selected.");
+                Assert.IsLessThanOrEqualTo(delta, 2, "Newest persisted cert should be selected.");
             }
             finally
             {
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Read returns the newer
                 Assert.IsTrue(WaitForFind(alias, out var value), "Expected to find persisted cert.");
                 var delta = Math.Abs((value.Certificate.NotAfter - newer.NotAfter).TotalSeconds);
-                Assert.IsTrue(delta <= 2);
+                Assert.IsLessThanOrEqualTo(delta, 2);
             }
             finally
             {

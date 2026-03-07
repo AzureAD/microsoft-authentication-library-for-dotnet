@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode), "Expected a non-empty ErrorCode.");
             }
             catch (Exception ex)
             {
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [DoNotRunOnLinux] // Linux broker return different error code
         [IgnoreOnOneBranch]
         [TestMethod]
-        public async Task WamInvalidROPC_ThrowsException_TestAsync()
+        public async Task WamInvalidROPC_ThrowsExactly_TestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
@@ -201,8 +201,11 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(ex.Message.Contains("You are trying to acquire a token silently using a login hint. " +
-                    "No account was found in the token cache having this login hint"));
+                Assert.Contains(
+                    "You are trying to acquire a token silently using a login hint. " +
+                    "No account was found in the token cache having this login hint",
+                    ex.Message,
+                    StringComparison.Ordinal);
             }
         }
 
@@ -360,7 +363,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [IgnoreOnOneBranch]
         [TestMethod]
-        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -368,7 +370,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             string[] scopes = { "User.Read" };
 
             IntPtr intPtr = TestUtils.GetWindowHandle();
-
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
             WamLoggerValidator testLogger = new WamLoggerValidator();
@@ -381,15 +382,15 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(_brokerOptions)
                .Build();
 
-            // Acquire token using username password
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
+#pragma warning disable CS0618 // Type or member is obsolete
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword())
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+#pragma warning restore CS0618
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
-            // Get Accounts
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             Assert.IsNotNull(accounts);
 
@@ -399,19 +400,22 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsTrue(testLogger.HasLogged);
             Assert.IsTrue(testLogger.HasPiiLogged);
 
-            // Acquire token silently
-            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+            result = await pca.AcquireTokenSilent(scopes, account)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
             await pca.RemoveAsync(account).ConfigureAwait(false);
-            // Assert the account is removed
+
             accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             Assert.IsNotNull(accounts);
 
             // this should throw MsalUiRequiredException
-            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+            await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() =>
+                pca.AcquireTokenSilent(scopes, account).ExecuteAsync())
+                .ConfigureAwait(false);
         }
 
         [DoNotRunOnLinux] // List Windows Work and School accounts is not supported on Linux
@@ -456,9 +460,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [DataTestMethod]
-        [DataRow(null)]
         [TestMethod]
+        [DataRow(null)]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
         {
             IntPtr intPtr = TestUtils.GetWindowHandle();
@@ -483,7 +486,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);
-                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode), "Expected a non-empty ErrorCode.");
             }
         }
 
@@ -526,7 +529,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [DoNotRunOnLinux] // POP are not supported on Linux  
         [IgnoreOnOneBranch]
         [TestMethod]
-        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
@@ -550,10 +552,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // CA policy enforces token issuance to popUser only for Exchange Online this call will fail with UI Required Exception
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
             #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword())
-                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
-                .ExecuteAsync()
-                .ConfigureAwait(false);
+                        var ex = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() =>
+                            pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword())
+                                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
+                                .ExecuteAsync()).ConfigureAwait(false);
             #pragma warning restore CS0618
         }
     }

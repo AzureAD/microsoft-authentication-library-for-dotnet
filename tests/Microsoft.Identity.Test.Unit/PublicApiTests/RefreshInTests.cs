@@ -56,8 +56,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert token is proactively refreshed
                 Assert.IsNotNull(result);
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
-                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+                Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
 
                 // The following can be indeterministic due to background threading nature
                 // So it is verified on check and wait basis
@@ -79,8 +79,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                   .ExecuteAsync(CancellationToken.None)
                   .ConfigureAwait(false);
                 Assert.IsNotNull(result);
-                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == ati.RefreshOn);
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
+                Assert.AreEqual(ati.RefreshOn, result.AuthenticationResultMetadata.RefreshOn);
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 cacheAccess.WaitTo_AssertAcessCounts(2, 1);
             }
@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     refreshOnWithJitter.Value, 
                     TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
             }
-            Assert.IsTrue(refreshOnWithJitterList.Distinct().Count() >= 8, "Jitter is random, so we can only have 1-2 identical values");
+            Assert.IsGreaterThanOrEqualTo(refreshOnWithJitterList.Distinct().Count(), 8, "Jitter is random, so we can only have 1-2 identical values");
         }
 
         [TestMethod]
@@ -329,14 +329,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
                 cacheAccess.WaitTo_AssertAcessCounts(1, 1);
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
-                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+                Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
 
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
             }
         }
 
@@ -369,13 +369,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(0, harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
                 cacheAccess.WaitTo_AssertAcessCounts(1, 1);
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
-                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+                Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
 
                 result = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion, "assertiontype"))
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
             }
         }
 

@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result.Account.GetTenantProfiles());
             Assert.IsTrue(result.Account.GetTenantProfiles().Any());
             Assert.AreEqual(user.Upn, result.Account.Username);
-            Assert.IsTrue(app.Authority.Contains(result.Account.Environment));
+            Assert.Contains(app.Authority, result.Account.Environment);
 
             Trace.WriteLine("Part 2 - Get Accounts");
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result.Account);
             Assert.IsNotNull(result.Account.GetTenantProfiles());
             Assert.IsTrue(result.Account.GetTenantProfiles().Any());
-            Assert.IsTrue(app.Authority.Contains(result.Account.Environment));
+            Assert.Contains(app.Authority, result.Account.Environment);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -239,8 +239,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs > 0);
+            Assert.IsGreaterThan(result.AuthenticationResultMetadata.DurationTotalInMs, 0);
+            Assert.IsGreaterThan(result.AuthenticationResultMetadata.DurationInHttpInMs, 0);
 
             userCacheAccess.AssertAccessCounts(0, 1);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);

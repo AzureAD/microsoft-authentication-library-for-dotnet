@@ -104,9 +104,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.Cache, silentResult.AuthenticationResultMetadata.TokenSource);
 
                 // Verify expected cache state
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
             }
         }
 
@@ -277,9 +277,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.Cache, silentResult1.AuthenticationResultMetadata.TokenSource);
 
                 // Verify final cache state
-                Assert.AreEqual(4, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should have 4 app tokens in cache");
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should have 1 user token in cache");
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count, "Should have 1 refresh token in cache");
+                Assert.HasCount(4, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(), "Should have 4 app tokens in cache");
+                Assert.HasCount(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens(), "Should have 1 user token in cache");
+                Assert.HasCount(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens(), "Should have 1 refresh token in cache");
             }
         }
 
@@ -311,7 +311,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_both_params", result1.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Step 2: Request with same parameters, but only req_param_1 in the cache key
                 // Cache key is different now (only includes req_param_1), so should make new token request
@@ -327,7 +327,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_one_param", result2.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should have 2 different tokens in cache");
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(), "Should have 2 different tokens in cache");
 
                 // Step 3: Request with only req_param_1, included in cache key
                 // Cache key matches step 2, should use cached token
@@ -341,7 +341,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_one_param", result3.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result3.AuthenticationResultMetadata.TokenSource, "Should retrieve from cache since cache key matches step 2");
-                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should still have 2 tokens in cache");
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(), "Should still have 2 tokens in cache");
             }
         }
 
@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("token_with_params_order1", result1.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, "Should have 1 token after first request");
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(), "Should have 1 token after first request");
 
                 // Step 3: Make token request with same parameters but in different order: req_param_3, req_param_1, req_param_2
                 // Same cache key parameters (1 and 3), so should hit cache
@@ -391,7 +391,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     "Should return same token regardless of parameter order");
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource,
                     "Should retrieve from cache when cache key parameters match (order-independent)");
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count,
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(),
                     "Should still have only 1 token in cache");
 
                 // Step 4: Make another request with a different ordering to triple-check
@@ -409,7 +409,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     "Should return same token with yet another parameter order");
                 Assert.AreEqual(TokenSource.Cache, result3.AuthenticationResultMetadata.TokenSource,
                     "Should retrieve from cache (order-independent)");
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count,
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(),
                     "Should still have only 1 token in cache");
 
                 // Step 5: Verify that changing values (not just order) does create a new cache entry
@@ -428,7 +428,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     "Should get new token when cache key parameter value changes");
                 Assert.AreEqual(TokenSource.IdentityProvider, result4.AuthenticationResultMetadata.TokenSource,
                     "Should make new request when cache key parameter value is different");
-                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count,
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(),
                     "Should now have 2 tokens in cache (different cache keys)");
             }
         }

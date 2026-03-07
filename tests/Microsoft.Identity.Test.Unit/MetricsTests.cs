@@ -17,10 +17,22 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
+    [DoNotParallelize]
     public class MetricsTests : TestBase
     {
         [TestInitialize]
         public void TestInit()
+        {
+            ResetMetrics();
+        }
+
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            ResetMetrics();
+        }
+
+        private static void ResetMetrics()
         {
             Metrics.TotalAccessTokensFromIdP = 0;
             Metrics.TotalAccessTokensFromCache = 0;
@@ -47,33 +59,38 @@ namespace Microsoft.Identity.Test.Unit
                 memoryTokenCache.Bind(cca.AppTokenCache);
 
                 // Act - AcquireTokenForClient
-                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                AuthenticationResult result = await cca
+                    .AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
+                Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInCacheInMs);
+                Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/common/oauth2/v2.0/token",
                     result.AuthenticationResultMetadata.TokenEndpoint);
-                Assert.AreEqual(1, Metrics.TotalAccessTokensFromIdP);
-                Assert.AreEqual(0, Metrics.TotalAccessTokensFromCache);
-                Assert.AreEqual(0, Metrics.TotalAccessTokensFromBroker);
+                Assert.AreEqual(expected: 1, actual: Metrics.TotalAccessTokensFromIdP);
+                Assert.AreEqual(expected: 0, actual: Metrics.TotalAccessTokensFromCache);
+                Assert.AreEqual(expected: 0, actual: Metrics.TotalAccessTokensFromBroker);
 
                 // Act - AcquireTokenForClient returns result from cache
-                result = await cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                result = await cca
+                    .AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs == 0);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
-                Assert.AreEqual(1, Metrics.TotalAccessTokensFromIdP);
-                Assert.AreEqual(1, Metrics.TotalAccessTokensFromCache);
-                Assert.AreEqual(0, Metrics.TotalAccessTokensFromBroker);
-                Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+                Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInCacheInMs);
+                Assert.AreEqual(expected: 0L, actual: result.AuthenticationResultMetadata.DurationInHttpInMs);
+                Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
+                Assert.AreEqual(expected: 1, actual: Metrics.TotalAccessTokensFromIdP);
+                Assert.AreEqual(expected: 1, actual: Metrics.TotalAccessTokensFromCache);
+                Assert.AreEqual(expected: 0, actual: Metrics.TotalAccessTokensFromBroker);
+                Assert.IsGreaterThan(0, Metrics.TotalDurationInMs);
                 Assert.IsNull(result.AuthenticationResultMetadata.TokenEndpoint);
-
             }
         }
 
@@ -108,8 +125,8 @@ namespace Microsoft.Identity.Test.Unit
 
                 // Act - AcquireTokenForClient returns result from IDP because token is expired.
                 result = await cca.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                        .ExecuteAsync(CancellationToken.None)
-                                        .ConfigureAwait(false);
+                                  .ExecuteAsync(CancellationToken.None)
+                                  .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
@@ -117,8 +134,8 @@ namespace Microsoft.Identity.Test.Unit
 
                 // Act - AcquireTokenForClient returns result from Cache. Refresh reason is not applicable.
                 result = await cca.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                        .ExecuteAsync(CancellationToken.None)
-                                        .ConfigureAwait(false);
+                                  .ExecuteAsync(CancellationToken.None)
+                                  .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
@@ -129,10 +146,12 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
                 harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
 
-                // Act - AcquireTokenForClient returns result from IDP. Refresh reason is no access tokens.
-                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope.ToArray(), new UserAssertion(TestConstants.UserAssertion))
-                                       .ExecuteAsync(CancellationToken.None)
-                                       .ConfigureAwait(false);
+                // Act - AcquireTokenOnBehalfOf returns result from IDP. Refresh reason is no access tokens.
+                result = await cca.AcquireTokenOnBehalfOf(
+                                   TestConstants.s_scope.ToArray(),
+                                   new UserAssertion(TestConstants.UserAssertion))
+                                 .ExecuteAsync(CancellationToken.None)
+                                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
@@ -142,18 +161,22 @@ namespace Microsoft.Identity.Test.Unit
                 TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);
 
                 // Act - AcquireTokenOnBehalfOf returns result from IDP because access token is expired.
-                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope.ToArray(), new UserAssertion(TestConstants.UserAssertion))
-                       .ExecuteAsync(CancellationToken.None)
-                       .ConfigureAwait(false);
+                result = await cca.AcquireTokenOnBehalfOf(
+                                   TestConstants.s_scope.ToArray(),
+                                   new UserAssertion(TestConstants.UserAssertion))
+                                 .ExecuteAsync(CancellationToken.None)
+                                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(CacheRefreshReason.Expired, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 // Act - AcquireTokenOnBehalfOf returns result from cache. Refresh reason is not applicable.
-                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope.ToArray(), new UserAssertion(TestConstants.UserAssertion))
-                       .ExecuteAsync(CancellationToken.None)
-                       .ConfigureAwait(false);
+                result = await cca.AcquireTokenOnBehalfOf(
+                                   TestConstants.s_scope.ToArray(),
+                                   new UserAssertion(TestConstants.UserAssertion))
+                                 .ExecuteAsync(CancellationToken.None)
+                                 .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
@@ -169,14 +192,14 @@ namespace Microsoft.Identity.Test.Unit
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddMockHandler(
-                new MockHttpMessageHandler()
-                {
-                    ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                        TestConstants.Uid,
-                        TestConstants.DisplayableId,
-                        TestConstants.s_scope.ToArray())
-                });
+                    new MockHttpMessageHandler()
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                            TestConstants.Uid,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
+                    });
 
                 PublicClientApplication pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), false)
@@ -188,26 +211,26 @@ namespace Microsoft.Identity.Test.Unit
                 //expire access tokens
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
 
-                // Act - AcquireTokenForClient returns result from IDP.
+                // Act - AcquireTokenSilent returns result from IDP.
                 AuthenticationResult result = await pca.AcquireTokenSilent(
                                                         TestConstants.s_scope.ToArray(),
                                                         TestConstants.DisplayableId)
-                                                        .ExecuteAsync()
-                                                        .ConfigureAwait(false);
+                                                      .ExecuteAsync()
+                                                      .ConfigureAwait(false);
 
-                //Token should have refreshed due to expiration.
+                // Token should have refreshed due to expiration.
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(CacheRefreshReason.Expired, result.AuthenticationResultMetadata.CacheRefreshReason);
 
-                // Act - AcquireTokenForClient returns result from Cache.
+                // Act - AcquireTokenSilent returns result from Cache.
                 result = await pca.AcquireTokenSilent(
-                                                        TestConstants.s_scope.ToArray(),
-                                                        TestConstants.DisplayableId)
-                                                        .ExecuteAsync()
-                                                        .ConfigureAwait(false);
+                                    TestConstants.s_scope.ToArray(),
+                                    TestConstants.DisplayableId)
+                                  .ExecuteAsync()
+                                  .ConfigureAwait(false);
 
-                //Token should have come from cache and cache should not have been refreshed.
+                // Token should have come from cache and cache should not have been refreshed.
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
@@ -223,7 +246,10 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 PublicClientApplication pca = CreatePca(harness.HttpManager);
-                await TestAcquireTokenInteractive_Async(pca, expectedTokensFromIdp: 1, expectedTokensFromCache: 0).ConfigureAwait(false);
+                await TestAcquireTokenInteractive_Async(
+                    pca,
+                    expectedTokensFromIdp: 1,
+                    expectedTokensFromCache: 0).ConfigureAwait(false);
             }
         }
 
@@ -233,7 +259,10 @@ namespace Microsoft.Identity.Test.Unit
             using (var harness = CreateTestHarness())
             {
                 PublicClientApplication pca = CreatePca(harness.HttpManager, populateUserCache: true);
-                await TestAcquireTokenSilent_Async(pca, expectedTokensFromIdp: 0, expectedTokensFromCache: 1).ConfigureAwait(false);
+                await TestAcquireTokenSilent_Async(
+                    pca,
+                    expectedTokensFromIdp: 0,
+                    expectedTokensFromCache: 1).ConfigureAwait(false);
             }
         }
 
@@ -246,8 +275,15 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 PublicClientApplication pca = CreatePca(harness.HttpManager);
-                await TestAcquireTokenInteractive_Async(pca, expectedTokensFromIdp: 1, expectedTokensFromCache: 0).ConfigureAwait(false);
-                await TestAcquireTokenSilent_Async(pca, expectedTokensFromIdp: 1, expectedTokensFromCache: 1).ConfigureAwait(false);
+                await TestAcquireTokenInteractive_Async(
+                    pca,
+                    expectedTokensFromIdp: 1,
+                    expectedTokensFromCache: 0).ConfigureAwait(false);
+
+                await TestAcquireTokenSilent_Async(
+                    pca,
+                    expectedTokensFromIdp: 1,
+                    expectedTokensFromCache: 1).ConfigureAwait(false);
             }
         }
 
@@ -262,37 +298,49 @@ namespace Microsoft.Identity.Test.Unit
             {
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
             }
-            InMemoryTokenCache memoryTokenCache = new InMemoryTokenCache(withOperationDelay: true, shouldClearExistingCache: false);
+
+            InMemoryTokenCache memoryTokenCache = new InMemoryTokenCache(
+                withOperationDelay: true,
+                shouldClearExistingCache: false);
             memoryTokenCache.Bind(pca.UserTokenCache);
 
             return pca;
         }
 
-        private async Task TestAcquireTokenInteractive_Async(PublicClientApplication pca, int expectedTokensFromIdp = 0, int expectedTokensFromCache = 0, int expectedTokensFromBroker = 0)
+        private async Task TestAcquireTokenInteractive_Async(
+            PublicClientApplication pca,
+            int expectedTokensFromIdp = 0,
+            int expectedTokensFromCache = 0,
+            int expectedTokensFromBroker = 0)
         {
             pca.ServiceBundle.ConfigureMockWebUI(
                 AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
 
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(TestConstants.s_scope)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
-            Assert.AreEqual(expectedTokensFromIdp, Metrics.TotalAccessTokensFromIdP);
-            Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
-            Assert.AreEqual(expectedTokensFromBroker, Metrics.TotalAccessTokensFromBroker);
-            Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInCacheInMs);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
+            Assert.AreEqual(expected: expectedTokensFromIdp, actual: Metrics.TotalAccessTokensFromIdP);
+            Assert.AreEqual(expected: expectedTokensFromCache, actual: Metrics.TotalAccessTokensFromCache);
+            Assert.AreEqual(expected: expectedTokensFromBroker, actual: Metrics.TotalAccessTokensFromBroker);
+            Assert.IsGreaterThan(0, Metrics.TotalDurationInMs);
         }
 
-        private async Task TestAcquireTokenSilent_Async(PublicClientApplication pca, int expectedTokensFromIdp = 0, int expectedTokensFromCache = 0, int expectedTokensFromBroker = 0)
+        private async Task TestAcquireTokenSilent_Async(
+            PublicClientApplication pca,
+            int expectedTokensFromIdp = 0,
+            int expectedTokensFromCache = 0,
+            int expectedTokensFromBroker = 0)
         {
 #pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult result = await pca.AcquireTokenSilent(
-                TestConstants.s_scope.ToArray(),
-                TestConstants.DisplayableId)
+                    TestConstants.s_scope.ToArray(),
+                    TestConstants.DisplayableId)
                 .WithAuthority(pca.Authority, false)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -300,12 +348,12 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
-            Assert.AreEqual(expectedTokensFromIdp, Metrics.TotalAccessTokensFromIdP);
-            Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
-            Assert.AreEqual(expectedTokensFromBroker, Metrics.TotalAccessTokensFromBroker);
-            Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInCacheInMs);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
+            Assert.AreEqual(expected: expectedTokensFromIdp, actual: Metrics.TotalAccessTokensFromIdP);
+            Assert.AreEqual(expected: expectedTokensFromCache, actual: Metrics.TotalAccessTokensFromCache);
+            Assert.AreEqual(expected: expectedTokensFromBroker, actual: Metrics.TotalAccessTokensFromBroker);
+            Assert.IsGreaterThan(0, Metrics.TotalDurationInMs);
         }
     }
 }

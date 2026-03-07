@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit
 #pragma warning restore CS0618 // Type or member is obsolete
 
             // Expecting an exception because MTLS PoP requires a certificate to sign the claims
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
                    .ExecuteAsync())
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit
                             .Build();
 
             // Expecting an exception because MTLS PoP requires a certificate to sign the claims
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() =>
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() =>
                 app.AcquireTokenForClient(TestConstants.s_scope)
                    .WithMtlsProofOfPossession() // Enables MTLS PoP
                    .ExecuteAsync())
@@ -128,10 +128,10 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task MtlsPop_WithoutRegion_ThrowsException(bool setAzureRegion)
+        public async Task MtlsPop_WithoutRegion_ThrowsExactly(bool setAzureRegion)
         {
             using (var envContext = new EnvVariableContext())
             {
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsync_ThrowsException()
+        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsync_ThrowsExactly()
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
@@ -505,7 +505,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPop_ThrowsExceptionWhenRegionAutoDetectFailsAsync()
+        public async Task MtlsPop_ThrowsExactlyWhenRegionAutoDetectFailsAsync()
         {
             using (var envContext = new EnvVariableContext())
             {
@@ -527,7 +527,7 @@ namespace Microsoft.Identity.Test.Unit
                         .BuildConcrete();
 
                     // Expect an MsalServiceException due to missing region for MTLS POP
-                    MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    MsalServiceException ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(async () =>
                         await app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
                             .ExecuteAsync()
@@ -541,7 +541,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DataTestMethod]
         [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(MsalServiceException))]
         [DataRow("https://contoso.adfs.contoso.com/adfs", "ADFS Authority", typeof(HttpRequestException))]
         public async Task MtlsPop_NonAadAuthorityAsync(string authorityUrl, string authorityType, Type expectedException)
@@ -567,7 +566,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://login.microsoftonline.com", TestConstants.Common, "Public Cloud")]
         [DataRow("https://login.microsoftonline.com", TestConstants.Organizations, "Public Cloud")]
         [DataRow("https://login.microsoftonline.us", TestConstants.Common, "Azure Government")]
@@ -580,33 +579,40 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("https://login.sovcloud-identity.de", TestConstants.Organizations, "Azure Sovereign - Germany Delos")]
         [DataRow("https://login.sovcloud-identity.sg", TestConstants.Common, "Azure Sovereign - Singapore Gov SG")]
         [DataRow("https://login.sovcloud-identity.sg", TestConstants.Organizations, "Azure Sovereign - Singapore Gov SG")]
-        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsync_ThrowsException(string authorityUrl, string nonTenantValue, string cloudType)
+        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsync_ThrowsExactly(
+            string authorityUrl,
+            string nonTenantValue,
+            string cloudType)
         {
             const string region = "eastus";
 
-            using (var envContext = new EnvVariableContext()) 
+            using (var envContext = new EnvVariableContext())
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", region);
 
                 using (var httpManager = new MockHttpManager())
                 {
-                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithCertificate(s_testCertificate)
                         .WithAuthority($"{authorityUrl}/{nonTenantValue}")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
-                    // Expect an exception due to using /common or /organizations with MTLS PoP
-                    MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                        await app.AcquireTokenForClient(TestConstants.s_scope)
+                    MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(() =>
+                        app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
-                            .ExecuteAsync()
-                            .ConfigureAwait(false))
+                            .ExecuteAsync())
                         .ConfigureAwait(false);
 
-                    Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage, ex.Message);
+                    Assert.AreEqual(
+                        MsalError.MissingTenantedAuthority,
+                        ex.ErrorCode,
+                        $"{cloudType} should reject non-tenanted authority segment '{nonTenantValue}' for MTLS PoP.");
+
+                    Assert.AreEqual(
+                        MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage,
+                        ex.Message);
                 }
             }
         }
@@ -666,7 +672,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("login.microsoftonline.com", "mtlsauth.microsoft.com")]
         [DataRow("login.microsoftonline.us", "mtlsauth.microsoftonline.us")]
         [DataRow("login.partner.microsoftonline.cn", "mtlsauth.partner.microsoftonline.cn")]
@@ -725,7 +731,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(EastUsRegion, result.ApiEvent.RegionUsed);
                     Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                     Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                    Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+                    Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
                 }
             }
         }
@@ -894,7 +900,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
-                Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
 
                 // Second token acquisition - should retrieve from cache
@@ -909,10 +915,10 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityOrganizations)]
-        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsyncForDsts_ThrowsException(string authorityUrl)
+        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsyncForDsts_ThrowsExactly(string authorityUrl)
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)

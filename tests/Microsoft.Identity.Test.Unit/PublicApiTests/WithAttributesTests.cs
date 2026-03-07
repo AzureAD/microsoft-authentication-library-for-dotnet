@@ -122,12 +122,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.IdentityProvider, result3.AuthenticationResultMetadata.TokenSource);
 
                 // Verify cache has 2 different tokens
-                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             }
         }
 
         [TestMethod]
-        public async Task WithAttributes_NullOrEmpty_ThrowsException_Async()
+        public async Task WithAttributes_NullOrEmpty_ThrowsExactly_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .BuildConcrete();
 
                 // Act & Assert - Null attribute should throw
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 {
                     await app.AcquireTokenForClient(_scope)
                         .WithAttributes(null)
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }).ConfigureAwait(false);
 
                 // Act & Assert - Empty attribute should throw
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 {
                     await app.AcquireTokenForClient(_scope)
                         .WithAttributes("")
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }).ConfigureAwait(false);
 
                 // Act & Assert - Whitespace attribute should throw
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 {
                     await app.AcquireTokenForClient(_scope)
                         .WithAttributes("   ")

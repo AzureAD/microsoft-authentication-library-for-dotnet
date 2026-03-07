@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             // Wait for the seconf thread to finish
             resetEvent1.Wait();
 
-            Assert.IsTrue(getTime.ElapsedMilliseconds > 2000);
+            Assert.IsGreaterThan(getTime.ElapsedMilliseconds, 2000L);
         }
 
         [RunOnWindows]
@@ -358,12 +358,11 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
                 .ConfigureAwait(false);
 
             // Assert
-            Assert.AreEqual(ex.ErrorCode, "json_parse_failed");
+            Assert.AreEqual("json_parse_failed", ex.ErrorCode);
             byte[] data = storage.ReadData();
-            Assert.IsFalse(data.Any(), "Cache is corrupt, so it should have been deleted");
+            Assert.IsEmpty(data, "Cache is corrupt, so it should have been deleted");
         }
 
-       
         [DoNotRunOnLinux] // The FileSystemWatcher on Linux doesn't always fire
         public async Task ClearCacheUsesTheLockAsync()
         {

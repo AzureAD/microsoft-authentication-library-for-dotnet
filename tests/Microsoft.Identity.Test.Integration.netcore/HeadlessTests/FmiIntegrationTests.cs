@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string expectedFmiPathHash = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
             var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache"; // last part is the SHA256 of the fmi path
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
-                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
+                (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
 
             //Acquire Fmi Cred
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string expectedFmiPathHash = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
             var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
-                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
+                (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
 
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { WebApiScope })
                                                     .WithFmiPath("SomeFmiPath/FmiCredentialPath")
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string expectedFmiPathHash = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
             var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
-                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
+                (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
 
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
                                                     .WithFmiPath("SomeFmiPath/Path")
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string expectedFmiPathHash = ""; // If you have a value, replace accordingly
             var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
-                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
+                (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
 
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
                                                     .WithFmiPath("SomeFmiPath/Path")
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string expectedFmiPathHash = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
             var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
-                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
+                (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
 
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { WebApiScope })
                                                     .WithFmiPath("SomeFmiPath/Path")
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 audience = audience.Substring(0, audience.Length - "/.default".Length);
             }
             Assert.AreEqual(expectedAudience, audience);
-            Assert.IsTrue(subject.Contains(expectedFmiPath));
+            Assert.Contains(subject, expectedFmiPath);
             Assert.AreEqual(expectedInternalCacheKey, token.CacheKey);
         }
 
@@ -317,7 +317,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string expectedFmiPathHash = "NlReJx-vneHBYB53A1WmQWCgwPobHn98udAu2hCDkJ8";
             var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
-                (args) => Assert.AreEqual(args.SuggestedCacheKey, expectedExternalCacheKey));
+                (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
             var attributesString = "{\"FavoriteColor\": \"Blue\", \"file:/c/users/foobar/documents/info.txt\": \"{\\\"permissions\\\":[\\\"read\\\",\\\"write\\\"]}\"}";
             var authResult = await confidentialApp.AcquireTokenForClient(new[] { "api://AzureFMITokenExchange/.default" })
                                 .WithAttributes(attributesString)
@@ -328,9 +328,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
             Assert.IsTrue(jsonToken.Payload.ContainsKey("xms_attr"), "xms_attr claim should exist in the token");
             var xmsAttr = jsonToken.Payload["xms_attr"].ToString();
-            Assert.IsTrue(xmsAttr.Contains("FavoriteColor"), "xms_attr claim should contain 'FavoriteColor' attribute");
-            Assert.IsTrue(xmsAttr.Contains("Blue"), "xms_attr claim should contain 'Blue' value");
-            Assert.IsTrue(xmsAttr.Contains("file:/c/users/foobar/documents/info.txt"), "xms_attr claim should contain file path attribute");
+            Assert.Contains(xmsAttr, "FavoriteColor");
+            Assert.Contains(xmsAttr, "Blue");
+            Assert.Contains(xmsAttr, "file:/c/users/foobar/documents/info.txt");
            
             var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{RmaClientId}-{TenantId}-{"api://AzureFMITokenExchange/.default"}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,

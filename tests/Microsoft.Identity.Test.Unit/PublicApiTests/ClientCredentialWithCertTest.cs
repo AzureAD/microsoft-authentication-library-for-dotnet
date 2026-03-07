@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit
                     if (expectedX5C != null)
                     {
                         Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-                        Assert.AreEqual(x5c.Value.ToString(), expectedX5C);
+                        Assert.AreEqual(expectedX5C, x5c.Value.ToString());
                     }
                     else
                     {
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit
             httpManager.AddInstanceDiscoveryMockHandler();
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, null, true)]
         [DataRow(false, null, false)]
         [DataRow(null, null, false)] // the default is false
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, null, true)]
         [DataRow(false, null, false)]
         [DataRow(null, null, false)] // the default is false
@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Test.Unit
             var x5c = assertionJwt.Header.FirstOrDefault(header => header.Key == "x5c");
 
             Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-            Assert.AreEqual(x5c.Value.ToString(), expectedX5cValue);
+            Assert.AreEqual(expectedX5cValue, x5c.Value.ToString());
 
             return assertionJwt;
         }
@@ -562,7 +562,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, true, true, true)]
         [DataRow(true, true, true, false)]
         [DataRow(true, true, false, true)]
@@ -608,7 +608,7 @@ namespace Microsoft.Identity.Test.Unit
                 appendDefaultClaims = true;
 
             int expectedPayloadClaimsCount = (appendDefaultClaims ? 6 : 0) + (addExtraClaims ? 3 : 0);
-            Assert.AreEqual(expectedPayloadClaimsCount, decodedToken.Payload.Count);
+            Assert.HasCount(expectedPayloadClaimsCount, decodedToken.Payload);
             if (appendDefaultClaims)
             {
                 Assert.AreEqual("aud", decodedToken.Payload["aud"]);
@@ -666,7 +666,7 @@ namespace Microsoft.Identity.Test.Unit
         {
 
             // Wilson is guaranteed to parse the token correctly - use it as baseline
-            Assert.AreEqual(sendX5c ? 4 : 3, decodedToken.Header.Count);
+            Assert.HasCount(sendX5c ? 4 : 3, decodedToken.Header);
             Assert.AreEqual("JWT", decodedToken.Header["typ"]);
             Assert.AreEqual(useSha2AndPss ? "PS256" : "RS256", decodedToken.Header["alg"]);
 
@@ -761,7 +761,7 @@ namespace Microsoft.Identity.Test.Unit
                 }
 
                 //Testing client credential flow
-                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var exception = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
@@ -772,7 +772,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
 
                 //Testing auth code flow
-                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                exception = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
                              .ExecuteAsync(CancellationToken.None)
@@ -783,7 +783,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
 
                 //Testing OBO flow
-                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                exception = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion))
                              .ExecuteAsync(CancellationToken.None)
@@ -796,7 +796,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         // regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4913
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task RopcCcaSendsX5CAsync(bool sendX5C)
@@ -829,7 +829,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task RopcCcaSendsX5CUsingRequestLevelAPIAsync(bool sendX5C)
@@ -1072,7 +1072,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var certificate = CertHelper.GetOrCreateTestCert();
 
-                var exception = Assert.ThrowsException<ArgumentNullException>(() =>
+                var exception = Assert.ThrowsExactly<ArgumentNullException>(() =>
                 {
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
@@ -1083,7 +1083,7 @@ namespace Microsoft.Identity.Test.Unit
                                               .BuildConcrete();
                 });
 
-                Assert.IsTrue(exception.Message.Contains("Value cannot be null"));
+                Assert.Contains(exception.Message, "Value cannot be null");
             }
         }
 

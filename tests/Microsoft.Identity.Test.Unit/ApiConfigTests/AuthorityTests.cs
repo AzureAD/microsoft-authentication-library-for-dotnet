@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -35,6 +34,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             ApplicationBase.ResetStateForTest();
             base.TestInitialize();
+
             _harness = base.CreateTestHarness();
             _testRequestContext = new RequestContext(
                 _harness.ServiceBundle,
@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             base.TestCleanup();
         }
 
+        [TestMethod]
         [DataRow(TestConstants.ADFSAuthority)]
         [DataRow(TestConstants.GenericAuthority)]
         public void WithTenantIdAtRequestLevel_Noop_AdfsGeneric(string inputAuthority)
@@ -74,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 "The tenant id should have been changed");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityTenanted)]
         [DataRow(TestConstants.CiamAuthorityMainFormat)]
@@ -103,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 "The tenant id should have been changed");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant, true)]
         [DataRow(TestConstants.AuthorityCommonPpeAuthority, true)]
         [DataRow(TestConstants.DstsAuthorityCommon, false)]
@@ -117,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public void IsSha2Supported(string inputAuthority, bool expected)
         {
             Authority a = Authority.CreateAuthority(inputAuthority);
-            Assert.AreEqual(a.AuthorityInfo.IsSha2CredentialSupported, expected);
+            Assert.AreEqual(expected, a.AuthorityInfo.IsSha2CredentialSupported);
         }
 
         [TestMethod]
@@ -127,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.IsFalse(ai.IsSha2CredentialSupported);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant)]
         [DataRow(TestConstants.AuthorityCommonPpeAuthority)]
         [DataRow(TestConstants.AuthorityConsumersTenant)]
@@ -144,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .Create(TestConstants.ClientId)
                 .WithTenantId(TestConstants.TenantId2)
                 .WithAuthority(inputAuthority)
-            .Build();
+                .Build();
 
             Assert.AreEqual(
                 new Uri(inputAuthority).Host,
@@ -163,7 +164,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .Create(TestConstants.ClientId)
                 .WithTenantId(TestConstants.TenantId2)
                 .WithAuthority(TestConstants.B2CAuthority)
-            .Build();
+                .Build();
 
             Assert.AreEqual(
                 new Uri(TestConstants.B2CAuthority).Host,
@@ -179,10 +180,10 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public void WithTenantId_B2C()
         {
             var app = ConfidentialClientApplicationBuilder
-            .Create(TestConstants.ClientId)
-            .WithAuthority(TestConstants.B2CAuthority)
-            .WithClientSecret("secret")
-            .Build();
+                .Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.B2CAuthority)
+                .WithClientSecret("secret")
+                .Build();
 
             var parameterBuilder = app
                 .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
@@ -199,8 +200,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 "The tenant id should have NOT changed");
         }
 
-        [DataTestMethod]
-        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
+        [TestMethod]
+        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData))]
         public void AADWithTenantId_Success(Uri authorityValue, string tenantId)
         {
             // Ignore authorityValue, it's just that we don't need to create another TestData method
@@ -215,15 +216,17 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                 .WithTenantId(tenantId);
 
-            // Verify Host still matches the original Authority
-            Assert.AreEqual(new Uri(TestConstants.AuthorityCommonTenant).Host, parameterBuilder.CommonParameters.AuthorityOverride.Host);
+            Assert.AreEqual(
+                new Uri(TestConstants.AuthorityCommonTenant).Host,
+                parameterBuilder.CommonParameters.AuthorityOverride.Host);
 
-            // Verify the Tenant Id matches
-            Assert.AreEqual(tenantId, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
+            Assert.AreEqual(
+                tenantId,
+                AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
         }
 
-        [DataTestMethod]
-        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
+        [TestMethod]
+        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData))]
         public void AADWithTenantIdFromAuthority_Success(Uri authorityValue, string expectedTenantId)
         {
             var app = ConfidentialClientApplicationBuilder
@@ -236,19 +239,21 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                 .WithTenantIdFromAuthority(authorityValue);
 
-            // Verify Host still matches the original Authority
-            Assert.AreEqual(new Uri(TestConstants.AuthorityCommonTenant).Host, parameterBuilder.CommonParameters.AuthorityOverride.Host);
+            Assert.AreEqual(
+                new Uri(TestConstants.AuthorityCommonTenant).Host,
+                parameterBuilder.CommonParameters.AuthorityOverride.Host);
 
-            // Verify the Tenant Id matches
-            Assert.AreEqual(expectedTenantId, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
+            Assert.AreEqual(
+                expectedTenantId,
+                AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("malformed tenant")]
-        public void WithTenantId_AppLevel_MalformedTenant_ThrowsException(string tenantId)
+        public void WithTenantId_AppLevel_MalformedTenant_ThrowsExactly(string tenantId)
         {
-            // Tenant and authority modifiers
-            Assert.ThrowsException<ArgumentException>(() =>
+            // Build() is synchronous => use ThrowsExactly (not Async)
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithTenantId(tenantId)
@@ -256,8 +261,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build());
 
-            // Tenant only modifier
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithTenantId(tenantId)
@@ -265,38 +269,36 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                     .Build());
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("malformed tenant")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void WithTenantId_RequestLevel_MalformedTenant_ThrowsException(string tenantId)
+        public void WithTenantId_RequestLevel_MalformedTenant_ThrowsExactly(string tenantId)
         {
             var app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .Build();
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .Build();
 
-            // Tenant and authority modifiers
-            app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-               .WithTenantId(tenantId);
+            Assert.ThrowsExactly<ArgumentException>(() =>
+                app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                   .WithTenantId(tenantId));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null)]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void WithTenantIdFromAuthority_NullUriAuthority_ThrowsException(Uri authorityValue)
+        public void WithTenantIdFromAuthority_NullUriAuthority_ThrowsExactly(Uri authorityValue)
         {
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithClientSecret("secret")
                 .Build();
 
-            app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-               .WithTenantIdFromAuthority(authorityValue);
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+                app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                   .WithTenantIdFromAuthority(authorityValue));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void WithTenantIdFromAuthority_MalformedTenant_ThrowsException()
+        public void WithTenantIdFromAuthority_MalformedTenant_ThrowsExactly()
         {
             var invalidAuthorityUri = new Uri("https://login.microsoftonline.com/invalid tenant/");
             var app = ConfidentialClientApplicationBuilder
@@ -304,8 +306,9 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .WithClientSecret("secret")
                 .Build();
 
-            app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-               .WithTenantIdFromAuthority(invalidAuthorityUri);
+            Assert.ThrowsExactly<ArgumentException>(() =>
+                app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                   .WithTenantIdFromAuthority(invalidAuthorityUri));
         }
 
         [TestMethod]
@@ -359,6 +362,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public async Task AuthorityMismatchTestAsync()
         {
             _testRequestContext.ServiceBundle.Config.Authority = s_utidAuthority;
+
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
                 () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority.AuthorityInfo, null))
                 .ConfigureAwait(false);
@@ -370,8 +374,10 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public async Task DefaultAuthorityDifferentTypeTestAsync()
         {
             _testRequestContext.ServiceBundle.Config.Authority = s_commonAuthority;
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
-                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority.AuthorityInfo, null)).ConfigureAwait(false);
+
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
+                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_b2cAuthority.AuthorityInfo, null))
+                .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex.ErrorCode);
         }
@@ -381,44 +387,52 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
             _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
+
             _testRequestContext.ServiceBundle.Config.Authority = s_commonAuthority;
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
-                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeOrgAuthority.AuthorityInfo, null)).ConfigureAwait(false);
+            var ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
+                () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_ppeOrgAuthority.AuthorityInfo, null))
+                .ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.ErrorCode);
 
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
             _testRequestContext.ServiceBundle.Config.Authority = s_ppeOrgAuthority;
-            var ex2 = await Assert.ThrowsExceptionAsync<MsalClientException>(
-              () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority.AuthorityInfo, null)).ConfigureAwait(false);
+            var ex2 = await Assert.ThrowsExactlyAsync<MsalClientException>(
+              () => Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority.AuthorityInfo, null))
+              .ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex2.ErrorCode);
 
             _testRequestContext.ServiceBundle.Config.Authority = Authority.CreateAuthority(TestConstants.ADFSAuthority, true);
-            var ex3 = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var ex3 = await Assert.ThrowsExactlyAsync<MsalClientException>(
              () => Authority.CreateAuthorityForRequestAsync(
                  _testRequestContext,
                  AuthorityInfo.FromAdfsAuthority(TestConstants.ADFSAuthority2, true),
-                 null)).ConfigureAwait(false);
+                 null))
+             .ConfigureAwait(false);
             Assert.AreEqual(MsalError.AuthorityHostMismatch, ex3.ErrorCode);
 
             _testRequestContext.ServiceBundle.Config.Authority = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
-            var ex4 = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var ex4 = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => Authority.CreateAuthorityForRequestAsync(
                    _testRequestContext,
                    AuthorityInfo.FromAuthorityUri(TestConstants.B2CCustomDomain, true),
-                   null)).ConfigureAwait(false);
+                   null))
+                .ConfigureAwait(false);
             Assert.AreEqual(MsalError.B2CAuthorityHostMismatch, ex4.ErrorCode);
         }
 
         [TestMethod]
         public async Task DifferentHostsWithAliasedAuthorityAsync()
         {
-            //Checking for aliased authority. Should not throw exception when a developer configures an authority on the application
-            //but uses a different authority that is a known alias of the previously configured one.
-            //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2736
+            // Checking for aliased authority. Should not throw exception when a developer configures an authority on the application
+            // but uses a different authority that is a known alias of the previously configured one.
+            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2736
             _harness.HttpManager.AddInstanceDiscoveryMockHandler(TestConstants.PrefCacheAuthorityCommonTenant);
             _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
             _testRequestContext.ServiceBundle.Config.Authority = s_commonNetAuthority;
-            var authority = await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority.AuthorityInfo).ConfigureAwait(false);
+
+            var authority = await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority.AuthorityInfo)
+                .ConfigureAwait(false);
+
             Assert.AreEqual(s_commonNetAuthority.AuthorityInfo.CanonicalAuthority, authority.AuthorityInfo.CanonicalAuthority);
         }
 
@@ -433,7 +447,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.IsFalse(s_b2cAuthority.AuthorityInfo.IsDefaultAuthority);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant, typeof(AadAuthority), "Aad")]
         [DataRow(TestConstants.AuthorityCommonPpeAuthority, typeof(AadAuthority), "Aad")]
         [DataRow(TestConstants.AuthorityConsumersTenant, typeof(AadAuthority), "Aad")]
@@ -445,7 +459,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [DataRow(TestConstants.CiamAuthorityMainFormat, typeof(CiamAuthority), "Ciam")]
         public void VerifyConfigAuthorityType(string authorityHost, Type authorityTypeInstance, string authorityType)
         {
-            string tenantId = "tenant";
+            const string tenantId = "tenant";
 
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -454,7 +468,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .BuildConcrete();
 
             Assert.IsInstanceOfType(app.ServiceBundle.Config.Authority, authorityTypeInstance);
-            Assert.AreEqual(app.AuthorityInfo.AuthorityType.ToString(), authorityType);
+            Assert.AreEqual(authorityType, app.AuthorityInfo.AuthorityType.ToString());
         }
 
         private static void VerifyAuthority(
@@ -467,7 +481,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             requestContext.ServiceBundle.Config.Authority = configAuthority;
             requestContext.ServiceBundle.Config.MultiCloudSupportEnabled = multiCloudSupport;
-            var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, requestAuthority?.AuthorityInfo, account).Result;
+
+            var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, requestAuthority?.AuthorityInfo, account)
+                .GetAwaiter()
+                .GetResult();
+
             Assert.AreEqual(expectedTenantId, resultAuthority.TenantId);
         }
     }

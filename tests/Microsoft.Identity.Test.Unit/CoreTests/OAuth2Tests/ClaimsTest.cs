@@ -242,8 +242,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
         }
 
-        [DataTestMethod]
-        [DynamicData(nameof(TestData.GetClaimsAndCapabilities), typeof(TestData), DynamicDataSourceType.Method)]
+        [TestMethod]
+        [DynamicData(nameof(TestData.GetClaimsAndCapabilities), typeof(TestData))]
         public void ClaimsMerge_Test(string claims, string[] capabilities, string expectedMergedJson)
         {
             var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(claims, capabilities);

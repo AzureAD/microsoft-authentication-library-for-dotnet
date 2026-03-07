@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             using (var httpManager = new MockHttpManager())
             {
-                await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
+                await Assert.ThrowsExactlyAsync<NotImplementedException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
                         headers: null,
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 CancellationTokenSource cts = new CancellationTokenSource();
                 cts.Cancel();
 
-                await Assert.ThrowsExceptionAsync<TaskCanceledException>(() =>
+                await Assert.ThrowsExactlyAsync<TaskCanceledException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                         headers: queryParams,
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: null,
@@ -320,7 +320,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
                 }
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(() =>
+                var ex = await Assert.ThrowsExactlyAsync<MsalServiceException>(() =>
                     httpManager.SendRequestAsync(
                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                         headers: null,

@@ -19,10 +19,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         public void ValidateRedirectUri_Throws()
         {
 
-            Assert.ThrowsException<MsalClientException>(
+            Assert.ThrowsExactly<MsalClientException>(
                 () => RedirectUriHelper.Validate(null));
 
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                () => RedirectUriHelper.Validate(new Uri("https://redirectUri/uri#fragment")),
                "Validatation should fail if uri has a fragment, i.e. #foo");
         }
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [TestMethod]
         public void ValidateRedirectUri_NoOAuth2DefaultWhenUsingSystemBrowser()
         {
-            Assert.ThrowsException<MsalClientException>(() =>
+            Assert.ThrowsExactly<MsalClientException>(() =>
                 RedirectUriHelper.Validate(new Uri(Constants.DefaultRedirectUri), true));
 
               RedirectUriHelper.Validate(new Uri(Constants.DefaultRedirectUri), false);
@@ -61,16 +61,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             RedirectUriHelper.ValidateIosBrokerRedirectUri(new Uri($"myscheme://{bundleId}/suffix"), bundleId, new NullLogger());
 
             // the comparison MUST be case sensitive 
-            Assert.ThrowsException<MsalClientException>(() =>
+            Assert.ThrowsExactly<MsalClientException>(() =>
                RedirectUriHelper.ValidateIosBrokerRedirectUri(
                    new Uri($"msauth.{bundleId.ToUpper(CultureInfo.InvariantCulture)}://auth"),
                    bundleId, new NullLogger()));
 
-            Assert.ThrowsException<MsalClientException>(() =>
+            Assert.ThrowsExactly<MsalClientException>(() =>
               RedirectUriHelper.ValidateIosBrokerRedirectUri(
                   new Uri($"other.{bundleId}://auth"), bundleId, new NullLogger()));
 
-            Assert.ThrowsException<MsalClientException>(() =>
+            Assert.ThrowsExactly<MsalClientException>(() =>
                 RedirectUriHelper.ValidateIosBrokerRedirectUri(
                   new Uri($"msauth.{bundleId}://other"), bundleId, new NullLogger()));
         }

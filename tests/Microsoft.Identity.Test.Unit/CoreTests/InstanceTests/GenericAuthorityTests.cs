@@ -22,11 +22,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class GenericAuthorityTests : TestBase
     {
-        [DataTestMethod]
+        /// <summary>
+        /// AAD doesn't return the "scope" in the response.
+        /// Duende does return the "scope" in the response.
+        /// </summary>
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        /// AAD doesn't returns the "scope" in the response
-        /// Duende does return the "scope" in the response
         public async Task ClientCredential_Success_Async(bool includeScopeInResponse)
         {
             using (var httpManager = new MockHttpManager())
@@ -46,12 +48,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     CreateTokenResponseHttpHandler(
                         authority + "/connect/token",
                         scopesInRequest: "api",
-                        scopesInResponse: includeScopeInResponse ? "api" : null, 
+                        scopesInResponse: includeScopeInResponse ? "api" : null,
                         grant: "client_credentials"));
 
                 Assert.AreEqual(authority + "/", app.Authority);
-                var confidentailClientApp = (ConfidentialClientApplication)app;
-                Assert.AreEqual(AuthorityType.Generic, confidentailClientApp.AuthorityInfo.AuthorityType);
+
+                var confidentialClientApp = (ConfidentialClientApplication)app;
+                Assert.AreEqual(AuthorityType.Generic, confidentialClientApp.AuthorityInfo.AuthorityType);
 
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(new[] { "api" })
@@ -72,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
-      
+
         [TestMethod]
         public async Task UserAuth_HappyPath_Async()
         {
@@ -94,20 +97,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     CreateOidcHttpHandler(authority + @"/" + Constants.WellKnownOpenIdConfigurationPath));
 
                 httpManager.AddMockHandler(
-                     CreateTokenResponseHttpHandler(
-                         authority + "/connect/token",
-                         scopesInRequest: string.Join(" ", requestedScopes),
-                         scopesInResponse: "openid profile email all:catchreport offline_access",
-                         grant: "authorization_code"));
+                    CreateTokenResponseHttpHandler(
+                        authority + "/connect/token",
+                        scopesInRequest: string.Join(" ", requestedScopes),
+                        scopesInResponse: "openid profile email all:catchreport offline_access",
+                        grant: "authorization_code"));
 
                 Debug.WriteLine("Scopes returned: openid profile email all:catchreport offline_access");
                 var result = await cca.AcquireTokenByAuthorizationCode(requestedScopes, "auth_code")
-                                        .ExecuteAsync().ConfigureAwait(false);
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                var result2 = await cca.AcquireTokenSilent(requestedScopes, result.Account)                
-                    .ExecuteAsync().ConfigureAwait(false);
+                var result2 = await cca.AcquireTokenSilent(requestedScopes, result.Account)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
 
@@ -117,14 +122,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     "sub",
                     null,
                     "sub",
-                    result.Account, 
+                    result.Account,
                     result2.Account);
-
             }
         }
 
         [TestMethod]
-        public async Task ExtraQueryParametersArePresevedTest()
+        public async Task ExtraQueryParametersArePreservedTest()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -145,38 +149,42 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 string oidcDocument = TestConstants.GenericOidcResponse;
                 oidcDocument = oidcDocument.Replace(
-                    "https://demo.duendesoftware.com/connect/authorize", 
+                    "https://demo.duendesoftware.com/connect/authorize",
                     $"https://demo.duendesoftware.com/connect/authorize?{QP}");
 
                 oidcDocument = oidcDocument.Replace(
-                   "https://demo.duendesoftware.com/connect/token",
-                   $"https://demo.duendesoftware.com/connect/token?{QP}");
+                    "https://demo.duendesoftware.com/connect/token",
+                    $"https://demo.duendesoftware.com/connect/token?{QP}");
 
                 var oidcHandler = new MockHttpMessageHandler()
                 {
-                    ExpectedMethod = HttpMethod.Get,                    
+                    ExpectedMethod = HttpMethod.Get,
                     ResponseMessage = MockHelpers.CreateSuccessResponseMessage(oidcDocument)
                 };
 
                 var oidcHttpResult = httpManager.AddMockHandler(oidcHandler);
 
                 var tokenHttpResult = httpManager.AddMockHandler(
-                     CreateTokenResponseHttpHandler(
-                          $"{Authority}/connect/token?{QP}",  // notice the QP
-                         scopesInRequest: string.Join(" ", requestedScopes),
-                         scopesInResponse: "openid profile email all:catchreport offline_access",
-                         grant: "authorization_code"));
+                    CreateTokenResponseHttpHandler(
+                        $"{Authority}/connect/token?{QP}",  // notice the QP
+                        scopesInRequest: string.Join(" ", requestedScopes),
+                        scopesInResponse: "openid profile email all:catchreport offline_access",
+                        grant: "authorization_code"));
 
                 Debug.WriteLine("Scopes returned: openid profile email all:catchreport offline_access");
                 var result = await cca.AcquireTokenByAuthorizationCode(requestedScopes, "auth_code")
-                                        .ExecuteAsync().ConfigureAwait(false);
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 Assert.AreEqual(
-                    $"{Authority}/connect/token?{QP}", 
+                    $"{Authority}/connect/token?{QP}",
                     tokenHttpResult.ActualRequestMessage.RequestUri.ToString());
+
                 Assert.AreEqual(
                     $"{Authority}/.well-known/openid-configuration?{QP}",
                     oidcHttpResult.ActualRequestMessage.RequestUri.ToString());
+
+                Assert.IsNotNull(result);
             }
         }
 
@@ -202,23 +210,25 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     CreateOidcHttpHandler(authority + @"/" + Constants.WellKnownOpenIdConfigurationPath));
 
                 httpManager.AddMockHandler(
-                     CreateTokenResponseHttpHandler(
-                         authority + "/connect/token",
-                         scopesInRequest: string.Join(" ", requestedScopes),
-                         scopesInResponse: "openid profile email all:catchreport offline_access",
-                         grant: "authorization_code"));
+                    CreateTokenResponseHttpHandler(
+                        authority + "/connect/token",
+                        scopesInRequest: string.Join(" ", requestedScopes),
+                        scopesInResponse: "openid profile email all:catchreport offline_access",
+                        grant: "authorization_code"));
 
                 Debug.WriteLine("Scopes returned: openid profile email all:catchreport offline_access");
                 var result = await cca.AcquireTokenByAuthorizationCode(requestedScopes, "auth_code")
-                                        .ExecuteAsync().ConfigureAwait(false);
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
 #pragma warning disable CS0618 // Type or member is obsolete
-                var accounts = (await cca.GetAccountsAsync().ConfigureAwait(false));
+                var accounts = await cca.GetAccountsAsync().ConfigureAwait(false);
 #pragma warning restore CS0618 // Type or member is obsolete
 
                 var account1 = accounts.First();
                 Assert.AreEqual("sub", account1.HomeAccountId.Identifier);
-                Assert.AreEqual(null, account1.HomeAccountId.TenantId);
+                Assert.IsNotNull(account1.HomeAccountId);
+                Assert.IsNull(account1.HomeAccountId.TenantId);
 
                 // This is because of how we've done it in ADFS. Probably doesn't matter what value is used here, as it is not defined for non-Microsoft.
                 Assert.AreEqual("sub", account1.HomeAccountId.ObjectId);
@@ -241,40 +251,41 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     CreateTokenResponseHttpHandler(
                         authority + "/connect/token",
                         scopesInRequest: string.Join(" ", requestedScopes),
-                        scopesInResponse: "email openid profile all:catchreport offline_access", // this is different from above!
+                        scopesInResponse: "email openid profile all:catchreport offline_access", // different order
                         grant: "refresh_token"));
 
                 var result2 = await cca.AcquireTokenSilent(requestedScopes, result.Account)
                     .WithForceRefresh(true)
-                    .ExecuteAsync().ConfigureAwait(false);
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
 
                 Debug.WriteLine("This would result in multiple matching tokens error");
                 var result3 = await cca.AcquireTokenSilent(requestedScopes, result.Account)
-                    .ExecuteAsync().ConfigureAwait(false);
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, result3.AuthenticationResultMetadata.TokenSource);
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://demo.duend esoftware.com")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void MalformedAuthority_ThrowsException(string malformedAuthority)
+        public void MalformedAuthority_ThrowsExactly(string malformedAuthority)
         {
-            // Tenant and authority modifiers
-            ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithOidcAuthority(malformedAuthority)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .Build();
+            Assert.ThrowsExactly<ArgumentException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithOidcAuthority(malformedAuthority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build());
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("oidc_response_not_json")]
         [DataRow("oidc_response_http_error")]
-        public async Task BadOidcResponse_ThrowsException_Async(string badOidcResponseType)
+        public async Task BadOidcResponse_ThrowsExactly_Async(string badOidcResponseType)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -288,18 +299,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 string oidcEndpoint = authority + @"/" + Constants.WellKnownOpenIdConfigurationPath;
 
-                HttpResponseMessage responseMessage;
-                switch (badOidcResponseType)
+                HttpResponseMessage responseMessage = badOidcResponseType switch
                 {
-                    case "oidc_response_not_json":
-                        responseMessage = MockHelpers.CreateSuccessResponseMessage("bad_response_no_json");
-                        break;
-                    case "oidc_response_http_error":
-                        responseMessage = MockHelpers.CreateFailureMessage(System.Net.HttpStatusCode.BadRequest, "");
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
+                    "oidc_response_not_json" => MockHelpers.CreateSuccessResponseMessage("bad_response_no_json"),
+                    "oidc_response_http_error" => MockHelpers.CreateFailureMessage(HttpStatusCode.BadRequest, ""),
+                    _ => throw new NotImplementedException(),
+                };
 
                 var oidcMock = new MockHttpMessageHandler()
                 {
@@ -311,13 +316,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 httpManager.AddMockHandler(oidcMock);
 
                 Assert.AreEqual(authority + "/", app.Authority);
-                var confidentailClientApp = (ConfidentialClientApplication)app;
-                Assert.AreEqual(AuthorityType.Generic, confidentailClientApp.AuthorityInfo.AuthorityType);
+                var confidentialClientApp = (ConfidentialClientApplication)app;
+                Assert.AreEqual(AuthorityType.Generic, confidentialClientApp.AuthorityInfo.AuthorityType);
 
                 var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
-                         app.AcquireTokenForClient(new[] { "api" })
-                             .ExecuteAsync())
-                             .ConfigureAwait(false);
+                    app.AcquireTokenForClient(new[] { "api" })
+                       .ExecuteAsync())
+                    .ConfigureAwait(false);
 
                 switch (badOidcResponseType)
                 {
@@ -351,40 +356,37 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     CreateOidcHttpHandler($"{authority}/{Constants.WellKnownOpenIdConfigurationPath}", authority));
 
                 httpManager.AddFailureTokenEndpointResponse(
-                                error: "error",
-                                AadErrorCode: Constants.AadAccountTypeAndResourceIncompatibleErrorCode,
-                                expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
+                    error: "error",
+                    AadErrorCode: Constants.AadAccountTypeAndResourceIncompatibleErrorCode,
+                    expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
 
                 Assert.AreEqual(authority, app.Authority);
-                var confidentailClientApp = (ConfidentialClientApplication)app;
-                Assert.AreEqual(AuthorityType.Generic, confidentailClientApp.AuthorityInfo.AuthorityType);
+                var confidentialClientApp = (ConfidentialClientApplication)app;
+                Assert.AreEqual(AuthorityType.Generic, confidentialClientApp.AuthorityInfo.AuthorityType);
 
                 var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
-                         app.AcquireTokenForClient(new[] { "api" })
-                             .ExecuteAsync())
-                             .ConfigureAwait(false);
+                    app.AcquireTokenForClient(new[] { "api" })
+                       .ExecuteAsync())
+                    .ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains(
-                                string.Format(
-                                    CultureInfo.InvariantCulture, 
-                                    MsalErrorMessage.MalformedOidcAuthorityFormat, 
-                                    TestConstants.CiamCUDAuthorityMalformed)));
+                var expected = string.Format(
+                    CultureInfo.InvariantCulture,
+                    MsalErrorMessage.MalformedOidcAuthorityFormat,
+                    TestConstants.CiamCUDAuthorityMalformed);
+
+                Assert.Contains(expected, ex.Message, StringComparison.Ordinal);
 
                 httpManager.AddFailureTokenEndpointResponse(
-                error: "error",
-                AadErrorCode: Constants.AadMissingScopeErrorCode,
-                expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
+                    error: "error",
+                    AadErrorCode: Constants.AadMissingScopeErrorCode,
+                    expectedUrl: $"{TestConstants.CiamCUDAuthorityMalformed}/connect/token");
 
                 ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
-                         app.AcquireTokenForClient(new[] { "api" })
-                             .ExecuteAsync())
-                             .ConfigureAwait(false);
+                    app.AcquireTokenForClient(new[] { "api" })
+                       .ExecuteAsync())
+                    .ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains(
-                                string.Format(
-                                    CultureInfo.InvariantCulture,
-                                    MsalErrorMessage.MalformedOidcAuthorityFormat,
-                                    TestConstants.CiamCUDAuthorityMalformed)));
+                Assert.Contains(expected, ex.Message, StringComparison.Ordinal);
             }
         }
 
@@ -406,7 +408,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
-                // Create OIDC document with a Microsoft host and an issuer that has matching host but different path
                 string oidcDocumentWithDifferentPath = TestConstants.GenericOidcResponse.Replace(
                         $"\"issuer\":\"{TestConstants.GenericAuthority}\"",
                         $"\"issuer\":\"{issuerWithDifferentPath}\"");
@@ -414,7 +415,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         "demo.duendesoftware.com",
                         microsoftHost);
 
-                // Mock OIDC endpoint response
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     ExpectedMethod = HttpMethod.Get,
@@ -422,17 +422,15 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     ResponseMessage = MockHelpers.CreateSuccessResponseMessage(oidcDocumentWithDifferentPath)
                 });
 
-                // Mock token endpoint response
                 httpManager.AddMockHandler(
                     CreateTokenResponseHttpHandler(
                         $"https://{microsoftHost}/connect/token",
                         scopesInRequest: "api",
-                        scopesInResponse: "api", 
+                        scopesInResponse: "api",
                         grant: "client_credentials"));
 
-                // Should not throw an exception with our updated validation
                 var result = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
-                
+
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
             }
@@ -452,12 +450,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
-                // Create OIDC document with non-matching issuer
                 string validOidcDocumentWithWrongIssuer = TestConstants.GenericOidcResponse.Replace(
                         $"\"issuer\":\"{TestConstants.GenericAuthority}\"",
                         $"\"issuer\":\"{wrongIssuer}\"");
 
-                // Mock OIDC endpoint response
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     ExpectedMethod = HttpMethod.Get,
@@ -469,18 +465,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()
                 ).ConfigureAwait(false);
 
-                string expectedErrorMessage = string.Format(MsalErrorMessage.IssuerValidationFailed, app.Authority, wrongIssuer);
+                string expectedErrorMessage = string.Format(
+                    CultureInfo.InvariantCulture,
+                    MsalErrorMessage.IssuerValidationFailed,
+                    app.Authority,
+                    wrongIssuer);
 
                 Assert.AreEqual(MsalError.AuthorityValidationFailed, ex.ErrorCode);
-                Assert.AreEqual(expectedErrorMessage, ex.Message, 
-                    "Error message should match the expected error message.");
+                Assert.AreEqual(expectedErrorMessage, ex.Message, "Error message should match the expected error message.");
             }
         }
 
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(
             string tokenEndpoint,
             string scopesInRequest,
-            string scopesInResponse, 
+            string scopesInResponse,
             string grant)
         {
             IDictionary<string, string> expectedRequestBody = new Dictionary<string, string>
@@ -494,18 +493,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             string responseWithScopes = @"{ ""access_token"":""secret"", ""expires_in"":3600, ""token_type"":""Bearer"", ""scope"":""scope_placeholder"" }";
             string responseWithoutScopes = @"{ ""access_token"":""secret"", ""expires_in"":3600, ""token_type"":""Bearer"" }";
 
-            string response = scopesInResponse != null ?
-                responseWithScopes.Replace("scope_placeholder", scopesInResponse)
+            string response = scopesInResponse != null
+                ? responseWithScopes.Replace("scope_placeholder", scopesInResponse)
                 : responseWithoutScopes;
 
-            // user flows have ID token - inject it into the response
             if (grant != "client_credentials")
             {
                 response = response.Insert(response.Length - 1, ",\"id_token\":\"" + CreateIdToken() + "\"");
-
-                // insert a fake refresh token with key refresh_token
                 response = response.Insert(response.Length - 1, ",\"refresh_token\":\"secret\"");
-
                 expectedRequestBody["scope"] = scopesInRequest + " openid profile offline_access";
             }
 
@@ -516,18 +511,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 ExpectedPostData = expectedRequestBody,
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
             };
-        }        
+        }
 
         private static string CreateIdToken()
         {
-            // as per https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
-            // but not all claims are required. Adding only a few that MSAL uses.
             string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
                        "\"iss\": \"https://demo.duendesoftware.com\"," +
                        "\"iat\": 1455833828," +
                        "\"exp\": 1455837728," +
-                       "\"name\": \""+ TestConstants.Email + "\"," +
-                       "\"email\": \""+ TestConstants.Email + "\"," +
+                       "\"name\": \"" + TestConstants.Email + "\"," +
+                       "\"email\": \"" + TestConstants.Email + "\"," +
                        "\"sub\": \"sub\"" +
                 "}";
 

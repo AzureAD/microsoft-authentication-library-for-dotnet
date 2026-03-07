@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             var proxy2 = PlatformProxyFactory.CreatePlatformProxy(null);
 
             // Assert
-            Assert.IsFalse(proxy1 == proxy2);
+            Assert.AreNotEqual(proxy1, proxy2);
         }
 
         [TestMethod]
@@ -146,8 +146,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
           Constants.LocalHostRedirectUri,
           proxy.GetDefaultRedirectUri("cid", true));
 #endif
-
-
         }
 
     }

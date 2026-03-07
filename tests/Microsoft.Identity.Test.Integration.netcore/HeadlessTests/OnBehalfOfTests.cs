@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Tests the behavior when calling OBO and silent in different orders with multiple users.
         /// OBO calls should return tokens for correct users, silent calls should throw.
         /// </summary>
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false, false)]
         [DataRow(true, false)]
         [DataRow(true, true)]
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(CacheRefreshReason.NotApplicable, authResult.AuthenticationResultMetadata.CacheRefreshReason);
             oboTokens.Add(authResult.AccessToken);
 
-            Assert.AreEqual(2, oboTokens.Count);
+            Assert.HasCount(2, oboTokens);
 
             // Silent calls should throw
             await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, oboResult.AuthenticationResultMetadata.TokenSource);
-            Assert.IsFalse(oboResult.AuthenticationResultMetadata.TokenEndpoint.Contains(TestConstants.Region));
+            Assert.DoesNotContain(oboResult.AuthenticationResultMetadata.TokenEndpoint, TestConstants.Region);
 
             // Client uses regional - IdP
             var clientResult = await cca.AcquireTokenForClient(new string[] { "https://graph.microsoft.com/.default" })
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, clientResult.AuthenticationResultMetadata.TokenSource);
-            Assert.IsTrue(clientResult.AuthenticationResultMetadata.TokenEndpoint.Contains(TestConstants.Region));
+            Assert.Contains(clientResult.AuthenticationResultMetadata.TokenEndpoint, TestConstants.Region);
 
             // OBO from cache
             oboResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(userResult.AccessToken))
@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             void AssertLastHttpContent(string content)
             {
-                Assert.IsTrue(HttpSnifferClientFactory.LastHttpContentData.Contains(content));
+                Assert.Contains(HttpSnifferClientFactory.LastHttpContentData, content);
                 HttpSnifferClientFactory.LastHttpContentData = string.Empty;
             }
         }
