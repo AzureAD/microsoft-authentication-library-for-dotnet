@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             base.TestInitialize();
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, true, true)]
         [DataRow(true, false, false)]
         [DataRow(false, true, false)]
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task WithMultiCloudSupportTest_Async(
@@ -1428,7 +1428,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public void AccessTokenCacheItem_ToLogString_UsesPiiFlag_Test(bool enablePii)
@@ -1441,7 +1441,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreNotEqual(enablePii, log.Contains(accessTokenCacheItem.HomeAccountId.GetHashCode().ToString()));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public void RefreshTokenCacheItem_ToLogString_UsesPiiFlag_Test(bool enablePii)

@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .BuildConcrete();
 
                 // Act & Assert - Null attribute should throw
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 {
                     await app.AcquireTokenForClient(_scope)
                         .WithAttributes(null)
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }).ConfigureAwait(false);
 
                 // Act & Assert - Empty attribute should throw
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 {
                     await app.AcquireTokenForClient(_scope)
                         .WithAttributes("")
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }).ConfigureAwait(false);
 
                 // Act & Assert - Whitespace attribute should throw
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 {
                     await app.AcquireTokenForClient(_scope)
                         .WithAttributes("   ")

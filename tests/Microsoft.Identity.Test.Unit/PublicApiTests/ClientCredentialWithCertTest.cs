@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit
             httpManager.AddInstanceDiscoveryMockHandler();
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, null, true)]
         [DataRow(false, null, false)]
         [DataRow(null, null, false)] // the default is false
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, null, true)]
         [DataRow(false, null, false)]
         [DataRow(null, null, false)] // the default is false
@@ -562,7 +562,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, true, true, true)]
         [DataRow(true, true, true, false)]
         [DataRow(true, true, false, true)]
@@ -761,7 +761,7 @@ namespace Microsoft.Identity.Test.Unit
                 }
 
                 //Testing client credential flow
-                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
@@ -772,7 +772,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
 
                 //Testing auth code flow
-                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
                              .ExecuteAsync(CancellationToken.None)
@@ -783,7 +783,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
 
                 //Testing OBO flow
-                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion))
                              .ExecuteAsync(CancellationToken.None)
@@ -796,7 +796,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         // regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4913
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task RopcCcaSendsX5CAsync(bool sendX5C)
@@ -829,7 +829,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task RopcCcaSendsX5CUsingRequestLevelAPIAsync(bool sendX5C)
@@ -867,7 +867,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task EnsureCertificateSerialNumberIsAddedToCacheKeyTestAsync(bool useCertificateOptions)
@@ -984,7 +984,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task EnsureDefaultCacheKeyBehaviorWhenCertSerialNumberIsNotUsedTestAsync(bool useCertificateOptions)
@@ -1072,7 +1072,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var certificate = CertHelper.GetOrCreateTestCert();
 
-                var exception = Assert.ThrowsException<ArgumentNullException>(() =>
+                var exception = Assert.Throws<ArgumentNullException>(() =>
                 {
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)

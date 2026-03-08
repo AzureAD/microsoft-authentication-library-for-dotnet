@@ -181,26 +181,26 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("http://login.microsoftonline.com/", "ten ant")]
         [DataRow("https://login.microsoftonline.com/", "ten ant")]
         public void MalformedAuthority_ThrowsException(string malformedCloudInstanceUri, string malformedTenant)
         {
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority($"{malformedCloudInstanceUri}{malformedTenant}")
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build());
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(malformedCloudInstanceUri, malformedTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build());
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(AzureCloudInstance.AzurePublic, malformedTenant)

@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(3600, 0, 0)]
         [DataRow(3600, 500, 500)]
         [DataRow(7200, 0, 3600)]

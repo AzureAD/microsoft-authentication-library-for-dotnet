@@ -569,7 +569,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, true)]
         [DataRow(true, false)]
         [DataRow(false, true)]
@@ -675,7 +675,7 @@ namespace Microsoft.Identity.Test.Unit
 
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("login.partner.microsoftonline.cn", "login.partner.microsoftonline.cn")]
         [DataRow("login.chinacloudapi.cn", "login.partner.microsoftonline.cn")]
         [DataRow("login.microsoftonline.us", "login.microsoftonline.us")]
@@ -823,7 +823,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                var ex = Assert.Throws<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
                     hasCustomInstanceMetadata: true));
@@ -841,7 +841,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                var ex = Assert.Throws<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
                     hasCustomInstanceMetadataUri: true));
@@ -936,7 +936,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                var ex = Assert.Throws<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
                     hasCustomInstanceMetadata: true));

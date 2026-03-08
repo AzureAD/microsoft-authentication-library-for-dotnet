@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod] // Fix for regression https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5261
+        [TestMethod] // Fix for regression https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5261
         [DataRow(false)]
         [DataRow(true)]
         public async Task Should_UseCustomRequestHeaders_And_StoreAdditionalParametersWithCaching(bool useSerializedCache)

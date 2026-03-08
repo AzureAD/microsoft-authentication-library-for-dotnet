@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(false, mi.ServiceBundle.Config.IsDefaultPlatformLoggingEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
         [DataRow("resourceId/subscription", UserAssignedIdentityId.ResourceId)]

@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsTrue((cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public void CacheSynchronization_WithOptions(bool enableCacheSynchronization)
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(enableCacheSynchronization, (cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false, false, false)]
         [DataRow(true, true, true)]
         [DataRow(true, false, false)]
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithInvalidRedirectUri()
         {
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
                 ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithClientSecret("cats")
                                                     .WithRedirectUri("this is not a valid uri")
@@ -435,7 +435,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var certificateOptions = new CertificateOptions { SendX5C = true };
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.Throws<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithCertificate((X509Certificate2)null, certificateOptions)
@@ -504,7 +504,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)] // Not specified, default is true
@@ -528,7 +528,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(isLegacyCacheCompatibilityEnabled, cca.AppConfig.LegacyCacheCompatibilityEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)] // Not specified, default is true

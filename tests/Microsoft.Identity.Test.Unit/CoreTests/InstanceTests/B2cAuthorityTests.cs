@@ -17,13 +17,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void NotEnoughPathSegments_ThrowsException_Test()
         {
-            var ex = Assert.ThrowsException<ArgumentException>(() =>
+            var ex = Assert.Throws<ArgumentException>(() =>
                 Authority.CreateAuthority("https://login.microsoftonline.in/tfp/"));
 
             Assert.AreEqual(MsalErrorMessage.B2cAuthorityUriInvalidPath, ex.Message);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://sometenantid.b2clogin.com/tfp/sometenantid/policy/", "sometenantid")]
         [DataRow("https://catsareamazing.com/tfp/catsareamazing/policy/", "catsareamazing")]
         [DataRow("https://sometenantid.b2clogin.de/tfp/tid/policy/", "tid")]
@@ -87,12 +87,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(new Uri(UriVanityPort), authority.AuthorityInfo.CanonicalAuthority);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://login.microsoftonline.in/tfp/te nant/b2c_1_susi/")]
         [DataRow("http://login.microsoftonline.in/tfp/tenant/b2c_1_susi/")]
         public void MalformedAuthority_ThrowsException(string malformedAuthority)
         {
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithB2CAuthority(malformedAuthority)
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 .WithClientSecret(TestConstants.ClientSecret)
                 .Build();
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                    .WithB2CAuthority(malformedAuthority));
         }

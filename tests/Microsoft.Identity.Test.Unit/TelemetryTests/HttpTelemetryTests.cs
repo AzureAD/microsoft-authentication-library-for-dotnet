@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task LegacyCacheEnabledTelemetryTestAsync(bool isLegacyCacheEnabled)
@@ -502,7 +502,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("1")]
         [DataRow("0")]
         public async Task ManagedCert_AppearsInTelemetry_AndNotSentToAAD_TestAsync(string managedCertValue)
