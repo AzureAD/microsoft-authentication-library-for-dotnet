@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 
                 NuGetVersion.TryParse(match.Value, out var semanticVersion);
 
-                Assert.IsGreaterThanOrEqualTo(semanticVersion.Major, 10);
+                Assert.IsGreaterThanOrEqualTo(10, semanticVersion.Major);
 
                 
             }

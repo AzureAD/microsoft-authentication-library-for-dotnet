@@ -239,8 +239,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
-            Assert.IsGreaterThan(result.AuthenticationResultMetadata.DurationTotalInMs, 0);
-            Assert.IsGreaterThan(result.AuthenticationResultMetadata.DurationInHttpInMs, 0);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInHttpInMs);
 
             userCacheAccess.AssertAccessCounts(0, 1);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);

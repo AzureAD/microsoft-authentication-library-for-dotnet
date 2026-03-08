@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     refreshOnWithJitter.Value, 
                     TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
             }
-            Assert.IsGreaterThanOrEqualTo(refreshOnWithJitterList.Distinct().Count(), 8, "Jitter is random, so we can only have 1-2 identical values");
+            Assert.IsGreaterThanOrEqualTo(8, refreshOnWithJitterList.Distinct().Count(), "Jitter is random, so we can only have 1-2 identical values");
         }
 
         [TestMethod]

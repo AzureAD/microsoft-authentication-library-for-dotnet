@@ -1000,7 +1000,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsGreaterThanOrEqualTo(callCount, 1, "Expected the client assertion delegate to be called at least once.");
+                Assert.IsGreaterThanOrEqualTo(1, callCount, "Expected the client assertion delegate to be called at least once.");
             }
         }
 
@@ -1046,7 +1046,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsGreaterThanOrEqualTo(callCount, 1, "Expected the client assertion provider to be called at least once.");
+                Assert.IsGreaterThanOrEqualTo(1, callCount, "Expected the client assertion provider to be called at least once.");
             }
         }
 

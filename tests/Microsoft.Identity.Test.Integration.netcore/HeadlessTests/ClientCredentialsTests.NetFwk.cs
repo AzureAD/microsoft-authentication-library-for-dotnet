@@ -495,8 +495,8 @@ var confidentialApp = ConfidentialClientApplicationBuilder
             CollectionAssert.AreEquivalent(scopes.ToArray(), appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
             Assert.AreEqual(tenantId, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestTenantId ?? "");
             Assert.AreEqual(tenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
-            Assert.IsGreaterThan(authResult.AuthenticationResultMetadata.DurationTotalInMs, 0);
-            Assert.IsGreaterThan(authResult.AuthenticationResultMetadata.DurationInHttpInMs, 0);
+            Assert.IsGreaterThan(0, authResult.AuthenticationResultMetadata.DurationTotalInMs);
+            Assert.IsGreaterThan(0, authResult.AuthenticationResultMetadata.DurationInHttpInMs);
             Assert.AreEqual(
               GetExpectedCacheKey(appConfig.AppId, tenantId),
               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
