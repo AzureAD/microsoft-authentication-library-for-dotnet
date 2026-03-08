@@ -566,7 +566,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [Ignore("TODO: Production code validation for non-tenanted authority with mTLS PoP is not yet implemented. See MsalError.MissingTenantedAuthority.")]
+        //[Ignore("TODO: Production code validation for non-tenanted authority with mTLS PoP is not yet implemented. See MsalError.MissingTenantedAuthority.")]
         [TestMethod]
         [DataRow("https://login.microsoftonline.com", TestConstants.Common, "Public Cloud")]
         [DataRow("https://login.microsoftonline.com", TestConstants.Organizations, "Public Cloud")]
@@ -598,7 +598,7 @@ namespace Microsoft.Identity.Test.Unit
                         .BuildConcrete();
 
                     // Expect an exception due to using /common or /organizations with MTLS PoP
-                    MsalClientException ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
+                    MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(async () =>
                         await app.AcquireTokenForClient(TestConstants.s_scope)
                             .WithMtlsProofOfPossession()
                             .ExecuteAsync()
