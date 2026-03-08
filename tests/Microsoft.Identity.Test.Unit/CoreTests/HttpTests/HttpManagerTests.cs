@@ -171,8 +171,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
                 Assert.AreEqual(
-                    actualResponseBody,
-                    response.Body);
+                    response.Body,
+                    actualResponseBody);
             }
         }
 
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-                Assert.AreEqual(actualResponseBody, response.Body);
+                Assert.AreEqual(response.Body, actualResponseBody);
             }
         }
 

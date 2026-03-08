@@ -616,7 +616,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNotNull(ex.InnerException);
                     Assert.IsTrue(ex.InnerException is MsalUiRequiredException);
                     var msalExc = (MsalUiRequiredException)ex.InnerException;
-                    Assert.AreEqual(msalExc.ErrorCode, MsalError.InvalidGrantError);
+                    Assert.AreEqual(MsalError.InvalidGrantError, msalExc.ErrorCode);
                 }
             }
         }

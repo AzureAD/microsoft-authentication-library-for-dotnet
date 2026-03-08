@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var (retryAfterProvider, _, _) = throttlingManager.GetTypedThrottlingProviders();
                 var singleEntry = retryAfterProvider.ThrottlingCache.CacheForTest.Single().Value;
                 TimeSpan actualExpiration = singleEntry.ExpirationTime - singleEntry.CreationTime;
-                Assert.AreEqual(actualExpiration, RetryAfterProvider.MaxRetryAfter);
+                Assert.AreEqual(RetryAfterProvider.MaxRetryAfter, actualExpiration);
             }
         }
 
@@ -222,10 +222,10 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                     () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(serverEx.StatusCode, 429);
-                Assert.AreEqual(serverEx.ErrorCode, MsalError.RequestThrottled);
-                Assert.AreEqual(serverEx.Message, MsalErrorMessage.AadThrottledError);
-                Assert.AreEqual(serverEx.ResponseBody, MockHelpers.TooManyRequestsContent);
+                Assert.AreEqual(429, serverEx.StatusCode);
+                Assert.AreEqual(MsalError.RequestThrottled, serverEx.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.AadThrottledError, serverEx.Message);
+                Assert.AreEqual(MockHelpers.TooManyRequestsContent, serverEx.ResponseBody);
             }
         }
         #endregion

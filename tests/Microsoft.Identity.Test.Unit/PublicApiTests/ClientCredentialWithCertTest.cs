@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit
                     if (expectedX5C != null)
                     {
                         Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-                        Assert.AreEqual(x5c.Value.ToString(), expectedX5C);
+                        Assert.AreEqual(expectedX5C, x5c.Value.ToString());
                     }
                     else
                     {
@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Test.Unit
             var x5c = assertionJwt.Header.FirstOrDefault(header => header.Key == "x5c");
 
             Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-            Assert.AreEqual(x5c.Value.ToString(), expectedX5cValue);
+            Assert.AreEqual(expectedX5cValue, x5c.Value.ToString());
 
             return assertionJwt;
         }

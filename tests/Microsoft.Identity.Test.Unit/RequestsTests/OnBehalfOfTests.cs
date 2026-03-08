@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 

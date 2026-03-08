@@ -356,7 +356,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #if NETFRAMEWORK
             Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
 #else
-            Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
+            Assert.AreEqual("http://localhost", app.AppConfig.RedirectUri);
 #endif
 
         }
@@ -644,7 +644,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             var accounts = app.GetAccountsAsync().Result;
-            Assert.IsTrue(!accounts.Any());
+            Assert.IsFalse(accounts.Any());
 
             var acc = app.GetAccountAsync(null).Result;
             Assert.IsNull(acc);
@@ -1134,7 +1134,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.OnPremiseUniqueId, result2.UniqueId);
                 Assert.AreEqual(new AccountId(TestConstants.OnPremiseUniqueId), result2.Account.HomeAccountId);
                 Assert.AreEqual(TestConstants.OnPremiseDisplayableId, result2.Account.Username);
-                Assert.AreEqual(app.UserTokenCacheInternal.Semaphore.CurrentCount, 1);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Semaphore.CurrentCount);
             }
         }
 

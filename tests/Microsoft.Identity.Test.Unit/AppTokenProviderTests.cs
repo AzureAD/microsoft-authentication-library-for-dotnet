@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TestConstants.DefaultAccessToken + differentScopesForAt, result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, 2);
+                Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(3, callbackInvoked);
 
                 // Acquire token from app provider with claims. Should not use cache

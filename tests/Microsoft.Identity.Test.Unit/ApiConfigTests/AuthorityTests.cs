@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public void IsSha2Supported(string inputAuthority, bool expected)
         {
             Authority a = Authority.CreateAuthority(inputAuthority);
-            Assert.AreEqual(a.AuthorityInfo.IsSha2CredentialSupported, expected);
+            Assert.AreEqual(expected, a.AuthorityInfo.IsSha2CredentialSupported);
         }
 
         [TestMethod]

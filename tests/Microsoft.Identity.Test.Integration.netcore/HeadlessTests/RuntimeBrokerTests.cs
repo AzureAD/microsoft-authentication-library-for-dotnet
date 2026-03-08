@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode));
             }
             catch (Exception ex)
             {
@@ -482,7 +482,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);
-                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode));
             }
         }
 

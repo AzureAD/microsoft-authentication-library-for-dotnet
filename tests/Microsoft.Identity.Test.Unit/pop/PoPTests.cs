@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // access token parsing can be done with MSAL's id token parsing logic
                 var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
 
-                Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
+                Assert.IsFalse(string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
                 AssertSingedHttpRequestClaims(provider, claims);
             }
         }
@@ -607,7 +607,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // access token parsing can be done with MSAL's id token parsing logic
                 var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
 
-                Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
+                Assert.IsFalse(string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
                 AssertSingedHttpRequestClaims(provider, claims);
             }
         }
@@ -675,7 +675,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Assert
                 Assert.AreEqual("PS256", provider.CryptographicAlgorithm);
-                Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
+                Assert.IsFalse(string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
                 AssertSingedHttpRequestClaims(provider, claims);
             }
         }

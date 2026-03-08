@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     () => SilentAsync(_appB, ServerTokenResponse.OtherError)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.InvalidGrantError, ex.ErrorCode);
-                Assert.IsTrue(!String.IsNullOrEmpty(ex.CorrelationId));
+                Assert.IsFalse(String.IsNullOrEmpty(ex.CorrelationId));
 
                 // B performs interactive auth and everything goes back to normal - both A and B can silently sing in
                 await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);

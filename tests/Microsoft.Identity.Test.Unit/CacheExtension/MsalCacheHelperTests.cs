@@ -358,7 +358,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
                 .ConfigureAwait(false);
 
             // Assert
-            Assert.AreEqual(ex.ErrorCode, "json_parse_failed");
+            Assert.AreEqual("json_parse_failed", ex.ErrorCode);
             byte[] data = storage.ReadData();
             Assert.IsFalse(data.Any(), "Cache is corrupt, so it should have been deleted");
         }
