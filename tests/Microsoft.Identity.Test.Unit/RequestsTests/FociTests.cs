@@ -253,8 +253,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var tokens = _appA.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
 
-                Assert.IsTrue(
-                    !string.IsNullOrEmpty(tokens.Single().FamilyId),
+                Assert.IsFalse(
+                    string.IsNullOrEmpty(tokens.Single().FamilyId),
                     "The FRT should not be deleted when FOCI is disabled");
 
                 Assert.IsFalse(
