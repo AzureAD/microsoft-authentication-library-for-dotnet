@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id", false);
             Assert.AreEqual(authority.TenantId, actualTenant);
-            Assert.AreEqual(updatedAuthority, authorityUri);
+            Assert.AreEqual(authorityUri, updatedAuthority);
 
             authority = Authority.CreateAuthorityWithTenant(authority.AuthorityInfo, "other_tenant_id_2");
 
