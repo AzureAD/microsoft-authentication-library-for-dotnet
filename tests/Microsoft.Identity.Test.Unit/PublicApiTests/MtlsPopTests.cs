@@ -566,7 +566,6 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        //[Ignore("TODO: Production code validation for non-tenanted authority with mTLS PoP is not yet implemented. See MsalError.MissingTenantedAuthority.")]
         [TestMethod]
         [DataRow("https://login.microsoftonline.com", TestConstants.Common, "Public Cloud")]
         [DataRow("https://login.microsoftonline.com", TestConstants.Organizations, "Public Cloud")]
