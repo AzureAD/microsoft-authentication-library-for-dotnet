@@ -496,7 +496,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.IsFalse(ex.Message.Contains(MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse));
+                Assert.DoesNotContain(MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse, ex.Message);
             }
         }
 
@@ -543,8 +543,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 foreach (var expectedErrorSubString in expectedInErrorResponse)
                 {
-                    Assert.IsTrue(ex.Message.Contains(expectedErrorSubString), 
-                        $"Expected to contain string {expectedErrorSubString}. Actual error message: {ex.Message}");
+                    Assert.Contains(expectedErrorSubString, ex.Message, $"Expected to contain string {expectedErrorSubString}. Actual error message: {ex.Message}");
                 }
             }
         }
@@ -996,7 +995,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         {
                             // Increment identity hits count
                             Interlocked.Increment(ref identityProviderHits);
-                            Assert.IsTrue(identityProviderHits == 1);
+                            Assert.AreEqual(1, identityProviderHits);
                         }
                         else
                         {
@@ -1010,7 +1009,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
                 Debug.WriteLine($"Total Cache Hits: {cacheHits}");
-                Assert.IsTrue(cacheHits == 9);
+                Assert.AreEqual(9, cacheHits);
             }
         }
 
@@ -1244,8 +1243,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var userAssignedTokens = userAssignedMI.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
                 var systemAssignedTokens = systemAssignedMI.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
 
-                Assert.AreEqual(1, userAssignedTokens.Count, "User-assigned cache entry missing.");
-                Assert.AreEqual(1, systemAssignedTokens.Count, "System-assigned cache entry missing.");
+                Assert.HasCount(1, userAssignedTokens, "User-assigned cache entry missing.");
+                Assert.HasCount(1, systemAssignedTokens, "System-assigned cache entry missing.");
 
                 // Verify the ClientId for each cached entry
                 Assert.AreEqual(UserAssignedClientId, userAssignedTokens[0].ClientId, "User-assigned ClientId mismatch in cache.");
@@ -1256,7 +1255,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, 429)] // not defined in HttpStatusCode enum
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, (HttpStatusCode)429)] // not defined in HttpStatusCode enum
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
@@ -1541,7 +1540,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 .WithExtraQueryParameters(secondParams);
 
             // Verify that parameters are merged
-            Assert.AreEqual(4, miBuilder.Config.ExtraQueryParameters.Count);
+            Assert.HasCount(4, miBuilder.Config.ExtraQueryParameters);
     
             // Verify merged values
             Assert.AreEqual("newvalue1", miBuilder.Config.ExtraQueryParameters["param1"]);

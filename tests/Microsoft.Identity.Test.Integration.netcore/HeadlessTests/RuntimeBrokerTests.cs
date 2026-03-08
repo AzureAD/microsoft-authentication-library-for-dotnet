@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode));
             }
             catch (Exception ex)
             {
@@ -201,8 +201,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(ex.Message.Contains("You are trying to acquire a token silently using a login hint. " +
-                    "No account was found in the token cache having this login hint"));
+                Assert.Contains("You are trying to acquire a token silently using a login hint. " + "No account was found in the token cache having this login hint", ex.Message);
             }
         }
 
@@ -482,7 +481,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);
-                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode));
             }
         }
 

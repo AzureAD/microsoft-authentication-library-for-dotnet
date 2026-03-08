@@ -317,7 +317,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     ManagedIdentitySource.Imds : ManagedIdentitySource.AppService;
 
                 //Assert
-                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(expectedResource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
             }
         }
@@ -355,7 +355,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 }).ConfigureAwait(false);
 
                 //Assert
-                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(ManagedIdentitySource.AppService.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
             }
         }

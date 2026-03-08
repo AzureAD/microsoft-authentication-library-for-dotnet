@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit
                     if (expectedX5C != null)
                     {
                         Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-                        Assert.AreEqual(x5c.Value.ToString(), expectedX5C);
+                        Assert.AreEqual(expectedX5C, x5c.Value.ToString());
                     }
                     else
                     {
@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Test.Unit
             var x5c = assertionJwt.Header.FirstOrDefault(header => header.Key == "x5c");
 
             Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-            Assert.AreEqual(x5c.Value.ToString(), expectedX5cValue);
+            Assert.AreEqual(expectedX5cValue, x5c.Value.ToString());
 
             return assertionJwt;
         }
@@ -608,7 +608,7 @@ namespace Microsoft.Identity.Test.Unit
                 appendDefaultClaims = true;
 
             int expectedPayloadClaimsCount = (appendDefaultClaims ? 6 : 0) + (addExtraClaims ? 3 : 0);
-            Assert.AreEqual(expectedPayloadClaimsCount, decodedToken.Payload.Count);
+            Assert.HasCount(expectedPayloadClaimsCount, decodedToken.Payload);
             if (appendDefaultClaims)
             {
                 Assert.AreEqual("aud", decodedToken.Payload["aud"]);
@@ -666,7 +666,7 @@ namespace Microsoft.Identity.Test.Unit
         {
 
             // Wilson is guaranteed to parse the token correctly - use it as baseline
-            Assert.AreEqual(sendX5c ? 4 : 3, decodedToken.Header.Count);
+            Assert.HasCount(sendX5c ? 4 : 3, decodedToken.Header);
             Assert.AreEqual("JWT", decodedToken.Header["typ"]);
             Assert.AreEqual(useSha2AndPss ? "PS256" : "RS256", decodedToken.Header["alg"]);
 
@@ -1083,7 +1083,7 @@ namespace Microsoft.Identity.Test.Unit
                                               .BuildConcrete();
                 });
 
-                Assert.IsTrue(exception.Message.Contains("Value cannot be null"));
+                Assert.Contains("Value cannot be null", exception.Message);
             }
         }
 
@@ -1363,7 +1363,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(JsonValueKind.Array, nwperimidProperty.ValueKind);
                     
                     var arrayElements = nwperimidProperty.EnumerateArray().ToList();
-                    Assert.AreEqual(2, arrayElements.Count);
+                    Assert.HasCount(2, arrayElements);
                     Assert.AreEqual("00000000-1403-0100-0000-000000000000", arrayElements[0].GetString());
                     Assert.AreEqual("00000000-dc4b-4eb1-9fa3-902c8d13b5bd", arrayElements[1].GetString());
                 };

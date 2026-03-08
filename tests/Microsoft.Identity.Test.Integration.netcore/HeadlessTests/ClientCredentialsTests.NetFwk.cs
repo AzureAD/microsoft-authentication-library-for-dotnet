@@ -495,8 +495,8 @@ var confidentialApp = ConfidentialClientApplicationBuilder
             CollectionAssert.AreEquivalent(scopes.ToArray(), appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
             Assert.AreEqual(tenantId, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestTenantId ?? "");
             Assert.AreEqual(tenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
+            Assert.IsGreaterThan(authResult.AuthenticationResultMetadata.DurationTotalInMs, 0);
+            Assert.IsGreaterThan(authResult.AuthenticationResultMetadata.DurationInHttpInMs, 0);
             Assert.AreEqual(
               GetExpectedCacheKey(appConfig.AppId, tenantId),
               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
@@ -511,7 +511,7 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs == 0);
+            Assert.AreEqual(0, authResult.AuthenticationResultMetadata.DurationInHttpInMs);
 
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);

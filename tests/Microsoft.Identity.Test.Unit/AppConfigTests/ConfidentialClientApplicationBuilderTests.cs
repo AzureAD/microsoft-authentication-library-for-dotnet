@@ -41,12 +41,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(TestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNull(cca.AppConfig.ClientName);
             Assert.IsNull(cca.AppConfig.ClientVersion);
-            Assert.AreEqual(false, cca.AppConfig.EnablePiiLogging);
+            Assert.IsFalse(cca.AppConfig.EnablePiiLogging);
             Assert.IsNull(cca.AppConfig.HttpClientFactory);
-            Assert.AreEqual(false, cca.AppConfig.IsDefaultPlatformLoggingEnabled);
+            Assert.IsFalse(cca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(cca.AppConfig.LoggingCallback);
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
-            Assert.AreEqual(null, cca.AppConfig.TenantId);
+            Assert.IsNull(cca.AppConfig.TenantId);
         }
 
         private ConfidentialClientApplicationOptions CreateConfidentialClientApplicationOptions()
@@ -477,7 +477,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                    .Build();
 
             var instanceDiscoveryMetadata = (cca.AppConfig as ApplicationConfiguration).CustomInstanceDiscoveryMetadata;
-            Assert.AreEqual(2, instanceDiscoveryMetadata.Metadata.Length);
+            Assert.HasCount(2, instanceDiscoveryMetadata.Metadata);
         }
 
         [TestMethod]
@@ -490,7 +490,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithClientSecret("cats")
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
-            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+            Assert.AreEqual(MsalError.ValidateAuthorityOrCustomMetadata, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -501,7 +501,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithClientSecret("cats")
                                                   .Build());
 
-            Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
+            Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
         }
 
         [TestMethod]

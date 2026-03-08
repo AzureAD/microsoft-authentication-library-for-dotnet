@@ -2,20 +2,6 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
   <PropertyGroup>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <!-- Suppress MSTest v4 analyzer diagnostics deferred to later migration phases:
-         MSTEST0001: Parallelization configuration (Phase 4)
-         MSTEST0014: DataRow argument types (pre-existing, no behavioral change)
-         MSTEST0017: Assertion argument order (Phase 3)
-         MSTEST0023: Do not negate boolean assertions (Phase 3)
-         MSTEST0025: Use Assert.Fail instead of always-failing IsFalse (Phase 3)
-         MSTEST0032: Assertion condition always true (Phase 3)
-         MSTEST0037: Use newer assertion methods (Phase 3)
-         MSTEST0040: Assert inside async void (pre-existing pattern)
-         MSTEST0042: Duplicate DataRow attributes (pre-existing)
-         MSTEST0044: DataTestMethod obsolete - replaced via global rename
-         MSTEST0045: CooperativeCancellation with Timeout (Phase 4)
-         MSTEST0052: DynamicDataSourceType argument (Phase 3) -->
-    <NoWarn>$(NoWarn);MSTEST0001;MSTEST0014;MSTEST0017;MSTEST0023;MSTEST0025;MSTEST0032;MSTEST0037;MSTEST0040;MSTEST0042;MSTEST0044;MSTEST0045;MSTEST0052</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(PipelineType)' == 'OneBranch'">
     <DefineConstants>$(DefineConstants);ONEBRANCH_BUILD</DefineConstants>

@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 var account1 = accounts.First();
                 Assert.AreEqual("sub", account1.HomeAccountId.Identifier);
-                Assert.AreEqual(null, account1.HomeAccountId.TenantId);
+                Assert.IsNull(account1.HomeAccountId.TenantId);
 
                 // This is because of how we've done it in ADFS. Probably doesn't matter what value is used here, as it is not defined for non-Microsoft.
                 Assert.AreEqual("sub", account1.HomeAccountId.ObjectId);
@@ -364,11 +364,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                              .ExecuteAsync())
                              .ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains(
-                                string.Format(
-                                    CultureInfo.InvariantCulture, 
-                                    MsalErrorMessage.MalformedOidcAuthorityFormat, 
-                                    TestConstants.CiamCUDAuthorityMalformed)));
+                Assert.Contains(string.Format( CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, TestConstants.CiamCUDAuthorityMalformed), ex.Message);
 
                 httpManager.AddFailureTokenEndpointResponse(
                 error: "error",
@@ -380,11 +376,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                              .ExecuteAsync())
                              .ConfigureAwait(false);
 
-                Assert.IsTrue(ex.Message.Contains(
-                                string.Format(
-                                    CultureInfo.InvariantCulture,
-                                    MsalErrorMessage.MalformedOidcAuthorityFormat,
-                                    TestConstants.CiamCUDAuthorityMalformed)));
+                Assert.Contains(string.Format( CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, TestConstants.CiamCUDAuthorityMalformed), ex.Message);
             }
         }
 

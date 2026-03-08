@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.InvalidClientAssertion, exception.ErrorCode);
-                Assert.IsTrue(exception.Message.Contains("returned null"));
+                Assert.Contains("returned null", exception.Message);
             }
         }
 
