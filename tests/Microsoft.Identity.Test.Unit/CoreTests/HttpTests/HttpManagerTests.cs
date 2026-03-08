@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             using (var httpManager = new MockHttpManager())
             {
                 var mock = MockHelpers.CreateSuccessTokenResponseMessage();
-                string actualResponseBody = mock.Content.ReadAsStringAsync().Result;
+                string expectedResponseBody = mock.Content.ReadAsStringAsync().Result;
                 httpManager.AddResponseMockHandlerForPost(mock);
 
                 var response = await httpManager.SendRequestAsync(
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-                Assert.AreEqual(actualResponseBody, response.Body);
+                Assert.AreEqual(expectedResponseBody, response.Body);
             }
         }
 
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             using (var httpManager = new MockHttpManager())
             {
                 var mock = MockHelpers.CreateSuccessTokenResponseMessage();
-                string actualResponseBody = mock.Content.ReadAsStringAsync().Result;
+                string expectedResponseBody = mock.Content.ReadAsStringAsync().Result;
 
                 httpManager.AddResponseMockHandlerForPost(mock, bodyParameters, headers);
 
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-                Assert.AreEqual(actualResponseBody, response.Body);
+                Assert.AreEqual(expectedResponseBody, response.Body);
             }
         }
 

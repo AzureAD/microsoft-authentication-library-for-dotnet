@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Test.Unit
                     var authHeader = request.Headers.Authorization?.ToString();
 
                     // Check value of pkeyAuth header.
-                    Assert.AreEqual(authHeader, TestConstants.PKeyAuthResponse);
+                    Assert.AreEqual(TestConstants.PKeyAuthResponse, authHeader);
                 }
             };
         }
