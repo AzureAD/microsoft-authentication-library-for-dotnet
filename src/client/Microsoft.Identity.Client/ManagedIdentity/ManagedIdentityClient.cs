@@ -64,9 +64,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source. " + 
                     $"Discovery cached: {s_cachedSourceResult != null}");
 
-                // Check for cancellation before potentially expensive operations
-                // (e.g., network calls in token acquisition) to fail fast if the
-                // caller has already requested cancellation.
+                // Fail fast if cancellation was requested, before performing expensive network probes
                 cancellationToken.ThrowIfCancellationRequested();
 
                 ManagedIdentitySource source;
