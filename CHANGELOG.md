@@ -20,13 +20,13 @@
 * **Client Credentials Tenant ID**: Updated result to properly pass tenant ID in client credentials flow [#5754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5754)
 * **Experimental Flag Removal**: Removed experimental flag requirement from `IAuthenticationOperation` and `WithAuthenticationExtension` [#5699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5699)
 * **OpenTelemetry Exception Handling**: Expanded OTel exception handling for Azure Functions compatibility [#5720](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5720)
-* **ICustomWebUI Security Warning**: Added security warnings to `ICustomWebUI` documentation [#5704](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5704)
+* **ICustomWebUi Security Warning**: Added security warnings to `ICustomWebUi` documentation [#5704](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5704)
 
 ### Infrastructure & Dependencies
 
 * **GitHub Actions Workflow**: Added GitHub Actions workflow for Managed Identity WebAPI automated build and deployment to Azure [#5751](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5751)
 * **.NET SDK Security Update**: Updated .NET SDK from version 8.0.415 to 8.0.418 to address high severity security vulnerabilities [#5779](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5779) [#5783](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5783)
-  
+
 4.82.1
 ======
 
