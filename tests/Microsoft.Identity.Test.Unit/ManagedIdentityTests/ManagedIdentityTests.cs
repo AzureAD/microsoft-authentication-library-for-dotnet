@@ -1468,6 +1468,55 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public void ImdsEndpointCache_ResetBetweenTests_ProperlyReevaluatesEnvironmentVariable()
+        {
+            // Simulate a first "test" that sets a custom AZURE_POD_IDENTITY_AUTHORITY_HOST
+            string firstEndpoint = "http://custom-imds-host-1.example.com";
+            string secondEndpoint = "http://custom-imds-host-2.example.com";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                // First "test" run: set the environment variable and build request context
+                using (new EnvVariableContext())
+                {
+                    Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", firstEndpoint);
+
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                        .WithHttpManager(httpManager);
+                    var managedIdentityApp = miBuilder.BuildConcrete();
+                    var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+
+                    // Build the IMDS source; this caches s_cachedBaseEndpoint to firstEndpoint
+                    var imdsSource = new ImdsManagedIdentitySource(requestContext);
+
+                    // Verify the first endpoint is cached
+                    Uri firstUri = ImdsManagedIdentitySource.GetValidatedEndpoint(
+                        requestContext.Logger, ImdsManagedIdentitySource.ImdsTokenPath);
+                    StringAssert.StartsWith(firstUri.ToString(), firstEndpoint);
+                }
+
+                // Simulate test cleanup (as TestBase.TestInitialize calls ResetStateForTest)
+                ApplicationBase.ResetStateForTest();
+
+                // Second "test" run: change the environment variable
+                using (new EnvVariableContext())
+                {
+                    Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", secondEndpoint);
+
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                        .WithHttpManager(httpManager);
+                    var managedIdentityApp = miBuilder.BuildConcrete();
+                    var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+
+                    // After ResetStateForTest, the cache should be cleared and the new env var should be picked up
+                    Uri secondUri = ImdsManagedIdentitySource.GetValidatedEndpoint(
+                        requestContext.Logger, ImdsManagedIdentitySource.ImdsTokenPath);
+                    StringAssert.StartsWith(secondUri.ToString(), secondEndpoint);
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task ManagedIdentityWithExtraQueryParametersTestAsync()
         {
             using (new EnvVariableContext())
