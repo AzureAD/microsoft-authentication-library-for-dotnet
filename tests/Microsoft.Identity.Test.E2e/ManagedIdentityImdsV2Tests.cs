@@ -100,13 +100,9 @@ namespace Microsoft.Identity.Test.E2E
                 Assert.Inconclusive($"Cryptographic operation failed. Credential Guard may not be properly configured: {ex.Message}");
             }
         }
-
         #endregion
 
         #region AKV mTLS PoP Tests
-
-        #region AKV mTLS PoP Tests
-
         /// <summary>
         /// Tests mTLS PoP token acquisition and Azure Key Vault resource call with attestation.
         /// </summary>
@@ -115,6 +111,11 @@ namespace Microsoft.Identity.Test.E2E
         [TestMethod]
         public async Task AcquireTokenAndCallAKV_OnImdsV2_MtlsPoP_WithAttestation_Succeeds()
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
+            }
+            
             var mi = BuildMi();
             const string akvScope = "https://vault.azure.net";
             const string akvSecretUrl = "https://mtlstb.vault.azure.net/secrets/boundsecret?api-version=7.3";
