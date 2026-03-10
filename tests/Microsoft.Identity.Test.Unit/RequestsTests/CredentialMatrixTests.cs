@@ -342,20 +342,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task CredentialMaterial_NullTokenRequestParameters_ThrowsInvalidOperationExceptionAsync()
+        public void CredentialMaterial_NullTokenRequestParameters_ThrowsInvalidOperationException()
         {
-            // This tests that CredentialMaterial rejects null TokenRequestParameters at construction time.
-            await Task.CompletedTask.ConfigureAwait(false); // keep async pattern
-
+            // CredentialMaterial rejects null TokenRequestParameters at construction time.
             Assert.ThrowsException<InvalidOperationException>(
                 () => new CredentialMaterial(null, CredentialSource.Static));
         }
 
         [TestMethod]
-        public async Task CredentialMaterial_EmptyTokenRequestParameters_IsValidAsync()
+        public void CredentialMaterial_EmptyTokenRequestParameters_IsValid()
         {
-            await Task.CompletedTask.ConfigureAwait(false); // keep async pattern
-
             // Empty dictionary (e.g. for mTLS cert credential in MtlsMode) is explicitly allowed.
             var material = new CredentialMaterial(
                 new Dictionary<string, string>(),
