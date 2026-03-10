@@ -2,8 +2,8 @@
 ======
 
 ### Bug Fixes
+
 - Fix IMDS endpoint cache not being reset during test cleanup [#5830](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5830)
-  
 4.83.0
 ======
 
