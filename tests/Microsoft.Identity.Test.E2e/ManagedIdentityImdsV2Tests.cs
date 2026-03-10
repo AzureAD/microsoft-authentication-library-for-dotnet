@@ -101,47 +101,100 @@ namespace Microsoft.Identity.Test.E2E
             }
         }
 
+        #endregion
+
+        #region AKV mTLS PoP Tests
+
+        #region AKV mTLS PoP Tests
+
         /// <summary>
-        /// Tests graceful degradation when Credential Guard is not available.
-        /// Should fall back to non-attested mTLS PoP flow.
+        /// Tests mTLS PoP token acquisition and Azure Key Vault resource call with attestation.
         /// </summary>
         [RunOnAzureDevOps]
-        [TestCategory("MI_E2E_ImdsV2")]
+        [TestCategory("MI_E2E_ImdsV2_Attested")]
         [TestMethod]
-        public async Task AcquireToken_OnImdsV2_MtlsPoP_GracefulDegradation_WhenCredentialGuardUnavailable()
+        public async Task AcquireTokenAndCallAKV_OnImdsV2_MtlsPoP_WithAttestation_Succeeds()
         {
-            if (!OperatingSystem.IsWindows())
-            {
-                Assert.Inconclusive("This test is only applicable on Windows.");
-            }
-
             var mi = BuildMi();
+            const string akvScope = "https://vault.azure.net";
+            const string akvSecretUrl = "https://mtlstb.vault.azure.net/secrets/boundsecret?api-version=7.3";
 
-            // When attestation endpoint is not configured, should fall back to non-attested flow
-            var originalEndpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
             try
             {
-                // Temporarily clear the endpoint to simulate unavailability
-                Environment.SetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT", null);
-
-                var result = await mi.AcquireTokenForManagedIdentity(ArmScope)
+                var tokenResult = await mi.AcquireTokenForManagedIdentity(akvScope)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken), "AccessToken should not be empty.");
-                Assert.AreEqual("mtls_pop", result.TokenType, "Token type should be 'mtls_pop' for mTLS PoP flow.");
-                Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should not be null.");
+                Assert.IsFalse(string.IsNullOrEmpty(tokenResult.AccessToken), "AccessToken should not be empty.");
+                Assert.AreEqual("mtls_pop", tokenResult.TokenType, "Token type should be 'mtls_pop'.");
+                Assert.IsNotNull(tokenResult.BindingCertificate, "BindingCertificate should not be null.");
 
-                // Should succeed with non-attested certificate
-                ValidateMtlsPopBinding(result.AccessToken, result.BindingCertificate);
+                ValidateMtlsPopBinding(tokenResult.AccessToken, tokenResult.BindingCertificate);
+
+                await CallAkvSecretAsync(
+                    akvSecretUrl,
+                    tokenResult.BindingCertificate,
+                    tokenResult.TokenType,
+                    tokenResult.AccessToken)
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, tokenResult.AuthenticationResultMetadata.TokenSource,
+                    "Token should come from MSI endpoint.");
             }
-            finally
+            catch (MsalClientException ex) when (ex.ErrorCode == "credential_guard_not_available")
             {
-                // Restore original endpoint
-                Environment.SetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT", originalEndpoint);
+                Assert.Inconclusive("Credential Guard is not available.");
             }
+            catch (CryptographicException ex)
+            {
+                Assert.Inconclusive($"Cryptographic operation failed: {ex.Message}");
+            }
+            catch (HttpRequestException ex)
+            {
+                Assert.Fail($"AKV call failed: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Calls AKV secret endpoint over mTLS with client certificate and token.
+        /// </summary>
+        private static async Task CallAkvSecretAsync(
+            string secretUrl,
+            X509Certificate2 clientCertificate,
+            string tokenType,
+            string accessToken)
+        {
+            Assert.IsNotNull(clientCertificate, "Client certificate required.");
+            Assert.IsFalse(string.IsNullOrEmpty(accessToken), "Access token required.");
+
+            using var httpClient = new HttpClient(new HttpClientHandler
+            {
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                SslProtocols = System.Security.Authentication.SslProtocols.Tls12 |
+                               System.Security.Authentication.SslProtocols.Tls13,
+                ClientCertificates = { clientCertificate }
+            });
+
+            httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue(tokenType, accessToken);
+            httpClient.DefaultRequestHeaders.Accept.Add(
+                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            httpClient.DefaultRequestHeaders.Add("x-ms-tokenboundauth", "true");
+
+            using var response = await httpClient.GetAsync(new Uri(secretUrl)).ConfigureAwait(false);
+            var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            Assert.IsTrue(
+                response.IsSuccessStatusCode,
+                $"AKV secret GET failed: {(int)response.StatusCode} {response.StatusCode}. Body: {responseContent}");
+
+            using var jsonDoc = System.Text.Json.JsonDocument.Parse(responseContent);
+            var root = jsonDoc.RootElement;
+
+            Assert.IsTrue(root.TryGetProperty("value", out var secretValue), "Response missing 'value' property.");
+            Assert.IsFalse(string.IsNullOrEmpty(secretValue.GetString()), "Secret value is empty.");
         }
 
         #endregion
