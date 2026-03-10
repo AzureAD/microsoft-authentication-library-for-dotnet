@@ -1,1 +1,1 @@
-Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.cancellationToken.get -> System.Threading.CancellationToken
+Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.cancellationToken.get -> System.Threading.CancellationTokenconst Microsoft.Identity.Client.MsalError.InvalidCredentialMaterial = "invalid_credential_material" -> string

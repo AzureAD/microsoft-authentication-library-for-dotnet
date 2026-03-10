@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.OAuth2.Throttling;
@@ -129,22 +130,32 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
-            if (_serviceBundle.Config.ClientCredential != null)
+            IClientCredential credentialToUse = _requestParams.RequestContext.ServiceBundle.Config.ClientCredential;
+            if (credentialToUse != null)
             {
                 _requestParams.RequestContext.Logger.Verbose(
-                    () => "[TokenClient] Before adding the client assertion / secret");
+                    () => "[TokenClient] Before resolving credential material");
 
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
-                await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
-                    _oAuth2Client,
+                CredentialMaterial material = await Internal.ClientCredential.CredentialMaterialResolver.ResolveAsync(
+                    credentialToUse,
                     _requestParams,
-                    _serviceBundle.PlatformProxy.CryptographyManager,
                     tokenEndpoint,
                     cancellationToken).ConfigureAwait(false);
 
+                foreach (var kvp in material.TokenRequestParameters)
+                {
+                    _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
+                }
+
+                if (material.ResolvedCertificate != null)
+                {
+                    _requestParams.ResolvedCertificate = material.ResolvedCertificate;
+                }
+
                 _requestParams.RequestContext.Logger.Verbose(
-                    () => "[TokenClient] After adding the client assertion / secret");
+                    () => "[TokenClient] After resolving credential material");
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
