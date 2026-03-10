@@ -1,1 +1,14 @@
+Microsoft.Identity.Client.AcquireTokenForAgentOnBehalfOfUserParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForAgentOnBehalfOfUserParameterBuilder.ExecuteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
+Microsoft.Identity.Client.AcquireTokenForAgentOnBehalfOfUserParameterBuilder.WithCorrelationId(System.Guid correlationId) -> Microsoft.Identity.Client.AcquireTokenForAgentOnBehalfOfUserParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForAgentOnBehalfOfUserParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenForAgentOnBehalfOfUserParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder.ExecuteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
+Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder.WithCorrelationId(System.Guid correlationId) -> Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.cancellationToken.get -> System.Threading.CancellationToken
+Microsoft.Identity.Client.ConfidentialClientApplication.AcquireTokenForAgent(string agentId, System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
+Microsoft.Identity.Client.ConfidentialClientApplication.AcquireTokenForAgentOnBehalfOfUser(string agentId, System.Collections.Generic.IEnumerable<string> scopes, string userPrincipalName) -> Microsoft.Identity.Client.AcquireTokenForAgentOnBehalfOfUserParameterBuilder
+Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithFederatedCredentialAudience(string audience) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+Microsoft.Identity.Client.IConfidentialClientApplication.AcquireTokenForAgent(string agentId, System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
+Microsoft.Identity.Client.IConfidentialClientApplication.AcquireTokenForAgentOnBehalfOfUser(string agentId, System.Collections.Generic.IEnumerable<string> scopes, string userPrincipalName) -> Microsoft.Identity.Client.AcquireTokenForAgentOnBehalfOfUserParameterBuilder

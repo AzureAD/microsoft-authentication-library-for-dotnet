@@ -454,6 +454,23 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Sets the audience URL used when acquiring Federated Identity Credentials (FIC) for agentic flows.
+        /// Defaults to <c>api://AzureADTokenExchange/.default</c>. Override for airgapped or sovereign clouds.
+        /// </summary>
+        /// <param name="audience">The FIC audience URL.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        public ConfidentialClientApplicationBuilder WithFederatedCredentialAudience(string audience)
+        {
+            if (string.IsNullOrWhiteSpace(audience))
+            {
+                throw new ArgumentNullException(nameof(audience));
+            }
+
+            Config.FederatedCredentialAudience = audience;
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override void Validate()
         {
