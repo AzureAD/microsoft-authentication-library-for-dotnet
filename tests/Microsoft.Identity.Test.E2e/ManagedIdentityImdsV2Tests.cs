@@ -177,6 +177,9 @@ namespace Microsoft.Identity.Test.E2E
                 Assert.AreEqual("mtls_pop", tokenResult.TokenType, "Token type should be 'mtls_pop'.");
                 Assert.IsNotNull(tokenResult.BindingCertificate, "BindingCertificate should not be null.");
 
+                // Validate the certificate is backed by Credential Guard (RSACng with proper properties)
+                ValidateCredentialGuardCertificate(tokenResult.BindingCertificate);
+
                 ValidateMtlsPopBinding(tokenResult.AccessToken, tokenResult.BindingCertificate);
 
                 await CallAkvSecretAsync(
