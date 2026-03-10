@@ -1098,6 +1098,7 @@ Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation2.ValidateCachedTok
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.MsalCacheValidationData() -> void
 Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.PersistedCacheParameters.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.CancellationToken.get -> System.Threading.CancellationToken
 Microsoft.Identity.Client.AssertionRequestOptions.Authority.get -> string
 Microsoft.Identity.Client.AssertionRequestOptions.Authority.set -> void
 Microsoft.Identity.Client.AssertionRequestOptions.TenantId.get -> string
@@ -1132,4 +1133,3 @@ static Microsoft.Identity.Client.ManagedIdentityPopExtensions.WithMtlsProofOfPos
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAttributes(string attributeJson) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.AssertionRequestOptions, System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2>> certificateProvider, Microsoft.Identity.Client.AppConfig.CertificateOptions certificateOptions) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 const Microsoft.Identity.Client.MsalError.MtlsPopNotSupportedForEnvironment = "mtls_pop_not_supported_for_environment" -> string
-Microsoft.Identity.Client.AuthScheme.MsalCacheValidationData.cancellationToken.get -> System.Threading.CancellationToken
