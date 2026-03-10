@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -27,7 +26,7 @@ namespace Microsoft.Identity.Test.E2E
     {
         private const string GraphResource = "https://graph.microsoft.com";
         private const string AkvResource = "https://vault.azure.net";
-        private const string AkvSecretUrl = "https://mtlstb.vault.azure.net/secrets/boundsecret?api-version=7.3";
+        private const string AkvSecretUrl = "https://tokenbinding.vault.azure.net/secrets/boundsecret/?api-version=2015-06-01";
 
         // UAMI identifiers for MSALMSIV2 pool
         private const string UamiClientId = "6325cd32-9911-41f3-819c-416cdf9104e7";
