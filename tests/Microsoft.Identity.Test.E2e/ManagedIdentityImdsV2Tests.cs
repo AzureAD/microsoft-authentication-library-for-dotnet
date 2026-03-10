@@ -105,8 +105,6 @@ namespace Microsoft.Identity.Test.E2E
 
         #region AKV mTLS PoP Tests
 
-        #region AKV mTLS PoP Tests
-
         /// <summary>
         /// Tests mTLS PoP token acquisition and Azure Key Vault resource call with attestation.
         /// </summary>
