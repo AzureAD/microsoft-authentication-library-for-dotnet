@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     ///   Row 6  – SignedAssertion (static) + MtlsMode → MsalClientException
     ///   Row 7  – JWT callback (string) + Regular → JWT-bearer assertion
     ///   Row 8  – JWT callback (string) + MtlsMode → MsalClientException
-    ///   Row 9  – JWT+cert callback + Regular → JWT-bearer assertion + ResolvedCertificate
+    ///   Row 9  – JWT+cert callback + Regular → JWT-PoP assertion + ResolvedCertificate
     ///   Row 10 – JWT+cert callback + MtlsMode → JWT-PoP assertion + ResolvedCertificate
     /// Plus additional edge-case tests: null certificate, empty assertion, null-result validation.
     /// </summary>

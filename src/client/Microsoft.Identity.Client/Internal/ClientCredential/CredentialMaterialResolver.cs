@@ -11,10 +11,11 @@ using Microsoft.Identity.Client.OAuth2;
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     /// <summary>
-    /// Central authority for credential invocation.
-    /// Builds a <see cref="CredentialContext"/> from the active request, invokes the credential
-    /// exactly once, and validates the returned <see cref="CredentialMaterial"/> before handing
-    /// it back to the <see cref="TokenClient"/>.
+    /// Central authority for invoking <see cref="IClientCredential.GetCredentialMaterialAsync"/>.
+    /// Builds a <see cref="CredentialContext"/> from the active request, invokes
+    /// <see cref="IClientCredential.GetCredentialMaterialAsync"/> exactly once, and validates
+    /// the returned <see cref="CredentialMaterial"/> before handing it back to the
+    /// <see cref="TokenClient"/>.
     /// </summary>
     internal static class CredentialMaterialResolver
     {
