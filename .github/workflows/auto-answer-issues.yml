@@ -14,7 +14,7 @@ jobs:
     # Only run for issues created by org members or owners (i.e., Microsoft Open Source enterprise members).
     # github.event.issue.author_association is set by GitHub based on the issue author's relationship
     # to this repository. MEMBER = org member, OWNER = repo/org owner. This prevents untrusted
-    # external contributors from triggering the OpenAI-backed responder and consuming secrets/tokens.
+    # external contributors from triggering the Azure OpenAI-backed responder and consuming secrets/tokens.
     if: |
       github.event.issue.author_association == 'MEMBER' ||
       github.event.issue.author_association == 'OWNER' ||
@@ -35,7 +35,10 @@ jobs:
       - name: Generate and post response
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+          AZURE_OPENAI_API_VERSION: "2024-12-01-preview"
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
@@ -44,12 +47,15 @@ jobs:
         run: |
           node - << 'EOF'
           const { Octokit } = require("@octokit/rest");
-          const OpenAI = require("openai");
+          const { AzureOpenAI } = require("openai");
           
           async function main() {
             const {
               GITHUB_TOKEN,
-              OPENAI_API_KEY,
+              AZURE_OPENAI_API_KEY,
+              AZURE_OPENAI_ENDPOINT,
+              AZURE_OPENAI_DEPLOYMENT,
+              AZURE_OPENAI_API_VERSION,
               ISSUE_NUMBER,
               ISSUE_TITLE,
               ISSUE_BODY,
@@ -60,8 +66,14 @@ jobs:
             if (!GITHUB_TOKEN) {
               throw new Error("GITHUB_TOKEN is not set.");
             }
-            if (!OPENAI_API_KEY) {
-              throw new Error("OPENAI_API_KEY is not set.");
+            if (!AZURE_OPENAI_API_KEY) {
+              throw new Error("AZURE_OPENAI_API_KEY is not set.");
+            }
+            if (!AZURE_OPENAI_ENDPOINT) {
+              throw new Error("AZURE_OPENAI_ENDPOINT is not set.");
+            }
+            if (!AZURE_OPENAI_DEPLOYMENT) {
+              throw new Error("AZURE_OPENAI_DEPLOYMENT is not set.");
             }
             if (!ISSUE_NUMBER || !REPO_OWNER || !REPO_NAME) {
               throw new Error("Required issue/repository environment variables are missing.");
@@ -72,7 +84,12 @@ jobs:
             const body = ISSUE_BODY || "";
           
             const octokit = new Octokit({ auth: GITHUB_TOKEN });
-            const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+            const openai = new AzureOpenAI({
+              apiKey: AZURE_OPENAI_API_KEY,
+              endpoint: AZURE_OPENAI_ENDPOINT,
+              deployment: AZURE_OPENAI_DEPLOYMENT,
+              apiVersion: AZURE_OPENAI_API_VERSION
+            });
           
             const prompt = `
 You are a helpful GitHub assistant. An issue has been opened in the repository \`${REPO_OWNER}/${REPO_NAME}\`.
@@ -91,7 +108,7 @@ Please write a concise, friendly reply that:
 `;
           
             const completion = await openai.chat.completions.create({
-              model: "gpt-4.1-mini",
+              model: AZURE_OPENAI_DEPLOYMENT,
               messages: [
                 { role: "system", content: "You are a helpful assistant for triaging GitHub issues." },
                 { role: "user", content: prompt }
@@ -100,7 +117,7 @@ Please write a concise, friendly reply that:
           
             const reply = (completion.choices[0]?.message?.content || "").trim();
             if (!reply) {
-              throw new Error("OpenAI returned an empty response.");
+              throw new Error("Azure OpenAI returned an empty response.");
             }
           
             await octokit.issues.createComment({
