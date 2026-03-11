@@ -24,7 +24,6 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Test.Unit.Helpers;
 using System.Net;
 using System.Security.Cryptography;
