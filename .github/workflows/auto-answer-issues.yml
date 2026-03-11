@@ -46,10 +46,11 @@ jobs:
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
           node - << 'EOF'
-          const { Octokit } = require("@octokit/rest");
-          const { AzureOpenAI } = require("openai");
-          
           async function main() {
+            // Use dynamic import() for ESM-only packages (openai v4+ and @octokit/rest v19+
+            // are ESM-only; dynamic import() works from CommonJS in Node 20).
+            const { Octokit } = await import("@octokit/rest");
+            const { AzureOpenAI } = await import("openai");
             const {
               GITHUB_TOKEN,
               AZURE_OPENAI_API_KEY,
