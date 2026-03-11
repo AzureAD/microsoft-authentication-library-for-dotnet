@@ -40,6 +40,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private static string s_cachedBaseEndpoint = null;
 
+        internal static void ResetEndpointCacheForTest()
+        {
+            s_cachedBaseEndpoint = null;
+        }
+
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
             return new ImdsManagedIdentitySource(requestContext);
