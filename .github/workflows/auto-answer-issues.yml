@@ -84,6 +84,22 @@ jobs:
             const body = ISSUE_BODY || "";
           
             const octokit = new Octokit({ auth: GITHUB_TOKEN });
+
+            // Check if the bot has already commented on this issue to avoid duplicate responses.
+            const comments = await octokit.paginate(octokit.issues.listComments, {
+              owner: REPO_OWNER,
+              repo: REPO_NAME,
+              issue_number: issueNumber,
+              per_page: 100
+            });
+            const botAlreadyCommented = comments.some(
+              (comment) => comment.user?.login === "github-actions[bot]"
+            );
+            if (botAlreadyCommented) {
+              console.log("Bot has already commented on this issue. Skipping.");
+              return;
+            }
+
             const openai = new AzureOpenAI({
               apiKey: AZURE_OPENAI_API_KEY,
               endpoint: AZURE_OPENAI_ENDPOINT,
