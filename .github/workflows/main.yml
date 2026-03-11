@@ -11,8 +11,13 @@ permissions:
 jobs:
   answer-issue:
     runs-on: ubuntu-latest
-    # Optional: only run for issues with a specific label
-    # if: contains(github.event.issue.labels.*.name, 'question')
+    # Only run for issues created by org members or owners (i.e., Microsoft Open Source enterprise members).
+    # github.event.issue.author_association is set by GitHub based on the issue author's relationship
+    # to this repository. MEMBER = org member, OWNER = repo/org owner. This prevents untrusted
+    # external contributors from triggering the OpenAI-backed responder and consuming secrets/tokens.
+    if: |
+      github.event.issue.author_association == 'MEMBER' ||
+      github.event.issue.author_association == 'OWNER'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
