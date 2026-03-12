@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             catch (Exception e)
             { 
                 requestContext.Logger.Warning(
-                    $"[Instance Discovery] Instance Discovery failed. MSAL will continue without instance metadata. \n\r" +
+                    $"[Instance Discovery] Instance discovery failed. MSAL will continue using fallback (non network-discovered) instance metadata. \n\r" +
                     $" Exception: {e} ");
 
                 var fallbackEntry =

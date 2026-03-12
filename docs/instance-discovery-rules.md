@@ -71,12 +71,35 @@ MSAL maintains a static, hardcoded list of known cloud environments and their me
 
 ---
 
-## 4. Discovery Endpoint Selection
+## 4. User-Supplied Overrides
+
+MSAL provides two APIs for callers to override the default instance discovery behavior.
+
+### 4.1 User-Supplied Instance Metadata (`WithInstanceDiscoveryMetadata(string json)`)
+
+Callers can supply a complete pre-fetched instance discovery response as a JSON string (matching the format returned by the AAD instance discovery endpoint).
+
+**Effect**: When this is set, the user-supplied metadata **completely short-circuits all other providers**. The `UserMetadataProvider` is consulted first in every resolution flow (§5). If the authority environment is found in the user-supplied metadata, that entry is used. If the environment is **not** found, an exception is thrown immediately (fail-fast) rather than falling back to the network.
+
+**Use case**: Microservice/service environments where a shared discovery cache is pre-fetched and distributed out-of-band.
+
+### 4.2 User-Supplied Discovery URI (`WithInstanceDiscoveryMetadata(Uri instanceDiscoveryUri)`)
+
+Callers can supply a custom URI to use as the instance discovery endpoint instead of the AAD default.
+
+**Effect**: When this is set, the network call in §5 goes to this URI instead of computing the host based on the authority (see §5 Discovery Endpoint Selection). The user-supplied URI completely replaces the default endpoint — both for known and unknown cloud environments.
+
+**Use case**: Organizations that operate their own instance discovery service.
+
+---
+
+## 5. Discovery Endpoint Selection
 
 When a network call is needed, MSAL must choose which host to call:
 
-| Authority Host | Discovery Endpoint Host |
+| Condition | Discovery Endpoint Used |
 |---|---|
+| User supplied a discovery URI (`WithInstanceDiscoveryMetadata(Uri)`) | The user-supplied URI (verbatim, no modification) |
 | Known environment (e.g., `login.microsoftonline.com`) | Same host: `https://{authority_host}/common/discovery/instance` |
 | Unknown environment (e.g., `login.microsoft.new`) | Fallback to default trusted host: `https://login.microsoftonline.com/common/discovery/instance` |
 
@@ -89,13 +112,16 @@ GET https://{discovery_host}/common/discovery/instance
 
 ---
 
-## 5. Provider Resolution Order
+## 6. Provider Resolution Order
 
-### 5.1 Full Flow (GetMetadataEntryAsync — used during token acquisition)
+### 6.1 Full Flow (GetMetadataEntryAsync — used during token acquisition)
 
 Providers are consulted in strict priority order. The first non-null result wins.
 
 ```
+0. [User-supplied metadata provider (WithInstanceDiscoveryMetadata(string))]
+   → If set: return entry for authority, or THROW if not found. STOP.
+
 1. [If instance discovery is disabled (WithInstanceDiscovery(false))]
    → Check region discovery provider (regions are not affected by the disable flag)
    → If still null, return self-entry. STOP.
@@ -103,18 +129,22 @@ Providers are consulted in strict priority order. The first non-null result wins
 2. Region discovery provider
 
 3. Network call (FetchNetworkMetadataOrFallback)
+   → Endpoint: per §5 (user-supplied URI overrides default host selection)
    → On success: cache all entries by alias in the network cache
-   → On "invalid_instance" error: see §6
-   → On any other error (404, 502, network failure, etc.): see §7
+   → On "invalid_instance" error: see §7
+   → On any other error (404, 502, network failure, etc.): see §8
 
 4. [If still null] Log warning, create self-entry, cache it in network cache
 ```
 
-### 5.2 Cache-Preferring Flow (GetMetadataEntryTryAvoidNetworkAsync — used during token acquisition with cache check)
+### 6.2 Cache-Preferring Flow (GetMetadataEntryTryAvoidNetworkAsync — used during token acquisition with cache check)
 
 This flow tries to avoid network calls when possible:
 
 ```
+0. [User-supplied metadata provider (WithInstanceDiscoveryMetadata(string))]
+   → If set: return entry for authority, or THROW if not found. STOP.
+
 1. Region discovery provider
 
 2. [If instance discovery is disabled] → return self-entry
@@ -123,12 +153,12 @@ This flow tries to avoid network calls when possible:
 
 4. Known metadata provider (hardcoded, but only if all cached environments are known)
 
-5. Full flow (§5.1)
+5. Full flow (§6.1)
 
 6. [If still null] Return self-entry
 ```
 
-### 5.3 Offline Flow (GetMetadataEntryAvoidNetwork — used for GetAccounts/AcquireTokenSilent)
+### 6.3 Offline Flow (GetMetadataEntryAvoidNetwork — used for GetAccounts/AcquireTokenSilent)
 
 No network calls are ever made:
 
@@ -142,7 +172,7 @@ No network calls are ever made:
 
 ---
 
-## 6. Error Handling: `invalid_instance`
+## 7. Error Handling: `invalid_instance`
 
 When the discovery endpoint returns an `invalid_instance` error (the AAD server-side error `AADSTS50049`), this means the authority genuinely does not exist.
 
@@ -153,7 +183,7 @@ When the discovery endpoint returns an `invalid_instance` error (the AAD server-
 
 ---
 
-## 7. Error Handling: All Other Errors (404, 502, network failures, etc.)
+## 8. Error Handling: All Other Errors (404, 502, network failures, etc.)
 
 When instance discovery fails with any error other than `invalid_instance`:
 
@@ -166,9 +196,9 @@ When instance discovery fails with any error other than `invalid_instance`:
 
 ---
 
-## 8. Caching Rules
+## 9. Caching Rules
 
-### 8.1 Network Cache
+### 9.1 Network Cache
 
 - **Scope**: Static / process-wide (shared across all app instances in the same process).
 - **Key**: Authority host string (case-sensitive).
@@ -178,7 +208,7 @@ When instance discovery fails with any error other than `invalid_instance`:
 - **Eviction**: None. Entries persist for the process lifetime.
 - **Thread safety**: Must be thread-safe (concurrent dictionary or equivalent).
 
-### 8.2 Known Metadata Cache
+### 9.2 Known Metadata Cache
 
 - **Scope**: Static / compiled into the library.
 - **Immutable**: Never modified at runtime.
@@ -186,7 +216,7 @@ When instance discovery fails with any error other than `invalid_instance`:
 
 ---
 
-## 9. Interaction with Regions
+## 10. Interaction with Regions
 
 - Regional discovery (e.g., `centralus.login.microsoft.com`) runs independently of instance discovery.
 - Even when instance discovery is disabled (`WithInstanceDiscovery(false)`), region discovery still runs.
@@ -194,7 +224,7 @@ When instance discovery fails with any error other than `invalid_instance`:
 
 ---
 
-## 10. Interaction with Authority Validation
+## 11. Interaction with Authority Validation
 
 Authority validation is a separate step that runs **after** instance discovery:
 
@@ -205,7 +235,7 @@ Authority validation is a separate step that runs **after** instance discovery:
 
 ---
 
-## 11. Validation Test Matrix
+## 12. Validation Test Matrix
 
 The following test scenarios should be implemented in any MSAL that supports instance discovery. Tests use HTTP mocking (no real network calls).
 
@@ -244,7 +274,7 @@ The following test scenarios should be implemented in any MSAL that supports ins
 - Third `AcquireTokenForClient` (different scope): token acquired from IdP, NO discovery call (fallback is cached).
 
 **HTTP mocks (in order)**:
-1. GET discovery → 404 (or 502)
+1. GET `https://login.microsoftonline.com/common/discovery/instance` → 404 (or 502)
 2. POST token → 200 (success)
 3. POST token → 200 (success) — for the different-scope call
 
@@ -309,16 +339,18 @@ If the SDK makes an unexpected discovery call, the mock framework should fail.
 
 ---
 
-## 12. Implementation Checklist
+## 13. Implementation Checklist
 
 - [ ] Hardcode the known cloud metadata table (§3).
-- [ ] Implement the three resolution flows (§5.1, §5.2, §5.3).
-- [ ] Implement discovery endpoint host selection (§4).
-- [ ] Handle `invalid_instance` separately from other errors (§6 vs §7).
-- [ ] Cache fallback entries on non-`invalid_instance` failures (§7 — critical).
-- [ ] Use a process-wide static cache for network results (§8.1).
-- [ ] Guard known metadata usage by checking all cached environments are known (§8.2).
+- [ ] Implement support for user-supplied instance metadata (`WithInstanceDiscoveryMetadata(string)`) (§4.1).
+- [ ] Implement support for user-supplied discovery URI (`WithInstanceDiscoveryMetadata(Uri)`) (§4.2).
+- [ ] Implement discovery endpoint host selection (§5).
+- [ ] Implement the three resolution flows (§6.1, §6.2, §6.3).
+- [ ] Handle `invalid_instance` separately from other errors (§7 vs §8).
+- [ ] Cache fallback entries on non-`invalid_instance` failures (§8 — critical).
+- [ ] Use a process-wide static cache for network results (§9.1).
+- [ ] Guard known metadata usage by checking all cached environments are known (§9.2).
 - [ ] Support `WithInstanceDiscovery(false)` to disable network discovery.
-- [ ] Ensure region discovery is independent of instance discovery toggle (§9).
+- [ ] Ensure region discovery is independent of instance discovery toggle (§10).
 - [ ] Self-entry: `preferred_network = preferred_cache = aliases = [authority_host]` (§2).
-- [ ] Implement all tests T1–T12 in §11.
+- [ ] Implement all tests T1–T12 in §12.
