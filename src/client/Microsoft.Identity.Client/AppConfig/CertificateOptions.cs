@@ -24,5 +24,57 @@ namespace Microsoft.Identity.Client.AppConfig
         /// by default it is set to <see langword="false"/> /></remarks>
         /// </summary>
         public bool AssociateTokensWithCertificate { get; init; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the certificate should be sent over the mTLS connection 
+        /// for token acquisition (without requiring PoP token type).
+        /// When <see langword="true"/>, the certificate will be sent in the TLS handshake (client certificate authentication)
+        /// while acquiring tokens, which may be standard Bearer tokens or PoP tokens depending on request-level configuration.
+        /// When <see langword="false"/> (default), the certificate is sent as a JWT assertion in the request body.
+        /// </summary>
+        /// <remarks>
+        /// <para><b>Default transport</b>:
+        /// This property sets the DEFAULT transport for requests that do not explicitly call 
+        /// <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession()"/>.
+        /// Request-level <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession()"/> 
+        /// always implies mTLS transport, regardless of this setting.
+        /// </para>
+        /// <para><b>Applicable to certificate credentials only</b>:
+        /// Because <see cref="CertificateOptions"/> is accepted exclusively by
+        /// <see cref="ConfidentialClientApplicationBuilder.WithCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2, CertificateOptions)"/>
+        /// and its overloads, this property is inherently scoped to certificate-based credentials.
+        /// As a defensive measure, <see cref="ConfidentialClientApplicationBuilder.Build()"/> will throw
+        /// <see cref="MsalClientException"/> with error code <c><see cref="MsalError.InvalidCredentialMaterial"/></c>
+        /// if this property is <see langword="true"/> but the configured credential is not certificate-based.
+        /// </para>
+        /// <para><b>AAD authority region requirement</b>:
+        /// When this property is <see langword="true"/> and the authority is an AAD authority (login.microsoftonline.com),
+        /// <see cref="ConfidentialClientApplicationBuilder.WithAzureRegion(string)"/> <b>must</b> also be configured.
+        /// mTLS Bearer token acquisition is routed to a regional endpoint; without a region, token acquisition will fail
+        /// at runtime with error code <c><see cref="MsalError.MtlsBearerWithoutRegion"/></c>.
+        /// Non-AAD authorities (ADFS, B2C, etc.) do not require a region.
+        /// </para>
+        /// <example>
+        /// <code>
+        /// // mTLS Bearer token — note WithAzureRegion is required for AAD authorities
+        /// var options = new CertificateOptions { SendCertificateOverMtls = true };
+        /// var app = ConfidentialClientApplicationBuilder
+        ///     .Create(clientId)
+        ///     .WithAzureRegion("eastus")   // required for AAD when SendCertificateOverMtls = true
+        ///     .WithCertificate(cert, options)
+        ///     .Build();
+        /// 
+        /// var result = await app.AcquireTokenForClient(scopes).ExecuteAsync();
+        /// // Result: Bearer token, certificate sent over mTLS
+        /// 
+        /// // mTLS PoP (also supported with the same app instance)
+        /// var result = await app.AcquireTokenForClient(scopes)
+        ///     .WithMtlsProofOfPossession()
+        ///     .ExecuteAsync();
+        /// // Result: PoP token, certificate sent over mTLS
+        /// </code>
+        /// </example>
+        /// </remarks>
+        public bool SendCertificateOverMtls { get; init; } = false;
     }
 }
