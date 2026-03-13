@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
-            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+            Assert.AreEqual(MsalError.ValidateAuthorityOrCustomMetadata, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithInstanceDiscoveryMetadata(new Uri("https://some_uri.com"))
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
-            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+            Assert.AreEqual(MsalError.ValidateAuthorityOrCustomMetadata, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithInstanceDiscoveryMetadata(new Uri("https://some_uri.com"))
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
-            Assert.AreEqual(ex.ErrorCode, MsalError.CustomMetadataInstanceOrUri);
+            Assert.AreEqual(MsalError.CustomMetadataInstanceOrUri, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithInstanceDiscoveryMetadata("{bad_json_metadata")
                                                   .Build());
 
-            Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
+            Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
         }
 
         [TestMethod]

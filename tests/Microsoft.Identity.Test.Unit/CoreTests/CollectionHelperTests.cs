@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void EmptyStringDictionaryIsImmutable()
         {
             (CollectionHelpers.GetEmptyDictionary<string, string>() as System.Collections.Immutable.ImmutableDictionary<string, string>).Add("k", "v");
-            Assert.IsTrue(!CollectionHelpers.GetEmptyDictionary<string, string>().Any());
+            Assert.IsFalse(CollectionHelpers.GetEmptyDictionary<string, string>().Any());
 
             Assert.IsNull((CollectionHelpers.GetEmptyDictionary<string, string>() as Dictionary<string, string>));
         }

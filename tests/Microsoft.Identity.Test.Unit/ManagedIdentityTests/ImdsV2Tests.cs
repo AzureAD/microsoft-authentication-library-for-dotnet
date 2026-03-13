@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 1
@@ -267,7 +267,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result2.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result2.TokenType);
                 Assert.IsNotNull(result2.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
 
@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result2.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result2.TokenType);
                 Assert.IsNotNull(result2.BindingCertificate);
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 2
@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
@@ -393,7 +393,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.AreEqual(result.TokenType, Bearer);
+                Assert.AreEqual(Bearer, result.TokenType);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 // even though the app fell back to ImdsV1, the source should still be ImdsV2

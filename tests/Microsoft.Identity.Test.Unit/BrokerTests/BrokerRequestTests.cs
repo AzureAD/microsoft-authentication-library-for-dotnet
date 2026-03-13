@@ -118,8 +118,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         Assert.IsNotNull(exc);
                         Assert.AreEqual(MsalError.InteractionRequired, exc.ErrorCode);
                         Assert.AreEqual(MsalErrorMessage.BrokerResponseError + MsalError.InteractionRequired, exc.Message);
-                        Assert.AreEqual(exc.StatusCode, (int)HttpStatusCode.Unauthorized);
-                        Assert.AreEqual(exc.ResponseBody, "SomeBody");
+                        Assert.AreEqual((int)HttpStatusCode.Unauthorized, exc.StatusCode);
+                        Assert.AreEqual("SomeBody", exc.ResponseBody);
                         Assert.IsNotNull(exc.Headers);
                     });
             }
@@ -146,8 +146,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         Assert.IsNotNull(exc);
                         Assert.AreEqual(MsalError.InvalidGrantError, exc.ErrorCode);
                         Assert.AreEqual(MsalErrorMessage.BrokerResponseError + MsalError.InvalidGrantError, exc.Message);
-                        Assert.AreEqual(exc.StatusCode, (int)HttpStatusCode.Unauthorized);
-                        Assert.AreEqual(exc.ResponseBody, "SomeBody");
+                        Assert.AreEqual((int)HttpStatusCode.Unauthorized, exc.StatusCode);
+                        Assert.AreEqual("SomeBody", exc.ResponseBody);
                         Assert.IsNotNull(exc.Headers);
                     });
             }

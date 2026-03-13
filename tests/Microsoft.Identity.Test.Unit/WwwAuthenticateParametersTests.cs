@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Test.Unit
                                     AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponse.Headers));
 
             //Assert
-            Assert.AreEqual(ex.ErrorCode, MsalError.UnableToParseAuthenticationHeader);
+            Assert.AreEqual(MsalError.UnableToParseAuthenticationHeader, ex.ErrorCode);
             Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader + $"Response Headers: {httpResponse.Headers.ToString()} See inner exception for details.");
         }
 
@@ -321,15 +321,15 @@ namespace Microsoft.Identity.Test.Unit
             var httpClient = new HttpClient(handler);
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            Assert.AreEqual(authParams.GetTenantId(), tenantId);
+            Assert.AreEqual(tenantId, authParams.GetTenantId());
 
             authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient, default).ConfigureAwait(false);
 
-            Assert.AreEqual(authParams.GetTenantId(), tenantId);
+            Assert.AreEqual(tenantId, authParams.GetTenantId());
 
             var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, httpClient, default).ConfigureAwait(false);
 
-            Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
+            Assert.AreEqual(tenantId, authParamList.FirstOrDefault().GetTenantId());
         }
 
         [TestMethod]

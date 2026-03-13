@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                             .ExecuteAsync()
                             .ConfigureAwait(false);
-                Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
 
                 const int NumRequests = 2; // initial request + 1 retry
                 int requestsMade = NumRequests - httpManager.QueueSize;
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                             .ExecuteAsync()
                             .ConfigureAwait(false);
-                Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
 
                 const int NumRequests = 2; // initial request + 1 retry
                 int requestsMade = NumRequests - httpManager.QueueSize;

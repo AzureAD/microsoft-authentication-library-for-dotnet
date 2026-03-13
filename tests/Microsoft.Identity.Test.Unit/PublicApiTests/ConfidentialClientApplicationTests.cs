@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
-                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
+                Assert.AreEqual(TestConstants.Utid, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId);
                 string partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid, null);
                 Assert.AreEqual(
                     partitionKey,
@@ -1084,7 +1084,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             else
             {
-                Assert.IsTrue(!qp.ContainsKey(Constants.CcsRoutingHintHeader));
+                Assert.IsFalse(qp.ContainsKey(Constants.CcsRoutingHintHeader));
             }
         }
 
@@ -1671,7 +1671,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.AccessToken, "some-access-token");
+                Assert.AreEqual("some-access-token", result.AccessToken);
 
                 app.UserTokenCacheInternal.Accessor.Clear();
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
@@ -1683,7 +1683,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.AccessToken, "some-access-token");
+                Assert.AreEqual("some-access-token", result.AccessToken);
             }
         }
 

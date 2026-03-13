@@ -490,7 +490,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithClientSecret("cats")
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
-            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+            Assert.AreEqual(MsalError.ValidateAuthorityOrCustomMetadata, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -501,7 +501,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithClientSecret("cats")
                                                   .Build());
 
-            Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
+            Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
         }
 
         [TestMethod]

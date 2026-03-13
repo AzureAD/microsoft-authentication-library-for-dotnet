@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret2, result.AccessToken);
-                Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().FirstOrDefault(at => at.Secret.Equals(TestConstants.ATSecret2));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault(rt => rt.Secret.Equals(TestConstants.RTSecret2));
                 Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);

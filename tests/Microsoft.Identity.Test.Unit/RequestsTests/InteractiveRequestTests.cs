@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count);
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(result.AccessToken, "some-access-token");
+                Assert.AreEqual("some-access-token", result.AccessToken);
             }
         }
 
@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count);
                 Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(result.AccessToken, "some-access-token");
+                Assert.AreEqual("some-access-token", result.AccessToken);
             }
         }
 
@@ -416,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual("https://login.microsoftonline.com/home/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count);
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(result.AccessToken, "some-access-token");
+                Assert.AreEqual("some-access-token", result.AccessToken);
             }
         }
 
