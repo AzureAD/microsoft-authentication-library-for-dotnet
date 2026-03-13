@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityGuidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantIdNumber1 + "/";
         public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantIdNumber2 + "/";
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
-        public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
+        public const string ADFSAuthority = "https://fs.id4slab1.com/adfs/";
         public const string ADFSAuthority2 = "https://someAdfs.com/adfs/";
 
         public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
@@ -639,15 +639,4 @@ namespace Microsoft.Identity.Test.Unit
         #endregion
     }
 
-    internal static class Adfs2019LabConstants
-    {
-        public const string Authority = "https://fs.msidlab8.com/adfs";
-        public const string AppId = "TestAppIdentifier";
-        public const string PublicClientId = "PublicClientId";
-        public const string ConfidentialClientId = "ConfidentialClientId";
-        public const string ClientRedirectUri = "http://localhost:8080";
-        public static readonly SortedSet<string> s_supportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" }, StringComparer.OrdinalIgnoreCase);
-        public const string ADFS2019ClientSecretURL = "https://id4skeyvault.vault.azure.net/secrets/ADFS2019ClientCredSecret/";
-        public const string ADFS2019ClientSecretName = "ADFS2019ClientCredSecret";
-    }
 }

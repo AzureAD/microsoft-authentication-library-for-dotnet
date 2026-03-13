@@ -274,7 +274,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(accessor: pca.UserTokenCacheInternal.Accessor,
-                                               environment: "fs.msidlab8.com");
+                                               environment: "fs.id4slab1.com");
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
 
                 pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
