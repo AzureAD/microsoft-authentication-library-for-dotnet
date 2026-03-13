@@ -43,7 +43,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate two 404s (to trigger retries), then a successful response
                 const int Num404Errors = 2;
@@ -91,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -101,7 +100,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate four 410s (to trigger retries), then a successful response
                 const int Num410Errors = 4;
@@ -149,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -159,7 +157,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate permanent 410s (to trigger the maximum number of retries)
                 const int Num410Errors = 1 + TestImdsRetryPolicy.LinearStrategyNumRetries; // initial request + maximum number of retries
@@ -204,7 +201,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -214,7 +211,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate permanent 504s (to trigger the maximum number of retries)
                 const int Num504Errors = 1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries; // initial request + maximum number of retries
@@ -259,7 +255,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -269,7 +265,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
@@ -310,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager(disableInternalRetries: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -320,7 +315,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
@@ -351,7 +345,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        
+
         public async Task ImdsRetryPolicyLifeTimeIsPerRequestAsync()
         {
             using (new EnvVariableContext())
@@ -365,7 +359,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds);
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
                 const int Num504Errors = 1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries; // initial request + maximum number of retries
