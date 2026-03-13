@@ -233,7 +233,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 var acl = fi.GetAccessControl();
                 var accessRules = acl.GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
 
-                Assert.AreEqual(1, accessRules.Count);
+                Assert.HasCount(1, accessRules);
 
                 var rule = accessRules.Cast<FileSystemAccessRule>().Single();
 
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 // e.g. -rw------ 1 user1 user1 1280 Mar 23 08:39 /home/user1/g/Program.cs
                 var output = ExecuteAndCaptureOutput($"ls -l {filePath}");
-                Assert.IsTrue(output.StartsWith("-rw------")); // 600
+                Assert.StartsWith("-rw------", output); // 600
             }
         }
 

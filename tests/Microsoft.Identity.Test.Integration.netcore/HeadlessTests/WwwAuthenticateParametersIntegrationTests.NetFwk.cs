@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("login.microsoftonline.com", new Uri(authParams.Authority).Host);
             Assert.AreEqual("72f988bf-86f1-41af-91ab-2d7cd011db47", authParams.GetTenantId()); // because the Key Vault resource belong to Microsoft Corp tenant
-            Assert.AreEqual(2, authParams.RawParameters.Count);
+            Assert.HasCount(2, authParams.RawParameters);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
         }
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("https://login.microsoftonline.com/common", authParams.Authority);
             Assert.AreEqual("common", authParams.GetTenantId());
-            Assert.AreEqual(3, authParams.RawParameters.Count);
+            Assert.HasCount(3, authParams.RawParameters);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
         }
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual($"https://{authority}/{tenantId}", authParams.Authority); // authority URI consists of AAD endpoint and tenant ID
             Assert.AreEqual(tenantId, authParams.GetTenantId()); // tenant ID is extracted out of authority URI
-            Assert.AreEqual(3, authParams.RawParameters.Count);
+            Assert.HasCount(3, authParams.RawParameters);
             Assert.IsNull(authParams.Claims);
             Assert.AreEqual("invalid_token", authParams.Error);
             Assert.AreEqual($"https://{authority}/{tenantId}", authParams.RawParameters["authorization_uri"]);

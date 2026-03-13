@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 app.UserTokenCacheInternal.Accessor.SaveAccount(accountCacheItem);
 
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(2, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 accounts = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(accounts);
                 Assert.AreEqual(2, accounts.Count()); // scoped by env
@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     homeAccountId3);
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
-                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(3, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 accounts = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(accounts);
                 Assert.AreEqual(2, accounts.Count());
@@ -361,8 +361,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.RemoveAsync(user).Wait();
             }
 
-            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+            Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+            Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
         }
 
         [TestMethod]

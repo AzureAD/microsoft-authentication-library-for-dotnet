@@ -47,8 +47,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         private static void AssertHeaders(MockHttpMessageHandler headers, Guid correlationId)
         {
-            Assert.IsFalse(headers.ActualRequestMessage.Headers.GetValues("x-client-os").Single().Contains("6.2.9200"));
-            Assert.IsTrue(headers.ActualRequestMessage.Headers.GetValues("x-client-os").Single().Contains("Windows"));
+            Assert.DoesNotContain("6.2.9200", headers.ActualRequestMessage.Headers.GetValues("x-client-os").Single());
+            Assert.Contains("Windows", headers.ActualRequestMessage.Headers.GetValues("x-client-os").Single());
             Assert.AreEqual(
                 typeof(PublicClientApplication).Assembly.GetName().Version.ToString(),
                 headers.ActualRequestMessage.Headers.GetValues("x-client-Ver").Single());

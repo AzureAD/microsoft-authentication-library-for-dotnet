@@ -1,3 +1,39 @@
+4.83.1
+======
+
+### Bug Fixes
+
+* Fix IMDS endpoint cache not being reset during test cleanup [#5830](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5830)
+  
+4.83.0
+======
+
+### New Features
+
+* **Agent Skills**: Added Agent Skills catalog with complete coverage of both Confidential Client Authentication and mTLS PoP flows [#5733](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5733)
+* **mTLS PoP Skills Guide**: Added comprehensive guide for GitHub Copilot Chat covering MSAL.NET authentication, mTLS Proof of Possession, and Federated Identity Credentials [#5790](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5790)
+
+### Changes
+
+* **Credential Guard Attestation**: Integrated native DLL handling for Credential Guard attestation with centralized versioning [#5674](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5674)
+
+### Bug Fixes
+
+* **IMDSv2 mTLS Auto-Recovery**: Implemented automatic recovery from SCHANNEL handshake failures by evicting cached certificates and re-minting [#5761](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5761)
+* **Managed Identity Fallback Behavior**: Restored classic fallback behavior in MSAL MI unless `GetManagedIdentitySourceAsync()` is explicitly invoked [#5815](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5815)
+* **Attestation Token Expiration**: Exposed `expires_on` field in attestation tokens for better token lifecycle management [#5741](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5741)
+* **Service Fabric API Version**: Updated Service Fabric managed identity API version from 2019-07-01-preview to 2020-05-01 [#5781](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5781)
+* **Cached Token Validation**: Enhanced `ValidateCachedTokenAsync` to work properly with multiple APIs beyond the initial scope [#5764](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5764)
+* **Client Credentials Tenant ID**: Updated result to properly pass tenant ID in client credentials flow [#5754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5754)
+* **Experimental Flag Removal**: Removed experimental flag requirement from `IAuthenticationOperation` and `WithAuthenticationExtension` [#5699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5699)
+* **OpenTelemetry Exception Handling**: Expanded OTel exception handling for Azure Functions compatibility [#5720](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5720)
+* **ICustomWebUi Security Warning**: Added security warnings to `ICustomWebUi` documentation [#5704](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5704)
+
+### Infrastructure & Dependencies
+
+* **GitHub Actions Workflow**: Added GitHub Actions workflow for Managed Identity WebAPI automated build and deployment to Azure [#5751](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5751)
+* **.NET SDK Security Update**: Updated .NET SDK from version 8.0.415 to 8.0.418 to address high severity security vulnerabilities [#5779](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5779) [#5783](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5783)
+
 4.82.1
 ======
 

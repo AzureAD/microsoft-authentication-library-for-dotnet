@@ -44,19 +44,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
-        // MtlsPop is disabled for all these tests, so no need to mock IMDSv2 probe here
-        internal static void MockImdsV1Probe(
-            MockHttpManager httpManager,
-            ManagedIdentitySource managedIdentitySource,
-            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-            string userAssignedId = null)
-        {
-            if (managedIdentitySource == ManagedIdentitySource.Imds)
-            {
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
-            }
-        }
-
         [TestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService)]
@@ -84,11 +71,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 if (managedIdentitySource == ManagedIdentitySource.ImdsV2)
                 {
+                    // New discovery order: V1 probed first (fails), then V2 (succeeds)
+                    httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
                 }
                 else if (managedIdentitySource == ManagedIdentitySource.Imds)
                 {
-                    httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+                    // New discovery order: V1 probed first (succeeds)
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
                 }
 
@@ -123,10 +112,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -172,12 +160,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
-                
+
                 miBuilder.WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource, userAssignedIdentityId, userAssignedId);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -222,10 +209,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -281,10 +267,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -342,10 +327,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithClientCapabilities(TestConstants.ClientCapabilities)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -406,10 +390,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -479,10 +462,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(managedIdentitySource),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
@@ -496,7 +478,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.IsFalse(ex.Message.Contains(MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse));
+                Assert.DoesNotContain(MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse, ex.Message);
             }
         }
 
@@ -521,7 +503,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(AppServiceEndpoint, Resource, errorResponse,
@@ -543,8 +525,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 foreach (var expectedErrorSubString in expectedInErrorResponse)
                 {
-                    Assert.IsTrue(ex.Message.Contains(expectedErrorSubString), 
-                        $"Expected to contain string {expectedErrorSubString}. Actual error message: {ex.Message}");
+                    Assert.Contains(expectedErrorSubString, ex.Message, $"Expected to contain string {expectedErrorSubString}. Actual error message: {ex.Message}");
                 }
             }
         }
@@ -584,10 +565,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
@@ -625,10 +605,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -664,10 +643,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
                     new SocketException(10051)));
@@ -683,18 +661,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [TestMethod] 
+        [TestMethod]
         public async Task SystemAssignedManagedIdentityApiIdTestAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-     
+
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -724,7 +702,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId))
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -756,7 +734,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.BuildConcrete();
 
                 CancellationTokenSource cts = new CancellationTokenSource();
@@ -799,7 +777,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -830,7 +808,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -858,7 +836,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.BuildConcrete();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -893,7 +871,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.AreEqual(0, httpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                
+
                 cacheAccess.WaitTo_AssertAcessCounts(1, 1);
 
                 Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
@@ -903,7 +881,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 result = await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-                
+
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
             }
         }
@@ -921,7 +899,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithLogging(LocalLogCallback)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.BuildConcrete();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -961,7 +939,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task ParallelRequests_CallTokenEndpointOnceAsync()
         {
-            int numOfTasks = 10; 
+            int numOfTasks = 10;
             int identityProviderHits = 0;
             int cacheHits = 0;
 
@@ -974,7 +952,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.BuildConcrete();
 
                 httpManager.AddManagedIdentityMockHandler(
@@ -996,7 +974,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         {
                             // Increment identity hits count
                             Interlocked.Increment(ref identityProviderHits);
-                            Assert.IsTrue(identityProviderHits == 1);
+                            Assert.AreEqual(1, identityProviderHits);
                         }
                         else
                         {
@@ -1010,7 +988,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
                 Debug.WriteLine($"Total Cache Hits: {cacheHits}");
-                Assert.IsTrue(cacheHits == 9);
+                Assert.AreEqual(9, cacheHits);
             }
         }
 
@@ -1050,7 +1028,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                      endpoint,
@@ -1076,9 +1053,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
         [DataRow(Resource, "https://graph.microsoft.com", ManagedIdentitySource.MachineLearning, MachineLearningEndpoint)]
         public async Task ManagedIdentityRequestTokensForDifferentScopesTestAsync(
-            string initialResource, 
-            string newResource, 
-            ManagedIdentitySource managedIdentitySource, 
+            string initialResource,
+            string newResource,
+            ManagedIdentitySource managedIdentitySource,
             string endpoint)
         {
             using (new EnvVariableContext())
@@ -1089,10 +1066,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
-                
+
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 // Mock handler for the initial resource request
                 httpManager.AddManagedIdentityMockHandler(endpoint, initialResource,
@@ -1161,10 +1137,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                var mi = miBuilder.Build();
+                var mi = miBuilder.Build() as ManagedIdentityApplication;
+                Assert.IsNotNull(mi, "Build() should return a ManagedIdentityApplication instance.");
 
+                // Explicit discovery: V1 probe fails, then V2 probe also fails → NoneFound cached
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
 
+                var sourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.None, sourceResult.Source);
+
+                // Token acquisition uses cached NoneFound and throws AllSourcesUnavailable
                 var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("https://management.azure.com")
                         .ExecuteAsync()
@@ -1192,7 +1175,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId
                     .WithUserAssignedClientId(UserAssignedClientId))
                     .WithHttpManager(httpManager);
-                
+
                 userAssignedBuilder.Config.AccessorOptions = null;
 
                 var userAssignedMI = userAssignedBuilder.BuildConcrete();
@@ -1244,8 +1227,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var userAssignedTokens = userAssignedMI.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
                 var systemAssignedTokens = systemAssignedMI.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
 
-                Assert.AreEqual(1, userAssignedTokens.Count, "User-assigned cache entry missing.");
-                Assert.AreEqual(1, systemAssignedTokens.Count, "System-assigned cache entry missing.");
+                Assert.HasCount(1, userAssignedTokens, "User-assigned cache entry missing.");
+                Assert.HasCount(1, systemAssignedTokens, "System-assigned cache entry missing.");
 
                 // Verify the ClientId for each cached entry
                 Assert.AreEqual(UserAssignedClientId, userAssignedTokens[0].ClientId, "User-assigned ClientId mismatch in cache.");
@@ -1256,7 +1239,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
-        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, 429)] // not defined in HttpStatusCode enum
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, (HttpStatusCode)429)] // not defined in HttpStatusCode enum
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
@@ -1277,7 +1260,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
-                
+
                 var mi = miBuilder.Build();
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
@@ -1291,7 +1274,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         managedIdentitySource,
                         statusCode: statusCode);
                 }
-                
+
                 MsalServiceException ex =
                     await Assert.ThrowsAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(Resource)
@@ -1370,7 +1353,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MockImdsV1Probe(httpManager, managedIdentitySource);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -1485,6 +1467,55 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public void ImdsEndpointCache_ResetBetweenTests_ProperlyReevaluatesEnvironmentVariable()
+        {
+            // Simulate a first "test" that sets a custom AZURE_POD_IDENTITY_AUTHORITY_HOST
+            string firstEndpoint = "http://custom-imds-host-1.example.com";
+            string secondEndpoint = "http://custom-imds-host-2.example.com";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                // First "test" run: set the environment variable and build request context
+                using (new EnvVariableContext())
+                {
+                    Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", firstEndpoint);
+
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                        .WithHttpManager(httpManager);
+                    var managedIdentityApp = miBuilder.BuildConcrete();
+                    var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+
+                    // Build the IMDS source; this caches s_cachedBaseEndpoint to firstEndpoint
+                    var imdsSource = new ImdsManagedIdentitySource(requestContext);
+
+                    // Verify the first endpoint is cached
+                    Uri firstUri = ImdsManagedIdentitySource.GetValidatedEndpoint(
+                        requestContext.Logger, ImdsManagedIdentitySource.ImdsTokenPath);
+                    StringAssert.StartsWith(firstUri.ToString(), firstEndpoint);
+                }
+
+                // Simulate test cleanup (as TestBase.TestInitialize calls ResetStateForTest)
+                ApplicationBase.ResetStateForTest();
+
+                // Second "test" run: change the environment variable
+                using (new EnvVariableContext())
+                {
+                    Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", secondEndpoint);
+
+                    var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                        .WithHttpManager(httpManager);
+                    var managedIdentityApp = miBuilder.BuildConcrete();
+                    var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+
+                    // After ResetStateForTest, the cache should be cleared and the new env var should be picked up
+                    Uri secondUri = ImdsManagedIdentitySource.GetValidatedEndpoint(
+                        requestContext.Logger, ImdsManagedIdentitySource.ImdsTokenPath);
+                    StringAssert.StartsWith(secondUri.ToString(), secondEndpoint);
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task ManagedIdentityWithExtraQueryParametersTestAsync()
         {
             using (new EnvVariableContext())
@@ -1541,7 +1572,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 .WithExtraQueryParameters(secondParams);
 
             // Verify that parameters are merged
-            Assert.AreEqual(4, miBuilder.Config.ExtraQueryParameters.Count);
+            Assert.HasCount(4, miBuilder.Config.ExtraQueryParameters);
     
             // Verify merged values
             Assert.AreEqual("newvalue1", miBuilder.Config.ExtraQueryParameters["param1"]);

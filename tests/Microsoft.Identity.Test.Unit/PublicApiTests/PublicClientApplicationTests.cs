@@ -506,7 +506,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
             }
         }
 
@@ -566,7 +566,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.HasCount(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
             }
         }
 
@@ -915,7 +915,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             else
             {
                 Assert.IsNotNull(account.WamAccountIds);
-                Assert.AreEqual(1, account.WamAccountIds.Count);
+                Assert.HasCount(1, account.WamAccountIds);
                 Assert.AreEqual(wamId, account.WamAccountIds["1d18b3b0-251b-4714-a02a-9956cec86c2d"]);
             }
         }
@@ -934,10 +934,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsFalse(tenantProfile2.IsHomeTenant);
 
             Assert.IsNotNull(tenantProfile1.ClaimsPrincipal);
-            Assert.IsTrue(tenantProfile1.ClaimsPrincipal.Claims.Count() > 0);
+            Assert.IsGreaterThan(0, tenantProfile1.ClaimsPrincipal.Claims.Count());
 
             Assert.IsNotNull(tenantProfile2.ClaimsPrincipal);
-            Assert.IsTrue(tenantProfile2.ClaimsPrincipal.Claims.Count() > 0);
+            Assert.IsGreaterThan(0, tenantProfile2.ClaimsPrincipal.Claims.Count());
         }
 
         /// <summary>
@@ -1210,9 +1210,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
-                Assert.IsNotNull(result.CorrelationId);
                 Assert.AreEqual(correlationId.ToString(), result.CorrelationId.ToString());
-                Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
             }
         }

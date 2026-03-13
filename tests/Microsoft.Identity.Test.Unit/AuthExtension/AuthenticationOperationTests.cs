@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AdditionalResponseParameters == null);
+                Assert.IsNull(result.AdditionalResponseParameters);
                 Assert.AreEqual(expectedAt, result.AccessToken);
             }
         }
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AdditionalResponseParameters == null);
+                Assert.IsNull(result.AdditionalResponseParameters);
                 Assert.AreEqual(expectedAt, result.AccessToken);
             }
         }

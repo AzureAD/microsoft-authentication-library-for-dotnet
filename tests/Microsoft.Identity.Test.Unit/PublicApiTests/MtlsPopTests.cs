@@ -725,7 +725,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(EastUsRegion, result.ApiEvent.RegionUsed);
                     Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                     Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                    Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+                    Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
                 }
             }
         }
@@ -894,7 +894,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
-                Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
 
                 // Second token acquisition - should retrieve from cache

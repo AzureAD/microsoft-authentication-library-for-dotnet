@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         null,
                         broker,
                         "install_url");
-                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
             }
         }
 
@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Generic));
                 Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Dsts));
 
-                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 
             }
         }
@@ -400,9 +400,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Assert.AreEqual(TestConstants.TestErrCode, token.Error);
             Assert.AreEqual(TestConstants.iOSBrokerSuberrCode, token.SubError);
             Assert.AreEqual(TestConstants.iOSBrokerErrDescr, token.ErrorDescription);
-            Assert.AreEqual(null, token.AccountUserId);
-            Assert.AreEqual(null, token.TenantId);
-            Assert.AreEqual(null, token.Upn);
+            Assert.IsNull(token.AccountUserId);
+            Assert.IsNull(token.TenantId);
+            Assert.IsNull(token.Upn);
         }
 
         [TestMethod]
@@ -421,7 +421,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Assert.AreEqual(TestConstants.TestErrCode, token.Error);
             Assert.AreEqual(string.Empty, token.SubError);
             Assert.AreEqual(TestConstants.iOSBrokerErrDescr, token.ErrorDescription);
-            Assert.AreEqual(null, token.AccountUserId);
+            Assert.IsNull(token.AccountUserId);
             Assert.AreEqual(TestConstants.Username, token.Upn);
         }
 
@@ -442,7 +442,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Assert.AreEqual(string.Empty, token.SubError);
             Assert.AreEqual(TestConstants.iOSBrokerErrDescr, token.ErrorDescription);
             Assert.AreEqual("test_home", token.AccountUserId);
-            Assert.AreEqual(null, token.Upn);
+            Assert.IsNull(token.Upn);
         }
 
         [TestMethod]
@@ -761,7 +761,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 }
                 catch (MsalUiRequiredException ex)
                 {
-                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidNoTokenFound);
+                    Assert.AreEqual(BrokerResponseConst.AndroidNoTokenFound, ex.ErrorCode);
                     return;
                 }
 
@@ -780,7 +780,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 }
                 catch (MsalUiRequiredException ex)
                 {
-                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidNoAccountFound);
+                    Assert.AreEqual(BrokerResponseConst.AndroidNoAccountFound, ex.ErrorCode);
                     return;
                 }
 
@@ -799,7 +799,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 }
                 catch (MsalUiRequiredException ex)
                 {
-                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidInvalidRefreshToken);
+                    Assert.AreEqual(BrokerResponseConst.AndroidInvalidRefreshToken, ex.ErrorCode);
                     return;
                 }
 

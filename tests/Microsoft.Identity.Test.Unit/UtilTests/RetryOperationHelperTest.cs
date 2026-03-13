@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             var result = RetryOperationHelper.ExecuteWithRetryAsync(func, numberOfRetriesToAttempt).Result;
 
             //Assert 
-            Assert.AreEqual(true, result);
+            Assert.IsTrue(result);
         }
 
         [TestMethod]

@@ -51,8 +51,8 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
+                Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInCacheInMs);
+                Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/common/oauth2/v2.0/token",
                     result.AuthenticationResultMetadata.TokenEndpoint);
@@ -65,13 +65,13 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs == 0);
-                Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
+                Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInCacheInMs);
+                Assert.AreEqual(0, result.AuthenticationResultMetadata.DurationInHttpInMs);
+                Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
                 Assert.AreEqual(1, Metrics.TotalAccessTokensFromIdP);
                 Assert.AreEqual(1, Metrics.TotalAccessTokensFromCache);
                 Assert.AreEqual(0, Metrics.TotalAccessTokensFromBroker);
-                Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+                Assert.IsGreaterThan(0, Metrics.TotalDurationInMs);
                 Assert.IsNull(result.AuthenticationResultMetadata.TokenEndpoint);
 
             }
@@ -279,12 +279,12 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInCacheInMs);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
             Assert.AreEqual(expectedTokensFromIdp, Metrics.TotalAccessTokensFromIdP);
             Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
             Assert.AreEqual(expectedTokensFromBroker, Metrics.TotalAccessTokensFromBroker);
-            Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+            Assert.IsGreaterThan(0, Metrics.TotalDurationInMs);
         }
 
         private async Task TestAcquireTokenSilent_Async(PublicClientApplication pca, int expectedTokensFromIdp = 0, int expectedTokensFromCache = 0, int expectedTokensFromBroker = 0)
@@ -300,12 +300,12 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInCacheInMs);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
             Assert.AreEqual(expectedTokensFromIdp, Metrics.TotalAccessTokensFromIdP);
             Assert.AreEqual(expectedTokensFromCache, Metrics.TotalAccessTokensFromCache);
             Assert.AreEqual(expectedTokensFromBroker, Metrics.TotalAccessTokensFromBroker);
-            Assert.IsTrue(Metrics.TotalDurationInMs > 0);
+            Assert.IsGreaterThan(0, Metrics.TotalDurationInMs);
         }
     }
 }

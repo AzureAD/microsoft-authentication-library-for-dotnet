@@ -417,7 +417,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         [TestMethod]
         public async Task UiRequired_MultipleEntries_Async()
         {
-            Assert.AreEqual(2, TestConstants.s_scope.Count, "test error - expecting at least 2 scopes");
+            Assert.HasCount(2, TestConstants.s_scope, "test error - expecting at least 2 scopes");
 
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
@@ -526,9 +526,9 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             var (retryAfterProvider, httpStatusProvider, uiRequiredProvider) =
                 throttlingManager.GetTypedThrottlingProviders();
 
-            Assert.AreEqual(retryAfterEntryCount, retryAfterProvider.ThrottlingCache.CacheForTest.Count);
-            Assert.AreEqual(httpStatusEntryCount, httpStatusProvider.ThrottlingCache.CacheForTest.Count);
-            Assert.AreEqual(uiRequiredEntryCount, uiRequiredProvider.ThrottlingCache.CacheForTest.Count);
+            Assert.HasCount(retryAfterEntryCount, retryAfterProvider.ThrottlingCache.CacheForTest);
+            Assert.HasCount(httpStatusEntryCount, httpStatusProvider.ThrottlingCache.CacheForTest);
+            Assert.HasCount(uiRequiredEntryCount, uiRequiredProvider.ThrottlingCache.CacheForTest);
         }
 
         private static void AssertInvalidClientEx(MsalServiceException ex)

@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             // Wait for the seconf thread to finish
             resetEvent1.Wait();
 
-            Assert.IsTrue(getTime.ElapsedMilliseconds > 2000);
+            Assert.IsGreaterThanOrEqualTo(2000, getTime.ElapsedMilliseconds);
         }
 
         [RunOnWindows]

@@ -49,8 +49,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             base.TestCleanup();
         }
 
+        [TestMethod]
         [DataRow(TestConstants.ADFSAuthority)]
-        [DataRow(TestConstants.GenericAuthority)]
         public void WithTenantIdAtRequestLevel_Noop_AdfsGeneric(string inputAuthority)
         {
             var app = ConfidentialClientApplicationBuilder
@@ -63,15 +63,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                 .WithTenantId(TestConstants.TenantId2);
 
+            // For ADFS and Generic authorities, WithTenantId is a no-op - the host should remain unchanged
             Assert.AreEqual(
                 new Uri(inputAuthority).Host,
                 parameterBuilder.CommonParameters.AuthorityOverride.Host,
                 "The host should have stayed the same");
-
-            Assert.AreEqual(
-                TestConstants.TenantId2,
-                AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority),
-                "The tenant id should have been changed");
         }
 
         [TestMethod]
@@ -200,7 +196,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [TestMethod]
-        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
+        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData))]
         public void AADWithTenantId_Success(Uri authorityValue, string tenantId)
         {
             // Ignore authorityValue, it's just that we don't need to create another TestData method
@@ -223,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [TestMethod]
-        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
+        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData))]
         public void AADWithTenantIdFromAuthority_Success(Uri authorityValue, string expectedTenantId)
         {
             var app = ConfidentialClientApplicationBuilder

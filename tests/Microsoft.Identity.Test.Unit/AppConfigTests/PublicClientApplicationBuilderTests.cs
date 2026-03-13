@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                    .Build();
 
             var instanceDiscoveryMetadata = (pca.AppConfig as ApplicationConfiguration).CustomInstanceDiscoveryMetadata;
-            Assert.AreEqual(2, instanceDiscoveryMetadata.Metadata.Length);
+            Assert.HasCount(2, instanceDiscoveryMetadata.Metadata);
         }
 
         [TestMethod]
@@ -501,7 +501,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             catch (Exception ex)
             {
                 Assert.IsTrue(ex is ArgumentException);
-                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.AuthorityUriInvalidPath));
+                Assert.Contains(MsalErrorMessage.AuthorityUriInvalidPath, ex.Message);
             }
         }
 

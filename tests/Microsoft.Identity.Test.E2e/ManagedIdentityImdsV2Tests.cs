@@ -68,13 +68,6 @@ namespace Microsoft.Identity.Test.E2E
                 Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
             }
 
-            // Check if TOKEN_ATTESTATION_ENDPOINT is configured (required for attestation)
-            var attestationEndpoint = Environment.GetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT");
-            if (string.IsNullOrWhiteSpace(attestationEndpoint))
-            {
-                Assert.Inconclusive("TOKEN_ATTESTATION_ENDPOINT is not configured. Attestation tests require this environment variable.");
-            }
-
             var mi = BuildMi(id, idType);
 
             try

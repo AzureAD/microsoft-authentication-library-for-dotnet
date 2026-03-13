@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DataRow(true, true, true)]
         [DataRow(true, false, false)]
         [DataRow(false, true, false)]
-        [DataRow(false, true, false)]
         public async Task WithLegacyCacheCompatibilityTest_Async(
             bool enableLegacyCacheCompatibility,
             bool serializeCache,
@@ -703,7 +702,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             cache.LegacyPersistence.WriteCache(AdalCacheOperations.Serialize(serviceBundle.ApplicationLogger, dictionary));
 
             // ADAL cache is empty because B2C scenario is only for MSAL
-            Assert.AreEqual(0, dictionary.Count);
+            Assert.IsEmpty(dictionary);
         }
 
         [TestMethod]
@@ -1282,7 +1281,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var item = cache.FindAccessTokenAsync(requestParams).Result;
 
             Assert.IsNotNull(item);
-            Assert.IsTrue(item.ScopeSet.Contains(scopeInCache));
+            Assert.Contains(scopeInCache, item.ScopeSet);
         }
 
         [TestMethod]
@@ -1373,7 +1372,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 bool? result = cache.IsFociMemberAsync(requestParams, "1").Result; //request params uses ProductionPrefEnvAlias
 
                 // Assert
-                Assert.AreEqual(true, result.Value);
+                Assert.IsTrue(result.Value);
             }
         }
 
@@ -1413,18 +1412,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
             //Assert
-            Assert.IsTrue(logs != string.Empty);
-            Assert.IsTrue(logs.Contains("Total number of access tokens in the cache: 12"));
-            Assert.IsTrue(logs.Contains("Total number of refresh tokens in the cache: 12"));
-            Assert.IsTrue(logs.Contains("First 10 access token cache keys:"));
-            Assert.IsTrue(logs.Contains("First 10 refresh token cache keys:"));
+            Assert.AreNotEqual(logs, string.Empty);
+            Assert.Contains("Total number of access tokens in the cache: 12", logs);
+            Assert.Contains("Total number of refresh tokens in the cache: 12", logs);
+            Assert.Contains("First 10 access token cache keys:", logs);
+            Assert.Contains("First 10 refresh token cache keys:", logs);
 
             var accessTokens = cache.Accessor.GetAllAccessTokens().ToList();
             var refreshTokens = cache.Accessor.GetAllRefreshTokens().ToList();
             for (int i = 0; i < 10; i++)
             {
-                Assert.IsTrue(logs.Contains(accessTokens[i].ToLogString()));
-                Assert.IsTrue(logs.Contains(refreshTokens[i].ToLogString()));
+                Assert.Contains(accessTokens[i].ToLogString(), logs);
+                Assert.Contains(refreshTokens[i].ToLogString(), logs);
             }
         }
 

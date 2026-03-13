@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion MSTest Hooks
 
         [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [Timeout(2 * 60 * 1000, CooperativeCancellation = true)] // 2 min timeout
         public async Task DeviceCodeFlowTestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [Timeout(2 * 60 * 1000, CooperativeCancellation = true)] // 2 min timeout
         public async Task SilentTokenAfterDeviceCodeFlowWithBrokerTestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(result);
             var account = result.Account as Account;
-            Assert.IsTrue(account.AccountSource == "device_code_flow");
+            Assert.AreEqual("device_code_flow", account.AccountSource);
             Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken));
 
             var silentTokenResult = await pca.AcquireTokenSilent(s_scopes, result.Account).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);

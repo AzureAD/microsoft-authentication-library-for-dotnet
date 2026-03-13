@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit
 
             // Assert
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
-            Assert.AreEqual(3, authParams.RawParameters.Count);
+            Assert.HasCount(3, authParams.RawParameters);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
         }
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit
 
             if (scheme == "AuthScheme1")
             {
-                Assert.AreEqual(0, authParams.RawParameters.Count);
+                Assert.IsEmpty(authParams.RawParameters);
             }
             else if (scheme == "AuthScheme2")
             {
@@ -149,14 +149,14 @@ namespace Microsoft.Identity.Test.Unit
             }
             else if (scheme == "WLID1.0")
             {
-                Assert.AreEqual(3, authParams.RawParameters.Count);
+                Assert.HasCount(3, authParams.RawParameters);
                 Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
                 Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
                 Assert.AreEqual("ssl.live-tst.net", authParams.RawParameters["siteId"]);
             }
             else
             {
-                Assert.AreEqual(3, authParams.RawParameters.Count);
+                Assert.HasCount(3, authParams.RawParameters);
                 Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
                 Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
                 Assert.AreEqual("ssl.live-tst.net - ssl2.live-tst2.net", authParams.RawParameters["siteId"]);
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit
 
             // Assert
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
-            Assert.AreEqual(3, authParams.RawParameters.Count);
+            Assert.HasCount(3, authParams.RawParameters);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
         }
@@ -577,7 +577,7 @@ namespace Microsoft.Identity.Test.Unit
             // Assert
             Assert.IsNotNull(headers.AuthenticationInfoParameters);
             Assert.AreEqual(TestConstants.Nonce, headers.AuthenticationInfoParameters.NextNonce);
-            Assert.AreEqual(0, headers.WwwAuthenticateParameters.Count);
+            Assert.IsEmpty(headers.WwwAuthenticateParameters);
         }
 
         [TestMethod]

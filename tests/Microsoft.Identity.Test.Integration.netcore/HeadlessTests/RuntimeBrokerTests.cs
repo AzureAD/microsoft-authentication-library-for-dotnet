@@ -201,8 +201,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(ex.Message.Contains("You are trying to acquire a token silently using a login hint. " +
-                    "No account was found in the token cache having this login hint"));
+                Assert.Contains("You are trying to acquire a token silently using a login hint. " + "No account was found in the token cache having this login hint", ex.Message);
             }
         }
 
