@@ -177,11 +177,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // First call: instance discovery returns an HTTP error, then token endpoint succeeds.
                 // 404 is not retried; 502 (5xx) is retried once by the STS retry policy.
+                // The unknown host (sts.access.edu) causes discovery to fall back to the default trusted host.
+                string expectedDiscoveryUrl = $"https://{TestConstants.ProductionPrefNetworkEnvironment}/common/{TestConstants.DiscoveryEndPoint}";
                 for (int i = 0; i < expectedDiscoveryCalls; i++)
                 {
                     httpManager.AddMockHandler(new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = expectedDiscoveryUrl,
                         ResponseMessage = new HttpResponseMessage(errorStatusCode)
                         {
                             Content = new StringContent("error")
