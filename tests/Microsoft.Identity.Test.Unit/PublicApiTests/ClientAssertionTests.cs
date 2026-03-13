@@ -767,8 +767,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNull(result.BindingCertificate, "BindingCertificate should not be present.");
 
                         // Core of the test: prove 2 invocations + capture the two distinct pairs
-                        Assert.AreEqual(2, calls.Count,
-                            "Expected the client assertion provider delegate to be invoked twice for a single token acquisition.");
+                        Assert.HasCount(2, calls, "Expected the client assertion provider delegate to be invoked twice for a single token acquisition.");
 
                         // First invocation: cert A + assertion A
                         Assert.AreEqual("assertion-a", calls[0].Assertion);
@@ -1001,7 +1000,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(callCount >= 1, "Expected the client assertion delegate to be called at least once.");
+                Assert.IsGreaterThanOrEqualTo(1, callCount, "Expected the client assertion delegate to be called at least once.");
             }
         }
 
@@ -1047,7 +1046,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(callCount >= 1, "Expected the client assertion provider to be called at least once.");
+                Assert.IsGreaterThanOrEqualTo(1, callCount, "Expected the client assertion provider to be called at least once.");
             }
         }
 

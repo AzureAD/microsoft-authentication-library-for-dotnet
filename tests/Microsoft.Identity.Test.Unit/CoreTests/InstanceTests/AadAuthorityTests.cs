@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Authority instance = Authority.CreateAuthority("https://login.microsoftonline.com/common");
             Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+            Assert.AreEqual(AuthorityType.Aad, instance.AuthorityInfo.AuthorityType);
 
             Assert.AreEqual(
                 "https://login.microsoftonline.com/common/oauth2/v2.0/authorize", 
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
             Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+            Assert.AreEqual(AuthorityType.Aad, instance.AuthorityInfo.AuthorityType);
 
             TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority.ToString(), validateAuthority: true);
             try
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             catch (Exception exc)
             {
                 Assert.IsTrue(exc is MsalServiceException);
-                Assert.AreEqual(((MsalServiceException)exc).ErrorCode, "invalid_instance");
+                Assert.AreEqual("invalid_instance", ((MsalServiceException)exc).ErrorCode);
             }
         }
 
@@ -129,19 +129,19 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                                              .WithAuthority(host, TestConstants.TenantId)
                                                              .BuildConcrete();
 
-            Assert.AreEqual(publicClient.Authority, expectedAuthority);
+            Assert.AreEqual(expectedAuthority, publicClient.Authority);
 
             publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(host, new Guid(TestConstants.TenantId))
                                                          .BuildConcrete();
 
-            Assert.AreEqual(publicClient.Authority, expectedAuthority);
+            Assert.AreEqual(expectedAuthority, publicClient.Authority);
 
             publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(new Uri(expectedAuthority))
                                                          .BuildConcrete();
 
-            Assert.AreEqual(publicClient.Authority, expectedAuthority);
+            Assert.AreEqual(expectedAuthority, publicClient.Authority);
         }
 
         [TestMethod]
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                                          .WithAuthority(host, new Guid(TestConstants.TenantId))
                                                          .BuildConcrete();
 
-            Assert.AreEqual(publicClient.Authority, expectedAuthority);
+            Assert.AreEqual(expectedAuthority, publicClient.Authority);
 
             //Check additional path segments
             fullAuthority = string.Concat(host, TestConstants.TenantId, "/ABCD!@#$TEST//");
@@ -178,29 +178,29 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                                          .WithAuthority(new Uri(fullAuthority))
                                                          .BuildConcrete();
 
-            Assert.AreEqual(publicClient.Authority, expectedAuthority);
+            Assert.AreEqual(expectedAuthority, publicClient.Authority);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("http://login.microsoftonline.com/", "ten ant")]
         [DataRow("https://login.microsoftonline.com/", "ten ant")]
         public void MalformedAuthority_ThrowsException(string malformedCloudInstanceUri, string malformedTenant)
         {
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority($"{malformedCloudInstanceUri}{malformedTenant}")
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build());
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(malformedCloudInstanceUri, malformedTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build());
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(AzureCloudInstance.AzurePublic, malformedTenant)
@@ -267,13 +267,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             string updatedAuthority = authority.GetTenantedAuthority(TestConstants.Utid, false);
             Assert.AreEqual(TestConstants.AuthorityUtidTenant, updatedAuthority);
-            Assert.AreEqual(updatedAuthority, TestConstants.AuthorityUtidTenant);
+            Assert.AreEqual(TestConstants.AuthorityUtidTenant, updatedAuthority);
 
             authority = Authority.CreateAuthorityWithTenant(
               authority.AuthorityInfo,
               TestConstants.Utid);
 
-            Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri, TestConstants.AuthorityUtidTenant);
+            Assert.AreEqual(TestConstants.AuthorityUtidTenant, authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri);
         }
 
         [TestMethod]
@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             AadAuthority aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/common").AuthorityInfo);
 
             Assert.IsNotNull(aadAuthorityInstance);
-            Assert.AreEqual(aadAuthorityInstance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+            Assert.AreEqual(AuthorityType.Aad, aadAuthorityInstance.AuthorityInfo.AuthorityType);
 
             Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(true, ""));
             Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(true, "9188040d-6c67-4c5b-b112-36a304b66dad"));
@@ -340,7 +340,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             AadAuthority aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/common").AuthorityInfo);
 
             Assert.IsNotNull(aadAuthorityInstance);
-            Assert.AreEqual(aadAuthorityInstance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+            Assert.AreEqual(AuthorityType.Aad, aadAuthorityInstance.AuthorityInfo.AuthorityType);
 
             Assert.IsTrue(aadAuthorityInstance.IsCommonOrOrganizationsTenant());
 
@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/organizations").AuthorityInfo);
 
             Assert.IsNotNull(aadAuthorityInstance);
-            Assert.AreEqual(aadAuthorityInstance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+            Assert.AreEqual(AuthorityType.Aad, aadAuthorityInstance.AuthorityInfo.AuthorityType);
 
             Assert.IsTrue(aadAuthorityInstance.IsCommonOrOrganizationsTenant());
 
@@ -356,7 +356,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/consumers").AuthorityInfo);
 
             Assert.IsNotNull(aadAuthorityInstance);
-            Assert.AreEqual(aadAuthorityInstance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+            Assert.AreEqual(AuthorityType.Aad, aadAuthorityInstance.AuthorityInfo.AuthorityType);
 
             Assert.IsFalse(aadAuthorityInstance.IsCommonOrOrganizationsTenant());
         }

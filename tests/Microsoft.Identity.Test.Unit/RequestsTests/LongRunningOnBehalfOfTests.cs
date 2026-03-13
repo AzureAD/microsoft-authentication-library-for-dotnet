@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret2, result.AccessToken);
-                Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().FirstOrDefault(at => at.Secret.Equals(TestConstants.ATSecret2));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault(rt => rt.Secret.Equals(TestConstants.RTSecret2));
                 Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
@@ -414,8 +414,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Cache has 1 partition (user-provided key) with 1 token
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-long-running", result.AccessToken);
@@ -436,8 +436,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Cache has 2 partitions (user-provided key, assertion) with 1 token each
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(2, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(2, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(userAssertion.AssertionHash));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault(t => t.OboCacheKey.Equals(userAssertion.AssertionHash));
                 Assert.AreEqual("access-token-normal", result.AccessToken);
@@ -491,8 +491,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                         .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-1", result.AccessToken);
@@ -529,8 +529,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-2", result.AccessToken);
@@ -554,8 +554,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-3", result.AccessToken);
@@ -579,8 +579,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-4", result.AccessToken);
@@ -621,8 +621,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(0, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-1", result.AccessToken);
@@ -663,8 +663,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-2", result.AccessToken);
@@ -688,8 +688,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-3", result.AccessToken);
@@ -730,8 +730,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(0, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-1", result.AccessToken);
@@ -772,8 +772,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-2", result.AccessToken);
@@ -797,8 +797,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-3", result.AccessToken);
@@ -828,8 +828,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     if (validateCacheProperties)
                     {
-                        Assert.AreEqual(true, args.HasTokens);
-                        Assert.AreEqual(false, args.HasStateChanged);
+                        Assert.IsTrue(args.HasTokens);
+                        Assert.IsFalse(args.HasStateChanged);
                         Assert.AreEqual(oboCacheKey, args.SuggestedCacheKey);
                     }
                 });
@@ -838,8 +838,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     if (validateCacheProperties)
                     {
-                        Assert.AreEqual(true, args.HasStateChanged);
-                        Assert.AreEqual(false, args.HasTokens);
+                        Assert.IsTrue(args.HasStateChanged);
+                        Assert.IsFalse(args.HasTokens);
                         Assert.AreEqual(oboCacheKey, args.SuggestedCacheKey);
                     }
 
@@ -864,8 +864,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                         .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.HasCount(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
                 MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single(t => t.OboCacheKey.Equals(oboCacheKey));
                 MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-1", result.AccessToken);
@@ -879,8 +879,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var cachedAccessTokens = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
                 var cachedRefreshTokens = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
 
-                Assert.AreEqual(0, cachedAccessTokens.Count);
-                Assert.AreEqual(0, cachedRefreshTokens.Count);
+                Assert.IsEmpty(cachedAccessTokens);
+                Assert.IsEmpty(cachedRefreshTokens);
                 Assert.IsTrue(tokensRemoved);
 
                 //validate that no more tokens are removed
@@ -889,8 +889,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 cachedAccessTokens = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
                 cachedRefreshTokens = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
 
-                Assert.AreEqual(0, cachedAccessTokens.Count);
-                Assert.AreEqual(0, cachedRefreshTokens.Count);
+                Assert.IsEmpty(cachedAccessTokens);
+                Assert.IsEmpty(cachedRefreshTokens);
                 Assert.IsFalse(tokensRemoved);
             }
         }

@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             if (ExpectedMtlsBindingCertificate != null)
             {
-                Assert.AreEqual(1, base.ClientCertificates.Count);
+                Assert.HasCount(1, base.ClientCertificates);
                 Assert.AreEqual(ExpectedMtlsBindingCertificate, base.ClientCertificates[0]);
             }
 
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 Assert.IsFalse(string.IsNullOrEmpty(uri.Query), $"Provided url ({uri.AbsoluteUri}) does not contain query parameters as expected.");
                 Dictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
-                Assert.AreEqual(ExpectedQueryParams.Count, inputQp.Count, "Different number of query params.");
+                Assert.HasCount(ExpectedQueryParams.Count, inputQp, "Different number of query params.");
                 foreach (var key in ExpectedQueryParams.Keys)
                 {
                     Assert.IsTrue(inputQp.ContainsKey(key), $"Expected query parameter ({key}) not found in the url ({uri.AbsoluteUri}).");
@@ -121,8 +121,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
 
                 // Fail if any "not expected" key/value pairs were found
-                Assert.IsTrue(
-                    unexpectedKeysFound.Count == 0,
+                Assert.IsEmpty(
+                    unexpectedKeysFound,
                     $"Did not expect to find these query parameter keys/values: {string.Join(", ", unexpectedKeysFound)}"
                 );
             }
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
 
                 // Assert that no unexpected keys were found, reporting all violations at once
-                Assert.IsTrue(unexpectedKeysFound.Count == 0, $"Did not expect to find post data keys: {string.Join(", ", unexpectedKeysFound)}");
+                Assert.IsEmpty(unexpectedKeysFound, $"Did not expect to find post data keys: {string.Join(", ", unexpectedKeysFound)}");
             }
         }
 
