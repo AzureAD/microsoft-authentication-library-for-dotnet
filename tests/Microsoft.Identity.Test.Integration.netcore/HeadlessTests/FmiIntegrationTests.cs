@@ -239,15 +239,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static async Task<string> GetFmiCredentialFromRma(AssertionRequestOptions options)
         {
             //Fmi app/scenario parameters
-            var clientId = "4df2cbbb-8612-49c1-87c8-f334d6d065ad";
             var scope = "api://AzureFMITokenExchange/.default";
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             //Create application
             var confidentialApp = ConfidentialClientApplicationBuilder
-                        .Create(clientId)
-                        .WithAuthority("https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca", true)
+                        .Create(RmaClientId)
+                        .WithAuthority("https://login.microsoftonline.com/", TenantId)
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows
                         .WithAzureRegion(AzureRegion)
                         .BuildConcrete();
