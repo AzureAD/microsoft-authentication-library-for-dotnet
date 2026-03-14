@@ -1,0 +1,48 @@
+Microsoft.Identity.Client.TestOnly.Http.MockHttpClientFactory
+Microsoft.Identity.Client.TestOnly.Http.MockHttpClientFactory.AddMockHandler(Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler handler) -> Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler
+Microsoft.Identity.Client.TestOnly.Http.MockHttpClientFactory.ClearQueue() -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpClientFactory.GetHttpClient() -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.TestOnly.Http.MockHttpClientFactory.GetHttpClient(System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> validateServerCert) -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.TestOnly.Http.MockHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
+Microsoft.Identity.Client.TestOnly.Http.MockHttpClientFactory.GetPendingMocks() -> System.Collections.Generic.IReadOnlyCollection<Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpClientFactory.MockHttpClientFactory() -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpClientFactory.MockHttpClientFactory(System.Func<Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler> messageHandlerFactory) -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ActualRequestHeaders.get -> System.Net.Http.Headers.HttpRequestHeaders
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ActualRequestMessage.get -> System.Net.Http.HttpRequestMessage
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ActualRequestPostData.get -> System.Collections.Generic.Dictionary<string, string>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.AdditionalRequestValidation.get -> System.Action<System.Net.Http.HttpRequestMessage>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.AdditionalRequestValidation.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExceptionToThrow.get -> System.Exception
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExceptionToThrow.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedMethod.get -> System.Net.Http.HttpMethod
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedMethod.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedMtlsBindingCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedMtlsBindingCertificate.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedPostData.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedPostData.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedQueryParams.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedQueryParams.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedRequestHeaders.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedRequestHeaders.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedUrl.get -> string
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ExpectedUrl.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.MockHttpMessageHandler() -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.NotExpectedQueryParams.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.NotExpectedQueryParams.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.PresentRequestHeaders.get -> System.Collections.Generic.IList<string>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.PresentRequestHeaders.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ResponseMessage.get -> System.Net.Http.HttpResponseMessage
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ResponseMessage.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.UnExpectedPostData.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.UnExpectedPostData.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.UnexpectedRequestHeaders.get -> System.Collections.Generic.IList<string>
+Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.UnexpectedRequestHeaders.set -> void
+Microsoft.Identity.Client.TestOnly.Http.MockHttpValidationException
+Microsoft.Identity.Client.TestOnly.Http.MockHttpValidationException.MockHttpValidationException(string message) -> void
+Microsoft.Identity.Client.TestOnly.Logging.TestIdentityLogger
+Microsoft.Identity.Client.TestOnly.Logging.TestIdentityLogger.IsEnabled(Microsoft.IdentityModel.Abstractions.EventLogLevel eventLogLevel) -> bool
+Microsoft.Identity.Client.TestOnly.Logging.TestIdentityLogger.Log(Microsoft.IdentityModel.Abstractions.LogEntry entry) -> void
+Microsoft.Identity.Client.TestOnly.Logging.TestIdentityLogger.MinLogLevel.get -> Microsoft.IdentityModel.Abstractions.EventLogLevel
+Microsoft.Identity.Client.TestOnly.Logging.TestIdentityLogger.StringBuilder.get -> System.Text.StringBuilder
+Microsoft.Identity.Client.TestOnly.Logging.TestIdentityLogger.TestIdentityLogger(Microsoft.IdentityModel.Abstractions.EventLogLevel logLevel = Microsoft.IdentityModel.Abstractions.EventLogLevel.Verbose) -> void
