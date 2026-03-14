@@ -168,25 +168,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsync_ThrowsException()
-        {
-            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
-                            .Create(TestConstants.ClientId)
-                            .WithCertificate(s_testCertificate)
-                            .Build();
-
-            // Set WithMtlsProofOfPossession on the request without specifying an authority
-            MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                app.AcquireTokenForClient(TestConstants.s_scope)
-                   .WithMtlsProofOfPossession()
-                   .ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.MtlsPopWithoutRegion, ex.Message);
-        }
-
-        [TestMethod]
         public void Constructor_ValidCertificate()
         {
             var scheme = new MtlsPopAuthenticationOperation(s_testCertificate);
@@ -566,7 +547,6 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [Ignore("TODO: Production code validation for non-tenanted authority with mTLS PoP is not yet implemented. See MsalError.MissingTenantedAuthority.")]
         [TestMethod]
         [DataRow("https://login.microsoftonline.com", TestConstants.Common, "Public Cloud")]
         [DataRow("https://login.microsoftonline.com", TestConstants.Organizations, "Public Cloud")]
