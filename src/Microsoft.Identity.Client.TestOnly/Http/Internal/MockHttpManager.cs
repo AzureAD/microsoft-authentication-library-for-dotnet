@@ -103,18 +103,28 @@ namespace Microsoft.Identity.Client.TestOnly.Http.Internal
         /// <inheritdoc />
         public void Dispose()
         {
-            // Only check the queue when we are not already unwinding due to an exception,
-            // to prevent masking the real failure with a secondary "queue not empty" error.
-#pragma warning disable CS0618 // Marshal.GetExceptionCode is non-production-safe but acceptable here
-            if (Marshal.GetExceptionCode() == 0 && !_httpMessageHandlerQueue.IsEmpty)
-#pragma warning restore CS0618
+            if (_httpMessageHandlerQueue.IsEmpty)
             {
-                string remainingMocks = string.Join(" ",
-                    _httpMessageHandlerQueue.Select(m => (m as MockHttpMessageHandler)?.ExpectedUrl ?? string.Empty));
-
-                throw new MockHttpValidationException(
-                    "All mocks should have been consumed. Remaining mocks are for: " + remainingMocks);
+                return;
             }
+
+            // Only throw when there is no active exception propagating, to avoid masking
+            // the original test failure with a secondary "queue not empty" diagnostic.
+            // Marshal.GetExceptionCode() is marked obsolete but still available on all platforms;
+            // on non-Windows it always returns 0 (no Windows structured-exception model),
+            // which means the queue check always runs — acceptable for test-only code.
+#pragma warning disable CS0618 // Marshal.GetExceptionCode is intentionally used here for test diagnostics
+            if (Marshal.GetExceptionCode() != 0)
+            {
+                return;
+            }
+#pragma warning restore CS0618
+
+            string remainingMocks = string.Join(" ",
+                _httpMessageHandlerQueue.Select(m => (m as MockHttpMessageHandler)?.ExpectedUrl ?? string.Empty));
+
+            throw new MockHttpValidationException(
+                "All mocks should have been consumed. Remaining mocks are for: " + remainingMocks);
         }
 
         /// <inheritdoc />

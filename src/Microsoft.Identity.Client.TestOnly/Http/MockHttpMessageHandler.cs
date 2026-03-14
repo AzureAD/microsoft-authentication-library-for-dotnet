@@ -342,6 +342,7 @@ namespace Microsoft.Identity.Client.TestOnly.Http
             foreach (string pair in input.Split('&'))
             {
                 int idx = pair.IndexOf('=');
+                // idx < 0: no '=' found (malformed); idx == 0: empty key (intentionally skipped)
                 if (idx <= 0)
                 {
                     continue;
@@ -356,7 +357,8 @@ namespace Microsoft.Identity.Client.TestOnly.Http
                     value = Uri.UnescapeDataString(value.Replace("+", "%20"));
                 }
 
-                key = key.Trim().ToLowerInvariant();
+                // The dictionary already uses OrdinalIgnoreCase; no need to lowercase explicitly.
+                key = key.Trim();
                 value = value.Trim().Trim('"').Trim();
 
                 result[key] = value;
