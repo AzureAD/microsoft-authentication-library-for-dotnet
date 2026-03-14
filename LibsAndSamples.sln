@@ -182,6 +182,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheExtension", "tests\dev
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Extensions.Msal", "src\client\Microsoft.Identity.Client.Extensions.Msal\Microsoft.Identity.Client.Extensions.Msal.csproj", "{87679336-95BE-47E4-B42B-8F6860A0B215}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.TestOnly", "src\Microsoft.Identity.Client.TestOnly\Microsoft.Identity.Client.TestOnly.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "tests\devapps\WAM\NetWSLWam\test.csproj", "{43BCA8C7-E9F4-4067-9F54-C2127B82B5E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedIdentityTokenRevocation", "tests\devapps\Managed Identity apps\ManagedIdentityTokenRevocation\ManagedIdentityTokenRevocation.csproj", "{DA9C3258-DEF6-7794-9762-20CF7B826839}"

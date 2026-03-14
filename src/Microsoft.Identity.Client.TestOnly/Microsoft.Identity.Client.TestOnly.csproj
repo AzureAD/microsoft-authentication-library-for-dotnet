@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net48;net8.0</TargetFrameworks>
+    <AssemblyName>Microsoft.Identity.Client.TestOnly</AssemblyName>
+    <RootNamespace>Microsoft.Identity.Client.TestOnly</RootNamespace>
+    <Authors>Microsoft</Authors>
+    <Description>Reusable test infrastructure helpers for Microsoft Authentication Library (MSAL.NET) consumers. Provides mock HTTP factories, message handlers, and logging helpers for test scenarios.</Description>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
+    <!-- System.Net.Http is a framework assembly on netstandard2.0 and net8.0, but needs
+         explicit referencing on net48 to resolve forwarded types correctly. -->
+    <PackageReference Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>
