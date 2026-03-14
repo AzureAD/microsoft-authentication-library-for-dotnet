@@ -114,6 +114,7 @@ namespace Microsoft.Identity.Client
 
         public IEnumerable<string> ClientCapabilities { get; set; }
         public bool SendX5C { get; internal set; } = false;
+        public bool SendCertificateOverMtls { get; internal set; } = false;
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
         public bool MultiCloudSupportEnabled { get; set; } = false;

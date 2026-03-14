@@ -163,6 +163,7 @@ namespace Microsoft.Identity.Client
 
             Config.ClientCredential = new CertificateClientCredential(certificate);
             Config.SendX5C = certificateOptions?.SendX5C ?? false;
+            Config.SendCertificateOverMtls = certificateOptions?.SendCertificateOverMtls ?? false;
             
             return this;
         }
@@ -467,6 +468,20 @@ namespace Microsoft.Identity.Client
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri _))
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
+            }
+
+            // SendCertificateOverMtls is only meaningful for certificate-based credentials.
+            // Although the public API (CertificateOptions on WithCertificate()) makes this
+            // combination nearly impossible to reach via normal usage, we add a defensive
+            // guard here so any future extensibility path surfaces a clear build-time error
+            // rather than a confusing runtime failure.
+            if (Config.SendCertificateOverMtls &&
+                Config.ClientCredential != null &&
+                Config.ClientCredential is not CertificateAndClaimsClientCredential)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    MsalErrorMessage.SendCertificateOverMtlsRequiresCertificate);
             }
 
             ValidateAndUpdateRegion();
