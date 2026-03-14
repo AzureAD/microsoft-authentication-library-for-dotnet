@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       
       - name: Setup .NET
-        uses: actions/setup-dotnet@4d6c8fcf3c8f7a26587f948c88c7c0cbb13c825 # v4
+        uses: actions/setup-dotnet@4d6c8fcf3c8f7a26587f948c88c7c0cbb13c825 # v4.0.0
         with:
           dotnet-version: '8.0.x'
 
@@ -33,7 +33,7 @@ jobs:
         run: dotnet publish -c Release -o ${{github.workspace}}/publish
 
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@afef1131737c56d24af5296b6131d97e0a87843a # v2
+        uses: azure/webapps-deploy@c1b0909bb6b86b0c78dc7e0686f1402b3dcd3b26 # v3
         with:
           app-name: 'msalmsi'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
