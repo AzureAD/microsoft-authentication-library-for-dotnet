@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ─── Target frameworks ─────────────────────────────────────────────── -->
+  <PropertyGroup>
+    <TargetFrameworks>net462;net6.0;net8.0</TargetFrameworks>
+    <AssemblyName>Microsoft.Identity.Client.TestOnly</AssemblyName>
+    <RootNamespace>Microsoft.Identity.Client.TestOnly</RootNamespace>
+    <Configurations>Debug;Release</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
+    <!--This should be passed from the VSTS build-->
+    <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">$(MsalInternalVersion)</MicrosoftIdentityClientVersion>
+    <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
+    <Version>$(MicrosoftIdentityClientVersion)-test.1</Version>
+    <IsPackable>true</IsPackable>
+    <PackageId>Microsoft.Identity.Client.TestOnly</PackageId>
+    <Title>Microsoft Identity Client Test Framework</Title>
+    <Description>Public test framework for Microsoft.Identity.Client (MSAL.NET). Provides mock HTTP infrastructure, test helpers, and utilities for testing applications that use MSAL, including managed identity token acquisition, mTLS Proof-of-Possession, attestation support, and certificate binding.</Description>
+    <PackageTags>Microsoft Authentication Library MSAL Test Mock ManagedIdentity mTLS PoP Attestation</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Microsoft</Authors>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <!-- ─── File inclusions ───────────────────────────────────────────────── -->
+  <ItemGroup>
+    <Compile Include="..\client\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!-- ─── References ────────────────────────────────────────────────────── -->
+  <ItemGroup>
+    <ProjectReference Include="..\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+  </ItemGroup>
+
+</Project>
