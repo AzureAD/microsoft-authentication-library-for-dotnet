@@ -686,6 +686,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var cert = CertHelper.GetOrCreateTestCert();
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithExperimentalFeatures(true)
+                              .WithAuthority(TestConstants.AadAuthorityWithMsftTenantId)
                               .WithClientAssertion(PopDelegate())
                               .WithHttpManager(http)
                               .BuildConcrete();
