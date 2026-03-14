@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPop_WithUnsupportedNonTenantedAuthorityAsync_ThrowsException()
+        public async Task MtlsPop_WithDefaultAuthorityAndWithoutRegion_ThrowsException()
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
