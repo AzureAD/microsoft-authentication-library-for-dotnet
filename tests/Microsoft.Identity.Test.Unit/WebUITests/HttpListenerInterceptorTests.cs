@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             
             var msalEx = (MsalClientException)listenTask.Exception.InnerException;
             Assert.AreEqual(MsalError.AuthenticationFailed, msalEx.ErrorCode);
-            Assert.IsTrue(msalEx.Message.Contains("Expected POST request"), "Error message should explain POST is required");
+            Assert.Contains("Expected POST request", msalEx.Message, "Error message should explain POST is required");
         }
 
         [TestMethod]
@@ -131,8 +131,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             // Assert
             Assert.IsTrue(completed, "Listener did not complete within timeout.");
-            Assert.IsTrue(listenTask.Result.RequestUri.ToString().StartsWith($"http://localhost:{port}/TestPath/"), 
-                "Request URI should include the custom path");
+            Assert.StartsWith($"http://localhost:{port}/TestPath/", listenTask.Result.RequestUri.ToString(), "Request URI should include the custom path");
         }
 
         /// <summary>
@@ -208,8 +207,8 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             
             // Verify the POST data contains the expected values
             string postDataString = System.Text.Encoding.UTF8.GetString(listenTask.Result.PostData);
-            Assert.IsTrue(postDataString.Contains("code=auth_code_value"));
-            Assert.IsTrue(postDataString.Contains("state=state_value"));
+            Assert.Contains("code=auth_code_value", postDataString);
+            Assert.Contains("state=state_value", postDataString);
             
             // Verify the request URI is clean (no query params)
             Assert.AreEqual("/", listenTask.Result.RequestUri.AbsolutePath);

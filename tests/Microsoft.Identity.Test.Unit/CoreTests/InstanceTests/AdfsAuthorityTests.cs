@@ -10,12 +10,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class AdfsAuthorityTests
     {
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://someAdfs.com/a dfs/")]
         [DataRow("http://someAdfs.com/adfs/")]
         public void MalformedAuthority_ThrowsException(string malformedAuthority)
         {
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAdfsAuthority(malformedAuthority)
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 .WithClientSecret(TestConstants.ClientSecret)
                 .Build();
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                    .WithAdfsAuthority(malformedAuthority));
         }

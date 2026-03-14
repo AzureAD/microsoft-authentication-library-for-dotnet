@@ -139,9 +139,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             Assert.AreEqual("Bearer", result.TokenType);
-            Assert.AreEqual(
-                2,
-                (cca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+            Assert.HasCount(2, (cca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens());
         }
 
         private async Task MultipleKeys_Async()
@@ -664,7 +662,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/users").ConfigureAwait(false);
 
             // Check for WWW-Authenticate header
-            Assert.IsTrue(response.StatusCode == HttpStatusCode.Unauthorized, "The response should be Unauthorized (401)");
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode, "The response should be Unauthorized (401)");
 
             // Extract WWW-Authenticate header to get the nonce
             var authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(

@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             byte[] result = storage.ReadData();
 
             // Assert
-            Assert.AreEqual(0, result.Length);
+            Assert.IsEmpty(result);
         }
 
       
@@ -132,9 +132,9 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             }
 
             // Assert            
-            Assert.IsTrue(stringListener.CurrentLog.Contains("TestSource Error"));
-            Assert.IsTrue(stringListener.CurrentLog.Contains("InvalidOperationException"));
-            Assert.IsTrue(stringListener.CurrentLog.Contains("some error"));
+            Assert.Contains("TestSource Error", stringListener.CurrentLog);
+            Assert.Contains("InvalidOperationException", stringListener.CurrentLog);
+            Assert.Contains("some error", stringListener.CurrentLog);
         }
 
         [TestMethod]
