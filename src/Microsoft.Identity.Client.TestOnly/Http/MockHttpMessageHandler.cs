@@ -22,8 +22,13 @@ namespace Microsoft.Identity.Client.TestOnly.Http
     ///
     /// Validation failures throw <see cref="MockHttpValidationException"/> rather than using
     /// a specific test framework, making this class usable from xUnit, NUnit, MSTest, and others.
+    ///
+    /// This class is intentionally not <c>sealed</c> so that MSAL's own test infrastructure can
+    /// re-export it under a different namespace without duplicating logic. Do not add test-framework
+    /// assertions in derived classes; extend the base-class validation by overriding
+    /// <see cref="System.Net.Http.HttpClientHandler.SendAsync"/> and calling <c>base.SendAsync</c>.
     /// </remarks>
-    public sealed class MockHttpMessageHandler : HttpClientHandler
+    public class MockHttpMessageHandler : HttpClientHandler
     {
         /// <summary>Gets or sets the response to return for the matched request.</summary>
         public HttpResponseMessage ResponseMessage { get; set; }
