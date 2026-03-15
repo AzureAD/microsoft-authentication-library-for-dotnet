@@ -34,6 +34,7 @@ Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.PresentRequestHea
 Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.PresentRequestHeaders.set -> void
 Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ResponseMessage.get -> System.Net.Http.HttpResponseMessage
 Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.ResponseMessage.set -> void
+override Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage>
 Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.UnExpectedPostData.get -> System.Collections.Generic.IDictionary<string, string>
 Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.UnExpectedPostData.set -> void
 Microsoft.Identity.Client.TestOnly.Http.MockHttpMessageHandler.UnexpectedRequestHeaders.get -> System.Collections.Generic.IList<string>
