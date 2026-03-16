@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -131,6 +132,42 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Sets the certificate associated with the application.
+        /// Applicable to first-party applications only, this method also allows to specify 
+        /// if the <see href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.7">x5c claim</see> should be sent to Azure AD.
+        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
+        /// this method will send the certificate chain to Azure AD along with the token request,
+        /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
+        /// This saves the application admin from the need to explicitly manage the certificate rollover
+        /// (either via portal or PowerShell/CLI operation). For details see https://aka.ms/msal-net-sni
+        /// </summary>
+        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        /// <param name="certificateOptions">Configuration options for certificate handling. See <see cref="CertificateOptions"/> for more information.</param>
+        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, CertificateOptions certificateOptions)
+        {
+            if (certificate == null)
+            {
+                throw new ArgumentNullException(nameof(certificate));
+            }
+
+            if (!certificate.HasPrivateKey)
+            {
+                throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificate)));
+            }
+
+            if (certificateOptions?.AssociateTokensWithCertificate ?? false)
+            {
+                Config.CertificateIdToAssociateWithToken = certificate.SerialNumber;
+            }
+
+            Config.ClientCredential = new CertificateClientCredential(certificate);
+            Config.SendX5C = certificateOptions?.SendX5C ?? false;
+            
+            return this;
+        }
+
+        /// <summary>
         /// Sets the certificate associated with the application along with the specific claims to sign.
         /// By default, this will merge the <paramref name="claimsToSign"/> with the default required set of claims needed for authentication.
         /// If <paramref name="mergeWithDefaultClaims"/> is set to false, you will need to provide the required default claims. See https://aka.ms/msal-net-client-assertion
@@ -142,6 +179,8 @@ namespace Microsoft.Identity.Client
         /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
         /// Does not send the certificate (as x5c parameter) with the request by default.
         /// </remarks>
+        [Obsolete("This method is obsolete. Use the WithExtraClientAssertionClaims method on AcquireTokenForClientParameterBuilder", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims)
         {
             return WithClientClaims(certificate, claimsToSign, mergeWithDefaultClaims, false);
@@ -157,6 +196,8 @@ namespace Microsoft.Identity.Client
         /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
         /// <param name="sendX5C">To send X5C with every request or not.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.</remarks>
+        [Obsolete("This method is obsolete. Use the WithExtraClientAssertionClaims method on AcquireTokenForClientParameterBuilder", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true, bool sendX5C = false)
         {
             if (certificate == null)
@@ -233,12 +274,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientAssertionDelegate));
             }
 
+            // String assertion => cannot return TokenBindingCertificate => use string credential
             return WithClientAssertionInternal(
-                (opts, ct) =>
-                    Task.FromResult(new ClientSignedAssertion
-                    {
-                        Assertion = clientAssertionDelegate()   // bearer
-                    }));
+                (opts, ct) => Task.FromResult(clientAssertionDelegate()));
         }
 
         /// <summary>
@@ -256,12 +294,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
             }
 
+            // String assertion => cannot return TokenBindingCertificate => use string credential
             return WithClientAssertionInternal(
-                async (opts, ct) =>
-                {
-                    string jwt = await clientAssertionAsyncDelegate(ct).ConfigureAwait(false);
-                    return new ClientSignedAssertion { Assertion = jwt };    // bearer
-                });
+                (opts, ct) => clientAssertionAsyncDelegate(ct));
         }
 
         /// <summary>
@@ -278,12 +313,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
             }
 
+            // String assertion => cannot return TokenBindingCertificate => use string credential
             return WithClientAssertionInternal(
-                async (opts, _) =>
-                {
-                    string jwt = await clientAssertionAsyncDelegate(opts).ConfigureAwait(false);
-                    return new ClientSignedAssertion { Assertion = jwt };    // bearer
-                });
+                (opts, ct) => clientAssertionAsyncDelegate(opts));
         }
 
         /// <summary>
@@ -302,7 +334,8 @@ namespace Microsoft.Identity.Client
             CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
             ValidateUseOfExperimentalFeature();
-            return WithClientAssertionInternal(clientSignedAssertionProvider);
+            return WithClientAssertionInternal(
+                clientSignedAssertionProvider: clientSignedAssertionProvider);
         }
 
         /// <summary>
@@ -314,6 +347,18 @@ namespace Microsoft.Identity.Client
             Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
             Config.ClientCredential = new ClientAssertionDelegateCredential(clientSignedAssertionProvider);
+            return this;
+        }
+
+        /// <summary>
+        /// Internal helper to set the client assertion provider that returns a string.
+        /// </summary>
+        /// <param name="clientAssertionProvider"></param>
+        /// <returns></returns>
+        internal ConfidentialClientApplicationBuilder WithClientAssertionInternal(
+            Func<AssertionRequestOptions, CancellationToken, Task<string>> clientAssertionProvider)
+        {
+            Config.ClientCredential = new ClientAssertionStringDelegateCredential(clientAssertionProvider);
             return this;
         }
 

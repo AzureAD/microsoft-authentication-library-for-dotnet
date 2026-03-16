@@ -23,11 +23,11 @@ namespace Microsoft.Identity.Test.Unit
             int expectedAccountCount,
             int expectedAppMetadataCount = 0)
         {
-            Assert.AreEqual(expectedAtCount, accessor.GetAllAccessTokens().Count, "Access Tokens");
-            Assert.AreEqual(expectedRtCount, accessor.GetAllRefreshTokens().Count, "Refresh Tokens");
-            Assert.AreEqual(expectedIdtCount, accessor.GetAllIdTokens().Count, "Id Tokens");
-            Assert.AreEqual(expectedAccountCount, accessor.GetAllAccounts().Count, "Accounts");
-            Assert.AreEqual(expectedAppMetadataCount, accessor.GetAllAppMetadata().Count, "App Metadata");
+            Assert.HasCount(expectedAtCount, accessor.GetAllAccessTokens(), "Access Tokens");
+            Assert.HasCount(expectedRtCount, accessor.GetAllRefreshTokens(), "Refresh Tokens");
+            Assert.HasCount(expectedIdtCount, accessor.GetAllIdTokens(), "Id Tokens");
+            Assert.HasCount(expectedAccountCount, accessor.GetAllAccounts(), "Accounts");
+            Assert.HasCount(expectedAppMetadataCount, accessor.GetAllAppMetadata(), "App Metadata");
         }
 
         public static void InitializeTokenCacheFromFile(this IClientApplicationBase app, string resourceFile, bool updateATExpiry = false)

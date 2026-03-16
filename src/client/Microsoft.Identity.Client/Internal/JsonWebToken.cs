@@ -3,13 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography;
 #if SUPPORTS_SYSTEM_TEXT_JSON
-using JObject = System.Text.Json.Nodes.JsonObject;
+using System.Text.Json;
 #else
 using Microsoft.Identity.Json.Linq;
 #endif
@@ -23,6 +24,7 @@ namespace Microsoft.Identity.Client.Internal
         public const long JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
 
         private readonly IDictionary<string, string> _claimsToSign;
+        private readonly string _claimsToSignJson;
         private readonly ICryptographyManager _cryptographyManager;
         private readonly string _clientId;
         private readonly string _audience;
@@ -47,12 +49,27 @@ namespace Microsoft.Identity.Client.Internal
             _appendDefaultClaims = appendDefaultClaims;
         }
 
+        public JsonWebToken(
+             ICryptographyManager cryptographyManager,
+             string clientId,
+             string audience,
+             string claimsToSignJson,
+             bool appendDefaultClaims = false)
+         : this(cryptographyManager, clientId, audience)
+        {
+            _claimsToSignJson = claimsToSignJson;
+            _appendDefaultClaims = appendDefaultClaims;
+        }
+
         private string CreateJsonPayload()
         {
             long validFrom = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             long validTo = validFrom + JwtToAadLifetimeInSeconds; // 10 min
 
-            if (_claimsToSign == null || _claimsToSign.Count == 0)
+            bool hasClaimsFromDictionary = _claimsToSign != null && _claimsToSign.Count > 0;
+            bool hasClaimsFromJson = !string.IsNullOrWhiteSpace(_claimsToSignJson);
+
+            if (!hasClaimsFromDictionary && !hasClaimsFromJson)
             {
                 return $$"""{"aud":"{{_audience}}","iss":"{{_clientId}}","sub":"{{_clientId}}","nbf":"{{validFrom}}","exp":"{{validTo}}","jti":"{{Guid.NewGuid()}}"}""";
             }
@@ -70,17 +87,56 @@ namespace Microsoft.Identity.Client.Internal
                 payload.Append('{');
             }
 
-            var json = new JObject();
-
-            foreach (var claim in _claimsToSign)
+            // Handle claims from JSON string
+            if (hasClaimsFromJson)
             {
-                json[claim.Key] = claim.Value;
+                // Remove outer braces from JSON string and append
+                string jsonClaims = _claimsToSignJson.Trim();
+                if (jsonClaims.StartsWith("{") && jsonClaims.EndsWith("}"))
+                {
+                    jsonClaims = jsonClaims.Substring(1, jsonClaims.Length - 2);
+                }
+
+                payload.Append(jsonClaims);
             }
 
-            var jsonClaims = JsonHelper.JsonObjectToString(json);
+            // Handle claims from dictionary
+            else if (hasClaimsFromDictionary)
+            {
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                using (var stream = new MemoryStream())
+                {
+                    using (var writer = new Utf8JsonWriter(stream))
+                    {
+                        writer.WriteStartObject();
 
-            //Remove extra brackets from JSON result
-            payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
+                        foreach (var claim in _claimsToSign)
+                        {
+                            writer.WriteString(claim.Key, claim.Value);
+                        }
+
+                        writer.WriteEndObject();
+                    }
+
+                    var jsonClaims = Encoding.UTF8.GetString(stream.ToArray());
+
+                    //Remove extra brackets from JSON result
+                    payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
+                }
+#else
+                var json = new JObject();
+
+                foreach (var claim in _claimsToSign)
+                {
+                    json[claim.Key] = claim.Value;
+                }
+
+                var jsonClaims = JsonHelper.JsonObjectToString(json);
+
+                //Remove extra brackets from JSON result
+                payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
+#endif
+            }
 
             payload.Append('}');
 
@@ -146,11 +202,11 @@ namespace Microsoft.Identity.Client.Internal
 
                     thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
 #else
-                using (var hasher = SHA256.Create())
-                {
-                    byte[] hash = hasher.ComputeHash(certificate.RawData);
-                    thumbprint = Base64UrlHelpers.Encode(hash);
-                }
+                    using (var hasher = SHA256.Create())
+                    {
+                        byte[] hash = hasher.ComputeHash(certificate.RawData);
+                        thumbprint = Base64UrlHelpers.Encode(hash);
+                    }
 #endif
                 }
                 else

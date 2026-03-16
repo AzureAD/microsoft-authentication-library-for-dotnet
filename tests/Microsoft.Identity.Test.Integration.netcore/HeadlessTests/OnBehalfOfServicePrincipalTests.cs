@@ -9,6 +9,8 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -37,8 +39,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
 
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            var cert = settings.Certificate;
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             IReadOnlyList<string> middleTierApiScopes = new List<string>() { OBOServicePpeClientID + "/.default" };
             IReadOnlyList<string> downstreamApiScopes = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
@@ -102,8 +104,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
 
-            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            var cert = settings.Certificate;
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             IReadOnlyList<string> middleTierApiScopes = new List<string>() { OBOServicePpeClientID + "/.default" };
             IReadOnlyList<string> downstreamApiScopes = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
@@ -143,10 +145,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNull(
                 userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
                 "The cache expiry is not set because there is an RT in the cache");
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts());
 
             Trace.WriteLine("3. Later, mid-tier needs the token again, and one is in the cache");
             authenticationResult = await middletierServiceApp
@@ -172,10 +174,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNull(
                 userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
                 "The cache expiry is not set because there is an RT in the cache");
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens());
+            Assert.HasCount(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts());
 
             Trace.WriteLine("5. Subsequent acquire token calls should return cached token.");
             authenticationResult = await middletierServiceApp

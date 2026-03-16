@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             VerifyPoPToken(clientId, requestUri, method, result.AccessToken, result.TokenType);
         }
 
-        public static void VerifyPoPToken(
+        public static ClaimsPrincipal VerifyPoPToken(
             string clientId, 
             string requestUri, 
             HttpMethod method, 
@@ -61,6 +61,8 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             ClaimsPrincipal innerTokenClaims = IdToken.Parse(assertionWithoutShr).ClaimsPrincipal;
             string reqCnf = innerTokenClaims.FindFirst("cnf").Value;
             Assert.IsNotNull(reqCnf);
+
+            return popClaims;
         }
 
         public static async Task VerifyPopNonceAsync(string nonce)
@@ -68,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             var response = await s_httpClient.GetAsync(
                 $"https://testingsts.azurewebsites.net/servernonce/validate?serverNonce={nonce}").ConfigureAwait(false);
 
-            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
+            Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
 
     }

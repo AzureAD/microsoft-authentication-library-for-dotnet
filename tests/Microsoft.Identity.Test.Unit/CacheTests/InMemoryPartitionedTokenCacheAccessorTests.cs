@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     public class InMemoryPartitionedTokenCacheAccessorTests
     {
         #region Access token tests
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public void SaveAccessToken_Test(bool isAppCache)
@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Save with new item
             accessor.SaveAccessToken(at1);
 
-            Assert.AreEqual(1, accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(1, GetAccessTokenCache(accessor, isAppCache).Count);
+            Assert.HasCount(1, accessor.GetAllAccessTokens());
+            Assert.HasCount(1, GetAccessTokenCache(accessor, isAppCache));
             string partitionKey1 = GetPartitionKey(isAppCache, at1);
             Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey1][at1.CacheKey]);
 
@@ -39,8 +39,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Save under the existing partition
             accessor.SaveAccessToken(at2);
 
-            Assert.AreEqual(2, accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(1, GetAccessTokenCache(accessor, isAppCache).Count);
+            Assert.HasCount(2, accessor.GetAllAccessTokens());
+            Assert.HasCount(1, GetAccessTokenCache(accessor, isAppCache));
             Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey1][at2.CacheKey]);
 
             var at3 = TokenCacheHelper.CreateAccessTokenItem("scope1", "tenant2", "homeAccountId2");
@@ -50,13 +50,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Save overwrites the existing token
             accessor.SaveAccessToken(at3);
 
-            Assert.AreEqual(3, accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(2, GetAccessTokenCache(accessor, isAppCache).Count);
+            Assert.HasCount(3, accessor.GetAllAccessTokens());
+            Assert.HasCount(2, GetAccessTokenCache(accessor, isAppCache));
             string partitionKey2 = GetPartitionKey(isAppCache, at3);
             Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey2][at3.CacheKey]);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public void DeleteAccessToken_Test(bool isAppCache)
@@ -73,15 +73,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveAccessToken(at2);
             accessor.SaveAccessToken(at3);
 
-            Assert.AreEqual(3, accessor.GetAllAccessTokens().Count);
+            Assert.HasCount(3, accessor.GetAllAccessTokens());
 
             // Assert: Delete an existing item
             accessor.DeleteAccessToken(at1);
 
-            Assert.AreEqual(2, accessor.GetAllAccessTokens().Count);
+            Assert.HasCount(2, accessor.GetAllAccessTokens());
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public void GetAllAccessTokens_Test(bool isAppCache)
@@ -94,22 +94,22 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string partitionKey2 = GetPartitionKey(isAppCache, at3);
 
             // Assert: Returns empty collection
-            Assert.AreEqual(0, accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(0, accessor.GetAllAccessTokens(partitionKey1).Count);
+            Assert.IsEmpty(accessor.GetAllAccessTokens());
+            Assert.IsEmpty(accessor.GetAllAccessTokens(partitionKey1));
 
             accessor.SaveAccessToken(at1);
             accessor.SaveAccessToken(at2);
             accessor.SaveAccessToken(at3);
 
             // Assert: Get all tokens and get all tokens by partition key
-            Assert.AreEqual(3, accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(2, accessor.GetAllAccessTokens(partitionKey1).Count);
-            Assert.AreEqual(1, accessor.GetAllAccessTokens(partitionKey2).Count);
+            Assert.HasCount(3, accessor.GetAllAccessTokens());
+            Assert.HasCount(2, accessor.GetAllAccessTokens(partitionKey1));
+            Assert.HasCount(1, accessor.GetAllAccessTokens(partitionKey2));
         }
         #endregion
 
         #region App metadata tests
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
 
@@ -121,15 +121,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveAppMetadata(TokenCacheHelper.CreateAppMetadataItem());
             accessor.SaveAppMetadata(TokenCacheHelper.CreateAppMetadataItem());
 
-            Assert.AreEqual(1, GetAppMetadataCache(accessor, isAppCache).Count);
+            Assert.HasCount(1, GetAppMetadataCache(accessor, isAppCache));
 
             // Assert: Different key
             accessor.SaveAppMetadata(TokenCacheHelper.CreateAppMetadataItem(TestConstants.ClientId2));
 
-            Assert.AreEqual(2, GetAppMetadataCache(accessor, isAppCache).Count);
+            Assert.HasCount(2, GetAppMetadataCache(accessor, isAppCache));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
 
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(appMetadataItem.CacheKey, accessor.GetAppMetadata(appMetadataItem).CacheKey);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
 
@@ -154,14 +154,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveAppMetadata(TokenCacheHelper.CreateAppMetadataItem());
             accessor.SaveAppMetadata(TokenCacheHelper.CreateAppMetadataItem());
 
-            Assert.AreEqual(1, GetAppMetadataCache(accessor, isAppCache).Count);
-            Assert.AreEqual(1, accessor.GetAllAppMetadata().Count);
+            Assert.HasCount(1, GetAppMetadataCache(accessor, isAppCache));
+            Assert.HasCount(1, accessor.GetAllAppMetadata());
 
             // Assert: Different key
             accessor.SaveAppMetadata(TokenCacheHelper.CreateAppMetadataItem(TestConstants.ClientId2));
 
-            Assert.AreEqual(2, GetAppMetadataCache(accessor, isAppCache).Count);
-            Assert.AreEqual(2, accessor.GetAllAppMetadata().Count);
+            Assert.HasCount(2, GetAppMetadataCache(accessor, isAppCache));
+            Assert.HasCount(2, accessor.GetAllAppMetadata());
         }
         #endregion
 
@@ -176,8 +176,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Saves with new item
             accessor.SaveRefreshToken(rt1);
 
-            Assert.AreEqual(1, accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(1, accessor.RefreshTokenCacheDictionary.Count);
+            Assert.HasCount(1, accessor.GetAllRefreshTokens());
+            Assert.HasCount(1, accessor.RefreshTokenCacheDictionary);
             string partitionKey1 = CacheKeyFactory.GetKeyFromCachedItem(rt1);
             Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey1][rt1.CacheKey]);
 
@@ -186,8 +186,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Save under the existing partition
             accessor.SaveRefreshToken(rt2);
 
-            Assert.AreEqual(2, accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(1, accessor.RefreshTokenCacheDictionary.Count);
+            Assert.HasCount(2, accessor.GetAllRefreshTokens());
+            Assert.HasCount(1, accessor.RefreshTokenCacheDictionary);
             Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey1][rt2.CacheKey]);
 
             var rt3 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion2", "homeAccountId");
@@ -197,8 +197,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Save overwrites the existing token
             accessor.SaveRefreshToken(rt3);
 
-            Assert.AreEqual(3, accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(2, accessor.RefreshTokenCacheDictionary.Count);
+            Assert.HasCount(3, accessor.GetAllRefreshTokens());
+            Assert.HasCount(2, accessor.RefreshTokenCacheDictionary);
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(rt3);
             Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey2][rt3.CacheKey]);
         }
@@ -218,12 +218,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveRefreshToken(rt2);
             accessor.SaveRefreshToken(rt3);
 
-            Assert.AreEqual(3, accessor.GetAllRefreshTokens().Count);
+            Assert.HasCount(3, accessor.GetAllRefreshTokens());
 
             // Assert: Delete on existing item
             accessor.DeleteRefreshToken(rt1);
 
-            Assert.AreEqual(2, accessor.GetAllRefreshTokens().Count);
+            Assert.HasCount(2, accessor.GetAllRefreshTokens());
         }
 
         [TestMethod]
@@ -237,17 +237,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(rt3);
 
             // Assert: Returns empty collection
-            Assert.AreEqual(0, accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(0, accessor.GetAllRefreshTokens(partitionKey1).Count);
+            Assert.IsEmpty(accessor.GetAllRefreshTokens());
+            Assert.IsEmpty(accessor.GetAllRefreshTokens(partitionKey1));
 
             accessor.SaveRefreshToken(rt1);
             accessor.SaveRefreshToken(rt2);
             accessor.SaveRefreshToken(rt3);
 
             // Assert: Get all tokens and get all tokens by partition key
-            Assert.AreEqual(3, accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(2, accessor.GetAllRefreshTokens(partitionKey1).Count);
-            Assert.AreEqual(1, accessor.GetAllRefreshTokens(partitionKey2).Count);
+            Assert.HasCount(3, accessor.GetAllRefreshTokens());
+            Assert.HasCount(2, accessor.GetAllRefreshTokens(partitionKey1));
+            Assert.HasCount(1, accessor.GetAllRefreshTokens(partitionKey2));
         }
         #endregion
 
@@ -262,8 +262,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Saves with new item
             accessor.SaveIdToken(idt1);
 
-            Assert.AreEqual(1, accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(1, accessor.IdTokenCacheDictionary.Count);
+            Assert.HasCount(1, accessor.GetAllIdTokens());
+            Assert.HasCount(1, accessor.IdTokenCacheDictionary);
             string partitionKey1 = CacheKeyFactory.GetKeyFromCachedItem(idt1);
             Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey1][idt1.CacheKey]);
 
@@ -272,8 +272,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Save under the existing partition
             accessor.SaveIdToken(idt2);
 
-            Assert.AreEqual(2, accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(1, accessor.IdTokenCacheDictionary.Count);
+            Assert.HasCount(2, accessor.GetAllIdTokens());
+            Assert.HasCount(1, accessor.IdTokenCacheDictionary);
             Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey1][idt2.CacheKey]);
 
             var idt3 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId2");
@@ -283,8 +283,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Save overwrites the existing token
             accessor.SaveIdToken(idt3);
 
-            Assert.AreEqual(3, accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(2, accessor.IdTokenCacheDictionary.Count);
+            Assert.HasCount(3, accessor.GetAllIdTokens());
+            Assert.HasCount(2, accessor.IdTokenCacheDictionary);
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(idt3);
             Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey2][idt3.CacheKey]);
         }
@@ -304,12 +304,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveIdToken(idt2);
             accessor.SaveIdToken(idt3);
 
-            Assert.AreEqual(3, accessor.GetAllIdTokens().Count);
+            Assert.HasCount(3, accessor.GetAllIdTokens());
 
             // Assert: Delete on existing item
             accessor.DeleteIdToken(idt1);
 
-            Assert.AreEqual(2, accessor.GetAllIdTokens().Count);
+            Assert.HasCount(2, accessor.GetAllIdTokens());
         }
 
         [TestMethod]
@@ -345,17 +345,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(idt2);
 
             // Assert: Returns empty collection
-            Assert.AreEqual(0, accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(0, accessor.GetAllIdTokens(partitionKey1).Count);
+            Assert.IsEmpty(accessor.GetAllIdTokens());
+            Assert.IsEmpty(accessor.GetAllIdTokens(partitionKey1));
 
             accessor.SaveIdToken(idt1);
             accessor.SaveIdToken(idt2);
             accessor.SaveIdToken(idt3);
 
             // Assert: Get all tokens and get all tokens by partition key
-            Assert.AreEqual(3, accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(2, accessor.GetAllIdTokens(partitionKey1).Count);
-            Assert.AreEqual(1, accessor.GetAllIdTokens(partitionKey2).Count);
+            Assert.HasCount(3, accessor.GetAllIdTokens());
+            Assert.HasCount(2, accessor.GetAllIdTokens(partitionKey1));
+            Assert.HasCount(1, accessor.GetAllIdTokens(partitionKey2));
         }
         #endregion
 
@@ -370,8 +370,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Saves with new item
             accessor.SaveAccount(acc1);
 
-            Assert.AreEqual(1, accessor.GetAllAccounts().Count);
-            Assert.AreEqual(1, accessor.AccountCacheDictionary.Count);
+            Assert.HasCount(1, accessor.GetAllAccounts());
+            Assert.HasCount(1, accessor.AccountCacheDictionary);
             string partitionKey1 = CacheKeyFactory.GetKeyFromCachedItem(acc1);
             Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey1][acc1.CacheKey]);
 
@@ -380,8 +380,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Save under the existing partition
             accessor.SaveAccount(acc2);
 
-            Assert.AreEqual(2, accessor.GetAllAccounts().Count);
-            Assert.AreEqual(1, accessor.AccountCacheDictionary.Count);
+            Assert.HasCount(2, accessor.GetAllAccounts());
+            Assert.HasCount(1, accessor.AccountCacheDictionary);
             Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey1][acc2.CacheKey]);
 
             var acc3 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId2");
@@ -391,8 +391,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert: Save overwrites the existing token
             accessor.SaveAccount(acc3);
 
-            Assert.AreEqual(3, accessor.GetAllAccounts().Count);
-            Assert.AreEqual(2, accessor.AccountCacheDictionary.Count);
+            Assert.HasCount(3, accessor.GetAllAccounts());
+            Assert.HasCount(2, accessor.AccountCacheDictionary);
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(acc3);
             Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey2][acc3.CacheKey]);
         }
@@ -412,12 +412,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveAccount(acc2);
             accessor.SaveAccount(acc3);
 
-            Assert.AreEqual(3, accessor.GetAllAccounts().Count);
+            Assert.HasCount(3, accessor.GetAllAccounts());
 
             // Assert: Delete on existing item
             accessor.DeleteAccount(acc1);
 
-            Assert.AreEqual(2, accessor.GetAllAccounts().Count);
+            Assert.HasCount(2, accessor.GetAllAccounts());
         }
 
         [TestMethod]
@@ -451,17 +451,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(acc2);
 
             // Assert: Returns empty collection
-            Assert.AreEqual(0, accessor.GetAllAccounts().Count);
-            Assert.AreEqual(0, accessor.GetAllAccounts(partitionKey1).Count);
+            Assert.IsEmpty(accessor.GetAllAccounts());
+            Assert.IsEmpty(accessor.GetAllAccounts(partitionKey1));
 
             accessor.SaveAccount(acc1);
             accessor.SaveAccount(acc2);
             accessor.SaveAccount(acc3);
 
             // Assert: Get all tokens and get all tokens by partition key
-            Assert.AreEqual(3, accessor.GetAllAccounts().Count);
-            Assert.AreEqual(2, accessor.GetAllAccounts(partitionKey1).Count);
-            Assert.AreEqual(1, accessor.GetAllAccounts(partitionKey2).Count);
+            Assert.HasCount(3, accessor.GetAllAccounts());
+            Assert.HasCount(2, accessor.GetAllAccounts(partitionKey1));
+            Assert.HasCount(1, accessor.GetAllAccounts(partitionKey2));
         }
         #endregion
 
@@ -472,11 +472,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), null);
             accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem());
 
-            Assert.AreEqual(1, accessor.AccessTokenCacheDictionary.Count);
+            Assert.HasCount(1, accessor.AccessTokenCacheDictionary);
 
             accessor.Clear();
 
-            Assert.AreEqual(0, accessor.AccessTokenCacheDictionary.Count);
+            Assert.IsEmpty(accessor.AccessTokenCacheDictionary);
         }
 
         [TestMethod]
@@ -488,17 +488,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveIdToken(TokenCacheHelper.CreateIdTokenCacheItem());
             accessor.SaveAccount(TokenCacheHelper.CreateAccountItem());
 
-            Assert.AreEqual(1, accessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual(1, accessor.RefreshTokenCacheDictionary.Count);
-            Assert.AreEqual(1, accessor.IdTokenCacheDictionary.Count);
-            Assert.AreEqual(1, accessor.AccountCacheDictionary.Count);
+            Assert.HasCount(1, accessor.AccessTokenCacheDictionary);
+            Assert.HasCount(1, accessor.RefreshTokenCacheDictionary);
+            Assert.HasCount(1, accessor.IdTokenCacheDictionary);
+            Assert.HasCount(1, accessor.AccountCacheDictionary);
 
             accessor.Clear();
 
-            Assert.AreEqual(0, accessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual(0, accessor.RefreshTokenCacheDictionary.Count);
-            Assert.AreEqual(0, accessor.IdTokenCacheDictionary.Count);
-            Assert.AreEqual(0, accessor.AccountCacheDictionary.Count);
+            Assert.IsEmpty(accessor.AccessTokenCacheDictionary);
+            Assert.IsEmpty(accessor.RefreshTokenCacheDictionary);
+            Assert.IsEmpty(accessor.IdTokenCacheDictionary);
+            Assert.IsEmpty(accessor.AccountCacheDictionary);
         }
 
         [TestMethod]
@@ -550,41 +550,41 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), null);
 
-            var ex = Assert.ThrowsException<MsalClientException>(() => accessor.SaveRefreshToken(TokenCacheHelper.CreateRefreshTokenItem()));
+            var ex = Assert.Throws<MsalClientException>(() => accessor.SaveRefreshToken(TokenCacheHelper.CreateRefreshTokenItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.SaveIdToken(TokenCacheHelper.CreateIdTokenCacheItem()));
+            ex = Assert.Throws<MsalClientException>(() => accessor.SaveIdToken(TokenCacheHelper.CreateIdTokenCacheItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.SaveAccount(TokenCacheHelper.CreateAccountItem()));
+            ex = Assert.Throws<MsalClientException>(() => accessor.SaveAccount(TokenCacheHelper.CreateAccountItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.GetIdToken(TokenCacheHelper.CreateAccessTokenItem()));
+            ex = Assert.Throws<MsalClientException>(() => accessor.GetIdToken(TokenCacheHelper.CreateAccessTokenItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.GetAccount(TokenCacheHelper.CreateAccountItem()));
+            ex = Assert.Throws<MsalClientException>(() => accessor.GetAccount(TokenCacheHelper.CreateAccountItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.DeleteRefreshToken(TokenCacheHelper.CreateRefreshTokenItem()));
+            ex = Assert.Throws<MsalClientException>(() => accessor.DeleteRefreshToken(TokenCacheHelper.CreateRefreshTokenItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.DeleteIdToken(TokenCacheHelper.CreateIdTokenCacheItem()));
+            ex = Assert.Throws<MsalClientException>(() => accessor.DeleteIdToken(TokenCacheHelper.CreateIdTokenCacheItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            ex = Assert.ThrowsException<MsalClientException>(() => accessor.DeleteAccount(TokenCacheHelper.CreateAccountItem()));
+            ex = Assert.Throws<MsalClientException>(() => accessor.DeleteAccount(TokenCacheHelper.CreateAccountItem()));
             Assert.AreEqual(MsalError.CombinedUserAppCacheNotSupported, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.CombinedUserAppCacheNotSupported, ex.Message);
 
-            Assert.AreEqual(0, accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(0, accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(0, accessor.GetAllAccounts().Count);
+            Assert.IsEmpty(accessor.GetAllRefreshTokens());
+            Assert.IsEmpty(accessor.GetAllIdTokens());
+            Assert.IsEmpty(accessor.GetAllAccounts());
         }
         #endregion
 

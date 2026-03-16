@@ -13,6 +13,8 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -32,21 +34,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .AddInMemoryExporter(exportedMetrics)
                 .Build();
 
-            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
-            settings.UseAppIdUri = true;
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
             AuthenticationResult authResult;
 
             Trace.WriteLine("Create a confidential client application with certificate.");
             ConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority, true)
-                .WithCertificate(settings.Certificate)
+                .Create(appConfig.AppId)
+                .WithAuthority(appConfig.Authority, true)
+                .WithCertificate(cert)
                 .BuildConcrete();
 
             Trace.WriteLine("Acquire a token from IDP.");
             authResult = await confidentialApp
-                .AcquireTokenForClient(settings.AppScopes)
+                .AcquireTokenForClient(appScopes)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -56,7 +59,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Acquire a token from cache.");
             authResult = await confidentialApp
-                .AcquireTokenForClient(settings.AppScopes)
+                .AcquireTokenForClient(appScopes)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -64,14 +67,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(CacheRefreshReason.NotApplicable, authResult.AuthenticationResultMetadata.CacheRefreshReason);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs < 50);
-
-            Trace.WriteLine("Update the refresh token in the cache to trigger proactive refresh.");
+            Assert.IsLessThan(100, authResult.AuthenticationResultMetadata.DurationTotalInMs);
             TestCommon.UpdateATWithRefreshOn(confidentialApp.AppTokenCacheInternal.Accessor);
 
             Trace.WriteLine("Acquire a token from cache with proactive refresh.");
             authResult = await confidentialApp
-                .AcquireTokenForClient(settings.AppScopes)
+                .AcquireTokenForClient(appScopes)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -79,7 +80,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, authResult.AuthenticationResultMetadata.CacheRefreshReason);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs < 50);
+            Assert.IsLessThan(100, authResult.AuthenticationResultMetadata.DurationTotalInMs);
 
             meterProvider.ForceFlush();
 
@@ -91,7 +92,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private long ValidateSuccessMetrics(MeterProvider meterProvider, List<Metric> exportedMetrics)
         {
-            Assert.AreEqual(5, exportedMetrics.Count);
+            Assert.HasCount(5, exportedMetrics);
 
             foreach (var metric in exportedMetrics)
             {

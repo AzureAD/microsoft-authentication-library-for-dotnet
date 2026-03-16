@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange - Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             var result = await RunTestForUserAsync(user, app).ConfigureAwait(false);
         }
 
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task InteractiveConsentPromptAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             await RunPromptTestForUserAsync(user, app, Prompt.Consent, true).ConfigureAwait(false);
             await RunPromptTestForUserAsync(user, app, Prompt.Consent, false).ConfigureAwait(false);
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result.Account.GetTenantProfiles());
             Assert.IsTrue(result.Account.GetTenantProfiles().Any());
             Assert.AreEqual(user.Upn, result.Account.Username);
-            Assert.IsTrue(app.Authority.Contains(result.Account.Environment));
+            Assert.Contains(result.Account.Environment, app.Authority);
 
             Trace.WriteLine("Part 2 - Get Accounts");
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result.Account);
             Assert.IsNotNull(result.Account.GetTenantProfiles());
             Assert.IsTrue(result.Account.GetTenantProfiles().Any());
-            Assert.IsTrue(app.Authority.Contains(result.Account.Environment));
+            Assert.Contains(result.Account.Environment, app.Authority);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgsPublicClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                .Create(app.AppId)
@@ -239,8 +239,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
-            Assert.IsTrue(result.AuthenticationResultMetadata.DurationInHttpInMs > 0);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationTotalInMs);
+            Assert.IsGreaterThan(0, result.AuthenticationResultMetadata.DurationInHttpInMs);
 
             userCacheAccess.AssertAccessCounts(0, 1);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(user, pca, result).ConfigureAwait(false);

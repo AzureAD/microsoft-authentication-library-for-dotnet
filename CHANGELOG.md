@@ -1,3 +1,67 @@
+4.83.1
+======
+
+### Bug Fixes
+
+* Fix IMDS endpoint cache not being reset during test cleanup [#5830](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5830)
+  
+4.83.0
+======
+
+### New Features
+
+* **Agent Skills**: Added Agent Skills catalog with complete coverage of both Confidential Client Authentication and mTLS PoP flows [#5733](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5733)
+* **mTLS PoP Skills Guide**: Added comprehensive guide for GitHub Copilot Chat covering MSAL.NET authentication, mTLS Proof of Possession, and Federated Identity Credentials [#5790](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5790)
+
+### Changes
+
+* **Credential Guard Attestation**: Integrated native DLL handling for Credential Guard attestation with centralized versioning [#5674](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5674)
+
+### Bug Fixes
+
+* **IMDSv2 mTLS Auto-Recovery**: Implemented automatic recovery from SCHANNEL handshake failures by evicting cached certificates and re-minting [#5761](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5761)
+* **Managed Identity Fallback Behavior**: Restored classic fallback behavior in MSAL MI unless `GetManagedIdentitySourceAsync()` is explicitly invoked [#5815](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5815)
+* **Attestation Token Expiration**: Exposed `expires_on` field in attestation tokens for better token lifecycle management [#5741](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5741)
+* **Service Fabric API Version**: Updated Service Fabric managed identity API version from 2019-07-01-preview to 2020-05-01 [#5781](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5781)
+* **Cached Token Validation**: Enhanced `ValidateCachedTokenAsync` to work properly with multiple APIs beyond the initial scope [#5764](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5764)
+* **Client Credentials Tenant ID**: Updated result to properly pass tenant ID in client credentials flow [#5754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5754)
+* **Experimental Flag Removal**: Removed experimental flag requirement from `IAuthenticationOperation` and `WithAuthenticationExtension` [#5699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5699)
+* **OpenTelemetry Exception Handling**: Expanded OTel exception handling for Azure Functions compatibility [#5720](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5720)
+* **ICustomWebUi Security Warning**: Added security warnings to `ICustomWebUi` documentation [#5704](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5704)
+
+### Infrastructure & Dependencies
+
+* **GitHub Actions Workflow**: Added GitHub Actions workflow for Managed Identity WebAPI automated build and deployment to Azure [#5751](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5751)
+* **.NET SDK Security Update**: Updated .NET SDK from version 8.0.415 to 8.0.418 to address high severity security vulnerabilities [#5779](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5779) [#5783](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5783)
+
+4.82.1
+======
+
+### Bug Fixes
+
+* Remove experimental flag requirement from IAuthenticationOperation [#5699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5699)
+* Add security warning to ICustomWebUi documentation [#5704](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5704)
+
+### Changes
+
+* Adds support for implicit mTLS (Mutual TLS) transport for client assertion delegates [#5670](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5670)
+
+4.82.0
+======
+
+### Highlights
+This release expands extensibility for confidential-client authentication (certificates + client assertions), adds additional sovereign cloud environments, and hardens security-sensitive flows (mTLS PoP and system browser auth) with clearer validation and safer defaults.
+
+### Features
+* **Certificate-based confidential client extensibility:** Introduced `CertificateOptions` and updated `WithCertificate` extensibility APIs to accept it, including support for passing `sendX5C` configuration through the options model. ([#5655](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5655))
+* **Sovereign cloud support:** Added instance discovery / authority validation support for Bleu (France), Delos (Germany), and GovSG (Singapore) cloud environments. ([#5671](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5671))
+* **Client assertion customization:** Added `WithExtraClientAssertionClaims` on `AcquireTokenForClientParameterBuilder` to enable supplying additional signed claims in client assertions (intended for advanced scenarios and higher-level libraries). ([#5650](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5650))
+* **mTLS PoP guardrails:** Added validation and explicit error handling when mTLS PoP is requested for unsupported environments and/or non-`login.*` hosts. ([#5684](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5684))
+* **System browser hardening:** Added `response_mode=form_post` support for the default system browser (loopback) flow. MSAL will enforce `form_post` and process the authorization response from POST data. ([#5678](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5678))
+
+### Changes
+* **Key Attestation packaging rename:** `Microsoft.Identity.Client.MtlsPop` renamed to `Microsoft.Identity.Client.KeyAttestation` (assembly/package naming update). ([#5653](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5653))
+
 4.81.0
 ======
 
@@ -27,6 +91,21 @@
 * Bump winsdk dependency  [#5575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5575)
 * ImdsV2 probe does not fire when .WithMtlsProofOfPossesstion is not used [#5579](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5579)
 * Downgrade System.Formats.Asn1 to match ID web [#5583](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5583)
+
+4.79.1
+======
+
+### Dependency Update
+
+This hotfix release addresses compatibility between MSAL.NET and Microsoft.Identity.Web by **downgrading the System.Formats.Asn1 dependency** from version 9.0.8 to 8.0.1.
+
+#### What Changed
+* **System.Formats.Asn1 downgraded to v8.0.1** ([#5583](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5583))
+  - Ensures compatibility with Microsoft.Identity.Web and other dependencies
+
+#### Why This Release
+
+MSAL.NET 4.79.0 introduced a dependency on System.Formats.Asn1 9.0.8, which created version conflicts with Microsoft.Identity.Web and other packages that require System.Formats.Asn1 8.0.1. This hotfix resolves those conflicts to maintain ecosystem compatibility.
 
 4.79.0
 ======

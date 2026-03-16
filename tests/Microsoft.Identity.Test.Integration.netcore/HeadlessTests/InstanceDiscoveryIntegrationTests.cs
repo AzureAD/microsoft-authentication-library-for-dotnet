@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task FailedAuthorityValidationTestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            Assert.IsTrue(exception.Message.Contains("AADSTS50049"));
+            Assert.Contains("AADSTS50049", exception.Message);
             Assert.AreEqual("invalid_instance", exception.ErrorCode);
         }
 
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AuthorityValidationTestWithFalseValidateAuthorityAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
@@ -155,8 +155,21 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 }
             }
 
-            IDictionary<string, InstanceDiscoveryMetadataEntry> expectedMetadata = 
+            IDictionary<string, InstanceDiscoveryMetadataEntry> allKnownMetadata = 
                 KnownMetadataProvider.GetAllEntriesForTest();
+
+            // Filter out new sovereign clouds that are not part of the public discovery endpoint responses
+            // These clouds (Bleu, Delos, GovSG) rely on client-side configuration only
+            var sovereignCloudsNotInDiscovery = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "login.sovcloud-identity.fr",  // Bleu (France)
+                "login.sovcloud-identity.de",  // Delos (Germany)
+                "login.sovcloud-identity.sg"   // GovSG (Singapore)
+            };
+
+            IDictionary<string, InstanceDiscoveryMetadataEntry> expectedMetadata = 
+                allKnownMetadata.Where(kvp => !sovereignCloudsNotInDiscovery.Contains(kvp.Key))
+                                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             CoreAssert.AssertDictionariesAreEqual(
                 expectedMetadata,

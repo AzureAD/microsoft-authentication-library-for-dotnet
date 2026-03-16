@@ -2,16 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -43,12 +41,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(TestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNull(cca.AppConfig.ClientName);
             Assert.IsNull(cca.AppConfig.ClientVersion);
-            Assert.AreEqual(false, cca.AppConfig.EnablePiiLogging);
+            Assert.IsFalse(cca.AppConfig.EnablePiiLogging);
             Assert.IsNull(cca.AppConfig.HttpClientFactory);
-            Assert.AreEqual(false, cca.AppConfig.IsDefaultPlatformLoggingEnabled);
+            Assert.IsFalse(cca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(cca.AppConfig.LoggingCallback);
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
-            Assert.AreEqual(null, cca.AppConfig.TenantId);
+            Assert.IsNull(cca.AppConfig.TenantId);
         }
 
         private ConfidentialClientApplicationOptions CreateConfidentialClientApplicationOptions()
@@ -114,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsTrue((cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public void CacheSynchronization_WithOptions(bool enableCacheSynchronization)
@@ -129,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(enableCacheSynchronization, (cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false, false, false)]
         [DataRow(true, true, true)]
         [DataRow(true, false, false)]
@@ -289,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithInvalidRedirectUri()
         {
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
                 ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithClientSecret("cats")
                                                     .WithRedirectUri("this is not a valid uri")
@@ -381,6 +379,94 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
+        public void TestConstructor_WithCertificate_CertificateOptions_SendX5C_True()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
+            var certificateOptions = new CertificateOptions { SendX5C = true };
+
+            var app = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithCertificate(cert, certificateOptions)
+                      .Build();
+
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).SendX5C, "SendX5C should be true when CertificateOptions.SendX5C is true");
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
+        public void TestConstructor_WithCertificate_CertificateOptions_SendX5C_False()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
+            var certificateOptions = new CertificateOptions { SendX5C = false };
+
+            var app = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithCertificate(cert, certificateOptions)
+                      .Build();
+
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).SendX5C, "SendX5C should be false when CertificateOptions.SendX5C is false");
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
+        public void TestConstructor_WithCertificate_NullCertificateOptions_DefaultsToSendX5C_False()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
+
+            var app = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithCertificate(cert, (CertificateOptions)null)
+                      .Build();
+
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).SendX5C, "SendX5C should default to false when CertificateOptions is null");
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
+        public void TestConstructor_WithCertificate_NullCertificate_ThrowsException()
+        {
+            var certificateOptions = new CertificateOptions { SendX5C = true };
+
+            Assert.Throws<ArgumentNullException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithCertificate((X509Certificate2)null, certificateOptions)
+                    .Build());
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\valid_cert.cer")]
+        public void TestConstructor_WithCertificate_CertificateOptions_WithoutPrivateKey()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("valid_cert.cer"));
+            var certificateOptions = new CertificateOptions { SendX5C = false };
+
+            try
+            {
+                ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithCertificate(cert, certificateOptions)
+                      .Build();
+
+                Assert.Fail("Should have thrown MsalClientException");
+            }
+            catch (MsalClientException e)
+            {
+                Assert.IsNotNull(e);
+                Assert.AreEqual(MsalError.CertWithoutPrivateKey, e.ErrorCode);
+            }
+        }
+
+        [TestMethod]
         [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
         public void TestConstructor_WithValidInstanceDicoveryMetadata()
         {
@@ -391,7 +477,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                    .Build();
 
             var instanceDiscoveryMetadata = (cca.AppConfig as ApplicationConfiguration).CustomInstanceDiscoveryMetadata;
-            Assert.AreEqual(2, instanceDiscoveryMetadata.Metadata.Length);
+            Assert.HasCount(2, instanceDiscoveryMetadata.Metadata);
         }
 
         [TestMethod]
@@ -404,7 +490,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithClientSecret("cats")
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
-            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+            Assert.AreEqual(MsalError.ValidateAuthorityOrCustomMetadata, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -415,10 +501,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                   .WithClientSecret("cats")
                                                   .Build());
 
-            Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
+            Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)] // Not specified, default is true
@@ -442,7 +528,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(isLegacyCacheCompatibilityEnabled, cca.AppConfig.LegacyCacheCompatibilityEnabled);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)] // Not specified, default is true

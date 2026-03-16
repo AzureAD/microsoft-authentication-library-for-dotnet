@@ -21,5 +21,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         [JsonProperty("defaultscopes")]
         public string DefaultScopes { get; set; }
+
+        [JsonProperty("tenantid")]
+        public string TenantId { get; set; }
+
+        [JsonProperty("environment")]
+        public string Environment { get; set; }
+
+        [JsonProperty("secretname")]
+        public string SecretName { get; set; }
     }
 }

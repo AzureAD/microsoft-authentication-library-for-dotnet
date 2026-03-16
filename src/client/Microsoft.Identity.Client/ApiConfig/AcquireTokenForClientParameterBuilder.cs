@@ -133,6 +133,34 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Specifies an identity attribute to include in the token request.
+        /// The attribute values will be returned as a claim in the token called "xms_attr"
+        /// in the access token claims. This is typically used with FMI (Federated Managed Identity) scenarios.
+        /// Example attribute json: "{\"sg1\":\"0000-00000-0001\",\"sg2\":[\"0000-00000-0002\",\"0000-00000-0003\",\"0000-00000-0004\"]}"
+        /// </summary>
+        /// <param name="attributeJson">The attribute value to include in the request</param>
+        /// <returns>The builder to chain method calls</returns>
+        /// <remarks>
+        /// The attribute value is included in the cache key, so different attribute values will result in different cache entries.
+        /// This ensures that tokens with different attributes are not confused with each other.
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithAttributes(string attributeJson)
+        {
+            if (string.IsNullOrWhiteSpace(attributeJson))
+            {
+                throw new ArgumentNullException(nameof(attributeJson));
+            }
+            var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
+            {
+                { OAuth2Parameter.Attributes, _ => Task.FromResult(attributeJson) }
+            };
+
+            this.WithExtraBodyParameters(extraBodyParams);
+
+            return this;
+        }
+
         /// <summary> 
         /// Adds an fmi_path parameter to the request. It modifies the subject of the token. 
         /// </summary>

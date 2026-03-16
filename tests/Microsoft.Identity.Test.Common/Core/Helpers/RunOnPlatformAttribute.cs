@@ -2,43 +2,49 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public class RunOnOSXAttribute : RunOnPlatformAttribute
     {
-        public RunOnOSXAttribute() : base(OSPlatform.OSX)
+        public RunOnOSXAttribute([CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = 0)
+            : base(OSPlatform.OSX, filePath, lineNumber)
         {
         }
     }
 
     public class RunOnWindowsAttribute : RunOnPlatformAttribute
     {
-        public RunOnWindowsAttribute() : base(OSPlatform.Windows)
+        public RunOnWindowsAttribute([CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = 0)
+            : base(OSPlatform.Windows, filePath, lineNumber)
         {
         }
     }
 
     public class RunOnLinuxAttribute : RunOnPlatformAttribute
     {
-        public RunOnLinuxAttribute() : base(OSPlatform.Linux)
+        public RunOnLinuxAttribute([CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = 0)
+            : base(OSPlatform.Linux, filePath, lineNumber)
         {
         }
     }
 
     public class DoNotRunOnWindowsAttribute : DoNotRunOnPlatformAttribute
     {
-        public DoNotRunOnWindowsAttribute(): base(OSPlatform.Windows)
+        public DoNotRunOnWindowsAttribute([CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = 0)
+            : base(OSPlatform.Windows, filePath, lineNumber)
         {
-
         }
     }
 
     public class DoNotRunOnLinuxAttribute : DoNotRunOnPlatformAttribute
     {
-        public DoNotRunOnLinuxAttribute() : base(OSPlatform.Linux)
+        public DoNotRunOnLinuxAttribute([CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = 0)
+            : base(OSPlatform.Linux, filePath, lineNumber)
         {
         }
     }
@@ -47,12 +53,13 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     {
         private readonly OSPlatform _platform;
 
-        protected RunOnPlatformAttribute(OSPlatform platform)
+        protected RunOnPlatformAttribute(OSPlatform platform, [CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = 0)
+            : base(filePath, lineNumber)
         {
             _platform = platform;
         }
 
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public override async Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
             if ((OsHelper.IsLinuxPlatform() && _platform != OSPlatform.Linux) ||
                 (OsHelper.IsMacPlatform() && _platform != OSPlatform.OSX) ||
@@ -68,7 +75,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 };
             }
 
-            return base.Execute(testMethod);
+            return await base.ExecuteAsync(testMethod).ConfigureAwait(false);
         }
     }
 
@@ -76,12 +83,13 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     {
         private readonly OSPlatform _platform;
 
-        protected DoNotRunOnPlatformAttribute(OSPlatform platform)
+        protected DoNotRunOnPlatformAttribute(OSPlatform platform, [CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = 0)
+            : base(filePath, lineNumber)
         {
             _platform = platform;
         }
 
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public override async Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
             if ((OsHelper.IsLinuxPlatform() && _platform == OSPlatform.Linux) ||
                 (OsHelper.IsMacPlatform() && _platform == OSPlatform.OSX) ||
@@ -97,14 +105,19 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 };
             }
 
-            return base.Execute(testMethod);
+            return await base.ExecuteAsync(testMethod).ConfigureAwait(false);
         }
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
     public sealed class RunOnAzureDevOpsAttribute : TestMethodAttribute
     {
-        public override TestResult[] Execute(ITestMethod testMethod)
+        public RunOnAzureDevOpsAttribute([CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = 0)
+            : base(filePath, lineNumber)
+        {
+        }
+
+        public override async Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
             // TF_BUILD is true for all Azure DevOps agents
             if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TF_BUILD")))
@@ -119,7 +132,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 };
             }
 
-            return base.Execute(testMethod);
+            return await base.ExecuteAsync(testMethod).ConfigureAwait(false);
         }
     }
 }

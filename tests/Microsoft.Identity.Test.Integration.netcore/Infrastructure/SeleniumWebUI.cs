@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
@@ -101,6 +102,13 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Uri redirectUri,
             CancellationToken externalCancellationToken)
         {
+            // Add response_mode=form_post to match production behavior
+            var authUriBuilder = new UriBuilder(authorizationUri);
+            authUriBuilder.AppendOrReplaceQueryParameter("response_mode", "form_post");
+            authorizationUri = authUriBuilder.Uri;
+            
+            _logger.Info($"[SeleniumWebUI] Authorization URI with form_post: {authorizationUri.AbsoluteUri}");
+            
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
             {
                 var listener = new HttpListenerInterceptor(_logger);
@@ -113,15 +121,48 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     innerSource.Token, 
                     externalCancellationToken);
 
-                Task<Uri> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
+                Task<AuthorizationResponse> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
                     redirectUri.Port,
                     redirectUri.AbsolutePath,
-                    (uri) =>
+                    (authResponse) =>
                     {
-                        authCodeUri = uri;
+                        // With form_post, auth code is in POST body, not query params
+                        // Reconstruct URI with query params for compatibility with ICustomWebUi interface
+                        if (authResponse.IsFormPost)
+                        {
+                            // Security: Ensure no data in query string when using form_post
+                            if (!string.IsNullOrEmpty(authResponse.RequestUri.Query) && 
+                                authResponse.RequestUri.Query != "?")
+                            {
+                                _logger.Error($"[SeleniumWebUI] Security violation: Received form_post response with query parameters. " +
+                                             $"Query: {authResponse.RequestUri.Query}");
+                                throw new InvalidOperationException(
+                                    "Data should only be in POST body.");
+                            }
+
+                            // Convert POST data to query params for ICustomWebUi compatibility
+                            string postDataString = System.Text.Encoding.UTF8.GetString(authResponse.PostData);
+                            var uriBuilder = new UriBuilder(authResponse.RequestUri);
+                            uriBuilder.Query = postDataString;
+                            authCodeUri = uriBuilder.Uri;
+                            
+                            _logger.Info($"[SeleniumWebUI] Form_post response received. Converted POST data to URI for ICustomWebUi compatibility.");
+                        }
+                        else
+                        {
+                            // SECURITY FAILURE: We requested form_post but received GET with query params
+                            // This means the authorization server did not honor response_mode=form_post
+                            _logger.Error($"[SeleniumWebUI] SECURITY FAILURE: Requested form_post but received GET response. " +
+                                        $"The authorization server did not honor response_mode=form_post. " +
+                                        $"Auth code is exposed in URL query parameters.");
+                            throw new InvalidOperationException(
+                                "Security violation: Requested response_mode=form_post but received GET request with query parameters. " +
+                                "The authorization code is exposed in the URL. " +
+                                "The authorization server must honor response_mode=form_post for security.");
+                        }
 
                         _logger.Info("Auth code intercepted. Writing message back to browser");
-                        return GetMessageToShowInBroswerAfterAuth(uri);
+                        return GetMessageToShowInBroswerAfterAuth(authCodeUri);
                     },
                     tcpCancellationToken.Token);
 

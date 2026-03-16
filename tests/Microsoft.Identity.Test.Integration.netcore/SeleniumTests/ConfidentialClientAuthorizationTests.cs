@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             
             await RunTestForUserAsync(app.AppId, user, "https://login.microsoftonline.com/common", false).ConfigureAwait(false);
             await RunTestForUserAsync(app.AppId, user, $"https://login.microsoftonline.com/{user.TenantId}", false).ConfigureAwait(false);
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             await RunTestForUserAsync(app.AppId, user, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
         }
 
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppAzureAdMultipleOrgs).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
 
             var result = await RunTestForUserAsync(app.AppId, user, 
                 $"https://login.microsoftonline.com/{user.TenantId}", false).ConfigureAwait(false);
