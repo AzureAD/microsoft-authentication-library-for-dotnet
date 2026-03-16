@@ -392,7 +392,6 @@ const Microsoft.Identity.Test.Unit.TestConstants.TenantId2 = aaaaaaab-aaaa-aaaa-
 const Microsoft.Identity.Test.Unit.TestConstants.TenantIdNumber1 = 12345679 -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.TenantIdNumber2 = 987654321 -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.TenantIdString = tenantid -> System.String
-const Microsoft.Identity.Test.Unit.TestConstants.TestCertPassword = passw0rd! -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.TestErrCode = TestErrCode -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.TestMessage = test message -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.TimeoutInMs = 2000 -> System.Int32
