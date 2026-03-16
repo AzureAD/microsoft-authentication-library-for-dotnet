@@ -110,8 +110,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <summary>
         /// Create the MIA with the http proxy
         /// </summary>
-        /// <param name="url"></param>
         /// <param name="userAssignedId"></param>
+        /// <param name="userAssignedIdentityId"></param>
         /// <returns></returns>
         public static ManagedIdentityApplicationBuilder CreateMIABuilder(string userAssignedId = "", UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId)
         {

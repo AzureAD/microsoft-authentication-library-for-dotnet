@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
-    internal class OsHelper
+    public class OsHelper
     {
         /// <summary>
         ///  Is this a windows platform

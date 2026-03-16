@@ -1,12 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net48;net8.0</TargetFrameworks>
-    <IsPackable>false</IsPackable>
+    <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Identity.Client.TestOnly</AssemblyName>
     <Configurations>Debug;Release</Configurations>
     <!-- Strong naming is inherited from Directory.Build.props -->
-    <!-- Suppress XML doc requirement - these are test helpers -->
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>CS1591;CS1574;IL2070;IL2072;IL2087</NoWarn>
   </PropertyGroup>
 
@@ -32,8 +31,8 @@
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 
-  <!-- TestOnly is test infrastructure, not a shipped library - disable public API tracking -->
-  <ItemGroup Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <PackageReference Remove="Microsoft.CodeAnalysis.PublicApiAnalyzers" />
+  <ItemGroup>
+    <AdditionalFiles Include="PublicApi/$(TargetFramework)/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicApi/$(TargetFramework)/PublicAPI.Unshipped.txt" />
   </ItemGroup>
 </Project>

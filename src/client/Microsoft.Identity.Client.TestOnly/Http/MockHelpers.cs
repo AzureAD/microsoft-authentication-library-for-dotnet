@@ -23,7 +23,7 @@ using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
-    internal static class MockHelpers
+    public static class MockHelpers
     {
         public const string TooManyRequestsContent = "Too many requests error";
         public static readonly TimeSpan TestRetryAfterDuration = TimeSpan.FromSeconds(120);
@@ -597,7 +597,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
         }
 
-        public static MsalTokenResponse CreateMsalRunTimeBrokerTokenResponse(string accessToken = null, string tokenType = null)
+        internal static MsalTokenResponse CreateMsalRunTimeBrokerTokenResponse(string accessToken = null, string tokenType = null)
         {
             return new MsalTokenResponse()
             {
@@ -613,7 +613,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
         }
 
-        public static MockHttpMessageHandler MockImdsProbe(
+        internal static MockHttpMessageHandler MockImdsProbe(
             ImdsVersion imdsVersion,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
@@ -691,7 +691,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
-        public static MockHttpMessageHandler MockImdsProbeFailure(
+        internal static MockHttpMessageHandler MockImdsProbeFailure(
             ImdsVersion imdsVersion,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
@@ -807,7 +807,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
-        public static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponse(
+        internal static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponse(
             IdentityLoggerAdapter identityLoggerAdapter)
         {
             IDictionary<string, string> expectedPostData = new Dictionary<string, string>();
