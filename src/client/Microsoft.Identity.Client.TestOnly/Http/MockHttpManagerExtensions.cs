@@ -1,0 +1,644 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Unit;
+using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
+
+namespace Microsoft.Identity.Test.Common.Core.Mocks
+{
+    internal static class MockHttpManagerExtensions
+    {
+        public static MockHttpMessageHandler AddInstanceDiscoveryMockHandler(
+            this MockHttpManager httpManager, 
+            string authority = TestConstants.AuthorityCommonTenant, 
+            Uri customDiscoveryEndpoint = null, 
+            string instanceMetadataContent = null)
+        {
+            Uri authorityURI = new Uri(authority);
+
+            string discoveryEndpoint;
+
+            if (customDiscoveryEndpoint == null)
+            {
+                string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authorityURI.Host)
+                                           ? authorityURI.Host
+                                           : AadAuthority.DefaultTrustedHost;
+
+                discoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort($"https://{discoveryHost}/common/discovery/instance", authorityURI.Port);
+            }
+            else
+            {
+                discoveryEndpoint = customDiscoveryEndpoint.AbsoluteUri;
+            }
+
+            return httpManager.AddMockHandler(
+                MockHelpers.CreateInstanceDiscoveryMockHandler(
+                    discoveryEndpoint, 
+                    instanceMetadataContent ?? TestConstants.DiscoveryJsonResponse));
+        }
+
+        public static MockHttpMessageHandler AddWsTrustMockHandler(this MockHttpManager httpManager)
+        {
+            MockHttpMessageHandler wsTrustHandler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = "https://login.microsoftonline.com/common/userrealm/username",
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{ \"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"domain.onmicrosoft.com\",\"cloud_instance_name\":\"microsoftonline.com\",\"cloud_audience_urn\":\"urn:federation:MicrosoftOnline\"}")
+                }
+            };
+
+            return httpManager.AddMockHandler(wsTrustHandler);
+        }
+
+        public static MockHttpMessageHandler AddResponseMockHandlerForPost(
+            this MockHttpManager httpManager,
+            HttpResponseMessage responseMessage,
+            IDictionary<string, string> bodyParameters = null,
+            IDictionary<string, string> queryParameters = null)
+        {
+            return httpManager.AddMockHandler(
+                new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedPostData = bodyParameters,
+                    ExpectedQueryParams = queryParameters,
+                    ResponseMessage = responseMessage
+                });
+        }
+
+        public static MockHttpMessageHandler AddFailureTokenEndpointResponse(
+           this MockHttpManager httpManager,
+           string error,
+           string authority = TestConstants.AuthorityCommonTenant, 
+           string correlationId = null,
+           string AadErrorCode = "AADSTS00000",
+           string expectedUrl = null)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = expectedUrl != null? expectedUrl : $"{authority}oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateFailureTokenResponseMessage(
+                    error,
+                    correlationId: correlationId,
+                    errorCode: AadErrorCode)
+            };
+            httpManager.AddMockHandler(handler);
+            return handler;
+        }
+
+        public static MockHttpMessageHandler AddSuccessTokenResponseMockHandlerForPost(
+            this MockHttpManager httpManager,
+            string authority = TestConstants.AuthorityCommonTenant,
+            IDictionary<string, string> bodyParameters = null,
+            IDictionary<string, string> queryParameters = null,
+            bool foci = false, 
+            HttpResponseMessage responseMessage = null,
+            IDictionary<string, string> expectedHttpHeaders = null)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = authority + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = bodyParameters,
+                ExpectedQueryParams = queryParameters,
+                ResponseMessage = responseMessage ?? MockHelpers.CreateSuccessTokenResponseMessage(foci),
+                ExpectedRequestHeaders = expectedHttpHeaders
+            };
+            httpManager.AddMockHandler(handler);
+            return handler;
+        }
+
+        public static void AddSuccessTokenResponseMockHandlerForGet(
+            this MockHttpManager httpManager,
+            IDictionary<string, string> bodyParameters = null,
+            IDictionary<string, string> queryParameters = null)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedPostData = bodyParameters,
+                    ExpectedQueryParams = queryParameters,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                });
+        }
+
+        public static HttpResponseMessage AddResiliencyMessageMockHandler(
+            this MockHttpManager httpManager,
+            HttpMethod httpMethod,
+            HttpStatusCode httpStatusCode, 
+            int? retryAfter = null)
+        {
+            var response = MockHelpers.CreateServerErrorMessage(httpStatusCode, retryAfter);
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = httpMethod,
+                    ResponseMessage = response
+                });
+            return response;
+        }
+
+        public static void AddRequestTimeoutResponseMessageMockHandler(this MockHttpManager httpManager, HttpMethod httpMethod)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = httpMethod,
+                    ResponseMessage = MockHelpers.CreateRequestTimeoutResponseMessage(),
+                    ExceptionToThrow = new TaskCanceledException("request timed out")
+                });
+        }
+
+        public static void AddMockHandlerContentNotFound(this MockHttpManager httpManager, HttpMethod httpMethod, string url = "")
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = url,
+                    ExpectedMethod = httpMethod,
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                    {
+                        Content = new StringContent("Not found")
+                    }
+                });
+        }
+
+        public static MockHttpMessageHandler AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+            this MockHttpManager httpManager,
+            string token = "header.payload.signature",
+            string expiresIn = "3599",
+            string tokenType = "Bearer",
+            IList<string> unexpectedHttpHeaders = null,
+            Dictionary<string, string> expectedPostData = null,
+            bool addClientInfo = false,
+            bool sendX5C = false)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = addClientInfo? MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithClientInfoMessage(token, expiresIn, tokenType, true)
+                                                 : MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token, expiresIn, tokenType),
+                UnexpectedRequestHeaders = unexpectedHttpHeaders,
+                ExpectedPostData = expectedPostData
+            };
+
+            if (sendX5C)
+            {
+                handler.AdditionalRequestValidation = (request) =>
+                {
+                    // validate that the request have x5c header
+                    if (expectedPostData != null && expectedPostData.ContainsKey("client_assertion"))
+                    {
+                        string clientAssertion = expectedPostData["client_assertion"];
+                        string[] assertionParts = clientAssertion.Split('.');
+                        if (assertionParts.Length != 3)
+                        {
+                            throw new InvalidDataException("client_assertion is not in the correct format");
+                        }
+                        string header = assertionParts[0];
+                        string headerJson = Base64UrlHelpers.Decode(header);
+                        if (!headerJson.Contains("\"x5c\""))
+                        {
+                            throw new InvalidDataException("client_assertion does not contain x5c header");
+                        }
+                    }
+                };
+            }
+
+            httpManager.AddMockHandler(handler);
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(
+            this MockHttpManager httpManager,
+            string token = "header.payload.signature",
+            string expiresIn = "3599",
+            string tokenType = "Bearer",
+            IList<string> unexpectedHttpHeaders = null,
+            string additionalparams = ",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"additional_param4\":[\"GUID\",\"GUID2\",\"GUID3\"],\"additional_param5\":{\"value5json\":\"value5\"}",
+            IDictionary<string, string> expectedRequestHeaders = null)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(token, expiresIn, tokenType, additionalparams),
+                UnexpectedRequestHeaders = unexpectedHttpHeaders,
+                ExpectedRequestHeaders = expectedRequestHeaders
+            };
+
+            httpManager.AddMockHandler(handler);
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler AddMockHandlerForThrottledResponseMessage(
+            this MockHttpManager httpManager)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateTooManyRequestsNonJsonResponse()
+            };
+
+            httpManager.AddMockHandler(handler);
+
+            return handler;
+        }
+
+        public static void AddFailingRequest(this MockHttpManager httpManager, Exception exceptionToThrow)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("Foo")
+                    },
+                    ExceptionToThrow = exceptionToThrow
+                });
+        }
+
+        public static void AddAdfs2019MockHandler(this MockHttpManager httpManager)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = "https://fs.contoso.com/.well-known/webfinger",
+                    ExpectedQueryParams = new Dictionary<string, string>
+                    {
+                            {"resource", "https://fs.contoso.com"},
+                            {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
+                    },
+                    ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.contoso.com")
+                });
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateAdfsSuccessTokenResponseMessage()
+            });
+        }
+
+       
+
+        public static MockHttpMessageHandler AddAllMocks(this MockHttpManager httpManager, TokenResponseType aadResponse)
+        {
+            httpManager.AddInstanceDiscoveryMockHandler();
+            return AddTokenResponse(httpManager, aadResponse);
+        }
+
+        public static MockHttpMessageHandler AddTokenResponse(
+            this MockHttpManager httpManager, 
+            TokenResponseType responseType, 
+            IDictionary<string, string> expectedRequestHeaders = null)
+        {
+            HttpResponseMessage responseMessage;
+
+            switch (responseType)
+            {
+                case TokenResponseType.Valid_UserFlows:
+                    responseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                       TestConstants.Uid,
+                       TestConstants.DisplayableId,
+                       TestConstants.s_scope.ToArray());
+                   
+                    break;
+                case TokenResponseType.Valid_ClientCredentials:
+                    responseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage();
+
+                    break;
+                case TokenResponseType.Invalid_AADUnavailable503:
+                    responseMessage = MockHelpers.CreateFailureMessage(
+                            System.Net.HttpStatusCode.ServiceUnavailable, "service down");
+                   
+                    break;
+                case TokenResponseType.InvalidGrant:
+                    responseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage();                   
+                    break;
+                case TokenResponseType.InvalidClient:                    
+
+                    responseMessage = MockHelpers.CreateInvalidClientResponseMessage();
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            var responseHandler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                ResponseMessage = responseMessage, 
+            };
+            httpManager.AddMockHandler(responseHandler);
+
+            return responseHandler;
+        }
+
+        public static HttpResponseMessage AddTokenErrorResponse(
+            this MockHttpManager httpManager, 
+            string error, 
+            HttpStatusCode? customStatusCode)
+        {
+            var responseMessage = MockHelpers.CreateFailureTokenResponseMessage(error, customStatusCode: customStatusCode);
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = responseMessage
+            };
+            httpManager.AddMockHandler(handler);
+            return responseMessage;
+        }
+
+        public static void AddRegionDiscoveryMockHandler(
+            this MockHttpManager httpManager,
+            string response)
+        {
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/location",
+                        ExpectedRequestHeaders = new Dictionary<string, string>
+                         {
+                            {"Metadata", "true"}
+                         },
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
+                    });
+        }
+
+        public static MockHttpMessageHandler AddManagedIdentityMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            string resource,
+            string response,
+            ManagedIdentitySource managedIdentitySourceType,
+            string userAssignedId = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            HttpStatusCode statusCode = HttpStatusCode.OK,
+            string retryAfterHeader = null, // A number of seconds (e.g., "120"), or an HTTP-date in RFC1123 format (e.g., "Fri, 19 Apr 2025 15:00:00 GMT")
+            bool capabilityEnabled = false,
+            bool claimsEnabled = false,
+            IDictionary<string, string> extraQueryParameters = null
+            )
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode)
+            {
+                Content = new StringContent(response)
+            };
+
+            if (retryAfterHeader != null)
+            {
+                responseMessage.Headers.TryAddWithoutValidation("Retry-After", retryAfterHeader);
+            }
+
+            MockHttpMessageHandler httpMessageHandler = BuildMockHandlerForManagedIdentitySource(
+                managedIdentitySourceType,
+                resource,
+                capabilityEnabled,
+                claimsEnabled);
+
+            // Add extra query parameters if provided
+            if (extraQueryParameters != null)
+            {
+                foreach (var kvp in extraQueryParameters)
+                {
+                    httpMessageHandler.ExpectedQueryParams[kvp.Key] = kvp.Value;
+                }
+            }
+
+            if (managedIdentitySourceType == ManagedIdentitySource.MachineLearning)
+            {
+                // For Machine Learning (App Service 2017), the client id param is "clientid"
+                // it will always be a query parameter, no matter the source type
+                // use env var for SAMI, passed-in userAssignedId for UAMI
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    Constants.ManagedIdentityClientId2017,
+                    userAssignedId ?? EnvironmentVariables.MachineLearningDefaultClientId);
+            }
+            else if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+            {
+                // For App Service 2019, Azure Arc, IMDS, etc., the param is "client_id"
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    Constants.ManagedIdentityClientId, 
+                    userAssignedId);
+            }
+            else if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            {
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    managedIdentitySourceType == ManagedIdentitySource.Imds ? 
+                        Constants.ManagedIdentityResourceIdImds : Constants.ManagedIdentityResourceId, 
+                    userAssignedId);
+            }
+            else if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
+            {
+                httpMessageHandler.ExpectedQueryParams.Add(
+                    Constants.ManagedIdentityObjectId,
+                    userAssignedId);
+            }
+
+            httpMessageHandler.ResponseMessage = responseMessage;
+            httpMessageHandler.ExpectedUrl = expectedUrl;
+
+            httpManager.AddMockHandler(httpMessageHandler);
+
+            return httpMessageHandler;
+        }
+
+        private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(
+            ManagedIdentitySource managedIdentitySourceType,
+            string resource,
+            bool capabilityEnabled = false,
+            bool claimsEnabled = false)
+        {
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IDictionary<string, string> notExpectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedPostData = null; // Only used for Cloud Shell
+
+            switch (managedIdentitySourceType)
+            {
+                case ManagedIdentitySource.AppService:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedQueryParams.Add("api-version", "2019-08-01");
+                    expectedQueryParams.Add("resource", resource);
+                    expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
+                    break;
+                case ManagedIdentitySource.AzureArc:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedQueryParams.Add("api-version", "2019-11-01");
+                    expectedQueryParams.Add("resource", resource);
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    break;
+                case ManagedIdentitySource.Imds:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedQueryParams.Add("api-version", "2018-02-01");
+                    expectedQueryParams.Add("resource", resource);
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    break;
+                case ManagedIdentitySource.CloudShell:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    expectedRequestHeaders.Add("ContentType", "application/x-www-form-urlencoded");
+                    expectedPostData = new Dictionary<string, string>
+                    {
+                        { "resource", resource }
+                    };
+                    break;
+                case ManagedIdentitySource.ServiceFabric:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedRequestHeaders.Add("secret", "secret");
+                    expectedQueryParams.Add("api-version", "2020-05-01");
+                    expectedQueryParams.Add("resource", resource);
+                    break;
+                case ManagedIdentitySource.MachineLearning:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedRequestHeaders.Add("secret", "secret");
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    expectedQueryParams.Add("api-version", "2017-09-01");
+                    expectedQueryParams.Add("resource", resource);
+                    break;
+            }
+
+            var manager = new CommonCryptographyManager();
+
+            // ---------------------------------------------------------------------------
+            // Client-capabilities (xms_cc) and revoked-token hash
+            // ---------------------------------------------------------------------------
+
+            bool sourceSupportsExtras = managedIdentitySourceType.SupportsClaimsAndCapabilities();
+
+            // ----- xms_cc --------------------------------------------------------------
+            if (sourceSupportsExtras)
+            {
+                if (capabilityEnabled)
+                {
+                    // This source should send xms_cc
+                    expectedQueryParams.Add("xms_cc", "cp1,cp2");
+                }
+                else
+                {
+                    // Capability flag disabled → xms_cc must NOT be present
+                    notExpectedQueryParams.Add("xms_cc", "cp1,cp2");
+                }
+            }
+            else
+            {
+                // Source does not support capabilities → never expect xms_cc
+                notExpectedQueryParams.Add("xms_cc", "cp1,cp2");
+            }
+
+            // ----- token_sha256_to_refresh --------------------------------------------
+            if (sourceSupportsExtras)
+            {
+                string hash = manager.CreateSha256HashHex(TestConstants.ATSecret);
+
+                if (claimsEnabled)
+                {
+                    // Claims path active → expect the hash
+                    expectedQueryParams.Add("token_sha256_to_refresh", hash);
+                }
+                else
+                {
+                    // No claims → hash must be absent
+                    notExpectedQueryParams.Add("token_sha256_to_refresh", hash);
+                }
+            }
+            else
+            {
+                // Source does not support hash param → ensure it's absent
+                notExpectedQueryParams.Add(
+                    "token_sha256_to_refresh",
+                    manager.CreateSha256HashHex(TestConstants.ATSecret));
+            }
+
+            if (managedIdentitySourceType != ManagedIdentitySource.CloudShell)
+            {
+                httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
+            }
+            else
+            {
+                httpMessageHandler.ExpectedPostData = expectedPostData;
+            }
+
+            httpMessageHandler.ExpectedRequestHeaders = expectedRequestHeaders;
+
+            return httpMessageHandler;
+        }
+
+        public static void AddManagedIdentityWSTrustMockHandler(
+            this MockHttpManager httpManager, 
+            string expectedUrl, 
+            string filePath = null)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            if (filePath != null)
+            {
+                responseMessage.Headers.Add("WWW-Authenticate", $"Basic realm={filePath}");
+            }
+            
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = expectedUrl,
+                        ResponseMessage = responseMessage
+                    });
+        }
+
+        public static void AddRegionDiscoveryMockHandlerWithError(
+            this MockHttpManager httpManager,
+            HttpStatusCode statusCode)
+        {
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/api-version=2020-06-01",
+                        ExpectedRequestHeaders = new Dictionary<string, string>
+                         {
+                            {"Metadata", "true"}
+                         },
+                        ResponseMessage = MockHelpers.CreateFailureMessage(statusCode, "")
+                    });
+        }
+    }
+
+    public enum TokenResponseType
+    {
+        Valid_UserFlows,
+        Valid_ClientCredentials,
+        Invalid_AADUnavailable503,
+        /// <summary>
+        /// Results in a UI Required Exception
+        /// </summary>
+        InvalidGrant, 
+
+        /// <summary>
+        /// Normal server exception
+        /// </summary>
+        InvalidClient
+    }
+ }
