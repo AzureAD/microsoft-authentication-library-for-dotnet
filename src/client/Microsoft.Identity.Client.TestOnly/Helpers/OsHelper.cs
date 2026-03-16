@@ -2,10 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+#if NET8_0_OR_GREATER
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+#endif
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
-    internal class OsHelper
+    public class OsHelper
     {
         /// <summary>
         ///  Is this a windows platform

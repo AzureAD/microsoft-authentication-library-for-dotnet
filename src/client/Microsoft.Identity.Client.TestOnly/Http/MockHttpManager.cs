@@ -121,7 +121,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
     }
 
-    internal class MockHttpClientFactoryBase
+    /// <summary>
+    /// Base class for test HTTP client factories that dequeue <see cref="MockHttpMessageHandler"/>
+    /// instances from a shared queue and wrap them in <see cref="System.Net.Http.HttpClient"/> objects.
+    /// </summary>
+    public class MockHttpClientFactoryBase
     {
         protected Func<MockHttpMessageHandler> MessageHandlerFunc { get; set; }
         protected ConcurrentQueue<HttpClientHandler> HttpMessageHandlerQueue { get; set; }
@@ -176,7 +180,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
     }
 
-    internal class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
+    /// <summary>
+    /// A test implementation of <see cref="IMsalMtlsHttpClientFactory"/> and
+    /// <see cref="IMsalSFHttpClientFactory"/> that returns pre-configured
+    /// <see cref="System.Net.Http.HttpClient"/> instances backed by <see cref="MockHttpMessageHandler"/>.
+    /// Use with <see cref="AbstractApplicationBuilder{T}.WithHttpClientFactory"/> to inject HTTP mocks.
+    /// </summary>
+    public class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
     {
         public MockHttpClientFactory(
             Func<MockHttpMessageHandler> messageHandlerFunc,
@@ -202,7 +212,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
     }
 
-    internal class MockNonMtlsHttpClientFactory : MockHttpClientFactoryBase, IMsalHttpClientFactory
+    /// <summary>
+    /// A test implementation of <see cref="IMsalHttpClientFactory"/> (non-mTLS)
+    /// backed by queued <see cref="MockHttpMessageHandler"/> instances.
+    /// Use with <see cref="AbstractApplicationBuilder{T}.WithHttpClientFactory"/> to inject HTTP mocks.
+    /// </summary>
+    public class MockNonMtlsHttpClientFactory : MockHttpClientFactoryBase, IMsalHttpClientFactory
     {
         public MockNonMtlsHttpClientFactory(
             Func<MockHttpMessageHandler> messageHandlerFunc,

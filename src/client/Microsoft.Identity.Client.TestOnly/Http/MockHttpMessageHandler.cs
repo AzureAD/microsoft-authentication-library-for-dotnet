@@ -16,7 +16,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
-    internal class MockHttpMessageHandler : HttpClientHandler
+    /// <summary>
+    /// A test <see cref="System.Net.Http.HttpMessageHandler"/> that returns a pre-configured
+    /// <see cref="System.Net.Http.HttpResponseMessage"/> and validates request properties
+    /// (URL, method, query parameters, post data, headers) against expectations.
+    /// Enqueue instances into <see cref="MockHttpManager"/> to drive MSAL unit tests.
+    /// </summary>
+    public class MockHttpMessageHandler : HttpClientHandler
     {
         public HttpResponseMessage ResponseMessage { get; set; }
         public string ExpectedUrl { get; set; }
