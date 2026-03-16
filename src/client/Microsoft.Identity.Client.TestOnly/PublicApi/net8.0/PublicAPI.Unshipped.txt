@@ -1,4 +1,3 @@
-#nullable enable
 const Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.TooManyRequestsContent = Too many requests error -> System.String
 const Microsoft.Identity.Test.Common.TestCategories.ADFS = ADFS -> System.String
 const Microsoft.Identity.Test.Common.TestCategories.Arlington = Arlington -> System.String
