@@ -7,6 +7,9 @@
     <!-- Strong naming is inherited from Directory.Build.props -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>CS1591;CS1574;IL2070;IL2072;IL2087</NoWarn>
+    <!-- Disable nullable to prevent IsAotCompatible (net8.0) from implying Nullable=enable,
+         which would cause PublicApiAnalyzer entries to require '!' annotations on Windows CI. -->
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
