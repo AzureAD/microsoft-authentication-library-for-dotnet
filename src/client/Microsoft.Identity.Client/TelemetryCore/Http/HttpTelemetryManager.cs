@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
     {
         /// <summary>
         /// Expected format: 5|api_id,cache_info,region_used,region_autodetection,region_outcome|platform_config
-        /// platform_config: is_token_cache_serialized,is_legacy_cache_enabled, token_type, caller_sdk_id, caller_sdk_version
+        /// platform_config: is_token_cache_serialized,is_legacy_cache_enabled, token_type, caller_sdk_id, caller_sdk_version, is_managed_cert_used
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
@@ -55,6 +55,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             sb.Append(eventInProgress.CallerSdkApiId);
             sb.Append(TelemetryConstants.CommaDelimiter);
             sb.Append(eventInProgress.CallerSdkVersion);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            if (eventInProgress.IsManagedCertUsed != '\0')
+            {
+                sb.Append(eventInProgress.IsManagedCertUsed);
+            }
 
             return sb.ToString();
         }

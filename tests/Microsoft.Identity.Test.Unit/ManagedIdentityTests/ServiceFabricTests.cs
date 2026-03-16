@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DeploymentItem(@"Resources\testCert.crtfile")]
         [DataRow("invalidThumbprint", SslPolicyErrors.None, true, DisplayName = "ServerCertificateValidationCallback_NoSSLErrors_InvalidThumbprint")]
         [DataRow("E70C50DA4EA66F94229A594BC112CB4B4FF29EB4", SslPolicyErrors.RemoteCertificateNameMismatch, true, DisplayName = "ServerCertificateValidationCallback_SSLErrors_validThumbprint")]
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 var mi = miBuilder.BuildConcrete();
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                  {
                      await mi.AcquireTokenForManagedIdentity(Resource)
                          .ExecuteAsync().ConfigureAwait(false);

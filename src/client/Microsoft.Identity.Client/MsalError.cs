@@ -1191,6 +1191,12 @@ namespace Microsoft.Identity.Client
         public const string MtlsPopWithoutRegion = "mtls_pop_without_region";
 
         /// <summary>
+        /// <para>What happened?</para>mTLS Bearer is configured but a region was not specified.
+        /// <para>Mitigation</para>Ensure that the AzureRegion configuration is set when using mTLS Bearer as it requires a regional endpoint.
+        /// </summary>
+        public const string MtlsBearerWithoutRegion = "mtls_bearer_without_region";
+
+        /// <summary>
         /// <para>What happened?</para> mTLS Proof of Possession (mTLS PoP) is configured but a certificate was not provided.
         /// <para>Mitigation</para> Ensure that a valid certificate is provided in the configuration when using mTLS PoP as it is required for secure authentication.
         /// </summary>
@@ -1206,6 +1212,12 @@ namespace Microsoft.Identity.Client
         /// <para>What happened?</para> mTLS is not supported for managed identity authentication.
         /// </summary>
         public const string MtlsNotSupportedForManagedIdentity = "mtls_not_supported_for_managed_identity";
+
+        /// <summary>
+        /// <para>What happened?</para> mTLS Proof of Possession (mTLS PoP) is not supported for the specified sovereign cloud environment.
+        /// <para>Mitigation:</para> Use the supported alternative endpoint for the sovereign cloud environment.
+        /// </summary>
+        public const string MtlsPopNotSupportedForEnvironment = "mtls_pop_not_supported_for_environment";
 
         /// <summary>
         /// <para>What happened?</para> The operation attempted to force a token refresh while also using a token hash. 

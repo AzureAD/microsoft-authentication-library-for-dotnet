@@ -96,6 +96,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             Exception ex = null,
             int? statusCode = null)
         {
+            // A 404 from the IMDSv2 CSR endpoint indicates that the host supports only IMDSv1.
+            // This happens when WithMtlsProofOfPossession() is used without a prior
+            // GetManagedIdentitySourceAsync() call: MSAL routes directly to IMDSv2, and
+            // on an IMDSv1-only host the /getplatformmetadata endpoint does not exist.
+            // Translate to a client error so callers know mTLS PoP is not supported here.
+            if (statusCode == (int)HttpStatusCode.NotFound)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsPopTokenNotSupportedinImdsV1,
+                    MsalErrorMessage.MtlsPopTokenNotSupportedinImdsV1);
+            }
+
             throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                 MsalError.ManagedIdentityRequestFailed,
                 $"[ImdsV2] {errorMessage}",
@@ -154,8 +166,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return new ImdsV2ManagedIdentitySource(requestContext);
         }
 
-        internal ImdsV2ManagedIdentitySource(RequestContext requestContext) 
-            : this(requestContext,  
+        internal ImdsV2ManagedIdentitySource(RequestContext requestContext)
+            : this(requestContext,
                   new MtlsBindingCache(s_mtlsCertificateCache, PersistentCertificateCacheFactory
                       .Create(requestContext.Logger)))
         {
@@ -175,7 +187,58 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             // Capture the attestation token provider delegate before calling base
             _attestationTokenProvider = parameters.AttestationTokenProvider;
-            return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+            }
+            catch (MsalServiceException ex) when (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex))
+            {
+                _requestContext.Logger.Verbose(() =>
+                    "[ImdsV2] SCHANNEL mTLS failure detected. Removing bad persisted cert and retrying with fresh mint.");
+
+                // Remove the bad cert from both caches
+                string certCacheKey = GetMtlsCertCacheKey();
+                try
+                {
+                    if (_mtlsCache is MtlsBindingCache mtlsCache)
+                    {
+                        mtlsCache.RemoveBadCert(certCacheKey, _requestContext.Logger);
+                    }
+                }
+                catch (Exception removalEx)
+                {
+                    _requestContext.Logger.Verbose(() => $"[ImdsV2] Error removing bad cert: {removalEx.Message}");
+                }
+
+                // Retry - will mint fresh cert since we just deleted the bad one
+                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Detects if the exception was caused by a SCHANNEL failure during mTLS authentication, 
+        /// which can occur if the client certificate becomes invalid.
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <returns></returns>
+        private static bool IsSchanelFailure(MsalServiceException ex)
+        {
+            for (Exception e = ex; e != null; e = e.InnerException)
+            {
+                if (e is System.Net.Sockets.SocketException se &&
+                    (se.ErrorCode == 10054 || se.SocketErrorCode == System.Net.Sockets.SocketError.ConnectionReset))
+                {
+                    return true;
+                }
+
+                if (e is System.Security.Authentication.AuthenticationException)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
@@ -385,9 +448,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>JWT string suitable for the IMDSv2 attested PoP flow, or null for non-attested flow.</returns>
         private async Task<string> GetAttestationJwtAsync(
-            string clientId, 
-            Uri attestationEndpoint, 
-            ManagedIdentityKeyInfo keyInfo, 
+            string clientId,
+            Uri attestationEndpoint,
+            ManagedIdentityKeyInfo keyInfo,
             CancellationToken cancellationToken)
         {
             // Check if attestation token provider has been configured

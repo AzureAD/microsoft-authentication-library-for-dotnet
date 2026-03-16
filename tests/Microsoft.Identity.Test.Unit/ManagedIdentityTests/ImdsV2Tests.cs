@@ -53,12 +53,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // A broad sweep is simplest and safe for our fake endpoints/certs
                 ImdsV2TestStoreCleaner.RemoveAllTestArtifacts();
             }
+
+            // Inject mock attestation provider to avoid loading native DLL in tests
+            PopKeyAttestor.s_testAttestationProvider = TestAttestationProviders.CreateFakeAttestationResultProvider();
         }
 
         [TestCleanup]
         public void ImdsV2Tests_Cleanup()
         {
             // Cleanup handled automatically with delegate-based approach
+
+            // Reset test provider to ensure clean state for other tests
+            PopKeyAttestor.s_testAttestationProvider = null;
         }
 
         private void AddMocksToGetEntraToken(
@@ -115,13 +121,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             if (imdsVersion == ImdsVersion.V1)
             {
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, userAssignedIdentityId, userAssignedId));
+                // New discovery order: V1 probed first (succeeds) → ImdsV1 cached
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
+
+                if (addSourceCheck)
+                {
+                    var miSourceResultV1 = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                    Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResultV1.Source);
+                }
+
                 return managedIdentityApp;
             }
 
             if (addProbeMock)
             {
+                // New discovery order: V1 probed first (fails), then V2 (succeeds)
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2, userAssignedIdentityId, userAssignedId));
             }
 
@@ -158,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         #region Acceptance Tests
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
@@ -183,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
@@ -194,13 +209,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, $"{TestConstants.ClientId}-2")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, $"{TestConstants.MiResourceId}-2")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, $"{TestConstants.ObjectId}-2")]
@@ -226,18 +241,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()   
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 1
@@ -261,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result2.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result2.TokenType);
                 Assert.IsNotNull(result2.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
 
@@ -272,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result2);
                 Assert.IsNotNull(result2.AccessToken);
-                Assert.AreEqual(result2.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result2.TokenType);
                 Assert.IsNotNull(result2.BindingCertificate);
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
                 #endregion Identity 2
@@ -281,7 +296,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
@@ -306,7 +321,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(result.TokenType, MTLSPoP);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
@@ -330,7 +345,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         #endregion Acceptance Tests
 
         #region Failure Tests
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
@@ -346,7 +361,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, imdsVersion: ImdsVersion.V1).ConfigureAwait(false);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .ExecuteAsync().ConfigureAwait(false)
@@ -356,7 +371,61 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        /// <summary>
+        /// mTLS PoP token request should succeed with IMDSv2 even without prior discovery.
+        /// When .WithMtlsProofOfPossession() is used, MSAL routes directly to IMDSv2 (no probing,
+        /// and no fallback to IMDSv1, which does not support mTLS PoP). The presence of mTLS-specific
+        /// headers in the request signals to IMDS that it's an mTLS request and IMDS should respond accordingly.
+        /// </summary>
+        /// <param name="userAssignedIdentityId"></param>
+        /// <param name="userAssignedId"></param>
+        /// <returns></returns>
+        [TestMethod]
+        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
+        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
+        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
+        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
+        public async Task MtlsPopWithoutPriorDiscovery_UsesImdsV2AndSucceeds(
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
+                {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+
+                // Simulate IMDS host
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                // Create app WITHOUT discovery and WITHOUT probe mocks
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    userAssignedIdentityId,
+                    userAssignedId,
+                    addProbeMock: false,
+                    addSourceCheck: false,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard,
+                    imdsVersion: ImdsVersion.V2
+                ).ConfigureAwait(false);
+
+                // Add IMDSv2 mocks (CSR + issuecredential + token)
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
+
+                var result = await managedIdentityApp
+                    .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.IsNotNull(result.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
@@ -387,7 +456,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.AreEqual(result.TokenType, Bearer);
+                Assert.AreEqual(Bearer, result.TokenType);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 // even though the app fell back to ImdsV1, the source should still be ImdsV2
@@ -395,7 +464,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
 
                 // none of the mocks from AddMocksToGetEntraToken are needed since checking the cache occurs before the network requests
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession() // this will cause an error to be thrown since the app already fell back to ImdsV1
                     .WithAttestationSupport()
@@ -416,6 +485,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
 
+                // New discovery order: V1 probed first (fails), then V2 (succeeds)
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
 
                 await CreateManagedIdentityAsync(httpManager, addProbeMock: false).ConfigureAwait(false);
@@ -430,11 +501,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
 
+                // New discovery order: V1 probed first (fails), then V2 (first attempt fails with retry, second succeeds)
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
                 // `retry: true` indicates a retriable status code will be returned
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, retry: true));
+                // Second V2 attempt succeeds
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
 
-                // Second attempt succeeds (defined inside of CreateManagedIdentityAsync)
-                await CreateManagedIdentityAsync(httpManager).ConfigureAwait(false);
+                await CreateManagedIdentityAsync(httpManager, addProbeMock: false).ConfigureAwait(false);
             }
         }
 
@@ -446,14 +520,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
 
-                // `retry: false` indicates a retriable status code will be returned
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, retry: false));
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                // New discovery order: V1 probed first (fails with non-retriable 404), then V2 (succeeds)
+                // `retry: false` indicates a non-retriable status code (404) will be returned for V1
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1, retry: false));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
+                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
             }
         }
 
@@ -471,13 +546,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var managedIdentityApp = miBuilder.Build();
 
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+                // New discovery order: V1 is probed first
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
 
                 var cts = new CancellationTokenSource();
                 cts.Cancel();
                 var imdsProbesCancellationToken = cts.Token;
 
-                await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
+                await Assert.ThrowsAsync<TaskCanceledException>(async () =>
                     await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(imdsProbesCancellationToken)
                     .ConfigureAwait(false))
                 .ConfigureAwait(false);
@@ -487,7 +563,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region Fallback Behavior Tests
         // Verifies non-mTLS request after IMDSv2 detection falls back per-request to IMDSv1 (Bearer),
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
         public async Task NonMtlsRequest_FallsBackToImdsV1(
@@ -526,12 +602,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task ImdsV2ProbeFailsMaxRetries_FallsBackToImdsV1()
+        public async Task BothImdsProbesFailMaxRetries_ReturnsNoneFound()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                // New discovery order: V1 probed first (fails), then V2 fails with max retries → NoneFound
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1, retry: false));
 
                 const int Num500Errors = 1 + TestImdsProbeRetryPolicy.ExponentialStrategyNumRetries;
                 for (int i = 0; i < Num500Errors; i++)
@@ -540,12 +619,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, retry: true));
                 }
 
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
-
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
+                Assert.AreEqual(ManagedIdentitySource.None, miSourceResult.Source);
             }
         }
         #endregion
@@ -563,7 +640,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: null));
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .ExecuteAsync().ConfigureAwait(false)
@@ -585,7 +662,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(responseServerHeader: "I_MDS/150.870.65.1854"));
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .ExecuteAsync().ConfigureAwait(false)
@@ -624,13 +701,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             CsrValidator.ValidateCsrContent(csr, TestConstants.ClientId, TestConstants.TenantId, cuid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Invalid@#$%Certificate!")]
         [DataRow("")]
         [DataRow(null)]
         public void TestCsrGeneration_BadCert_ThrowsMsalServiceException(string badCert)
         {
-            Assert.ThrowsException<MsalServiceException>(() =>
+            Assert.Throws<MsalServiceException>(() =>
                 CsrValidator.ParseRawCsr(badCert));
         }
         #endregion CSR Generation Tests
@@ -646,7 +723,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Invalid@#$%Certificate!")]
         [DataRow("")]
         [DataRow(null)]
@@ -654,7 +731,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (RSA rsa = RSA.Create())
             {
-                Assert.ThrowsException<MsalServiceException>(() =>
+                Assert.Throws<MsalServiceException>(() =>
                     CommonCryptographyManager.AttachPrivateKeyToCert(badCert, rsa));
             }
         }
@@ -662,7 +739,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void AttachPrivateKeyToCert_NullPrivateKey_ThrowsArgumentNullException()
         {
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.Throws<ArgumentNullException>(() =>
                 CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidRawCertificate, null));
         }
         #endregion
@@ -761,7 +838,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // CreateManagedIdentityAsync does a probe; Add one more CSR response for the actual acquire.
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .WithMtlsProofOfPossession() // request PoP on a non-KeyGuard env
                         .ExecuteAsync().ConfigureAwait(false)
@@ -807,7 +884,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // (2) Second acquire: NO attestation support + ForceRefresh
                 MockHelpers.AddMocks_AttestedCertMustNotBeReused_ExpectIssueCredential400(httpManager);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .WithForceRefresh(true)
                         .WithMtlsProofOfPossession()
@@ -858,7 +935,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // (2) Second acquire: NO attestation support + ForceRefresh
                 MockHelpers.AddMocks_AttestedCertMustNotBeReused_ExpectIssueCredential400(httpManager);
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .WithMtlsProofOfPossession()
                         // NOTE: intentionally NOT calling .WithAttestationSupport()
@@ -924,7 +1001,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, TestConstants.ClientId + "-2")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, TestConstants.MiResourceId + "-2")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, TestConstants.ObjectId + "-2")]
@@ -983,7 +1060,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region Cert cache tests
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null,                    /*isUami*/ false)] // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId,  /*isUami*/ true)]  // UAMI by client_id
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, /*isUami*/ true)] // UAMI by resource_id
@@ -1051,7 +1128,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         ///   - One for UAMI (CN=UAMI-20Y)
         /// Then run mint + cached flows and assert thumbprints.
         /// </summary>
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null,                      /*aliasLabel*/ "SAMI")] // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId,    /*aliasLabel*/ "UAMI-ClientId")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId,/*aliasLabel*/ "UAMI-ResourceId")]
@@ -1213,7 +1290,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// - UAMI (client_id|object_id|resource_id) ? CN = TestConstants.ClientId (canonical)
         /// Both assert DC = TestConstants.TenantId and cert cache reuse.
         /// </summary>
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null,                    /*label*/ "SAMI", /*isUami*/ false)]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId,  /*label*/ "UAMI-ClientId", /*isUami*/ true)]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId,  /*label*/ "UAMI-ObjectId", /*isUami*/ true)]
@@ -1329,7 +1406,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, "object_id")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, "resource_id")]
         public async Task mTLSPoP_Uami_ClientIdThenAlias_MintsThenCaches_SubjectCNIsClientId(
@@ -1405,7 +1482,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, "UAMI-ClientId")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, "UAMI-ObjectId")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, "UAMI-ResourceId")]
@@ -1459,7 +1536,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, "UAMI-ClientId")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, "UAMI-ObjectId")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, "UAMI-ResourceId")]

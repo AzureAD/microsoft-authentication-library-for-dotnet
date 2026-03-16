@@ -9,6 +9,7 @@
   <!-- Add packages, then highlight all lines and go to Edit > Advanced > Sort Lines -->
   <ItemGroup>
     <!-- Packages for the main MSAL code -->
+    <PackageVersion Include="Microsoft.Azure.Security.KeyGuardAttestation" Version="1.1.5" />
     <PackageVersion Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageVersion Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />
@@ -57,8 +58,9 @@
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.35.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.SignedHttpRequest" Version="6.35.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.1.1" />
-    <PackageVersion Include="MSTest.TestFramework" Version="3.1.1" />
+    <PackageVersion Include="MSTest.Analyzers" Version="4.0.2" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.0.2" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.0.2" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />

@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -62,12 +61,12 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AdditionalResponseParameters == null);
+                Assert.IsNull(result.AdditionalResponseParameters);
                 Assert.AreEqual(expectedAt, result.AccessToken);
             }
         }
 
-        [DataTestMethod] // Fix for regression https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5261
+        [TestMethod] // Fix for regression https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5261
         [DataRow(false)]
         [DataRow(true)]
         public async Task Should_UseCustomRequestHeaders_And_StoreAdditionalParametersWithCaching(bool useSerializedCache)
@@ -78,7 +77,6 @@ namespace Microsoft.Identity.Test.Unit
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -158,7 +156,6 @@ namespace Microsoft.Identity.Test.Unit
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -188,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(result.AdditionalResponseParameters == null);
+                Assert.IsNull(result.AdditionalResponseParameters);
                 Assert.AreEqual(expectedAt, result.AccessToken);
             }
         }

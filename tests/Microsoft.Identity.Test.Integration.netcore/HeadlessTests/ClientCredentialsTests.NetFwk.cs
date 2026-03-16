@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         // regression test based on SAL introducing a new SKU value and making ESTS not issue the refresh_in value
         // This needs to run on .NET and .NET FWK to protect against MSAL SKU value changes
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task RefreshOnIsEnabled(bool useRegional)
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.Cert, useAppIdUri).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.Secret).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Manual).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Wilson).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientClaims_ExtraClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientClaims_SendX5C_ExtraClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims, sendX5C: true).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
 #if !IGNORE_FEDERATED
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims, sendX5C: true).ConfigureAwait(false);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         public async Task WithOnBeforeTokenRequest_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -219,6 +219,130 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
+        [DataRow(TargetFrameworks.NetCore)]
+        [Description("Issue #5743: Validates that AuthenticationResult.TenantId is not null for client credentials")]
+        public async Task ClientCredentials_TenantId_ShouldNotBeNull_Issue5743_Async(TargetFrameworks runOn)
+        {
+            runOn.AssertFramework();
+
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] scopes = new[] { "https://vault.azure.net/.default" };
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(appConfig.AppId)
+                .WithAuthority(appConfig.Authority, true)
+                .WithCertificate(cert)
+                .WithTestLogging()
+                .Build();
+
+            // First call - from identity provider
+            var result = await confidentialApp
+                .AcquireTokenForClient(scopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result.TenantId,
+                "TenantId should not be null in AuthenticationResult for client credentials flow!");
+            Assert.AreEqual(appConfig.TenantId, result.TenantId,
+                "TenantId should match the configured tenant");
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+            // Second call - from cache
+            result = await confidentialApp
+                .AcquireTokenForClient(scopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result.TenantId,
+                "TenantId should not be null even when token comes from cache!");
+            Assert.AreEqual(appConfig.TenantId, result.TenantId,
+                "Cached token should preserve TenantId");
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
+        [DataRow(TargetFrameworks.NetCore)]
+        [Description("Issue #5743: Validates TenantId when using WithTenantId override with organizations authority")]
+        public async Task ClientCredentials_WithTenantIdOverride_ShouldPopulateTenantId_Issue5743_Async(TargetFrameworks runOn)
+        {
+            runOn.AssertFramework();
+
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] scopes = new[] { "https://vault.azure.net/.default" };
+
+            // Build app with "organizations" authority
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(appConfig.AppId)
+                .WithAuthority("https://login.microsoftonline.com/organizations", true)
+                .WithCertificate(cert)
+                .WithTestLogging()
+                .Build();
+
+            // Request token with specific tenant override
+            var result = await confidentialApp
+                .AcquireTokenForClient(scopes)
+                .WithTenantId(appConfig.TenantId)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // ❌ BUG #5743: This assertion will FAIL
+            Assert.IsNotNull(result.TenantId,
+                "❌ BUG #5743: TenantId must be populated when using WithTenantId override!");
+            Assert.AreEqual(appConfig.TenantId, result.TenantId,
+                "TenantId should match the overridden tenant, not 'organizations'");
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+            // Second call from cache
+            result = await confidentialApp
+                .AcquireTokenForClient(scopes)
+                .WithTenantId(appConfig.TenantId)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result.TenantId,
+                "❌ BUG #5743: Cached token should also have TenantId populated!");
+            Assert.AreEqual(appConfig.TenantId, result.TenantId);
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
+        [DataRow(TargetFrameworks.NetCore)]
+        [Description("Issue #5743: Rapid tenant switching should maintain correct TenantId")]
+        public async Task ClientCredentials_RapidTenantSwitching_Issue5743_Async(TargetFrameworks runOn)
+        {
+            runOn.AssertFramework();
+
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            string[] scopes = new[] { "https://vault.azure.net/.default" };
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(appConfig.AppId)
+                .WithAuthority("https://login.microsoftonline.com/organizations", true)
+                .WithCertificate(cert)
+                .WithTestLogging()
+                .Build();
+
+            // Rapidly switch between same tenant multiple times with force refresh
+            for (int i = 0; i < 10; i++)
+            {   
+                var result = await confidentialApp
+                    .AcquireTokenForClient(scopes)
+                    .WithTenantId(appConfig.TenantId)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.TenantId,
+                    $"❌ BUG #5743: Iteration {i}: TenantId should not be null!");
+                Assert.AreEqual(appConfig.TenantId, result.TenantId,
+                    $"Iteration {i}: TenantId should match requested tenant");
+            }
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -357,6 +481,12 @@ var confidentialApp = ConfidentialClientApplicationBuilder
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+
+            // Issue #5743: Validate TenantId is populated
+            Assert.IsNotNull(authResult.TenantId, 
+                "❌ BUG #5743: TenantId should not be null for client credentials!");
+            Assert.AreEqual(tenantId, authResult.TenantId,
+                "TenantId should match the tenant from authority");
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(correlationId, appCacheRecorder.LastAfterAccessNotificationArgs.CorrelationId);
@@ -365,8 +495,8 @@ var confidentialApp = ConfidentialClientApplicationBuilder
             CollectionAssert.AreEquivalent(scopes.ToArray(), appCacheRecorder.LastAfterAccessNotificationArgs.RequestScopes.ToArray());
             Assert.AreEqual(tenantId, appCacheRecorder.LastBeforeAccessNotificationArgs.RequestTenantId ?? "");
             Assert.AreEqual(tenantId, appCacheRecorder.LastAfterAccessNotificationArgs.RequestTenantId ?? "");
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 0);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs > 0);
+            Assert.IsGreaterThan(0, authResult.AuthenticationResultMetadata.DurationTotalInMs);
+            Assert.IsGreaterThan(0, authResult.AuthenticationResultMetadata.DurationInHttpInMs);
             Assert.AreEqual(
               GetExpectedCacheKey(appConfig.AppId, tenantId),
               appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
@@ -381,10 +511,16 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationInHttpInMs == 0);
+            Assert.AreEqual(0, authResult.AuthenticationResultMetadata.DurationInHttpInMs);
 
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+
+            // Issue #5743: Validate TenantId is preserved in cached result
+            Assert.IsNotNull(authResult.TenantId,
+                "❌ BUG #5743: TenantId should not be null even from cache!");
+            Assert.AreEqual(tenantId, authResult.TenantId,
+                "Cached token should preserve TenantId");
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreNotEqual(correlationId, appCacheRecorder.LastAfterAccessNotificationArgs.CorrelationId);

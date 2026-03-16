@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.AutoDetectedRegion);
                 Assert.AreEqual(RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
                 Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.AutoDetectedRegion);
                 Assert.AreEqual(RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
                 Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.AutoDetectedRegion);
                 Assert.AreEqual(RegionAutodetectionSource.Cache, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
                 Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
@@ -218,11 +218,11 @@ namespace Microsoft.Identity.Test.Unit
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(null, result.ApiEvent.RegionUsed);
+                Assert.IsNull(result.ApiEvent.RegionUsed);
                 Assert.IsNull(result.ApiEvent.AutoDetectedRegion);
                 Assert.AreEqual(RegionAutodetectionSource.None, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual(RegionOutcome.None, result.ApiEvent.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.None, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
                 Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
@@ -286,14 +286,13 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.IsNotNull(result.AccessToken);
 
-                Assert.AreEqual(null, result.ApiEvent.RegionUsed);
+                Assert.IsNull(result.ApiEvent.RegionUsed);
                 Assert.IsNull(result.ApiEvent.AutoDetectedRegion);
                 Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.ApiEvent.RegionOutcome);
                 Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError
-                    .Contains(TestConstants.RegionDiscoveryIMDSCallFailedMessage));
+                Assert.Contains(TestConstants.RegionDiscoveryIMDSCallFailedMessage, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
 
             }
         }
@@ -551,7 +550,7 @@ namespace Microsoft.Identity.Test.Unit
                     "Authority validation is made on https://login.microsoftonline.com/ and it validates the auth_endpoint of the non-regional authority");
                 Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.UserProvidedAutodetectionFailed, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError.Contains(imdsError));
+                Assert.Contains(imdsError, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
 
                 result = await app
                    .AcquireTokenForClient(TestConstants.s_scope)
@@ -564,12 +563,12 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.UserProvidedAutodetectionFailed, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                Assert.IsTrue(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError.Contains(autoDiscoveryError));
+                Assert.Contains(autoDiscoveryError, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
 
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, true)]
         [DataRow(true, false)]
         [DataRow(false, true)]
@@ -650,7 +649,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                     Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                     Assert.AreEqual(RegionOutcome.UserProvidedValid, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                    Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+                    Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
 
                     if (validateAuthority)
                     {
@@ -669,18 +668,21 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(EastUsRegion, result.ApiEvent.RegionUsed);
                     Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                     Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
-                    Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+                    Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
                 }
             }
 
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("login.partner.microsoftonline.cn", "login.partner.microsoftonline.cn")]
         [DataRow("login.chinacloudapi.cn", "login.partner.microsoftonline.cn")]
         [DataRow("login.microsoftonline.us", "login.microsoftonline.us")]
         [DataRow("login.usgovcloudapi.net", "login.microsoftonline.us")]
         [DataRow("login-us.microsoftonline.com", "login-us.microsoftonline.com")]
+        [DataRow(TestConstants.SovereignNetworkEnvironmentBleu, TestConstants.SovereignNetworkEnvironmentBleu)]
+        [DataRow(TestConstants.SovereignNetworkEnvironmentDelos, TestConstants.SovereignNetworkEnvironmentDelos)]
+        [DataRow(TestConstants.SovereignNetworkEnvironmentGovSG, TestConstants.SovereignNetworkEnvironmentGovSG)]
         [DataRow("login.windows.net", "login.microsoft.com")]
         [DataRow("login.microsoft.com", "login.microsoft.com")]
         [DataRow("sts.windows.net", "login.microsoft.com")]
@@ -727,7 +729,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
-                Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+                Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
             }
         }
 
@@ -754,19 +756,19 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
                 Assert.AreEqual(RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual(RegionOutcome.UserProvidedValid, result.ApiEvent.RegionOutcome);
-                Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+                Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
                 Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.UserProvidedValid, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
 
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
-                Assert.AreEqual(null, result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
                 Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.UserProvidedValid, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
             }
@@ -820,7 +822,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                var ex = Assert.Throws<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
                     hasCustomInstanceMetadata: true));
@@ -838,7 +840,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                var ex = Assert.Throws<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
                     hasCustomInstanceMetadataUri: true));
@@ -933,7 +935,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var httpManager = harness.HttpManager;
 
-                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                var ex = Assert.Throws<MsalClientException>(() => CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery,
                     hasCustomInstanceMetadata: true));

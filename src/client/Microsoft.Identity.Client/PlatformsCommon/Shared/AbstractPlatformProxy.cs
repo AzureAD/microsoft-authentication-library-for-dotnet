@@ -61,7 +61,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             try
             {
                 return new OtelInstrumentation();
-            } catch (FileNotFoundException ex) 
+            }
+            catch (Exception ex) 
+            when (ex is FileNotFoundException
+                     or TypeLoadException
+                     or TypeInitializationException)
             {
                 // Can happen in in-process Azure Functions: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4456
                 Logger.Warning("Failed instantiating OpenTelemetry instrumentation. Exception: " + ex.Message);
@@ -247,3 +251,4 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public IManagedIdentityKeyProvider ManagedIdentityKeyProvider => _miKeyProvider.Value;
     }
 }
+

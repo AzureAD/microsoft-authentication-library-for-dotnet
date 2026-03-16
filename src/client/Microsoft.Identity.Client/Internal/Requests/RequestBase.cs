@@ -250,6 +250,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();
 
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.ManagedCertKey, out string managedCertValue) 
+                && !string.IsNullOrEmpty(managedCertValue))
+            {
+                apiEvent.IsManagedCertUsed = managedCertValue[0];
+            }
+            AuthenticationRequestParameters.ExtraQueryParameters.Remove(Constants.ManagedCertKey);
+
             UpdateCallerSdkDetails(apiEvent);
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
@@ -264,18 +271,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string callerSdkVer;
 
             // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
-            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-id", out callerSdkId))
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.CallerSdkIdKey, out callerSdkId))
             {
-                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-id");
+                AuthenticationRequestParameters.ExtraQueryParameters.Remove(Constants.CallerSdkIdKey);
             }
             else
             {
                 callerSdkId = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientName;
             }
 
-            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-ver", out callerSdkVer))
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.CallerSdkVersionKey, out callerSdkVer))
             {
-                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-ver");
+                AuthenticationRequestParameters.ExtraQueryParameters.Remove(Constants.CallerSdkVersionKey);
             }
             else
             {
@@ -562,6 +569,32 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.RegionOutcome,
                 apiEvent.RegionUsed,
                 apiEvent.RegionDiscoveryFailureReason);
+        }
+
+        /// <summary>
+        /// Validates a cached access token using the authentication operation, if the scheme implements <see cref="IAuthenticationOperation2"/>.
+        /// Returns the original cache item if validation passes or is not applicable, or null if validation fails.
+        /// </summary>
+        internal static async Task<MsalAccessTokenCacheItem> ValidateCachedAccessTokenAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            MsalAccessTokenCacheItem cachedAccessTokenItem,
+            string requestType)
+        {
+            if (cachedAccessTokenItem != null &&
+                authenticationRequestParameters.AuthenticationScheme is IAuthenticationOperation2 authOp2)
+            {
+                var cacheValidationData = new MsalCacheValidationData();
+                cacheValidationData.PersistedCacheParameters = cachedAccessTokenItem.PersistedCacheParameters;
+
+                if (!await authOp2.ValidateCachedTokenAsync(cacheValidationData).ConfigureAwait(false))
+                {
+                    authenticationRequestParameters.RequestContext.Logger.Info(
+                        $"[{requestType}] Cached token failed authentication operation validation.");
+                    return null;
+                }
+            }
+
+            return cachedAccessTokenItem;
         }
     }
 }

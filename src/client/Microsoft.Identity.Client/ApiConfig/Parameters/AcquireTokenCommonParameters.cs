@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
         public string ExtraClientAssertionClaims { get; internal set; }
-        
+
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
         /// Set by the KeyAttestation package via .WithAttestationSupport().
@@ -50,73 +50,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// </summary>
         public Func<string, SafeHandle, string, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
 
-        internal async Task InitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
+        /// <summary>
+        /// This tries to see if the token request should be done over mTLS or over normal HTTP 
+        /// and set the correct parameters
+        /// </summary>
+        /// <param name="serviceBundle"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        /// <exception cref="MsalClientException"></exception>
+        internal async Task TryInitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {
-            if (!IsMtlsPopRequested)
-            {
-                return; // PoP not requested
-            }
-
-            // ────────────────────────────────────
-            // Case 1 – Certificate credential
-            // ────────────────────────────────────
-            if (serviceBundle.Config.ClientCredential is CertificateClientCredential certCred)
-            {
-                if (certCred.Certificate == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-                }
-
-                return;
-            }
-
-            // ────────────────────────────────────
-            // Case 2 – Client‑assertion delegate
-            // ────────────────────────────────────
-            if (serviceBundle.Config.ClientCredential is ClientAssertionDelegateCredential cadc)
-            {
-                var opts = new AssertionRequestOptions
-                {
-                    ClientID = serviceBundle.Config.ClientId,
-                    ClientCapabilities = serviceBundle.Config.ClientCapabilities,
-                    Claims = Claims,
-                    CancellationToken = ct
-                };
-
-                ClientSignedAssertion ar = await cadc.GetAssertionAsync(opts, ct).ConfigureAwait(false);
-
-                if (ar.TokenBindingCertificate == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-                }
-
-                InitMtlsPopParameters(ar.TokenBindingCertificate, serviceBundle);
-                return;
-            }
-
-            // ────────────────────────────────────
-            // Case 3 – Any other credential (client‑secret etc.)
-            // ────────────────────────────────────
-            throw new MsalClientException(
-                MsalError.MtlsCertificateNotProvided,
-                MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-        }
-
-        private void InitMtlsPopParameters(X509Certificate2 cert, IServiceBundle serviceBundle)
-        {
-            // region check (AAD only)
-            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                serviceBundle.Config.AzureRegion == null)
-            {
-                throw new MsalClientException(MsalError.MtlsPopWithoutRegion, MsalErrorMessage.MtlsPopWithoutRegion);
-            }
-
-            AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
-            MtlsCertificate = cert;
+            await MtlsPopParametersInitializer.TryInitAsync(this, serviceBundle, ct).ConfigureAwait(false);
         }
     }
 }

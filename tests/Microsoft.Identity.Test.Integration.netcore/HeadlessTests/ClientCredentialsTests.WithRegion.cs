@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task AcquireTokenToRegionalEndpointAsync(bool instanceDiscoveryEnabled)
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await GetAuthenticationResultAsync(appScopes).ConfigureAwait(false); // regional endpoint
             AssertTokenSourceIsIdp(result);
             AssertValidHost(true, factory);
-            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheRefreshReason.NoCachedAccessToken:D},centralus,3,4|0,1,1,,");
+            AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheRefreshReason.NoCachedAccessToken:D},centralus,3,4|0,1,1,,,");
             Assert.AreEqual(
                 $"https://{RegionalHost}/{appConfig.TenantId}/oauth2/v2.0/token",
                 result.AuthenticationResultMetadata.TokenEndpoint);
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-            var ex = await Assert.ThrowsExceptionAsync<HttpRequestException>(
+            var ex = await Assert.ThrowsAsync<HttpRequestException>(
                 async () => await GetAuthenticationResultAsync(appScopes).ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.IsTrue(ex is HttpRequestException);

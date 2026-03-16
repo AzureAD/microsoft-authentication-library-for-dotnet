@@ -28,8 +28,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         // HTTP Telemetry Constants
         private static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
-        private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1,1,,";
-        private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1,1,,";
+        private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1,1,,,";
+        private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1,1,,,";
         private const string UPApiId = "1003";
         private const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
         private static readonly string[] s_b2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
@@ -279,13 +279,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
                 x.Item2.StatusCode == HttpStatusCode.OK);
 
-            Assert.IsTrue(!req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader));
+            Assert.IsFalse(req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader));
         }
 
         private void AssertTenantProfiles(IEnumerable<TenantProfile> tenantProfiles, string tenantId)
         {
             Assert.IsNotNull(tenantProfiles);
-            Assert.IsTrue(tenantProfiles.Count() > 0);
+            Assert.IsGreaterThan(0, tenantProfiles.Count());
 
             TenantProfile tenantProfile = tenantProfiles.Single(tp => tp.TenantId == tenantId);
             Assert.IsNotNull(tenantProfile);

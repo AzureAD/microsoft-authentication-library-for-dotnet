@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IAccount account = await cca.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
             var result2 = await cca.AcquireTokenSilent([Scope], account).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsTrue(result2.AuthenticationResultMetadata.TokenSource == TokenSource.Cache, "Token should be from cache");
+            Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource, "Token should be from cache");
         }
 
         private static async Task<string> GetAppCredentialAsync(string fmiPath)
