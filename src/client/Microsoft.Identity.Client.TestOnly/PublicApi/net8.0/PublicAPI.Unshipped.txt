@@ -25,26 +25,6 @@ const Microsoft.Identity.Test.Unit.TestConstants.AadRawClientInfo = eyJ1aWQiOiI5
 const Microsoft.Identity.Test.Unit.TestConstants.AadTenantId = 751a212b-4003-416e-b600-e1f48e40db9f -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.ADFSAuthority = https://fs.msidlab8.com/adfs/ -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.ADFSAuthority2 = https://someAdfs.com/adfs/ -> System.String
-const Microsoft.Identity.Test.Unit.TestConstants.AndroidBrokerResponse = 
-{
-      "access_token":"secretAt",
-      "authority":"https://login.microsoftonline.com/common",
-      "cached_at":1591193165,
-      "client_id":"4a1aa1d5-c567-49d0-ad0b-cd957a47f842",
-      "client_info":"clientInfo",
-      "environment":"login.windows.net",
-      "expires_on":1591196764,
-      "ext_expires_on":1591196764,
-      "home_account_id":"ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
-      "http_response_code":0,
-      "id_token":"idT",
-      "local_account_id":"ae821e4d-f408-451a-af82-882691148603",
-      "scopes":"User.Read openid offline_access profile",
-      "success":true,
-      "tenant_id":"49f548d0-12b7-4169-a390-bb5304d24462",
-      "token_type":"Bearer",
-      "username":"some_user@contoso.com"
-   } -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.AppServiceEndpoint = http://127.0.0.1:41564/msi/token -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.ATSecret = some-access-token -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.ATSecret2 = some-access-token2 -> System.String
@@ -131,49 +111,6 @@ const Microsoft.Identity.Test.Unit.TestConstants.DefaultGraphScope = https://gra
 const Microsoft.Identity.Test.Unit.TestConstants.DefaultPassword = password -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.DeserializeLogMessage = MsalExternalLogMessage: Deserializing Cache without Pii -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.DiscoveryEndPoint = discovery/instance -> System.String
-const Microsoft.Identity.Test.Unit.TestConstants.DiscoveryFailedResponse = {"error":"invalid_instance",
-               "error_description":"AADSTS50049: Unknown or invalid instance.\r\nTrace ID: 82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\r\nCorrelation ID: e7619cf4-53ea-443c-b76a-194c032e9840\r\nTimestamp: 2021-04-14 11:27:26Z",
-               "error_codes":[50049],
-               "timestamp":"2021-04-14 11:27:26Z",
-               "trace_id":"82e709b9-f0b3-431d-99cd-f3c2ca3d4b00",
-               "correlation_id":"e7619cf4-53ea-443c-b76a-194c032e9840",
-               "error_uri":"https://login.microsoftonline.com/error?code=50049"} -> System.String
-const Microsoft.Identity.Test.Unit.TestConstants.DiscoveryJsonResponse = {
-                        "tenant_discovery_endpoint":"https://login.microsoftonline.com/tenant/.well-known/openid-configuration",
-                        "api-version":"1.1",
-                        "metadata":[
-                            {
-                            "preferred_network":"login.microsoftonline.com",
-                            "preferred_cache":"login.windows.net",
-                            "aliases":[
-                                "login.microsoftonline.com",
-                                "login.windows.net",
-                                "login.microsoft.com",
-                                "sts.windows.net"]},
-                            {
-                            "preferred_network":"login.partner.microsoftonline.cn",
-                            "preferred_cache":"login.partner.microsoftonline.cn",
-                            "aliases":[
-                                "login.partner.microsoftonline.cn",
-                                "login.chinacloudapi.cn"]},
-                            {
-                            "preferred_network":"login.microsoftonline.de",
-                            "preferred_cache":"login.microsoftonline.de",
-                            "aliases":[
-                                    "login.microsoftonline.de"]},
-                            {
-                            "preferred_network":"login.microsoftonline.us",
-                            "preferred_cache":"login.microsoftonline.us",
-                            "aliases":[
-                                "login.microsoftonline.us",
-                                "login.usgovcloudapi.net"]},
-                            {
-                            "preferred_network":"login-us.microsoftonline.com",
-                            "preferred_cache":"login-us.microsoftonline.com",
-                            "aliases":[
-                                "login-us.microsoftonline.com"]}
-                        ]
-                } -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.DisplayableId = displayable@id.com -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.DstsAuthorityCommon = https://some.url.dsts.core.azure-test.net/dstsv2/common/ -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.DstsAuthorityConsumers = https://some.url.dsts.core.azure-test.net/dstsv2/consumers/ -> System.String
@@ -188,117 +125,6 @@ const Microsoft.Identity.Test.Unit.TestConstants.FamilyName = Doe -> System.Stri
 const Microsoft.Identity.Test.Unit.TestConstants.FmiNodeClientId = urn:microsoft:identity:fmi -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.GenericAuthority = https://demo.duendesoftware.com -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.GenericOidcJwkResponse = {"keys":[{"kty":"RSA","use":"sig","kid":"66682C848A3140685FC883FD7EA993CC","e":"AQAB","n":"pY-a5km28zOE-KS1UgYlWS9AT-4eYdxAlTVeGaSq21dhbB4L6tmlUiiV8s-Zv_L5Ng6rC1asmjEVtrKmFkYMoW4RbJC6HAzQbS7crGglyTJ39uDGJBpeQZCWYUljlIzp2VAJnPxG1-iyIDjZSOuGgvTxiphV4j2naU46RcT3IfC7CPkUZUtmqpbYNOHRli_oVirxGUMjHbq623qOCQUkUfMBLhKr0EjrZtcispSDzHqWktUO7K8Iy8D6VyttPIuzVkYx1GYiB0jCF1jgIDyEnH1E3r6S5ytao9KvoO6DGZTzFTJL2-i_uPco1DXfXFlVO9jKb5MHomO3NNrSDNRSnQ","alg":"RS256"}]} -> System.String
-const Microsoft.Identity.Test.Unit.TestConstants.GenericOidcResponse = {
-   "issuer":"https://demo.duendesoftware.com",
-   "jwks_uri":"https://demo.duendesoftware.com/.well-known/openid-configuration/jwks",
-   "authorization_endpoint":"https://demo.duendesoftware.com/connect/authorize",
-   "token_endpoint":"https://demo.duendesoftware.com/connect/token",
-   "userinfo_endpoint":"https://demo.duendesoftware.com/connect/userinfo",
-   "end_session_endpoint":"https://demo.duendesoftware.com/connect/endsession",
-   "check_session_iframe":"https://demo.duendesoftware.com/connect/checksession",
-   "revocation_endpoint":"https://demo.duendesoftware.com/connect/revocation",
-   "introspection_endpoint":"https://demo.duendesoftware.com/connect/introspect",
-   "device_authorization_endpoint":"https://demo.duendesoftware.com/connect/deviceauthorization",
-   "backchannel_authentication_endpoint":"https://demo.duendesoftware.com/connect/ciba",
-   "frontchannel_logout_supported":true,
-   "frontchannel_logout_session_supported":true,
-   "backchannel_logout_supported":true,
-   "backchannel_logout_session_supported":true,
-   "scopes_supported":[
-      "openid",
-      "profile",
-      "email",
-      "api",
-      "resource1.scope1",
-      "resource1.scope2",
-      "resource2.scope1",
-      "resource2.scope2",
-      "resource3.scope1",
-      "resource3.scope2",
-      "scope3",
-      "scope4",
-      "shared.scope",
-      "transaction",
-      "offline_access"
-   ],
-   "claims_supported":[
-      "sub",
-      "name",
-      "family_name",
-      "given_name",
-      "middle_name",
-      "nickname",
-      "preferred_username",
-      "profile",
-      "picture",
-      "website",
-      "gender",
-      "birthdate",
-      "zoneinfo",
-      "locale",
-      "updated_at",
-      "email",
-      "email_verified"
-   ],
-   "grant_types_supported":[
-      "authorization_code",
-      "client_credentials",
-      "refresh_token",
-      "implicit",
-      "password",
-      "urn:ietf:params:oauth:grant-type:device_code",
-      "urn:openid:params:grant-type:ciba"
-   ],
-   "response_types_supported":[
-      "code",
-      "token",
-      "id_token",
-      "id_token token",
-      "code id_token",
-      "code token",
-      "code id_token token"
-   ],
-   "response_modes_supported":[
-      "form_post",
-      "query",
-      "fragment"
-   ],
-   "token_endpoint_auth_methods_supported":[
-      "client_secret_basic",
-      "client_secret_post",
-      "private_key_jwt"
-   ],
-   "id_token_signing_alg_values_supported":[
-      "RS256"
-   ],
-   "subject_types_supported":[
-      "public"
-   ],
-   "code_challenge_methods_supported":[
-      "plain",
-      "S256"
-   ],
-   "request_parameter_supported":true,
-   "request_object_signing_alg_values_supported":[
-      "RS256",
-      "RS384",
-      "RS512",
-      "PS256",
-      "PS384",
-      "PS512",
-      "ES256",
-      "ES384",
-      "ES512",
-      "HS256",
-      "HS384",
-      "HS512"
-   ],
-   "authorization_response_iss_parameter_supported":true,
-   "backchannel_token_delivery_modes_supported":[
-      "poll"
-   ],
-   "backchannel_user_code_parameter_supported":true
-} -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.GivenName = Joe -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.Guest = guest -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.Home = home -> System.String
@@ -395,19 +221,6 @@ const Microsoft.Identity.Test.Unit.TestConstants.TenantIdString = tenantid -> Sy
 const Microsoft.Identity.Test.Unit.TestConstants.TestErrCode = TestErrCode -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.TestMessage = test message -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.TimeoutInMs = 2000 -> System.Int32
-const Microsoft.Identity.Test.Unit.TestConstants.TokenResponseJson = {
-                                                   "token_type": "Bearer",
-                                                   "scope": "user_impersonation",
-                                                   "expires_in": "3600",
-                                                   "ext_expires_in": "3600",
-                                                   "expires_on": "1566165638",
-                                                   "not_before": "1566161738",
-                                                   "resource": "user.read",
-                                                   "access_token": "at_secret",
-                                                   "refresh_token": "rt_secret",
-                                                   "id_token": "idtoken.",
-                                                   "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0"
-                                                } -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.Uid = my-uid -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.UniqueId = unique_id -> System.String
 const Microsoft.Identity.Test.Unit.TestConstants.UserAssertion = fake_access_token -> System.String

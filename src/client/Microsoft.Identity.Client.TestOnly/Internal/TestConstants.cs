@@ -347,7 +347,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string BrokerOIDCScopes = "openid offline_access profile";
         public const string BrokerClaims = "testClaims";
 
-        public const string DiscoveryJsonResponse = @"{
+        internal const string DiscoveryJsonResponse = @"{
                         ""tenant_discovery_endpoint"":""https://login.microsoftonline.com/tenant/.well-known/openid-configuration"",
                         ""api-version"":""1.1"",
                         ""metadata"":[
@@ -384,7 +384,7 @@ namespace Microsoft.Identity.Test.Unit
                         ]
                 }";
 
-        public const string DiscoveryFailedResponse =
+        internal const string DiscoveryFailedResponse =
             @"{""error"":""invalid_instance"",
                ""error_description"":""AADSTS50049: Unknown or invalid instance.\r\nTrace ID: 82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\r\nCorrelation ID: e7619cf4-53ea-443c-b76a-194c032e9840\r\nTimestamp: 2021-04-14 11:27:26Z"",
                ""error_codes"":[50049],
@@ -393,7 +393,7 @@ namespace Microsoft.Identity.Test.Unit
                ""correlation_id"":""e7619cf4-53ea-443c-b76a-194c032e9840"",
                ""error_uri"":""https://login.microsoftonline.com/error?code=50049""}";
 
-        public const string TokenResponseJson = @"{
+        internal const string TokenResponseJson = @"{
                                                    ""token_type"": ""Bearer"",
                                                    ""scope"": ""user_impersonation"",
                                                    ""expires_in"": ""3600"",
@@ -407,7 +407,7 @@ namespace Microsoft.Identity.Test.Unit
                                                    ""client_info"": ""eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0""
                                                 }";
 
-        public const string AndroidBrokerResponse = @"
+        internal const string AndroidBrokerResponse = @"
 {
       ""access_token"":""secretAt"",
       ""authority"":""https://login.microsoftonline.com/common"",
@@ -446,7 +446,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string DeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache without Pii";
 
         public const string GenericOidcJwkResponse = @"{""keys"":[{""kty"":""RSA"",""use"":""sig"",""kid"":""66682C848A3140685FC883FD7EA993CC"",""e"":""AQAB"",""n"":""pY-a5km28zOE-KS1UgYlWS9AT-4eYdxAlTVeGaSq21dhbB4L6tmlUiiV8s-Zv_L5Ng6rC1asmjEVtrKmFkYMoW4RbJC6HAzQbS7crGglyTJ39uDGJBpeQZCWYUljlIzp2VAJnPxG1-iyIDjZSOuGgvTxiphV4j2naU46RcT3IfC7CPkUZUtmqpbYNOHRli_oVirxGUMjHbq623qOCQUkUfMBLhKr0EjrZtcispSDzHqWktUO7K8Iy8D6VyttPIuzVkYx1GYiB0jCF1jgIDyEnH1E3r6S5ytao9KvoO6DGZTzFTJL2-i_uPco1DXfXFlVO9jKb5MHomO3NNrSDNRSnQ"",""alg"":""RS256""}]}";
-        public const string GenericOidcResponse = @"{
+        internal const string GenericOidcResponse = @"{
    ""issuer"":""https://demo.duendesoftware.com"",
    ""jwks_uri"":""https://demo.duendesoftware.com/.well-known/openid-configuration/jwks"",
    ""authorization_endpoint"":""https://demo.duendesoftware.com/connect/authorize"",
