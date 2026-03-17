@@ -51,7 +51,7 @@ steps:
     ProjectRootPath: '$(Build.SourcesDirectory)\$(MsalSourceDir)src\client'
     AssemblyName: 'Microsoft.Identity.Client.KeyAttestation'
 
-# Sign binary and pack Microsoft.Identity.Client.KeyAttestation
+# Sign binary and pack Microsoft.Identity.Client.TestOnly
 - template: template-pack-and-sign-nuget.yaml
   parameters:
     BuildConfiguration: ${{ parameters.BuildConfiguration }}
