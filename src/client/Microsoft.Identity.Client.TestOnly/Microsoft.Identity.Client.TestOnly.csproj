@@ -1,14 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net48;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Identity.Client.TestOnly</AssemblyName>
-    <Configurations>Debug;Release</Configurations>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
     <!-- Strong naming is inherited from Directory.Build.props -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".config\CredScanSuppressions.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Security.KeyVault.Certificates" />
+    <PackageReference Include="Azure.Security.KeyVault.Secrets" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,7 +35,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Identity.Client.Extensions.Msal\Microsoft.Identity.Client.Extensions.Msal.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="LabInfra\" />
   </ItemGroup>
 
 </Project>

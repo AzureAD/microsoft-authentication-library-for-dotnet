@@ -11,6 +11,37 @@ const Microsoft.Identity.Test.Common.TestCategories.Regression = "Regression" ->
 const Microsoft.Identity.Test.Common.TestCategories.Selenium = "Selenium" -> string
 const Microsoft.Identity.Test.Common.TestCategories.TokenCacheTests = "TokenCacheTests" -> string
 const Microsoft.Identity.Test.Common.TestCategories.UnifiedSchemaValidation = "UnifiedSchema_Validation" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultInstance.MsalTeam = "https://id4skeyvault.vault.azure.net/" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultInstance.MSIDLab = "https://msidlabs.vault.azure.net" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppPCAClient = "App-PCAClient-Config" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppS2S = "App-S2S-Config" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppWebApi = "App-WebApi-Config" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.ArlAppIdLabsApp = "MSAL-App-Arlington-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.B2CAppIdLabsAppB2C = "MSAL-App-B2C-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.DefaultAppSecret = "MSAL-App-Default" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.MsalAppArlingtonCCA = "MSAL-App-ArlingtonCCA-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.MsalAppAzureAdMultipleOrgsRegional = "MSAL-APP-AzureADMultipleOrgsRegional-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.MsalAppCiam = "MSAL-App-CIAM-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.UserArlington = "MSAL-USER-Arlington-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.UserB2C = "MSAL-USER-B2C-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.UserCiam = "MSAL-USER-CIAM-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.UserFederated = "User-Federated-Config" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.UserPop = "MSAL-User-POP-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.UserPublicCloud = "User-PublicCloud-Config" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.UserPublicCloud2 = "MSAL-User-Default2-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.UserXcg = "MSAL-User-XCG-JSON" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.LabAccessConfidentialClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.LabClientInstance = "https://login.microsoftonline.com/" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.LabClientTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.LabScope = "https://request.msidlab.com/.default" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabConstants.AzureEnvironmentUsGovernment = "azureusgovernment" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabConstants.B2CIdentityProviderFacebook = "Facebook" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabConstants.B2CIdentityProviderGoogle = "Google" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabConstants.B2CIdentityProviderLocal = "Local" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabConstants.FederationProviderNone = "None" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabConstants.UserTypeB2C = "B2C" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabConstants.UserTypeFederated = "Federated" -> string
+const Microsoft.Identity.Test.LabInfrastructure.LabConstants.UserTypeMSA = "MSA" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.AadRawClientInfo = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.AndroidBrokerResponse = "\r\n{\r\n      \"access_token\":\"secretAt\",\r\n      \"authority\":\"https://login.microsoftonline.com/common\",\r\n      \"cached_at\":1591193165,\r\n      \"client_id\":\"4a1aa1d5-c567-49d0-ad0b-cd957a47f842\",\r\n      \"client_info\":\"clientInfo\",\r\n      \"environment\":\"login.windows.net\",\r\n      \"expires_on\":1591196764,\r\n      \"ext_expires_on\":1591196764,\r\n      \"home_account_id\":\"ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462\",\r\n      \"http_response_code\":0,\r\n      \"id_token\":\"idT\",\r\n      \"local_account_id\":\"ae821e4d-f408-451a-af82-882691148603\",\r\n      \"scopes\":\"User.Read openid offline_access profile\",\r\n      \"success\":true,\r\n      \"tenant_id\":\"49f548d0-12b7-4169-a390-bb5304d24462\",\r\n      \"token_type\":\"Bearer\",\r\n      \"username\":\"some_user@contoso.com\"\r\n   }" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.ATSecret = "some-access-token" -> string
@@ -382,6 +413,65 @@ Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvid
 Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider.CryptographicAlgorithm.get -> string
 Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider.ECDCertificatePopCryptoProvider() -> void
 Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider.Sign(byte[] payload) -> byte[]
+Microsoft.Identity.Test.LabInfrastructure.AppConfig
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.AppConfig() -> void
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.AppId.get -> string
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.AppId.set -> void
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.Authority.get -> string
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.Authority.set -> void
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.DefaultScopes.get -> string
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.DefaultScopes.set -> void
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.Environment.get -> string
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.Environment.set -> void
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.RedirectUri.get -> string
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.RedirectUri.set -> void
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.SecretName.get -> string
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.SecretName.set -> void
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.TenantId.get -> string
+Microsoft.Identity.Test.LabInfrastructure.AppConfig.TenantId.set -> void
+Microsoft.Identity.Test.LabInfrastructure.CertificateHelper
+Microsoft.Identity.Test.LabInfrastructure.Cloud
+Microsoft.Identity.Test.LabInfrastructure.Cloud.Adfs = 1 -> Microsoft.Identity.Test.LabInfrastructure.Cloud
+Microsoft.Identity.Test.LabInfrastructure.Cloud.Arlington = 2 -> Microsoft.Identity.Test.LabInfrastructure.Cloud
+Microsoft.Identity.Test.LabInfrastructure.Cloud.Public = 0 -> Microsoft.Identity.Test.LabInfrastructure.Cloud
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultInstance
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultInstance.KeyVaultInstance() -> void
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider.Dispose() -> void
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider.GetCertificateWithPrivateMaterialAsync(string certName) -> System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2>
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider.GetSecretByName(string secretName) -> Azure.Security.KeyVault.Secrets.KeyVaultSecret
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider.GetSecretByName(string secretName, string secretVersion) -> Azure.Security.KeyVault.Secrets.KeyVaultSecret
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider.GetSecretByNameAsync(string secretName) -> System.Threading.Tasks.Task<Azure.Security.KeyVault.Secrets.KeyVaultSecret>
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider.GetSecretByNameAsync(string secretName, string secretVersion) -> System.Threading.Tasks.Task<Azure.Security.KeyVault.Secrets.KeyVaultSecret>
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider.KeyVaultSecretsProvider(string keyVaultAddress = "https://msidlabs.vault.azure.net") -> void
+Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider.~KeyVaultSecretsProvider() -> void
+Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper
+Microsoft.Identity.Test.LabInfrastructure.LabConstants
+Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper
+Microsoft.Identity.Test.LabInfrastructure.UserConfig
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.AppId.get -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.AppId.set -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.AzureEnvironment.get -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.AzureEnvironment.set -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.B2cProvider.get -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.B2cProvider.set -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.FederationProvider.get -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.FederationProvider.set -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.GetOrFetchPassword() -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.HomeUPN.get -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.HomeUPN.set -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.LabName.get -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.LabName.set -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.ObjectId.get -> System.Guid
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.ObjectId.set -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.TenantId.get -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.TenantId.set -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.Upn.get -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.Upn.set -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.UserConfig() -> void
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.UserType.get -> string
+Microsoft.Identity.Test.LabInfrastructure.UserConfig.UserType.set -> void
 Microsoft.Identity.Test.Unit.TestConstants
 Microsoft.Identity.Test.Unit.TestConstants.AuthorityType
 Microsoft.Identity.Test.Unit.TestConstants.AuthorityType.B2C = 0 -> Microsoft.Identity.Test.Unit.TestConstants.AuthorityType
@@ -462,6 +552,16 @@ static Microsoft.Identity.Test.Common.HttpSnifferClientFactory.LastHttpContentDa
 static Microsoft.Identity.Test.Common.TestData.GetAuthorityWithExpectedTenantId() -> System.Collections.Generic.IEnumerable<object[]>
 static Microsoft.Identity.Test.Common.TestData.GetClaimsAndCapabilities() -> System.Collections.Generic.IEnumerable<object[]>
 static Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider.Sign(System.Security.Cryptography.ECDsa ecdKey, byte[] payload) -> byte[]
+static Microsoft.Identity.Test.LabInfrastructure.CertificateHelper.FindCertificateByName(string subjectName) -> System.Security.Cryptography.X509Certificates.X509Certificate2
+static Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(string labAccessClientId) -> System.Threading.Tasks.Task<Azure.Core.AccessToken>
+static Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.GetLabAccessTokenAsync(string authority, string[] scopes) -> System.Threading.Tasks.Task<Azure.Core.AccessToken>
+static Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.GetLabAccessTokenAsync(string authority, string[] scopes, string clientId) -> System.Threading.Tasks.Task<Azure.Core.AccessToken>
+static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.FetchSecretString(string secretName, Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider keyVault) -> string
+static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.FetchUserPassword(string userLabName) -> string
+static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.GetAppConfigAsync(string secret) -> System.Threading.Tasks.Task<Microsoft.Identity.Test.LabInfrastructure.AppConfig>
+static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.GetUserConfigAsync(string secret) -> System.Threading.Tasks.Task<Microsoft.Identity.Test.LabInfrastructure.UserConfig>
+static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.KeyVaultSecretsProviderMsal.get -> Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider
+static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.KeyVaultSecretsProviderMsid.get -> Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider
 static Microsoft.Identity.Test.Unit.TestConstants.AdditionalAssertionClaims.get -> System.Collections.Generic.Dictionary<string, string>
 static Microsoft.Identity.Test.Unit.TestConstants.CreateUserIdentifier() -> string
 static Microsoft.Identity.Test.Unit.TestConstants.CreateUserIdentifier(string uid, string utid) -> string

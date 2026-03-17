@@ -9,13 +9,23 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
+    /// <summary>
+    /// LabResponseHelper provides utility methods for retrieving and parsing lab user and app configuration data from Key Vault secrets.
+    /// </summary>
     public static class LabResponseHelper
     {
+        /// <summary>
+        /// key vault secrets provider for retrieving lab configuration secrets, using MSAL-based authentication. This provider is used to access secrets containing user and app configuration data for lab testing scenarios.
+        /// </summary>
         public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsal { get; }
+
+        /// <summary>
+        /// key vault secrets provider for retrieving lab configuration secrets, using MSID-based authentication. This provider is used to access secrets containing sensitive data such as user passwords for lab testing scenarios.
+        /// </summary>
         public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsid { get; }
 
         // Caches for configuration objects retrieved from Key Vault
-         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig> s_userConfigCache = new System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig>();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig> s_userConfigCache = new System.Collections.Concurrent.ConcurrentDictionary<string, UserConfig>();
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, AppConfig> s_appConfigCache = new System.Collections.Concurrent.ConcurrentDictionary<string, AppConfig>();
 
         static LabResponseHelper()
@@ -138,6 +148,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
 
+        /// <summary>
+        /// Fetches the user password from Key Vault for the given lab user. The password is expected to be stored in a Key Vault secret with the name matching the user's lab name. This method retrieves the secret value and returns it as a string. Caching is not implemented for passwords due to security considerations, so each call will fetch the latest value from Key Vault. Exceptions are thrown if the lab name is not set, if the Key Vault provider is not initialized, or if there are issues retrieving or parsing the secret from Key Vault.
+        /// </summary>
+        /// <param name="userLabName"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public static string FetchUserPassword(string userLabName)
         {
             // TODO: Implement caching to avoid repeated Key Vault calls
