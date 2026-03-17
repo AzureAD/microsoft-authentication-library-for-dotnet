@@ -2,11 +2,11 @@
     "tool": "Credential Scanner",
     "suppressions": [
         {
-            "file": "\\src\\client\\Microsoft.Identity.Client.TestOnly\\PublicAPI.Unshipped.txt",
+            "file": "src/client/Microsoft.Identity.Client.TestOnly/PublicAPI.Unshipped.txt",
             "_justification": "Public API tracking file includes test-only placeholder password used across unit tests/test certificates; not a production secret."
         },
         {
-            "file": "\\src\\client\\Microsoft.Identity.Client.TestOnly\\PublicAPI.Shipped.txt",
+            "file": "src/client/Microsoft.Identity.Client.TestOnly/PublicAPI.Unshipped.txt",
             "_justification": "Public API tracking file includes test-only placeholder password used across unit tests/test certificates; not a production secret."
         }
     ]
