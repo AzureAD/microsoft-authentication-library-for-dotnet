@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Client.TestOnly\Microsoft.Identity.Lab.Api.csproj" />
+    <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Lab.Api\Microsoft.Identity.Lab.Api.csproj" />
     <ProjectReference Include="..\CommonCache.Test.Common\CommonCache.Test.Common.csproj" />
   </ItemGroup>
 
