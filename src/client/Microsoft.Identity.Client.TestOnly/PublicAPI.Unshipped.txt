@@ -101,7 +101,6 @@ const Microsoft.Identity.Test.Unit.TestConstants.DefaultAccessToken = "DefaultAc
 const Microsoft.Identity.Test.Unit.TestConstants.DefaultAuthorizationCode = "DefaultAuthorizationCode" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.DefaultClientAssertion = "DefaultClientAssertion" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.DefaultGraphScope = "https://graph.microsoft.com/.default" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DefaultPassword = "password" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.DeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache without Pii" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.DiscoveryEndPoint = "discovery/instance" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.DiscoveryFailedResponse = "{\"error\":\"invalid_instance\",\r\n               \"error_description\":\"AADSTS50049: Unknown or invalid instance.\\r\\nTrace ID: 82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\\r\\nCorrelation ID: e7619cf4-53ea-443c-b76a-194c032e9840\\r\\nTimestamp: 2021-04-14 11:27:26Z\",\r\n               \"error_codes\":[50049],\r\n               \"timestamp\":\"2021-04-14 11:27:26Z\",\r\n               \"trace_id\":\"82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\",\r\n               \"correlation_id\":\"e7619cf4-53ea-443c-b76a-194c032e9840\",\r\n               \"error_uri\":\"https://login.microsoftonline.com/error?code=50049\"}" -> string
@@ -174,6 +173,7 @@ const Microsoft.Identity.Test.Unit.TestConstants.Organizations = "organizations"
 const Microsoft.Identity.Test.Unit.TestConstants.PiiDeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache Pii" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.PiiSerializeLogMessage = "MsalExternalLogMessage: Serializing Cache Pii" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.PKeyAuthResponse = "PKeyAuth Context=\"context\",Version=\"1.0\"" -> string
+const Microsoft.Identity.Test.Unit.TestConstants.PlaceholderCredential = "placeholder-credential" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.Pop = "PoP" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.PpeEnvironment = "login.windows-ppe.net" -> string
 const Microsoft.Identity.Test.Unit.TestConstants.PpeOrgEnvironment = "login.windows-ppe.org" -> string

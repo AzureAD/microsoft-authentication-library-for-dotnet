@@ -744,7 +744,7 @@ namespace Microsoft.Identity.Test.Unit
         /// <summary>
         /// Default password used by tests.
         /// </summary>
-        public const string DefaultPassword = "password";
+        public const string PlaceholderCredential = "placeholder-credential";
 
         /// <summary>
         /// Password used for test certificates.

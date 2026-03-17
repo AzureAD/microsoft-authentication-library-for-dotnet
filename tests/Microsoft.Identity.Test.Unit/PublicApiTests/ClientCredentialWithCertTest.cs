@@ -823,7 +823,7 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.Username,
-                        TestConstants.DefaultPassword)
+                        TestConstants.PlaceholderCredential)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
@@ -856,7 +856,7 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.Username,
-                        TestConstants.DefaultPassword)
+                        TestConstants.PlaceholderCredential)
                     .WithSendX5C(sendX5C)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
