@@ -1,0 +1,9 @@
+{
+    "tool": "Credential Scanner",
+    "suppressions": [
+        {
+            "placeholder": "passw0rd!",
+            "_justification": "Test-only placeholder password used across test certs; not a production secret."
+        }
+    ]
+}

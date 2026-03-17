@@ -7,6 +7,9 @@
     <!-- Strong naming is inherited from Directory.Build.props -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include=".config\CredScanSuppressions.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
