@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Castle.Core.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
@@ -23,11 +24,25 @@ using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
+    /// <summary>
+    /// Provides reusable mock helpers and canned HTTP/token responses for MSAL test scenarios.
+    /// </summary>
     public static class MockHelpers
     {
+        /// <summary>
+        /// Gets the default plain-text content used for mocked HTTP 429 responses.
+        /// </summary>
         public const string TooManyRequestsContent = "Too many requests error";
+
+        /// <summary>
+        /// Gets the default Retry-After duration used in mocked throttling responses.
+        /// </summary>
         public static readonly TimeSpan TestRetryAfterDuration = TimeSpan.FromSeconds(120);
 
+        /// <summary>
+        /// Gets a B2C token response payload that intentionally does not include an access token.
+        /// Useful for testing parsing and failure handling paths.
+        /// </summary>
         public static readonly string B2CTokenResponseWithoutAT =
             "{\"id_token\":\"" + CreateIdTokenForB2C(TestConstants.Uid, TestConstants.Utid, TestConstants.B2CSignUpSignIn) + "  \"," +
             "\"token_type\":\"Bearer\",\"not_before\":1585658742," +
@@ -36,6 +51,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             "\"refresh_token\":\"eyJraWQiOiJjcGltY29yZV8wOTI1MjAxNSIsInZlciI6IjEuMCIsInppcCI6IkRlZmxhdGUiLCJzZXIiOiIxLjAifQ..58S7QKY4AVcJS620.mMAGPkA5-v2QL4-kfB7sThyLQec7ZLyd2b-3-GBly5fLNVkbO9GVo9ZzqbaXbuzkNpj4iSITIRjfK4mBEcNU7s7EieHBbsRP8oee3feUuOzzAc61ZQBmTAkYsjEVa4iTSCxM-eU5n1fyZ1lIK6s33lOzylEs5pVT75HMvr_iLEd_2_QN0Y3ql2NVx1kPJsqk4TR0vfG2vum60sr5IBd2TcIamSAfByzfS6LUfVTicbVuWW7GHbJaQtFiE2tOhoJD_bePKGwWX-UwakMe3A4CfKbpT20OIs_o1UPcQUCGmn7XUjBrEPiaPcRHjVCes7ptGR4uTE7emHl9zHq4btl8poHg7iWG4gEmmp0FFvi6XhFOZosotSTTn72SdEkf-o93SmMrlxMRMMFdzEjqbyaiZSwirYfhbNMPcy_jeQ3BL0cr5UreIhxLkSj_xc9A3vDHVK8a3d6IcBa_x1Wwrt_mzEynI1ldgmQwxyda_Xti1JS3OdBQ0ZIkSiw6Z6l8Vmw-kGgkmWOfYjaFWI-vsV5TGYRUA7UnnbzXfbR1x1KwmVs28ssvl_6lsjqWrbBWMUduPGWA1THZzXEnf-MqA1cJfQRq.vRqgMxW_pIJoPUzNOxKUpQ\"," +
             "\"refresh_token_expires_in\":1209600}";
 
+        /// <summary>
+        /// Gets a default ADFS token response payload for unit and integration tests.
+        /// </summary>
         public static readonly string DefaultAdfsTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
@@ -43,6 +61,23 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ":\"" + CreateAdfsIdToken(TestConstants.OnPremiseDisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
 
+        /// <summary>
+        /// Gets an error payload that omits the standard <c>error</c> field.
+        /// Useful for validating fallback error parsing logic.
+        /// </summary>
+        public static readonly string DefaultEmtpyFailureErrorMessage =
+            "{\"the-error-is-not-here\":\"erorwithouterrorfield\",\"error_description\":\"AADSTS991: " +
+                                        "This is an error message which doesn't contain the error field. " +
+                                        "Trace ID: dd25f4fb-3e8d-458e-90e7-179524ce0000Correlation ID: " +
+                                        "f11508ab-067f-40d4-83cb-ccc67bf57e45Timestamp: 2018-09-22 00:50:11Z\"," +
+                                        "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
+                                        "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
+                                        "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}";
+
+        /// <summary>
+        /// Creates a token response payload that contains the <c>foci</c> marker.
+        /// </summary>
+        /// <returns>A JSON token response string for FOCI-enabled scenarios.</returns>
         public static string GetFociTokenResponse()
         {
             return
@@ -55,6 +90,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             "\",\"id_token_expires_in\":\"3600\"}";
         }
 
+        /// <summary>
+        /// Creates a token response whose ID token does not contain the <c>oid</c> claim.
+        /// </summary>
+        /// <returns>A JSON token response string missing the object identifier claim.</returns>
         public static string GetTokenResponseWithNoOidClaim()
         {
             return "{\"token_type\": \"Bearer\"," +
@@ -67,15 +106,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"client_info\": \"eyJ1aWQiOiI0ZTYyYTJiNC0wYmU2LTQyNGItYTA4NC1mMmZmMDkyMThlMjMiLCJ1dGlkIjoiODExOTg5MGItNGMzZi00NjVkLTk4NDAtNTk5MTMxZDE0ZDk4In0\"}";
         }
 
-        public static readonly string DefaultEmtpyFailureErrorMessage =
-            "{\"the-error-is-not-here\":\"erorwithouterrorfield\",\"error_description\":\"AADSTS991: " +
-                                        "This is an error message which doesn't contain the error field. " +
-                                        "Trace ID: dd25f4fb-3e8d-458e-90e7-179524ce0000Correlation ID: " +
-                                        "f11508ab-067f-40d4-83cb-ccc67bf57e45Timestamp: 2018-09-22 00:50:11Z\"," +
-                                        "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
-                                        "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
-                                        "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}";
-
+        /// <summary>
+        /// Creates a default successful OAuth token response.
+        /// </summary>
+        /// <param name="accessToken">The access token value to include in the response.</param>
+        /// <param name="refreshToken">The refresh token value to include in the response.</param>
+        /// <returns>A JSON token response string.</returns>
         public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
             return
@@ -86,6 +122,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
           ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
         }
 
+        /// <summary>
+        /// Creates a successful PoP token response.
+        /// </summary>
+        /// <returns>A JSON token response string containing a PoP token type.</returns>
         public static string GetPopTokenResponse()
         {
             return
@@ -97,6 +137,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
           "\",\"id_token_expires_in\":\"3600\"}";
         }
 
+        /// <summary>
+        /// Creates a hybrid SPA token response that includes a <c>spa_code</c>.
+        /// </summary>
+        /// <param name="spaCode">The SPA code to include in the mocked response.</param>
+        /// <returns>A JSON token response string.</returns>
         public static string GetHybridSpaTokenResponse(string spaCode)
         {
             return
@@ -109,6 +154,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
+        /// <summary>
+        /// Creates a bridged hybrid SPA token response that includes a <c>spa_accountId</c>.
+        /// </summary>
+        /// <param name="spaAccountId">The SPA account identifier to include in the mocked response.</param>
+        /// <returns>A JSON token response string.</returns>
         public static string GetBridgedHybridSpaTokenResponse(string spaAccountId)
         {
             return
@@ -121,6 +171,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
+        /// <summary>
+        /// Creates a successful managed identity token response for IMDS v1 or v2 style payloads.
+        /// </summary>
+        /// <param name="expiresInHours">The number of hours from now until expiry.</param>
+        /// <param name="useIsoFormat">Whether to emit the expiry value in ISO 8601 format instead of Unix time.</param>
+        /// <param name="imdsV2">Whether to emit an IMDS v2-style response.</param>
+        /// <returns>A JSON managed identity response string.</returns>
         public static string GetMsiSuccessfulResponse(
             int expiresInHours = 1,
             bool useIsoFormat = false,
@@ -146,12 +203,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"token_type\":\"" + tokenType + "\",\"client_id\":\"client_id\"}";
         }
 
+        /// <summary>
+        /// Creates malformed JSON based on a managed identity success response.
+        /// </summary>
+        /// <returns>An invalid JSON string useful for parse-failure tests.</returns>
         public static string GetMsiErrorBadJson()
         {
             string successResponse = GetMsiSuccessfulResponse();
             return successResponse.Replace("{", "|");
         }
 
+        /// <summary>
+        /// Creates a managed identity error response tailored to a given source type.
+        /// </summary>
+        /// <param name="source">The managed identity source being simulated.</param>
+        /// <returns>A JSON error payload for the requested managed identity source.</returns>
         public static string GetMsiErrorResponse(ManagedIdentitySource source)
         {
             switch (source)
@@ -172,6 +238,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
         }
 
+        /// <summary>
+        /// Creates a representative IMDS error response payload.
+        /// </summary>
+        /// <returns>A JSON error string for IMDS resource resolution failures.</returns>
         public static string GetMsiImdsErrorResponse()
         {
             return "{\"error\":\"invalid_resource\"," +
@@ -183,6 +253,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"correlation_id\":\"77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\",\"error_uri\":\"https://westus2.login.microsoft.com/error?code=500011\"}";
         }
 
+        /// <summary>
+        /// Creates a Base64Url-encoded client_info payload.
+        /// </summary>
+        /// <param name="uid">The user identifier to encode.</param>
+        /// <param name="utid">The tenant identifier to encode.</param>
+        /// <param name="CreateClientInfoForS2S">Whether to create a service-to-service style payload instead of a user payload.</param>
+        /// <returns>An encoded <c>client_info</c> string.</returns>
         public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid, bool CreateClientInfoForS2S = false)
         {
             if (CreateClientInfoForS2S)
@@ -193,6 +270,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
         }
 
+        /// <summary>
+        /// Creates a readable stream from a string for HTTP/content testing scenarios.
+        /// </summary>
+        /// <param name="s">The string to place into the stream.</param>
+        /// <returns>A stream positioned at the beginning of the provided content.</returns>
         public static Stream GenerateStreamFromString(string s)
         {
             MemoryStream stream = new MemoryStream();
@@ -203,6 +285,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return stream;
         }
 
+        /// <summary>
+        /// Creates a mocked server error HTTP response, optionally including a Retry-After header.
+        /// </summary>
+        /// <param name="statusCode">The HTTP status code to return.</param>
+        /// <param name="retryAfter">An optional Retry-After value in seconds.</param>
+        /// <returns>A configured <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateServerErrorMessage(HttpStatusCode statusCode, int? retryAfter = null)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
@@ -214,6 +302,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return responseMessage;
         }
 
+        /// <summary>
+        /// Creates a mocked HTTP 408 timeout response.
+        /// </summary>
+        /// <returns>A timeout <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateRequestTimeoutResponseMessage()
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.RequestTimeout);
@@ -221,20 +313,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return responseMessage;
         }
 
-        internal static HttpResponseMessage CreateFailureMessage(HttpStatusCode code, string message)
-        {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(code);
-            responseMessage.Content = new StringContent(message);
-            return responseMessage;
-        }
-
-        internal static HttpResponseMessage CreateNullMessage(HttpStatusCode code)
-        {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(code);
-            responseMessage.Content = null;
-            return responseMessage;
-        }
-
+        /// <summary>
+        /// Creates a successful token response message from explicit scopes, ID token, and client info values.
+        /// </summary>
+        /// <param name="scopes">The scopes to include in the response.</param>
+        /// <param name="idToken">The ID token to include in the response.</param>
+        /// <param name="clientInfo">The client_info payload to include in the response.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/> containing a token payload.</returns>
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(
             string scopes,
             string idToken,
@@ -249,12 +334,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 scopes, idToken, clientInfo));
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false, string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
+        /// <summary>
+        /// Creates a default successful token response message, optionally marked as FOCI-enabled.
+        /// </summary>
+        /// <param name="foci">Whether to include the FOCI marker in the response.</param>
+        /// <param name="accessToken">The access token value to include.</param>
+        /// <param name="refreshToken">The refresh token value to include.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/> containing the token payload.</returns>
+        internal static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false, string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
             return CreateSuccessResponseMessage(
                 foci ? GetFociTokenResponse() : GetDefaultTokenResponse(accessToken, refreshToken));
         }
 
+        /// <summary>
+        /// Creates a successful token response message with custom UID, UTID, and displayable name values.
+        /// </summary>
+        /// <param name="uid">The user object identifier.</param>
+        /// <param name="utid">The tenant identifier.</param>
+        /// <param name="displayableName">The displayable username to encode into the ID token.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/> containing the token payload.</returns>
         public static HttpResponseMessage CreateSuccessTokenResponseMessageWithUid(
             string uid, string utid, string displayableName)
         {
@@ -269,11 +368,24 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return CreateSuccessResponseMessage(tokenResponse);
         }
 
+        /// <summary>
+        /// Creates a successful ADFS token response message.
+        /// </summary>
+        /// <returns>A success <see cref="HttpResponseMessage"/> containing the default ADFS payload.</returns>
         public static HttpResponseMessage CreateAdfsSuccessTokenResponseMessage()
         {
             return CreateSuccessResponseMessage(DefaultAdfsTokenResponse);
         }
 
+        /// <summary>
+        /// Creates a token failure response message with customizable error metadata.
+        /// </summary>
+        /// <param name="error">The OAuth error value.</param>
+        /// <param name="subError">An optional suberror value.</param>
+        /// <param name="correlationId">An optional correlation identifier.</param>
+        /// <param name="customStatusCode">An optional custom HTTP status code.</param>
+        /// <param name="errorCode">The AADSTS error code prefix to include in the description.</param>
+        /// <returns>A failure <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateFailureTokenResponseMessage(
             string error,
             string subError = null,
@@ -294,6 +406,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return CreateFailureMessage(statusCode, message);
         }
 
+        /// <summary>
+        /// Creates an <c>invalid_grant</c> token response message, optionally including suberror and claims values.
+        /// </summary>
+        /// <param name="subError">An optional suberror value.</param>
+        /// <param name="claims">Optional claims challenge content.</param>
+        /// <returns>A failure <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage(string subError = null, string claims = null)
         {
             return CreateFailureMessage(HttpStatusCode.BadRequest,
@@ -309,6 +427,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"04bb0cae-580b-49ac-9a10-b6c3316b1eaa\"}");
         }
 
+        /// <summary>
+        /// Creates an <c>invalid_request</c> token response message.
+        /// </summary>
+        /// <returns>A failure <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateInvalidRequestTokenResponseMessage()
         {
             return CreateFailureMessage(HttpStatusCode.BadRequest,
@@ -322,6 +444,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
         }
 
+        /// <summary>
+        /// Creates an <c>invalid_client</c> token response message.
+        /// </summary>
+        /// <returns>A failure <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateInvalidClientResponseMessage()
         {
             return CreateFailureMessage(HttpStatusCode.BadRequest,
@@ -336,11 +462,19 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"3d483b09-1198-4acb-929f-c648674e32bd\"}");
         }
 
+        /// <summary>
+        /// Creates a failure response that has no standard <c>error</c> field.
+        /// </summary>
+        /// <returns>A failure <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateNoErrorFieldResponseMessage()
         {
             return CreateFailureMessage(HttpStatusCode.BadRequest, DefaultEmtpyFailureErrorMessage);
         }
 
+        /// <summary>
+        /// Creates a 404 failure response message with a non-standard error payload.
+        /// </summary>
+        /// <returns>A not-found <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateHttpStatusNotFoundResponseMessage()
         {
             return CreateFailureMessage(HttpStatusCode.NotFound,
@@ -353,16 +487,31 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                         "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
         }
 
+        /// <summary>
+        /// Creates a response message whose content is explicitly <see langword="null"/>.
+        /// </summary>
+        /// <returns>A failure <see cref="HttpResponseMessage"/> with null content.</returns>
         public static HttpResponseMessage CreateNullResponseMessage()
         {
             return CreateNullMessage(HttpStatusCode.BadRequest);
         }
 
+        /// <summary>
+        /// Creates a response message whose content is an empty string.
+        /// </summary>
+        /// <returns>A failure <see cref="HttpResponseMessage"/> with empty content.</returns>
         public static HttpResponseMessage CreateEmptyResponseMessage()
         {
             return CreateFailureMessage(HttpStatusCode.BadRequest, string.Empty);
         }
 
+        /// <summary>
+        /// Creates a successful client credential token response message.
+        /// </summary>
+        /// <param name="token">The access token value to return.</param>
+        /// <param name="expiry">The expiry value, in seconds, to include in the response.</param>
+        /// <param name="tokenType">The token type to include in the response.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage(
             string token = "header.payload.signature",
             string expiry = "3599",
@@ -372,6 +521,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\"}");
         }
 
+        /// <summary>
+        /// Creates a successful client credential token response message that includes <c>client_info</c>.
+        /// </summary>
+        /// <param name="token">The access token value to return.</param>
+        /// <param name="expiry">The expiry value, in seconds, to include in the response.</param>
+        /// <param name="tokenType">The token type to include in the response.</param>
+        /// <param name="CreateClientInfoForS2S">Whether to emit service-to-service style client_info.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseWithClientInfoMessage(
             string token = "header.payload.signature",
             string expiry = "3599",
@@ -383,6 +540,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"client_info\":\"" + CreateClientInfo(null, null, CreateClientInfoForS2S) + "\"}");
         }
 
+        /// <summary>
+        /// Creates a successful client credential token response message with caller-supplied additional parameters.
+        /// </summary>
+        /// <param name="token">The access token value to return.</param>
+        /// <param name="expiry">The expiry value, in seconds, to include in the response.</param>
+        /// <param name="tokenType">The token type to include in the response.</param>
+        /// <param name="additionalparams">Raw JSON fragment containing additional properties to append.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(
             string token = "header.payload.signature",
             string expiry = "3599",
@@ -394,7 +559,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\"" + additionalparams + "}");
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage(
+        /// <summary>
+        /// Creates a successful token response message using explicit token identity and scope values.
+        /// </summary>
+        /// <param name="uniqueId">The unique user/object identifier to embed in the ID token.</param>
+        /// <param name="displayableId">The displayable identifier to embed in the ID token.</param>
+        /// <param name="scope">The scopes to include in the response.</param>
+        /// <param name="foci">Whether to include the FOCI marker.</param>
+        /// <param name="utid">The tenant identifier to include in client_info.</param>
+        /// <param name="accessToken">The access token value.</param>
+        /// <param name="refreshToken">The refresh token value.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/>.</returns>
+        internal static HttpResponseMessage CreateSuccessTokenResponseMessage(
             string uniqueId,
             string displayableId,
             string[] scope,
@@ -410,6 +586,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return responseMessage;
         }
 
+        /// <summary>
+        /// Creates the JSON content for a successful token response using explicit token identity and scope values.
+        /// </summary>
+        /// <param name="uniqueId">The unique user/object identifier to embed in the ID token.</param>
+        /// <param name="displayableId">The displayable identifier to embed in the ID token.</param>
+        /// <param name="scope">The scopes to include in the response.</param>
+        /// <param name="foci">Whether to include the FOCI marker.</param>
+        /// <param name="utid">The tenant identifier to include in client_info.</param>
+        /// <param name="accessToken">The access token value.</param>
+        /// <param name="refreshToken">The refresh token value.</param>
+        /// <returns>A JSON token response string.</returns>
         public static string CreateSuccessTokenResponseString(string uniqueId,
             string displayableId,
             string[] scope,
@@ -429,11 +616,24 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return stringContent;
         }
 
+        /// <summary>
+        /// Creates an ID token using the default tenant identifier.
+        /// </summary>
+        /// <param name="uniqueId">The unique user/object identifier to include as the OID claim.</param>
+        /// <param name="displayableId">The displayable identifier to include as the preferred username claim.</param>
+        /// <returns>A serialized mock ID token string.</returns>
         public static string CreateIdToken(string uniqueId, string displayableId)
         {
             return CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
         }
 
+        /// <summary>
+        /// Creates an ID token using the provided tenant identifier.
+        /// </summary>
+        /// <param name="uniqueId">The unique user/object identifier to include as the OID claim.</param>
+        /// <param name="displayableId">The displayable identifier to include as the preferred username claim.</param>
+        /// <param name="tenantId">The tenant identifier to include as the TID claim.</param>
+        /// <returns>A serialized mock ID token string.</returns>
         public static string CreateIdToken(string uniqueId, string displayableId, string tenantId)
         {
             string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
@@ -451,29 +651,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
 
-        private static string CreateIdTokenForB2C(string uniqueId, string tenantId, string policy)
-        {
-            string id = "{" +
-                        "  \"exp\": 1585662342," +
-                        "  \"nbf\": 1585658742," +
-                        "  \"ver\": \"1.0\"," +
-                        $"  \"iss\": \"https://fabrikamb2c.b2clogin.com/{tenantId}/v2.0/\"," +
-                        "  \"sub\": \"52f6cad9-b822-4492-b742-e60cd2d55ee2\"," +
-                        "  \"aud\": \"841e1190-d73a-450c-9d68-f5cf16b78e81\"," +
-                        $"  \"acr\": \"{policy}\"," +
-                        "  \"iat\": 1585658742," +
-                        "  \"auth_time\": 1585658742," +
-                        "  \"idp\": \"live.com\"," +
-                        "  \"name\": \"John Bob\"," +
-                        "  \"oid\": \"" + uniqueId + "\"," +
-                        "  \"emails\": [" +
-                        "    \"john.bob@outlook.com\"" +
-                        "  ]}";
-
-            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
-
-        }
-
+        /// <summary>
+        /// Creates a mock ADFS ID token.
+        /// </summary>
+        /// <param name="upn">The UPN value to include in the token.</param>
+        /// <returns>A serialized mock ADFS ID token string.</returns>
         public static string CreateAdfsIdToken(string upn)
         {
             string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
@@ -489,6 +671,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
 
+        /// <summary>
+        /// Creates a successful WebFinger response message for the specified trusted realm href.
+        /// </summary>
+        /// <param name="href">The trusted realm href to include in the response.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateSuccessWebFingerResponseMessage(string href)
         {
             return
@@ -498,12 +685,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     "\"href\": \"" + href + "\"}]}");
         }
 
+        /// <summary>
+        /// Creates a successful default WebFinger response message.
+        /// </summary>
+        /// <returns>A success <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateSuccessWebFingerResponseMessage()
         {
             return
                 CreateSuccessWebFingerResponseMessage("https://fs.contoso.com");
         }
 
+        /// <summary>
+        /// Creates a generic HTTP 200 response containing the provided success payload.
+        /// </summary>
+        /// <param name="successResponse">The response content to include.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateSuccessResponseMessage(string successResponse)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
@@ -513,6 +709,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return responseMessage;
         }
 
+        /// <summary>
+        /// Creates a non-JSON HTTP 429 throttling response.
+        /// </summary>
+        /// <returns>A throttling <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateTooManyRequestsNonJsonResponse()
         {
             HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429)
@@ -524,6 +724,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return httpResponse;
         }
 
+        /// <summary>
+        /// Creates a PKeyAuth challenge response with a <c>WWW-Authenticate</c> header.
+        /// </summary>
+        /// <returns>An unauthorized <see cref="HttpResponseMessage"/> containing a PKeyAuth challenge.</returns>
         public static HttpResponseMessage CreatePKeyAuthChallengeResponse()
         {
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized)
@@ -535,6 +739,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return httpResponse;
         }
 
+        /// <summary>
+        /// Creates a JSON HTTP 429 throttling response.
+        /// </summary>
+        /// <returns>A throttling <see cref="HttpResponseMessage"/>.</returns>
         public static HttpResponseMessage CreateTooManyRequestsJsonResponse()
         {
             HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429)
@@ -550,6 +758,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return httpResponse;
         }
 
+        /// <summary>
+        /// Creates an OpenID configuration response for the specified authority.
+        /// </summary>
+        /// <param name="authority">The authority base URL.</param>
+        /// <param name="qp">Optional query parameters to append to authorization and token endpoints.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/> containing OpenID metadata.</returns>
         public static HttpResponseMessage CreateOpenIdConfigurationResponse(string authority, string qp = "")
         {
             var authorityUri = new Uri(authority);
@@ -570,6 +784,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 authority, tenant, qp));
         }
 
+        /// <summary>
+        /// Creates an ADFS OpenID configuration response for the specified authority.
+        /// </summary>
+        /// <param name="authority">The ADFS authority base URL.</param>
+        /// <param name="qp">Optional query parameters to append.</param>
+        /// <returns>A success <see cref="HttpResponseMessage"/> containing ADFS OpenID metadata.</returns>
         public static HttpResponseMessage CreateAdfsOpenIdConfigurationResponse(string authority, string qp = "")
         {
             if (!string.IsNullOrEmpty(qp))
@@ -582,6 +802,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 authority, qp));
         }
 
+        /// <summary>
+        /// Creates a mock handler for instance discovery responses.
+        /// </summary>
+        /// <param name="discoveryEndpoint">The expected discovery endpoint URL.</param>
+        /// <param name="content">The discovery payload to return.</param>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
         public static MockHttpMessageHandler CreateInstanceDiscoveryMockHandler(
             string discoveryEndpoint,
             string content = TestConstants.DiscoveryJsonResponse)
@@ -597,6 +823,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
         }
 
+        /// <summary>
+        /// Creates a mock broker/MSAL runtime token response.
+        /// </summary>
+        /// <param name="accessToken">The access token value to use, or <see langword="null"/> to use the default test token.</param>
+        /// <param name="tokenType">The token type to use, or <see langword="null"/> to use Bearer.</param>
+        /// <returns>A configured <see cref="MsalTokenResponse"/>.</returns>
         internal static MsalTokenResponse CreateMsalRunTimeBrokerTokenResponse(string accessToken = null, string tokenType = null)
         {
             return new MsalTokenResponse()
@@ -613,6 +845,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
         }
 
+        /// <summary>
+        /// Creates a mock IMDS probe handler for v1 or v2 probing scenarios.
+        /// </summary>
+        /// <param name="imdsVersion">The IMDS version being probed.</param>
+        /// <param name="userAssignedIdentityId">The user-assigned identity identifier type, if any.</param>
+        /// <param name="userAssignedId">The user-assigned identity value, if any.</param>
+        /// <param name="success">Whether to simulate a successful probe pattern.</param>
+        /// <param name="retry">Whether to simulate a retryable failure when <paramref name="success"/> is false.</param>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
         internal static MockHttpMessageHandler MockImdsProbe(
             ImdsVersion imdsVersion,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
@@ -687,10 +928,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     Content = new StringContent(""),
                 }
             };
-            
+
             return handler;
         }
 
+        /// <summary>
+        /// Creates a failed IMDS probe handler.
+        /// </summary>
+        /// <param name="imdsVersion">The IMDS version being probed.</param>
+        /// <param name="userAssignedIdentityId">The user-assigned identity identifier type, if any.</param>
+        /// <param name="userAssignedId">The user-assigned identity value, if any.</param>
+        /// <param name="retry">Whether to simulate a retryable failure.</param>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
         internal static MockHttpMessageHandler MockImdsProbeFailure(
             ImdsVersion imdsVersion,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
@@ -700,6 +949,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return MockImdsProbe(imdsVersion, userAssignedIdentityId, userAssignedId, success: false, retry: retry);
         }
 
+        /// <summary>
+        /// Creates a mock CSR metadata response handler for IMDS v2 flows.
+        /// </summary>
+        /// <param name="statusCode">The HTTP status code to return.</param>
+        /// <param name="responseServerHeader">The optional server header value to add.</param>
+        /// <param name="userAssignedIdentityId">The user-assigned identity identifier type, if any.</param>
+        /// <param name="userAssignedId">The user-assigned identity value, if any.</param>
+        /// <param name="clientIdOverride">Optional client ID override to include in the payload.</param>
+        /// <param name="tenantIdOverride">Optional tenant ID override to include in the payload.</param>
+        /// <param name="attestationEndpointOverride">Optional attestation endpoint override to include in the payload.</param>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
         public static MockHttpMessageHandler MockCsrResponse(
             HttpStatusCode statusCode = HttpStatusCode.OK,
             string responseServerHeader = "IMDS/150.870.65.1854",
@@ -752,12 +1012,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
+        /// <summary>
+        /// Creates a failed CSR metadata response handler using HTTP 400.
+        /// </summary>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
         public static MockHttpMessageHandler MockCsrResponseFailure()
         {
             // 400 doesn't trigger the retry policy
             return MockCsrResponse(HttpStatusCode.BadRequest);
         }
 
+        /// <summary>
+        /// Creates a mock certificate issuance response handler for IMDS v2 flows.
+        /// </summary>
+        /// <param name="userAssignedIdentityId">The user-assigned identity identifier type, if any.</param>
+        /// <param name="userAssignedId">The user-assigned identity value, if any.</param>
+        /// <param name="certificate">The raw certificate payload to return.</param>
+        /// <param name="clientIdOverride">Optional client ID override to include in the payload.</param>
+        /// <param name="tenantIdOverride">Optional tenant ID override to include in the payload.</param>
+        /// <param name="mtlsEndpointOverride">Optional mTLS endpoint override to include in the payload.</param>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
         public static MockHttpMessageHandler MockCertificateRequestResponse(
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
@@ -807,6 +1081,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
+        /// <summary>
+        /// Creates a mock Entra token response handler for IMDS v2 token acquisition.
+        /// </summary>
+        /// <param name="identityLoggerAdapter">The logger adapter used to populate expected MSAL ID headers.</param>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
         internal static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponse(
             IdentityLoggerAdapter identityLoggerAdapter)
         {
@@ -842,6 +1121,88 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
 
             return handler;
+        }
+
+        /// <summary>
+        /// Creates a mock certificate issuance response handler that returns HTTP 400 because attestation was required but no attestation token was provided.
+        /// </summary>
+        /// <param name="userAssignedIdentityId">The user-assigned identity identifier type, if any.</param>
+        /// <param name="userAssignedId">The user-assigned identity value, if any.</param>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
+        internal static MockHttpMessageHandler MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400(
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IList<string> presentRequestHeaders = new List<string>
+            {
+                OAuth2Header.XMsCorrelationId
+            };
+
+            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
+            {
+                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
+                    (ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
+
+                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
+            }
+
+            expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
+            expectedRequestHeaders.Add("Metadata", "true");
+
+            string content =
+                "{\"error\":\"invalid_request\",\"error_description\":\"Attestation Token is missing / empty in the issue credential request\"}";
+
+            return new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CertificateRequestPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedQueryParams = expectedQueryParams,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                PresentRequestHeaders = presentRequestHeaders,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(content),
+                }
+            };
+        }
+
+        private static string CreateIdTokenForB2C(string uniqueId, string tenantId, string policy)
+        {
+            string id = "{" +
+                        "  \"exp\": 1585662342," +
+                        "  \"nbf\": 1585658742," +
+                        "  \"ver\": \"1.0\"," +
+                        $"  \"iss\": \"https://fabrikamb2c.b2clogin.com/{tenantId}/v2.0/\"," +
+                        "  \"sub\": \"52f6cad9-b822-4492-b742-e60cd2d55ee2\"," +
+                        "  \"aud\": \"841e1190-d73a-450c-9d68-f5cf16b78e81\"," +
+                        $"  \"acr\": \"{policy}\"," +
+                        "  \"iat\": 1585658742," +
+                        "  \"auth_time\": 1585658742," +
+                        "  \"idp\": \"live.com\"," +
+                        "  \"name\": \"John Bob\"," +
+                        "  \"oid\": \"" + uniqueId + "\"," +
+                        "  \"emails\": [" +
+                        "    \"john.bob@outlook.com\"" +
+                        "  ]}";
+
+            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
+
+        }
+
+        internal static HttpResponseMessage CreateFailureMessage(HttpStatusCode code, string message)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(code);
+            responseMessage.Content = new StringContent(message);
+            return responseMessage;
+        }
+
+        internal static HttpResponseMessage CreateNullMessage(HttpStatusCode code)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(code);
+            responseMessage.Content = null;
+            return responseMessage;
         }
 
         internal static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponseExpectClientId(
@@ -892,7 +1253,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null)
         {
-            // cached‑cert refresh still calls /getplatformmetadata (SAMI or UAMI flavor)
+            // cached-cert refresh still calls /getplatformmetadata (SAMI or UAMI flavor)
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
                 httpManager.AddMockHandler(
@@ -914,45 +1275,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 httpManager.AddMockHandler(
                     MockHelpers.MockImdsV2EntraTokenRequestResponse(identityLoggerAdapter));
             }
-        }
-
-        public static MockHttpMessageHandler MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400(
-            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-            string userAssignedId = null)
-        {
-            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
-            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
-            IList<string> presentRequestHeaders = new List<string>
-            {
-                OAuth2Header.XMsCorrelationId
-            };
-
-            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
-            {
-                var userAssignedIdQueryParam = ImdsManagedIdentitySource.GetUserAssignedIdQueryParam(
-                    (ManagedIdentityIdType)userAssignedIdentityId, userAssignedId, null);
-
-                expectedQueryParams.Add(userAssignedIdQueryParam.Value.Key, userAssignedIdQueryParam.Value.Value);
-            }
-
-            expectedQueryParams.Add("cred-api-version", ImdsV2ManagedIdentitySource.ImdsV2ApiVersion);
-            expectedRequestHeaders.Add("Metadata", "true");
-
-            string content =
-                "{\"error\":\"invalid_request\",\"error_description\":\"Attestation Token is missing / empty in the issue credential request\"}";
-
-            return new MockHttpMessageHandler()
-            {
-                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsV2ManagedIdentitySource.CertificateRequestPath}",
-                ExpectedMethod = HttpMethod.Post,
-                ExpectedQueryParams = expectedQueryParams,
-                ExpectedRequestHeaders = expectedRequestHeaders,
-                PresentRequestHeaders = presentRequestHeaders,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
-                {
-                    Content = new StringContent(content),
-                }
-            };
         }
 
         internal static void AddMocks_AttestedCertMustNotBeReused_ExpectIssueCredential400(

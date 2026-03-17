@@ -584,7 +584,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithClientSecret(TestConstants.ClientSecret)
-                            .WithClientCapabilities(TestConstants.ClientCapabilities)
+                            .WithClientCapabilities(TestConstants.s_clientCapabilities)
                             .BuildConcrete();
 
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(

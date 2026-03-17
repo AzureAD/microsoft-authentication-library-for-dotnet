@@ -626,16 +626,27 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
     }
 
+    /// <summary>
+    /// token response types for testing AAD token endpoint responses. These can be used to configure the type of response returned by mock handlers for token requests, allowing tests to simulate various success and failure scenarios when acquiring tokens from AAD.
+    /// </summary>
     public enum TokenResponseType
     {
+        /// <summary>
+        /// Valid user flows response
+        /// </summary>  
         Valid_UserFlows,
+        /// <summary>
+        /// valid client credentials response
+        /// </summary>
         Valid_ClientCredentials,
+        /// <summary>
+        /// unexpected 503 response simulating AAD being unavailable, which should trigger MSAL's resiliency logic and retries
+        /// </summary>
         Invalid_AADUnavailable503,
         /// <summary>
         /// Results in a UI Required Exception
         /// </summary>
         InvalidGrant, 
-
         /// <summary>
         /// Normal server exception
         /// </summary>

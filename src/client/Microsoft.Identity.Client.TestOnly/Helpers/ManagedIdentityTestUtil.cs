@@ -11,27 +11,76 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
+    /// <summary>
+    /// ManagedIdentityTestUtil provides utility methods for setting up and managing environment variables
+    /// related to managed identities in test scenarios. These utilities help simulate different managed
+    /// identity sources and configurations, facilitating comprehensive testing of MSAL's managed identity
+    /// integration.
+    /// </summary>
     public static class ManagedIdentityTestUtil
     {
+        /// <summary>
+        /// user assigned identity identifier types for testing. This enum is used to specify the type of identifier (ClientId, ResourceId, ObjectId) when creating a user-assigned managed identity in tests.
+        /// </summary>
         public enum UserAssignedIdentityId
         {
+            /// <summary>
+            /// represents the absence of a user-assigned identity identifier. This value is used when creating a managed identity without specifying any identifier, allowing tests to verify behavior when no user-assigned identity is configured.
+            /// </summary>
             None,
+            /// <summary>
+            /// represents a user-assigned identity identified by its client ID. This value is used when creating a managed identity with a specific client ID, allowing tests to verify behavior when a client ID is provided.
+            /// </summary>  
             ClientId,
+            /// <summary>
+            /// represents a user-assigned identity identified by its resource ID. This value is used when creating a managed identity with a specific resource ID, allowing tests to verify behavior when a resource ID is provided.    
+            /// </summary>
             ResourceId,
+            /// <summary>
+            /// represents a user-assigned identity identified by its object ID. This value is used when creating a managed identity with a specific object ID, allowing tests to verify behavior when an object ID is provided.
+            /// </summary>
             ObjectId
         }
 
         //MSI Azure resources
+        /// <summary>
+        /// MSI Azure resource types for testing. This enum is used to specify the type of Azure resource (WebApp, Function, VM, AzureArc, CloudShell, ServiceFabric) when creating a managed identity in tests.
+        /// </summary>
         public enum MsiAzureResource
         {
+            /// <summary>
+            /// Web App resource type for managed identity testing. This value is used when simulating a managed identity associated with an Azure Web App, allowing tests to verify behavior specific to this resource type.
+            /// </summary>
             WebApp,
+            /// <summary>
+            /// Function resource type for managed identity testing. This value is used when simulating a managed identity associated with an Azure Function, allowing tests to verify behavior specific to this resource type.    
+            /// </summary>
             Function,
+            /// <summary>
+            /// VM resource type for managed identity testing. This value is used when simulating a managed identity associated with an Azure Virtual Machine, allowing tests to verify behavior specific to this resource type.
+            /// </summary>
             VM,
+            /// <summary>
+            /// Azure Arc resource type for managed identity testing. This value is used when simulating a managed identity associated with Azure Arc, allowing tests to verify behavior specific to this resource type.
+            /// </summary>
             AzureArc,
+            /// <summary>
+            /// Cloud Shell resource type for managed identity testing. This value is used when simulating a managed identity associated with Azure Cloud Shell, allowing tests to verify behavior specific to this resource type.
+            /// </summary>
             CloudShell,
+            /// <summary>
+            /// Service Fabric resource type for managed identity testing. This value is used when simulating a managed identity associated with Azure Service Fabric, allowing tests to verify behavior specific to this resource type.
+            /// </summary>
             ServiceFabric
         }
 
+        /// <summary>
+        /// Sets environment variables for the specified managed identity source.
+        /// </summary>
+        /// <param name="managedIdentitySource">The managed identity source.</param>
+        /// <param name="endpoint">The endpoint URL.</param>
+        /// <param name="secret">The secret value (default is "secret").</param>
+        /// <param name="thumbprint">The certificate thumbprint (default is "thumbprint").</param>
         public static void SetEnvironmentVariables(ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint")
         {
             switch (managedIdentitySource)

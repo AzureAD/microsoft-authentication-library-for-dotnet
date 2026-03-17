@@ -8,6 +8,9 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
+    /// <summary>
+    /// OsHelper provides utility methods for determining the operating system platform on which the tests are running. This is useful for conditionally executing test logic or assertions based on the underlying OS, ensuring that tests can be appropriately tailored for Windows, macOS, and Linux environments.
+    /// </summary>
     public class OsHelper
     {
         /// <summary>

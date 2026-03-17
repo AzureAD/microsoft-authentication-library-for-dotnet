@@ -7,6 +7,9 @@ using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common
 {
+    /// <summary>
+    /// TestData provides static methods that return enumerables of object arrays, which can be used as data sources for parameterized tests. The methods in this class yield test cases for various scenarios, such as testing authority URLs and their expected tenant IDs, as well as testing the merging of claims and client capabilities. Each test case is represented as an object array, where the elements correspond to the parameters of the test method that will consume this data. This approach allows for comprehensive testing of different input combinations and expected outcomes in a structured manner.
+    /// </summary>
     public static class TestData
     {
         /// <summary>Retrieves a list of Authorities and their defining Tenant Id's</summary>
@@ -49,19 +52,19 @@ namespace Microsoft.Identity.Test.Common
         public static IEnumerable<object[]> GetClaimsAndCapabilities()
         {
             // Test case with non-empty claims, non-empty capabilities, and the expected merged JSON
-            yield return new object[] { TestConstants.Claims, TestConstants.ClientCapabilities, TestConstants.ClientCapabilitiesAndClaimsJson };
+            yield return new object[] { TestConstants.Claims, TestConstants.s_clientCapabilities, TestConstants.ClientCapabilitiesAndClaimsJson };
 
             // Test case with claims containing an access token, non-empty capabilities, and the expected merged JSON
-            yield return new object[] { TestConstants.ClaimsWithAccessToken, TestConstants.ClientCapabilities, TestConstants.ClientCapabilitiesAndClaimsJsonWithAccessToken };
+            yield return new object[] { TestConstants.ClaimsWithAccessToken, TestConstants.s_clientCapabilities, TestConstants.ClientCapabilitiesAndClaimsJsonWithAccessToken };
 
             // Test case with empty claims, non-empty capabilities, and the expected merged JSON being the capabilities alone
-            yield return new object[] { TestConstants.EmptyClaimsJson, TestConstants.ClientCapabilities, TestConstants.ClientCapabilitiesJson };
+            yield return new object[] { TestConstants.EmptyClaimsJson, TestConstants.s_clientCapabilities, TestConstants.ClientCapabilitiesJson };
 
             // Test case with claims containing an additional claim, non-empty capabilities, and the expected merged JSON
-            yield return new object[] { TestConstants.ClaimsWithAdditionalClaim, TestConstants.ClientCapabilities, TestConstants.MergedJsonWithAdditionalClaim };
+            yield return new object[] { TestConstants.ClaimsWithAdditionalClaim, TestConstants.s_clientCapabilities, TestConstants.MergedJsonWithAdditionalClaim };
 
             // Test case with claims containing an additional key, non-empty capabilities, and the expected merged JSON
-            yield return new object[] { TestConstants.ClaimWithAdditionalKey, TestConstants.ClientCapabilities, TestConstants.MergedJsonWithAdditionalKey };
+            yield return new object[] { TestConstants.ClaimWithAdditionalKey, TestConstants.s_clientCapabilities, TestConstants.MergedJsonWithAdditionalKey };
 
             // Test case with claims containing an additional key, empty capabilities, and the expected merged JSON being the claims alone
             yield return new object[] { TestConstants.ClaimWithAdditionalKey, new string[0], TestConstants.ClaimWithAdditionalKey };
@@ -70,7 +73,7 @@ namespace Microsoft.Identity.Test.Common
             yield return new object[] { TestConstants.Claims, new string[0], TestConstants.Claims };
 
             // Test case with null claims, non-empty capabilities, and the expected merged JSON being the capabilities alone
-            yield return new object[] { null, TestConstants.ClientCapabilities, TestConstants.ClientCapabilitiesJson };
+            yield return new object[] { null, TestConstants.s_clientCapabilities, TestConstants.ClientCapabilitiesJson };
 
             // Test case with non-empty claims, null capabilities, and the expected merged JSON being the claims alone
             yield return new object[] { TestConstants.Claims, null, TestConstants.Claims };
@@ -79,7 +82,7 @@ namespace Microsoft.Identity.Test.Common
             yield return new object[] { TestConstants.ClaimsWithAccessToken, null, TestConstants.ClaimsWithAccessToken };
 
             // Test case with claims containing an additional key and access key (different order), non-empty capabilities, and the expected merged JSON
-            yield return new object[] { TestConstants.ClaimWithAdditionalKeyAndAccessKey, TestConstants.ClientCapabilities, TestConstants.MergedJsonClaimWithAdditionalKeyAndAccessKey };
+            yield return new object[] { TestConstants.ClaimWithAdditionalKeyAndAccessKey, TestConstants.s_clientCapabilities, TestConstants.MergedJsonClaimWithAdditionalKeyAndAccessKey };
         }
     }
 }

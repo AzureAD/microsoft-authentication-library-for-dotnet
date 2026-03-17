@@ -12,11 +12,17 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     {
         private readonly System.Collections.IDictionary _originalVariables;
 
+        /// <summary>
+        /// Ensures that any changes to environment variables within the context of this object are reverted when the object is disposed.
+        /// </summary>
         public EnvVariableContext()
         {
             _originalVariables = Environment.GetEnvironmentVariables();
         }
 
+        /// <summary>
+        /// Disposes the context, reverting any changes to environment variables back to their original state at the time of this object's creation.
+        /// </summary>
         public void Dispose()
         {
             var newVariables = Environment.GetEnvironmentVariables();
