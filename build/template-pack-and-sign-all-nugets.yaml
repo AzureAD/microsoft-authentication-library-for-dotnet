@@ -51,12 +51,12 @@ steps:
     ProjectRootPath: '$(Build.SourcesDirectory)\$(MsalSourceDir)src\client'
     AssemblyName: 'Microsoft.Identity.Client.KeyAttestation'
 
-# Sign binary and pack Microsoft.Identity.Client.TestOnly
+# Sign binary and pack Microsoft.Identity.Lab.Api
 - template: template-pack-and-sign-nuget.yaml
   parameters:
     BuildConfiguration: ${{ parameters.BuildConfiguration }}
     ProjectRootPath: '$(Build.SourcesDirectory)\$(MsalSourceDir)src\client'
-    AssemblyName: 'Microsoft.Identity.Client.TestOnly'
+    AssemblyName: 'Microsoft.Identity.Lab.Api'
 
 # Copy all packages out to staging
 - task: CopyFiles@2
