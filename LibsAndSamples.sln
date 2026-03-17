@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopTestApp", "tests\dev
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572-BBD7-424E-81D5-E59E6884EB3A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.TestOnly", "src\client\Microsoft.Identity.Client.TestOnly\Microsoft.Identity.Client.TestOnly.csproj", "{F3F4BDE0-1408-4345-8152-A1BBBB02E1B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Lab.Api", "src\client\Microsoft.Identity.Client.TestOnly\Microsoft.Identity.Lab.Api.csproj", "{F3F4BDE0-1408-4345-8152-A1BBBB02E1B1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CacheCompat", "CacheCompat", "{58B95AA7-BE17-40F2-9C9A-FA27C282A10A}"
 EndProject

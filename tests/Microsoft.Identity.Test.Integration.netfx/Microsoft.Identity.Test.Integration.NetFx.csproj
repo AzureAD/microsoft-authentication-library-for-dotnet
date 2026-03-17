@@ -16,7 +16,7 @@
     
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Extensions.Msal\Microsoft.Identity.Client.Extensions.Msal.csproj" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.TestOnly\Microsoft.Identity.Client.TestOnly.csproj" />
+    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.TestOnly\Microsoft.Identity.Lab.Api.csproj" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.SignedHttpRequest" />
