@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Build();
 
                 // Act & Assert
-                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                         .ExecuteAsync()
@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.InvalidClientAssertion, exception.ErrorCode);
-                Assert.IsTrue(exception.Message.Contains("returned null"));
+                Assert.Contains("returned null", exception.Message);
             }
         }
 
@@ -386,7 +386,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddFailureTokenEndpointResponse("request_failed");
 
                 // Act & Assert
-                await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                await Assert.ThrowsAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                         .ExecuteAsync()
@@ -424,7 +424,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Build();
 
                 // Act & Assert
-                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                         .ExecuteAsync()
@@ -547,7 +547,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddFailureTokenEndpointResponse("request_failed");
 
                 // Act & Assert
-                var exception = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                var exception = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                         .ExecuteAsync()

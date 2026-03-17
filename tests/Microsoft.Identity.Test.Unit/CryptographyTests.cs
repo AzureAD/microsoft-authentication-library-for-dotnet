@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit
                 crypto.SignWithCertificate("TEST", cert, RSASignaturePadding.Pkcs1);
             });
 
-            Assert.AreEqual(ex.ErrorCode, MsalError.CertificateNotRsa);
+            Assert.AreEqual(MsalError.CertificateNotRsa, ex.ErrorCode);
             Assert.AreEqual(ex.Message, MsalErrorMessage.CertMustBeRsa(cert.PublicKey.Oid.FriendlyName));
         }
     }

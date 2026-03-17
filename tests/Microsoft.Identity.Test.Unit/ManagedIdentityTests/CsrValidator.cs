@@ -59,8 +59,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var subject = new X500DistinguishedName(certReqInfoSeq.ReadEncodedValue().ToArray());
             string subjectString = subject.Name;
 
-            Assert.IsTrue(subjectString.Contains($"CN={expectedClientId}"), "Client ID (CN) not found in subject");
-            Assert.IsTrue(subjectString.Contains($"DC={expectedTenantId}"), "Tenant ID (DC) not found in subject");
+            Assert.Contains($"CN={expectedClientId}", subjectString, "Client ID (CN) not found in subject");
+            Assert.Contains($"DC={expectedTenantId}", subjectString, "Tenant ID (DC) not found in subject");
 
             // subjectPKInfo
             var pkInfoReader = new AsnReader(certReqInfoSeq.ReadEncodedValue().ToArray(), AsnEncodingRules.DER);

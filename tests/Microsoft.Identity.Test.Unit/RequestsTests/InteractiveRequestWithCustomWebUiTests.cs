@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                          // Capture the state from the authorizationUri and add it to the result uri
                          var authorizationUri = x[0] as Uri;
                          var state = CoreHelpers.ParseKeyValueList(authorizationUri.Query, '&', true, false, null)["state"];
-                         Assert.IsTrue(!string.IsNullOrEmpty(state));
+                         Assert.IsFalse(string.IsNullOrEmpty(state));
 
                          return Task.FromResult(new Uri(ExpectedRedirectUri + "?code=some-code&state=" + state));
                      });

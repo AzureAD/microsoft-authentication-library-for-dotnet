@@ -391,7 +391,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> cache =
                 AdalCacheOperations.Deserialize(_logger, _legacyCachePersistence.LoadCache());
-            Assert.AreEqual(expectedEntryCount, cache.Count);
+            Assert.HasCount(expectedEntryCount, cache);
         }
 
         [TestMethod]
@@ -401,7 +401,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             LegacyTokenCacheHelper.PopulateLegacyCache(_logger, _legacyCachePersistence);
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCacheBeforeDelete =
                 AdalCacheOperations.Deserialize(_logger, _legacyCachePersistence.LoadCache());
-            Assert.AreEqual(6, adalCacheBeforeDelete.Count);
+            Assert.HasCount(6, adalCacheBeforeDelete);
 
             // Act - nothing happens and a message is logged
             CacheFallbackOperations.RemoveAdalUser(
