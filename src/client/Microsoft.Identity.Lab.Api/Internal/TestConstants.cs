@@ -749,7 +749,7 @@ namespace Microsoft.Identity.Test.Unit
         /// <summary>
         /// Password used for test certificates.
         /// </summary>
-        public const string TestPlaceholderCredential = "placeholder-credential!";
+        public const string TestPlaceholderCredential = "passw0rd!";
 
         /// <summary>
         /// Authority targeting the test tenant.
