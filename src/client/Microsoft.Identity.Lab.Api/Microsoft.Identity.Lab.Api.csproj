@@ -20,10 +20,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include=".config\CredScanSuppressions.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Azure.Security.KeyVault.Certificates" />
     <PackageReference Include="Azure.Security.KeyVault.Secrets" />
   </ItemGroup>
