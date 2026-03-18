@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
-    <AssemblyName>Microsoft.Identity.Client.TestOnly</AssemblyName>
+    <AssemblyName>Microsoft.Identity.Lab.Api</AssemblyName>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
     <!-- Strong naming is inherited from Directory.Build.props -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
