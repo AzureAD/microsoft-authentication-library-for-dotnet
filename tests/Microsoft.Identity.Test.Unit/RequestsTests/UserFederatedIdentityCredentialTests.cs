@@ -135,45 +135,45 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void AcquireTokenByUserFic_NullUsername_ThrowsArgumentNullException()
         {
             using var httpManager = new MockHttpManager();
             var app = BuildCCA(httpManager);
 
-            _ = (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(
-                    TestConstants.s_scope,
-                    username: null,
-                    assertion: FakeAssertion);
+            AssertException.Throws<ArgumentNullException>(() =>
+                (app as IByUserFederatedIdentityCredential)
+                    .AcquireTokenByUserFederatedIdentityCredential(
+                        TestConstants.s_scope,
+                        username: null,
+                        assertion: FakeAssertion));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void AcquireTokenByUserFic_NullAssertion_ThrowsArgumentNullException()
         {
             using var httpManager = new MockHttpManager();
             var app = BuildCCA(httpManager);
 
-            _ = (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(
-                    TestConstants.s_scope,
-                    username: FakeUsername,
-                    assertion: null);
+            AssertException.Throws<ArgumentNullException>(() =>
+                (app as IByUserFederatedIdentityCredential)
+                    .AcquireTokenByUserFederatedIdentityCredential(
+                        TestConstants.s_scope,
+                        username: FakeUsername,
+                        assertion: null));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void AcquireTokenByUserFic_EmptyAssertion_ThrowsArgumentNullException()
         {
             using var httpManager = new MockHttpManager();
             var app = BuildCCA(httpManager);
 
-            _ = (app as IByUserFederatedIdentityCredential)
-                .AcquireTokenByUserFederatedIdentityCredential(
-                    TestConstants.s_scope,
-                    username: FakeUsername,
-                    assertion: string.Empty);
+            AssertException.Throws<ArgumentNullException>(() =>
+                (app as IByUserFederatedIdentityCredential)
+                    .AcquireTokenByUserFederatedIdentityCredential(
+                        TestConstants.s_scope,
+                        username: FakeUsername,
+                        assertion: string.Empty));
         }
     }
 }
