@@ -115,7 +115,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     Resource,
@@ -165,7 +164,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     Resource,
@@ -211,7 +209,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build();
-
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -270,7 +267,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     Resource,
@@ -325,11 +321,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithClientCapabilities(TestConstants.ClientCapabilities)
+                    .WithClientCapabilities(TestConstants.s_clientCapabilities)
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build();
-
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -392,7 +387,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build();
-
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -464,7 +458,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build();
-
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(managedIdentitySource),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
@@ -568,7 +561,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
@@ -608,7 +600,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     Resource,
@@ -645,7 +636,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build();
-
 
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
                     new SocketException(10051)));
@@ -1028,7 +1018,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-
                 httpManager.AddManagedIdentityMockHandler(
                      endpoint,
                      "scope",
@@ -1068,7 +1057,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build();
-
 
                 // Mock handler for the initial resource request
                 httpManager.AddManagedIdentityMockHandler(endpoint, initialResource,
@@ -1348,11 +1336,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithClientCapabilities(TestConstants.ClientCapabilities)
+                    .WithClientCapabilities(TestConstants.s_clientCapabilities)
                     .WithHttpManager(httpManager);
 
                 var mi = miBuilder.Build();
-
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
