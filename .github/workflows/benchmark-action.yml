@@ -27,6 +27,8 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+      - name: Restore NuGet packages
+        run: dotnet restore tests/Microsoft.Identity.Test.Performance
       - name: Run benchmark
         run: cd tests/Microsoft.Identity.Test.Performance && dotnet run -c release -f net8.0 --exporters json 
 
