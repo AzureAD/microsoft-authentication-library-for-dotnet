@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
     [TestClass]
     public class UriBuilderExtensionsTests
     {
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("https://microsoft.com/auth?scope=scope1", "response_mode", "form_post", "https://microsoft.com/auth?scope=scope1&response_mode=form_post")]
         [DataRow("https://microsoft.com/auth?response_mode=query&scope=scope1", "response_mode", "form_post", "https://microsoft.com/auth?response_mode=form_post&scope=scope1")]
         [DataRow("https://microsoft.com/auth?response_mode=form_post&scope=scope1", "response_mode", "form_post", "https://microsoft.com/auth?response_mode=form_post&scope=scope1")]

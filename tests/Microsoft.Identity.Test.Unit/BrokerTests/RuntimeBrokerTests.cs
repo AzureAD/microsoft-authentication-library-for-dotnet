@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Client.NativeInterop.LogLevel.Trace, Client.LogLevel.Verbose)]
         [DataRow(Client.NativeInterop.LogLevel.Debug, Client.LogLevel.Verbose)]
         [DataRow(Client.NativeInterop.LogLevel.Info, Client.LogLevel.Info)]
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _logger.Received().Log(msalLogLevel, string.Empty, logMessage);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(Client.NativeInterop.LogLevel.Trace, Client.LogLevel.Verbose)]
         [DataRow(Client.NativeInterop.LogLevel.Debug, Client.LogLevel.Verbose)]
         [DataRow(Client.NativeInterop.LogLevel.Info, Client.LogLevel.Info)]

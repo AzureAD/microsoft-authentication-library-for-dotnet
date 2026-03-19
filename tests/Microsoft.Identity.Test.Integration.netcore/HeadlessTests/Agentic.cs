@@ -54,6 +54,21 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static async Task AgentUserIdentityGetsTokenForGraphAsync()
         {
+            // Assertion app: acquires the user_fic assertion via FMI path
+            var assertionApp = ConfidentialClientApplicationBuilder
+                        .Create(AgentIdentity)
+                        .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                        .WithExperimentalFeatures(true)
+                        .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
+                        .WithClientAssertion(async (AssertionRequestOptions a) =>
+                        {
+                            Assert.AreEqual(AgentIdentity, a.ClientAssertionFmiPath);
+                            var cred = await GetAppCredentialAsync(a.ClientAssertionFmiPath).ConfigureAwait(false);
+                            return cred;
+                        })
+                        .Build();
+
+            // Main app: acquires the final user token via user_fic grant
             var cca = ConfidentialClientApplicationBuilder
                         .Create(AgentIdentity)
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
@@ -63,31 +78,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
                         .Build();
 
-            var result = await (cca as IByUsernameAndPassword).AcquireTokenByUsernamePassword([Scope], UserUpn, "no_password")
-                .OnBeforeTokenRequest(
-                async (request) =>
-                {
-                    string userFicAssertion = await GetUserFic().ConfigureAwait(false);
-                    request.BodyParameters["user_federated_identity_credential"] = userFicAssertion;
-                    request.BodyParameters["grant_type"] = "user_fic";
+            // Assertion provider using the assertion app with FMI path
+            var assertionResult = await assertionApp
+                .AcquireTokenForClient([TokenExchangeUrl])
+                .WithFmiPathForClientAssertion(AgentIdentity)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
-                    // remove the password
-                    request.BodyParameters.Remove("password");
+            Trace.WriteLine($"User FIC credential from : {assertionResult.AuthenticationResultMetadata.TokenSource}");
+            string assertion = assertionResult.AccessToken;
 
-                    if (request.BodyParameters.TryGetValue("client_secret", out var secret)
-                            && secret.Equals("default", StringComparison.OrdinalIgnoreCase))
-                    {
-                        request.BodyParameters.Remove("client_secret");
-                    }
-                }
-                )
+            var result = await (cca as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential([Scope], UserUpn, assertion)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
             IAccount account = await cca.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
             var result2 = await cca.AcquireTokenSilent([Scope], account).ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsTrue(result2.AuthenticationResultMetadata.TokenSource == TokenSource.Cache, "Token should be from cache");
+            Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource, "Token should be from cache");
         }
 
         private static async Task<string> GetAppCredentialAsync(string fmiPath)
@@ -109,30 +118,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Trace.WriteLine($"FMI app credential from : {result.AuthenticationResultMetadata.TokenSource}");
-
-            return result.AccessToken;
-        }
-
-        private  static async Task<string> GetUserFic()
-        {
-            var cca1 = ConfidentialClientApplicationBuilder
-                     .Create(AgentIdentity)
-                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
-                     .WithExperimentalFeatures(true)
-                     .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
-                     .WithClientAssertion(async (AssertionRequestOptions a) =>
-                     {
-                         Assert.AreEqual(AgentIdentity, a.ClientAssertionFmiPath);
-                         var cred = await GetAppCredentialAsync(a.ClientAssertionFmiPath).ConfigureAwait(false);
-                         return cred;
-                     })                   
-                     .Build();
-
-            var result = await cca1.AcquireTokenForClient([TokenExchangeUrl])   
-                .WithFmiPathForClientAssertion(AgentIdentity)
-                .ExecuteAsync().ConfigureAwait(false);
-
-            Trace.WriteLine($"User FIC credential from : {result.AuthenticationResultMetadata.TokenSource}");
 
             return result.AccessToken;
         }

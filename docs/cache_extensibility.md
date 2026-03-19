@@ -117,7 +117,7 @@ In user flows, only the access tokens will be cached by the new schema. Refresh 
 - Call `AcquireTokenForClient` with no extensibility. Assert cache miss.
 - Call `AcquireTokenForClient` with the same "key1"="val1". Assert cache miss.
 - Call `AcquireTokenForClient` with the same "key1"="val1", "key2"="foo". Assert cache miss.
-- Call `AcquireTokenForClient` with the same "Key1"="val1", "key2"="val2". Assert cache miss (capital "K" used in "key1")
+- Call `AcquireTokenForClient` with the same "Key1"="val1", "key2"="val2". Assert cache miss (uppercase "K" used in "key1")
 
 2. Forwards compatibility test: old MSAL must function side by side with new MSAL, i.e. old MSAL must ignore the new access token cache entries. 
 

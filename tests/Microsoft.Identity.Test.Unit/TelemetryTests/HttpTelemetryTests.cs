@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task LegacyCacheEnabledTelemetryTestAsync(bool isLegacyCacheEnabled)
@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 var pca = CreatePublicClientApp();
 
 #pragma warning disable CS0618 // Type or member is obsolete
-                await pca.AcquireTokenByUsernamePassword(TestConstants.s_scope, "username", TestConstants.DefaultPassword)
+                await pca.AcquireTokenByUsernamePassword(TestConstants.s_scope, "username", TestConstants.PlaceholderCredential)
                     .ExecuteAsync().ConfigureAwait(false);
 #pragma warning restore CS0618
                 AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenByUsernamePassword, CacheRefreshReason.NotApplicable);
@@ -502,7 +502,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("1")]
         [DataRow("0")]
         public async Task ManagedCert_AppearsInTelemetry_AndNotSentToAAD_TestAsync(string managedCertValue)
@@ -767,10 +767,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             string[] telemetryCategories = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single().Split('|');
 
-            Assert.AreEqual(3, telemetryCategories.Length);
-            Assert.AreEqual(1, telemetryCategories[0].Split(',').Length); // version
-            Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.AreEqual(6, telemetryCategories[2].Split(',').Length); // platform_fields
+            Assert.HasCount(3, telemetryCategories);
+            Assert.HasCount(1, telemetryCategories[0].Split(',')); // version
+            Assert.HasCount(5, telemetryCategories[1].Split(',')); // api_id, cache_info, region_used, region_source, region_outcome
+            Assert.HasCount(6, telemetryCategories[2].Split(',')); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 
