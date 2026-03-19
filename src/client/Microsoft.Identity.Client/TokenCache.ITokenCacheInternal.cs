@@ -25,8 +25,7 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
-    /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
+    /// IMPORTANT: this class is performance critical; 
     /// </summary>
     public sealed partial class TokenCache : ITokenCacheInternal
     {
@@ -432,9 +431,7 @@ namespace Microsoft.Identity.Client
 
         #region FindAccessToken
         /// <summary>
-        /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
-        /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
-        /// 
+        /// IMPORTANT: this class is performance critical;
         /// Scenario: client_creds with default in-memory cache can get to ~500k tokens
         /// </summary>
         async Task<MsalAccessTokenCacheItem> ITokenCacheInternal.FindAccessTokenAsync(
