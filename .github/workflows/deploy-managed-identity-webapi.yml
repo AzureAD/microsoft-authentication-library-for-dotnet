@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    paths:
+      - '.github/workflows/deploy-managed-identity-webapi.yml'
 
 jobs:
   build-and-deploy:
