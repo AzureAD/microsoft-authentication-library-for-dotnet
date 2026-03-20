@@ -40,6 +40,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             // Clear cert caches so each test starts fresh
             ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
+
+            // Clear IMDS endpoint cache so environment-based endpoints are re-evaluated
+            ImdsManagedIdentitySource.ResetEndpointCacheForTest();
         }
 
         internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(

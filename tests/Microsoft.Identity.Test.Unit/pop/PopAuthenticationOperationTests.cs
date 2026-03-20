@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Assert.AreEqual("PoP", authenticationScheme.AuthorizationHeaderPrefix);
                 Assert.AreEqual(TelemetryTokenTypeConstants.Pop, authenticationScheme.TelemetryTokenType);
                 Assert.AreEqual(JWT, authenticationScheme.KeyId);
-                Assert.AreEqual(2, tokenParams.Count);
+                Assert.HasCount(2, tokenParams);
                 Assert.AreEqual("pop", tokenParams["token_type"]);
 
                 // This is the base64 URL encoding of the JWK containing only the KeyId
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 Assert.AreEqual(GetAccessTokenFromPopToken(result.AccessToken), GetAccessTokenFromPopToken(initialToken));
                 Assert.AreEqual(GetModulusFromPopToken(result.AccessToken), GetModulusFromPopToken(initialToken));
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
                 //Advance time 2 hours. Should be a different key
                 testClock.MoveToFuture(TimeSpan.FromHours(2));
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 Assert.AreNotEqual(GetModulusFromPopToken(result.AccessToken), GetModulusFromPopToken(initialToken));
                 Assert.AreNotEqual(GetAccessTokenFromPopToken(result.AccessToken), GetAccessTokenFromPopToken(initialToken));
-                Assert.IsTrue(result.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 

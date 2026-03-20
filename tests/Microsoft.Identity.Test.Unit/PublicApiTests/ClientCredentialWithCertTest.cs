@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit
                     if (expectedX5C != null)
                     {
                         Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-                        Assert.AreEqual(x5c.Value.ToString(), expectedX5C);
+                        Assert.AreEqual(expectedX5C, x5c.Value.ToString());
                     }
                     else
                     {
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit
             httpManager.AddInstanceDiscoveryMockHandler();
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, null, true)]
         [DataRow(false, null, false)]
         [DataRow(null, null, false)] // the default is false
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, null, true)]
         [DataRow(false, null, false)]
         [DataRow(null, null, false)] // the default is false
@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Test.Unit
             var x5c = assertionJwt.Header.FirstOrDefault(header => header.Key == "x5c");
 
             Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-            Assert.AreEqual(x5c.Value.ToString(), expectedX5cValue);
+            Assert.AreEqual(expectedX5cValue, x5c.Value.ToString());
 
             return assertionJwt;
         }
@@ -562,7 +562,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, true, true, true)]
         [DataRow(true, true, true, false)]
         [DataRow(true, true, false, true)]
@@ -588,7 +588,7 @@ namespace Microsoft.Identity.Test.Unit
             var cert = new X509Certificate2(
                ResourceHelper.GetTestResourceRelativePath(
                    "testCert.crtfile"),
-               TestConstants.TestCertPassword);
+               TestConstants.TestPlaceholderCredential);
 
             JsonWebToken msalJwtTokenObj =
                 new JsonWebToken(new CommonCryptographyManager(),
@@ -608,7 +608,7 @@ namespace Microsoft.Identity.Test.Unit
                 appendDefaultClaims = true;
 
             int expectedPayloadClaimsCount = (appendDefaultClaims ? 6 : 0) + (addExtraClaims ? 3 : 0);
-            Assert.AreEqual(expectedPayloadClaimsCount, decodedToken.Payload.Count);
+            Assert.HasCount(expectedPayloadClaimsCount, decodedToken.Payload);
             if (appendDefaultClaims)
             {
                 Assert.AreEqual("aud", decodedToken.Payload["aud"]);
@@ -666,7 +666,7 @@ namespace Microsoft.Identity.Test.Unit
         {
 
             // Wilson is guaranteed to parse the token correctly - use it as baseline
-            Assert.AreEqual(sendX5c ? 4 : 3, decodedToken.Header.Count);
+            Assert.HasCount(sendX5c ? 4 : 3, decodedToken.Header);
             Assert.AreEqual("JWT", decodedToken.Header["typ"]);
             Assert.AreEqual(useSha2AndPss ? "PS256" : "RS256", decodedToken.Header["alg"]);
 
@@ -761,7 +761,7 @@ namespace Microsoft.Identity.Test.Unit
                 }
 
                 //Testing client credential flow
-                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                var exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope)
                              .ExecuteAsync(CancellationToken.None)
@@ -772,7 +772,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
 
                 //Testing auth code flow
-                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
                              .ExecuteAsync(CancellationToken.None)
@@ -783,7 +783,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
 
                 //Testing OBO flow
-                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion))
                              .ExecuteAsync(CancellationToken.None)
@@ -796,7 +796,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         // regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4913
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task RopcCcaSendsX5CAsync(bool sendX5C)
@@ -823,13 +823,13 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.Username,
-                        TestConstants.DefaultPassword)
+                        TestConstants.PlaceholderCredential)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task RopcCcaSendsX5CUsingRequestLevelAPIAsync(bool sendX5C)
@@ -856,7 +856,7 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.Username,
-                        TestConstants.DefaultPassword)
+                        TestConstants.PlaceholderCredential)
                     .WithSendX5C(sendX5C)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -867,7 +867,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task EnsureCertificateSerialNumberIsAddedToCacheKeyTestAsync(bool useCertificateOptions)
@@ -984,7 +984,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task EnsureDefaultCacheKeyBehaviorWhenCertSerialNumberIsNotUsedTestAsync(bool useCertificateOptions)
@@ -1072,7 +1072,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var certificate = CertHelper.GetOrCreateTestCert();
 
-                var exception = Assert.ThrowsException<ArgumentNullException>(() =>
+                var exception = Assert.Throws<ArgumentNullException>(() =>
                 {
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
@@ -1083,7 +1083,7 @@ namespace Microsoft.Identity.Test.Unit
                                               .BuildConcrete();
                 });
 
-                Assert.IsTrue(exception.Message.Contains("Value cannot be null"));
+                Assert.Contains("Value cannot be null", exception.Message);
             }
         }
 
@@ -1363,7 +1363,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(JsonValueKind.Array, nwperimidProperty.ValueKind);
                     
                     var arrayElements = nwperimidProperty.EnumerateArray().ToList();
-                    Assert.AreEqual(2, arrayElements.Count);
+                    Assert.HasCount(2, arrayElements);
                     Assert.AreEqual("00000000-1403-0100-0000-000000000000", arrayElements[0].GetString());
                     Assert.AreEqual("00000000-dc4b-4eb1-9fa3-902c8d13b5bd", arrayElements[1].GetString());
                 };
