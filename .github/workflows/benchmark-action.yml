@@ -30,7 +30,7 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore tests/Microsoft.Identity.Test.Performance
       - name: Run benchmark
-        run: cd tests/Microsoft.Identity.Test.Performance && dotnet run -c release -f net8.0 --exporters json 
+        run: cd tests/Microsoft.Identity.Test.Performance && dotnet run --no-restore -c release -f net8.0 --exporters json 
 
       - name: Download previous benchmark data
         uses: actions/cache@v3
