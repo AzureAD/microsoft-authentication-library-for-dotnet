@@ -131,7 +131,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
         }
 
-
+        [DoNotRunOnLinux] // POP is not supported on Linux
+        [TestMethod]
+        public async Task Sni_AssertionFlow_Uses_JwtPop_TestAsync()
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
