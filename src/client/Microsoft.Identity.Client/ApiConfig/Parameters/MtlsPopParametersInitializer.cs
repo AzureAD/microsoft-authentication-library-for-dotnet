@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -134,13 +135,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             X509Certificate2 cert,
             IServiceBundle serviceBundle)
         {
-            // region check (AAD only)
-            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                serviceBundle.Config.AzureRegion == null)
+            // Tenanted authority check (AAD only): mTLS PoP requires a specific tenant ID.
+            if (serviceBundle.Config.Authority is AadAuthority aadAuthority &&
+                aadAuthority.IsCommonOrganizationsOrConsumersTenant())
             {
                 throw new MsalClientException(
-                    MsalError.MtlsPopWithoutRegion,
-                    MsalErrorMessage.MtlsPopWithoutRegion);
+                    MsalError.MissingTenantedAuthority,
+                    MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
             }
 
             p.AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);

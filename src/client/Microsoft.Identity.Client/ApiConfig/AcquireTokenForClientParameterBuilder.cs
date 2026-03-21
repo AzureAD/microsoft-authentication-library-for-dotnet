@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.OAuth2;
@@ -193,17 +194,15 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="ConfidentialClientApplicationBuilder.Validate"/> for a comment inside this function for AzureRegion.
         protected override void Validate()
         {
-            if (CommonParameters.MtlsCertificate != null)
+            if (CommonParameters.IsMtlsPopRequested || CommonParameters.MtlsCertificate != null)
             {
-                // Check for Azure region only if the authority is AAD
-                // AzureRegion is by default set to null or set to null when the application is created
-                // with region set to DisableForceRegion (see ConfidentialClientApplicationBuilder.Validate)
-                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                    ServiceBundle.Config.AzureRegion == null)
+                // mTLS PoP requires a tenanted authority (not /common, /organizations, etc.)
+                if (ServiceBundle.Config.Authority is AadAuthority aadAuthority &&
+                    aadAuthority.IsCommonOrganizationsOrConsumersTenant())
                 {
                     throw new MsalClientException(
-                        MsalError.MtlsPopWithoutRegion,
-                        MsalErrorMessage.MtlsPopWithoutRegion);
+                        MsalError.MissingTenantedAuthority,
+                        MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
                 }
             }
 

@@ -45,15 +45,6 @@ namespace Microsoft.Identity.Client.Region
                         MsalError.MtlsPopNotSupportedForEnvironment,
                         errorMessage);
                 }
-
-                // Check if host starts with "login."
-                if (!host.StartsWith("login.", StringComparison.OrdinalIgnoreCase))
-                {
-                    requestContext.Logger.Error($"[Region discovery] mTLS PoP requires hosts to start with 'login.': {host}");
-                    throw new MsalClientException(
-                        MsalError.MtlsPopNotSupportedForEnvironment,
-                        MsalErrorMessage.MtlsPopNotSupportedForNonLoginHostMessage);
-                }
             }
 
             string region = null;
@@ -68,11 +59,11 @@ namespace Microsoft.Identity.Client.Region
             {
                 if (isMtlsEnabled)
                 {
-                    requestContext.Logger.Info("[Region discovery] Region discovery failed during mTLS Pop. ");
-
-                    throw new MsalServiceException(
-                        MsalError.RegionRequiredForMtlsPop,
-                        MsalErrorMessage.RegionRequiredForMtlsPopMessage);
+                    // mTLS PoP is now supported on global endpoints; return a passthrough entry so that
+                    // the original (global) authority is used as-is, without triggering network
+                    // instance discovery.
+                    requestContext.Logger.Info("[Region discovery] Region not available for mTLS PoP; falling back to global endpoint. ");
+                    return CreateEntry(authority.Host, authority.Host);
                 }
 
                 requestContext.Logger.Info("[Region discovery] Not using a regional authority. ");

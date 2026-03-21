@@ -631,6 +631,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                        .WithExperimentalFeatures(true)
+                       .WithAuthority(TestConstants.AuthorityTenant)
                        .WithClientSecret(TestConstants.ClientSecret)
                       .WithClientAssertion(BearerDelegate())
                       .BuildConcrete();
@@ -678,19 +679,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task WithMtlsPop_AfterPoPDelegate_NoRegion_ThrowsAsync()
+        public async Task WithMtlsPop_WithPoPDelegate_NonTenantedAuthority_ThrowsAsync()
         {
             using var http = new MockHttpManager();
             {
-                // Arrange – CCA with PoP delegate (returns JWT + cert) but **no AzureRegion configured**
-                var cert = CertHelper.GetOrCreateTestCert();
+                // Arrange: CCA with PoP delegate but non-tenanted authority (/common)
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithExperimentalFeatures(true)
                               .WithClientAssertion(PopDelegate())
                               .WithHttpManager(http)
-                              .BuildConcrete();
+                              .BuildConcrete();  // default authority = login.microsoftonline.com/common
 
-                // Act & Assert – should fail because region is missing
+                // Act & Assert: should fail because mTLS PoP requires a tenanted authority
                 var ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
                     await cca.AcquireTokenForClient(TestConstants.s_scope)
                              .WithMtlsProofOfPossession()
@@ -698,7 +698,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                              .ConfigureAwait(false))
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
+                Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
             }
         }
 

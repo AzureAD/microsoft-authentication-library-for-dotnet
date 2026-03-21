@@ -72,6 +72,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
+                            .WithAuthority(TestConstants.AuthorityTenant)
                             .WithClientSecret(TestConstants.ClientSecret)
                             .Build();
 
@@ -96,6 +97,7 @@ namespace Microsoft.Identity.Test.Unit
 #pragma warning disable CS0618 // Type or member is obsolete
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
+                            .WithAuthority(TestConstants.AuthorityTenant)
                             .WithClientClaims(s_testCertificate, ipAddress)
                             .Build();
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -115,6 +117,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                             .Create(TestConstants.ClientId)
+                            .WithAuthority(TestConstants.AuthorityTenant)
                             .WithClientAssertion(() => { return TestConstants.DefaultClientAssertion; })
                             .Build();
 
@@ -131,39 +134,41 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task MtlsPop_WithoutRegion_ThrowsException(bool setAzureRegion)
+        public async Task MtlsPop_GlobalEndpoint_SucceedsWithoutRegionAsync(bool setAzureRegion)
         {
             using (var envContext = new EnvVariableContext())
             {
-                IConfidentialClientApplication app;
-                if (setAzureRegion)
-                {
-                    app = ConfidentialClientApplicationBuilder
-                                    .Create(TestConstants.ClientId)
-                                    .WithAuthority(TestConstants.AuthorityTenant)
-                                    .WithCertificate(s_testCertificate)
-                                    // Setting Azure region to ConfidentialClientApplicationBuilder.DisableForceRegion overrides the AzureRegion to null.
-                                    .WithAzureRegion(ConfidentialClientApplicationBuilder.DisableForceRegion)
-                                    .Build();
-                }
-                else
-                {
-                    app = ConfidentialClientApplicationBuilder
-                                    .Create(TestConstants.ClientId)
-                                    .WithAuthority(TestConstants.AuthorityTenant)
-                                    .WithCertificate(s_testCertificate)
-                                    .Build();
-                }
+                Environment.SetEnvironmentVariable("REGION_NAME", null); // Ensure no region is auto-detected
 
-                // Set WithMtlsProofOfPossession on the request
-                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                        app.AcquireTokenForClient(TestConstants.s_scope)
-                           .WithMtlsProofOfPossession() // Enables MTLS PoP
-                           .ExecuteAsync())
+                using (var httpManager = new MockHttpManager())
+                {
+                    // No region set: mTLS PoP should fall back to global endpoint
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
+
+                    ConfidentialClientApplicationBuilder builder = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithAuthority(TestConstants.AuthorityTenant)
+                        .WithCertificate(s_testCertificate)
+                        .WithHttpManager(httpManager);
+
+                    if (setAzureRegion)
+                    {
+                        // Explicitly disable region - global endpoint should still work
+                        builder = builder.WithAzureRegion(ConfidentialClientApplicationBuilder.DisableForceRegion);
+                    }
+
+                    IConfidentialClientApplication app = builder.Build();
+
+                    // Should succeed using the global endpoint
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
                         .ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.MtlsPopWithoutRegion, ex.Message);
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed,
+                        "No region should be used when falling back to global endpoint.");
+                }
             }
         }
 
@@ -182,8 +187,8 @@ namespace Microsoft.Identity.Test.Unit
                    .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.MtlsPopWithoutRegion, ex.Message);
+            Assert.AreEqual(MsalError.MissingTenantedAuthority, ex.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage, ex.Message);
         }
 
         [TestMethod]
@@ -505,19 +510,19 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPop_ThrowsExceptionWhenRegionAutoDetectFailsAsync()
+        public async Task MtlsPop_FallsBackToGlobalEndpointWhenRegionAutoDetectFailsAsync()
         {
             using (var envContext = new EnvVariableContext())
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", null);  // Ensure no region is set
 
                 using (var httpManager = new MockHttpManager())
-                using (var harness = new MockHttpAndServiceBundle())
                 {
-                    harness.ServiceBundle.Config.RetryPolicyFactory = new TestRetryPolicyFactory();
-
                     // for simplicity, return 404 so retry is not triggered
                     httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
+
+                    // mTLS PoP should fall back to the global endpoint when region auto-detect fails
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
 
                     ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithCertificate(s_testCertificate)
@@ -526,22 +531,22 @@ namespace Microsoft.Identity.Test.Unit
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
-                    // Expect an MsalServiceException due to missing region for MTLS POP
-                    MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
-                        await app.AcquireTokenForClient(TestConstants.s_scope)
-                            .WithMtlsProofOfPossession()
-                            .ExecuteAsync()
-                            .ConfigureAwait(false))
+                    // Should succeed using the global endpoint
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
                         .ConfigureAwait(false);
 
-                    Assert.AreEqual(MsalError.RegionRequiredForMtlsPop, ex.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.RegionRequiredForMtlsPopMessage, ex.Message);
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed,
+                        "No region should be used when auto-detection fails and falling back to global endpoint.");
+                    Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
                 }
             }
         }
 
         [TestMethod]
-        [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(MsalServiceException))]
+        [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(HttpRequestException))]
         [DataRow("https://contoso.adfs.contoso.com/adfs", "ADFS Authority", typeof(HttpRequestException))]
         public async Task MtlsPop_NonAadAuthorityAsync(string authorityUrl, string authorityType, Type expectedException)
         {
@@ -566,7 +571,6 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [Ignore("TODO: Production code validation for non-tenanted authority with mTLS PoP is not yet implemented. See MsalError.MissingTenantedAuthority.")]
         [TestMethod]
         [DataRow("https://login.microsoftonline.com", TestConstants.Common, "Public Cloud")]
         [DataRow("https://login.microsoftonline.com", TestConstants.Organizations, "Public Cloud")]
@@ -763,44 +767,6 @@ namespace Microsoft.Identity.Test.Unit
 
                     Assert.AreEqual(MsalError.MtlsPopNotSupportedForEnvironment, exception.ErrorCode);
                     Assert.AreEqual(expectedErrorMessage, exception.Message);
-                }
-            }
-        }
-
-        [TestMethod]
-        [DataRow("mtlsauth.microsoft.com")]
-        [DataRow("sts.windows.net")]
-        [DataRow("graph.microsoft.com")]
-        public async Task NonLoginHosts_ThrowsMsalClientException_Async(string nonLoginHost)
-        {
-            // Arrange
-            string authorityUrl = $"https://{nonLoginHost}/17b189bc-2b81-4ec5-aa51-3e628cbc931b";
-
-            using (var envContext = new EnvVariableContext())
-            {
-                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
-
-                using (var harness = new MockHttpAndServiceBundle())
-                {
-                    var app = ConfidentialClientApplicationBuilder
-                                        .Create(TestConstants.ClientId)
-                                        .WithAuthority(authorityUrl)
-                                        .WithHttpManager(harness.HttpManager)
-                                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                                        .WithCertificate(s_testCertificate)
-                                        .Build();
-
-                    // Act & Assert
-                    var exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    {
-                        await app.AcquireTokenForClient(TestConstants.s_scope)
-                            .WithMtlsProofOfPossession()
-                            .ExecuteAsync()
-                            .ConfigureAwait(false);
-                    }).ConfigureAwait(false);
-
-                    Assert.AreEqual(MsalError.MtlsPopNotSupportedForEnvironment, exception.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.MtlsPopNotSupportedForNonLoginHostMessage, exception.Message);
                 }
             }
         }
