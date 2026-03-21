@@ -5,7 +5,7 @@
 parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
-  MicrosoftIdentityClientVersion: '4.55.0-devopsbuild'
+  MicrosoftIdentityClientVersion: '4.60.0-devopsbuild'
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
 
 steps:
