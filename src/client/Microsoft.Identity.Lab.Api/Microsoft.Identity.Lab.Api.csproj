@@ -10,7 +10,6 @@
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
-    <LabApiVersion Condition="'$(LabApiVersion)' == ''">$(MsalInternalVersion)</LabApiVersion>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(LabApiVersion)</Version>
 
