@@ -5,6 +5,7 @@ parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
   MicrosoftIdentityClientVersion: '4.60.0-devopsbuild' 
+  LabApiVersion: '1.0.0-devopsbuild'
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
 
 steps:
@@ -82,6 +83,6 @@ steps:
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }} /p:LabApiVersion=${{ parameters.LabApiVersion }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
