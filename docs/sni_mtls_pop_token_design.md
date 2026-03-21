@@ -42,17 +42,20 @@ Bearer tokens are vulnerable to theft. Proof-of-Possession (PoP) tokens mitigate
 
 ### MTLS Endpoint Usage
 
-The mTLS PoP flow relies on tenanted endpoints with support for regional configurations. The behavior varies based on the cloud environment:
+The mTLS PoP flow relies on tenanted endpoints and supports both regional and global configurations. The behavior varies based on the cloud environment:
 
 #### Public Cloud
 
-The base endpoint for public clouds is:
+Both global and regional endpoints are supported:
 
-`https://{region}.mtlsauth.microsoft.com/{tenant_id}`
+- **Global endpoint** (no region required): `https://login.microsoftonline.com/{tenant_id}`
+- **Regional endpoint**: `https://{region}.mtlsauth.microsoft.com/{tenant_id}`
 
 Example: Specifying the `westus` region results in:
 
-`https://eastus.mtlsauth.microsoft.com/{tenant_id}`
+`https://westus.mtlsauth.microsoft.com/{tenant_id}`
+
+If no region is specified (or region auto-detection fails), MSAL falls back to the global endpoint (`login.microsoftonline.com`).
 
 #### Sovereign Clouds
 
@@ -77,6 +80,8 @@ Note: App developers create an MSAL Confidential Client Application (CCA) object
 
 #### Sample usage in MSAL .NET
 
+**With a region (recommended for low-latency):**
+
 ```csharp
 string clientId = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
 string authority = "https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c";
@@ -86,14 +91,25 @@ X509Certificate2 certificate = GetCertificateFromStore("Use The Lab Auth Cert");
 
 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(clientId)
     .WithAuthority(authority)
-    .WithAzureRegion("westus")
+    .WithAzureRegion("westus")   // region is optional; omit to use global endpoint
     .WithCertificate(certificate, true)
     .WithExperimentalFeatures(true)
     .Build();
 
 AuthenticationResult result = await app.AcquireTokenForClient(scopes).WithMtlsProofOfPossession()
-    .WithExtraQueryParameters("dc=ESTSR-PUB-WUS3-AZ1-TEST1&slice=TestSlice") //Feature in test slice 
-    .WithSendX5C(true)
+    .ExecuteAsync();
+```
+
+**Without a region (uses global endpoint):**
+
+```csharp
+IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(clientId)
+    .WithAuthority(authority)    // region is optional; omit WithAzureRegion to use global endpoint
+    .WithCertificate(certificate, true)
+    .WithExperimentalFeatures(true)
+    .Build();
+
+AuthenticationResult result = await app.AcquireTokenForClient(scopes).WithMtlsProofOfPossession()
     .ExecuteAsync();
 ```
 
@@ -114,9 +130,10 @@ AuthenticationResult result = await app.AcquireTokenForClient(scopes).WithMtlsPr
 
 ### Region Validation Tests
 
-- Ensure `MsalClientException` is thrown when no region is set and `WithMtlsProofOfPossession()` is called.
-- Validate successful token acquisition with a specified region.
-- Test auto-detected region functionality and confirm the expected region is used.
+- Validate successful token acquisition with a specified region (uses regional mTLS endpoint).
+- Validate successful token acquisition without a region (uses global endpoint).
+- Test auto-detected region functionality and confirm the expected regional endpoint is used.
+- When region auto-detection fails, verify fallback to global endpoint succeeds.
 - Region is not required if the authority is DSTS.
 
 ### Grant Type Validation

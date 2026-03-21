@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit
 
                     Assert.IsNotNull(result.AccessToken);
                     Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed,
-                        "No region should be used when falling back to global endpoint.");
+                        "No region should be used when global endpoint is configured.");
                 }
             }
         }
