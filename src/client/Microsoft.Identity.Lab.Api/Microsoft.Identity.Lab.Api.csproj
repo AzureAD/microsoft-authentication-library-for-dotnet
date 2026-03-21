@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
+    <LabApiVersion Condition="'$(LabApiVersion)' == ''">$(LabApiInternalVersion)</LabApiVersion>
     <!--This should be passed from the VSTS build-->
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(LabApiVersion)</Version>
