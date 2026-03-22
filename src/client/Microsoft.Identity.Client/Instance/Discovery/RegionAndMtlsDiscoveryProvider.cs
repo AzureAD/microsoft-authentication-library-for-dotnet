@@ -59,11 +59,28 @@ namespace Microsoft.Identity.Client.Region
             {
                 if (isMtlsEnabled)
                 {
-                    // mTLS PoP is now supported on global endpoints; return a passthrough entry so that
-                    // the original (global) authority is used as-is, without triggering network
-                    // instance discovery.
-                    requestContext.Logger.Info("[Region discovery] Region not available for mTLS PoP; falling back to global endpoint. ");
-                    return CreateEntry(authority.Host, authority.Host);
+                    // mTLS PoP is supported on global endpoints. Transform the authority host so that
+                    // the HTTP request goes to the mTLS endpoint (mtlsauth.*) instead of the regular
+                    // login endpoint. This is required for the mutual-TLS handshake to take place.
+                    //   Public:     login.microsoftonline.com  → mtlsauth.microsoft.com
+                    //   Gov:        login.microsoftonline.us   → mtlsauth.microsoftonline.us
+                    //   China:      login.partner.microsoftonline.cn → mtlsauth.partner.microsoftonline.cn
+                    //   Sovereign:  login.sovcloud-identity.xx → mtlsauth.sovcloud-identity.xx
+                    string originalHost = authority.Host;
+                    string mtlsHost = originalHost;
+
+                    if (KnownMetadataProvider.IsPublicEnvironment(originalHost))
+                    {
+                        // Public cloud has a dedicated global mTLS hostname.
+                        mtlsHost = PublicEnvForRegionalMtlsAuth;
+                    }
+                    else if (originalHost.StartsWith("login.", StringComparison.OrdinalIgnoreCase))
+                    {
+                        mtlsHost = "mtlsauth." + originalHost.Substring("login.".Length);
+                    }
+
+                    requestContext.Logger.Info($"[Region discovery] Region not available for mTLS PoP; using global mTLS endpoint: {mtlsHost}");
+                    return CreateEntry(originalHost, mtlsHost);
                 }
 
                 requestContext.Logger.Info("[Region discovery] Not using a regional authority. ");

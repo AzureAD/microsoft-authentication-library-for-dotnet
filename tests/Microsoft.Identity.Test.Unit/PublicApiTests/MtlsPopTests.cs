@@ -142,8 +142,15 @@ namespace Microsoft.Identity.Test.Unit
 
                 using (var httpManager = new MockHttpManager())
                 {
-                    // No region set: mTLS PoP should fall back to global endpoint
-                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
+                    // No region: mTLS PoP should redirect to the global mTLS endpoint (mtlsauth.microsoft.com)
+                    string expectedTokenEndpoint = $"https://{RegionAndMtlsDiscoveryProvider.PublicEnvForRegionalMtlsAuth}/{TestConstants.TenantId}/oauth2/v2.0/token";
+                    var tokenHandler = new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = expectedTokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop")
+                    };
+                    httpManager.AddMockHandler(tokenHandler);
 
                     ConfidentialClientApplicationBuilder builder = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
@@ -153,19 +160,20 @@ namespace Microsoft.Identity.Test.Unit
 
                     if (setAzureRegion)
                     {
-                        // Explicitly disable region - global endpoint should still work
+                        // Explicitly disable region - global mTLS endpoint should still be used
                         builder = builder.WithAzureRegion(ConfidentialClientApplicationBuilder.DisableForceRegion);
                     }
 
                     IConfidentialClientApplication app = builder.Build();
 
-                    // Should succeed using the global endpoint
+                    // Should succeed using the global mTLS endpoint (mtlsauth.microsoft.com)
                     AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
                         .WithMtlsProofOfPossession()
                         .ExecuteAsync()
                         .ConfigureAwait(false);
 
                     Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
                     Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed,
                         "No region should be used when global endpoint is configured.");
                 }
@@ -510,8 +518,9 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPop_FallsBackToGlobalEndpointWhenRegionAutoDetectFailsAsync()
+        public async Task MtlsPop_FallsBackToGlobalMtlsEndpointWhenRegionAutoDetectFailsAsync()
         {
+            const string tenantId = "123456-1234-2345-1234561234";
             using (var envContext = new EnvVariableContext())
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", null);  // Ensure no region is set
@@ -521,32 +530,39 @@ namespace Microsoft.Identity.Test.Unit
                     // for simplicity, return 404 so retry is not triggered
                     httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
 
-                    // mTLS PoP should fall back to the global endpoint when region auto-detect fails
-                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
+                    // mTLS PoP should redirect to the global mTLS endpoint when region auto-detect fails
+                    string expectedTokenEndpoint = $"https://{RegionAndMtlsDiscoveryProvider.PublicEnvForRegionalMtlsAuth}/{tenantId}/oauth2/v2.0/token";
+                    httpManager.AddMockHandler(new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = expectedTokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop")
+                    });
 
                     ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithCertificate(s_testCertificate)
-                        .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAuthority($"https://login.microsoftonline.com/{tenantId}")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
-                    // Should succeed using the global endpoint
+                    // Should succeed using the global mTLS endpoint (mtlsauth.microsoft.com)
                     AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
                         .WithMtlsProofOfPossession()
                         .ExecuteAsync()
                         .ConfigureAwait(false);
 
                     Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
                     Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.RegionUsed,
-                        "No region should be used when auto-detection fails and falling back to global endpoint.");
+                        "No region should be used when auto-detection fails and falling back to global mTLS endpoint.");
                     Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
                 }
             }
         }
 
         [TestMethod]
-        [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(MsalServiceException))]
+        [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(HttpRequestException))]
         [DataRow("https://contoso.adfs.contoso.com/adfs", "ADFS Authority", typeof(HttpRequestException))]
         public async Task MtlsPop_NonAadAuthorityAsync(string authorityUrl, string authorityType, Type expectedException)
         {
