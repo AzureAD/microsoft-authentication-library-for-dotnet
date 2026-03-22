@@ -546,7 +546,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(HttpRequestException))]
+        [DataRow("https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signupsignin", "B2C Authority", typeof(MsalServiceException))]
         [DataRow("https://contoso.adfs.contoso.com/adfs", "ADFS Authority", typeof(HttpRequestException))]
         public async Task MtlsPop_NonAadAuthorityAsync(string authorityUrl, string authorityType, Type expectedException)
         {
