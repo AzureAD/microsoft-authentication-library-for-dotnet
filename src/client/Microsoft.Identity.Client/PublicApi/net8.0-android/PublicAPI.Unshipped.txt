@@ -1,0 +1,5 @@
+Microsoft.Identity.Client.TokenAcquisitionResult
+Microsoft.Identity.Client.TokenAcquisitionResult.AuthenticationResult.get -> Microsoft.Identity.Client.AuthenticationResult
+Microsoft.Identity.Client.TokenAcquisitionResult.Exception.get -> System.Exception
+Microsoft.Identity.Client.TokenAcquisitionResult.IsSuccess.get -> bool
+Microsoft.Identity.Client.TokenAcquisitionResult.TokenAcquisitionResult() -> void
