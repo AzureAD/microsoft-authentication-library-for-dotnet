@@ -269,12 +269,6 @@ Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.ExpectedTenantId.se
 Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.ToObjectArray() -> object[]
 Microsoft.Identity.Test.Common.Core.Helpers.AssertException
 Microsoft.Identity.Test.Common.Core.Helpers.CoreAssert
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnLinuxAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnLinuxAttribute.DoNotRunOnLinuxAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnPlatformAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnPlatformAttribute.DoNotRunOnPlatformAttribute(System.Runtime.InteropServices.OSPlatform platform, string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnWindowsAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnWindowsAttribute.DoNotRunOnWindowsAttribute(string filePath = null, int lineNumber = 0) -> void
 Microsoft.Identity.Test.Common.Core.Helpers.EnvVariableContext
 Microsoft.Identity.Test.Common.Core.Helpers.EnvVariableContext.Dispose() -> void
 Microsoft.Identity.Test.Common.Core.Helpers.EnvVariableContext.EnvVariableContext() -> void
@@ -304,16 +298,6 @@ Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.Cryp
 Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.RSACertificatePopCryptoProvider(System.Security.Cryptography.X509Certificates.X509Certificate2 cert) -> void
 Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.Sign(byte[] payload) -> byte[]
 Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnAzureDevOpsAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnAzureDevOpsAttribute.RunOnAzureDevOpsAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnLinuxAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnLinuxAttribute.RunOnLinuxAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnOSXAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnOSXAttribute.RunOnOSXAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnPlatformAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnPlatformAttribute.RunOnPlatformAttribute(System.Runtime.InteropServices.OSPlatform platform, string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnWindowsAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnWindowsAttribute.RunOnWindowsAttribute(string filePath = null, int lineNumber = 0) -> void
 Microsoft.Identity.Test.Common.Core.Helpers.TestIdentityLogger
 Microsoft.Identity.Test.Common.Core.Helpers.TestIdentityLogger.IsEnabled(Microsoft.IdentityModel.Abstractions.EventLogLevel eventLogLevel) -> bool
 Microsoft.Identity.Test.Common.Core.Helpers.TestIdentityLogger.Log(Microsoft.IdentityModel.Abstractions.LogEntry entry) -> void
@@ -476,9 +460,6 @@ Microsoft.Identity.Test.LabInfrastructure.UserConfig.UserType.set -> void
 Microsoft.Identity.Test.Unit.TestConstants
 Microsoft.Identity.Test.Unit.TestConstants.AuthorityType
 Microsoft.Identity.Test.Unit.TestConstants.AuthorityType.B2C = 0 -> Microsoft.Identity.Test.Unit.TestConstants.AuthorityType
-override Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnPlatformAttribute.ExecuteAsync(Microsoft.VisualStudio.TestTools.UnitTesting.ITestMethod testMethod) -> System.Threading.Tasks.Task<Microsoft.VisualStudio.TestTools.UnitTesting.TestResult[]>
-override Microsoft.Identity.Test.Common.Core.Helpers.RunOnAzureDevOpsAttribute.ExecuteAsync(Microsoft.VisualStudio.TestTools.UnitTesting.ITestMethod testMethod) -> System.Threading.Tasks.Task<Microsoft.VisualStudio.TestTools.UnitTesting.TestResult[]>
-override Microsoft.Identity.Test.Common.Core.Helpers.RunOnPlatformAttribute.ExecuteAsync(Microsoft.VisualStudio.TestTools.UnitTesting.ITestMethod testMethod) -> System.Threading.Tasks.Task<Microsoft.VisualStudio.TestTools.UnitTesting.TestResult[]>
 override Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage>
 override Microsoft.Identity.Test.Common.RecordingHandler.SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage>
 static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.DoesNotThrow(System.Action testCode) -> void
