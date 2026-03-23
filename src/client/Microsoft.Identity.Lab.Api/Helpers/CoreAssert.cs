@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -32,10 +31,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var actualScopes = ScopeHelper.ConvertStringToScopeSet(scopesActual);
 
             // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.HasCount(expectedScopes.Count, actualScopes);
+            ValidationHelpers.AssertHasCount(expectedScopes.Count, actualScopes);
             foreach (string expectedScope in expectedScopes)
             {
-                Assert.Contains(expectedScope, actualScopes);
+                ValidationHelpers.AssertContains(expectedScope, actualScopes);
             }
         }
 
@@ -49,11 +48,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         {
             foreach (var account in accounts)
             {
-                Assert.AreEqual(expectedUsername, account.Username);
-                Assert.AreEqual(expectedEnv, account.Environment);
-                Assert.AreEqual(expectedId, account.HomeAccountId.Identifier);
-                Assert.AreEqual(expectedTid, account.HomeAccountId.TenantId);
-                Assert.AreEqual(expectedOid, account.HomeAccountId.ObjectId);
+                ValidationHelpers.AssertAreEqual(expectedUsername, account.Username);
+                ValidationHelpers.AssertAreEqual(expectedEnv, account.Environment);
+                ValidationHelpers.AssertAreEqual(expectedId, account.HomeAccountId.Identifier);
+                ValidationHelpers.AssertAreEqual(expectedTid, account.HomeAccountId.TenantId);
+                ValidationHelpers.AssertAreEqual(expectedOid, account.HomeAccountId.ObjectId);
             }
         }
 
@@ -66,8 +65,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <param name="val3">The third value.</param>
         public static void AreEqual<T>(T val1, T val2, T val3)
         {
-            Assert.AreEqual(val1, val2, "First and second values differ");
-            Assert.AreEqual(val1, val3, "First and third values differ");
+            ValidationHelpers.AssertAreEqual(val1, val2, "First and second values differ");
+            ValidationHelpers.AssertAreEqual(val1, val3, "First and third values differ");
         }
 
         /// <summary>
@@ -91,7 +90,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         public static void IsWithinRange(DateTimeOffset expected, DateTimeOffset actual, TimeSpan range, string message = "")
         {
             TimeSpan t = expected - actual;
-            Assert.IsTrue(t >= -range && t <= range,
+            ValidationHelpers.AssertIsTrue(t >= -range && t <= range,
                 $"{message} The dates are off by {t.TotalMilliseconds}ms, which is more than the expected {range.TotalMilliseconds}ms");
         }
 
@@ -111,7 +110,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
           IDictionary<TKey, TValue> dict2,
           IEqualityComparer<TValue> valueComparer)
         {
-            Assert.IsTrue(DictionariesAreEqual(dict1, dict2, valueComparer));
+            ValidationHelpers.AssertIsTrue(DictionariesAreEqual(dict1, dict2, valueComparer));
         }
 
         /// <summary>
@@ -125,7 +124,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// </remarks>
         public static void IsImmutable<T>()
         {
-            Assert.IsTrue(IsImmutable(typeof(T)));
+            ValidationHelpers.AssertIsTrue(IsImmutable(typeof(T)));
         }
 
         private static bool IsImmutable(Type type)

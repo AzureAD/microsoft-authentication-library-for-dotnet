@@ -7,7 +7,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -20,31 +19,31 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public override List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            Assert.IsNotNull(partitionKey);
+            ValidationHelpers.AssertIsNotNull(partitionKey);
             return base.GetAllAccessTokens(partitionKey);
         }
 
         public override List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            Assert.IsNotNull(partitionKey);
+            ValidationHelpers.AssertIsNotNull(partitionKey);
             return base.GetAllAccounts(partitionKey);
         }
 
         public override List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            Assert.IsNotNull(partitionKey);
+            ValidationHelpers.AssertIsNotNull(partitionKey);
             return base.GetAllIdTokens(partitionKey);
         }
 
         public override List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            Assert.IsNotNull(partitionKey);
+            ValidationHelpers.AssertIsNotNull(partitionKey);
             return base.GetAllRefreshTokens(partitionKey);
         }
 
         public override bool HasAccessOrRefreshTokens()
         {
-            Assert.Fail("HasAccessOrRefreshTokens was called. It should not be called unless the token cache serialization hooks");
+            ValidationHelpers.AssertFail("HasAccessOrRefreshTokens was called. It should not be called unless the token cache serialization hooks");
             throw new InvalidOperationException();
         }
     }

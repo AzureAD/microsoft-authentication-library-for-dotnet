@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Common.Mocks
 {
@@ -48,11 +48,11 @@ namespace Microsoft.Identity.Test.Common.Mocks
 
             if (ExpectedEnvironment != null)
             {
-                Assert.AreEqual(ExpectedEnvironment, authorizationUri.Host);
+                ValidationHelpers.AssertAreEqual(ExpectedEnvironment, authorizationUri.Host);
             }
 
             IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
-            Assert.IsNotNull(inputQp[OAuth2Parameter.State]);
+            ValidationHelpers.AssertIsNotNull(inputQp[OAuth2Parameter.State]);
             if (AddStateInAuthorizationResult)
             {
                 MockResult.State = inputQp[OAuth2Parameter.State];
@@ -61,11 +61,11 @@ namespace Microsoft.Identity.Test.Common.Mocks
             //match QP passed in for validation.
             if (QueryParamsToValidate != null)
             {
-                Assert.IsNotNull(authorizationUri.Query);
+                ValidationHelpers.AssertIsNotNull(authorizationUri.Query);
                 foreach (var key in QueryParamsToValidate.Keys)
                 {
-                    Assert.IsTrue(inputQp.ContainsKey(key));
-                    Assert.AreEqual(QueryParamsToValidate[key], inputQp[key]);
+                    ValidationHelpers.AssertIsTrue(inputQp.ContainsKey(key));
+                    ValidationHelpers.AssertAreEqual(QueryParamsToValidate[key], inputQp[key]);
                 }
             }
 

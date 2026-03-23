@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -16,30 +15,30 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     public static class AssertException
     {
         /// <summary>
-        /// DoesNotThrow verifies that the provided test code does not throw any exceptions. If an exception is thrown, it captures the exception and throws an AssertFailedException with a message indicating that the assertion failed and includes details of the exception that was thrown.
+        /// DoesNotThrow verifies that the provided test code does not throw any exceptions. If an exception is thrown, it captures the exception and throws an InvalidOperationException with a message indicating that the assertion failed and includes details of the exception that was thrown.
         /// </summary>
         /// <param name="testCode">The code to test for exceptions.</param>
-        /// <exception cref="AssertFailedException">Thrown if the test code throws an exception.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the test code throws an exception.</exception>
         public static void DoesNotThrow(Action testCode)
         {
             var ex = Recorder.Exception<Exception>(testCode);
             if (ex != null)
             {
-                throw new AssertFailedException("DoesNotThrow failed - - an exception was thrown {ex}", ex);
+                throw new InvalidOperationException("DoesNotThrow failed - - an exception was thrown {ex}", ex);
             }
         }
 
         /// <summary>
-        /// DoesNotThrow verifies that the provided test code does not throw any exceptions. If an exception is thrown, it captures the exception and throws an AssertFailedException with a message indicating that the assertion failed and includes details of the exception that was thrown.
+        /// DoesNotThrow verifies that the provided test code does not throw any exceptions. If an exception is thrown, it captures the exception and throws an InvalidOperationException with a message indicating that the assertion failed and includes details of the exception that was thrown.
         /// </summary>
         /// <param name="testCode">The code to test for exceptions.</param>
-        /// <exception cref="AssertFailedException">Thrown if the test code throws an exception.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the test code throws an exception.</exception>
         public static void DoesNotThrow(Func<object> testCode)
         {
             var ex = Recorder.Exception<Exception>(testCode);
             if (ex != null)
             {
-                throw new AssertFailedException($"DoesNotThrow failed - an exception was thrown {ex}", ex);
+                throw new InvalidOperationException($"DoesNotThrow failed - an exception was thrown {ex}", ex);
             }
         }
 
@@ -49,7 +48,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <typeparam name="TException">The type of exception expected to be thrown.</typeparam>
         /// <param name="testCode">The code to test for exceptions.</param>
         /// <returns>The exception that was thrown by the test code.</returns>
-        /// <exception cref="AssertFailedException">Thrown if the test code does not throw an exception or throws a different exception type.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the test code does not throw an exception or throws a different exception type.</exception>
         public static TException Throws<TException>(Action testCode)
              where TException : Exception
         {
@@ -63,7 +62,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <param name="testCode">The code to test for exceptions.</param>
         /// <param name="allowDerived">If true, allows exceptions derived from <typeparamref name="TException"/>. If false, requires an exact type match.</param>
         /// <returns>The exception that was thrown by the test code.</returns>
-        /// <exception cref="AssertFailedException">Thrown if the test code does not throw an exception or throws an incompatible exception type.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the test code does not throw an exception or throws an incompatible exception type.</exception>
         public static TException Throws<TException>(Action testCode, bool allowDerived)
              where TException : Exception
         {
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             if (exception == null)
             {
-                throw new AssertFailedException("AssertExtensions.Throws failed. No exception occurred.");
+                throw new InvalidOperationException("AssertExtensions.Throws failed. No exception occurred.");
             }
 
             CheckExceptionType<TException>(exception, allowDerived);
@@ -85,7 +84,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <typeparam name="TException">The type of exception expected to be thrown.</typeparam>
         /// <param name="testCode">The code to test for exceptions.</param>
         /// <returns>The exception that was thrown by the test code.</returns>
-        /// <exception cref="AssertFailedException">Thrown if the test code does not throw an exception or throws a different exception type.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the test code does not throw an exception or throws a different exception type.</exception>
         public static TException Throws<TException>(Func<object> testCode)
             where TException : Exception
         {
@@ -99,7 +98,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <param name="testCode">The code to test for exceptions.</param>
         /// <param name="allowDerived">If true, allows exceptions derived from <typeparamref name="TException"/>. If false, requires an exact type match.</param>
         /// <returns>The exception that was thrown by the test code.</returns>
-        /// <exception cref="AssertFailedException">Thrown if the test code does not throw an exception or throws an incompatible exception type.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the test code does not throw an exception or throws an incompatible exception type.</exception>
         public static TException Throws<TException>(Func<object> testCode, bool allowDerived)
             where TException : Exception
         {
@@ -107,7 +106,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             if (exception == null)
             {
-                throw new AssertFailedException("AssertExtensions.Throws failed. No exception occurred.");
+                throw new InvalidOperationException("AssertExtensions.Throws failed. No exception occurred.");
             }
 
             CheckExceptionType<TException>(exception, allowDerived);
@@ -122,7 +121,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <param name="testCode">The asynchronous code to test for exceptions.</param>
         /// <param name="allowDerived">If true, allows exceptions derived from <typeparamref name="T"/>. If false, requires an exact type match.</param>
         /// <returns>A task that represents the asynchronous operation, containing the exception that was thrown by the test code.</returns>
-        /// <exception cref="AssertFailedException">Thrown if the test code does not throw an exception or throws an incompatible exception type.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the test code does not throw an exception or throws an incompatible exception type.</exception>
         public static async Task<T> TaskThrowsAsync<T>(Func<Task> testCode, bool allowDerived = false)
             where T : Exception
         {
@@ -138,12 +137,12 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             if (exception == null)
             {
-                throw new AssertFailedException("AssertExtensions.TaskThrowsAsync failed. No exception occurred.");
+                throw new InvalidOperationException("AssertExtensions.TaskThrowsAsync failed. No exception occurred.");
             }
 
             if (exception is AggregateException aggEx)
             {
-                if (aggEx.InnerException.GetType() == typeof(AssertFailedException))
+                if (aggEx.InnerException.GetType() == typeof(InvalidOperationException))
                 {
                     throw aggEx.InnerException;
                 }
@@ -164,10 +163,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         }
 
         /// <summary>
-        /// TaskDoesNotThrow verifies that the provided asynchronous test code does not throw any exceptions. If an exception is thrown, it captures the exception and throws an AssertFailedException with a message indicating that the assertion failed and includes details of the exception that was thrown.
+        /// TaskDoesNotThrow verifies that the provided asynchronous test code does not throw any exceptions. If an exception is thrown, it captures the exception and throws an InvalidOperationException with a message indicating that the assertion failed and includes details of the exception that was thrown.
         /// </summary>
         /// <param name="testCode">The asynchronous code to test for exceptions.</param>
-        /// <exception cref="AssertFailedException">Thrown if the test code throws an exception.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the test code throws an exception.</exception>
         public static void TaskDoesNotThrow(Func<Task> testCode)
         {
             var exception = Recorder.Exception(() => testCode().Wait());
@@ -177,7 +176,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 return;
             }
 
-            throw new AssertFailedException(
+            throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     "AssertExtensions.TaskDoesNotThrow failed. Incorrect exception {0} occurred. Details {1}",
@@ -191,7 +190,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// </summary>
         /// <typeparam name="T">The type of exception to verify is not thrown.</typeparam>
         /// <param name="testCode">The asynchronous code to test for exceptions.</param>
-        /// <exception cref="AssertFailedException">Thrown if the test code throws an exception of type <typeparamref name="T"/> or a derived type.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the test code throws an exception of type <typeparamref name="T"/> or a derived type.</exception>
         public static void TaskDoesNotThrow<T>(Func<Task> testCode) where T : Exception
         {
             var exception = Recorder.Exception<AggregateException>(() => testCode().Wait());
@@ -234,7 +233,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         private static void ThrowAssertFailedForExceptionMismatch(Type expectedExceptionType, Exception actualException)
         {
             Trace.TraceError("Exception match failed. Actual exception is: " + actualException);
-            throw new AssertFailedException(
+            throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     "Exception types do not match. Expected: {0}  Actual: {1}. Actual exception details: {2}",
@@ -273,7 +272,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 }
                 catch (Exception e)
                 {
-                    throw new AssertFailedException(
+                    throw new InvalidOperationException(
                         $"Expected to capture a {typeof(TException)} exception but got {e.GetType()}. Details {e}", 
                         e);
                 }
@@ -293,7 +292,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 }
                 catch (Exception e)
                 {
-                    throw new AssertFailedException(
+                    throw new InvalidOperationException(
                         $"Expected to capture a {typeof(TException)} exception but got {e.GetType()}. Details {e}", 
                         e);
                 }

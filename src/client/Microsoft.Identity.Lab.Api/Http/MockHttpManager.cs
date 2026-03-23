@@ -17,7 +17,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 string remainingMocks = string.Join(" ",
                     _httpMessageHandlerQueue.Select(m => GetExpectedUrlFromHandler(m)));
-                Assert.IsEmpty(_httpMessageHandlerQueue,
+                ValidationHelpers.AssertIsEmpty(_httpMessageHandlerQueue,
                     "All mocks should have been consumed. Remaining mocks are for: " + remainingMocks);
             }
         }
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 if (!HttpMessageHandlerQueue.TryDequeue(out messageHandler))
                 {
-                    Assert.Fail("The MockHttpManager's queue is empty. Cannot serve another response");
+                    ValidationHelpers.AssertFail("The MockHttpManager's queue is empty. Cannot serve another response");
                 }
             }
 
