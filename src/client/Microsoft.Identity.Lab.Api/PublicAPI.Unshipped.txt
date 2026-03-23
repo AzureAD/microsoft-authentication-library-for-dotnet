@@ -303,6 +303,7 @@ Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.Cann
 Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.CryptographicAlgorithm.get -> string
 Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.RSACertificatePopCryptoProvider(System.Security.Cryptography.X509Certificates.X509Certificate2 cert) -> void
 Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.Sign(byte[] payload) -> byte[]
+Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers
 Microsoft.Identity.Test.Common.Core.Helpers.RunOnAzureDevOpsAttribute
 Microsoft.Identity.Test.Common.Core.Helpers.RunOnAzureDevOpsAttribute.RunOnAzureDevOpsAttribute(string filePath = null, int lineNumber = 0) -> void
 Microsoft.Identity.Test.Common.Core.Helpers.RunOnLinuxAttribute
@@ -503,6 +504,14 @@ static Microsoft.Identity.Test.Common.Core.Helpers.OsHelper.IsLinuxPlatform() ->
 static Microsoft.Identity.Test.Common.Core.Helpers.OsHelper.IsMacPlatform() -> bool
 static Microsoft.Identity.Test.Common.Core.Helpers.OsHelper.IsWindowsPlatform() -> bool
 static Microsoft.Identity.Test.Common.Core.Helpers.RandomDataUtils.GetRandomData(int size) -> byte[]
+static Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers.AssertAreEqual<T>(T expected, T actual, string message = null) -> void
+static Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers.AssertContains<T>(T expected, System.Collections.Generic.IEnumerable<T> collection, string message = null) -> void
+static Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers.AssertFail(string message) -> void
+static Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers.AssertHasCount<T>(int expected, System.Collections.Generic.IEnumerable<T> collection, string message = null) -> void
+static Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers.AssertIsFalse(bool condition, string message = null) -> void
+static Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers.AssertIsEmpty<T>(System.Collections.Generic.IEnumerable<T> collection, string message = null) -> void
+static Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers.AssertIsNotNull(object value, string message = null) -> void
+static Microsoft.Identity.Test.Common.Core.Helpers.ValidationHelpers.AssertIsTrue(bool condition, string message = null) -> void
 static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateAdfsIdToken(string upn) -> string
 static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateAdfsOpenIdConfigurationResponse(string authority, string qp = "") -> System.Net.Http.HttpResponseMessage
 static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateAdfsSuccessTokenResponseMessage() -> System.Net.Http.HttpResponseMessage
