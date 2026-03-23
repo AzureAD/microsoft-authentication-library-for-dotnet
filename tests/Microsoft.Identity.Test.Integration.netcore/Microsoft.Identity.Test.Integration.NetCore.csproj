@@ -42,6 +42,8 @@
     <None Update="federationMetadata.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <!-- Shared test attributes moved out of Microsoft.Identity.Lab.Api -->
+    <Compile Include="..\Microsoft.Identity.Test.Unit\Helpers\RunOnPlatformAttribute.cs" />
   </ItemGroup>
 
 </Project>

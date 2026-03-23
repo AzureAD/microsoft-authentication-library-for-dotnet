@@ -24,5 +24,9 @@
     <PackageReference Include="StrongNamer" />
     <PackageReference Include="System.Formats.Asn1" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Shared test attributes moved out of Microsoft.Identity.Lab.Api -->
+    <Compile Include="..\Microsoft.Identity.Test.Unit\Helpers\RunOnPlatformAttribute.cs" />
+  </ItemGroup>
 
 </Project>
