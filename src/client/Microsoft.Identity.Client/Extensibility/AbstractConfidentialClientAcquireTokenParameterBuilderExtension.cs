@@ -204,7 +204,29 @@ namespace Microsoft.Identity.Client.Extensibility
         }
 
         /// <summary>
-        /// Specifies extra claims to be included in the client assertion. 
+        /// Registers a callback that is invoked just before OpenTelemetry metrics are recorded for this
+        /// token acquisition call. Use this to append tags to every metric emitted for the request.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="otelTagsEnricher">
+        /// A delegate that receives the <see cref="TokenAcquisitionResult"/> (carrying either the
+        /// successful <see cref="AuthenticationResult"/> or the failure <see cref="Exception"/>)
+        /// and a mutable tag list. Add <see cref="KeyValuePair{String, Object}"/> entries to the list
+        /// to include them as dimensions on all metrics emitted for this call.
+        /// </param>
+        /// <returns>The builder to chain other options to.</returns>
+        public static AbstractAcquireTokenParameterBuilder<T> WithOtelTagsEnricher<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            Action<TokenAcquisitionResult, IList<KeyValuePair<string, object>>> otelTagsEnricher)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            builder.CommonParameters.OtelTagsEnricher = otelTagsEnricher;
+            return builder;
+        }
+
+        /// <summary>
+        /// Specifies extra claims to be included in the client assertion.
         /// These claims will be merged with default claims when the client assertion is generated.
         /// This lets higher level APIs like Microsoft.Identity.Web provide additional claims for the client assertion.
         /// Important: tokens are associated with the extra client assertion claims, which impacts cache lookups.

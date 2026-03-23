@@ -3,3 +3,4 @@ Microsoft.Identity.Client.TokenAcquisitionResult.AuthenticationResult.get -> Mic
 Microsoft.Identity.Client.TokenAcquisitionResult.Exception.get -> System.Exception
 Microsoft.Identity.Client.TokenAcquisitionResult.IsSuccess.get -> bool
 Microsoft.Identity.Client.TokenAcquisitionResult.TokenAcquisitionResult() -> void
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithOtelTagsEnricher<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Action<Microsoft.Identity.Client.TokenAcquisitionResult, System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, object>>> otelTagsEnricher) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
