@@ -6,7 +6,7 @@
     <!-- Version of MSAL if not defined by the CI-->
     <MsalInternalVersion>4.61.0</MsalInternalVersion>
     <!-- Version of Microsoft.Identity.Lab.Api if not defined by the CI-->
-    <LabApiInternalVersion>1.0.0</LabApiInternalVersion>
+    <LabApiInternalVersion>2.0.0</LabApiInternalVersion>
   </PropertyGroup>
   <!-- Add packages, then highlight all lines and go to Edit > Advanced > Sort Lines -->
   <ItemGroup>

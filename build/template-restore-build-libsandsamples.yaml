@@ -5,7 +5,7 @@ parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'Release'
   MicrosoftIdentityClientVersion: '4.60.0-devopsbuild'
-  LabApiVersion: '1.0.0-devopsbuild'
+  LabApiVersion: '2.0.0-devopsbuild'
 
 steps:
 
