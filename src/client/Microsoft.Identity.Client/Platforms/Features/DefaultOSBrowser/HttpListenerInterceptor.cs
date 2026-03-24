@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     throw new NotImplementedException("HttpCode not supported" + messageAndCode.HttpCode);
             }
 
-            context.Response.OutputStream.Close();
+            context.Response.Close();
         }
     }
 }

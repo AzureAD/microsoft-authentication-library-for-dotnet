@@ -475,7 +475,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 _certificate = new X509Certificate2(
                     ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"),
-                    TestConstants.TestCertPassword);
+                    TestConstants.TestPlaceholderCredential);
             }
             return _certificate;
         }
