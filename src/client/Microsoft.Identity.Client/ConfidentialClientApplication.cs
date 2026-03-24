@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -241,6 +242,13 @@ namespace Microsoft.Identity.Client
 
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
+
+        /// <summary>
+        /// Caches internal CCA instances created by <see cref="AgentTokenRequest"/> so that
+        /// subsequent AcquireTokenForAgent calls for the same agent reuse the same CCA
+        /// (and its in-memory token cache) instead of rebuilding from scratch each time.
+        /// </summary>
+        internal ConcurrentDictionary<string, IConfidentialClientApplication> AgentCcaCache { get; } = new();
 
         internal override async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,

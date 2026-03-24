@@ -319,6 +319,230 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         #endregion
 
+        #region Cache Isolation Tests
+
+        /// <summary>
+        /// Verifies that two separate blueprint CCA instances maintain independent caches,
+        /// and that the internal agent CCAs created by AcquireTokenForAgent are cached and
+        /// reused within each blueprint (so subsequent agent calls hit the cache).
+        ///
+        /// Scenario:
+        ///   CCA1 (blueprint1): makes a non-agent client credential call, then a silent call → cache hit.
+        ///   CCA2 (blueprint2): makes a non-agent client credential call, then a silent call → cache hit;
+        ///     then makes an agent call (UPN) → identity provider; then a second identical agent call → cache hit.
+        ///   Finally, verifies CCA1's agent CCA cache is empty (no bleed from CCA2).
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenForAgent_CacheIsolation_Test()
+        {
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            // === CCA1: Non-agent only ===
+            var cca1 = ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                .WithExperimentalFeatures(true)
+                .WithCertificate(cert, sendX5C: true)
+                .Build();
+
+            // CCA1: First call hits the identity provider
+            var cca1Result1 = await cca1
+                .AcquireTokenForClient([Scope])
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(cca1Result1.AccessToken, "CCA1 first call should return a token");
+            Assert.AreEqual(TokenSource.IdentityProvider, cca1Result1.AuthenticationResultMetadata.TokenSource,
+                "CCA1 first call should come from identity provider");
+
+            // CCA1: Second call should come from cache
+            var cca1Result2 = await cca1
+                .AcquireTokenForClient([Scope])
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, cca1Result2.AuthenticationResultMetadata.TokenSource,
+                "CCA1 second call should come from cache");
+
+            // === CCA2: Non-agent + agent ===
+            var cca2 = ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                .WithExperimentalFeatures(true)
+                .WithCertificate(cert, sendX5C: true)
+                .Build();
+
+            // CCA2: Non-agent call - should NOT get CCA1's cached token (separate instance, separate cache)
+            var cca2Result1 = await cca2
+                .AcquireTokenForClient([Scope])
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(cca2Result1.AccessToken, "CCA2 first call should return a token");
+            Assert.AreEqual(TokenSource.IdentityProvider, cca2Result1.AuthenticationResultMetadata.TokenSource,
+                "CCA2 first call should come from identity provider (no cache bleed from CCA1)");
+
+            // CCA2: Non-agent silent call - should come from CCA2's own cache
+            var cca2Result2 = await cca2
+                .AcquireTokenForClient([Scope])
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, cca2Result2.AuthenticationResultMetadata.TokenSource,
+                "CCA2 second call should come from its own cache");
+
+            // CCA2: Agent call (first time) - should hit identity provider
+            var agentId = Client.AgentIdentity.WithUsername(AgentIdentity, UserUpn);
+
+            var agentResult1 = await cca2
+                .AcquireTokenForAgent([Scope], agentId)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(agentResult1.AccessToken, "Agent first call should return a token");
+            Assert.AreEqual(TokenSource.IdentityProvider, agentResult1.AuthenticationResultMetadata.TokenSource,
+                "Agent first call should come from identity provider");
+
+            // CCA2: Agent call (second time, same identity) - should come from the cached internal CCA
+            var agentResult2 = await cca2
+                .AcquireTokenForAgent([Scope], agentId)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, agentResult2.AuthenticationResultMetadata.TokenSource,
+                "Agent second call should come from cache (internal CCA reuse)");
+
+            // Verify CCA1 has no agent CCA cache entries (no bleed from CCA2's agent operations)
+            var cca1Cache = (ConfidentialClientApplication)cca1;
+            Assert.IsTrue(cca1Cache.AgentCcaCache.IsEmpty,
+                "CCA1 should have no agent CCA cache entries");
+
+            // Verify CCA2 has agent CCA cache entries (the internal CCAs were cached)
+            var cca2Cache = (ConfidentialClientApplication)cca2;
+            Assert.IsFalse(cca2Cache.AgentCcaCache.IsEmpty,
+                "CCA2 should have cached agent CCA instances");
+
+            Trace.WriteLine($"CCA2 agent CCA cache size: {cca2Cache.AgentCcaCache.Count}");
+        }
+
+        /// <summary>
+        /// Verifies that WithForceRefresh(true) on AcquireTokenForAgent bypasses the
+        /// internal AcquireTokenSilent cache check and always hits the identity provider.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenForAgent_ForceRefresh_Test()
+        {
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                .WithExperimentalFeatures(true)
+                .WithCertificate(cert, sendX5C: true)
+                .Build();
+
+            var agentId = Client.AgentIdentity.WithUsername(AgentIdentity, UserUpn);
+
+            // First call: hits identity provider and populates cache
+            var result1 = await cca
+                .AcquireTokenForAgent([Scope], agentId)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource,
+                "First call should come from identity provider");
+
+            // Second call without ForceRefresh: should come from cache
+            var result2 = await cca
+                .AcquireTokenForAgent([Scope], agentId)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource,
+                "Second call should come from cache");
+
+            // Third call with ForceRefresh: should bypass cache and hit identity provider
+            var result3 = await cca
+                .AcquireTokenForAgent([Scope], agentId)
+                .WithForceRefresh(true)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result3.AuthenticationResultMetadata.TokenSource,
+                "ForceRefresh call should bypass cache and come from identity provider");
+        }
+
+        /// <summary>
+        /// Verifies that the internal AcquireTokenSilent account-matching logic correctly
+        /// resolves cached tokens when switching between UPN-based and OID-based AgentIdentity
+        /// for the same user on the same blueprint CCA.
+        ///
+        /// Scenario:
+        ///   1. AcquireTokenForAgent with UPN → hits identity provider, populates cache.
+        ///   2. AcquireTokenForAgent with UPN again → cache hit (UPN match).
+        ///   3. AcquireTokenForAgent with OID (same user) → cache hit (OID match on the same account).
+        ///
+        /// This proves that the FindMatchingAccount logic works for both identifier types
+        /// and that an OID lookup can find a token originally cached via a UPN-based call.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenForAgent_UpnThenOid_SharesCache_Test()
+        {
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                .WithExperimentalFeatures(true)
+                .WithCertificate(cert, sendX5C: true)
+                .Build();
+
+            // Step 1: UPN-based call → identity provider (populates cache)
+            var upnIdentity = Client.AgentIdentity.WithUsername(AgentIdentity, UserUpn);
+
+            var upnResult = await cca
+                .AcquireTokenForAgent([Scope], upnIdentity)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, upnResult.AuthenticationResultMetadata.TokenSource,
+                "First UPN call should come from identity provider");
+            Assert.IsNotNull(upnResult.Account, "Account should not be null");
+
+            // Extract the OID from the returned account
+            string oidString = upnResult.Account.HomeAccountId.ObjectId;
+            Assert.IsNotNull(oidString, "OID should not be null in the account");
+            Guid userOid = Guid.Parse(oidString);
+
+            // Step 2: UPN-based call again → cache hit (sanity check)
+            var upnResult2 = await cca
+                .AcquireTokenForAgent([Scope], upnIdentity)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, upnResult2.AuthenticationResultMetadata.TokenSource,
+                "Second UPN call should come from cache");
+
+            // Step 3: OID-based call for the SAME user → should also be a cache hit
+            // because FindMatchingAccount matches by HomeAccountId.ObjectId
+            var oidIdentity = new Client.AgentIdentity(AgentIdentity, userOid);
+
+            var oidResult = await cca
+                .AcquireTokenForAgent([Scope], oidIdentity)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, oidResult.AuthenticationResultMetadata.TokenSource,
+                "OID call for the same user should come from cache (OID-based account match)");
+            Assert.AreEqual(oidString, oidResult.Account.HomeAccountId.ObjectId,
+                "OID should match between UPN-cached and OID-retrieved tokens");
+
+            Trace.WriteLine($"UPN token: {upnResult.AccessToken.Substring(0, 20)}...");
+            Trace.WriteLine($"OID token: {oidResult.AccessToken.Substring(0, 20)}...");
+        }
+
+        #endregion
+
         #region Shared Helpers
 
         private static async Task<string> GetAppCredentialAsync(string fmiPath)
