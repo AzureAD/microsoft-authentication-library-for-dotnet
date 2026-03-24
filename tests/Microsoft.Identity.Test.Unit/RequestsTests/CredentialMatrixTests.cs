@@ -47,7 +47,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            s_cert?.Dispose();
         }
 
         // ──────────────────────────────────────────────
