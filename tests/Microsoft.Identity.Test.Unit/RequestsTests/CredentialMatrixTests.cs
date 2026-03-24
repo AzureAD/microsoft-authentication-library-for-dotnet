@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     /// Plus additional edge-case tests: null certificate, empty assertion, null-result validation.
     /// </summary>
     [TestClass]
-    public class CredentialMatrixTests
+    public class CredentialMatrixTests : TestBase
     {
         private static X509Certificate2 s_cert;
         private static CommonCryptographyManager s_crypto;
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             ClientId = "client-id",
             TokenEndpoint = "https://login.microsoftonline.com/tenant/oauth2/v2.0/token",
-            Mode = ClientAuthMode.Regular,
+            Mode = OAuthMode.Regular,
             Claims = null,
             ClientCapabilities = null,
             CryptographyManager = s_crypto,
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             ClientId = "client-id",
             TokenEndpoint = "https://login.microsoftonline.com/tenant/oauth2/v2.0/token",
-            Mode = ClientAuthMode.MtlsMode,
+            Mode = OAuthMode.MtlsMode,
             Claims = null,
             ClientCapabilities = null,
             CryptographyManager = s_crypto,
@@ -97,7 +97,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(material);
-            Assert.AreEqual(CredentialSource.Static, material.Source);
             Assert.IsNotNull(material.ResolvedCertificate);
             Assert.IsNotNull(material.TokenRequestParameters);
 
@@ -105,6 +104,34 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.IsTrue(material.TokenRequestParameters.ContainsKey(OAuth2Parameter.ClientAssertion));
             Assert.AreEqual(OAuth2AssertionType.JwtBearer, material.TokenRequestParameters[OAuth2Parameter.ClientAssertionType]);
             Assert.IsFalse(string.IsNullOrWhiteSpace(material.TokenRequestParameters[OAuth2Parameter.ClientAssertion]));
+        }
+
+        [TestMethod]
+        public async Task Row1b_DynamicCertificateCredential_Regular_InvokesProviderOnce_AndReturnsJwtBearerAndCertAsync()
+        {
+            int callCount = 0;
+
+            var credential = new CertificateAndClaimsClientCredential(
+                certificateProvider: _ =>
+                {
+                    Interlocked.Increment(ref callCount);
+                    return Task.FromResult(s_cert);
+                },
+                claimsToSign: null,
+                appendDefaultClaims: true);
+
+            CredentialMaterial material = await credential
+                .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(1, callCount);
+            Assert.IsNotNull(material);
+            Assert.AreSame(s_cert, material.ResolvedCertificate);
+            Assert.IsNotNull(material.TokenRequestParameters);
+            Assert.AreEqual(
+                OAuth2AssertionType.JwtBearer,
+                material.TokenRequestParameters[OAuth2Parameter.ClientAssertionType]);
+            Assert.IsTrue(material.TokenRequestParameters.ContainsKey(OAuth2Parameter.ClientAssertion));
         }
 
         // ──────────────────────────────────────────────
@@ -120,11 +147,35 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(material);
-            Assert.AreEqual(CredentialSource.Static, material.Source);
             Assert.IsNotNull(material.ResolvedCertificate);
             Assert.IsNotNull(material.TokenRequestParameters);
-            Assert.AreEqual(0, material.TokenRequestParameters.Count,
+            Assert.IsEmpty(material.TokenRequestParameters,
                 "MtlsMode certificate credential should not add any token request parameters.");
+        }
+
+        [TestMethod]
+        public async Task Row2b_DynamicCertificateCredential_MtlsMode_InvokesProviderOnce_AndReturnsEmptyParamsAndCertAsync()
+        {
+            int callCount = 0;
+
+            var credential = new CertificateAndClaimsClientCredential(
+                certificateProvider: _ =>
+                {
+                    Interlocked.Increment(ref callCount);
+                    return Task.FromResult(s_cert);
+                },
+                claimsToSign: null,
+                appendDefaultClaims: true);
+
+            CredentialMaterial material = await credential
+                .GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(1, callCount);
+            Assert.IsNotNull(material);
+            Assert.AreSame(s_cert, material.ResolvedCertificate);
+            Assert.IsNotNull(material.TokenRequestParameters);
+            Assert.IsEmpty(material.TokenRequestParameters);
         }
 
         // ──────────────────────────────────────────────
@@ -135,13 +186,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task Row3_SecretCredential_Regular_ReturnsClientSecretAsync()
         {
             const string secret = "my-secret";
-            var credential = new SecretStringClientCredential(secret);
+            var credential = new ClientSecretCredential(secret);
             CredentialMaterial material = await credential
                 .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(material);
-            Assert.AreEqual(CredentialSource.Static, material.Source);
             Assert.IsNull(material.ResolvedCertificate);
             Assert.IsTrue(material.TokenRequestParameters.ContainsKey(OAuth2Parameter.ClientSecret));
             Assert.AreEqual(secret, material.TokenRequestParameters[OAuth2Parameter.ClientSecret]);
@@ -154,8 +204,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task Row4_SecretCredential_MtlsMode_ThrowsMsalClientExceptionAsync()
         {
-            var credential = new SecretStringClientCredential("my-secret");
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            var credential = new ClientSecretCredential("my-secret");
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
                 .ConfigureAwait(false);
 
@@ -176,7 +226,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(material);
-            Assert.AreEqual(CredentialSource.Static, material.Source);
             Assert.IsNull(material.ResolvedCertificate);
             Assert.AreEqual(OAuth2AssertionType.JwtBearer, material.TokenRequestParameters[OAuth2Parameter.ClientAssertionType]);
             Assert.AreEqual(jwt, material.TokenRequestParameters[OAuth2Parameter.ClientAssertion]);
@@ -190,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task Row6_StaticSignedAssertion_MtlsMode_ThrowsMsalClientExceptionAsync()
         {
             var credential = new SignedAssertionClientCredential("header.payload.signature");
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
                 .ConfigureAwait(false);
 
@@ -205,15 +254,21 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task Row7_StringCallbackCredential_Regular_ReturnsJwtBearerAsync()
         {
             const string callbackJwt = "cb.header.payload.signature";
+            int callCount = 0;
+
             var credential = new ClientAssertionStringDelegateCredential(
-                (_, __) => Task.FromResult(callbackJwt));
+                (_, __) =>
+                {
+                    Interlocked.Increment(ref callCount);
+                    return Task.FromResult(callbackJwt);
+                });
 
             CredentialMaterial material = await credential
                 .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
                 .ConfigureAwait(false);
 
+            Assert.AreEqual(1, callCount);
             Assert.IsNotNull(material);
-            Assert.AreEqual(CredentialSource.Callback, material.Source);
             Assert.IsNull(material.ResolvedCertificate);
             Assert.AreEqual(OAuth2AssertionType.JwtBearer, material.TokenRequestParameters[OAuth2Parameter.ClientAssertionType]);
             Assert.AreEqual(callbackJwt, material.TokenRequestParameters[OAuth2Parameter.ClientAssertion]);
@@ -229,7 +284,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var credential = new ClientAssertionStringDelegateCredential(
                 (_, __) => Task.FromResult("some-jwt"));
 
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
                 .ConfigureAwait(false);
 
@@ -254,7 +309,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(material);
-            Assert.AreEqual(CredentialSource.Callback, material.Source);
             Assert.IsNotNull(material.ResolvedCertificate);
             // Even in Regular mode, returning a cert from the callback triggers JWT-PoP binding.
             Assert.AreEqual(OAuth2AssertionType.JwtPop, material.TokenRequestParameters[OAuth2Parameter.ClientAssertionType]);
@@ -269,15 +323,25 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task Row10_AssertionWithCertCallback_MtlsMode_ReturnsJwtPopAndCertAsync()
         {
             const string jwt = "signed.jwt.pop.for.test";
+            int callCount = 0;
+
             var credential = new ClientAssertionDelegateCredential(
-                (_, __) => Task.FromResult(new ClientSignedAssertion { Assertion = jwt, TokenBindingCertificate = s_cert }));
+                (_, __) =>
+                {
+                    Interlocked.Increment(ref callCount);
+                    return Task.FromResult(new ClientSignedAssertion
+                    {
+                        Assertion = jwt,
+                        TokenBindingCertificate = s_cert
+                    });
+                });
 
             CredentialMaterial material = await credential
                 .GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None)
                 .ConfigureAwait(false);
 
+            Assert.AreEqual(1, callCount);
             Assert.IsNotNull(material);
-            Assert.AreEqual(CredentialSource.Callback, material.Source);
             Assert.IsNotNull(material.ResolvedCertificate);
             Assert.AreEqual(OAuth2AssertionType.JwtPop, material.TokenRequestParameters[OAuth2Parameter.ClientAssertionType]);
             Assert.AreEqual(jwt, material.TokenRequestParameters[OAuth2Parameter.ClientAssertion]);
@@ -311,7 +375,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var credential = new ClientAssertionDelegateCredential(
                 (_, __) => Task.FromResult(new ClientSignedAssertion { Assertion = "jwt", TokenBindingCertificate = null }));
 
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
                 .ConfigureAwait(false);
 
@@ -324,7 +388,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var credential = new ClientAssertionStringDelegateCredential(
                 (_, __) => Task.FromResult(string.Empty));
 
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(RegularContext(), CancellationToken.None))
                 .ConfigureAwait(false);
 
@@ -337,7 +401,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var credential = new ClientAssertionDelegateCredential(
                 (_, __) => Task.FromResult(new ClientSignedAssertion { Assertion = null, TokenBindingCertificate = null }));
 
-            MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(RegularContext(), CancellationToken.None))
                 .ConfigureAwait(false);
 
@@ -348,8 +412,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public void CredentialMaterial_NullTokenRequestParameters_ThrowsInvalidOperationException()
         {
             // CredentialMaterial rejects null TokenRequestParameters at construction time.
-            Assert.ThrowsException<InvalidOperationException>(
-                () => new CredentialMaterial(null, CredentialSource.Static));
+            Assert.ThrowsExactly<InvalidOperationException>(
+                () => new CredentialMaterial(null));
         }
 
         [TestMethod]
@@ -358,25 +422,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Empty dictionary (e.g. for mTLS cert credential in MtlsMode) is explicitly allowed.
             var material = new CredentialMaterial(
                 new Dictionary<string, string>(),
-                CredentialSource.Static,
                 s_cert);
 
             Assert.IsNotNull(material.TokenRequestParameters);
-            Assert.AreEqual(0, material.TokenRequestParameters.Count);
-            Assert.AreEqual(CredentialSource.Static, material.Source);
+            Assert.IsEmpty(material.TokenRequestParameters);
             Assert.IsNotNull(material.ResolvedCertificate);
-        }
-
-        [TestMethod]
-        public void ClientAuthMode_RegularAndMtlsMode_DistinctValues()
-        {
-            Assert.AreNotEqual(ClientAuthMode.Regular, ClientAuthMode.MtlsMode);
-        }
-
-        [TestMethod]
-        public void CredentialSource_StaticAndCallback_DistinctValues()
-        {
-            Assert.AreNotEqual(CredentialSource.Static, CredentialSource.Callback);
         }
     }
 }

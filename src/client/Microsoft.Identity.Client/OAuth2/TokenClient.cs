@@ -133,29 +133,27 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
             IClientCredential credentialToUse = _requestParams.RequestContext.ServiceBundle.Config.ClientCredential;
+
             if (credentialToUse != null)
             {
-                _requestParams.RequestContext.Logger.Verbose(
-                    () => "[TokenClient] Before resolving credential material");
-
-                CredentialMaterial material = await CredentialMaterialResolver.ResolveAsync(
-                    credentialToUse,
-                    _requestParams,
-                    tokenEndpoint,
-                    cancellationToken).ConfigureAwait(false);
-
-                foreach (var kvp in material.TokenRequestParameters)
+                using (_requestParams.RequestContext.Logger.LogBlockDuration("[TokenClient] Resolving credential material"))
                 {
-                    _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
-                }
+                    CredentialMaterial material = await CredentialMaterialResolver.ResolveAsync(
+                        credentialToUse,
+                        _requestParams,
+                        tokenEndpoint,
+                        cancellationToken).ConfigureAwait(false);
 
-                if (material.ResolvedCertificate != null)
-                {
-                    _requestParams.ResolvedCertificate = material.ResolvedCertificate;
-                }
+                    foreach (var kvp in material.TokenRequestParameters)
+                    {
+                        _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
+                    }
 
-                _requestParams.RequestContext.Logger.Verbose(
-                    () => "[TokenClient] After resolving credential material");
+                    if (material.ResolvedCertificate != null)
+                    {
+                        _requestParams.ResolvedCertificate = material.ResolvedCertificate;
+                    }
+                }
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);

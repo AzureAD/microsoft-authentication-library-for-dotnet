@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     /// Determines how the client authenticates when acquiring tokens.
     /// Replaces the confusing pair of boolean flags previously used to signal mTLS vs. regular flows.
     /// </summary>
-    internal enum ClientAuthMode
+    internal enum OAuthMode
     {
         /// <summary>
         /// Standard client authentication: client secret, JWT bearer assertion, or JWT-PoP assertion.
@@ -15,9 +15,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         Regular,
 
         /// <summary>
-        /// mTLS Proof-of-Possession mode: the credential must supply a certificate for binding to the
+        /// mTLS Authentication mode: the credential must supply a certificate for binding to the
         /// TLS transport layer. No client_secret is valid here; JWT-PoP assertions are issued when
         /// a certificate-bound delegate credential is used.
+        /// <see cref="ClientSignedAssertion"/> (JWT plus an optional client certificate
+        /// for mTLS / bound-credential flows).
         /// </summary>
         MtlsMode
     }

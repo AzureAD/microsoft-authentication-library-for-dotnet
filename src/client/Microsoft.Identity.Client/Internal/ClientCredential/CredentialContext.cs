@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// <summary>
         /// Whether this is a standard (JWT / secret) request or an mTLS-bound request.
         /// </summary>
-        public ClientAuthMode Mode { get; init; }
+        public OAuthMode Mode { get; init; }
 
         /// <summary>User-provided claims string (may be null).</summary>
         public string Claims { get; init; }
@@ -46,12 +46,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         /// <summary>FMI path used to embed a subject suffix in the client assertion.</summary>
         public string ClientAssertionFmiPath { get; init; }
-
-        /// <summary>Type of authority (AAD, ADFS, B2C, …). Used for mode-constraint checks.</summary>
-        public AuthorityType AuthorityType { get; init; }
-
-        /// <summary>Azure region configured on the application (null when not configured).</summary>
-        public string AzureRegion { get; init; }
 
         /// <summary>Logger for credential resolution diagnostics.</summary>
         public ILoggerAdapter Logger { get; init; }

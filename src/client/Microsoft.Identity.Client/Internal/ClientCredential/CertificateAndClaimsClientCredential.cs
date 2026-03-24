@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             X509Certificate2 certificate = await ResolveCertificateAsync(context, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (context.Mode == ClientAuthMode.MtlsMode)
+            if (context.Mode == OAuthMode.MtlsMode)
             {
                 context.Logger.Verbose(() => "[CertificateAndClaimsClientCredential] mTLS mode detected. " +
                 "Using certificate for TLS client authentication; no client_assertion will be added.");
@@ -66,8 +67,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 // mTLS path: the certificate authenticates the client at the TLS layer.
                 // No client_assertion is needed; return an empty parameter set.
                 return new CredentialMaterial(
-                    new Dictionary<string, string>(),
-                    CredentialSource.Static,
+                    CollectionHelpers.GetEmptyDictionary<string, string>(),
                     certificate);
             }
 
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             context.Logger.Verbose(() => "[CertificateAndClaimsClientCredential] Certificate-based client " +
             "assertion created successfully.");
 
-            return new CredentialMaterial(parameters, CredentialSource.Static, certificate);
+            return new CredentialMaterial(parameters, certificate);
         }
 
         /// <summary>

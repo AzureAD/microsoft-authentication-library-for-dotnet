@@ -22,10 +22,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// </summary>
         public IReadOnlyDictionary<string, string> TokenRequestParameters { get; }
 
-        /// <summary>Whether the credential was resolved statically or via a runtime callback.</summary>
-        public CredentialSource Source { get; }
-
         /// <summary>
+        /// The client certificate resolved by the selected credential, if any.
+        /// In regular certificate-auth flows this is the certificate used by the credential.
+        /// In mTLS / bound-credential flows this is the certificate attached to transport.
+        /// Null for secret-based and plain string-assertion credentials.
         /// Optional certificate returned by the credential.
         /// Present when:
         /// <list type="bullet">
@@ -37,16 +38,13 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public X509Certificate2 ResolvedCertificate { get; }
 
         /// <param name="tokenRequestParameters">Body parameters to add to the token request. Must not be null.</param>
-        /// <param name="source">Where the credential came from.</param>
         /// <param name="resolvedCertificate">Optional certificate for mTLS transport or logging.</param>
         public CredentialMaterial(
             IReadOnlyDictionary<string, string> tokenRequestParameters,
-            CredentialSource source,
             X509Certificate2 resolvedCertificate = null)
         {
             TokenRequestParameters = tokenRequestParameters
                 ?? throw new InvalidOperationException("TokenRequestParameters must not be null.");
-            Source = source;
             ResolvedCertificate = resolvedCertificate;
         }
     }

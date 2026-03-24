@@ -35,16 +35,15 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             context.Logger.Verbose(() => $"[ClientAssertionStringDelegateCredential] Resolving client assertion material. " +
             $"Mode={context.Mode}, TokenEndpoint={context.TokenEndpoint}");
 
-            if (context.Mode == ClientAuthMode.MtlsMode)
+            if (context.Mode == OAuthMode.MtlsMode)
             {
                 context.Logger.Error("[ClientAssertionStringDelegateCredential] String-returning assertion delegate " +
                     "cannot be used with mTLS Proof-of-Possession because no token-binding certificate can be supplied.");
 
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,
-                    "A string-returning delegate credential cannot be used with mTLS Proof-of-Possession " +
-                    "because it cannot supply a certificate for TLS transport binding. " +
-                    "Use a delegate that returns a ClientSignedAssertion with a TokenBindingCertificate.");
+                    "A string-returning client assertion callback cannot be used over mTLS. " +
+                    "Use a ClientSignedAssertion callback that can return a token-binding certificate.");
             }
 
             context.Logger.Verbose(() => "[ClientAssertionStringDelegateCredential] Building assertion request " +
@@ -84,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             
             context.Logger.Verbose(() => "[ClientAssertionStringDelegateCredential] Client assertion material created successfully using JwtBearer.");
 
-            return new CredentialMaterial(parameters, CredentialSource.Callback);
+            return new CredentialMaterial(parameters);
         }
     }
 }

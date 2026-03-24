@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CancellationToken cancellationToken)
         {
             context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Resolving client assertion material. " +
-            $"Mode={context.Mode}, TokenEndpoint={context.TokenEndpoint}");
+                $"Mode={context.Mode}, TokenEndpoint={context.TokenEndpoint}");
 
             var opts = new AssertionRequestOptions
             {
@@ -56,8 +56,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             if (string.IsNullOrWhiteSpace(resp?.Assertion))
             {
-                context.Logger.Error("[ClientAssertionDelegateCredential] Client assertion provider returned a null or empty assertion.");
-
                 throw new MsalClientException(
                     MsalError.InvalidClientAssertion,
                     MsalErrorMessage.InvalidClientAssertionEmpty);
@@ -66,30 +64,26 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             bool hasCert = resp.TokenBindingCertificate != null;
 
             context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Provider returned assertion. " +
-            $"TokenBindingCertificatePresent={hasCert}");
+                $"TokenBindingCertificatePresent={hasCert}");
 
-            if (context.Mode == ClientAuthMode.MtlsMode && !hasCert)
+            if (context.Mode == OAuthMode.MtlsMode && !hasCert)
             {
-                context.Logger.Error("[ClientAssertionDelegateCredential] mTLS mode requires a token-binding certificate, " +
-                    "but the provider did not return one.");
-
                 throw new MsalClientException(
                     MsalError.MtlsCertificateNotProvided,
                     MsalErrorMessage.MtlsCertificateNotProvidedMessage);
             }
 
-            // Use JWT-PoP when in MtlsMode or when the callback returned a certificate (implicit bearer-over-mTLS).
-            bool useJwtPop = context.Mode == ClientAuthMode.MtlsMode || hasCert;
+            // Select the appropriate assertion type based on the presence of a certificate and the OAuth mode.
+            string assertionType =
+                (context.Mode == OAuthMode.MtlsMode || hasCert)
+                    ? OAuth2AssertionType.JwtPop
+                    : OAuth2AssertionType.JwtBearer;
 
-            context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Selected client assertion type: " +
-            $"{(useJwtPop ? OAuth2AssertionType.JwtPop : OAuth2AssertionType.JwtBearer)}");
+            context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Selected client assertion type: {assertionType}");
 
             var parameters = new Dictionary<string, string>
             {
-                {
-                    OAuth2Parameter.ClientAssertionType,
-                    useJwtPop ? OAuth2AssertionType.JwtPop : OAuth2AssertionType.JwtBearer
-                },
+                { OAuth2Parameter.ClientAssertionType, assertionType },
                 { OAuth2Parameter.ClientAssertion, resp.Assertion }
             };
 
@@ -97,7 +91,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             return new CredentialMaterial(
                 parameters,
-                CredentialSource.Callback,
                 hasCert ? resp.TokenBindingCertificate : null);
         }
     }
