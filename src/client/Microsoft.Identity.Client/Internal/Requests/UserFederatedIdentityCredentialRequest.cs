@@ -38,9 +38,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var dict = new Dictionary<string, string>
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.UserFic,
-                [OAuth2Parameter.Username] = _userFicParameters.Username,
                 [OAuth2Parameter.UserFederatedIdentityCredential] = assertion
             };
+
+            // The user_fic grant identifies the user by either OID (user_id) or UPN (username).
+            // The parameter builder enforces that exactly one is set via separate constructors,
+            // so both values cannot be populated simultaneously through the public API.
+            // OID is checked first because it is immutable and preferred over UPN, which can be renamed.
+            if (_userFicParameters.UserObjectId.HasValue)
+            {
+                dict[OAuth2Parameter.UserId] = _userFicParameters.UserObjectId.Value.ToString("D");
+            }
+            else
+            {
+                dict[OAuth2Parameter.Username] = _userFicParameters.Username;
+            }
 
             ISet<string> unionScope = new HashSet<string>
             {
@@ -58,6 +70,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
+            // CCS routing hint mirrors the OID/UPN choice above—route by OID when available, UPN otherwise.
+            if (_userFicParameters.UserObjectId.HasValue)
+            {
+                string ccsHint = CoreHelpers.GetCcsClientInfoHint(
+                    _userFicParameters.UserObjectId.Value.ToString("D"),
+                    AuthenticationRequestParameters.Authority.TenantId);
+
+                if (!string.IsNullOrEmpty(ccsHint))
+                {
+                    return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, ccsHint);
+                }
+
+                return null;
+            }
+
             return GetCcsUpnHeader(_userFicParameters.Username);
         }
     }

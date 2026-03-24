@@ -197,6 +197,19 @@ namespace Microsoft.Identity.Client
                 assertion);
         }
 
+        /// <inheritdoc/>
+        AcquireTokenByUserFederatedIdentityCredentialParameterBuilder IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(
+            IEnumerable<string> scopes,
+            Guid userObjectId,
+            string assertion)
+        {
+            return AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                userObjectId,
+                assertion);
+        }
+
         AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
             IEnumerable<string> scopes,
             string refreshToken)
@@ -205,6 +218,17 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
                 scopes,
                 refreshToken);
+        }
+
+        /// <inheritdoc/>
+        public AcquireTokenForAgentParameterBuilder AcquireTokenForAgent(
+            IEnumerable<string> scopes,
+            AgentIdentity agentIdentity)
+        {
+            return AcquireTokenForAgentParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                agentIdentity);
         }
 
         /// <inheritdoc/>
