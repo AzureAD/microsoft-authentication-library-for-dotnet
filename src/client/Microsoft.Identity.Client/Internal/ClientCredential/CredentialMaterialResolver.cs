@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// </exception>
         /// <exception cref="MsalClientException">
         /// Thrown when the credential/mode combination is not supported
-        /// (e.g., <see cref="ClientAuthMode.MtlsMode"/> with a secret credential).
+        /// (e.g., <see cref="OAuthMode.MtlsMode"/> with a secret credential).
         /// </exception>
         internal static async Task<CredentialMaterial> ResolveAsync(
             IClientCredential credential,
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             requestParams.RequestContext.Logger.Verbose(() => $"[CredentialMaterialResolver] Credential material " +
-            $"resolved successfully. Source={material.Source}, HasResolvedCertificate={material.ResolvedCertificate != null}");
+            $"resolved successfully. HasResolvedCertificate={material.ResolvedCertificate != null}");
 
             return material;
         }
@@ -90,8 +90,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 ClientId = requestParams.AppConfig.ClientId,
                 TokenEndpoint = tokenEndpoint,
                 Mode = requestParams.MtlsCertificate != null || requestParams.IsMtlsPopRequested
-                    ? ClientAuthMode.MtlsMode
-                    : ClientAuthMode.Regular,
+                    ? OAuthMode.MtlsMode
+                    : OAuthMode.Regular,
                 Claims = requestParams.Claims,
                 ClientCapabilities = requestParams.AppConfig.ClientCapabilities,
                 CryptographyManager = requestParams.RequestContext.ServiceBundle.PlatformProxy.CryptographyManager,
@@ -99,8 +99,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 UseSha2 = requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
                 ExtraClientAssertionClaims = requestParams.ExtraClientAssertionClaims,
                 ClientAssertionFmiPath = requestParams.ClientAssertionFmiPath,
-                AuthorityType = requestParams.AppConfig.Authority.AuthorityInfo.AuthorityType,
-                AzureRegion = requestParams.AppConfig.AzureRegion,
                 Logger = requestParams.RequestContext.Logger
             };
         }

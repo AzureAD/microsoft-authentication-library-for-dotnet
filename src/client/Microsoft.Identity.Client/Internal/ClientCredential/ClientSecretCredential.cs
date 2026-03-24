@@ -10,13 +10,13 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
-    internal class SecretStringClientCredential : IClientCredential
+    internal class ClientSecretCredential : IClientCredential
     {
         internal string Secret { get; }
 
         public AssertionType AssertionType => AssertionType.Secret;
 
-        public SecretStringClientCredential(string secret)
+        public ClientSecretCredential(string secret)
         {
             Secret = secret;
         }
@@ -25,18 +25,18 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialContext context,
             CancellationToken cancellationToken)
         {
-            context.Logger.Verbose(() => $"[SecretStringClientCredential] Resolving credential material. " +
+            context.Logger.Verbose(() => $"[ClientSecretCredential] Resolving credential material. " +
             $"Mode={context.Mode}");
 
-            if (context.Mode == ClientAuthMode.MtlsMode)
+            if (context.Mode == OAuthMode.MtlsMode)
             {
-                context.Logger.Error("[SecretStringClientCredential] Client secret cannot be used with mTLS Proof-of-Possession.");
+                context.Logger.Error("[ClientSecretCredential] Client secret cannot be used with mTLS Proof-of-Possession.");
 
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,
-                    "A client secret cannot be used with mTLS Proof-of-Possession. " +
-                    "Use a certificate-based credential or a delegate that returns a ClientSignedAssertion " +
-                    "with a TokenBindingCertificate.");
+                    "A client secret cannot be used over mTLS. " +
+                    "Use a certificate credential or a ClientSignedAssertion callback " +
+                    "that can return a token-binding certificate.");
             }
 
             var parameters = new Dictionary<string, string>
@@ -44,9 +44,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 { OAuth2Parameter.ClientSecret, Secret }
             };
             
-            context.Logger.Verbose(() => "[SecretStringClientCredential] Secret-based credential material created successfully.");
+            context.Logger.Verbose(() => "[ClientSecretCredential] Secret-based credential material created successfully.");
 
-            return Task.FromResult(new CredentialMaterial(parameters, CredentialSource.Static));
+            return Task.FromResult(new CredentialMaterial(parameters));
         }
     }
 }

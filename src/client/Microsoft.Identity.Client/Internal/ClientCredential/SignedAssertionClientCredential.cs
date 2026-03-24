@@ -28,15 +28,15 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             context.Logger.Verbose(() => $"[SignedAssertionClientCredential] Resolving credential material. " +
             $"Mode={context.Mode}");
 
-            if (context.Mode == ClientAuthMode.MtlsMode)
+            if (context.Mode == OAuthMode.MtlsMode)
             {
                 context.Logger.Error("[SignedAssertionClientCredential] Static signed assertion cannot be used with mTLS Proof-of-Possession.");
 
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,
-                    "A static signed assertion cannot be used with mTLS Proof-of-Possession because it " +
-                    "cannot supply a certificate for TLS transport binding. " +
-                    "Use a delegate credential that returns a ClientSignedAssertion with a TokenBindingCertificate.");
+                    "A precomputed client assertion string cannot be used over mTLS. " +
+                    "Use a certificate credential or a ClientSignedAssertion callback " +
+                    "that can return a token-binding certificate.");
             }
 
             var parameters = new Dictionary<string, string>
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             context.Logger.Verbose(() => "[SignedAssertionClientCredential] Signed assertion credential material created successfully.");
 
-            return Task.FromResult(new CredentialMaterial(parameters, CredentialSource.Static));
+            return Task.FromResult(new CredentialMaterial(parameters));
         }
     }
 }
