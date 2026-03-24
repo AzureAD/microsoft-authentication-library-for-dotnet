@@ -333,5 +333,102 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         #endregion
+
+        #region High-Level AcquireTokenForAgent Multi-User Tests
+
+        /// <summary>
+        /// Verifies that two calls to AcquireTokenForAgent for different users produce correct tokens,
+        /// and that a subsequent call for the first user returns a cached token (via AcquireTokenSilent
+        /// inside AgentTokenRequest) without any additional HTTP calls.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenForAgent_TwoUpns_CacheReturnsCorrectUserToken_Async()
+        {
+            // Arrange
+            const string AgentAppId = "00000000-0000-0000-0000-000000001234";
+            const string User1Upn = "alice@contoso.com";
+            const string User1Oid = "oid-alice-1111";
+            const string User1Token = "access-token-alice";
+
+            const string User2Upn = "bob@contoso.com";
+            const string User2Oid = "oid-bob-2222";
+            const string User2Token = "access-token-bob";
+
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            var blueprintCca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithExperimentalFeatures(true)
+                .WithHttpManager(httpManager)
+                .BuildConcrete();
+
+            // --- User 1 (Alice): 3 HTTP calls ---
+            // Leg 1: Blueprint AcquireTokenForClient (FMI credential, consumed by assertion CCA's client assertion callback)
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token: "fmi-credential-token")
+            });
+
+            // Leg 2: Assertion CCA AcquireTokenForClient (assertion token)
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token: "assertion-token")
+            });
+
+            // Leg 3: Agent CCA AcquireTokenByUserFIC (user token for Alice)
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                    User1Oid, User1Upn, TestConstants.s_scope.ToArray(), accessToken: User1Token)
+            });
+
+            // Act: AcquireTokenForAgent for User 1
+            var agentId1 = AgentIdentity.WithUsername(AgentAppId, User1Upn);
+            var result1 = await blueprintCca
+                .AcquireTokenForAgent(TestConstants.s_scope, agentId1)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert: User 1 token from IdP
+            Assert.AreEqual(User1Token, result1.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+            // --- User 2 (Bob): only 1 HTTP call (FMI cred + assertion token cached) ---
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                    User2Oid, User2Upn, TestConstants.s_scope.ToArray(), accessToken: User2Token)
+            });
+
+            // Act: AcquireTokenForAgent for User 2
+            var agentId2 = AgentIdentity.WithUsername(AgentAppId, User2Upn);
+            var result2 = await blueprintCca
+                .AcquireTokenForAgent(TestConstants.s_scope, agentId2)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert: User 2 token from IdP
+            Assert.AreEqual(User2Token, result2.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+
+            // --- User 1 again: should come from cache (no HTTP calls) ---
+            var result1Again = await blueprintCca
+                .AcquireTokenForAgent(TestConstants.s_scope, agentId1)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert: User 1 token from cache
+            Assert.AreEqual(TokenSource.Cache, result1Again.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(User1Token, result1Again.AccessToken);
+        }
+
+        #endregion
     }
 }
