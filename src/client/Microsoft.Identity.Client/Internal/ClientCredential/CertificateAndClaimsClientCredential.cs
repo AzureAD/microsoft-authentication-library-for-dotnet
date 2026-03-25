@@ -123,6 +123,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 ClientID = context.ClientId,
                 TokenEndpoint = context.TokenEndpoint,
+                Authority = context.Authority,
+                TenantId = context.TenantId,
                 Claims = context.Claims,
                 ClientCapabilities = context.ClientCapabilities,
                 CancellationToken = cancellationToken

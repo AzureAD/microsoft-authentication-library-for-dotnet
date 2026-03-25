@@ -99,6 +99,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 UseSha2 = requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
                 ExtraClientAssertionClaims = requestParams.ExtraClientAssertionClaims,
                 ClientAssertionFmiPath = requestParams.ClientAssertionFmiPath,
+                Authority = requestParams.AuthorityInfo.CanonicalAuthority.Authority,
+                TenantId = requestParams.AuthorityManager.Authority.TenantId,
                 Logger = requestParams.RequestContext.Logger
             };
         }
