@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -13,6 +14,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.KeyAttestation;
+using Microsoft.Identity.Client.KeyAttestation.Attestation;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
@@ -64,6 +66,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Reset test provider to ensure clean state for other tests
             PopKeyAttestor.s_testAttestationProvider = null;
+
+            // Reset MAA token cache so cached tokens don't leak between tests
+            PopKeyAttestor.ResetCacheForTest();
         }
 
         private void AddMocksToGetEntraToken(
@@ -948,6 +953,153 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        [TestMethod]
+        public async Task MaaTokenCache_Hit_DoesNotCallAttestationProviderAgain()
+        {
+            // Arrange: track how many times the attestation provider is called
+            int providerCallCount = 0;
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, ct) =>
+            {
+                Interlocked.Increment(ref providerCallCount);
+                var fakeJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.sig";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                var rawCert = CreateRawCertForCsrKeyWithCnDc(
+                    Constants.ManagedIdentityDefaultClientId, TestConstants.TenantId,
+                    DateTimeOffset.UtcNow.AddHours(25));
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // First acquire: mints cert + calls MAA
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
+                await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(1, providerCallCount, "MAA should be called once on first acquire.");
+
+                // Second acquire: cert is cached, so MAA token cache should also be hit
+                var second = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(1, providerCallCount, "MAA should NOT be called again when token is cached.");
+                Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task MaaTokenCache_ExpiredToken_CallsAttestationProviderAgain()
+        {
+            // Arrange: use a very short expiration buffer so we can simulate expiry
+            var originalBuffer = PopKeyAttestor.s_expirationBuffer;
+            PopKeyAttestor.s_expirationBuffer = TimeSpan.Zero;
+
+            int providerCallCount = 0;
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, ct) =>
+            {
+                Interlocked.Increment(ref providerCallCount);
+                // Return a token that is already expired
+                var expiredJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.expired.sig";
+                var token = new AttestationToken(expiredJwt, DateTimeOffset.UtcNow.AddSeconds(-1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, expiredJwt, 0, string.Empty));
+            };
+
+            try
+            {
+                using (new EnvVariableContext())
+                using (var httpManager = new MockHttpManager())
+                {
+                    ManagedIdentityClient.ResetSourceForTest();
+                    SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                    var rawCert = CreateRawCertForCsrKeyWithCnDc(
+                        Constants.ManagedIdentityDefaultClientId, TestConstants.TenantId,
+                        DateTimeOffset.UtcNow.AddHours(25));
+
+                    var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                    // First acquire
+                    AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false);
+
+                    Assert.AreEqual(1, providerCallCount);
+
+                    // Force-refresh to bypass the MSAL token cache and re-enter cert/MAA logic
+                    ManagedIdentityClient.ResetSourceForTest();
+                    ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
+
+                    var mi2 = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                    AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
+
+                    await mi2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false);
+
+                    Assert.AreEqual(2, providerCallCount, "MAA should be called again when cached token is expired.");
+                }
+            }
+            finally
+            {
+                PopKeyAttestor.s_expirationBuffer = originalBuffer;
+            }
+        }
+
+        [TestMethod]
+        public async Task MaaTokenCache_DifferentEndpoints_CachedSeparately()
+        {
+            // Arrange: two providers for two different endpoints
+            var callCounts = new ConcurrentDictionary<string, int>();
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, ct) =>
+            {
+                callCounts.AddOrUpdate(endpoint, 1, (_, c) => c + 1);
+                var fakeJwt = $"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{Uri.EscapeDataString(endpoint)}.sig";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
+            const string endpoint1 = "https://eastus.attestation.azure.net";
+            const string endpoint2 = "https://westus.attestation.azure.net";
+
+            // Use a real RSACng key handle so validation passes on first (cache-miss) calls
+            using var rsa1 = new RSACng(2048);
+            using var rsa2 = new RSACng(2048);
+            var handle1 = rsa1.Key.Handle;
+            var handle2 = rsa2.Key.Handle;
+
+            // First calls: cache miss → MAA is invoked
+            var result1a = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint1, handle1, "client1", CancellationToken.None).ConfigureAwait(false);
+            var result2a = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint2, handle2, "client1", CancellationToken.None).ConfigureAwait(false);
+
+            // Second calls: cache hit → key handle not needed, pass null
+            var result1b = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint1, null, "client1", CancellationToken.None).ConfigureAwait(false);
+            var result2b = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint2, null, "client1", CancellationToken.None).ConfigureAwait(false);
+
+            Assert.AreEqual(1, callCounts[endpoint1], "endpoint1 MAA should only be called once.");
+            Assert.AreEqual(1, callCounts[endpoint2], "endpoint2 MAA should only be called once.");
+            Assert.AreEqual(result1a.Jwt, result1b.Jwt, "endpoint1 cached JWT should match.");
+            Assert.AreEqual(result2a.Jwt, result2b.Jwt, "endpoint2 cached JWT should match.");
+            Assert.AreNotEqual(result1a.Jwt, result2a.Jwt, "Different endpoints should produce different tokens.");
+        }
+
         #endregion
 
         #region Cached certificate tests
@@ -1722,3 +1874,4 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         #endregion
     }
 }
+
