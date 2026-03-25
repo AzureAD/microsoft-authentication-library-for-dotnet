@@ -71,7 +71,7 @@ If either check fails, a `MsalClientException` is thrown before any network call
 
 ### Step 2 — Token cache check
 
-MSAL checks its in-memory token cache. If a valid `mtls_pop` token already exists for this resource + attestation mode, it returns it immediately (no network calls at all).
+MSAL checks its in-memory token cache. If a valid `mtls_pop` token already exists for this resource, it returns it immediately (no network calls at all).
 
 ### Step 3 — Get platform metadata from IMDSv2
 
@@ -136,7 +136,7 @@ ESTS validates the certificate during the TLS handshake and uses it to bind the 
 ### Step 6 — Return result
 
 MSAL:
-- Caches the token in its token cache (keyed by resource + attestation mode)
+- Caches the token in its token cache (keyed by resource)
 - Sets `AuthenticationResult.BindingCertificate` to the certificate
 - Returns the `AuthenticationResult` to your application
 
@@ -178,7 +178,7 @@ ImdsV2ManagedIdentitySource
   ├─[1]→ IMDS /getplatformmetadata                 ← GET CSR metadata
   │       ← { clientId, tenantId, cuId, attestationEndpoint }
   │
-  ├─[2]→ MtlsCertificateCache (memory + Windows)   ← Check cert cache
+  ├─[2]→ MtlsBindingCache (memory + Windows)       ← Check cert cache
   │       │ Cache miss:
   │       ├─[3]→ IManagedIdentityKeyProvider        ← Get/create KeyGuard RSA key
   │       ├─[4]→ Csr.Generate()                    ← Build CSR from key + metadata
@@ -253,7 +253,7 @@ Without this, IMDS still issues a certificate — it just can't verify the key i
                           Body: { csr: "<raw base64>", attestation_token: "<MAA JWT>" }
                           // attestation_token omitted when WithAttestationSupport() not used
                                                   ▲
-                                     empty string without WithAttestationSupport()
+                                     null / omitted without WithAttestationSupport()
 ```
 
 ### Usage
@@ -305,14 +305,14 @@ When attestation is configured:
 
 There are **two** MTLSPoP flows in MSAL:
 
-| | **Managed Identity (IMDSv2)** | **Confidential Client (SNI cert)** |
+| Feature | **Managed Identity (IMDSv2)** | **Confidential Client (SNI cert)** |
 |---|---|---|
 | **Who provides the cert?** | IMDS mints it automatically | You provide it via `.WithCertificate()` |
 | **API entry point** | `AcquireTokenForManagedIdentity().WithMtlsProofOfPossession()` | `AcquireTokenForClient().WithMtlsProofOfPossession()` |
 | **Region required?** | No (endpoint comes from IMDS response) | Yes — `.WithAzureRegion("region")` required |
 | **Windows only?** | Yes | No — cross-platform |
 | **CSR flow?** | Yes — multi-step: metadata → CSR → cert issuance | No — cert already in hand |
-| **Key classes** | `ImdsV2ManagedIdentitySource`, `MtlsCertificateCache` | `MtlsPopParametersInitializer`, `CertificateClientCredential` |
+| **Key classes** | `ImdsV2ManagedIdentitySource`, `MtlsBindingCache` | `MtlsPopParametersInitializer`, `CertificateClientCredential` |
 
 ---
 

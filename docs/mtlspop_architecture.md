@@ -9,7 +9,7 @@ sequenceDiagram
     participant MSAL as MSAL.NET
     participant MIClient as ManagedIdentityClient
     participant IMDSv2 as ImdsV2ManagedIdentitySource
-    participant CertCache as MtlsCertificateCache<br/>(Memory + Windows Store)
+    participant CertCache as MtlsBindingCache<br/>(IMtlsCertificateCache; Memory + Windows Store)
     participant IMDS as Azure IMDS<br/>(169.254.169.254)
     participant MAA as Microsoft Azure Attestation<br/>(MAA)
     participant STS as Regional STS<br/>(mtlsauth.microsoft.com)
@@ -22,7 +22,7 @@ sequenceDiagram
         MSAL-->>App: Return cached AuthenticationResult<br/>(token_type=mtls_pop, BindingCertificate)
     else Cache miss — need a fresh token
         MSAL->>MIClient: SendTokenRequestForManagedIdentityAsync()
-        MIClient->>IMDSv2: Route (mTLS PoP → always IMDSv2)
+        MIClient->>IMDSv2: On IMDS/VM hosts, route mTLS PoP via IMDSv2
 
         rect rgb(230, 240, 255)
             Note over IMDSv2,IMDS: Step A — Get Platform Metadata
@@ -46,7 +46,7 @@ sequenceDiagram
                     MAA-->>IMDSv2: MAA JWT (proves key is hardware-backed)
                 end
 
-                IMDSv2->>IMDS: POST /metadata/identity/issuecredential<br/>Body: { csr: "&lt;raw base64, PEM headers stripped&gt;", attestation_token: MAA JWT or omitted }
+                IMDSv2->>IMDS: POST /metadata/identity/issuecredential<br/>Body: { csr: "[raw base64 - PEM headers stripped]", attestation_token: MAA JWT or omitted }
                 IMDS-->>IMDSv2: CertificateRequestResponse<br/>{ certificate (Base64 X.509),<br/>mtls_authentication_endpoint,<br/>client_id, tenant_id }
 
                 Note over IMDSv2: Attach private key to certificate<br/>Store in memory + Windows cert store
@@ -61,7 +61,7 @@ sequenceDiagram
             STS-->>IMDSv2: Token response<br/>{ access_token, token_type="mtls_pop", expires_in }
         end
 
-        Note over MSAL: Apply MtlsPopAuthenticationOperation<br/>Cache token (keyed by scope + attestation mode)<br/>Set AuthenticationResult.BindingCertificate
+        Note over MSAL: Apply MtlsPopAuthenticationOperation<br/>Cache token (keyed by scope)<br/>Set AuthenticationResult.BindingCertificate
         MSAL-->>App: AuthenticationResult<br/>{ AccessToken (mtls_pop), BindingCertificate,<br/>TokenType="mtls_pop", ExpiresOn }
     end
 ```
@@ -78,7 +78,7 @@ graph TD
 
     C["ManagedIdentityAuthRequest<br/>Orchestrates cache lookup + token acquisition"] --> D
 
-    D["ManagedIdentityClient<br/>Source selection & routing<br/>Holds runtime binding certificate"] -->|mTLS PoP → always IMDSv2| E
+    D["ManagedIdentityClient<br/>Source selection & routing<br/>Holds runtime binding certificate"] -->|On IMDS/VM hosts, route mTLS PoP via IMDSv2| E
 
     E["ImdsV2ManagedIdentitySource<br/>Full CSR → Cert → Token flow"] --> F
     E --> G
