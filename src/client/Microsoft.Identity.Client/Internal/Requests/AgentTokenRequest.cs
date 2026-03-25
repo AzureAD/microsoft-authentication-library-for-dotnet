@@ -11,9 +11,36 @@ using Microsoft.Identity.Client.Extensibility;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
+    /// <summary>
+    /// Orchestrates a multi-leg token acquisition for agent scenarios.
+    ///
+    /// Two CCA instances are involved:
+    ///
+    ///   1. Blueprint CCA — the developer-created CCA that holds the real credential (certificate, secret, etc.).
+    ///      It only participates in Leg 1: acquiring an FMI credential via AcquireTokenForClient + WithFmiPath.
+    ///      Its app token cache stores the FMI credential.
+    ///
+    ///   2. Agent CCA — an internal CCA keyed by the agent's app ID, created and cached by this class.
+    ///      Its client assertion callback delegates to the Blueprint for FMI credentials (Leg 1).
+    ///      It handles both Leg 2 (AcquireTokenForClient for the assertion token, stored in its app token cache)
+    ///      and Leg 3 (AcquireTokenByUserFederatedIdentityCredential for the user token, stored in its user token cache).
+    ///
+    /// Caching behavior:
+    ///   - The Agent CCA instance is persisted in <see cref="ConfidentialClientApplication.AgentCcaCache"/>
+    ///     so that subsequent calls for the same agent reuse its in-memory token caches.
+    ///   - On each call, the agent CCA's user token cache is checked first via AcquireTokenSilent.
+    ///     If a cached user token is found, it is returned immediately without executing Legs 2-3.
+    ///   - ForceRefresh skips this silent check, but the Leg 1 (FMI credential) and Leg 2 (assertion token)
+    ///     caches are still honored — only the final user token (Leg 3) is re-acquired from the network.
+    /// </summary>
     internal class AgentTokenRequest : RequestBase
     {
         private readonly AcquireTokenForAgentParameters _agentParameters;
+
+        /// <summary>
+        /// The developer-created CCA that holds the real credential. Used only to acquire
+        /// FMI credentials (Leg 1) and to store/retrieve the internal Agent CCA instances.
+        /// </summary>
         private readonly ConfidentialClientApplication _blueprintApplication;
 
         public AgentTokenRequest(
@@ -35,27 +62,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string agentAppId = agentIdentity.AgentApplicationId;
             string authority = AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString();
 
+            // Retrieve (or create) the internal Agent CCA for this agent app ID.
+            // This CCA is persisted across calls so its app and user token caches are retained.
+            var agentCca = GetOrCreateAgentCca(agentAppId, authority);
+
             if (!agentIdentity.HasUserIdentifier)
             {
-                // App-only flow: get a client credential token for the agent.
-                // AcquireTokenForClient has built-in cache-first logic, so CCA persistence
-                // is sufficient — no explicit silent call needed.
-                var agentCca = GetOrCreateAgentCca(agentAppId, authority);
-
+                // App-only flow: AcquireTokenForClient has built-in cache-first logic,
+                // so no explicit silent pre-check is needed.
                 return await agentCca
                     .AcquireTokenForClient(AuthenticationRequestParameters.Scope)
                     .ExecuteAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
 
-            // User identity flow
-            var mainCca = GetOrCreateAgentCca(agentAppId, authority);
+            // --- User identity flow ---
 
-            // Try cache first via AcquireTokenSilent (unless ForceRefresh is set)
+            // Check the Agent CCA's user token cache for a previously-acquired token for this user.
+            // ForceRefresh skips this check so a fresh user token is always obtained from the network.
             if (!_agentParameters.ForceRefresh)
             {
-                var cachedResult = await TryAcquireTokenSilentAsync(
-                    mainCca,
+                var cachedResult = await TryAcquireTokenSilentFromAgentCacheAsync(
+                    agentCca,
                     agentIdentity,
                     AuthenticationRequestParameters.Scope,
                     cancellationToken).ConfigureAwait(false);
@@ -65,12 +93,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            // Cache miss or ForceRefresh — execute the full Leg 2 + Leg 3 flow
+            // Cache miss (or ForceRefresh) — execute Leg 2 + Leg 3.
 
-            // Step 1: Get assertion token via FMI path
-            var assertionApp = GetOrCreateAssertionCca(agentAppId, authority);
-
-            var assertionResult = await assertionApp
+            // Leg 2: Acquire an assertion token from the Agent CCA's app token cache (or network).
+            // This is a client credential call scoped to api://AzureADTokenExchange/.default.
+            // The Agent CCA's assertion callback will invoke Leg 1 (GetFmiCredentialFromBlueprintAsync)
+            // to authenticate itself, but AcquireTokenForClient's built-in cache handles repeat calls.
+            var assertionResult = await agentCca
                 .AcquireTokenForClient(new[] { TokenExchangeScope })
                 .WithFmiPathForClientAssertion(agentAppId)
                 .ExecuteAsync(cancellationToken)
@@ -78,10 +107,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             string assertion = assertionResult.AccessToken;
 
-            // Step 2: Exchange assertion for user token via UserFIC
+            // Leg 3: Exchange the assertion for a user-scoped token via UserFIC.
+            // This is always a network call (acquisition flow, like auth code).
+            // The result is written to the Agent CCA's user token cache for future silent retrieval.
             if (agentIdentity.UserObjectId.HasValue)
             {
-                return await ((IByUserFederatedIdentityCredential)mainCca)
+                return await ((IByUserFederatedIdentityCredential)agentCca)
                     .AcquireTokenByUserFederatedIdentityCredential(
                         AuthenticationRequestParameters.Scope,
                         agentIdentity.UserObjectId.Value,
@@ -90,7 +121,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     .ConfigureAwait(false);
             }
 
-            return await ((IByUserFederatedIdentityCredential)mainCca)
+            return await ((IByUserFederatedIdentityCredential)agentCca)
                 .AcquireTokenByUserFederatedIdentityCredential(
                     AuthenticationRequestParameters.Scope,
                     agentIdentity.Username,
@@ -100,16 +131,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         /// <summary>
-        /// Attempts to find a cached token for the specified user on the agent CCA.
-        /// Returns null if no matching account is found or the silent call fails.
+        /// Searches the Agent CCA's user token cache for a previously-acquired token
+        /// matching the specified user identity (by OID or UPN).
+        /// Returns null if no matching account exists or the cached token is expired.
         /// </summary>
-        private static async Task<AuthenticationResult> TryAcquireTokenSilentAsync(
+        private static async Task<AuthenticationResult> TryAcquireTokenSilentFromAgentCacheAsync(
             IConfidentialClientApplication agentCca,
             AgentIdentity agentIdentity,
             IEnumerable<string> scopes,
             CancellationToken cancellationToken)
         {
-#pragma warning disable CS0618 // GetAccountsAsync is obsolete for external callers but needed here to enumerate cached accounts
+#pragma warning disable CS0618 // GetAccountsAsync is marked obsolete for external callers, but we need it here to enumerate cached accounts on the internal Agent CCA
             var accounts = await agentCca.GetAccountsAsync().ConfigureAwait(false);
 #pragma warning restore CS0618
 
@@ -128,13 +160,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (MsalUiRequiredException)
             {
-                // Token expired or requires interaction — fall through to full flow
+                // Token expired or requires interaction — fall through to full Leg 2 + Leg 3 flow
                 return null;
             }
         }
 
         /// <summary>
-        /// Finds an account in the cache that matches the agent identity by OID or UPN.
+        /// Finds an account in the Agent CCA's cache that matches the user identity.
+        /// Matches by OID (HomeAccountId.ObjectId) if the caller specified a Guid,
+        /// otherwise by UPN (Account.Username). Both comparisons are case-insensitive.
         /// </summary>
         private static IAccount FindMatchingAccount(IEnumerable<IAccount> accounts, AgentIdentity agentIdentity)
         {
@@ -151,39 +185,35 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
         {
-            // CCS headers are handled by the internal CCAs' own request handlers.
+            // CCS headers are handled by the internal Agent CCA's own request handlers.
             return null;
         }
 
+        #region Agent CCA Construction and Configuration
+
         private const string TokenExchangeScope = "api://AzureADTokenExchange/.default";
         private const string AgentCcaKeyPrefix = "agent_";
-        private const string AssertionCcaKeyPrefix = "assertion_";
 
+        /// <summary>
+        /// Retrieves the cached internal Agent CCA for the given agent app ID, or creates one
+        /// if this is the first call. The Agent CCA is stored in the Blueprint's AgentCcaCache
+        /// so its app and user token caches persist across calls.
+        /// </summary>
         private IConfidentialClientApplication GetOrCreateAgentCca(string agentAppId, string authority)
         {
             string key = AgentCcaKeyPrefix + agentAppId;
             return _blueprintApplication.AgentCcaCache.GetOrAdd(key, _ => BuildAgentCca(agentAppId, authority));
         }
 
-        private IConfidentialClientApplication GetOrCreateAssertionCca(string agentAppId, string authority)
-        {
-            string key = AssertionCcaKeyPrefix + agentAppId;
-            return _blueprintApplication.AgentCcaCache.GetOrAdd(key, _ => BuildAssertionApp(agentAppId, authority));
-        }
-
+        /// <summary>
+        /// Builds a new internal Agent CCA configured with:
+        ///   - Client ID = the agent's app ID
+        ///   - Authority = the Blueprint's resolved authority
+        ///   - Client assertion callback = delegates to <see cref="GetFmiCredentialFromBlueprintAsync"/>
+        ///     to get an FMI credential from the Blueprint (Leg 1)
+        ///   - HTTP config = propagated from the Blueprint (custom HttpClientFactory, test HttpManager)
+        /// </summary>
         private IConfidentialClientApplication BuildAgentCca(string agentAppId, string authority)
-        {
-            var builder = ConfidentialClientApplicationBuilder
-                .Create(agentAppId)
-                .WithAuthority(authority)
-                .WithExperimentalFeatures(true)
-                .WithClientAssertion((AssertionRequestOptions _) => GetFmiCredentialAsync(agentAppId));
-
-            PropagateHttpConfig(builder);
-            return builder.Build();
-        }
-
-        private IConfidentialClientApplication BuildAssertionApp(string agentAppId, string authority)
         {
             var builder = ConfidentialClientApplicationBuilder
                 .Create(agentAppId)
@@ -191,8 +221,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 .WithExperimentalFeatures(true)
                 .WithClientAssertion(async (AssertionRequestOptions opts) =>
                 {
+                    // When called from AcquireTokenForClient + WithFmiPathForClientAssertion (Leg 2),
+                    // opts.ClientAssertionFmiPath is set to the agent app ID.
+                    // When called from AcquireTokenByUserFIC (Leg 3), it falls back to agentAppId.
                     string fmiPath = opts.ClientAssertionFmiPath ?? agentAppId;
-                    return await GetFmiCredentialAsync(fmiPath).ConfigureAwait(false);
+                    return await GetFmiCredentialFromBlueprintAsync(fmiPath).ConfigureAwait(false);
                 });
 
             PropagateHttpConfig(builder);
@@ -200,9 +233,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         /// <summary>
-        /// Propagates HTTP configuration from the blueprint CCA to an internal CCA builder,
+        /// Propagates HTTP configuration from the Blueprint CCA to an internal Agent CCA builder,
         /// ensuring that custom HTTP client factories (e.g., proxy settings) and internal
-        /// HTTP managers (used in tests) are shared with the internal CCAs.
+        /// HTTP managers (used in tests) are shared with the Agent CCA.
         /// </summary>
         private void PropagateHttpConfig(ConfidentialClientApplicationBuilder builder)
         {
@@ -219,7 +252,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private async Task<string> GetFmiCredentialAsync(string fmiPath)
+        /// <summary>
+        /// Leg 1: Acquires an FMI credential from the Blueprint CCA.
+        /// Uses AcquireTokenForClient with WithFmiPath, which has built-in cache-first logic —
+        /// only the first call hits the network; subsequent calls return the cached FMI credential
+        /// from the Blueprint's app token cache.
+        /// </summary>
+        private async Task<string> GetFmiCredentialFromBlueprintAsync(string fmiPath)
         {
             var result = await _blueprintApplication
                 .AcquireTokenForClient(new[] { TokenExchangeScope })
@@ -229,5 +268,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             return result.AccessToken;
         }
+
+        #endregion
     }
 }
