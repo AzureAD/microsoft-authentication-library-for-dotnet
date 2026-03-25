@@ -9,7 +9,7 @@ sequenceDiagram
     participant MSAL as MSAL.NET
     participant MIClient as ManagedIdentityClient
     participant IMDSv2 as ImdsV2ManagedIdentitySource
-    participant CertCache as MtlsBindingCache<br/>(IMtlsCertificateCache; Memory + Windows Store)
+    participant CertCache as MtlsBindingCache<br/>(IMtlsCertificateCache, Memory and Windows Store)
     participant IMDS as Azure IMDS<br/>(169.254.169.254)
     participant MAA as Microsoft Azure Attestation<br/>(MAA)
     participant STS as Regional STS<br/>(mtlsauth.microsoft.com)
