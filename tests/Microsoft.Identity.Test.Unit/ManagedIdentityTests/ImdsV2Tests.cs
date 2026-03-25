@@ -1100,6 +1100,42 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreNotEqual(result1a.Jwt, result2a.Jwt, "Different endpoints should produce different tokens.");
         }
 
+        [TestMethod]
+        public async Task MaaTokenCache_ConcurrentCacheMiss_SingleFlightCallsProviderOnce()
+        {
+            // Arrange: provider has a delay so concurrent calls have time to pile up
+            int providerCallCount = 0;
+            var providerGate = new SemaphoreSlim(0, 1); // holds all provider calls until released
+            PopKeyAttestor.s_testAttestationProvider = async (endpoint, keyHandle, clientId, ct) =>
+            {
+                Interlocked.Increment(ref providerCallCount);
+                await providerGate.WaitAsync(ct).ConfigureAwait(false);
+                var fakeJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.concurrent.sig";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty);
+            };
+
+            const string endpoint = "https://eastus.attestation.azure.net";
+            using var rsa = new RSACng(2048);
+            var handle = rsa.Key.Handle;
+
+            // Fire 5 concurrent attestation calls for the same key before any result is cached
+            var tasks = new Task<AttestationResult>[5];
+            for (int i = 0; i < tasks.Length; i++)
+                tasks[i] = PopKeyAttestor.AttestCredentialGuardAsync(endpoint, handle, "client1", CancellationToken.None);
+
+            // Allow exactly one provider call to complete
+            providerGate.Release(1);
+            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            Assert.AreEqual(1, providerCallCount, "Provider should only be called once despite concurrent cache misses.");
+            foreach (var r in results)
+            {
+                Assert.AreEqual(AttestationStatus.Success, r.Status);
+                Assert.AreEqual("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.concurrent.sig", r.Jwt);
+            }
+        }
+
         #endregion
 
         #region Cached certificate tests
