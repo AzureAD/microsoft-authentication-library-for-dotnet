@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -70,8 +71,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 // App-only flow: AcquireTokenForClient has built-in cache-first logic,
                 // so no explicit silent pre-check is needed.
-                return await agentCca
-                    .AcquireTokenForClient(AuthenticationRequestParameters.Scope)
+                return await PropagateOuterRequestParameters(
+                        agentCca.AcquireTokenForClient(AuthenticationRequestParameters.Scope))
                     .ExecuteAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -99,8 +100,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // This is a client credential call scoped to api://AzureADTokenExchange/.default.
             // The Agent CCA's assertion callback will invoke Leg 1 (GetFmiCredentialFromBlueprintAsync)
             // to authenticate itself, but AcquireTokenForClient's built-in cache handles repeat calls.
-            var assertionResult = await agentCca
-                .AcquireTokenForClient(new[] { TokenExchangeScope })
+            var assertionResult = await PropagateOuterRequestParameters(
+                    agentCca.AcquireTokenForClient(new[] { TokenExchangeScope }))
                 .WithFmiPathForClientAssertion(agentAppId)
                 .ExecuteAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -112,20 +113,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // The result is written to the Agent CCA's user token cache for future silent retrieval.
             if (agentIdentity.UserObjectId.HasValue)
             {
-                return await ((IByUserFederatedIdentityCredential)agentCca)
-                    .AcquireTokenByUserFederatedIdentityCredential(
-                        AuthenticationRequestParameters.Scope,
-                        agentIdentity.UserObjectId.Value,
-                        assertion)
+                return await PropagateOuterRequestParameters(
+                        ((IByUserFederatedIdentityCredential)agentCca)
+                            .AcquireTokenByUserFederatedIdentityCredential(
+                                AuthenticationRequestParameters.Scope,
+                                agentIdentity.UserObjectId.Value,
+                                assertion))
                     .ExecuteAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
 
-            return await ((IByUserFederatedIdentityCredential)agentCca)
-                .AcquireTokenByUserFederatedIdentityCredential(
-                    AuthenticationRequestParameters.Scope,
-                    agentIdentity.Username,
-                    assertion)
+            return await PropagateOuterRequestParameters(
+                    ((IByUserFederatedIdentityCredential)agentCca)
+                        .AcquireTokenByUserFederatedIdentityCredential(
+                            AuthenticationRequestParameters.Scope,
+                            agentIdentity.Username,
+                            assertion))
                 .ExecuteAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -135,7 +138,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// matching the specified user identity (by OID or UPN).
         /// Returns null if no matching account exists or the cached token is expired.
         /// </summary>
-        private static async Task<AuthenticationResult> TryAcquireTokenSilentFromAgentCacheAsync(
+        private async Task<AuthenticationResult> TryAcquireTokenSilentFromAgentCacheAsync(
             IConfidentialClientApplication agentCca,
             AgentIdentity agentIdentity,
             IEnumerable<string> scopes,
@@ -153,8 +156,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                return await agentCca
-                    .AcquireTokenSilent(scopes, matchedAccount)
+                return await PropagateOuterRequestParameters(
+                        agentCca.AcquireTokenSilent(scopes, matchedAccount))
                     .ExecuteAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -211,7 +214,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         ///   - Authority = the Blueprint's resolved authority
         ///   - Client assertion callback = delegates to <see cref="GetFmiCredentialFromBlueprintAsync"/>
         ///     to get an FMI credential from the Blueprint (Leg 1)
-        ///   - HTTP config = propagated from the Blueprint (custom HttpClientFactory, test HttpManager)
+        ///   - App-level config = propagated from the Blueprint via <see cref="PropagateBlueprintConfig"/>
         /// </summary>
         private IConfidentialClientApplication BuildAgentCca(string agentAppId, string authority)
         {
@@ -228,28 +231,85 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return await GetFmiCredentialFromBlueprintAsync(fmiPath).ConfigureAwait(false);
                 });
 
-            PropagateHttpConfig(builder);
+            PropagateBlueprintConfig(builder);
             return builder.Build();
         }
 
         /// <summary>
-        /// Propagates HTTP configuration from the Blueprint CCA to an internal Agent CCA builder,
-        /// ensuring that custom HTTP client factories (e.g., proxy settings) and internal
-        /// HTTP managers (used in tests) are shared with the Agent CCA.
+        /// Propagates app-level configuration from the Blueprint CCA to the Agent CCA builder.
+        /// Copies properties directly on the builder's internal Config to avoid awkward builder
+        /// API constraints (e.g., WithLogging throwing if called twice, InstanceDiscoveryResponse
+        /// requiring JSON round-tripping). This ensures the Agent CCA shares the Blueprint's
+        /// HTTP behavior, logging, telemetry identity, and instance discovery settings.
+        ///
+        /// ExtraQueryParameters and ClientCapabilities are NOT propagated here because
+        /// they are already merged into the per-request AuthenticationRequestParameters
+        /// and propagated by <see cref="PropagateOuterRequestParameters{T}"/>.
         /// </summary>
-        private void PropagateHttpConfig(ConfidentialClientApplicationBuilder builder)
+        private void PropagateBlueprintConfig(ConfidentialClientApplicationBuilder builder)
         {
             var blueprintConfig = _blueprintApplication.ServiceBundle.Config;
+            var agentConfig = builder.Config;
 
-            if (blueprintConfig.HttpClientFactory != null)
+            // HTTP: factory, retry policy, and internal test HttpManager
+            agentConfig.HttpClientFactory = blueprintConfig.HttpClientFactory;
+            agentConfig.DisableInternalRetries = blueprintConfig.DisableInternalRetries;
+            agentConfig.HttpManager = blueprintConfig.HttpManager;
+
+            // Logging: copy whichever logger the Blueprint uses (IdentityLogger or LoggingCallback)
+            agentConfig.IdentityLogger = blueprintConfig.IdentityLogger;
+            agentConfig.LoggingCallback = blueprintConfig.LoggingCallback;
+            agentConfig.LogLevel = blueprintConfig.LogLevel;
+            agentConfig.EnablePiiLogging = blueprintConfig.EnablePiiLogging;
+            agentConfig.IsDefaultPlatformLoggingEnabled = blueprintConfig.IsDefaultPlatformLoggingEnabled;
+
+            // Telemetry: attribute network calls to the same caller
+            agentConfig.ClientName = blueprintConfig.ClientName;
+            agentConfig.ClientVersion = blueprintConfig.ClientVersion;
+
+            // Instance discovery: honor the Blueprint's custom metadata or disabled discovery
+            agentConfig.CustomInstanceDiscoveryMetadata = blueprintConfig.CustomInstanceDiscoveryMetadata;
+            agentConfig.CustomInstanceDiscoveryMetadataUri = blueprintConfig.CustomInstanceDiscoveryMetadataUri;
+            agentConfig.IsInstanceDiscoveryEnabled = blueprintConfig.IsInstanceDiscoveryEnabled;
+        }
+
+        /// <summary>
+        /// Propagates per-request parameters from the outer AcquireTokenForAgent call to an inner
+        /// token request builder (Leg 2, Leg 3, or Silent). This ensures that caller-specified
+        /// correlation IDs, claims challenges, tenant overrides, and extra query parameters
+        /// flow through to the Agent CCA's network calls.
+        /// </summary>
+        private T PropagateOuterRequestParameters<T>(T builder)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            var outerParams = AuthenticationRequestParameters;
+
+            // Correlation ID: chain inner calls to the same trace
+            builder.WithCorrelationId(outerParams.CorrelationId);
+
+            // Claims: propagate merged claims + client capabilities so the inner request
+            // includes any conditional access challenge from the caller
+            if (!string.IsNullOrEmpty(outerParams.ClaimsAndClientCapabilities))
             {
-                builder.WithHttpClientFactory(blueprintConfig.HttpClientFactory);
+                builder.WithClaims(outerParams.ClaimsAndClientCapabilities);
             }
 
-            if (blueprintConfig.HttpManager != null)
+            // Tenant override: if the caller used .WithTenantId() on AcquireTokenForAgent,
+            // apply the same override to the inner call
+            if (outerParams.AuthorityOverride != null)
             {
-                builder.WithHttpManager(blueprintConfig.HttpManager);
+                var overrideAuthority = Authority.CreateAuthority(outerParams.AuthorityOverride);
+                builder.WithTenantId(overrideAuthority.TenantId);
             }
+
+            // Extra query parameters: already merged (app-level + request-level) in outerParams
+            if (outerParams.ExtraQueryParameters != null && outerParams.ExtraQueryParameters.Count > 0)
+            {
+                builder.CommonParameters.ExtraQueryParameters = 
+                    new Dictionary<string, string>(outerParams.ExtraQueryParameters, StringComparer.OrdinalIgnoreCase);
+            }
+
+            return builder;
         }
 
         /// <summary>
