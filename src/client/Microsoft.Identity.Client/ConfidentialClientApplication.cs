@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -197,6 +198,19 @@ namespace Microsoft.Identity.Client
                 assertion);
         }
 
+        /// <inheritdoc/>
+        AcquireTokenByUserFederatedIdentityCredentialParameterBuilder IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(
+            IEnumerable<string> scopes,
+            Guid userObjectId,
+            string assertion)
+        {
+            return AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                userObjectId,
+                assertion);
+        }
+
         AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
             IEnumerable<string> scopes,
             string refreshToken)
@@ -205,6 +219,17 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
                 scopes,
                 refreshToken);
+        }
+
+        /// <inheritdoc/>
+        public AcquireTokenForAgentParameterBuilder AcquireTokenForAgent(
+            IEnumerable<string> scopes,
+            AgentIdentity agentIdentity)
+        {
+            return AcquireTokenForAgentParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                agentIdentity);
         }
 
         /// <inheritdoc/>
@@ -217,6 +242,13 @@ namespace Microsoft.Identity.Client
 
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
+
+        /// <summary>
+        /// Caches internal CCA instances created by <see cref="AgentTokenRequest"/> so that
+        /// subsequent AcquireTokenForAgent calls for the same agent reuse the same CCA
+        /// (and its in-memory token cache) instead of rebuilding from scratch each time.
+        /// </summary>
+        internal ConcurrentDictionary<string, IConfidentialClientApplication> AgentCcaCache { get; } = new();
 
         internal override async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
             AcquireTokenCommonParameters commonParameters,
