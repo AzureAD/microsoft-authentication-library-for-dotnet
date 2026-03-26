@@ -212,23 +212,37 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// Builds a new internal Agent CCA configured with:
         ///   - Client ID = the agent's app ID
         ///   - Authority = the Blueprint's resolved authority
-        ///   - Client assertion callback = delegates to <see cref="GetFmiCredentialFromBlueprintAsync"/>
-        ///     to get an FMI credential from the Blueprint (Leg 1)
+        ///   - Client assertion callback = Leg 1 (FMI credential from Blueprint)
         ///   - App-level config = propagated from the Blueprint via <see cref="PropagateBlueprintConfig"/>
         /// </summary>
         private IConfidentialClientApplication BuildAgentCca(string agentAppId, string authority)
         {
+            // The assertion callback lambda is stored inside the Agent CCA, which lives for the
+            // lifetime of the Blueprint CCA (persisted in AgentCcaCache). Only long-lived objects
+            // should be captured — specifically the Blueprint CCA reference and the agent app ID.
+            // Capturing 'this' (the per-request AgentTokenRequest) would pin per-request state
+            // (AuthenticationRequestParameters, RequestContext, CancellationToken, etc.) in memory
+            // indefinitely and risk using stale request data on future assertion callback invocations.
+            var blueprint = _blueprintApplication;
+
             var builder = ConfidentialClientApplicationBuilder
                 .Create(agentAppId)
                 .WithAuthority(authority)
                 .WithExperimentalFeatures(true)
                 .WithClientAssertion(async (AssertionRequestOptions opts) =>
                 {
-                    // When called from AcquireTokenForClient + WithFmiPathForClientAssertion (Leg 2),
-                    // opts.ClientAssertionFmiPath is set to the agent app ID.
-                    // When called from AcquireTokenByUserFIC (Leg 3), it falls back to agentAppId.
+                    // Leg 1: Acquire an FMI credential from the Blueprint CCA.
+                    // AcquireTokenForClient has built-in cache-first logic — only the first call
+                    // hits the network; subsequent calls return the cached FMI credential.
                     string fmiPath = opts.ClientAssertionFmiPath ?? agentAppId;
-                    return await GetFmiCredentialFromBlueprintAsync(fmiPath).ConfigureAwait(false);
+
+                    var result = await blueprint
+                        .AcquireTokenForClient(new[] { TokenExchangeScope })
+                        .WithFmiPath(fmiPath)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    return result.AccessToken;
                 });
 
             PropagateBlueprintConfig(builder);
@@ -310,23 +324,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return builder;
-        }
-
-        /// <summary>
-        /// Leg 1: Acquires an FMI credential from the Blueprint CCA.
-        /// Uses AcquireTokenForClient with WithFmiPath, which has built-in cache-first logic —
-        /// only the first call hits the network; subsequent calls return the cached FMI credential
-        /// from the Blueprint's app token cache.
-        /// </summary>
-        private async Task<string> GetFmiCredentialFromBlueprintAsync(string fmiPath)
-        {
-            var result = await _blueprintApplication
-                .AcquireTokenForClient(new[] { TokenExchangeScope })
-                .WithFmiPath(fmiPath)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            return result.AccessToken;
         }
 
         #endregion

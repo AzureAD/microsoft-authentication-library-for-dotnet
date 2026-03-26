@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
@@ -176,6 +177,102 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         username: FakeUsername,
                         assertion: string.Empty));
         }
+
+        #region OID-Based UserFIC Tests
+
+        private static readonly Guid FakeUserOid = new Guid("11111111-2222-3333-4444-555555555555");
+
+        /// <summary>
+        /// Verifies that when the Guid overload of AcquireTokenByUserFederatedIdentityCredential is used,
+        /// the token request sends "user_id" (OID) instead of "username" (UPN) in the POST body.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenByUserFic_WithOid_SendsUserIdParameter_Async()
+        {
+            // Arrange
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.GrantType, OAuth2GrantType.UserFic },
+                    { OAuth2Parameter.UserId, FakeUserOid.ToString("D") },
+                    { OAuth2Parameter.UserFederatedIdentityCredential, FakeAssertion }
+                },
+                // Verify that "username" is NOT sent when using the OID overload
+                UnExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.Username, "" }
+                },
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            var app = BuildCCA(httpManager);
+
+            // Act
+            var result = await (app as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential(
+                    TestConstants.s_scope,
+                    FakeUserOid,
+                    FakeAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        /// <summary>
+        /// Verifies that the UPN overload sends "username" and NOT "user_id" in the POST body.
+        /// This is the inverse of the OID test and ensures the two paths are mutually exclusive.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenByUserFic_WithUpn_SendsUsernameParameter_Async()
+        {
+            // Arrange
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.GrantType, OAuth2GrantType.UserFic },
+                    { OAuth2Parameter.Username, FakeUsername },
+                    { OAuth2Parameter.UserFederatedIdentityCredential, FakeAssertion }
+                },
+                // Verify that "user_id" is NOT sent when using the UPN overload
+                UnExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.UserId, "" }
+                },
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            var app = BuildCCA(httpManager);
+
+            // Act
+            var result = await (app as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential(
+                    TestConstants.s_scope,
+                    FakeUsername,
+                    FakeAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        #endregion
 
         #region Multi-User Cache Tests (Low-Level API)
 
@@ -427,6 +524,46 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Assert: User 1 token from cache
             Assert.AreEqual(TokenSource.Cache, result1Again.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(User1Token, result1Again.AccessToken);
+        }
+
+        /// <summary>
+        /// Verifies that a pre-cancelled CancellationToken propagates through the multi-leg
+        /// agent flow (AgentTokenRequest → inner AcquireTokenForClient → token request pipeline)
+        /// and causes an OperationCanceledException without making any token HTTP calls.
+        /// The cancellation is detected at TokenClient.SendTokenRequestAsync, which calls
+        /// CancellationToken.ThrowIfCancellationRequested() before issuing the HTTP request.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenForAgent_WithPreCancelledToken_ThrowsOperationCanceledException_Async()
+        {
+            // Arrange
+            const string AgentAppId = "00000000-0000-0000-0000-000000001234";
+            const string UserUpn = "alice@contoso.com";
+
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            var blueprintCca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithExperimentalFeatures(true)
+                .WithHttpManager(httpManager)
+                .BuildConcrete();
+
+            var agentId = AgentIdentity.WithUsername(AgentAppId, UserUpn);
+
+            var tokenSource = new CancellationTokenSource();
+            tokenSource.Cancel();
+
+            // Act & Assert – the cancelled token propagates through AgentTokenRequest.ExecuteAsync
+            // into the inner Leg 2 AcquireTokenForClient call, where TokenClient detects the
+            // cancellation and throws OperationCanceledException before any HTTP request is made.
+            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                () => blueprintCca
+                    .AcquireTokenForAgent(TestConstants.s_scope, agentId)
+                    .ExecuteAsync(tokenSource.Token))
+                .ConfigureAwait(false);
         }
 
         #endregion
