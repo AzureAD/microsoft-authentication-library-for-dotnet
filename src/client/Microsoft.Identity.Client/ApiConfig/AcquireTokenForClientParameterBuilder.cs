@@ -175,14 +175,26 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(attributeTokens));
             }
 
+            bool hasAnyToken = false;
+            foreach (var _ in attributeTokens)
+            {
+                hasAnyToken = true;
+                break;
+            }
+
+            if (!hasAnyToken)
+            {
+                throw new ArgumentNullException(nameof(attributeTokens));
+            }
+
             string joinedTokens = string.Join(" ", attributeTokens);
 
-            var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
+            var cacheKeyComponents = new SortedList<string, Func<CancellationToken, Task<string>>>
             {
-                { OAuth2Parameter.AttributeTokens, _ => Task.FromResult(joinedTokens) }
+                { OAuth2Parameter.AttributeTokens, ct => Task.FromResult(joinedTokens) }
             };
 
-            this.WithExtraBodyParameters(extraBodyParams);
+            this.WithAdditionalCacheKeyComponents(cacheKeyComponents);
 
             return this;
         }

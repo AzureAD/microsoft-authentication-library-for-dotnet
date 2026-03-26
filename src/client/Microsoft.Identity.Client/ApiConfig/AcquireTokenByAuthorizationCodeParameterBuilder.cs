@@ -170,10 +170,10 @@ namespace Microsoft.Identity.Client
 
             string joinedTokens = string.Join(" ", attributeTokens);
 
-            this.OnBeforeTokenRequest(async (data) =>
+            this.OnBeforeTokenRequest((data) =>
             {
                 data.BodyParameters.Add(OAuth2Parameter.AttributeTokens, joinedTokens);
-                await Task.CompletedTask.ConfigureAwait(false);
+                return Task.CompletedTask;
             });
 
             return this;

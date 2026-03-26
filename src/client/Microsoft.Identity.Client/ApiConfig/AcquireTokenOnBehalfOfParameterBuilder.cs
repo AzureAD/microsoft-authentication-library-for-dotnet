@@ -193,10 +193,10 @@ namespace Microsoft.Identity.Client
             }
 
             string joinedTokens = string.Join(" ", validTokens);
-            this.OnBeforeTokenRequest(async (data) =>
-            {
-                data.BodyParameters.Add(OAuth2Parameter.AttributeTokens, joinedTokens);
-                await Task.CompletedTask.ConfigureAwait(false);
+            this.OnBeforeTokenRequest((data) =>
+            {
+                data.BodyParameters.Add(OAuth2Parameter.AttributeTokens, joinedTokens);
+                return Task.CompletedTask;
             });
 
             return this;
