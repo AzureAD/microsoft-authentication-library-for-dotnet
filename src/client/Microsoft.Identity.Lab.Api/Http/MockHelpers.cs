@@ -19,7 +19,6 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks

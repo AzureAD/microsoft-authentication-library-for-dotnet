@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -58,7 +57,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             if ((tokenCache as ITokenCacheInternal).Accessor.GetType() == typeof(AppAccessorWithPartitionAsserts) ||
                 (tokenCache as ITokenCacheInternal).Accessor.GetType() == typeof(UserAccessorWithPartitionAsserts))
             {
-                Assert.Fail("[TEST FAILURE] This is test setup issue. You cannot use TokenCacheAccessRecorder and WithCachePartitioningAsserts at the same time");
+                ValidationHelpers.AssertFail("[TEST FAILURE] This is test setup issue. You cannot use TokenCacheAccessRecorder and WithCachePartitioningAsserts at the same time");
             }
 
             var existingBeforeAccessCallback = _tokenCache.BeforeAccess;
@@ -103,11 +102,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <param name="expectedWrites"></param>
         public void AssertAccessCounts(int expectedReads, int expectedWrites)
         {
-            Assert.AreEqual(expectedWrites, BeforeWriteCount, "Writes");
-            Assert.AreEqual(expectedWrites, AfterAccessWriteCount, "Writes");
+            ValidationHelpers.AssertAreEqual(expectedWrites, BeforeWriteCount, "Writes");
+            ValidationHelpers.AssertAreEqual(expectedWrites, AfterAccessWriteCount, "Writes");
 
-            Assert.AreEqual(expectedReads, AfterAccessTotalCount - AfterAccessWriteCount, "Reads");
-            Assert.AreEqual(expectedReads +  expectedWrites, BeforeAccessCount, "Reads");
+            ValidationHelpers.AssertAreEqual(expectedReads, AfterAccessTotalCount - AfterAccessWriteCount, "Reads");
+            ValidationHelpers.AssertAreEqual(expectedReads +  expectedWrites, BeforeAccessCount, "Reads");
         }
 
         /// <summary>

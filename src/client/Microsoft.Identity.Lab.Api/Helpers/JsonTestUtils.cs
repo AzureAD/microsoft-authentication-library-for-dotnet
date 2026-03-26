@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
@@ -38,7 +37,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             if (!JToken.DeepEquals(expected, actual))
             {
-                Assert.Fail($"The 2 JSON strings are not the same. Expected {expectedJson} Actual {actualJson}");
+                ValidationHelpers.AssertFail($"The 2 JSON strings are not the same. Expected {expectedJson} Actual {actualJson}");
             }
         }
     }

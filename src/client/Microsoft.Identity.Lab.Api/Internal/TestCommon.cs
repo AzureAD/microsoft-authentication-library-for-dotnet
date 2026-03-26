@@ -22,9 +22,9 @@ using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Test.Common
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Common
 
             atItem = atItem.WithRefreshOn(refreshOn);
 
-            Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
+            ValidationHelpers.AssertIsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
 
             if (expired)
             {

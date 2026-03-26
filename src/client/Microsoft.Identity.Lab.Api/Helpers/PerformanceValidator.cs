@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -38,7 +37,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             if (elapsedMilliseconds > _maxMilliseconds)
             {
-                Assert.Fail(
+                ValidationHelpers.AssertFail(
                     $"Measured performance time EXCEEDED.  Max allowed: {_maxMilliseconds}ms.  Elapsed:  {elapsedMilliseconds}.  {_message}");
             }
             else

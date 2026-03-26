@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -110,18 +109,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             if (!string.IsNullOrEmpty(ExpectedUrl))
             {
-                Assert.AreEqual(
+                ValidationHelpers.AssertAreEqual(
                     ExpectedUrl.Split('?')[0],
                     uri.AbsoluteUri.Split('?')[0]);
             }
 
             if (ExpectedMtlsBindingCertificate != null)
             {
-                Assert.HasCount(1, base.ClientCertificates);
-                Assert.AreEqual(ExpectedMtlsBindingCertificate, base.ClientCertificates[0]);
+                ValidationHelpers.AssertAreEqual(1, base.ClientCertificates.Count);
+                ValidationHelpers.AssertAreEqual(ExpectedMtlsBindingCertificate, base.ClientCertificates[0]);
             }
 
-            Assert.AreEqual(ExpectedMethod, request.Method);
+            ValidationHelpers.AssertAreEqual(ExpectedMethod, request.Method);
 
             ValidateExpectedQueryParams(uri);
 
@@ -144,13 +143,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             if (ExpectedQueryParams != null && ExpectedQueryParams.Any())
             {
-                Assert.IsFalse(string.IsNullOrEmpty(uri.Query), $"Provided url ({uri.AbsoluteUri}) does not contain query parameters as expected.");
+                ValidationHelpers.AssertIsFalse(string.IsNullOrEmpty(uri.Query), $"Provided url ({uri.AbsoluteUri}) does not contain query parameters as expected.");
                 Dictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
-                Assert.HasCount(ExpectedQueryParams.Count, inputQp, "Different number of query params.");
+                ValidationHelpers.AssertHasCount(ExpectedQueryParams.Count, inputQp, "Different number of query params.");
                 foreach (var key in ExpectedQueryParams.Keys)
                 {
-                    Assert.IsTrue(inputQp.ContainsKey(key), $"Expected query parameter ({key}) not found in the url ({uri.AbsoluteUri}).");
-                    Assert.AreEqual(ExpectedQueryParams[key], inputQp[key], $"Value mismatch for query parameter: {key}.");
+                    ValidationHelpers.AssertIsTrue(inputQp.ContainsKey(key), $"Expected query parameter ({key}) not found in the url ({uri.AbsoluteUri}).");
+                    ValidationHelpers.AssertAreEqual(ExpectedQueryParams[key], inputQp[key], $"Value mismatch for query parameter: {key}.");
                 }
             }
         }
@@ -177,7 +176,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
 
                 // Fail if any "not expected" key/value pairs were found
-                Assert.IsEmpty(
+                ValidationHelpers.AssertIsEmpty(
                     unexpectedKeysFound,
                     $"Did not expect to find these query parameter keys/values: {string.Join(", ", unexpectedKeysFound)}"
                 );
@@ -196,14 +195,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 foreach (string key in ExpectedPostData.Keys)
                 {
-                    Assert.IsTrue(ActualRequestPostData.ContainsKey(key));
+                    ValidationHelpers.AssertIsTrue(ActualRequestPostData.ContainsKey(key));
                     if (key.Equals(OAuth2Parameter.Scope, StringComparison.OrdinalIgnoreCase))
                     {
                         CoreAssert.AreScopesEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                     else
                     {
-                        Assert.AreEqual(ExpectedPostData[key], ActualRequestPostData[key]);
+                        ValidationHelpers.AssertAreEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                 }
             }
@@ -225,7 +224,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
 
                 // Assert that no unexpected keys were found, reporting all violations at once
-                Assert.IsEmpty(unexpectedKeysFound, $"Did not expect to find post data keys: {string.Join(", ", unexpectedKeysFound)}");
+                ValidationHelpers.AssertIsEmpty(unexpectedKeysFound, $"Did not expect to find post data keys: {string.Join(", ", unexpectedKeysFound)}");
             }
         }
 
@@ -235,7 +234,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 foreach (var headerName in PresentRequestHeaders)
                 {
-                    Assert.IsTrue(request.Headers.Contains(headerName),
+                    ValidationHelpers.AssertIsTrue(request.Headers.Contains(headerName),
                         $"Expected request header to be present: {headerName}.");
                 }
             }
@@ -245,9 +244,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 foreach (var kvp in ExpectedRequestHeaders)
                 {
-                    Assert.IsTrue(request.Headers.Contains(kvp.Key), $"Expected request header not found: {kvp.Key}.");
+                    ValidationHelpers.AssertIsTrue(request.Headers.Contains(kvp.Key), $"Expected request header not found: {kvp.Key}.");
                     var headerValue = request.Headers.GetValues(kvp.Key).FirstOrDefault();
-                    Assert.AreEqual(kvp.Value, headerValue, $"Value mismatch for request header {kvp.Key}.");
+                    ValidationHelpers.AssertAreEqual(kvp.Value, headerValue, $"Value mismatch for request header {kvp.Key}.");
                 }
             }
 
@@ -255,7 +254,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 foreach (var item in UnexpectedRequestHeaders)
                 {
-                    Assert.IsFalse(request.Headers.Contains(item), $"Not expecting a request header with key={item} but it was found.");
+                    ValidationHelpers.AssertIsFalse(request.Headers.Contains(item), $"Not expecting a request header with key={item} but it was found.");
                 }
             }
         }
