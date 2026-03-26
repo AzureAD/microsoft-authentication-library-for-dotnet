@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -159,6 +160,45 @@ namespace Microsoft.Identity.Client
             };
 
             this.WithExtraHttpHeaders(ccsRoutingHeader);
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies attribute tokens to include in the token request.
+        /// The tokens are joined with spaces and sent as the <c>attribute_tokens</c> body parameter.
+        /// </summary>
+        /// <param name="attributeTokens">A list of attribute token strings to include in the request.</param>
+        /// <returns>The builder to chain method calls.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="attributeTokens"/> is null or contains no elements.</exception>
+        public AcquireTokenOnBehalfOfParameterBuilder WithAttributeTokens(IEnumerable<string> attributeTokens)
+        {
+            if (attributeTokens == null)
+            {
+                throw new ArgumentNullException(nameof(attributeTokens));
+            }
+
+            var validTokens = new List<string>();
+
+            foreach (var token in attributeTokens)
+            {
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    validTokens.Add(token);
+                }
+            }
+
+            if (validTokens.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(attributeTokens));
+            }
+
+            string joinedTokens = string.Join(" ", validTokens);
+            this.OnBeforeTokenRequest((data) =>
+            {
+                data.BodyParameters.Add(OAuth2Parameter.AttributeTokens, joinedTokens);
+                return Task.CompletedTask;
+            });
+
             return this;
         }
 

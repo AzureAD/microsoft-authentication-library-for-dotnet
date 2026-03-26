@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string SpaCode = "return_spa_code"; // not a standard OAuth2 param
         public const string FmiPath = "fmi_path"; // not a standard OAuth2 param
         public const string Attributes = "attributes"; // not a standard OAuth2 param
+        public const string AttributeTokens = "attribute_tokens"; // not a standard OAuth2 param
         public const string UserFederatedIdentityCredential = "user_federated_identity_credential"; // user_fic grant type parameter
     }
 
