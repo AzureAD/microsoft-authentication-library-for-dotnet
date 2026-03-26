@@ -1,3 +1,4 @@
+const Microsoft.Identity.Client.MsalError.InvalidCredentialMaterial = "invalid_credential_material" -> string
 Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
 Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
 Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
