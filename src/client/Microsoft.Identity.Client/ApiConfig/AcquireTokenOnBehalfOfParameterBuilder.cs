@@ -177,8 +177,22 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(attributeTokens));
             }
 
-            string joinedTokens = string.Join(" ", attributeTokens);
+            var validTokens = new List<string>();
 
+            foreach (var token in attributeTokens)
+            {
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    validTokens.Add(token);
+                }
+            }
+
+            if (validTokens.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(attributeTokens));
+            }
+
+            string joinedTokens = string.Join(" ", validTokens);
             this.OnBeforeTokenRequest(async (data) =>
             {
                 data.BodyParameters.Add(OAuth2Parameter.AttributeTokens, joinedTokens);
