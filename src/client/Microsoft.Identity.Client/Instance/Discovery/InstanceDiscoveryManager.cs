@@ -205,12 +205,16 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             catch (Exception e) 
             { 
                 requestContext.Logger.Warning(
-                    $"[Instance Discovery] Instance Discovery failed. MSAL will continue without network instance metadata. \n\r" +
+                    $"[Instance Discovery] Instance Discovery failed. MSAL will continue without instance metadata. \n\r" +
                     $" Exception: {e} ");
-                
-                return 
+
+                var fallbackEntry =
                     _knownMetadataProvider.GetMetadata(authorityUri.Host, Enumerable.Empty<string>(), requestContext.Logger)
-                ?? CreateEntryForSingleAuthority(authorityUri);
+                    ?? CreateEntryForSingleAuthority(authorityUri);
+
+                _networkCacheMetadataProvider.AddMetadata(authorityUri.Host, fallbackEntry);
+
+                return fallbackEntry;
             }
         }
 
