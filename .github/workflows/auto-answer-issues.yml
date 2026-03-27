@@ -1,0 +1,151 @@
+name: Auto-Answer Issues
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  answer-issue:
+    runs-on: ubuntu-latest
+    # Only run for issues created by org members or owners (i.e., Microsoft Open Source enterprise members).
+    # github.event.issue.author_association is set by GitHub based on the issue author's relationship
+    # to this repository. MEMBER = org member, OWNER = repo/org owner. This prevents untrusted
+    # external contributors from triggering the Azure OpenAI-backed responder and consuming secrets/tokens.
+    if: |
+      github.event.issue.author_association == 'MEMBER' ||
+      github.event.issue.author_association == 'OWNER' ||
+      github.event.issue.author_association == 'COLLABORATOR'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install @octokit/rest openai
+
+      - name: Generate and post response
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+          AZURE_OPENAI_API_VERSION: "2024-12-01-preview"
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          node - << 'EOF'
+          async function main() {
+            // Use dynamic import() for ESM-only packages (openai v4+ and @octokit/rest v19+
+            // are ESM-only; dynamic import() works from CommonJS in Node 20).
+            const { Octokit } = await import("@octokit/rest");
+            const { AzureOpenAI } = await import("openai");
+            const {
+              GITHUB_TOKEN,
+              AZURE_OPENAI_API_KEY,
+              AZURE_OPENAI_ENDPOINT,
+              AZURE_OPENAI_DEPLOYMENT,
+              AZURE_OPENAI_API_VERSION,
+              ISSUE_NUMBER,
+              ISSUE_TITLE,
+              ISSUE_BODY,
+              REPO_OWNER,
+              REPO_NAME
+            } = process.env;
+          
+            if (!GITHUB_TOKEN) {
+              throw new Error("GITHUB_TOKEN is not set.");
+            }
+            if (!AZURE_OPENAI_API_KEY) {
+              throw new Error("AZURE_OPENAI_API_KEY is not set.");
+            }
+            if (!AZURE_OPENAI_ENDPOINT) {
+              throw new Error("AZURE_OPENAI_ENDPOINT is not set.");
+            }
+            if (!AZURE_OPENAI_DEPLOYMENT) {
+              throw new Error("AZURE_OPENAI_DEPLOYMENT is not set.");
+            }
+            if (!ISSUE_NUMBER || !REPO_OWNER || !REPO_NAME) {
+              throw new Error("Required issue/repository environment variables are missing.");
+            }
+          
+            const issueNumber = parseInt(ISSUE_NUMBER, 10);
+            const title = ISSUE_TITLE || "";
+            const body = ISSUE_BODY || "";
+          
+            const octokit = new Octokit({ auth: GITHUB_TOKEN });
+
+            // Check if the bot has already commented on this issue to avoid duplicate responses.
+            const comments = await octokit.paginate(octokit.issues.listComments, {
+              owner: REPO_OWNER,
+              repo: REPO_NAME,
+              issue_number: issueNumber,
+              per_page: 100
+            });
+            const botAlreadyCommented = comments.some(
+              (comment) => comment.user?.login === "github-actions[bot]"
+            );
+            if (botAlreadyCommented) {
+              console.log("Bot has already commented on this issue. Skipping.");
+              return;
+            }
+
+            const openai = new AzureOpenAI({
+              apiKey: AZURE_OPENAI_API_KEY,
+              endpoint: AZURE_OPENAI_ENDPOINT,
+              deployment: AZURE_OPENAI_DEPLOYMENT,
+              apiVersion: AZURE_OPENAI_API_VERSION
+            });
+          
+            const prompt = `
+You are a helpful GitHub assistant. An issue has been opened in the repository \`${REPO_OWNER}/${REPO_NAME}\`.
+
+Title:
+${title}
+
+Body:
+${body}
+
+Please write a concise, friendly reply that:
+- Acknowledges the question or issue.
+- Asks for any missing information if needed.
+- Suggests next steps or possible causes based only on the information provided.
+- Uses markdown formatting suitable for a GitHub issue comment.
+`;
+          
+            const completion = await openai.chat.completions.create({
+              model: AZURE_OPENAI_DEPLOYMENT,
+              messages: [
+                { role: "system", content: "You are a helpful assistant for triaging GitHub issues." },
+                { role: "user", content: prompt }
+              ]
+            });
+          
+            const reply = (completion.choices[0]?.message?.content || "").trim();
+            if (!reply) {
+              throw new Error("Azure OpenAI returned an empty response.");
+            }
+          
+            await octokit.issues.createComment({
+              owner: REPO_OWNER,
+              repo: REPO_NAME,
+              issue_number: issueNumber,
+              body: reply
+            });
+          }
+          
+          main().catch((error) => {
+            console.error("Failed to generate or post response:", error);
+            process.exit(1);
+          });
+          EOF
