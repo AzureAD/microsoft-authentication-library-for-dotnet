@@ -43,6 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\tests\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client.Extensions.Msal\Microsoft.Identity.Client.Extensions.Msal.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
