@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client
@@ -15,7 +16,7 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// Acquires a token on behalf of a user using a federated identity credential assertion.
-        /// This uses the <c>user_fic</c> grant type.
+        /// This uses the <c>user_fic</c> grant type. The user is identified by UPN.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API.</param>
         /// <param name="username">The UPN (User Principal Name) of the user, e.g. <c>john.doe@contoso.com</c>.</param>
@@ -27,6 +28,22 @@ namespace Microsoft.Identity.Client
         AcquireTokenByUserFederatedIdentityCredentialParameterBuilder AcquireTokenByUserFederatedIdentityCredential(
             IEnumerable<string> scopes,
             string username,
+            string assertion);
+
+        /// <summary>
+        /// Acquires a token on behalf of a user using a federated identity credential assertion.
+        /// This uses the <c>user_fic</c> grant type. The user is identified by Object ID (OID).
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API.</param>
+        /// <param name="userObjectId">The Object ID (OID) of the user in Entra ID.</param>
+        /// <param name="assertion">
+        /// The federated identity credential assertion (JWT) for the user.
+        /// Acquire this token from a Managed Identity or Confidential Client application before calling this method.
+        /// </param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request.</returns>
+        AcquireTokenByUserFederatedIdentityCredentialParameterBuilder AcquireTokenByUserFederatedIdentityCredential(
+            IEnumerable<string> scopes,
+            Guid userObjectId,
             string assertion);
     }
 }

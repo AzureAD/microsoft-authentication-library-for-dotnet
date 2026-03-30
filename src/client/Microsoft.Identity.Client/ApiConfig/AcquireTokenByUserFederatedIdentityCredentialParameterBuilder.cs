@@ -33,6 +33,16 @@ namespace Microsoft.Identity.Client
             Parameters.Assertion = assertion;
         }
 
+        internal AcquireTokenByUserFederatedIdentityCredentialParameterBuilder(
+            IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
+            Guid userObjectId,
+            string assertion)
+            : base(confidentialClientApplicationExecutor)
+        {
+            Parameters.UserObjectId = userObjectId;
+            Parameters.Assertion = assertion;
+        }
+
         internal static AcquireTokenByUserFederatedIdentityCredentialParameterBuilder Create(
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes,
@@ -51,6 +61,27 @@ namespace Microsoft.Identity.Client
 
             return new AcquireTokenByUserFederatedIdentityCredentialParameterBuilder(
                 confidentialClientApplicationExecutor, username, assertion)
+                .WithScopes(scopes);
+        }
+
+        internal static AcquireTokenByUserFederatedIdentityCredentialParameterBuilder Create(
+            IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
+            IEnumerable<string> scopes,
+            Guid userObjectId,
+            string assertion)
+        {
+            if (userObjectId == Guid.Empty)
+            {
+                throw new ArgumentException("userObjectId must not be empty.", nameof(userObjectId));
+            }
+
+            if (string.IsNullOrEmpty(assertion))
+            {
+                throw new ArgumentNullException(nameof(assertion));
+            }
+
+            return new AcquireTokenByUserFederatedIdentityCredentialParameterBuilder(
+                confidentialClientApplicationExecutor, userObjectId, assertion)
                 .WithScopes(scopes);
         }
 

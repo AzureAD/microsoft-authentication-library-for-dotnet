@@ -87,6 +87,20 @@ namespace Microsoft.Identity.Client
         GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
 
         /// <summary>
+        /// Acquires a token for an agent application acting on behalf of a user or as an app-only identity.
+        /// This method orchestrates the multi-leg Federated Managed Identity (FMI) and 
+        /// User Federated Identity Credential (UserFIC) flows automatically.
+        /// The calling application (blueprint) must be configured with a certificate credential (SN+I) 
+        /// for FMI token acquisition.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API.</param>
+        /// <param name="agentIdentity">An <see cref="AgentIdentity"/> describing the agent application and optionally the user.</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request.</returns>
+        AcquireTokenForAgentParameterBuilder AcquireTokenForAgent(
+            IEnumerable<string> scopes,
+            AgentIdentity agentIdentity);
+
+        /// <summary>
         /// In confidential client apps use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> instead.
         /// </summary>
         [Obsolete("In confidential client apps use AcquireTokenSilent(scopes, account) instead.")]

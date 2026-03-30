@@ -3,3 +3,16 @@ Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameter
 Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
 Microsoft.Identity.Client.IByUserFederatedIdentityCredential
 Microsoft.Identity.Client.IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(System.Collections.Generic.IEnumerable<string> scopes, string username, string assertion) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
+Microsoft.Identity.Client.IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(System.Collections.Generic.IEnumerable<string> scopes, System.Guid userObjectId, string assertion) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
+Microsoft.Identity.Client.AgentIdentity
+Microsoft.Identity.Client.AgentIdentity.AgentIdentity(string agentApplicationId, System.Guid userObjectId) -> void
+Microsoft.Identity.Client.AgentIdentity.AgentApplicationId.get -> string
+Microsoft.Identity.Client.AgentIdentity.UserObjectId.get -> System.Guid?
+Microsoft.Identity.Client.AgentIdentity.Username.get -> string
+static Microsoft.Identity.Client.AgentIdentity.WithUsername(string agentApplicationId, string username) -> Microsoft.Identity.Client.AgentIdentity
+static Microsoft.Identity.Client.AgentIdentity.AppOnly(string agentApplicationId) -> Microsoft.Identity.Client.AgentIdentity
+Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
+Microsoft.Identity.Client.IConfidentialClientApplication.AcquireTokenForAgent(System.Collections.Generic.IEnumerable<string> scopes, Microsoft.Identity.Client.AgentIdentity agentIdentity) -> Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
+Microsoft.Identity.Client.ConfidentialClientApplication.AcquireTokenForAgent(System.Collections.Generic.IEnumerable<string> scopes, Microsoft.Identity.Client.AgentIdentity agentIdentity) -> Microsoft.Identity.Client.AcquireTokenForAgentParameterBuilder
