@@ -55,8 +55,10 @@ namespace Microsoft.Identity.Client.KeyAttestation
         }
 
         /// <summary>
-        /// Resets the MAA token cache and key locks. Called automatically via
+        /// Resets the MAA token cache. Called automatically via
         /// <see cref="ApplicationBase.ResetStateForTest"/>; also callable directly from [TestCleanup].
+        /// Note: the <see cref="KeyedSemaphorePool"/> is intentionally not reset — semaphores are
+        /// stateless coordination primitives and do not hold cached data between tests.
         /// </summary>
         internal static void ResetCacheForTest()
         {
