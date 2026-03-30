@@ -11,7 +11,8 @@ steps:
 
 - template: template-OneBranch-CI-libsandsamples.yaml
   parameters:
-    Solution: 'LibsAndSamples.sln'
+    Solution: '${{ parameters.MsalSourceDir }}LibsAndSamples.sln'
+    MsalSourceDir: '${{ parameters.MsalSourceDir }}'
 
   # Run All Desktop Tests
 - template: template-run-all-tests.yaml
