@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.KeyAttestation.Attestation;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.KeyAttestation
@@ -29,9 +30,8 @@ namespace Microsoft.Identity.Client.KeyAttestation
         private static readonly ConcurrentDictionary<string, AttestationToken> s_tokenCache =
             new ConcurrentDictionary<string, AttestationToken>(StringComparer.OrdinalIgnoreCase);
 
-        // Per-key semaphores to prevent concurrent in-flight attestation for the same cache key (single-flight).
-        private static readonly ConcurrentDictionary<string, SemaphoreSlim> s_keyLocks =
-            new ConcurrentDictionary<string, SemaphoreSlim>(StringComparer.OrdinalIgnoreCase);
+        // Per-key async gates to prevent concurrent in-flight attestation for the same cache key (single-flight).
+        private static readonly KeyedSemaphorePool s_keyLocks = new KeyedSemaphorePool();
 
         // Tokens within this window of expiry are considered stale and will be refreshed.
         // Matches MSAL's AccessTokenExpirationBuffer (5 minutes).
@@ -61,7 +61,6 @@ namespace Microsoft.Identity.Client.KeyAttestation
         internal static void ResetCacheForTest()
         {
             s_tokenCache.Clear();
-            s_keyLocks.Clear();
         }
 
         /// <summary>
@@ -108,8 +107,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
             logger?.Info($"[PopKeyAttestor] MAA token cache miss for '{cacheKey}'. Acquiring semaphore.");
 
             // Acquire per-key semaphore to ensure only one attestation call in-flight per cache key.
-            SemaphoreSlim semaphore = s_keyLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
-            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await s_keyLocks.EnterAsync(cacheKey, cancellationToken).ConfigureAwait(false);
             try
             {
                 // Double-check cache after acquiring the lock — a concurrent caller may have populated it.
@@ -142,7 +140,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
             }
             finally
             {
-                semaphore.Release();
+                s_keyLocks.Release(cacheKey);
             }
         }
 
@@ -169,7 +167,10 @@ namespace Microsoft.Identity.Client.KeyAttestation
         {
             if (s_tokenCache.TryGetValue(cacheKey, out token))
             {
-                if (token.ExpiresOn - s_expirationBuffer > DateTimeOffset.UtcNow)
+                // Compare without subtraction to avoid overflow when ExpiresOn is DateTimeOffset.MinValue
+                // (e.g. when the JWT contains no 'exp' claim).
+                DateTimeOffset freshnessThreshold = DateTimeOffset.UtcNow + s_expirationBuffer;
+                if (token.ExpiresOn > freshnessThreshold)
                 {
                     return true;
                 }

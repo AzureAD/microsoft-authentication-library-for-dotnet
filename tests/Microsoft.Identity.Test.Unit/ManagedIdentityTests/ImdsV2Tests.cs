@@ -987,14 +987,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.AreEqual(1, providerCallCount, "MAA should be called once on first acquire.");
 
-                // Second acquire: cert is cached, so MAA token cache should also be hit
+                // Second acquire: force bypass the MSAL token cache so we actually exercise the
+                // cert/MAA path again. Cert is still cached so no re-mint; MAA cache is hit so
+                // the attestation provider must NOT be called a second time.
+                MockHelpers.AddMocksToGetEntraTokenUsingCachedCert(
+                    httpManager,
+                    _identityLoggerAdapter,
+                    mTLSPop: true);
+
                 var second = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithForceRefresh(true)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(1, providerCallCount, "MAA should NOT be called again when token is cached.");
-                Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TokenSource.IdentityProvider, second.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -1104,7 +1112,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             // Arrange: provider has a delay so concurrent calls have time to pile up
             int providerCallCount = 0;
-            var providerGate = new SemaphoreSlim(0, 1); // holds all provider calls until released
+            var providerGate = new SemaphoreSlim(0, 5); // max 5 in case of regression
             PopKeyAttestor.s_testAttestationProvider = async (endpoint, keyHandle, clientId, ct) =>
             {
                 Interlocked.Increment(ref providerCallCount);
@@ -1123,8 +1131,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             for (int i = 0; i < tasks.Length; i++)
                 tasks[i] = PopKeyAttestor.AttestCredentialGuardAsync(endpoint, handle, "client1", cancellationToken: CancellationToken.None);
 
-            // Allow exactly one provider call to complete
-            providerGate.Release(1);
+            // Release enough permits for all potential calls so that if the implementation
+            // regresses and invokes the provider more than once, the test fails with an assertion
+            // rather than hanging indefinitely.
+            providerGate.Release(tasks.Length);
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
             Assert.AreEqual(1, providerCallCount, "Provider should only be called once despite concurrent cache misses.");
@@ -1183,11 +1193,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Second acquire: cert cache miss → re-mints cert, but MAA cache hit → provider NOT called again
                 AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
-                await mi2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                var result2 = await mi2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource,
+                    "Should have called the identity provider (not MSAL token cache) to validate the cert/MAA path was exercised.");
                 Assert.AreEqual(1, providerCallCount, "MAA should NOT be called again when MAA token cache is still fresh, even after cert cache miss.");
             }
         }

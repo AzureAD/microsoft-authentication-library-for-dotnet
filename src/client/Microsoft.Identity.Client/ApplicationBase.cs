@@ -39,6 +39,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal static void RegisterResetCallback(Action callback)
         {
+            if (callback is null)
+                throw new ArgumentNullException(nameof(callback));
+
             s_resetCallbacks.Add(callback);
         }
 
