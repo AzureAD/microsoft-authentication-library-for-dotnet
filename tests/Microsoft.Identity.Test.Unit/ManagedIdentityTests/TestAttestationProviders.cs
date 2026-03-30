@@ -5,6 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.KeyAttestation.Attestation;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -31,9 +32,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// <summary>
         /// Creates an attestation provider delegate that returns null (for non-attested flow testing).
         /// </summary>
-        public static Func<string, SafeHandle, string, CancellationToken, Task<string>> CreateNullProvider()
+        public static Func<string, SafeHandle, string, ILoggerAdapter, CancellationToken, Task<string>> CreateNullProvider()
         {
-            return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
+            return (attestationEndpoint, keyHandle, clientId, logger, cancellationToken) =>
             {
                 return Task.FromResult<string>(null);
             };
@@ -42,9 +43,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// <summary>
         /// Creates an attestation provider delegate that returns empty/whitespace token (for error testing).
         /// </summary>
-        public static Func<string, SafeHandle, string, CancellationToken, Task<string>> CreateEmptyProvider()
+        public static Func<string, SafeHandle, string, ILoggerAdapter, CancellationToken, Task<string>> CreateEmptyProvider()
         {
-            return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
+            return (attestationEndpoint, keyHandle, clientId, logger, cancellationToken) =>
             {
                 return Task.FromResult("   ");
             };
@@ -53,9 +54,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// <summary>
         /// Creates an attestation provider delegate that throws an exception.
         /// </summary>
-        public static Func<string, SafeHandle, string, CancellationToken, Task<string>> CreateFailingProvider(string errorMessage = "Attestation failed")
+        public static Func<string, SafeHandle, string, ILoggerAdapter, CancellationToken, Task<string>> CreateFailingProvider(string errorMessage = "Attestation failed")
         {
-            return (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
+            return (attestationEndpoint, keyHandle, clientId, logger, cancellationToken) =>
             {
                 throw new InvalidOperationException(errorMessage);
             };
@@ -78,9 +79,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             public int CallCount => _callCount;
 
-            public Func<string, SafeHandle, string, CancellationToken, Task<string>> GetDelegate()
+            public Func<string, SafeHandle, string, ILoggerAdapter, CancellationToken, Task<string>> GetDelegate()
             {
-                return async (attestationEndpoint, keyHandle, clientId, cancellationToken) =>
+                return async (attestationEndpoint, keyHandle, clientId, logger, cancellationToken) =>
                 {
                     Interlocked.Increment(ref _callCount);
                     await Task.Yield();

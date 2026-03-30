@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// </summary>
         public static AcquireTokenForManagedIdentityParameterBuilder WithAttestationProviderForTests(
             this AcquireTokenForManagedIdentityParameterBuilder builder,
-            Func<string, SafeHandle, string, CancellationToken, Task<string>> attestationTokenProvider)
+            Func<string, SafeHandle, string, ILoggerAdapter, CancellationToken, Task<string>> attestationTokenProvider)
         {
             builder.CommonParameters.AttestationTokenProvider = attestationTokenProvider;
             return builder;

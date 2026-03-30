@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,6 +28,19 @@ namespace Microsoft.Identity.Client
         /// Default authority used for interactive calls.
         /// </summary>
         internal const string DefaultAuthority = "https://login.microsoftonline.com/common/";
+
+        // Allows extension packages (e.g. KeyAttestation) to register their own static-cache reset logic
+        // without introducing a circular dependency. Invoked by ResetStateForTest().
+        private static readonly ConcurrentBag<Action> s_resetCallbacks = new ConcurrentBag<Action>();
+
+        /// <summary>
+        /// Registers a callback to be invoked by <see cref="ResetStateForTest"/>.
+        /// Intended for extension packages (e.g. KeyAttestation) that own static caches MSAL cannot reference directly.
+        /// </summary>
+        internal static void RegisterResetCallback(Action callback)
+        {
+            s_resetCallbacks.Add(callback);
+        }
 
         internal IServiceBundle ServiceBundle { get; }
 
@@ -101,6 +115,9 @@ namespace Microsoft.Identity.Client
 
             InMemoryPartitionedAppTokenCacheAccessor.ClearStaticCacheForTest();
             InMemoryPartitionedUserTokenCacheAccessor.ClearStaticCacheForTest();
+
+            foreach (var cb in s_resetCallbacks)
+                cb();
         }
     }
 }

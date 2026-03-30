@@ -1075,7 +1075,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             const string endpoint1 = "https://eastus.attestation.azure.net";
             const string endpoint2 = "https://westus.attestation.azure.net";
 
-            // Use a real RSACng key handle so validation passes on first (cache-miss) calls
             using var rsa1 = new RSACng(2048);
             using var rsa2 = new RSACng(2048);
             var handle1 = rsa1.Key.Handle;
@@ -1083,15 +1082,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // First calls: cache miss → MAA is invoked
             var result1a = await PopKeyAttestor.AttestCredentialGuardAsync(
-                endpoint1, handle1, "client1", CancellationToken.None).ConfigureAwait(false);
+                endpoint1, handle1, "client1", cancellationToken: CancellationToken.None).ConfigureAwait(false);
             var result2a = await PopKeyAttestor.AttestCredentialGuardAsync(
-                endpoint2, handle2, "client1", CancellationToken.None).ConfigureAwait(false);
+                endpoint2, handle2, "client1", cancellationToken: CancellationToken.None).ConfigureAwait(false);
 
-            // Second calls: cache hit → key handle not needed, pass null
+            // Second calls: cache hit — key handle still required but provider is not called again
             var result1b = await PopKeyAttestor.AttestCredentialGuardAsync(
-                endpoint1, null, "client1", CancellationToken.None).ConfigureAwait(false);
+                endpoint1, handle1, "client1", cancellationToken: CancellationToken.None).ConfigureAwait(false);
             var result2b = await PopKeyAttestor.AttestCredentialGuardAsync(
-                endpoint2, null, "client1", CancellationToken.None).ConfigureAwait(false);
+                endpoint2, handle2, "client1", cancellationToken: CancellationToken.None).ConfigureAwait(false);
 
             Assert.AreEqual(1, callCounts[endpoint1], "endpoint1 MAA should only be called once.");
             Assert.AreEqual(1, callCounts[endpoint2], "endpoint2 MAA should only be called once.");
@@ -1122,7 +1121,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // Fire 5 concurrent attestation calls for the same key before any result is cached
             var tasks = new Task<AttestationResult>[5];
             for (int i = 0; i < tasks.Length; i++)
-                tasks[i] = PopKeyAttestor.AttestCredentialGuardAsync(endpoint, handle, "client1", CancellationToken.None);
+                tasks[i] = PopKeyAttestor.AttestCredentialGuardAsync(endpoint, handle, "client1", cancellationToken: CancellationToken.None);
 
             // Allow exactly one provider call to complete
             providerGate.Release(1);
@@ -1137,6 +1136,61 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         #endregion
+
+        [TestMethod]
+        public async Task MaaTokenCache_CertCacheMiss_MaaTokenCacheStillFresh_DoesNotCallAttestationProviderAgain()
+        {
+            // Validates that when the cert cache is cleared (forcing a cert re-mint),
+            // the MAA token cache is still consulted and the attestation provider is NOT called again
+            // as long as the MAA token hasn't expired. The CNG key is persistent across cert re-mints,
+            // so the existing MAA token remains valid.
+            int providerCallCount = 0;
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, ct) =>
+            {
+                Interlocked.Increment(ref providerCallCount);
+                var fakeJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.sig";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+
+                var rawCert = CreateRawCertForCsrKeyWithCnDc(
+                    Constants.ManagedIdentityDefaultClientId, TestConstants.TenantId,
+                    DateTimeOffset.UtcNow.AddHours(25));
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // First acquire: mints cert + calls MAA provider
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
+                await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(1, providerCallCount, "MAA should be called once on first acquire.");
+
+                // Clear only the cert cache to force a cert re-mint on the next acquire.
+                // The MAA token cache (in PopKeyAttestor) is intentionally NOT cleared.
+                ManagedIdentityClient.ResetSourceForTest();
+                ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
+
+                var mi2 = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // Second acquire: cert cache miss → re-mints cert, but MAA cache hit → provider NOT called again
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
+                await mi2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(1, providerCallCount, "MAA should NOT be called again when MAA token cache is still fresh, even after cert cache miss.");
+            }
+        }
 
         #region Cached certificate tests
         [TestMethod]

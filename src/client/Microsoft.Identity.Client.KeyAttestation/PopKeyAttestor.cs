@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.KeyAttestation.Attestation;
 using Microsoft.Win32.SafeHandles;
 
@@ -19,6 +20,12 @@ namespace Microsoft.Identity.Client.KeyAttestation
     internal static class PopKeyAttestor
     {
         // In-process cache: maps "{endpoint}|{clientId}" → AttestationToken (JWT + expiry).
+        //
+        // Cache key design: keyed by endpoint + clientId only (not by Key.ID / public-key hash)
+        // because SafeHandle does not expose key material and deriving a stable key ID would
+        // require platform-specific CNG API calls. In practice the same CNG key is reused for
+        // the lifetime of the cert (cert cache lifetime), so endpoint+clientId is sufficient.
+        // Tracking issue for adding Key.ID: include when the API is updated to accept it.
         private static readonly ConcurrentDictionary<string, AttestationToken> s_tokenCache =
             new ConcurrentDictionary<string, AttestationToken>(StringComparer.OrdinalIgnoreCase);
 
@@ -40,8 +47,16 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// </remarks>
         internal static Func<string, SafeHandle, string, CancellationToken, Task<AttestationResult>> s_testAttestationProvider;
 
+        static PopKeyAttestor()
+        {
+            // Register our cache reset with the MSAL master reset so that
+            // IdWeb, AzSDK and other stacks can clear it via ApplicationBase.ResetStateForTest().
+            ApplicationBase.RegisterResetCallback(ResetCacheForTest);
+        }
+
         /// <summary>
-        /// Resets the MAA token cache and key locks. Call from [TestCleanup] to prevent cache state leaking between tests.
+        /// Resets the MAA token cache and key locks. Called automatically via
+        /// <see cref="ApplicationBase.ResetStateForTest"/>; also callable directly from [TestCleanup].
         /// </summary>
         internal static void ResetCacheForTest()
         {
@@ -54,34 +69,23 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// Returns a cached token if one is available and not within the expiration buffer.
         /// Uses a per-key semaphore to ensure only one in-flight attestation call occurs per cache key,
         /// preventing redundant native DLL and network calls under concurrency.
-        /// Cancellation only applies before the native call starts.
         /// </summary>
         /// <param name="endpoint">Attestation service endpoint (required).</param>
         /// <param name="keyHandle">Valid SafeNCryptKeyHandle (must remain valid for duration of call).</param>
         /// <param name="clientId">Optional client identifier (may be null/empty).</param>
-        /// <param name="cancellationToken">Cancellation token (cooperative before scheduling / start).</param>
+        /// <param name="logger">Optional logger for cache hit/miss diagnostics.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         public static async Task<AttestationResult> AttestCredentialGuardAsync(
             string endpoint,
             SafeHandle keyHandle,
             string clientId,
+            ILoggerAdapter logger = null,
             CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(endpoint))
                 throw new ArgumentNullException(nameof(endpoint));
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Fast path: check cache without acquiring any lock.
-            // Key validation is intentionally deferred: a cache hit returns immediately
-            // without requiring (or validating) the key handle.
-            string cacheKey = BuildCacheKey(endpoint, clientId);
-            if (TryGetCachedToken(cacheKey, out AttestationToken cached))
-            {
-                return new AttestationResult(
-                    AttestationStatus.Success, cached, cached.Token, 0, string.Empty);
-            }
-
-            // Cache miss — validate the key handle before acquiring the lock.
+            // Validate the key handle upfront — callers must always supply a valid key.
             if (keyHandle is null)
                 throw new ArgumentNullException(nameof(keyHandle));
 
@@ -91,6 +95,18 @@ namespace Microsoft.Identity.Client.KeyAttestation
             var safeNCryptKeyHandle = keyHandle as SafeNCryptKeyHandle
                 ?? throw new ArgumentException("keyHandle must be a SafeNCryptKeyHandle. Only Windows CNG keys are supported.", nameof(keyHandle));
 
+            string cacheKey = BuildCacheKey(endpoint, clientId);
+
+            // Fast path: check cache without acquiring any lock.
+            if (TryGetCachedToken(cacheKey, out AttestationToken cached))
+            {
+                logger?.Info($"[PopKeyAttestor] MAA token cache hit for '{cacheKey}'.");
+                return new AttestationResult(
+                    AttestationStatus.Success, cached, cached.Token, 0, string.Empty);
+            }
+
+            logger?.Info($"[PopKeyAttestor] MAA token cache miss for '{cacheKey}'. Acquiring semaphore.");
+
             // Acquire per-key semaphore to ensure only one attestation call in-flight per cache key.
             SemaphoreSlim semaphore = s_keyLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -99,9 +115,12 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 // Double-check cache after acquiring the lock — a concurrent caller may have populated it.
                 if (TryGetCachedToken(cacheKey, out cached))
                 {
+                    logger?.Info($"[PopKeyAttestor] MAA token cache hit (post-lock) for '{cacheKey}'.");
                     return new AttestationResult(
                         AttestationStatus.Success, cached, cached.Token, 0, string.Empty);
                 }
+
+                logger?.Info($"[PopKeyAttestor] Calling attestation provider for '{cacheKey}'.");
 
                 // Check for test provider to avoid loading native DLL in unit tests.
                 Task<AttestationResult> attestTask = s_testAttestationProvider != null
@@ -119,7 +138,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
                         }
                     }, cancellationToken);
 
-                return await AttestAndCacheAsync(attestTask, cacheKey).ConfigureAwait(false);
+                return await AttestAndCacheAsync(attestTask, cacheKey, logger).ConfigureAwait(false);
             }
             finally
             {
@@ -132,13 +151,15 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// </summary>
         private static async Task<AttestationResult> AttestAndCacheAsync(
             Task<AttestationResult> attestTask,
-            string cacheKey)
+            string cacheKey,
+            ILoggerAdapter logger)
         {
             AttestationResult result = await attestTask.ConfigureAwait(false);
 
             if (result.Status == AttestationStatus.Success && result.Token != null)
             {
                 s_tokenCache[cacheKey] = result.Token;
+                logger?.Info($"[PopKeyAttestor] MAA token cached for '{cacheKey}', expires {result.Token.ExpiresOn:O}.");
             }
 
             return result;
