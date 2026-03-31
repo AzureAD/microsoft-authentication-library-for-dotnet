@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(HttpStatusCode.NotFound, DisplayName = "404")]
         [DataRow(HttpStatusCode.BadGateway, DisplayName = "502")]
         [WorkItem(5804)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5804
