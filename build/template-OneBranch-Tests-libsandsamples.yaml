@@ -42,7 +42,7 @@ steps:
       Write-Host "Chrome version: $chromeVersion (major: $chromeMajor)"
 
       # Fetch the matching ChromeDriver version from the Chrome for Testing API
-      $driverVersion = (Invoke-WebRequest -Uri "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$chromeMajor" -UseBasicParsing).Content.Trim()
+      $driverVersion = (New-Object System.Net.WebClient).DownloadString("https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$chromeMajor").Trim()
       Write-Host "Downloading ChromeDriver $driverVersion..."
 
       # Download and extract ChromeDriver
