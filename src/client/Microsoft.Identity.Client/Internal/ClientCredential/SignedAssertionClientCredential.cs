@@ -34,9 +34,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,
-                    "A precomputed client assertion string cannot be used over mTLS. " +
-                    "Use a certificate credential or a ClientSignedAssertion callback " +
-                    "that can return a token-binding certificate.");
+                    MsalErrorMessage.UnsupportedCredentialForMtlsMessage("A precomputed client assertion string"));
             }
 
             var parameters = new Dictionary<string, string>

@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     {
         private static X509Certificate2 s_cert;
         private static CommonCryptographyManager s_crypto;
+        private const string TestTokenEndpoint = "https://login.microsoftonline.com/tenant/oauth2/v2.0/token";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext _)
@@ -56,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private static CredentialContext RegularContext() => new CredentialContext
         {
             ClientId = "client-id",
-            TokenEndpoint = "https://login.microsoftonline.com/tenant/oauth2/v2.0/token",
+            TokenEndpoint = TestTokenEndpoint,
             Mode = OAuthMode.Regular,
             Claims = null,
             ClientCapabilities = null,
@@ -71,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private static CredentialContext MtlsContext() => new CredentialContext
         {
             ClientId = "client-id",
-            TokenEndpoint = "https://login.microsoftonline.com/tenant/oauth2/v2.0/token",
+            TokenEndpoint = TestTokenEndpoint,
             Mode = OAuthMode.MtlsMode,
             Claims = null,
             ClientCapabilities = null,
@@ -411,8 +412,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public void CredentialMaterial_NullTokenRequestParameters_ThrowsInvalidOperationException()
         {
             // CredentialMaterial rejects null TokenRequestParameters at construction time.
-            Assert.ThrowsExactly<InvalidOperationException>(
+            ArgumentNullException ex = Assert.ThrowsExactly<ArgumentNullException>(
                 () => new CredentialMaterial(null));
+            
+            Assert.AreEqual("tokenRequestParameters", ex.ParamName);
         }
 
         [TestMethod]

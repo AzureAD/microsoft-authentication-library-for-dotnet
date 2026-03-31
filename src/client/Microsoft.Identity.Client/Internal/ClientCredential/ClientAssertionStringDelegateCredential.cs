@@ -42,8 +42,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,
-                    "A string-returning client assertion callback cannot be used over mTLS. " +
-                    "Use a ClientSignedAssertion callback that can return a token-binding certificate.");
+                    MsalErrorMessage.UnsupportedCredentialForMtlsMessage("A string-returning client assertion callback"));
             }
 
             context.Logger.Verbose(() => "[ClientAssertionStringDelegateCredential] Building assertion request " +

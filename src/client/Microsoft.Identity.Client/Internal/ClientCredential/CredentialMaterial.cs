@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             X509Certificate2 resolvedCertificate = null)
         {
             TokenRequestParameters = tokenRequestParameters
-                ?? throw new InvalidOperationException("TokenRequestParameters must not be null.");
+                ?? throw new ArgumentNullException(nameof(tokenRequestParameters));
             ResolvedCertificate = resolvedCertificate;
         }
     }
