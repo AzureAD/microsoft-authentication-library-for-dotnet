@@ -24,8 +24,30 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
+      # Find chrome.exe - search common install locations and fall back to a filesystem search
+      $candidatePaths = @(
+        "C:\Program Files\Google\Chrome\Application\chrome.exe",
+        "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        "C:\tools\chrome\chrome.exe",
+        "C:\tools\googlechrome\chrome.exe"
+      )
+      $chromePath = $candidatePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+      if (-not $chromePath) {
+        Write-Host "Chrome not found in common paths, searching filesystem..."
+        $chromePath = Get-ChildItem -Path "C:\" -Filter "chrome.exe" -Recurse -ErrorAction SilentlyContinue |
+          Where-Object { $_.DirectoryName -notmatch "ChromeDriver|chromedriver" } |
+          Select-Object -First 1 -ExpandProperty FullName
+      }
+
+      if (-not $chromePath) {
+        Write-Error "Could not find chrome.exe on this agent. Chrome may not be installed."
+        exit 1
+      }
+
+      Write-Host "Found Chrome at: $chromePath"
+
       # Get the installed Chrome version
-      $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
       $chromeVersion = (Get-Item $chromePath).VersionInfo.ProductVersion
       $chromeMajor = $chromeVersion.Split('.')[0]
       Write-Host "Detected Chrome version: $chromeVersion (major: $chromeMajor)"
