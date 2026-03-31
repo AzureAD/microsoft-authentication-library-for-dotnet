@@ -13,6 +13,7 @@ steps:
   parameters:
     Solution: '${{ parameters.MsalSourceDir }}LibsAndSamples.sln'
     MsalSourceDir: '${{ parameters.MsalSourceDir }}'
+    PipelineType: $(PipelineType)
 
   # Run All Desktop Tests
 - template: template-run-all-tests.yaml
