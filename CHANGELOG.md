@@ -1,3 +1,19 @@
+4.83.3
+======
+
+### New Features
+- Added support for User Federated Identity Credential (UserFIC) scenarios through the `IByUserFederatedIdentityCredential` interface and `user_fic` grant type. [#5802](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5802)
+
+### Changes
+- Updated NativeInterop to version 0.20.3. [#5866](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5866)
+
+### Bug Fixes
+- Fixed response handling in `HttpListenerInterceptor.cs` to ensure the full response is properly closed. [#5478](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5478)
+- Fixed macOS detection to include maccatalyst target in desktop platform checks.[#5882](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5882) 
+
+### Infrastructure & Dependencies
+- Extracted reusable MSAL test infrastructure into `Microsoft.Identity.Lab.API`. [#5864](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5864)
+
 4.83.1
 ======
 
