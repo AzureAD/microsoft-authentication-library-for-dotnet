@@ -15,6 +15,17 @@ steps:
     MsalSourceDir: '${{ parameters.MsalSourceDir }}'
     PipelineType: $(PipelineType)
 
+  # Install Chrome and ChromeDriver for Selenium-based integration tests.
+  # The 1ES Windows 2022 image does not pre-install Chrome (unlike Microsoft-hosted windows-2022).
+  # SeleniumExtensions.cs resolves chromedriver via the CHROMEWEBDRIVER env var first, so we set it here.
+- task: PowerShell@2
+  displayName: 'Install Chrome and ChromeDriver'
+  inputs:
+    targetType: 'inline'
+    script: |
+      choco install googlechrome chromedriver --yes --no-progress
+      Write-Host "##vso[task.setvariable variable=CHROMEWEBDRIVER]C:\tools\selenium"
+
   # Run All Desktop Tests
 - template: template-run-all-tests.yaml
   parameters:
