@@ -64,14 +64,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.Inconclusive("Can't run regional on local devbox.");
             }
 
-#if ONEBRANCH_BUILD
-            // IMDS-based region auto-detection is not available on 1ES Hosted Pool agents
-            if (useRegional)
-            {
-                Assert.Inconclusive("Regional auto-detection via IMDS is not available on OneBranch 1ES agents.");
-            }
-#endif
-
             var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             var builder = ConfidentialClientApplicationBuilder.Create(LabAuthenticationHelper.LabAccessConfidentialClientId)

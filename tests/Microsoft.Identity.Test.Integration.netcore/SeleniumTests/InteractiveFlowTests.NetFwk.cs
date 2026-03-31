@@ -42,9 +42,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetFx)]
         public async Task Interactive_AADAsync()
         {
-#if ONEBRANCH_BUILD
-            Assert.Inconclusive("Skipped on OneBranch pipeline - Selenium/Chrome is not available on 1ES Hosted Pool agents.");
-#endif
             // Arrange - Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
