@@ -15,56 +15,43 @@ steps:
     MsalSourceDir: '${{ parameters.MsalSourceDir }}'
     PipelineType: $(PipelineType)
 
-  # Install ChromeDriver for Selenium-based integration tests.
-  # The 1ES Windows 2022 Starter Image includes Google Chrome but not ChromeDriver.
-  # SeleniumExtensions.cs resolves chromedriver via the CHROMEWEBDRIVER env var, so we set it here.
-  # We match the ChromeDriver version to the installed Chrome version via the Chrome for Testing API.
+  # Install Chrome and ChromeDriver for Selenium-based integration tests.
+  # Chrome is downloaded via the official Google enterprise MSI (silent install).
+  # ChromeDriver is matched to the installed Chrome version via the Chrome for Testing API.
+  # SeleniumExtensions.cs resolves chromedriver via the CHROMEWEBDRIVER env var.
 - task: PowerShell@2
-  displayName: 'Install ChromeDriver'
+  displayName: 'Install Chrome and ChromeDriver'
   inputs:
     targetType: 'inline'
     script: |
-      # Find chrome.exe - search common install locations and fall back to a filesystem search
-      $candidatePaths = @(
-        "C:\Program Files\Google\Chrome\Application\chrome.exe",
-        "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-        "C:\tools\chrome\chrome.exe",
-        "C:\tools\googlechrome\chrome.exe"
-      )
-      $chromePath = $candidatePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+      $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 
-      if (-not $chromePath) {
-        Write-Host "Chrome not found in common paths, searching filesystem..."
-        $chromePath = Get-ChildItem -Path "C:\" -Filter "chrome.exe" -Recurse -ErrorAction SilentlyContinue |
-          Where-Object { $_.DirectoryName -notmatch "ChromeDriver|chromedriver" } |
-          Select-Object -First 1 -ExpandProperty FullName
+      if (-not (Test-Path $chromePath)) {
+        Write-Host "Chrome not found, downloading and installing..."
+        $msiPath = "$env:TEMP\chrome_enterprise.msi"
+        Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/googlechromestandaloneenterprise64.msi" -OutFile $msiPath -UseBasicParsing
+        Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /quiet /norestart" -Wait -NoNewWindow
+        Write-Host "Chrome installation complete."
+      } else {
+        Write-Host "Chrome already present."
       }
-
-      if (-not $chromePath) {
-        Write-Error "Could not find chrome.exe on this agent. Chrome may not be installed."
-        exit 1
-      }
-
-      Write-Host "Found Chrome at: $chromePath"
 
       # Get the installed Chrome version
       $chromeVersion = (Get-Item $chromePath).VersionInfo.ProductVersion
       $chromeMajor = $chromeVersion.Split('.')[0]
-      Write-Host "Detected Chrome version: $chromeVersion (major: $chromeMajor)"
+      Write-Host "Chrome version: $chromeVersion (major: $chromeMajor)"
 
       # Fetch the matching ChromeDriver version from the Chrome for Testing API
-      $apiUrl = "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$chromeMajor"
-      $driverVersion = (Invoke-WebRequest -Uri $apiUrl -UseBasicParsing).Content.Trim()
-      Write-Host "Downloading ChromeDriver version: $driverVersion"
+      $driverVersion = (Invoke-WebRequest -Uri "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$chromeMajor" -UseBasicParsing).Content.Trim()
+      Write-Host "Downloading ChromeDriver $driverVersion..."
 
       # Download and extract ChromeDriver
       $driverDir = "C:\tools\chromedriver"
       $zipPath = "$env:TEMP\chromedriver.zip"
-      $downloadUrl = "https://storage.googleapis.com/chrome-for-testing-public/$driverVersion/win64/chromedriver-win64.zip"
-      Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath -UseBasicParsing
+      Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-for-testing-public/$driverVersion/win64/chromedriver-win64.zip" -OutFile $zipPath -UseBasicParsing
       Expand-Archive -Path $zipPath -DestinationPath $driverDir -Force
 
-      # The zip extracts to a chromedriver-win64 subfolder
+      # The zip extracts to a chromedriver-win64 subfolder; point CHROMEWEBDRIVER there
       $driverBin = Join-Path $driverDir "chromedriver-win64"
       Write-Host "##vso[task.setvariable variable=CHROMEWEBDRIVER]$driverBin"
       Write-Host "ChromeDriver installed to: $driverBin"
