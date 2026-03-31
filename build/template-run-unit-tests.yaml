@@ -17,7 +17,6 @@ steps:
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
 
 - task: VSTest@2
   displayName: 'Run unit tests NetFwk on OneBranch'
@@ -41,4 +40,4 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    runSettingsFile: 'build\CodeCoverage.runsettings'
+    runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'
