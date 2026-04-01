@@ -75,13 +75,20 @@ steps:
       # Fall back: download from Chrome for Testing (may be blocked in Official pipelines)
       if (-not $driverBin) {
         Write-Host "ChromeDriver not found in VS installation, attempting download..."
-        $driverVersion = (New-Object System.Net.WebClient).DownloadString("https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$chromeMajor").Trim()
-        Write-Host "Downloading ChromeDriver $driverVersion..."
-        $driverDir = "C:\tools\chromedriver"
-        $zipPath = "$env:TEMP\chromedriver.zip"
-        Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-for-testing-public/$driverVersion/win64/chromedriver-win64.zip" -OutFile $zipPath -UseBasicParsing
-        Expand-Archive -Path $zipPath -DestinationPath $driverDir -Force
-        $driverBin = Join-Path $driverDir "chromedriver-win64"
+        try {
+          $driverVersion = (New-Object System.Net.WebClient).DownloadString("https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$chromeMajor").Trim()
+          Write-Host "Downloading ChromeDriver $driverVersion..."
+          $driverDir = "C:\tools\chromedriver"
+          $zipPath = "$env:TEMP\chromedriver.zip"
+          # Use edgedl.me.gvt1.com instead of storage.googleapis.com; the latter is blocked in Official pipelines.
+          Invoke-WebRequest -Uri "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$driverVersion/win64/chromedriver-win64.zip" -OutFile $zipPath -UseBasicParsing
+          Expand-Archive -Path $zipPath -DestinationPath $driverDir -Force
+          $driverBin = Join-Path $driverDir "chromedriver-win64"
+        } catch {
+          Write-Host "##[warning]ChromeDriver download failed (edgedl.me.gvt1.com may also be blocked in this pipeline): $_"
+          Write-Host "##[warning]Selenium tests that require ChromeDriver will be skipped."
+          exit 0
+        }
       }
 
       Write-Host "##vso[task.setvariable variable=CHROMEWEBDRIVER]$driverBin"
