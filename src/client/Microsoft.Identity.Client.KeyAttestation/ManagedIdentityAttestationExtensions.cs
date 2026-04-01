@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.KeyAttestation
 {
@@ -25,13 +26,13 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            // Set the attestation provider delegate
-            builder.CommonParameters.AttestationTokenProvider = async (endpoint, keyHandle, clientId, ct) =>
+            builder.CommonParameters.AttestationTokenProvider = async (endpoint, keyHandle, clientId, logger, ct) =>
             {
                 var result = await PopKeyAttestor.AttestCredentialGuardAsync(
                     endpoint,
                     keyHandle,
                     clientId,
+                    logger,
                     ct).ConfigureAwait(false);
 
                 // Return JWT on success, null for non-attested flow on failure
