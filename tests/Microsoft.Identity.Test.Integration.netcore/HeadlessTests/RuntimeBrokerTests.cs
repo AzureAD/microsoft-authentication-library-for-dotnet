@@ -58,7 +58,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         
         // This test should fail locally but succeed in a CI build.
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamSilentAuthUserInteractionRequiredAsync()
         {
             string[] scopes = new[]
@@ -91,10 +90,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
         [IgnoreOnOneBranch]
         [Ignore("Tracking here: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5305")]
-        [TestMethod]
         public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -141,14 +138,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 result);
         }
     
-        [DoNotRunOnLinux] // Linux broker return different error code
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamInvalidROPC_ThrowsException_TestAsync()
         {
-#if ONEBRANCH_BUILD
-            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
-#endif
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
@@ -180,7 +172,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
         {
             string[] scopes = new[]
@@ -209,7 +200,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamUsernamePasswordRequestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -264,14 +254,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ConfigureAwait(false);
         }
 
-        [DoNotRunOnLinux] // SSH Certs are not supported on Linux
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamWithSSHCertificateAuthenticationSchemeAsync()
         {
-#if ONEBRANCH_BUILD
-            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
-#endif
             IntPtr intPtr = TestUtils.GetWindowHandle();
             Func<IntPtr> windowHandleProvider = () => intPtr;
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -311,7 +296,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -364,7 +348,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -419,14 +402,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
         }
 
-        [DoNotRunOnLinux] // List Windows Work and School accounts is not supported on Linux
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
         {
-#if ONEBRANCH_BUILD
-            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
-#endif
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
@@ -464,7 +442,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [TestMethod]
         [DataRow(null)]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
         {
@@ -494,14 +471,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux     
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
-#if ONEBRANCH_BUILD
-            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
-#endif
             //Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPop).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
@@ -533,14 +505,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(user.Upn, result.Account.Username);
         }
 
-        [DoNotRunOnLinux] // POP are not supported on Linux  
         [IgnoreOnOneBranch]
-        [TestMethod]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
-#if ONEBRANCH_BUILD
-            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
-#endif
             //Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPop).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
