@@ -67,10 +67,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             foreach (InstanceDiscoveryMetadataEntry entry in instanceDiscoveryResponse.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
-                foreach (string aliasedEnvironment in entry.Aliases ?? Enumerable.Empty<string>())
-                {
-                    _networkCacheMetadataProvider.AddMetadata(aliasedEnvironment, entry);
-                }
+                _networkCacheMetadataProvider.AddMetadataWithAliases(entry, fallbackEnvironment: null);
             }
         }
 
