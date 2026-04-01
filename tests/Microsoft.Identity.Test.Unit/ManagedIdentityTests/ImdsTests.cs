@@ -10,10 +10,11 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
+using static Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {

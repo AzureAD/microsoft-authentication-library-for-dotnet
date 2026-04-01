@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
             IPlatformProxy platformProxy = null)
         {
             HttpManager = new MockHttpManager(testName: testName);
-            ServiceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
+            ServiceBundle = MockTestBundleHelper.CreateServiceBundleWithCustomHttpManager(
                 HttpManager,
                 logCallback: logCallback,
                 isExtendedTokenLifetimeEnabled: isExtendedTokenLifetimeEnabled,

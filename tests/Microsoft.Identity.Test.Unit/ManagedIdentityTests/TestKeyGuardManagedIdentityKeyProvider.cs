@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 
-namespace Microsoft.Identity.Test.Common.Core.Mocks
+namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     /// <summary>
     /// Returns a KeyGuard key (Type = KeyGuard). On Windows, attempts to use RSACng so the

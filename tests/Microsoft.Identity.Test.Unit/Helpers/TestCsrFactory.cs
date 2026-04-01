@@ -3,6 +3,7 @@
 
 using System.Security.Cryptography;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Lab.Api;
 
 namespace Microsoft.Identity.Test.Unit.Helpers
 {

@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Lab.Api;
 #if NET8_0_OR_GREATER
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -23,7 +24,7 @@ using Microsoft.Identity.Json.Linq;
 #endif
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 

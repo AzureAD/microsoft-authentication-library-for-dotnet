@@ -9,8 +9,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Mocks;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests

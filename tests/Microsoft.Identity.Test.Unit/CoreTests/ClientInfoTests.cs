@@ -3,6 +3,7 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Internal;
 

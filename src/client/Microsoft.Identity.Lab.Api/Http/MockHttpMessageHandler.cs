@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
 
             if (!string.IsNullOrEmpty(ExpectedUrl))
             {
-                CoreAssert.AreEqual(
+                MockCoreAssert.AreEqual(
                     ExpectedUrl.Split('?')[0],
                     uri.AbsoluteUri.Split('?')[0]);
             }
@@ -120,10 +120,10 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
                     throw new InvalidOperationException($"Expected 1 client certificate but found {base.ClientCertificates.Count}.");
                 }
 
-                CoreAssert.AreEqual(ExpectedMtlsBindingCertificate, base.ClientCertificates[0]);
+                MockCoreAssert.AreEqual(ExpectedMtlsBindingCertificate, base.ClientCertificates[0]);
             }
 
-            CoreAssert.AreEqual(ExpectedMethod, request.Method);
+            MockCoreAssert.AreEqual(ExpectedMethod, request.Method);
 
             ValidateExpectedQueryParams(uri);
 
@@ -146,13 +146,13 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
         {
             if (ExpectedQueryParams != null && ExpectedQueryParams.Any())
             {
-                CoreAssert.IsFalse(string.IsNullOrEmpty(uri.Query), $"Provided url ({uri.AbsoluteUri}) does not contain query parameters as expected.");
+                MockCoreAssert.IsFalse(string.IsNullOrEmpty(uri.Query), $"Provided url ({uri.AbsoluteUri}) does not contain query parameters as expected.");
                 Dictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
-                CoreAssert.HasCount(ExpectedQueryParams.Count, inputQp, "Different number of query params.");
+                MockCoreAssert.HasCount(ExpectedQueryParams.Count, inputQp, "Different number of query params.");
                 foreach (var key in ExpectedQueryParams.Keys)
                 {
-                    CoreAssert.IsTrue(inputQp.ContainsKey(key), $"Expected query parameter ({key}) not found in the url ({uri.AbsoluteUri}).");
-                    CoreAssert.AreEqual(ExpectedQueryParams[key], inputQp[key], $"Value mismatch for query parameter: {key}.");
+                    MockCoreAssert.IsTrue(inputQp.ContainsKey(key), $"Expected query parameter ({key}) not found in the url ({uri.AbsoluteUri}).");
+                    MockCoreAssert.AreEqual(ExpectedQueryParams[key], inputQp[key], $"Value mismatch for query parameter: {key}.");
                 }
             }
         }
@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
                 }
 
                 // Fail if any "not expected" key/value pairs were found
-                CoreAssert.IsEmpty(
+                MockCoreAssert.IsEmpty(
                     unexpectedKeysFound,
                     $"Did not expect to find these query parameter keys/values: {string.Join(", ", unexpectedKeysFound)}"
                 );
@@ -198,14 +198,14 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
             {
                 foreach (string key in ExpectedPostData.Keys)
                 {
-                    CoreAssert.IsTrue(ActualRequestPostData.ContainsKey(key));
+                    MockCoreAssert.IsTrue(ActualRequestPostData.ContainsKey(key));
                     if (key.Equals(OAuth2Parameter.Scope, StringComparison.OrdinalIgnoreCase))
                     {
-                        CoreAssert.AreScopesEqual(ExpectedPostData[key], ActualRequestPostData[key]);
+                        MockCoreAssert.AreScopesEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                     else
                     {
-                        CoreAssert.AreEqual(ExpectedPostData[key], ActualRequestPostData[key]);
+                        MockCoreAssert.AreEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                 }
             }
@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
                 }
 
                 // Assert that no unexpected keys were found, reporting all violations at once
-                CoreAssert.IsEmpty(unexpectedKeysFound, $"Did not expect to find post data keys: {string.Join(", ", unexpectedKeysFound)}");
+                MockCoreAssert.IsEmpty(unexpectedKeysFound, $"Did not expect to find post data keys: {string.Join(", ", unexpectedKeysFound)}");
             }
         }
 
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
             {
                 foreach (var headerName in PresentRequestHeaders)
                 {
-                    CoreAssert.IsTrue(request.Headers.Contains(headerName),
+                    MockCoreAssert.IsTrue(request.Headers.Contains(headerName),
                         $"Expected request header to be present: {headerName}.");
                 }
             }
@@ -247,9 +247,9 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
             {
                 foreach (var kvp in ExpectedRequestHeaders)
                 {
-                    CoreAssert.IsTrue(request.Headers.Contains(kvp.Key), $"Expected request header not found: {kvp.Key}.");
+                    MockCoreAssert.IsTrue(request.Headers.Contains(kvp.Key), $"Expected request header not found: {kvp.Key}.");
                     var headerValue = request.Headers.GetValues(kvp.Key).FirstOrDefault();
-                    CoreAssert.AreEqual(kvp.Value, headerValue, $"Value mismatch for request header {kvp.Key}.");
+                    MockCoreAssert.AreEqual(kvp.Value, headerValue, $"Value mismatch for request header {kvp.Key}.");
                 }
             }
 
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
             {
                 foreach (var item in UnexpectedRequestHeaders)
                 {
-                    CoreAssert.IsFalse(request.Headers.Contains(item), $"Not expecting a request header with key={item} but it was found.");
+                    MockCoreAssert.IsFalse(request.Headers.Contains(item), $"Not expecting a request header with key={item} but it was found.");
                 }
             }
         }

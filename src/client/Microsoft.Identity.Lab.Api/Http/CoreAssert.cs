@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
     /// Throws <see cref="InvalidOperationException"/> on failures instead of depending
     /// on a test framework.
     /// </summary>
-    internal static class CoreAssert
+    internal static class MockCoreAssert
     {
         /// <summary>
         /// Asserts that two scope strings represent the same set of scopes.

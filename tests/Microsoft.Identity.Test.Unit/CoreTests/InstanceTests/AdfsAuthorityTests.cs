@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests

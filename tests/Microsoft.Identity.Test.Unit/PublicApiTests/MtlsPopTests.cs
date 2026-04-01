@@ -18,8 +18,9 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit

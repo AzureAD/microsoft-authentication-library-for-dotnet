@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.RP;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests

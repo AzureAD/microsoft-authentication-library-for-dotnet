@@ -18,8 +18,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests

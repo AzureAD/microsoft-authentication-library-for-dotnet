@@ -14,8 +14,9 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Mocks;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 

@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Lab.Api;
 #if NET8_0_OR_GREATER
 using Microsoft.Identity.Client.Broker;
 #endif
@@ -21,8 +22,8 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests

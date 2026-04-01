@@ -8,7 +8,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static System.Net.WebRequestMethods;
 

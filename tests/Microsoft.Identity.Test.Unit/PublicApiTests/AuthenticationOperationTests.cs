@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Lab.Api;
 #if !NET8_0
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 #endif
@@ -20,8 +21,8 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Mocks;
 using Microsoft.Identity.Test.Unit.BrokerTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;

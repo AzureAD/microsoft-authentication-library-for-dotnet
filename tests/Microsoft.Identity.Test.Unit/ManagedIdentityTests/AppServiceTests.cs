@@ -7,9 +7,9 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
+using static Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {

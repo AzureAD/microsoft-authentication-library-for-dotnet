@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
     /// <summary>
     /// Provides factory helpers for creating service bundles in MSAL tests.
     /// </summary>
-    internal static class TestCommon
+    internal static class MockTestBundleHelper
     {
         internal const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
 

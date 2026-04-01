@@ -12,8 +12,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
+using static Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {

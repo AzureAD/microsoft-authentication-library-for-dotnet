@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 

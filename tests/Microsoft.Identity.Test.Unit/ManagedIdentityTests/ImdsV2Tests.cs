@@ -19,11 +19,12 @@ using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Lab.Api.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
+using static Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
