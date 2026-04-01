@@ -83,27 +83,32 @@ namespace Microsoft.Identity.Client.Internal
         internal static void ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken,
             Func<Task<AuthenticationResult>> fetchAction,
-            ILoggerAdapter logger, 
-            IServiceBundle serviceBundle, 
-            ApiEvent apiEvent, 
-            string callerSdkId, 
-            string callerSdkVersion)
+            ILoggerAdapter logger,
+            IServiceBundle serviceBundle,
+            ApiEvent apiEvent,
+            string callerSdkId,
+            string callerSdkVersion,
+            Action<TokenAcquisitionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
         {
             _ = Task.Run(async () =>
             {
                 try
                 {
                     var authResult = await fetchAction().ConfigureAwait(false);
+                    var context = new TokenAcquisitionResult { AuthenticationResult = authResult };
+                    var extraTags = new List<KeyValuePair<string, object>>();
+                    tagsEnricher?.Invoke(context, extraTags);
                     serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
                         callerSdkId,
                         callerSdkVersion,
-                        TokenSource.IdentityProvider, 
-                        CacheRefreshReason.ProactivelyRefreshed, 
+                        TokenSource.IdentityProvider,
+                        CacheRefreshReason.ProactivelyRefreshed,
                         Cache.CacheLevel.None,
                         logger,
-                        apiEvent.TokenType);
+                        apiEvent.TokenType,
+                        extraTags);
                 }
                 catch (MsalServiceException ex)
                 {
@@ -117,38 +122,44 @@ namespace Microsoft.Identity.Client.Internal
                         logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
 
+                    var context = new TokenAcquisitionResult { Exception = ex };
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        ex.ErrorCode,
                         apiEvent.ApiId,
                         callerSdkId,
                         callerSdkVersion,
                         CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType);
+                        apiEvent.TokenType,
+                        context,
+                        tagsEnricher);
                 }
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
+                    var context = new TokenAcquisitionResult { Exception = ex };
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        ex.GetType().Name,
                         apiEvent.ApiId,
-                        callerSdkId, 
-                        callerSdkVersion, 
+                        callerSdkId,
+                        callerSdkVersion,
                         CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType);
+                        apiEvent.TokenType,
+                        context,
+                        tagsEnricher);
                 }
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
+                    var context = new TokenAcquisitionResult { Exception = ex };
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        ex.GetType().Name,
                         apiEvent.ApiId,
-                        callerSdkId, 
-                        callerSdkVersion, 
+                        callerSdkId,
+                        callerSdkVersion,
                         CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType);
+                        apiEvent.TokenType,
+                        context,
+                        tagsEnricher);
                 }
             });
         }

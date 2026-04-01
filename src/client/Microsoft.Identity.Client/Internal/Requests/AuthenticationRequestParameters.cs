@@ -81,6 +81,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public ApiEvent.ApiIds ApiId => _commonParameters.ApiId;
 
+        public Action<TokenAcquisitionResult, IList<KeyValuePair<string, object>>> OtelTagsEnricher => _commonParameters.OtelTagsEnricher;
+
         public RequestContext RequestContext { get; }
 
         #region Authority
