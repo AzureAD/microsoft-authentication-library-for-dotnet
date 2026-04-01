@@ -480,3 +480,18 @@ static readonly Microsoft.Identity.Lab.Api.TestConstants.s_extraHttpHeader -> Sy
 static readonly Microsoft.Identity.Lab.Api.TestConstants.s_graphScopes -> string[]
 static readonly Microsoft.Identity.Lab.Api.TestConstants.s_scopeForAnotherResource -> System.Collections.Generic.SortedSet<string>
 static readonly Microsoft.Identity.Lab.Api.TestConstants.s_userIdentifier -> string
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource.AzureArc = 3 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource.CloudShell = 4 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource.Function = 1 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource.ServiceFabric = 5 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource.VM = 2 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource.WebApp = 0 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId.ClientId = 1 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId.None = 0 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId.ObjectId = 3 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId
+Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId.ResourceId = 2 -> Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId
+static Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.CreateMIABuilder(string userAssignedId = "", Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId.ClientId) -> Microsoft.Identity.Client.AppConfig.ManagedIdentityApplicationBuilder
+static Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.SetEnvironmentVariables(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint") -> void
