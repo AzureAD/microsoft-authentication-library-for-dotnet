@@ -13,6 +13,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Collections.Generic;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Lab.Api;
 using OpenTelemetry.Logs;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests

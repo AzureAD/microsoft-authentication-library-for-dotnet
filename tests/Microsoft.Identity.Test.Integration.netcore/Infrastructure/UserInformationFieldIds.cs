@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Lab.Api;
 using System;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure

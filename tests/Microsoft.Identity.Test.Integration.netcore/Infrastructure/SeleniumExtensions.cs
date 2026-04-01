@@ -11,6 +11,7 @@ using System.Diagnostics;
 using Microsoft.Identity.Test.LabInfrastructure;
 using System.Linq;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Lab.Api;
 using System.Threading;
 using OpenQA.Selenium.Edge;
 

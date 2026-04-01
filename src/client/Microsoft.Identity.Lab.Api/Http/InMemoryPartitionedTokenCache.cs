@@ -6,22 +6,38 @@ using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Lab.Api.Core.Mocks
 {
-    internal class InMemoryPartitionedTokenCache
+    /// <summary>
+    /// A partitioned in-memory token cache implementation for testing purposes. Stores cache data keyed
+    /// by <see cref="TokenCacheNotificationArgs.SuggestedCacheKey"/> to simulate a partitioned cache.
+    /// </summary>
+    public class InMemoryPartitionedTokenCache
     {
         private ConcurrentDictionary<string, byte[]> _cacheData = new ConcurrentDictionary<string, byte[]>();
         private bool _shouldClearExistingCache;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryPartitionedTokenCache"/> class.
+        /// </summary>
+        /// <param name="shouldClearExistingCache">Whether to clear existing cache data before deserializing.</param>
         public InMemoryPartitionedTokenCache(bool shouldClearExistingCache = true)
         {
             _shouldClearExistingCache = shouldClearExistingCache;
         }
 
+        /// <summary>
+        /// Binds this cache to the specified <see cref="ITokenCache"/> instance.
+        /// </summary>
+        /// <param name="tokenCache">The token cache instance to bind to.</param>
         public void Bind(ITokenCache tokenCache)
         {
             tokenCache.SetBeforeAccess(BeforeAccessNotification);
             tokenCache.SetAfterAccess(AfterAccessNotification);
         }
 
+        /// <summary>
+        /// Handles the before access notification for the token cache.
+        /// </summary>
+        /// <param name="args">The token cache notification arguments.</param>
         public void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
             if (!string.IsNullOrEmpty(args.SuggestedCacheKey))
@@ -31,6 +47,10 @@ namespace Microsoft.Identity.Lab.Api.Core.Mocks
             }
         }
 
+        /// <summary>
+        /// Handles the after access notification for the token cache.
+        /// </summary>
+        /// <param name="args">The token cache notification arguments.</param>
         public void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             if (args.HasStateChanged)

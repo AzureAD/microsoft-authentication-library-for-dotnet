@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System;
 using Microsoft.Identity.Test.Unit;
+using Microsoft.Identity.Lab.Api;
 using System.Net.Http;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure

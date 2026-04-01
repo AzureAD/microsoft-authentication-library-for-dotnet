@@ -11,6 +11,7 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Lab.Api;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {

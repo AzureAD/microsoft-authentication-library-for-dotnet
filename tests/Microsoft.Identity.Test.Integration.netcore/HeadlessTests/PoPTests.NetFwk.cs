@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.Internal;
 using System.Security.Claims;
 using System.Net.Sockets;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Lab.Api;
 using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.ConstrainedExecution;
 using System.Collections.Generic;
