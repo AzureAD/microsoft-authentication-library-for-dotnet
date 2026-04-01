@@ -3,7 +3,7 @@
 
 using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Test.Common.Core.Mocks
+namespace Microsoft.Identity.Lab.Api.Core.Mocks
 {
     /// <summary>
     /// legacy cache persistence implementation for testing purposes. This class provides a simple in-memory storage mechanism for MSAL legacy cache data, allowing tests to simulate caching behavior without relying on external storage or file systems. It implements the <see cref="ILegacyCachePersistence"/> interface, enabling it to be used in scenarios where legacy cache persistence is required for testing MSAL functionality.

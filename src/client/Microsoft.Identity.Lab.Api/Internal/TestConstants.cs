@@ -10,9 +10,8 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit
+namespace Microsoft.Identity.Lab.Api
 {
     /// <summary>
     /// Contains shared test constants, helper values, sample payloads, and factory methods

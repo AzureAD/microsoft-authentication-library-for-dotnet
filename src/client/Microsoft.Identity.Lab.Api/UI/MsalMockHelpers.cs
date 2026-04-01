@@ -11,7 +11,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 
-namespace Microsoft.Identity.Test.Common.Mocks
+namespace Microsoft.Identity.Lab.Api.Mocks
 {
     internal static class MsalMockHelpers
     {

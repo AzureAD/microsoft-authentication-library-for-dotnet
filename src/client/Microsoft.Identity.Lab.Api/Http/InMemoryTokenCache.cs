@@ -4,7 +4,7 @@
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Test.Common.Core.Mocks
+namespace Microsoft.Identity.Lab.Api.Core.Mocks
 {
     /// <summary>
     /// In-memory token cache implementation for testing purposes. This class provides a simple in-memory storage mechanism for MSAL token cache data, allowing tests to simulate caching behavior without relying on external storage or file systems.

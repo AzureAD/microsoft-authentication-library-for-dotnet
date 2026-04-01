@@ -4,7 +4,7 @@
 using System.Collections.Concurrent;
 using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Test.Common.Core.Mocks
+namespace Microsoft.Identity.Lab.Api.Core.Mocks
 {
     internal class InMemoryPartitionedTokenCache
     {

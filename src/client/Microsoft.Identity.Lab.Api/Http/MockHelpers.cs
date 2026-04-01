@@ -8,7 +8,6 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Castle.Core.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
@@ -18,11 +17,9 @@ using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Unit;
-using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
-using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
+using static Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil;
 
-namespace Microsoft.Identity.Test.Common.Core.Mocks
+namespace Microsoft.Identity.Lab.Api.Core.Mocks
 {
     /// <summary>
     /// Provides reusable mock helpers and canned HTTP/token responses for MSAL test scenarios.

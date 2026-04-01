@@ -10,9 +10,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Common.Mocks
+namespace Microsoft.Identity.Lab.Api.Mocks
 {
     internal class MockWebUI : IWebUI
     {
@@ -48,11 +47,19 @@ namespace Microsoft.Identity.Test.Common.Mocks
 
             if (ExpectedEnvironment != null)
             {
-                Assert.AreEqual(ExpectedEnvironment, authorizationUri.Host);
+                if (ExpectedEnvironment != authorizationUri.Host)
+                {
+                    throw new InvalidOperationException(
+                        $"Expected environment '{ExpectedEnvironment}' but got '{authorizationUri.Host}'.");
+                }
             }
 
             IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
-            Assert.IsNotNull(inputQp[OAuth2Parameter.State]);
+            if (inputQp[OAuth2Parameter.State] == null)
+            {
+                throw new InvalidOperationException($"Expected '{OAuth2Parameter.State}' query parameter but it was null.");
+            }
+
             if (AddStateInAuthorizationResult)
             {
                 MockResult.State = inputQp[OAuth2Parameter.State];
@@ -61,11 +68,23 @@ namespace Microsoft.Identity.Test.Common.Mocks
             //match QP passed in for validation.
             if (QueryParamsToValidate != null)
             {
-                Assert.IsNotNull(authorizationUri.Query);
+                if (string.IsNullOrEmpty(authorizationUri.Query))
+                {
+                    throw new InvalidOperationException("Expected authorization URI to have a query string.");
+                }
+
                 foreach (var key in QueryParamsToValidate.Keys)
                 {
-                    Assert.IsTrue(inputQp.ContainsKey(key));
-                    Assert.AreEqual(QueryParamsToValidate[key], inputQp[key]);
+                    if (!inputQp.ContainsKey(key))
+                    {
+                        throw new InvalidOperationException($"Expected query parameter '{key}' not found in authorization URI.");
+                    }
+
+                    if (QueryParamsToValidate[key] != inputQp[key])
+                    {
+                        throw new InvalidOperationException(
+                            $"Query parameter '{key}' mismatch. Expected '{QueryParamsToValidate[key]}' but got '{inputQp[key]}'.");
+                    }
                 }
             }
 

@@ -3,9 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Test.Unit;
 
-namespace Microsoft.Identity.Test.Common
+namespace Microsoft.Identity.Lab.Api
 {
     /// <summary>
     /// TestData provides static methods that return enumerables of object arrays, which can be used as data sources for parameterized tests. The methods in this class yield test cases for various scenarios, such as testing authority URLs and their expected tenant IDs, as well as testing the merging of claims and client capabilities. Each test case is represented as an object array, where the elements correspond to the parameters of the test method that will consume this data. This approach allows for comprehensive testing of different input combinations and expected outcomes in a structured manner.

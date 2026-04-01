@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Test.Common.Core.Mocks
+namespace Microsoft.Identity.Lab.Api.Core.Mocks
 {
     /// <summary>
     /// Time service implementation for testing purposes. This class allows tests to control the current time by providing methods to move the time forward or backward, enabling the simulation of time-dependent scenarios such as token expiration and refresh logic in MSAL.NET.

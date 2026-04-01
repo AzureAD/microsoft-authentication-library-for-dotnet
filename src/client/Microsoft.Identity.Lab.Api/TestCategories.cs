@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Microsoft.Identity.Test.Common
+namespace Microsoft.Identity.Lab.Api
 {
     /// <summary>
     /// Test categories for MSAL.NET tests. These categories can be used to filter which tests to run in different environments, such as running only Selenium tests or only regression tests. They also help to organize tests based on their characteristics, such as the type of authentication they are testing (ADFS, MSA, B2C) or the specific features they are validating (Broker, TokenCacheTests, PromptTests, BuilderTests, UnifiedSchemaValidation).

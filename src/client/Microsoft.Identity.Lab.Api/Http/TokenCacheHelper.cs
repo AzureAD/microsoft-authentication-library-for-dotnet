@@ -12,10 +12,8 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Unit;
 
-namespace Microsoft.Identity.Test.Common.Core.Mocks
+namespace Microsoft.Identity.Lab.Api.Core.Mocks
 {
     internal static class TokenCacheHelper
     {
@@ -359,21 +357,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static void ExpireAllAccessTokens(ITokenCacheInternal tokenCache)
         {
-            IReadOnlyList<MsalAccessTokenCacheItem> allAccessTokens;
-
-            // avoid calling GetAllAccessTokens() on the strict accessors, as they will throw
-            if (tokenCache.Accessor is AppAccessorWithPartitionAsserts appPartitionedAccessor)
-            {
-                allAccessTokens = appPartitionedAccessor.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
-            }
-            else if (tokenCache.Accessor is UserAccessorWithPartitionAsserts userPartitionedAccessor)
-            {
-                allAccessTokens = userPartitionedAccessor.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
-            }
-            else
-            {
-                allAccessTokens = tokenCache.Accessor.GetAllAccessTokens();
-            }
+            IReadOnlyList<MsalAccessTokenCacheItem> allAccessTokens = tokenCache.Accessor.GetAllAccessTokens();
 
             foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
             {

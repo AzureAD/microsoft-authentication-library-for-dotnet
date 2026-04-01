@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Test.Common
+namespace Microsoft.Identity.Lab.Api
 {
     /// <summary>
     /// Represents an authority URI and its expected tenant ID for testing purposes.

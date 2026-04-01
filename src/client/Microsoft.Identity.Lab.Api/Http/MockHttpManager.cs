@@ -17,9 +17,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Common.Core.Mocks
+namespace Microsoft.Identity.Lab.Api.Core.Mocks
 {
     internal sealed class MockHttpManager : IHttpManager,
                                             IDisposable
@@ -68,10 +67,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             if (Marshal.GetExceptionCode() == 0)
 #pragma warning restore CS0618 // Type or member is obsolete
             {
-                string remainingMocks = string.Join(" ",
-                    _httpMessageHandlerQueue.Select(m => GetExpectedUrlFromHandler(m)));
-                Assert.IsEmpty(_httpMessageHandlerQueue,
-                    "All mocks should have been consumed. Remaining mocks are for: " + remainingMocks);
+                if (_httpMessageHandlerQueue.Count > 0)
+                {
+                    string remainingMocks = string.Join(" ",
+                        _httpMessageHandlerQueue.Select(m => GetExpectedUrlFromHandler(m)));
+                    throw new InvalidOperationException(
+                        $"All mocks should have been consumed. Remaining mocks are for: {remainingMocks}");
+                }
             }
         }
 
@@ -205,7 +207,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 if (!HttpMessageHandlerQueue.TryDequeue(out messageHandler))
                 {
-                    Assert.Fail("The MockHttpManager's queue is empty. Cannot serve another response");
+                    throw new InvalidOperationException("The MockHttpManager's queue is empty. Cannot serve another response");
                 }
             }
 

@@ -1,16 +1,16 @@
-﻿const Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.TooManyRequestsContent = "Too many requests error" -> string
-const Microsoft.Identity.Test.Common.TestCategories.ADFS = "ADFS" -> string
-const Microsoft.Identity.Test.Common.TestCategories.Arlington = "Arlington" -> string
-const Microsoft.Identity.Test.Common.TestCategories.B2C = "B2C" -> string
-const Microsoft.Identity.Test.Common.TestCategories.Broker = "Broker" -> string
-const Microsoft.Identity.Test.Common.TestCategories.BuilderTests = "BuilderTests" -> string
-const Microsoft.Identity.Test.Common.TestCategories.LabAccess = "LabAccess" -> string
-const Microsoft.Identity.Test.Common.TestCategories.MSA = "MSA" -> string
-const Microsoft.Identity.Test.Common.TestCategories.PromptTests = "PromptTests" -> string
-const Microsoft.Identity.Test.Common.TestCategories.Regression = "Regression" -> string
-const Microsoft.Identity.Test.Common.TestCategories.Selenium = "Selenium" -> string
-const Microsoft.Identity.Test.Common.TestCategories.TokenCacheTests = "TokenCacheTests" -> string
-const Microsoft.Identity.Test.Common.TestCategories.UnifiedSchemaValidation = "UnifiedSchema_Validation" -> string
+﻿const Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.TooManyRequestsContent = "Too many requests error" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.ADFS = "ADFS" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.Arlington = "Arlington" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.B2C = "B2C" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.Broker = "Broker" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.BuilderTests = "BuilderTests" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.LabAccess = "LabAccess" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.MSA = "MSA" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.PromptTests = "PromptTests" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.Regression = "Regression" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.Selenium = "Selenium" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.TokenCacheTests = "TokenCacheTests" -> string
+const Microsoft.Identity.Lab.Api.TestCategories.UnifiedSchemaValidation = "UnifiedSchema_Validation" -> string
 const Microsoft.Identity.Test.LabInfrastructure.KeyVaultInstance.MsalTeam = "https://id4skeyvault.vault.azure.net/" -> string
 const Microsoft.Identity.Test.LabInfrastructure.KeyVaultInstance.MSIDLab = "https://msidlabs.vault.azure.net" -> string
 const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppPCAClient = "App-PCAClient-Config" -> string
@@ -42,303 +42,303 @@ const Microsoft.Identity.Test.LabInfrastructure.LabConstants.FederationProviderN
 const Microsoft.Identity.Test.LabInfrastructure.LabConstants.UserTypeB2C = "B2C" -> string
 const Microsoft.Identity.Test.LabInfrastructure.LabConstants.UserTypeFederated = "Federated" -> string
 const Microsoft.Identity.Test.LabInfrastructure.LabConstants.UserTypeMSA = "MSA" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AadRawClientInfo = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AndroidBrokerResponse = "\r\n{\r\n      \"access_token\":\"secretAt\",\r\n      \"authority\":\"https://login.microsoftonline.com/common\",\r\n      \"cached_at\":1591193165,\r\n      \"client_id\":\"4a1aa1d5-c567-49d0-ad0b-cd957a47f842\",\r\n      \"client_info\":\"clientInfo\",\r\n      \"environment\":\"login.windows.net\",\r\n      \"expires_on\":1591196764,\r\n      \"ext_expires_on\":1591196764,\r\n      \"home_account_id\":\"ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462\",\r\n      \"http_response_code\":0,\r\n      \"id_token\":\"idT\",\r\n      \"local_account_id\":\"ae821e4d-f408-451a-af82-882691148603\",\r\n      \"scopes\":\"User.Read openid offline_access profile\",\r\n      \"success\":true,\r\n      \"tenant_id\":\"49f548d0-12b7-4169-a390-bb5304d24462\",\r\n      \"token_type\":\"Bearer\",\r\n      \"username\":\"some_user@contoso.com\"\r\n   }" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ATSecret = "some-access-token" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ATSecret2 = "some-access-token2" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ATSecret3 = "some-access-token3" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AadAuthorityWithMsftTenantId = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AadTenantId = "751a212b-4003-416e-b600-e1f48e40db9f" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ADFSAuthority = "https://fs.msidlab8.com/adfs/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ADFSAuthority2 = "https://someAdfs.com/adfs/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AppServiceEndpoint = "http://127.0.0.1:41564/msi/token" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityCommonPpeAuthority = "https://login.windows-ppe.net/common/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityCommonTenant = "https://login.microsoftonline.com/common/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityCommonTenantNotPrefAlias = "https://sts.windows.net/common/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityConsumerTidTenant = "https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityConsumersTenant = "https://login.microsoftonline.com/consumers/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityGuestTenant = "https://login.microsoftonline.com/guest/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityGuidTenant = "https://login.microsoftonline.com/12345679/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityGuidTenant2 = "https://login.microsoftonline.com/987654321/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityHomeTenant = "https://login.microsoftonline.com/home/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityNotKnownCommon = "https://sts.access.edu/common/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityNotKnownTenanted = "https://sts.access.edu/my-utid/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityOrganizationsTenant = "https://login.microsoftonline.com/organizations/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityRegional = "https://centralus.login.microsoft.com/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityRegionalInvalidRegion = "https://invalidregion.login.microsoft.com/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthoritySovereignCNCommon = "https://login.partner.microsoftonline.cn/common/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthoritySovereignCNTenant = "https://login.partner.microsoftonline.cn/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthoritySovereignDECommon = "https://login.microsoftonline.de/common/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthoritySovereignDETenant = "https://login.microsoftonline.de/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityTenant = "https://login.microsoftonline.com/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityTestTenant = "https://login.microsoftonline.com/my-utid/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityUtid2Tenant = "https://login.microsoftonline.com/my-utid2/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityUtidTenant = "https://login.microsoftonline.com/my-utid/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AuthorityWindowsNet = "https://login.windows.net/my-utid/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AutomationTestCertName = "LabAuth.MSIDLab.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/b2c_1_susi/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CCustomDomain = "https://catsareawesome.com/tfp/catsareawesome/b2c_1_susi/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CEditProfile = "b2c_1_editprofile" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CEditProfileHomeAccountIdentifer = "my-uid-b2c_1_editprofile.my-utid" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CEditProfileHomeAccountObjectId = "my-uid-b2c_1_editprofile" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CEnvironment = "sometenantid.b2clogin.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/b2c_1_susi/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/b2c_1_susi/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/b2c_1_susi/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginAuthorityUsGov = "https://sometenantid.b2clogin.us/tfp/sometenantid/b2c_1_susi/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/sometenantid/b2c_1_susi/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginBlackforest = ".b2clogin.de" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginCustomDomain = "catsareawesome.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginGlobal = ".b2clogin.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginMoonCake = ".b2clogin.cn" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CLoginUSGov = ".b2clogin.us" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CProfileWithDot = "b2c.someprofile" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CProfileWithDotHomeAccountIdentifer = "my-uid-b2c.someprofile.my-utid" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CProfileWithDotHomeAccountObjectId = "my-uid-b2c.someprofile" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CRawClientInfo = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CSignUpSignIn = "b2c_1_susi" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CSuSiHomeAccountIdentifer = "my-uid-b2c_1_susi.my-utid" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.B2CSuSiHomeAccountObjectId = "my-uid-b2c_1_susi" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Bearer = "Bearer" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.BrokerClaims = "testClaims" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.BrokerOIDCScopes = "openid offline_access profile" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.CatsAreAwesome = "catsareawesome" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.CiamAuthorityMainFormat = "https://tenant.ciamlogin.com/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.CiamAuthorityWithFriendlyName = "https://tenant.ciamlogin.com/tenant.onmicrosoft.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.CiamAuthorityWithGuid = "https://tenant.ciamlogin.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.CiamCUDAuthority = "https://login.msidlabsciam.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa/v2.0" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.CiamCUDAuthorityMalformed = "https://login.msidlabsciam.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Claims = "{\"userinfo\":{\"given_name\":{\"essential\":true},\"nickname\":null,\"email\":{\"essential\":true},\"email_verified\":{\"essential\":true},\"picture\":null,\"http://example.info/claims/groups\":null},\"id_token\":{\"auth_time\":{\"essential\":true},\"acr\":{\"values\":[\"urn:mace:incommon:iap:silver\"]}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClaimsChallenge = "eyJhY2Nlc3NfdG9rZW4iOnsiYWNycyI6eyJlc3NlbnRpYWwiOnRydWUsInZhbHVlIjoiY3AxIn19fQ==" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClaimsWithAccessToken = "{\"access_token\":{\"nbf\":{\"essential\":true, \"value\":\"1701477303\"}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClaimsWithAdditionalClaim = "{\"access_token\":{\"nbf\":{\"essential\":true, \"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClaimWithAdditionalKey = "{\"access_token\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}},\"some_other_key\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClaimWithAdditionalKeyAndAccessKey = "{\"some_other_key\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}},\"access_token\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClientCapabilitiesAndClaimsJson = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]}},\"userinfo\":{\"given_name\":{\"essential\":true},\"nickname\":null,\"email\":{\"essential\":true},\"email_verified\":{\"essential\":true},\"picture\":null,\"http://example.info/claims/groups\":null},\"id_token\":{\"auth_time\":{\"essential\":true},\"acr\":{\"values\":[\"urn:mace:incommon:iap:silver\"]}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClientCapabilitiesAndClaimsJsonWithAccessToken = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]},\"nbf\":{\"essential\":true,\"value\":\"1701477303\"}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClientCapabilitiesJson = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClientCredentialAudience = "https://login.microsoftonline.com/10c419d4-4a50-45b2-aa4e-919fb84df24f/v2.0" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ClientSecret = "client_secret" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.CodeVerifier = "someCodeVerifier" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Common = "common" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Consumers = "consumers" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DefaultAccessToken = "DefaultAccessToken" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DefaultAuthorizationCode = "DefaultAuthorizationCode" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DefaultClientAssertion = "DefaultClientAssertion" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DefaultGraphScope = "https://graph.microsoft.com/.default" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache without Pii" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DiscoveryEndPoint = "discovery/instance" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DiscoveryFailedResponse = "{\"error\":\"invalid_instance\",\r\n               \"error_description\":\"AADSTS50049: Unknown or invalid instance.\\r\\nTrace ID: 82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\\r\\nCorrelation ID: e7619cf4-53ea-443c-b76a-194c032e9840\\r\\nTimestamp: 2021-04-14 11:27:26Z\",\r\n               \"error_codes\":[50049],\r\n               \"timestamp\":\"2021-04-14 11:27:26Z\",\r\n               \"trace_id\":\"82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\",\r\n               \"correlation_id\":\"e7619cf4-53ea-443c-b76a-194c032e9840\",\r\n               \"error_uri\":\"https://login.microsoftonline.com/error?code=50049\"}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DiscoveryJsonResponse = "{\r\n                        \"tenant_discovery_endpoint\":\"https://login.microsoftonline.com/tenant/.well-known/openid-configuration\",\r\n                        \"api-version\":\"1.1\",\r\n                        \"metadata\":[\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.com\",\r\n                            \"preferred_cache\":\"login.windows.net\",\r\n                            \"aliases\":[\r\n                                \"login.microsoftonline.com\",\r\n                                \"login.windows.net\",\r\n                                \"login.microsoft.com\",\r\n                                \"sts.windows.net\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.partner.microsoftonline.cn\",\r\n                            \"preferred_cache\":\"login.partner.microsoftonline.cn\",\r\n                            \"aliases\":[\r\n                                \"login.partner.microsoftonline.cn\",\r\n                                \"login.chinacloudapi.cn\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.de\",\r\n                            \"preferred_cache\":\"login.microsoftonline.de\",\r\n                            \"aliases\":[\r\n                                    \"login.microsoftonline.de\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.us\",\r\n                            \"preferred_cache\":\"login.microsoftonline.us\",\r\n                            \"aliases\":[\r\n                                \"login.microsoftonline.us\",\r\n                                \"login.usgovcloudapi.net\"]},\r\n                            {\r\n                            \"preferred_network\":\"login-us.microsoftonline.com\",\r\n                            \"preferred_cache\":\"login-us.microsoftonline.com\",\r\n                            \"aliases\":[\r\n                                \"login-us.microsoftonline.com\"]}\r\n                        ]\r\n                }" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DisplayableId = "displayable@id.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/common/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DstsAuthorityConsumers = "https://some.url.dsts.core.azure-test.net/dstsv2/consumers/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DstsAuthorityOrganizations = "https://some.url.dsts.core.azure-test.net/dstsv2/organizations/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Email = "joe@contoso.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.EmptyClaimsJson = "{}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.FabrikamDisplayableId = "displayable@fabrikam.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.FamilyId = "1" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.FamilyName = "Doe" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.FmiNodeClientId = "urn:microsoft:identity:fmi" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.GenericAuthority = "https://demo.duendesoftware.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.GenericOidcJwkResponse = "{\"keys\":[{\"kty\":\"RSA\",\"use\":\"sig\",\"kid\":\"66682C848A3140685FC883FD7EA993CC\",\"e\":\"AQAB\",\"n\":\"pY-a5km28zOE-KS1UgYlWS9AT-4eYdxAlTVeGaSq21dhbB4L6tmlUiiV8s-Zv_L5Ng6rC1asmjEVtrKmFkYMoW4RbJC6HAzQbS7crGglyTJ39uDGJBpeQZCWYUljlIzp2VAJnPxG1-iyIDjZSOuGgvTxiphV4j2naU46RcT3IfC7CPkUZUtmqpbYNOHRli_oVirxGUMjHbq623qOCQUkUfMBLhKr0EjrZtcispSDzHqWktUO7K8Iy8D6VyttPIuzVkYx1GYiB0jCF1jgIDyEnH1E3r6S5ytao9KvoO6DGZTzFTJL2-i_uPco1DXfXFlVO9jKb5MHomO3NNrSDNRSnQ\",\"alg\":\"RS256\"}]}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.GenericOidcResponse = "{\r\n   \"issuer\":\"https://demo.duendesoftware.com\",\r\n   \"jwks_uri\":\"https://demo.duendesoftware.com/.well-known/openid-configuration/jwks\",\r\n   \"authorization_endpoint\":\"https://demo.duendesoftware.com/connect/authorize\",\r\n   \"token_endpoint\":\"https://demo.duendesoftware.com/connect/token\",\r\n   \"userinfo_endpoint\":\"https://demo.duendesoftware.com/connect/userinfo\",\r\n   \"end_session_endpoint\":\"https://demo.duendesoftware.com/connect/endsession\",\r\n   \"check_session_iframe\":\"https://demo.duendesoftware.com/connect/checksession\",\r\n   \"revocation_endpoint\":\"https://demo.duendesoftware.com/connect/revocation\",\r\n   \"introspection_endpoint\":\"https://demo.duendesoftware.com/connect/introspect\",\r\n   \"device_authorization_endpoint\":\"https://demo.duendesoftware.com/connect/deviceauthorization\",\r\n   \"backchannel_authentication_endpoint\":\"https://demo.duendesoftware.com/connect/ciba\",\r\n   \"frontchannel_logout_supported\":true,\r\n   \"frontchannel_logout_session_supported\":true,\r\n   \"backchannel_logout_supported\":true,\r\n   \"backchannel_logout_session_supported\":true,\r\n   \"scopes_supported\":[\r\n      \"openid\",\r\n      \"profile\",\r\n      \"email\",\r\n      \"api\",\r\n      \"resource1.scope1\",\r\n      \"resource1.scope2\",\r\n      \"resource2.scope1\",\r\n      \"resource2.scope2\",\r\n      \"resource3.scope1\",\r\n      \"resource3.scope2\",\r\n      \"scope3\",\r\n      \"scope4\",\r\n      \"shared.scope\",\r\n      \"transaction\",\r\n      \"offline_access\"\r\n   ],\r\n   \"claims_supported\":[\r\n      \"sub\",\r\n      \"name\",\r\n      \"family_name\",\r\n      \"given_name\",\r\n      \"middle_name\",\r\n      \"nickname\",\r\n      \"preferred_username\",\r\n      \"profile\",\r\n      \"picture\",\r\n      \"website\",\r\n      \"gender\",\r\n      \"birthdate\",\r\n      \"zoneinfo\",\r\n      \"locale\",\r\n      \"updated_at\",\r\n      \"email\",\r\n      \"email_verified\"\r\n   ],\r\n   \"grant_types_supported\":[\r\n      \"authorization_code\",\r\n      \"client_credentials\",\r\n      \"refresh_token\",\r\n      \"implicit\",\r\n      \"password\",\r\n      \"urn:ietf:params:oauth:grant-type:device_code\",\r\n      \"urn:openid:params:grant-type:ciba\"\r\n   ],\r\n   \"response_types_supported\":[\r\n      \"code\",\r\n      \"token\",\r\n      \"id_token\",\r\n      \"id_token token\",\r\n      \"code id_token\",\r\n      \"code token\",\r\n      \"code id_token token\"\r\n   ],\r\n   \"response_modes_supported\":[\r\n      \"form_post\",\r\n      \"query\",\r\n      \"fragment\"\r\n   ],\r\n   \"token_endpoint_auth_methods_supported\":[\r\n      \"client_secret_basic\",\r\n      \"client_secret_post\",\r\n      \"private_key_jwt\"\r\n   ],\r\n   \"id_token_signing_alg_values_supported\":[\r\n      \"RS256\"\r\n   ],\r\n   \"subject_types_supported\":[\r\n      \"public\"\r\n   ],\r\n   \"code_challenge_methods_supported\":[\r\n      \"plain\",\r\n      \"S256\"\r\n   ],\r\n   \"request_parameter_supported\":true,\r\n   \"request_object_signing_alg_values_supported\":[\r\n      \"RS256\",\r\n      \"RS384\",\r\n      \"RS512\",\r\n      \"PS256\",\r\n      \"PS384\",\r\n      \"PS512\",\r\n      \"ES256\",\r\n      \"ES384\",\r\n      \"ES512\",\r\n      \"HS256\",\r\n      \"HS384\",\r\n      \"HS512\"\r\n   ],\r\n   \"authorization_response_iss_parameter_supported\":true,\r\n   \"backchannel_token_delivery_modes_supported\":[\r\n      \"poll\"\r\n   ],\r\n   \"backchannel_user_code_parameter_supported\":true\r\n}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.GivenName = "Joe" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Guest = "guest" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Home = "home" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.HomeAccountId = "my-uid.my-utid" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.IdentityProvider = "my-idp" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ImdsHost = "169.254.169.254" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ImdsUrl = "http://169.254.169.254/metadata/instance/compute/location" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.InvalidRegion = "invalidregion" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.IOSBrokerErrDescr = "Test Error Description" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.IOSBrokerErrorMetadata = "error_metadata" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.IOSBrokerErrorMetadataValue = "{\"home_account_id\":\"test_home\", \"username\" : \"joe@localhost.com\" }" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.IOSBrokerSuberrCode = "TestSuberrCode" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.JwtToAadLifetimeInSeconds = 600 -> uint
-const Microsoft.Identity.Test.Unit.TestConstants.LocalAccountId = "test_local_account_id" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.LoginHint = "loginHint" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.LoginHintParam = "login_hint" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MachineLearningEndpoint = "http://localhost:7071/msi/token" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MergedJsonClaimWithAdditionalKeyAndAccessKey = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]},\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}},\"some_other_key\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MergedJsonWithAdditionalClaim = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]},\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MergedJsonWithAdditionalKey = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]},\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}},\"some_other_key\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}}}" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MiResourceId = "/subscriptions/ffa4aaa2-4444-4444-5555-e3ccedd3d046/resourcegroups/UAMI_group/providers/Microsoft.ManagedIdentityClient/userAssignedIdentities/UAMI" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MobileDefaultRedirectUri = "msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842://auth" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsalArlingtonCCAKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsalArlingtonOBOKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsalCCAKeyVaultSecretName = "MSIDLAB4-IDLABS-APP-AzureADMyOrg-CC" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsalCCAKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsalOBOKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsaRawClientInfo = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsftTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MsiResource = "scope" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.MtlsAuthenticationEndpoint = "http://fake_mtls_authentication_endpoint" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Name = "First Last" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Nonce = "someNonce" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ObjectId = "593b2662-5af7-4a90-a9cb-5a9de615b82f" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremiseAuthority = "https://fs.contoso.com/adfs/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremiseClientId = "on_premise_client_id" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremiseClientSecret = "on_premise_client_secret" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremiseDisplayableId = "displayable@contoso.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremiseHomeObjectId = "on_premise_unique_id" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremisePolicy = "on_premise_policy" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremiseRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremiseUid = "my-OnPremise-UID" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremiseUniqueId = "on_premise_unique_id" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.OnPremiseUtid = "my-OnPremise-UTID" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Organizations = "organizations" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.PiiDeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache Pii" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.PiiSerializeLogMessage = "MsalExternalLogMessage: Serializing Cache Pii" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.PKeyAuthResponse = "PKeyAuth Context=\"context\",Version=\"1.0\"" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.PlaceholderCredential = "placeholder-credential" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Pop = "PoP" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.PpeEnvironment = "login.windows-ppe.net" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.PpeOrgEnvironment = "login.windows-ppe.org" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.PrefCacheAuthorityCommonTenant = "https://login.windows.net/common/" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ProductionNotPrefEnvironmentAlias = "sts.windows.net" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ProductionPrefCacheEnvironment = "login.windows.net" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ProductionPrefNetworkEnvironment = "login.microsoftonline.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.PromptParam = "prompt" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.PublicCloudConfidentialClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RawClientId = "eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Realm = "someRealm" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RedirectUri = "urn:ietf:wg:oauth:2.0:oob" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Region = "centralus" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RegionAutoDetectInternalServerErrorFailureMessage = "Service is unavailable to process the request" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RegionAutoDetectNotFoundFailureMessage = "Call to local IMDS failed with status code NotFound or an empty response." -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RegionAutoDetectOkFailureMessage = "Call to local IMDS failed with status code OK or an empty response." -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RegionDiscoveryIMDSCallFailedMessage = "IMDS call failed" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RegionDiscoveryNotSupportedErrorMessage = "Region discovery can only be made if the service resides in Azure function or Azure VM" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RegionName = "REGION_NAME" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RTSecret = "someRT" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RTSecret2 = "someRT2" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.RTSecret3 = "someRT3" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ScopeForAnotherResourceStr = "r2/scope1 r2/scope2" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ScopeStr = "r1/scope1 r1/scope2" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ScopeStrFormat = "r{0}/scope1 r{0}/scope2" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.SerializeLogMessage = "MsalExternalLogMessage: Serializing Cache without Pii" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.ServiceFabricEndpoint = "https://localhost:2377/metadata/identity/oauth2/token" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.SomeTenantId = "sometenantid" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.SovereignNetworkEnvironmentBleu = "login.sovcloud-identity.fr" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.SovereignNetworkEnvironmentCN = "login.partner.microsoftonline.cn" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.SovereignNetworkEnvironmentDE = "login.microsoftonline.de" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.SovereignNetworkEnvironmentDelos = "login.sovcloud-identity.de" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.SovereignNetworkEnvironmentGovSG = "login.sovcloud-identity.sg" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.TenantId = "751a212b-4003-416e-b600-e1f48e40db9f" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.TenantId2 = "aaaaaaab-aaaa-aaaa-bbbb-aaaaaaaaaaaa" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.TenantIdNumber1 = "12345679" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.TenantIdNumber2 = "987654321" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.TenantIdString = "tenantid" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.TestErrCode = "TestErrCode" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.TestMessage = "test message" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.TestPlaceholderCredential = "placeholder-credential!" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.TimeoutInMs = 2000 -> int
-const Microsoft.Identity.Test.Unit.TestConstants.TokenResponseJson = "{\r\n                                                   \"token_type\": \"Bearer\",\r\n                                                   \"scope\": \"user_impersonation\",\r\n                                                   \"expires_in\": \"3600\",\r\n                                                   \"ext_expires_in\": \"3600\",\r\n                                                   \"expires_on\": \"1566165638\",\r\n                                                   \"not_before\": \"1566161738\",\r\n                                                   \"resource\": \"user.read\",\r\n                                                   \"access_token\": \"at_secret\",\r\n                                                   \"refresh_token\": \"rt_secret\",\r\n                                                   \"id_token\": \"idtoken.\",\r\n                                                   \"client_info\": \"eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0\"\r\n                                                }" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Uid = "my-uid" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.UniqueId = "unique_id" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.UserAssertion = "fake_access_token" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Username = "joe@localhost.com" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Utid = "my-utid" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.Utid2 = "my-utid2" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.VmId = "test-vm-id" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.VmssId = "test-vmss-id" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.XClientSku = "x-client-SKU" -> string
-const Microsoft.Identity.Test.Unit.TestConstants.XClientVer = "x-client-Ver" -> string
-Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId
-Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.Authority.get -> System.Uri
-Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.Authority.set -> void
-Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.AuthorityWithExpectedTenantId() -> void
-Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.ExpectedTenantId.get -> string
-Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.ExpectedTenantId.set -> void
-Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.ToObjectArray() -> object[]
-Microsoft.Identity.Test.Common.Core.Mocks.InMemoryTokenCache
-Microsoft.Identity.Test.Common.Core.Mocks.InMemoryTokenCache.AfterAccessNotification(Microsoft.Identity.Client.TokenCacheNotificationArgs args) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.InMemoryTokenCache.BeforeAccessNotification(Microsoft.Identity.Client.TokenCacheNotificationArgs args) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.InMemoryTokenCache.Bind(Microsoft.Identity.Client.ITokenCache tokenCache) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.InMemoryTokenCache.InMemoryTokenCache(bool withOperationDelay = false, bool shouldClearExistingCache = true) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactory
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactory.GetHttpClient() -> System.Net.Http.HttpClient
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactory.GetHttpClient(System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> validateServerCert) -> System.Net.Http.HttpClient
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 mtlsBindingCert) -> System.Net.Http.HttpClient
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactory.MockHttpClientFactory(System.Func<Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler> messageHandlerFunc, System.Collections.Concurrent.ConcurrentQueue<System.Net.Http.HttpClientHandler> httpMessageHandlerQueue, string testName) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactoryBase
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactoryBase.GetHttpClientInternal(System.Security.Cryptography.X509Certificates.X509Certificate2 mtlsBindingCert) -> System.Net.Http.HttpClient
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactoryBase.HttpMessageHandlerQueue.get -> System.Collections.Concurrent.ConcurrentQueue<System.Net.Http.HttpClientHandler>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactoryBase.HttpMessageHandlerQueue.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactoryBase.MessageHandlerFunc.get -> System.Func<Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactoryBase.MessageHandlerFunc.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactoryBase.MockHttpClientFactoryBase(System.Func<Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler> messageHandlerFunc, System.Collections.Concurrent.ConcurrentQueue<System.Net.Http.HttpClientHandler> httpMessageHandlerQueue, string testName) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactoryBase._testName.get -> string
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpClientFactoryBase._testName.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ActualRequestHeaders.get -> System.Net.Http.Headers.HttpRequestHeaders
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ActualRequestMessage.get -> System.Net.Http.HttpRequestMessage
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ActualRequestPostData.get -> System.Collections.Generic.Dictionary<string, string>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.AdditionalRequestValidation.get -> System.Action<System.Net.Http.HttpRequestMessage>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.AdditionalRequestValidation.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExceptionToThrow.get -> System.Exception
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExceptionToThrow.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedMethod.get -> System.Net.Http.HttpMethod
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedMethod.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedMtlsBindingCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedMtlsBindingCertificate.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedPostData.get -> System.Collections.Generic.IDictionary<string, string>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedPostData.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedQueryParams.get -> System.Collections.Generic.IDictionary<string, string>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedQueryParams.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedRequestHeaders.get -> System.Collections.Generic.IDictionary<string, string>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedRequestHeaders.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedUrl.get -> string
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ExpectedUrl.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.MockHttpMessageHandler() -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.NotExpectedQueryParams.get -> System.Collections.Generic.IDictionary<string, string>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.NotExpectedQueryParams.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.PresentRequestHeaders.get -> System.Collections.Generic.IList<string>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.PresentRequestHeaders.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ResponseMessage.get -> System.Net.Http.HttpResponseMessage
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.ResponseMessage.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.UnExpectedPostData.get -> System.Collections.Generic.IDictionary<string, string>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.UnExpectedPostData.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.UnexpectedRequestHeaders.get -> System.Collections.Generic.IList<string>
-Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.UnexpectedRequestHeaders.set -> void
-Microsoft.Identity.Test.Common.Core.Mocks.MockNonMtlsHttpClientFactory
-Microsoft.Identity.Test.Common.Core.Mocks.MockNonMtlsHttpClientFactory.GetHttpClient() -> System.Net.Http.HttpClient
-Microsoft.Identity.Test.Common.Core.Mocks.MockNonMtlsHttpClientFactory.MockNonMtlsHttpClientFactory(System.Func<Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler> messageHandlerFunc, System.Collections.Concurrent.ConcurrentQueue<System.Net.Http.HttpClientHandler> httpMessageHandlerQueue, string testName) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.TestLegacyCachePersistance
-Microsoft.Identity.Test.Common.Core.Mocks.TestLegacyCachePersistance.LoadCache() -> byte[]
-Microsoft.Identity.Test.Common.Core.Mocks.TestLegacyCachePersistance.TestLegacyCachePersistance() -> void
-Microsoft.Identity.Test.Common.Core.Mocks.TestLegacyCachePersistance.WriteCache(byte[] serializedCache) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.TestTimeService
-Microsoft.Identity.Test.Common.Core.Mocks.TestTimeService.GetUtcNow() -> System.DateTime
-Microsoft.Identity.Test.Common.Core.Mocks.TestTimeService.MoveToFuture(System.TimeSpan span) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.TestTimeService.MoveToPast(System.TimeSpan span) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.TestTimeService.TestTimeService() -> void
-Microsoft.Identity.Test.Common.Core.Mocks.TestTimeService.TestTimeService(System.DateTime utcNow) -> void
-Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType
-Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType.InvalidClient = 4 -> Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType
-Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType.InvalidGrant = 3 -> Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType
-Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType.Invalid_AADUnavailable503 = 2 -> Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType
-Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType.Valid_ClientCredentials = 1 -> Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType
-Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType.Valid_UserFlows = 0 -> Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType
-Microsoft.Identity.Test.Common.TestCategories
-Microsoft.Identity.Test.Common.TestData
+const Microsoft.Identity.Lab.Api.TestConstants.AadRawClientInfo = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AndroidBrokerResponse = "\r\n{\r\n      \"access_token\":\"secretAt\",\r\n      \"authority\":\"https://login.microsoftonline.com/common\",\r\n      \"cached_at\":1591193165,\r\n      \"client_id\":\"4a1aa1d5-c567-49d0-ad0b-cd957a47f842\",\r\n      \"client_info\":\"clientInfo\",\r\n      \"environment\":\"login.windows.net\",\r\n      \"expires_on\":1591196764,\r\n      \"ext_expires_on\":1591196764,\r\n      \"home_account_id\":\"ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462\",\r\n      \"http_response_code\":0,\r\n      \"id_token\":\"idT\",\r\n      \"local_account_id\":\"ae821e4d-f408-451a-af82-882691148603\",\r\n      \"scopes\":\"User.Read openid offline_access profile\",\r\n      \"success\":true,\r\n      \"tenant_id\":\"49f548d0-12b7-4169-a390-bb5304d24462\",\r\n      \"token_type\":\"Bearer\",\r\n      \"username\":\"some_user@contoso.com\"\r\n   }" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ATSecret = "some-access-token" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ATSecret2 = "some-access-token2" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ATSecret3 = "some-access-token3" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AadAuthorityWithMsftTenantId = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AadTenantId = "751a212b-4003-416e-b600-e1f48e40db9f" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ADFSAuthority = "https://fs.msidlab8.com/adfs/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ADFSAuthority2 = "https://someAdfs.com/adfs/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AppServiceEndpoint = "http://127.0.0.1:41564/msi/token" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityCommonPpeAuthority = "https://login.windows-ppe.net/common/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityCommonTenant = "https://login.microsoftonline.com/common/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityCommonTenantNotPrefAlias = "https://sts.windows.net/common/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityConsumerTidTenant = "https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityConsumersTenant = "https://login.microsoftonline.com/consumers/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityGuestTenant = "https://login.microsoftonline.com/guest/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityGuidTenant = "https://login.microsoftonline.com/12345679/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityGuidTenant2 = "https://login.microsoftonline.com/987654321/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityHomeTenant = "https://login.microsoftonline.com/home/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityNotKnownCommon = "https://sts.access.edu/common/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityNotKnownTenanted = "https://sts.access.edu/my-utid/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityOrganizationsTenant = "https://login.microsoftonline.com/organizations/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityRegional = "https://centralus.login.microsoft.com/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityRegionalInvalidRegion = "https://invalidregion.login.microsoft.com/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthoritySovereignCNCommon = "https://login.partner.microsoftonline.cn/common/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthoritySovereignCNTenant = "https://login.partner.microsoftonline.cn/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthoritySovereignDECommon = "https://login.microsoftonline.de/common/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthoritySovereignDETenant = "https://login.microsoftonline.de/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityTenant = "https://login.microsoftonline.com/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityTestTenant = "https://login.microsoftonline.com/my-utid/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityUtid2Tenant = "https://login.microsoftonline.com/my-utid2/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityUtidTenant = "https://login.microsoftonline.com/my-utid/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AuthorityWindowsNet = "https://login.windows.net/my-utid/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AutomationTestCertName = "LabAuth.MSIDLab.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/b2c_1_susi/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CCustomDomain = "https://catsareawesome.com/tfp/catsareawesome/b2c_1_susi/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CEditProfile = "b2c_1_editprofile" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CEditProfileHomeAccountIdentifer = "my-uid-b2c_1_editprofile.my-utid" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CEditProfileHomeAccountObjectId = "my-uid-b2c_1_editprofile" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CEnvironment = "sometenantid.b2clogin.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/b2c_1_susi/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/b2c_1_susi/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/b2c_1_susi/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginAuthorityUsGov = "https://sometenantid.b2clogin.us/tfp/sometenantid/b2c_1_susi/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/sometenantid/b2c_1_susi/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginBlackforest = ".b2clogin.de" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginCustomDomain = "catsareawesome.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginGlobal = ".b2clogin.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginMoonCake = ".b2clogin.cn" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CLoginUSGov = ".b2clogin.us" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CProfileWithDot = "b2c.someprofile" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CProfileWithDotHomeAccountIdentifer = "my-uid-b2c.someprofile.my-utid" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CProfileWithDotHomeAccountObjectId = "my-uid-b2c.someprofile" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CRawClientInfo = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CSignUpSignIn = "b2c_1_susi" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CSuSiHomeAccountIdentifer = "my-uid-b2c_1_susi.my-utid" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.B2CSuSiHomeAccountObjectId = "my-uid-b2c_1_susi" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Bearer = "Bearer" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.BrokerClaims = "testClaims" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.BrokerOIDCScopes = "openid offline_access profile" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.CatsAreAwesome = "catsareawesome" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.CiamAuthorityMainFormat = "https://tenant.ciamlogin.com/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.CiamAuthorityWithFriendlyName = "https://tenant.ciamlogin.com/tenant.onmicrosoft.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.CiamAuthorityWithGuid = "https://tenant.ciamlogin.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.CiamCUDAuthority = "https://login.msidlabsciam.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa/v2.0" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.CiamCUDAuthorityMalformed = "https://login.msidlabsciam.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Claims = "{\"userinfo\":{\"given_name\":{\"essential\":true},\"nickname\":null,\"email\":{\"essential\":true},\"email_verified\":{\"essential\":true},\"picture\":null,\"http://example.info/claims/groups\":null},\"id_token\":{\"auth_time\":{\"essential\":true},\"acr\":{\"values\":[\"urn:mace:incommon:iap:silver\"]}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClaimsChallenge = "eyJhY2Nlc3NfdG9rZW4iOnsiYWNycyI6eyJlc3NlbnRpYWwiOnRydWUsInZhbHVlIjoiY3AxIn19fQ==" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClaimsWithAccessToken = "{\"access_token\":{\"nbf\":{\"essential\":true, \"value\":\"1701477303\"}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClaimsWithAdditionalClaim = "{\"access_token\":{\"nbf\":{\"essential\":true, \"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClaimWithAdditionalKey = "{\"access_token\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}},\"some_other_key\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClaimWithAdditionalKeyAndAccessKey = "{\"some_other_key\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}},\"access_token\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClientCapabilitiesAndClaimsJson = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]}},\"userinfo\":{\"given_name\":{\"essential\":true},\"nickname\":null,\"email\":{\"essential\":true},\"email_verified\":{\"essential\":true},\"picture\":null,\"http://example.info/claims/groups\":null},\"id_token\":{\"auth_time\":{\"essential\":true},\"acr\":{\"values\":[\"urn:mace:incommon:iap:silver\"]}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClientCapabilitiesAndClaimsJsonWithAccessToken = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]},\"nbf\":{\"essential\":true,\"value\":\"1701477303\"}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClientCapabilitiesJson = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClientCredentialAudience = "https://login.microsoftonline.com/10c419d4-4a50-45b2-aa4e-919fb84df24f/v2.0" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ClientSecret = "client_secret" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.CodeVerifier = "someCodeVerifier" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Common = "common" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Consumers = "consumers" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DefaultAccessToken = "DefaultAccessToken" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DefaultAuthorizationCode = "DefaultAuthorizationCode" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DefaultClientAssertion = "DefaultClientAssertion" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DefaultGraphScope = "https://graph.microsoft.com/.default" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache without Pii" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DiscoveryEndPoint = "discovery/instance" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DiscoveryFailedResponse = "{\"error\":\"invalid_instance\",\r\n               \"error_description\":\"AADSTS50049: Unknown or invalid instance.\\r\\nTrace ID: 82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\\r\\nCorrelation ID: e7619cf4-53ea-443c-b76a-194c032e9840\\r\\nTimestamp: 2021-04-14 11:27:26Z\",\r\n               \"error_codes\":[50049],\r\n               \"timestamp\":\"2021-04-14 11:27:26Z\",\r\n               \"trace_id\":\"82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\",\r\n               \"correlation_id\":\"e7619cf4-53ea-443c-b76a-194c032e9840\",\r\n               \"error_uri\":\"https://login.microsoftonline.com/error?code=50049\"}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DiscoveryJsonResponse = "{\r\n                        \"tenant_discovery_endpoint\":\"https://login.microsoftonline.com/tenant/.well-known/openid-configuration\",\r\n                        \"api-version\":\"1.1\",\r\n                        \"metadata\":[\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.com\",\r\n                            \"preferred_cache\":\"login.windows.net\",\r\n                            \"aliases\":[\r\n                                \"login.microsoftonline.com\",\r\n                                \"login.windows.net\",\r\n                                \"login.microsoft.com\",\r\n                                \"sts.windows.net\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.partner.microsoftonline.cn\",\r\n                            \"preferred_cache\":\"login.partner.microsoftonline.cn\",\r\n                            \"aliases\":[\r\n                                \"login.partner.microsoftonline.cn\",\r\n                                \"login.chinacloudapi.cn\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.de\",\r\n                            \"preferred_cache\":\"login.microsoftonline.de\",\r\n                            \"aliases\":[\r\n                                    \"login.microsoftonline.de\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.us\",\r\n                            \"preferred_cache\":\"login.microsoftonline.us\",\r\n                            \"aliases\":[\r\n                                \"login.microsoftonline.us\",\r\n                                \"login.usgovcloudapi.net\"]},\r\n                            {\r\n                            \"preferred_network\":\"login-us.microsoftonline.com\",\r\n                            \"preferred_cache\":\"login-us.microsoftonline.com\",\r\n                            \"aliases\":[\r\n                                \"login-us.microsoftonline.com\"]}\r\n                        ]\r\n                }" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DisplayableId = "displayable@id.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/common/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DstsAuthorityConsumers = "https://some.url.dsts.core.azure-test.net/dstsv2/consumers/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DstsAuthorityOrganizations = "https://some.url.dsts.core.azure-test.net/dstsv2/organizations/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/751a212b-4003-416e-b600-e1f48e40db9f/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Email = "joe@contoso.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.EmptyClaimsJson = "{}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.FabrikamDisplayableId = "displayable@fabrikam.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.FamilyId = "1" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.FamilyName = "Doe" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.FmiNodeClientId = "urn:microsoft:identity:fmi" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.GenericAuthority = "https://demo.duendesoftware.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.GenericOidcJwkResponse = "{\"keys\":[{\"kty\":\"RSA\",\"use\":\"sig\",\"kid\":\"66682C848A3140685FC883FD7EA993CC\",\"e\":\"AQAB\",\"n\":\"pY-a5km28zOE-KS1UgYlWS9AT-4eYdxAlTVeGaSq21dhbB4L6tmlUiiV8s-Zv_L5Ng6rC1asmjEVtrKmFkYMoW4RbJC6HAzQbS7crGglyTJ39uDGJBpeQZCWYUljlIzp2VAJnPxG1-iyIDjZSOuGgvTxiphV4j2naU46RcT3IfC7CPkUZUtmqpbYNOHRli_oVirxGUMjHbq623qOCQUkUfMBLhKr0EjrZtcispSDzHqWktUO7K8Iy8D6VyttPIuzVkYx1GYiB0jCF1jgIDyEnH1E3r6S5ytao9KvoO6DGZTzFTJL2-i_uPco1DXfXFlVO9jKb5MHomO3NNrSDNRSnQ\",\"alg\":\"RS256\"}]}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.GenericOidcResponse = "{\r\n   \"issuer\":\"https://demo.duendesoftware.com\",\r\n   \"jwks_uri\":\"https://demo.duendesoftware.com/.well-known/openid-configuration/jwks\",\r\n   \"authorization_endpoint\":\"https://demo.duendesoftware.com/connect/authorize\",\r\n   \"token_endpoint\":\"https://demo.duendesoftware.com/connect/token\",\r\n   \"userinfo_endpoint\":\"https://demo.duendesoftware.com/connect/userinfo\",\r\n   \"end_session_endpoint\":\"https://demo.duendesoftware.com/connect/endsession\",\r\n   \"check_session_iframe\":\"https://demo.duendesoftware.com/connect/checksession\",\r\n   \"revocation_endpoint\":\"https://demo.duendesoftware.com/connect/revocation\",\r\n   \"introspection_endpoint\":\"https://demo.duendesoftware.com/connect/introspect\",\r\n   \"device_authorization_endpoint\":\"https://demo.duendesoftware.com/connect/deviceauthorization\",\r\n   \"backchannel_authentication_endpoint\":\"https://demo.duendesoftware.com/connect/ciba\",\r\n   \"frontchannel_logout_supported\":true,\r\n   \"frontchannel_logout_session_supported\":true,\r\n   \"backchannel_logout_supported\":true,\r\n   \"backchannel_logout_session_supported\":true,\r\n   \"scopes_supported\":[\r\n      \"openid\",\r\n      \"profile\",\r\n      \"email\",\r\n      \"api\",\r\n      \"resource1.scope1\",\r\n      \"resource1.scope2\",\r\n      \"resource2.scope1\",\r\n      \"resource2.scope2\",\r\n      \"resource3.scope1\",\r\n      \"resource3.scope2\",\r\n      \"scope3\",\r\n      \"scope4\",\r\n      \"shared.scope\",\r\n      \"transaction\",\r\n      \"offline_access\"\r\n   ],\r\n   \"claims_supported\":[\r\n      \"sub\",\r\n      \"name\",\r\n      \"family_name\",\r\n      \"given_name\",\r\n      \"middle_name\",\r\n      \"nickname\",\r\n      \"preferred_username\",\r\n      \"profile\",\r\n      \"picture\",\r\n      \"website\",\r\n      \"gender\",\r\n      \"birthdate\",\r\n      \"zoneinfo\",\r\n      \"locale\",\r\n      \"updated_at\",\r\n      \"email\",\r\n      \"email_verified\"\r\n   ],\r\n   \"grant_types_supported\":[\r\n      \"authorization_code\",\r\n      \"client_credentials\",\r\n      \"refresh_token\",\r\n      \"implicit\",\r\n      \"password\",\r\n      \"urn:ietf:params:oauth:grant-type:device_code\",\r\n      \"urn:openid:params:grant-type:ciba\"\r\n   ],\r\n   \"response_types_supported\":[\r\n      \"code\",\r\n      \"token\",\r\n      \"id_token\",\r\n      \"id_token token\",\r\n      \"code id_token\",\r\n      \"code token\",\r\n      \"code id_token token\"\r\n   ],\r\n   \"response_modes_supported\":[\r\n      \"form_post\",\r\n      \"query\",\r\n      \"fragment\"\r\n   ],\r\n   \"token_endpoint_auth_methods_supported\":[\r\n      \"client_secret_basic\",\r\n      \"client_secret_post\",\r\n      \"private_key_jwt\"\r\n   ],\r\n   \"id_token_signing_alg_values_supported\":[\r\n      \"RS256\"\r\n   ],\r\n   \"subject_types_supported\":[\r\n      \"public\"\r\n   ],\r\n   \"code_challenge_methods_supported\":[\r\n      \"plain\",\r\n      \"S256\"\r\n   ],\r\n   \"request_parameter_supported\":true,\r\n   \"request_object_signing_alg_values_supported\":[\r\n      \"RS256\",\r\n      \"RS384\",\r\n      \"RS512\",\r\n      \"PS256\",\r\n      \"PS384\",\r\n      \"PS512\",\r\n      \"ES256\",\r\n      \"ES384\",\r\n      \"ES512\",\r\n      \"HS256\",\r\n      \"HS384\",\r\n      \"HS512\"\r\n   ],\r\n   \"authorization_response_iss_parameter_supported\":true,\r\n   \"backchannel_token_delivery_modes_supported\":[\r\n      \"poll\"\r\n   ],\r\n   \"backchannel_user_code_parameter_supported\":true\r\n}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.GivenName = "Joe" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Guest = "guest" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Home = "home" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.HomeAccountId = "my-uid.my-utid" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.IdentityProvider = "my-idp" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ImdsHost = "169.254.169.254" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ImdsUrl = "http://169.254.169.254/metadata/instance/compute/location" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.InvalidRegion = "invalidregion" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.IOSBrokerErrDescr = "Test Error Description" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.IOSBrokerErrorMetadata = "error_metadata" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.IOSBrokerErrorMetadataValue = "{\"home_account_id\":\"test_home\", \"username\" : \"joe@localhost.com\" }" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.IOSBrokerSuberrCode = "TestSuberrCode" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.JwtToAadLifetimeInSeconds = 600 -> uint
+const Microsoft.Identity.Lab.Api.TestConstants.LocalAccountId = "test_local_account_id" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.LoginHint = "loginHint" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.LoginHintParam = "login_hint" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MachineLearningEndpoint = "http://localhost:7071/msi/token" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MergedJsonClaimWithAdditionalKeyAndAccessKey = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]},\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}},\"some_other_key\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MergedJsonWithAdditionalClaim = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]},\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MergedJsonWithAdditionalKey = "{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"cp2\"]},\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}},\"some_other_key\":{\"nbf\":{\"essential\":true,\"value\":\"1701477303\"},\"additional_claim\":{\"key\":\"value\"},\"new_claim\":{\"new_key\":\"new_value\"}}}" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MiResourceId = "/subscriptions/ffa4aaa2-4444-4444-5555-e3ccedd3d046/resourcegroups/UAMI_group/providers/Microsoft.ManagedIdentityClient/userAssignedIdentities/UAMI" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MobileDefaultRedirectUri = "msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842://auth" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsalArlingtonCCAKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsalArlingtonOBOKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsalCCAKeyVaultSecretName = "MSIDLAB4-IDLABS-APP-AzureADMyOrg-CC" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsalCCAKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsalOBOKeyVaultUri = "https://id4skeyvault.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsaRawClientInfo = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsftTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MsiResource = "scope" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.MtlsAuthenticationEndpoint = "http://fake_mtls_authentication_endpoint" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Name = "First Last" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Nonce = "someNonce" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ObjectId = "593b2662-5af7-4a90-a9cb-5a9de615b82f" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremiseAuthority = "https://fs.contoso.com/adfs/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremiseClientId = "on_premise_client_id" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremiseClientSecret = "on_premise_client_secret" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremiseDisplayableId = "displayable@contoso.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremiseHomeObjectId = "on_premise_unique_id" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremisePolicy = "on_premise_policy" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremiseRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremiseUid = "my-OnPremise-UID" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremiseUniqueId = "on_premise_unique_id" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.OnPremiseUtid = "my-OnPremise-UTID" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Organizations = "organizations" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.PiiDeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache Pii" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.PiiSerializeLogMessage = "MsalExternalLogMessage: Serializing Cache Pii" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.PKeyAuthResponse = "PKeyAuth Context=\"context\",Version=\"1.0\"" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.PlaceholderCredential = "placeholder-credential" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Pop = "PoP" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.PpeEnvironment = "login.windows-ppe.net" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.PpeOrgEnvironment = "login.windows-ppe.org" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.PrefCacheAuthorityCommonTenant = "https://login.windows.net/common/" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ProductionNotPrefEnvironmentAlias = "sts.windows.net" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ProductionPrefCacheEnvironment = "login.windows.net" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ProductionPrefNetworkEnvironment = "login.microsoftonline.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.PromptParam = "prompt" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.PublicCloudConfidentialClientID = "54a2d933-8bf8-483b-a8f8-0a31924f3c1f" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RawClientId = "eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Realm = "someRealm" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RedirectUri = "urn:ietf:wg:oauth:2.0:oob" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Region = "centralus" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RegionAutoDetectInternalServerErrorFailureMessage = "Service is unavailable to process the request" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RegionAutoDetectNotFoundFailureMessage = "Call to local IMDS failed with status code NotFound or an empty response." -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RegionAutoDetectOkFailureMessage = "Call to local IMDS failed with status code OK or an empty response." -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RegionDiscoveryIMDSCallFailedMessage = "IMDS call failed" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RegionDiscoveryNotSupportedErrorMessage = "Region discovery can only be made if the service resides in Azure function or Azure VM" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RegionName = "REGION_NAME" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RTSecret = "someRT" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RTSecret2 = "someRT2" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.RTSecret3 = "someRT3" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ScopeForAnotherResourceStr = "r2/scope1 r2/scope2" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ScopeStr = "r1/scope1 r1/scope2" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ScopeStrFormat = "r{0}/scope1 r{0}/scope2" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.SerializeLogMessage = "MsalExternalLogMessage: Serializing Cache without Pii" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.ServiceFabricEndpoint = "https://localhost:2377/metadata/identity/oauth2/token" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.SomeTenantId = "sometenantid" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.SovereignNetworkEnvironmentBleu = "login.sovcloud-identity.fr" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.SovereignNetworkEnvironmentCN = "login.partner.microsoftonline.cn" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.SovereignNetworkEnvironmentDE = "login.microsoftonline.de" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.SovereignNetworkEnvironmentDelos = "login.sovcloud-identity.de" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.SovereignNetworkEnvironmentGovSG = "login.sovcloud-identity.sg" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.TenantId = "751a212b-4003-416e-b600-e1f48e40db9f" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.TenantId2 = "aaaaaaab-aaaa-aaaa-bbbb-aaaaaaaaaaaa" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.TenantIdNumber1 = "12345679" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.TenantIdNumber2 = "987654321" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.TenantIdString = "tenantid" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.TestErrCode = "TestErrCode" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.TestMessage = "test message" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.TestPlaceholderCredential = "placeholder-credential!" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.TimeoutInMs = 2000 -> int
+const Microsoft.Identity.Lab.Api.TestConstants.TokenResponseJson = "{\r\n                                                   \"token_type\": \"Bearer\",\r\n                                                   \"scope\": \"user_impersonation\",\r\n                                                   \"expires_in\": \"3600\",\r\n                                                   \"ext_expires_in\": \"3600\",\r\n                                                   \"expires_on\": \"1566165638\",\r\n                                                   \"not_before\": \"1566161738\",\r\n                                                   \"resource\": \"user.read\",\r\n                                                   \"access_token\": \"at_secret\",\r\n                                                   \"refresh_token\": \"rt_secret\",\r\n                                                   \"id_token\": \"idtoken.\",\r\n                                                   \"client_info\": \"eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0\"\r\n                                                }" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Uid = "my-uid" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.UniqueId = "unique_id" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.UserAssertion = "fake_access_token" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Username = "joe@localhost.com" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Utid = "my-utid" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.Utid2 = "my-utid2" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.VmId = "test-vm-id" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.VmssId = "test-vmss-id" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.XClientSku = "x-client-SKU" -> string
+const Microsoft.Identity.Lab.Api.TestConstants.XClientVer = "x-client-Ver" -> string
+Microsoft.Identity.Lab.Api.AuthorityWithExpectedTenantId
+Microsoft.Identity.Lab.Api.AuthorityWithExpectedTenantId.Authority.get -> System.Uri
+Microsoft.Identity.Lab.Api.AuthorityWithExpectedTenantId.Authority.set -> void
+Microsoft.Identity.Lab.Api.AuthorityWithExpectedTenantId.AuthorityWithExpectedTenantId() -> void
+Microsoft.Identity.Lab.Api.AuthorityWithExpectedTenantId.ExpectedTenantId.get -> string
+Microsoft.Identity.Lab.Api.AuthorityWithExpectedTenantId.ExpectedTenantId.set -> void
+Microsoft.Identity.Lab.Api.AuthorityWithExpectedTenantId.ToObjectArray() -> object[]
+Microsoft.Identity.Lab.Api.Core.Mocks.InMemoryTokenCache
+Microsoft.Identity.Lab.Api.Core.Mocks.InMemoryTokenCache.AfterAccessNotification(Microsoft.Identity.Client.TokenCacheNotificationArgs args) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.InMemoryTokenCache.BeforeAccessNotification(Microsoft.Identity.Client.TokenCacheNotificationArgs args) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.InMemoryTokenCache.Bind(Microsoft.Identity.Client.ITokenCache tokenCache) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.InMemoryTokenCache.InMemoryTokenCache(bool withOperationDelay = false, bool shouldClearExistingCache = true) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactory
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactory.GetHttpClient() -> System.Net.Http.HttpClient
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactory.GetHttpClient(System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> validateServerCert) -> System.Net.Http.HttpClient
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 mtlsBindingCert) -> System.Net.Http.HttpClient
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactory.MockHttpClientFactory(System.Func<Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler> messageHandlerFunc, System.Collections.Concurrent.ConcurrentQueue<System.Net.Http.HttpClientHandler> httpMessageHandlerQueue, string testName) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactoryBase
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactoryBase.GetHttpClientInternal(System.Security.Cryptography.X509Certificates.X509Certificate2 mtlsBindingCert) -> System.Net.Http.HttpClient
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactoryBase.HttpMessageHandlerQueue.get -> System.Collections.Concurrent.ConcurrentQueue<System.Net.Http.HttpClientHandler>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactoryBase.HttpMessageHandlerQueue.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactoryBase.MessageHandlerFunc.get -> System.Func<Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactoryBase.MessageHandlerFunc.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactoryBase.MockHttpClientFactoryBase(System.Func<Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler> messageHandlerFunc, System.Collections.Concurrent.ConcurrentQueue<System.Net.Http.HttpClientHandler> httpMessageHandlerQueue, string testName) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactoryBase._testName.get -> string
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpClientFactoryBase._testName.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ActualRequestHeaders.get -> System.Net.Http.Headers.HttpRequestHeaders
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ActualRequestMessage.get -> System.Net.Http.HttpRequestMessage
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ActualRequestPostData.get -> System.Collections.Generic.Dictionary<string, string>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.AdditionalRequestValidation.get -> System.Action<System.Net.Http.HttpRequestMessage>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.AdditionalRequestValidation.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExceptionToThrow.get -> System.Exception
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExceptionToThrow.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedMethod.get -> System.Net.Http.HttpMethod
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedMethod.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedMtlsBindingCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedMtlsBindingCertificate.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedPostData.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedPostData.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedQueryParams.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedQueryParams.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedRequestHeaders.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedRequestHeaders.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedUrl.get -> string
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ExpectedUrl.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.MockHttpMessageHandler() -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.NotExpectedQueryParams.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.NotExpectedQueryParams.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.PresentRequestHeaders.get -> System.Collections.Generic.IList<string>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.PresentRequestHeaders.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ResponseMessage.get -> System.Net.Http.HttpResponseMessage
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.ResponseMessage.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.UnExpectedPostData.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.UnExpectedPostData.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.UnexpectedRequestHeaders.get -> System.Collections.Generic.IList<string>
+Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.UnexpectedRequestHeaders.set -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.MockNonMtlsHttpClientFactory
+Microsoft.Identity.Lab.Api.Core.Mocks.MockNonMtlsHttpClientFactory.GetHttpClient() -> System.Net.Http.HttpClient
+Microsoft.Identity.Lab.Api.Core.Mocks.MockNonMtlsHttpClientFactory.MockNonMtlsHttpClientFactory(System.Func<Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler> messageHandlerFunc, System.Collections.Concurrent.ConcurrentQueue<System.Net.Http.HttpClientHandler> httpMessageHandlerQueue, string testName) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.TestLegacyCachePersistance
+Microsoft.Identity.Lab.Api.Core.Mocks.TestLegacyCachePersistance.LoadCache() -> byte[]
+Microsoft.Identity.Lab.Api.Core.Mocks.TestLegacyCachePersistance.TestLegacyCachePersistance() -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.TestLegacyCachePersistance.WriteCache(byte[] serializedCache) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.TestTimeService
+Microsoft.Identity.Lab.Api.Core.Mocks.TestTimeService.GetUtcNow() -> System.DateTime
+Microsoft.Identity.Lab.Api.Core.Mocks.TestTimeService.MoveToFuture(System.TimeSpan span) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.TestTimeService.MoveToPast(System.TimeSpan span) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.TestTimeService.TestTimeService() -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.TestTimeService.TestTimeService(System.DateTime utcNow) -> void
+Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType
+Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType.InvalidClient = 4 -> Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType
+Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType.InvalidGrant = 3 -> Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType
+Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType.Invalid_AADUnavailable503 = 2 -> Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType
+Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType.Valid_ClientCredentials = 1 -> Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType
+Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType.Valid_UserFlows = 0 -> Microsoft.Identity.Lab.Api.Core.Mocks.TokenResponseType
+Microsoft.Identity.Lab.Api.TestCategories
+Microsoft.Identity.Lab.Api.TestData
 Microsoft.Identity.Test.LabInfrastructure.AppConfig
 Microsoft.Identity.Test.LabInfrastructure.AppConfig.AppConfig() -> void
 Microsoft.Identity.Test.LabInfrastructure.AppConfig.AppId.get -> string
@@ -398,56 +398,56 @@ Microsoft.Identity.Test.LabInfrastructure.UserConfig.Upn.set -> void
 Microsoft.Identity.Test.LabInfrastructure.UserConfig.UserConfig() -> void
 Microsoft.Identity.Test.LabInfrastructure.UserConfig.UserType.get -> string
 Microsoft.Identity.Test.LabInfrastructure.UserConfig.UserType.set -> void
-Microsoft.Identity.Test.Unit.TestConstants
-Microsoft.Identity.Test.Unit.TestConstants.AuthorityType
-Microsoft.Identity.Test.Unit.TestConstants.AuthorityType.B2C = 0 -> Microsoft.Identity.Test.Unit.TestConstants.AuthorityType
-override Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage>
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateAdfsIdToken(string upn) -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateAdfsOpenIdConfigurationResponse(string authority, string qp = "") -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateAdfsSuccessTokenResponseMessage() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateClientInfo(string uid = "my-uid", string utid = "my-utid", bool CreateClientInfoForS2S = false) -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateEmptyResponseMessage() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateFailureTokenResponseMessage(string error, string subError = null, string correlationId = null, System.Net.HttpStatusCode? customStatusCode = null, string errorCode = "AADSTS00000") -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateHttpStatusNotFoundResponseMessage() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateIdToken(string uniqueId, string displayableId) -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateIdToken(string uniqueId, string displayableId, string tenantId) -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateInstanceDiscoveryMockHandler(string discoveryEndpoint, string content = "{\r\n                        \"tenant_discovery_endpoint\":\"https://login.microsoftonline.com/tenant/.well-known/openid-configuration\",\r\n                        \"api-version\":\"1.1\",\r\n                        \"metadata\":[\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.com\",\r\n                            \"preferred_cache\":\"login.windows.net\",\r\n                            \"aliases\":[\r\n                                \"login.microsoftonline.com\",\r\n                                \"login.windows.net\",\r\n                                \"login.microsoft.com\",\r\n                                \"sts.windows.net\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.partner.microsoftonline.cn\",\r\n                            \"preferred_cache\":\"login.partner.microsoftonline.cn\",\r\n                            \"aliases\":[\r\n                                \"login.partner.microsoftonline.cn\",\r\n                                \"login.chinacloudapi.cn\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.de\",\r\n                            \"preferred_cache\":\"login.microsoftonline.de\",\r\n                            \"aliases\":[\r\n                                    \"login.microsoftonline.de\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.us\",\r\n                            \"preferred_cache\":\"login.microsoftonline.us\",\r\n                            \"aliases\":[\r\n                                \"login.microsoftonline.us\",\r\n                                \"login.usgovcloudapi.net\"]},\r\n                            {\r\n                            \"preferred_network\":\"login-us.microsoftonline.com\",\r\n                            \"preferred_cache\":\"login-us.microsoftonline.com\",\r\n                            \"aliases\":[\r\n                                \"login-us.microsoftonline.com\"]}\r\n                        ]\r\n                }") -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateInvalidClientResponseMessage() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateInvalidGrantTokenResponseMessage(string subError = null, string claims = null) -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateInvalidRequestTokenResponseMessage() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateNoErrorFieldResponseMessage() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateNullResponseMessage() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateOpenIdConfigurationResponse(string authority, string qp = "") -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreatePKeyAuthChallengeResponse() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateRequestTimeoutResponseMessage() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateServerErrorMessage(System.Net.HttpStatusCode statusCode, int? retryAfter = null) -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(string token = "header.payload.signature", string expiry = "3599", string tokenType = "Bearer") -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(string token = "header.payload.signature", string expiry = "3599", string tokenType = "Bearer", string additionalparams = ",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"additional_param4\":[\"GUID\",\"GUID2\",\"GUID3\"],\"additional_param5\":{\"value5json\":\"value5\"}") -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithClientInfoMessage(string token = "header.payload.signature", string expiry = "3599", string tokenType = "Bearer", bool CreateClientInfoForS2S = false) -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateSuccessResponseMessage(string successResponse) -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateSuccessTokenResponseMessage(string scopes, string idToken, string clientInfo) -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateSuccessTokenResponseMessageWithUid(string uid, string utid, string displayableName) -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateSuccessTokenResponseString(string uniqueId, string displayableId, string[] scope, bool foci = false, string utid = "my-utid", string accessToken = "some-access-token", string refreshToken = "OAAsomethingencrypedQwgAA") -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateSuccessWebFingerResponseMessage() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateSuccessWebFingerResponseMessage(string href) -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateTooManyRequestsJsonResponse() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateTooManyRequestsNonJsonResponse() -> System.Net.Http.HttpResponseMessage
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GenerateStreamFromString(string s) -> System.IO.Stream
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetBridgedHybridSpaTokenResponse(string spaAccountId) -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetDefaultTokenResponse(string accessToken = "some-access-token", string refreshToken = "someRT") -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetFociTokenResponse() -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetHybridSpaTokenResponse(string spaCode) -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetMsiErrorBadJson() -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetMsiErrorResponse(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetMsiImdsErrorResponse() -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetMsiSuccessfulResponse(int expiresInHours = 1, bool useIsoFormat = false, bool imdsV2 = false) -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetPopTokenResponse() -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetTokenResponseWithNoOidClaim() -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.MockCertificateRequestResponse(Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.None, string userAssignedId = null, string certificate = "MIIDATCCAemgAwIBAgIUSfjghyQB4FIS41rWfNcZHTLE/R4wDQYJKoZIhvcNAQELBQAwDzENMAsGA1UEAwwEVGVzdDAgFw0yNTA4MjgyMDIxMDBaGA8yMTI1MDgwNDIwMjEwMFowDzENMAsGA1UEAwwEVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALlc0S6TdwgQKGRl3Y/9uWNRpWo1WHiZtd1YdgCBt0rjxTqsbQUurU0B9Kdk7QQ9srxmjimxGHaUFypbb39awqIdQQcuQvIUj5+sQh9zzCyR35bGQp8vwbna5GlhAIbzsUi/y5kEGUMbuQN05XfoJSQrU35XZ8duQSDH5h9aDr6kuLcpDHo9/9vZiosPfqGPxZGtVjMvrJdVQGLJF35xD3LlX8xG2iJfVK/xYQVi3MgbRNQaL2lHtZaGAc1CToMUPO60xXrZkQE08hC907YTBcavUVQg4vrOaPpsCs+Fj6EJcasADAJeh1mGBn3kHFPCxBa2MKFraFPp53zOagTvYV0CAwEAAaNTMFEwHQYDVR0OBBYEFA9irQR/O6/V2JVyDEHFOdUDjAsyMB8GA1UdIwQYMBaAFA9irQR/O6/V2JVyDEHFOdUDjAsyMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAAOxtgYjtkUDVvWzq/lkjLTdcLjPvmH0hF34A3uvX4zcjmqF845lfvszTuhc1mx5J6YLEzKfr4TrO3D3g2BnDLvhupok0wEmJ9yVwbt1laim7zP09gZqnUqYM9hYKDhwgLZAaG3zGNocxDEAU7jazMGOGF7TweB7LdNuVI6CqgDOBQ8Cy2ObuZvzCI5Y7f+HucXpiJOu1xNa2ZZpMpQycYEvi5TD+CL5CBv2fcKQRn/+u5B3ZXCD2C9jT/RZ7rH46mIG7nC7dS4J2o4JjmlJIUAe2U6tRay5GvEmc/nZK8hd9y4BICzrykp9ENAoy9i+uaE1GGWeNgO+irrcrAcLwto=", string clientIdOverride = null, string tenantIdOverride = null, string mtlsEndpointOverride = null) -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.MockCsrResponse(System.Net.HttpStatusCode statusCode = System.Net.HttpStatusCode.OK, string responseServerHeader = "IMDS/150.870.65.1854", Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.None, string userAssignedId = null, string clientIdOverride = null, string tenantIdOverride = null, string attestationEndpointOverride = null) -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.MockCsrResponseFailure() -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
-static Microsoft.Identity.Test.Common.TestData.GetAuthorityWithExpectedTenantId() -> System.Collections.Generic.IEnumerable<object[]>
-static Microsoft.Identity.Test.Common.TestData.GetClaimsAndCapabilities() -> System.Collections.Generic.IEnumerable<object[]>
+Microsoft.Identity.Lab.Api.TestConstants
+Microsoft.Identity.Lab.Api.TestConstants.AuthorityType
+Microsoft.Identity.Lab.Api.TestConstants.AuthorityType.B2C = 0 -> Microsoft.Identity.Lab.Api.TestConstants.AuthorityType
+override Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler.SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage>
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateAdfsIdToken(string upn) -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateAdfsOpenIdConfigurationResponse(string authority, string qp = "") -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateAdfsSuccessTokenResponseMessage() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateClientInfo(string uid = "my-uid", string utid = "my-utid", bool CreateClientInfoForS2S = false) -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateEmptyResponseMessage() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateFailureTokenResponseMessage(string error, string subError = null, string correlationId = null, System.Net.HttpStatusCode? customStatusCode = null, string errorCode = "AADSTS00000") -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateHttpStatusNotFoundResponseMessage() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateIdToken(string uniqueId, string displayableId) -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateIdToken(string uniqueId, string displayableId, string tenantId) -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateInstanceDiscoveryMockHandler(string discoveryEndpoint, string content = "{\r\n                        \"tenant_discovery_endpoint\":\"https://login.microsoftonline.com/tenant/.well-known/openid-configuration\",\r\n                        \"api-version\":\"1.1\",\r\n                        \"metadata\":[\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.com\",\r\n                            \"preferred_cache\":\"login.windows.net\",\r\n                            \"aliases\":[\r\n                                \"login.microsoftonline.com\",\r\n                                \"login.windows.net\",\r\n                                \"login.microsoft.com\",\r\n                                \"sts.windows.net\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.partner.microsoftonline.cn\",\r\n                            \"preferred_cache\":\"login.partner.microsoftonline.cn\",\r\n                            \"aliases\":[\r\n                                \"login.partner.microsoftonline.cn\",\r\n                                \"login.chinacloudapi.cn\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.de\",\r\n                            \"preferred_cache\":\"login.microsoftonline.de\",\r\n                            \"aliases\":[\r\n                                    \"login.microsoftonline.de\"]},\r\n                            {\r\n                            \"preferred_network\":\"login.microsoftonline.us\",\r\n                            \"preferred_cache\":\"login.microsoftonline.us\",\r\n                            \"aliases\":[\r\n                                \"login.microsoftonline.us\",\r\n                                \"login.usgovcloudapi.net\"]},\r\n                            {\r\n                            \"preferred_network\":\"login-us.microsoftonline.com\",\r\n                            \"preferred_cache\":\"login-us.microsoftonline.com\",\r\n                            \"aliases\":[\r\n                                \"login-us.microsoftonline.com\"]}\r\n                        ]\r\n                }") -> Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateInvalidClientResponseMessage() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateInvalidGrantTokenResponseMessage(string subError = null, string claims = null) -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateInvalidRequestTokenResponseMessage() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateNoErrorFieldResponseMessage() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateNullResponseMessage() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateOpenIdConfigurationResponse(string authority, string qp = "") -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreatePKeyAuthChallengeResponse() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateRequestTimeoutResponseMessage() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateServerErrorMessage(System.Net.HttpStatusCode statusCode, int? retryAfter = null) -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(string token = "header.payload.signature", string expiry = "3599", string tokenType = "Bearer") -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(string token = "header.payload.signature", string expiry = "3599", string tokenType = "Bearer", string additionalparams = ",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"additional_param4\":[\"GUID\",\"GUID2\",\"GUID3\"],\"additional_param5\":{\"value5json\":\"value5\"}") -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithClientInfoMessage(string token = "header.payload.signature", string expiry = "3599", string tokenType = "Bearer", bool CreateClientInfoForS2S = false) -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateSuccessResponseMessage(string successResponse) -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateSuccessTokenResponseMessage(string scopes, string idToken, string clientInfo) -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateSuccessTokenResponseMessageWithUid(string uid, string utid, string displayableName) -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateSuccessTokenResponseString(string uniqueId, string displayableId, string[] scope, bool foci = false, string utid = "my-utid", string accessToken = "some-access-token", string refreshToken = "OAAsomethingencrypedQwgAA") -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateSuccessWebFingerResponseMessage() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateSuccessWebFingerResponseMessage(string href) -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateTooManyRequestsJsonResponse() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.CreateTooManyRequestsNonJsonResponse() -> System.Net.Http.HttpResponseMessage
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GenerateStreamFromString(string s) -> System.IO.Stream
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetBridgedHybridSpaTokenResponse(string spaAccountId) -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetDefaultTokenResponse(string accessToken = "some-access-token", string refreshToken = "someRT") -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetFociTokenResponse() -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetHybridSpaTokenResponse(string spaCode) -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetMsiErrorBadJson() -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetMsiErrorResponse(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetMsiImdsErrorResponse() -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetMsiSuccessfulResponse(int expiresInHours = 1, bool useIsoFormat = false, bool imdsV2 = false) -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetPopTokenResponse() -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.GetTokenResponseWithNoOidClaim() -> string
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.MockCertificateRequestResponse(Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId.None, string userAssignedId = null, string certificate = "MIIDATCCAemgAwIBAgIUSfjghyQB4FIS41rWfNcZHTLE/R4wDQYJKoZIhvcNAQELBQAwDzENMAsGA1UEAwwEVGVzdDAgFw0yNTA4MjgyMDIxMDBaGA8yMTI1MDgwNDIwMjEwMFowDzENMAsGA1UEAwwEVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALlc0S6TdwgQKGRl3Y/9uWNRpWo1WHiZtd1YdgCBt0rjxTqsbQUurU0B9Kdk7QQ9srxmjimxGHaUFypbb39awqIdQQcuQvIUj5+sQh9zzCyR35bGQp8vwbna5GlhAIbzsUi/y5kEGUMbuQN05XfoJSQrU35XZ8duQSDH5h9aDr6kuLcpDHo9/9vZiosPfqGPxZGtVjMvrJdVQGLJF35xD3LlX8xG2iJfVK/xYQVi3MgbRNQaL2lHtZaGAc1CToMUPO60xXrZkQE08hC907YTBcavUVQg4vrOaPpsCs+Fj6EJcasADAJeh1mGBn3kHFPCxBa2MKFraFPp53zOagTvYV0CAwEAAaNTMFEwHQYDVR0OBBYEFA9irQR/O6/V2JVyDEHFOdUDjAsyMB8GA1UdIwQYMBaAFA9irQR/O6/V2JVyDEHFOdUDjAsyMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAAOxtgYjtkUDVvWzq/lkjLTdcLjPvmH0hF34A3uvX4zcjmqF845lfvszTuhc1mx5J6YLEzKfr4TrO3D3g2BnDLvhupok0wEmJ9yVwbt1laim7zP09gZqnUqYM9hYKDhwgLZAaG3zGNocxDEAU7jazMGOGF7TweB7LdNuVI6CqgDOBQ8Cy2ObuZvzCI5Y7f+HucXpiJOu1xNa2ZZpMpQycYEvi5TD+CL5CBv2fcKQRn/+u5B3ZXCD2C9jT/RZ7rH46mIG7nC7dS4J2o4JjmlJIUAe2U6tRay5GvEmc/nZK8hd9y4BICzrykp9ENAoy9i+uaE1GGWeNgO+irrcrAcLwto=", string clientIdOverride = null, string tenantIdOverride = null, string mtlsEndpointOverride = null) -> Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.MockCsrResponse(System.Net.HttpStatusCode statusCode = System.Net.HttpStatusCode.OK, string responseServerHeader = "IMDS/150.870.65.1854", Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Lab.Api.Core.Mocks.ManagedIdentityTestUtil.UserAssignedIdentityId.None, string userAssignedId = null, string clientIdOverride = null, string tenantIdOverride = null, string attestationEndpointOverride = null) -> Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler
+static Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.MockCsrResponseFailure() -> Microsoft.Identity.Lab.Api.Core.Mocks.MockHttpMessageHandler
+static Microsoft.Identity.Lab.Api.TestData.GetAuthorityWithExpectedTenantId() -> System.Collections.Generic.IEnumerable<object[]>
+static Microsoft.Identity.Lab.Api.TestData.GetClaimsAndCapabilities() -> System.Collections.Generic.IEnumerable<object[]>
 static Microsoft.Identity.Test.LabInfrastructure.CertificateHelper.FindCertificateByName(string subjectName) -> System.Security.Cryptography.X509Certificates.X509Certificate2
 static Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(string labAccessClientId) -> System.Threading.Tasks.Task<Azure.Core.AccessToken>
 static Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.GetLabAccessTokenAsync(string authority, string[] scopes) -> System.Threading.Tasks.Task<Azure.Core.AccessToken>
@@ -458,25 +458,25 @@ static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.GetAppConfigA
 static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.GetUserConfigAsync(string secret) -> System.Threading.Tasks.Task<Microsoft.Identity.Test.LabInfrastructure.UserConfig>
 static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.KeyVaultSecretsProviderMsal.get -> Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider
 static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.KeyVaultSecretsProviderMsid.get -> Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider
-static Microsoft.Identity.Test.Unit.TestConstants.AdditionalAssertionClaims.get -> System.Collections.Generic.Dictionary<string, string>
-static Microsoft.Identity.Test.Unit.TestConstants.CreateClientInfo(string uid = "my-uid", string utid = "my-utid", bool CreateClientInfoForS2S = false) -> string
-static Microsoft.Identity.Test.Unit.TestConstants.CreateIdToken(string uniqueId, string displayableId) -> string
-static Microsoft.Identity.Test.Unit.TestConstants.CreateIdToken(string uniqueId, string displayableId, string tenantId) -> string
-static Microsoft.Identity.Test.Unit.TestConstants.CreateUserIdentifier() -> string
-static Microsoft.Identity.Test.Unit.TestConstants.CreateUserIdentifier(string uid, string utid) -> string
-static Microsoft.Identity.Test.Unit.TestConstants.ExtraQueryParameters.get -> System.Collections.Generic.IDictionary<string, string>
-static Microsoft.Identity.Test.Unit.TestConstants.ExtraQueryParametersNoAffectOnCacheKeys.get -> System.Collections.Generic.IDictionary<string, (string, bool)>
-static Microsoft.Identity.Test.Unit.TestConstants.GetOidcResponse(string authority = null) -> string
-static Microsoft.Identity.Test.Unit.TestConstants.s_prodEnvAliases -> string[]
-static Microsoft.Identity.Test.Unit.TestConstants.s_scope.get -> System.Collections.Generic.HashSet<string>
-static readonly Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.B2CTokenResponseWithoutAT -> string
-static readonly Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.DefaultAdfsTokenResponse -> string
-static readonly Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.DefaultEmtpyFailureErrorMessage -> string
-static readonly Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.TestRetryAfterDuration -> System.TimeSpan
-static readonly Microsoft.Identity.Test.Unit.TestConstants.s_cacheMissScope -> System.Collections.Generic.SortedSet<string>
-static readonly Microsoft.Identity.Test.Unit.TestConstants.s_clientAssertionClaims -> System.Collections.Generic.IDictionary<string, string>
-static readonly Microsoft.Identity.Test.Unit.TestConstants.s_clientCapabilities -> string[]
-static readonly Microsoft.Identity.Test.Unit.TestConstants.s_extraHttpHeader -> System.Collections.Generic.Dictionary<string, string>
-static readonly Microsoft.Identity.Test.Unit.TestConstants.s_graphScopes -> string[]
-static readonly Microsoft.Identity.Test.Unit.TestConstants.s_scopeForAnotherResource -> System.Collections.Generic.SortedSet<string>
-static readonly Microsoft.Identity.Test.Unit.TestConstants.s_userIdentifier -> string
+static Microsoft.Identity.Lab.Api.TestConstants.AdditionalAssertionClaims.get -> System.Collections.Generic.Dictionary<string, string>
+static Microsoft.Identity.Lab.Api.TestConstants.CreateClientInfo(string uid = "my-uid", string utid = "my-utid", bool CreateClientInfoForS2S = false) -> string
+static Microsoft.Identity.Lab.Api.TestConstants.CreateIdToken(string uniqueId, string displayableId) -> string
+static Microsoft.Identity.Lab.Api.TestConstants.CreateIdToken(string uniqueId, string displayableId, string tenantId) -> string
+static Microsoft.Identity.Lab.Api.TestConstants.CreateUserIdentifier() -> string
+static Microsoft.Identity.Lab.Api.TestConstants.CreateUserIdentifier(string uid, string utid) -> string
+static Microsoft.Identity.Lab.Api.TestConstants.ExtraQueryParameters.get -> System.Collections.Generic.IDictionary<string, string>
+static Microsoft.Identity.Lab.Api.TestConstants.ExtraQueryParametersNoAffectOnCacheKeys.get -> System.Collections.Generic.IDictionary<string, (string, bool)>
+static Microsoft.Identity.Lab.Api.TestConstants.GetOidcResponse(string authority = null) -> string
+static Microsoft.Identity.Lab.Api.TestConstants.s_prodEnvAliases -> string[]
+static Microsoft.Identity.Lab.Api.TestConstants.s_scope.get -> System.Collections.Generic.HashSet<string>
+static readonly Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.B2CTokenResponseWithoutAT -> string
+static readonly Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.DefaultAdfsTokenResponse -> string
+static readonly Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.DefaultEmtpyFailureErrorMessage -> string
+static readonly Microsoft.Identity.Lab.Api.Core.Mocks.MockHelpers.TestRetryAfterDuration -> System.TimeSpan
+static readonly Microsoft.Identity.Lab.Api.TestConstants.s_cacheMissScope -> System.Collections.Generic.SortedSet<string>
+static readonly Microsoft.Identity.Lab.Api.TestConstants.s_clientAssertionClaims -> System.Collections.Generic.IDictionary<string, string>
+static readonly Microsoft.Identity.Lab.Api.TestConstants.s_clientCapabilities -> string[]
+static readonly Microsoft.Identity.Lab.Api.TestConstants.s_extraHttpHeader -> System.Collections.Generic.Dictionary<string, string>
+static readonly Microsoft.Identity.Lab.Api.TestConstants.s_graphScopes -> string[]
+static readonly Microsoft.Identity.Lab.Api.TestConstants.s_scopeForAnotherResource -> System.Collections.Generic.SortedSet<string>
+static readonly Microsoft.Identity.Lab.Api.TestConstants.s_userIdentifier -> string
