@@ -252,6 +252,52 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public async Task NetworkProviderFailures_FallbackEntry_AllAliasesCached_Async()
+        {
+            // Arrange — use a real cache so we can inspect what was written
+            var realNetworkCache = new NetworkCacheMetadataProvider();
+
+            var multiAliasEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "some_env.com", "alias1.some_env.com", "alias2.some_env.com" },
+                PreferredCache = "some_env.com",
+                PreferredNetwork = "some_env.com"
+            };
+
+            _knownMetadataProvider
+                .GetMetadata("some_env.com", Enumerable.Empty<string>(), Arg.Any<ILoggerAdapter>())
+                .Returns(multiAliasEntry);
+
+            _networkMetadataProvider
+                .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
+                .Do(_ => throw new MsalServiceException("endpoint_busy", "simulated failure"));
+
+            _discoveryManager = new InstanceDiscoveryManager(
+                _harness.HttpManager,
+                null,
+                null,
+                _knownMetadataProvider,
+                realNetworkCache,
+                _networkMetadataProvider);
+
+            // Act
+            var result = await _discoveryManager.GetMetadataEntryAsync(
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
+                _testRequestContext)
+                .ConfigureAwait(false);
+
+            Assert.AreSame(multiAliasEntry, result);
+
+            // Assert — fallback entry must be cached under every alias so subsequent requests
+            // using any alias won't retry the failing network call
+            ILoggerAdapter logger = _testRequestContext.Logger;
+            Assert.IsNotNull(realNetworkCache.GetMetadata("some_env.com", logger), "Primary host should be cached");
+            Assert.IsNotNull(realNetworkCache.GetMetadata("alias1.some_env.com", logger), "First alias should be cached");
+            Assert.IsNotNull(realNetworkCache.GetMetadata("alias2.some_env.com", logger), "Second alias should be cached");
+            Assert.IsNull(realNetworkCache.GetMetadata("unrelated_env.com", logger), "Unrelated host should not be in cache");
+        }
+
+        [TestMethod]
         public async Task NetworkProviderFailures_WithNoKnownMetadata_ContinuesWithAuthority_Async()
         {
             // Arrange

@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     _knownMetadataProvider.GetMetadata(authorityUri.Host, Enumerable.Empty<string>(), requestContext.Logger)
                     ?? CreateEntryForSingleAuthority(authorityUri);
 
-                _networkCacheMetadataProvider.AddMetadata(authorityUri.Host, fallbackEntry);
+                _networkCacheMetadataProvider.AddMetadataWithAliases(fallbackEntry, authorityUri.Host);
 
                 return fallbackEntry;
             }

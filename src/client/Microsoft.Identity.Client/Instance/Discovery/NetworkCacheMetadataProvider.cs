@@ -26,6 +26,23 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             s_cache.AddOrUpdate(environment, entry, (_, _) => entry);
         }
 
+        public void AddMetadataWithAliases(InstanceDiscoveryMetadataEntry entry, string fallbackEnvironment)
+        {
+            string[] aliases = entry?.Aliases;
+            if (aliases != null && aliases.Length > 0)
+            {
+                foreach (string alias in aliases)
+                {
+                    if (!string.IsNullOrWhiteSpace(alias))
+                        s_cache.AddOrUpdate(alias, entry, (_, _) => entry);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(fallbackEnvironment))
+            {
+                s_cache.AddOrUpdate(fallbackEnvironment, entry, (_, _) => entry);
+            }
+        }
+
         internal static void ResetStaticCacheForTest()
         {
             s_cache.Clear();
