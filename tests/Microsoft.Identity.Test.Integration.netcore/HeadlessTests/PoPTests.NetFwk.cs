@@ -740,6 +740,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [IgnoreOnOneBranch]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
+#if ONEBRANCH_BUILD
+            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
+#endif
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };

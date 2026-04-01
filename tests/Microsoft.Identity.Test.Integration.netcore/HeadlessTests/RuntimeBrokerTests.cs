@@ -146,6 +146,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamInvalidROPC_ThrowsException_TestAsync()
         {
+#if ONEBRANCH_BUILD
+            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
+#endif
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
@@ -266,6 +269,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamWithSSHCertificateAuthenticationSchemeAsync()
         {
+#if ONEBRANCH_BUILD
+            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
+#endif
             IntPtr intPtr = TestUtils.GetWindowHandle();
             Func<IntPtr> windowHandleProvider = () => intPtr;
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -418,6 +424,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
         {
+#if ONEBRANCH_BUILD
+            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
+#endif
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
             string[] scopes = { "User.Read" };
@@ -490,6 +499,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
+#if ONEBRANCH_BUILD
+            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
+#endif
             //Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPop).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
@@ -526,6 +538,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [TestMethod]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
+#if ONEBRANCH_BUILD
+            Assert.Inconclusive("Skipped on OneBranch pipeline - WAM requires an interactive logon session");
+#endif
             //Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPop).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
