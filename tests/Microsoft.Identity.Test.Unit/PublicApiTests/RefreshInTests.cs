@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var at = TokenCacheHelper.CreateAccessTokenItem();
             var refreshOnFromCache = DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10);
-            at = at.WithRefreshOn(refreshOnFromCache);
+            at = TokenCacheHelper.WithRefreshOn(at, refreshOnFromCache);
 
             List<DateTimeOffset?> refreshOnWithJitterList = new List<DateTimeOffset?>();
             for (int i = 1; i <= 10; i++)

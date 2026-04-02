@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -133,13 +134,23 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             X509Certificate2 cert,
             IServiceBundle serviceBundle)
         {
-            // region check (AAD only)
-            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                serviceBundle.Config.AzureRegion == null)
+            // AAD only validation
+            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad)
             {
-                throw new MsalClientException(
-                    MsalError.MtlsPopWithoutRegion,
-                    MsalErrorMessage.MtlsPopWithoutRegion);
+                string tenant = AuthorityInfo.GetFirstPathSegment(serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
+                if (AadAuthority.IsCommonOrganizationsOrConsumersTenant(tenant))
+                {
+                    throw new MsalClientException(
+                        MsalError.MissingTenantedAuthority,
+                        MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
+                }
+
+                if (serviceBundle.Config.AzureRegion == null)
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsPopWithoutRegion,
+                        MsalErrorMessage.MtlsPopWithoutRegion);
+                }
             }
 
             p.ApplyMtlsPopScheme(cert);
