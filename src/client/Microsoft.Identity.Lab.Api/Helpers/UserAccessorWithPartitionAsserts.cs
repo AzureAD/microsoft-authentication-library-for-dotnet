@@ -21,25 +21,25 @@ namespace Microsoft.Identity.Lab.Api.Helpers
         public override List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-            return base.GetAllAccessTokens(partitionKey);
+            return base.GetAllAccessTokens(partitionKey, requestlogger);
         }
 
         public override List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-            return base.GetAllAccounts(partitionKey);
+            return base.GetAllAccounts(partitionKey, requestlogger);
         }
 
         public override List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-            return base.GetAllIdTokens(partitionKey);
+            return base.GetAllIdTokens(partitionKey, requestlogger);
         }
 
         public override List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-            return base.GetAllRefreshTokens(partitionKey);
+            return base.GetAllRefreshTokens(partitionKey, requestlogger);
         }
 
         public override bool HasAccessOrRefreshTokens()
