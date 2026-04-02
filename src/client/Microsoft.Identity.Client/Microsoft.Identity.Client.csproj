@@ -80,11 +80,8 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <None Remove="Internal\ClientCredential\CredentialSource.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
     <None Include="$(PathToMsalSources)\..\..\..\README.md" Pack="true" PackagePath="\" />
-    <None Include="Internal\ClientCredential\CredentialContext.cs" />
-    <None Include="Internal\ClientCredential\CredentialMaterial.cs" />
     <None Include="Platforms\net\JsonObjectAttribute.cs" />
     <None Include="Platforms\net\JsonStringConverter.cs" />
     <None Include="Platforms\net\MsalJsonSerializerContext.cs" />
@@ -163,12 +160,6 @@
   <ItemGroup Label="For public api analyzer support">
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Shipped.txt" />
     <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Unshipped.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Internal\ClientCredential\CredentialContext.cs" />
-    <Compile Include="Internal\ClientCredential\CredentialMaterial.cs" />
-    <Compile Include="Internal\ClientCredential\CredentialSource.cs" />
   </ItemGroup>
 
 </Project>

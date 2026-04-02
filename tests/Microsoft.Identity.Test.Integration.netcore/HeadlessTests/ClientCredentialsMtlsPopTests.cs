@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3") //test slice region 
-                .WithCertificate(cert, true)  
+                .WithCertificate(cert, true)
                 .WithTestLogging()
                 .Build();
 
@@ -81,6 +81,112 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(cert.Thumbprint,
                             authResult.BindingCertificate.Thumbprint,
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
+        }
+
+        [DoNotRunOnLinux] // POP is not supported on Linux
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task Sni_Gets_Pop_Token_Successfully_Alternate_TestAsync(bool sendcertificateovermtls)
+        {
+            // Arrange: Use LabResponseHelper to get app configuration
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+
+            var options = new Client.AppConfig.CertificateOptions
+            {
+                SendCertificateOverMtls = sendcertificateovermtls,
+                SendX5C = true,
+            };
+
+            // Build Confidential Client Application with SNI certificate at App level
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3") //test slice region 
+                .WithCertificate(cert, options)
+                .WithTestLogging()
+                .Build();
+
+            // Act: Acquire token with MTLS Proof of Possession at Request level
+            AuthenticationResult authResult = await confidentialApp
+                .AcquireTokenForClient(appScopes)
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert: Check that the MTLS PoP token acquisition was successful
+            Assert.IsNotNull(authResult, "The authentication result should not be null.");
+            Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
+            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
+
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint,
+                            authResult.BindingCertificate.Thumbprint,
+                            "BindingCertificate must match the certificate supplied via WithCertificate().");
+
+            // Simulate cache retrieval to verify MTLS configuration is cached properly
+            authResult = await confidentialApp
+               .AcquireTokenForClient(appScopes)
+               .WithMtlsProofOfPossession()
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
+            // Assert: Verify that the token was fetched from cache on the second request
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint,
+                            authResult.BindingCertificate.Thumbprint,
+                            "BindingCertificate must match the certificate supplied via WithCertificate().");
+        }
+
+        [DoNotRunOnLinux] // POP is not supported on Linux
+        [TestMethod]
+        public async Task Sni_Over_Mtls_Gets_Bearer_Token_Successfully_TestAsync()
+        {
+            // Arrange: Use LabResponseHelper to get app configuration
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+
+            var options = new Client.AppConfig.CertificateOptions
+            {
+                SendCertificateOverMtls = true,
+                SendX5C = true,
+            };
+
+            // Build Confidential Client Application with SNI certificate at App level
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3") //test slice region 
+                .WithCertificate(cert, options)
+                .WithTestLogging()
+                .Build();
+
+            // Act: Acquire token at Request level
+            AuthenticationResult authResult = await confidentialApp
+                .AcquireTokenForClient(appScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(authResult, "The authentication result should not be null.");
+            Assert.AreEqual(Constants.BearerTokenType, authResult.TokenType, true, "Token type should be MTLS PoP");
+            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
+
+            // Simulate cache retrieval to verify MTLS configuration is cached properly
+            authResult = await confidentialApp
+               .AcquireTokenForClient(appScopes)
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
+            // Assert: Verify that the token was fetched from cache on the second request
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
         }
 
         [DoNotRunOnLinux]
