@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
@@ -111,11 +112,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Guid CorrelationId => _commonParameters.CorrelationId;
 
-        public X509Certificate2 MtlsCertificate
-        {
-            get => _commonParameters.MtlsCertificate;
-            internal set => _commonParameters.MtlsCertificate = value;
-        }
+        public X509Certificate2 MtlsCertificate => _commonParameters.MtlsCertificate;
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
 
@@ -147,6 +144,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             get => _requestOverrideScheme ?? _commonParameters.AuthenticationOperation;
             internal set => _requestOverrideScheme = value;
+        }
+
+        /// <summary>
+        /// Applies the mTLS PoP authentication scheme as a request-level override.
+        /// Used by MIA after IMDS mints a binding certificate.
+        /// </summary>
+        internal void ApplyMtlsPopScheme(X509Certificate2 cert)
+        {
+            _requestOverrideScheme = new MtlsPopAuthenticationOperation(cert);
         }
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;

@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.BuildConcrete();
 
-                RequestContext requestContext = new RequestContext(mi.ServiceBundle, Guid.NewGuid(), null);
+                RequestContext requestContext = new RequestContext(mi.ServiceBundle, Guid.NewGuid(), false);
 
                 var sf = ServiceFabricManagedIdentitySource.Create(requestContext);
 

@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             var _testRequestContext = new RequestContext(
                 _harness.ServiceBundle,
                 Guid.NewGuid(),
-                null);
+                false);
 
             Assert.AreEqual($"{authority}oauth2/v2.0/token", instance.GetTokenEndpointAsync(_testRequestContext).Result);
             Assert.AreEqual($"{authority}oauth2/v2.0/authorize", instance.GetAuthorizationEndpointAsync(_testRequestContext).Result);

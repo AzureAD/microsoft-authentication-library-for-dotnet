@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -143,8 +142,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                     MsalErrorMessage.MtlsPopWithoutRegion);
             }
 
-            p.AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
-            p.MtlsCertificate = cert;
+            p.ApplyMtlsPopScheme(cert);
         }
 
         private static void ThrowIfRegionMissingForImplicitMtls(IServiceBundle serviceBundle)

@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             ImdsManagedIdentitySource.ResetEndpointCacheForTest();
         }
 
-        internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(
+        internal async Task<(ManagedIdentityResponse Response, X509Certificate2 BindingCertificate)> SendTokenRequestForManagedIdentityAsync(
             RequestContext requestContext,
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
