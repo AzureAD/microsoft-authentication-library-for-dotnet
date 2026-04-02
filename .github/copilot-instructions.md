@@ -31,26 +31,39 @@ This repository defines **Copilot Agent Skills** under `.github/skills/`.
 
 ---
 
-# Copilot Instructions for MSAL.NET mTLS Proof-of-Possession
+# Copilot Instructions for MSAL.NET Authentication
 
 ## 🚀 Quick Start: Discover Available Skills
 
 **Ask these questions in VS Code Copilot Chat to discover and explore all available skills:**
 
-What can you tell me about mTLS PoP in MSAL.NET?
+What skills are available for MSAL.NET authentication?
 
 Code
 
 Copilot will automatically reference and describe:
-- `@msal-mtls-pop-guidance` - Foundational concepts
-- `@msal-mtls-pop-vanilla` - Direct token acquisition
-- `@msal-mtls-pop-fic-two-leg` - Token exchange patterns
+- `@msal-confidential-auth-code-flow` - Authorization Code Flow for web apps
+- `@msal-confidential-client-credentials` - Client Credentials Flow for daemon apps
+- `@msal-confidential-obo-flow` - On-Behalf-Of Flow for multi-tier APIs
+- `@msal-mtls-pop-guidance` - Foundational mTLS PoP concepts
+- `@msal-mtls-pop-vanilla` - Direct mTLS PoP token acquisition
+- `@msal-mtls-pop-fic-two-leg` - FIC two-leg token exchange patterns
 
 ---
 
 ## 📚 Available Skills Overview
 
-This repository contains **three GitHub Agent Skills** for mTLS Proof-of-Possession (PoP) authentication:
+This repository contains **six GitHub Agent Skills** covering confidential client authentication and mTLS Proof-of-Possession (PoP):
+
+### Confidential Client Authentication
+
+| Skill | Purpose | Best For |
+|-------|---------|----------|
+| **@msal-confidential-auth-code-flow** | Authorization Code Flow guidance and examples | Web apps with user sign-in, AcquireTokenByAuthorizationCode |
+| **@msal-confidential-client-credentials** | Client Credentials Flow guidance and examples | Daemon apps, service-to-service, AcquireTokenForClient |
+| **@msal-confidential-obo-flow** | On-Behalf-Of Flow guidance and examples | Multi-tier APIs, AcquireTokenOnBehalfOf, user context propagation |
+
+### mTLS Proof-of-Possession (PoP)
 
 | Skill | Purpose | Best For |
 |-------|---------|----------|
@@ -62,17 +75,32 @@ This repository contains **three GitHub Agent Skills** for mTLS Proof-of-Possess
 
 ## 🔍 Discovery Prompts: Explore Each Skill
 
-### **Discover Skill 1: Guidance & Concepts**
+### **Discover Skill 1: Authorization Code Flow**
+@msal-confidential-auth-code-flow How do I implement authorization code flow? @msal-confidential-auth-code-flow Show me a web app sign-in example @msal-confidential-auth-code-flow How do I use AcquireTokenByAuthorizationCode with a certificate? @msal-confidential-auth-code-flow What credential types are supported?
+
+Code
+
+### **Discover Skill 2: Client Credentials Flow**
+@msal-confidential-client-credentials How do I implement client credentials flow? @msal-confidential-client-credentials Show me a daemon app example @msal-confidential-client-credentials How do I use AcquireTokenForClient with a certificate? @msal-confidential-client-credentials What are the best practices for token caching?
+
+Code
+
+### **Discover Skill 3: On-Behalf-Of Flow**
+@msal-confidential-obo-flow How do I implement OBO flow? @msal-confidential-obo-flow Show me a multi-tier API example @msal-confidential-obo-flow How do I use AcquireTokenOnBehalfOf? @msal-confidential-obo-flow Should I pass an access token or ID token?
+
+Code
+
+### **Discover Skill 4: mTLS PoP Guidance & Concepts**
 @msal-mtls-pop-guidance What is mTLS PoP and why do I need it? @msal-mtls-pop-guidance What are the main concepts I need to understand? @msal-mtls-pop-guidance Explain vanilla vs FIC two-leg flows @msal-mtls-pop-guidance What are the MSI limitations? @msal-mtls-pop-guidance Which approach should I use for my scenario? @msal-mtls-pop-guidance What version requirements exist?
 
 Code
 
-### **Discover Skill 2: Vanilla (Direct) Token Acquisition**
+### **Discover Skill 5: Vanilla (Direct) Token Acquisition**
 @msal-mtls-pop-vanilla What code examples do you have for mTLS PoP? @msal-mtls-pop-vanilla Show me System-Assigned Managed Identity (SAMI) example @msal-mtls-pop-vanilla Show me User-Assigned Managed Identity (UAMI) example @msal-mtls-pop-vanilla Show me Confidential Client with certificate example @msal-mtls-pop-vanilla How do I configure the HttpClient for mTLS? @msal-mtls-pop-vanilla What helper classes are available? @msal-mtls-pop-vanilla How do I handle certificate binding safely?
 
 Code
 
-### **Discover Skill 3: FIC Two-Leg Token Exchange**
+### **Discover Skill 6: FIC Two-Leg Token Exchange**
 @msal-mtls-pop-fic-two-leg What is the two-leg token exchange pattern? @msal-mtls-pop-fic-two-leg Show me a complete end-to-end example @msal-mtls-pop-fic-two-leg How does certificate binding work between legs? @msal-mtls-pop-fic-two-leg What's the difference between Leg 1 and Leg 2? @msal-mtls-pop-fic-two-leg What helper classes are available? @msal-mtls-pop-fic-two-leg Why is MSI limited to Leg 1 only?
 
 Code
@@ -82,6 +110,24 @@ Code
 ## 🎯 Comprehensive Question Bank
 
 Use these questions to explore the full depth of available skills:
+
+### **Confidential Client - Authorization Code Flow**
+
+@msal-confidential-auth-code-flow How do I implement authorization code flow? @msal-confidential-auth-code-flow Show me a web app sign-in example with certificate @msal-confidential-auth-code-flow How do I use AcquireTokenByAuthorizationCode? @msal-confidential-auth-code-flow What credential types can I use? @msal-confidential-auth-code-flow How do I set up token caching for a web app? @msal-confidential-auth-code-flow What errors might I encounter and how do I fix them? @msal-confidential-auth-code-flow When should I use auth code flow vs OBO?
+
+Code
+
+### **Confidential Client - Client Credentials Flow**
+
+@msal-confidential-client-credentials How do I implement client credentials flow? @msal-confidential-client-credentials Show me a daemon service example with certificate @msal-confidential-client-credentials How do I use AcquireTokenForClient? @msal-confidential-client-credentials How do I enable static token caching? @msal-confidential-client-credentials How do I use Federated Identity Credentials for keyless auth? @msal-confidential-client-credentials What errors might I encounter? @msal-confidential-client-credentials When should I use client credentials vs OBO?
+
+Code
+
+### **Confidential Client - On-Behalf-Of Flow**
+
+@msal-confidential-obo-flow How do I implement OBO flow? @msal-confidential-obo-flow Show me a multi-tier API example with certificate @msal-confidential-obo-flow How do I use AcquireTokenOnBehalfOf? @msal-confidential-obo-flow Should I pass an access token or ID token? @msal-confidential-obo-flow How do I handle guest users in OBO? @msal-confidential-obo-flow What does MsalUiRequiredException mean in OBO? @msal-confidential-obo-flow When should I use OBO vs client credentials?
+
+Code
 
 ### **Foundation & Architecture Questions**
 
@@ -291,6 +337,12 @@ Code
 
 Copy and paste these directly into VS Code Copilot Chat:
 
+@msal-confidential-auth-code-flow How do I implement authorization code flow for my web app?
+
+@msal-confidential-client-credentials Show me a daemon service example with certificate
+
+@msal-confidential-obo-flow How do I call a downstream API on behalf of a user?
+
 @msal-mtls-pop-guidance What can you tell me about mTLS PoP?
 
 @msal-mtls-pop-vanilla Show me how to get started in 5 minutes
@@ -330,6 +382,6 @@ Code
 
 ## ❓ Still Have Questions?
 
-Use the **Question Bank** above to discover answers. Most questions are already covered in one of the three skills!
+Use the **Question Bank** above to discover answers. Most questions are already covered in one of the six skills!
 
 **Happy exploring!** 🚀
