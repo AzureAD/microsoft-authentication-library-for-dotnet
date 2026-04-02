@@ -1,6 +1,14 @@
 ---
 name: msal-client-credentials
 description: Client Credentials Flow for service-to-service (daemon) authentication in MSAL.NET without user involvement
+tags:
+  - msal
+  - client-credentials
+  - daemon
+  - service-to-service
+  - confidential-client
+  - background-service
+  - machine-to-machine
 ---
 
 # Client Credentials Flow Skill

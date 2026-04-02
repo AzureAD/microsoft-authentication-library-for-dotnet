@@ -1,6 +1,15 @@
 ---
 name: msal-auth-code-flow
 description: Authorization Code Flow for web applications using MSAL.NET confidential client to sign in users and access APIs on their behalf
+tags:
+  - msal
+  - auth-code
+  - authorization-code
+  - web-app
+  - confidential-client
+  - user-sign-in
+  - redirect
+  - consent
 ---
 
 # Authorization Code Flow Skill
