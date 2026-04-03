@@ -156,5 +156,103 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert happens when httpManager disposes and checks for unconsumed handlers 
             }
         }
+
+        [TestMethod]
+        [DataRow(HttpStatusCode.NotFound, DisplayName = "404")]
+        [DataRow(HttpStatusCode.BadGateway, DisplayName = "502")]
+        [WorkItem(5804)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5804
+        public async Task InstanceDiscoveryFailure_IsCached_NotRetriedOnSubsequentCalls_Async(HttpStatusCode errorStatusCode)
+        {
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            {
+                // Arrange - use an authority unknown to MSAL so instance discovery goes to the network
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(TestConstants.AuthorityNotKnownTenanted)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                // First call: instance discovery returns an HTTP error, then token endpoint succeeds
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = new HttpResponseMessage(errorStatusCode)
+                    {
+                        Content = new StringContent("error")
+                    }
+                });
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var result1 = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                       .ExecuteAsync(CancellationToken.None)
+                                       .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                // Second call with the same scope - should come from cache, no network calls at all.
+                // No mock handlers added - if any network call happens, the test will fail.
+                var result2 = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                       .ExecuteAsync(CancellationToken.None)
+                                       .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
+
+                // Third call with a different scope to force a new token request from the STS.
+                // Only mock the token endpoint - NO instance discovery mock!
+                // If instance discovery were retried, the test would fail because
+                // MockHttpManager would receive an unexpected HTTP call.
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var result3 = await app.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource.ToArray())
+                                       .ExecuteAsync(CancellationToken.None)
+                                       .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result3.AuthenticationResultMetadata.TokenSource);
+
+                // MockHttpManager.Dispose() asserts all handlers were consumed and no extra calls were made
+            }
+        }
+
+        [TestMethod]
+        [WorkItem(5805)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5805
+        public async Task InstanceDiscoveryTimeout_FallsBackAndCachesResult_Async()
+        {
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            {
+                // Arrange - use an authority unknown to MSAL so instance discovery goes to the network
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(TestConstants.AuthorityNotKnownTenanted)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                // First call: instance discovery times out (TaskCanceledException is what HttpClient
+                // throws on timeout), then token endpoint succeeds
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExceptionToThrow = new TaskCanceledException("simulated timeout")
+                });
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var result1 = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                       .ExecuteAsync(CancellationToken.None)
+                                       .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                // Second call with a different scope to force a new token request from the STS.
+                // Only mock the token endpoint — NO instance discovery mock.
+                // If instance discovery were retried, the test would fail because
+                // MockHttpManager would receive an unexpected HTTP call.
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var result2 = await app.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource.ToArray())
+                                       .ExecuteAsync(CancellationToken.None)
+                                       .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+            }
+        }
     }
 }
