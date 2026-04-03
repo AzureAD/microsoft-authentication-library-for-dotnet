@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             _harness = base.CreateTestHarness(isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled);
 
-            _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid(), null);
+            _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid(), false);
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
                 null,
@@ -405,7 +405,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             var serviceBundle = ServiceBundle.Create(appConfig);
 
-            RequestContext requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
+            RequestContext requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), false);
 
             // network fails with invalid_instance exception
             _networkMetadataProvider
@@ -427,14 +427,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 InstanceDiscoveryMetadataEntry entry = await harness.ServiceBundle.InstanceDiscoveryManager
                     .GetMetadataEntryAsync(
                         AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri, true),
-                        requestContext ?? new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null))
+                        requestContext ?? new RequestContext(harness.ServiceBundle, Guid.NewGuid(), false))
                     .ConfigureAwait(false);
 
                 InstanceDiscoveryMetadataEntry entry2 = await harness.ServiceBundle.InstanceDiscoveryManager
                     .GetMetadataEntryTryAvoidNetworkAsync(
                         AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri, true),
                         new[] { "some_env" },
-                        requestContext ?? new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null))
+                        requestContext ?? new RequestContext(harness.ServiceBundle, Guid.NewGuid(), false))
                     .ConfigureAwait(false);
 
                 ValidateSingleEntryMetadata(authority, entry);

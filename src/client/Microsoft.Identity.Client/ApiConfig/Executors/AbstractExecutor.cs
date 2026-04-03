@@ -3,7 +3,6 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -20,9 +19,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         public IServiceBundle ServiceBundle { get; }
 
-        protected RequestContext CreateRequestContextAndLogVersionInfo(Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken userCancellationToken = default)
+        protected RequestContext CreateRequestContextAndLogVersionInfo(Guid correlationId, bool isMtlsRequested, CancellationToken userCancellationToken = default)
         {
-            var requestContext = new RequestContext(ServiceBundle, correlationId, mtlsCertificate, userCancellationToken);
+            var requestContext = new RequestContext(ServiceBundle, correlationId, isMtlsRequested, userCancellationToken);
 
             requestContext.Logger.Info(
                 () => string.Format(

@@ -1255,5 +1255,15 @@ namespace Microsoft.Identity.Client
         /// Represents the error code returned when an IMDS operation fails.
         /// </summary>
         public const string ImdsServiceError = "imds_service_error";
+
+        /// <summary>
+        /// <para>What happened?</para> The configured credential type is not compatible with the
+        /// requested authentication mode. For example, a client secret cannot be used with mTLS
+        /// Proof-of-Possession because mTLS requires a certificate to bind the token to the TLS transport.
+        /// <para>Mitigation:</para> Use a certificate-based credential or a delegate that returns a
+        /// <see cref="ClientSignedAssertion"/> with a <see cref="ClientSignedAssertion.TokenBindingCertificate"/>
+        /// when mTLS Proof-of-Possession is required.
+        /// </summary>
+        public const string InvalidCredentialMaterial = "invalid_credential_material";
     }
 }

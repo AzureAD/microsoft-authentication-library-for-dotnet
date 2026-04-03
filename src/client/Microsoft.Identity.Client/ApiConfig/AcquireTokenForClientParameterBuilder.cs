@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
@@ -105,8 +104,7 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.MtlsCertificateNotProvidedMessage);
                 }
 
-                CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
-                CommonParameters.MtlsCertificate = certificateCredential.Certificate;               
+                CommonParameters.ApplyMtlsPopScheme(certificateCredential.Certificate);
             }
 
             CommonParameters.IsMtlsPopRequested = true;

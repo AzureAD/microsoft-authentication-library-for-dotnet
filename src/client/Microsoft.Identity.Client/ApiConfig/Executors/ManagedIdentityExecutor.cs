@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForManagedIdentityParameters managedIdentityParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate != null, cancellationToken);
 
             var requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(
                 commonParameters,
