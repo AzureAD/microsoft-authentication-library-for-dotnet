@@ -205,8 +205,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [IgnoreOnOneBranch]
         [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
+        [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamUsernamePasswordRequestAsync()
         {
@@ -305,8 +305,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual("SshCert", result.TokenType);
         }
 
-        [IgnoreOnOneBranch]
         [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
+        [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
@@ -359,8 +359,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreNotEqual(ropcToken, result.AccessToken);
         }
 
-        [IgnoreOnOneBranch]
         [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
+        [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
@@ -457,8 +457,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(user.Upn, account.Username);
         }
 
+        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to platform-specific broker behavior differences
         [IgnoreOnOneBranch]
-        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
         [TestMethod]
         [DataRow(null)]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
@@ -474,19 +474,11 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(_brokerOptions)
                .Build();
             // Act
-            if (SharedUtilities.IsLinuxPlatform()) {
-                var exLinux = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                 () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
-                        .ExecuteAsync())
-                        .ConfigureAwait(false);
-                StringAssert.Contains(exLinux.AdditionalExceptionData[MsalException.BrokerErrorContext], "requestedScopes is NULL or EMPTY");
-            } else {
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
-                 () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
-                        .ExecuteAsync())
-                        .ConfigureAwait(false);
-                Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode));
-            }
+            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+             () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
+                    .ExecuteAsync())
+                    .ConfigureAwait(false);
+            Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode));
         }
 
         [DoNotRunOnLinux] // POP is not supported on Linux     
