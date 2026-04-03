@@ -455,5 +455,14 @@ namespace Microsoft.Identity.Client
         public const string CannotSwitchBetweenImdsVersionsForPreview = "ImdsV2 is currently experimental - A Bearer token has already been received; Please restart the application to receive a mTLS PoP token.";
         public const string MtlsPopTokenNotSupportedinImdsV1 = "A mTLS PoP token cannot be requested because the application\'s source was determined to be ImdsV1.";
         public const string ManagedIdentityAllSourcesUnavailable = "All Managed Identity sources are unavailable.";
+
+        public static string UnsupportedCredentialForMtlsMessage(string credentialDescription)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0} cannot be used over mTLS, for example to obtain mTLS Proof-of-Possession tokens. " +
+                "Use a certificate credential or a ClientSignedAssertion callback that can return a token-binding certificate.",
+                credentialDescription);
+        }
     }
 }

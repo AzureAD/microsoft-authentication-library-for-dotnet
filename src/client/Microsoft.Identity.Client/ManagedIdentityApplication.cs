@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
         public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
         {
             // Create a temporary RequestContext for the logger and the IMDS probe request.
-            var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
+            var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), false, cancellationToken);
 
             return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, cancellationToken).ConfigureAwait(false);
         }

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,8 +24,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string RevokedTokenHash { get; set; }
 
         public bool IsMtlsPopRequested { get; set; }
-
-        internal X509Certificate2 MtlsCertificate { get; set; }
 
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.

@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             // Arrange
             var appTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: false);
-            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid(), null);
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid(), false);
             var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {
