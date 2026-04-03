@@ -3,7 +3,6 @@
 
 
 using System;
-using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2.Throttling;
@@ -60,11 +59,15 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         public void AddAndCleanup_SameKey_KeepsNewerEntry()
         {
             var cache = new ThrottlingCache();
-            var olderEntry = new ThrottlingCacheEntry(_ex1, TimeSpan.FromMinutes(10));
+            var olderEntry = new ThrottlingCacheEntry(
+                _ex1,
+                DateTimeOffset.UtcNow.Subtract(TimeSpan.FromMinutes(1)),
+                DateTimeOffset.UtcNow.AddMinutes(10));
 
-            // Small delay to ensure different creation times
-            Thread.Sleep(10);
-            var newerEntry = new ThrottlingCacheEntry(_ex2, TimeSpan.FromMinutes(10));
+            var newerEntry = new ThrottlingCacheEntry(
+                _ex2,
+                DateTimeOffset.UtcNow,
+                DateTimeOffset.UtcNow.AddMinutes(10));
 
             cache.AddAndCleanup("k1", olderEntry, _logger);
             cache.AddAndCleanup("k1", newerEntry, _logger);
@@ -74,18 +77,25 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         }
 
         [TestMethod]
-        public void AddAndCleanup_SameKey_KeepsOlderIfNewer()
+        public void AddAndCleanup_SameKey_OlderEntryDoesNotReplaceNewer()
         {
             var cache = new ThrottlingCache();
-            var newerEntry = new ThrottlingCacheEntry(_ex1, TimeSpan.FromMinutes(10));
+            var newerEntry = new ThrottlingCacheEntry(
+                _ex1,
+                DateTimeOffset.UtcNow,
+                DateTimeOffset.UtcNow.AddMinutes(10));
 
-            // Add newer first, then older
+            var olderEntry = new ThrottlingCacheEntry(
+                _ex2,
+                DateTimeOffset.UtcNow.Subtract(TimeSpan.FromMinutes(1)),
+                DateTimeOffset.UtcNow.AddMinutes(10));
+
+            // Add newer first, then try to replace with older
             cache.AddAndCleanup("k1", newerEntry, _logger);
+            cache.AddAndCleanup("k1", olderEntry, _logger);
 
-            // Create an entry with an older creation time by adding an already-expired entry replacement
-            // The AddOrUpdate will keep the newer one
             cache.TryGetOrRemoveExpired("k1", _logger, out var foundEx);
-            Assert.AreSame(_ex1, foundEx);
+            Assert.AreSame(_ex1, foundEx, "Should keep the newer entry when an older entry is added later");
         }
 
         [TestMethod]
@@ -102,8 +112,8 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         [TestMethod]
         public void Cleanup_RemovesOnlyExpiredEntries()
         {
-            // Use a very short cleanup interval so cleanup triggers
-            var cache = new ThrottlingCache(1); // 1ms cleanup interval
+            // Use a cleanup interval of 0 so cleanup triggers immediately on next add
+            var cache = new ThrottlingCache(0);
 
             var expiredEntry = new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(-10000));
             var validEntry = new ThrottlingCacheEntry(_ex2, TimeSpan.FromMinutes(10));
@@ -111,8 +121,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             cache.AddAndCleanup("expired", expiredEntry, _logger);
             cache.AddAndCleanup("valid", validEntry, _logger);
 
-            // Wait for cleanup interval to pass, then trigger cleanup via another add
-            Thread.Sleep(50);
+            // Trigger cleanup via another add (interval is 0ms so it fires immediately)
             cache.AddAndCleanup("trigger", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMinutes(10)), _logger);
 
             Assert.IsFalse(cache.TryGetOrRemoveExpired("expired", _logger, out _), "Expired entry should be cleaned up");
