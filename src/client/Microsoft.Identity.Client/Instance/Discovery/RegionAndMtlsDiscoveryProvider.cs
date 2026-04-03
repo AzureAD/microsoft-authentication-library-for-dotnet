@@ -68,11 +68,10 @@ namespace Microsoft.Identity.Client.Region
             {
                 if (isMtlsEnabled)
                 {
-                    requestContext.Logger.Info("[Region discovery] Region discovery failed during mTLS Pop. ");
-
-                    throw new MsalServiceException(
-                        MsalError.RegionRequiredForMtlsPop,
-                        MsalErrorMessage.RegionRequiredForMtlsPopMessage);
+                    // Region is not available — use the global mTLS endpoint
+                    string globalMtlsEnv = GetGlobalMtlsEnvironment(authority, requestContext);
+                    requestContext.Logger.Info($"[Region discovery] Region not available. Using global mTLS environment: {globalMtlsEnv}");
+                    return CreateEntry(authority.Host, globalMtlsEnv);
                 }
 
                 requestContext.Logger.Info("[Region discovery] Not using a regional authority. ");
@@ -97,6 +96,29 @@ namespace Microsoft.Identity.Client.Region
                 PreferredCache = originalEnv,
                 PreferredNetwork = regionalEnv
             };
+        }
+
+        private static string GetGlobalMtlsEnvironment(Uri authority, RequestContext requestContext)
+        {
+            string host = authority.Host;
+
+            if (KnownMetadataProvider.IsPublicEnvironment(host))
+            {
+                return PublicEnvForRegionalMtlsAuth;
+            }
+
+            if (KnownMetadataProvider.TryGetKnownEnviromentPreferredNetwork(host, out var preferredNetworkEnv))
+            {
+                host = preferredNetworkEnv;
+            }
+
+            // Replace "login" with "mtlsauth" for mTLS scenarios
+            if (host.StartsWith("login"))
+            {
+                host = "mtlsauth" + host.Substring("login".Length);
+            }
+
+            return host;
         }
 
         private static string GetRegionalizedEnvironment(Uri authority, string region, RequestContext requestContext)
