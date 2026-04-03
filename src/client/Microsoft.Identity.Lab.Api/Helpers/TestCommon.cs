@@ -18,26 +18,38 @@ using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Unit;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Lab.Api.Helpers;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
-namespace Microsoft.Identity.Test.Common
+namespace Microsoft.Identity.Lab.Api.Helpers
 {
     internal static class TestCommon
     {
+        internal const string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
+        internal const string B2CSignUpSignIn = "b2c_1_susi";
+        internal const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/" + B2CSignUpSignIn + "/";
+        internal const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
+        internal const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
+        internal const string Utid = "my-utid";
+        internal const string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
+
+        internal static HashSet<string> s_scope
+        {
+            get
+            {
+                return new HashSet<string>(new[] { "r1/scope1", "r1/scope2" }, StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
         public static IServiceBundle CreateServiceBundleWithCustomHttpManager(
             IHttpManager httpManager,
             LogCallback logCallback = null,
             string authority = ClientApplicationBase.DefaultAuthority,
             bool isExtendedTokenLifetimeEnabled = false,
             bool enablePiiLogging = false,
-            string clientId = TestConstants.ClientId,
+            string clientId = ClientId,
             bool clearCaches = true,
             bool validateAuthority = true,
             bool isLegacyCacheEnabled = true,
@@ -76,12 +88,12 @@ namespace Microsoft.Identity.Test.Common
 
         public static IServiceBundle CreateDefaultAdfsServiceBundle()
         {
-            return CreateServiceBundleWithCustomHttpManager(null, authority: TestConstants.OnPremiseAuthority);
+            return CreateServiceBundleWithCustomHttpManager(null, authority: OnPremiseAuthority);
         }
 
         public static IServiceBundle CreateDefaultB2CServiceBundle()
         {
-            return CreateServiceBundleWithCustomHttpManager(null, authority: TestConstants.B2CAuthority);
+            return CreateServiceBundleWithCustomHttpManager(null, authority: B2CAuthority);
         }
 
         public static AuthenticationRequestParameters CreateAuthenticationRequestParameters(
@@ -93,11 +105,11 @@ namespace Microsoft.Identity.Test.Common
         {
             var commonParameters = new AcquireTokenCommonParameters
             {
-                Scopes = scopes ?? TestConstants.s_scope,
+                Scopes = scopes ?? s_scope,
                 ApiId = apiID
             };
 
-            authority ??= Authority.CreateAuthority(TestConstants.AuthorityTestTenant);
+            authority ??= Authority.CreateAuthority(TestCommon.AuthorityTestTenant);
             requestContext ??= new RequestContext(serviceBundle, Guid.NewGuid(), commonParameters.MtlsCertificate)
             {
                 ApiEvent = new Client.TelemetryCore.Internal.Events.ApiEvent(Guid.NewGuid())
@@ -111,19 +123,6 @@ namespace Microsoft.Identity.Test.Common
                 authority)
             {
             };
-        }
-
-        public static KeyValuePair<string, IEnumerable<string>> GetCcsHeaderFromSnifferFactory(HttpSnifferClientFactory factory)
-        {
-            if (factory.RequestsAndResponses.Any())
-            {
-                var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
-                x.Item2.StatusCode == HttpStatusCode.OK);
-
-                return req.Headers.Single(h => h.Key == Constants.CcsRoutingHintHeader);
-            }
-
-            throw new MsalClientException("Could not find CCS Header in sniffer factory.");
         }
 
         public static bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
@@ -164,6 +163,27 @@ namespace Microsoft.Identity.Test.Common
             accessor.SaveAccessToken(atItem);
 
             return atItem;
+        }
+
+        internal static MsalAccessTokenCacheItem WithRefreshOn(this MsalAccessTokenCacheItem atItem, DateTimeOffset? refreshOn)
+        {
+            MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
+               atItem.Environment,
+               atItem.ClientId,
+               atItem.ScopeString,
+               atItem.TenantId,
+               atItem.Secret,
+               atItem.CachedAt,
+               atItem.ExpiresOn,
+               atItem.ExtendedExpiresOn,
+               atItem.RawClientInfo,
+               atItem.HomeAccountId,
+               atItem.KeyId,
+               refreshOn,
+               atItem.TokenType,
+               atItem.OboCacheKey);
+
+            return newAtItem;
         }
     }
 }

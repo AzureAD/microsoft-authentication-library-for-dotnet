@@ -10,8 +10,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Lab.Api.Helpers;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
