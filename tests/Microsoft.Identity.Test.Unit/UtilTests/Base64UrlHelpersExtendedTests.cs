@@ -44,9 +44,9 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             string result = Base64UrlHelpers.Encode("Hello");
             Assert.IsNotNull(result);
             // Should not contain +, /, or =
-            Assert.DoesNotContain(result, "+");
-            Assert.DoesNotContain(result, "/");
-            Assert.DoesNotContain(result, "=");
+            Assert.DoesNotContain("+", result);
+            Assert.DoesNotContain("/", result);
+            Assert.DoesNotContain("=", result);
         }
 
         [TestMethod]
@@ -101,8 +101,8 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             // 0xFB, 0xEF, 0xBE => produces + and / in standard base64
             byte[] data = { 0xFB, 0xEF, 0xBE };
             string encoded = Base64UrlHelpers.Encode(data);
-            Assert.DoesNotContain(encoded, "+");
-            Assert.DoesNotContain(encoded, "/");
+            Assert.DoesNotContain("+", encoded);
+            Assert.DoesNotContain("/", encoded);
 
             // Verify round trip
             byte[] decoded = Base64UrlHelpers.DecodeBytes(encoded);
