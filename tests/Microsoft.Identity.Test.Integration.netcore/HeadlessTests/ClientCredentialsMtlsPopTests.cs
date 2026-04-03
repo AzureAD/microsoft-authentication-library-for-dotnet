@@ -391,3 +391,5 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com",
                 "Should use global mtlsauth endpoint when no region is configured.");
         }
+    }
+}
