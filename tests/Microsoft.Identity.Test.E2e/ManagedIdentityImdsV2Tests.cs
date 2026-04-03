@@ -362,6 +362,12 @@ namespace Microsoft.Identity.Test.E2E
             using var response = await httpClient.GetAsync(new Uri(secretUrl)).ConfigureAwait(false);
             var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+            if ((int)response.StatusCode >= 500)
+            {
+                Assert.Inconclusive(
+                    $"AKV service returned a server error (inconclusive): {(int)response.StatusCode} {response.StatusCode}. Body: {responseContent}");
+            }
+
             Assert.IsTrue(
                 response.IsSuccessStatusCode,
                 $"AKV secret GET failed: {(int)response.StatusCode} {response.StatusCode}. Body: {responseContent}");
