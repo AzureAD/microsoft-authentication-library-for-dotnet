@@ -205,7 +205,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamUsernamePasswordRequestAsync()
@@ -305,7 +304,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual("SshCert", result.TokenType);
         }
 
-        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
@@ -359,7 +357,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreNotEqual(ropcToken, result.AccessToken);
         }
 
-        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
         [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
@@ -457,7 +454,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(user.Upn, account.Username);
         }
 
-        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
         [IgnoreOnOneBranch]
         [TestMethod]
         [DataRow(null)]
