@@ -206,6 +206,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
+        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
         [TestMethod]
         public async Task WamUsernamePasswordRequestAsync()
         {
@@ -305,6 +306,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
+        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
         [TestMethod]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
@@ -358,6 +360,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
+        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
         [TestMethod]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
@@ -455,6 +458,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
+        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
         [TestMethod]
         [DataRow(null)]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
