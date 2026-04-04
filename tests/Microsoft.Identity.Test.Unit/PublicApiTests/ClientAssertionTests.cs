@@ -683,8 +683,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using var http = new MockHttpManager();
             {
                 // Arrange – CCA with PoP delegate (returns JWT + cert) but **no AzureRegion configured**
-                var cert = CertHelper.GetOrCreateTestCert();
-
                 http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
                     tokenType: "mtls_pop");
 
@@ -703,7 +701,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
-                StringAssert.Contains(result.AuthenticationResultMetadata.TokenEndpoint, "mtlsauth.microsoft.com");
+                var tokenEndpointUri = new Uri(result.AuthenticationResultMetadata.TokenEndpoint);
+                Assert.AreEqual("mtlsauth.microsoft.com", tokenEndpointUri.Host);
             }
         }
 
@@ -792,8 +791,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using var http = new MockHttpManager();
             {
                 // Arrange – CCA with PoP delegate (returns JWT + cert) but **no AzureRegion configured**
-                var cert = CertHelper.GetOrCreateTestCert();
-
                 http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -809,7 +806,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result.AccessToken);
-                StringAssert.Contains(result.AuthenticationResultMetadata.TokenEndpoint, "mtlsauth.microsoft.com");
+                var tokenEndpoint = new Uri(result.AuthenticationResultMetadata.TokenEndpoint, UriKind.Absolute);
+                Assert.AreEqual("mtlsauth.microsoft.com", tokenEndpoint.Host);
             }
         }
 

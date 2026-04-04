@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     // POP tests only work on the allow listed SNI app
     // and tenant ("bea21ebe-8b64-4d06-9f6d-6a889b120a7c") - MSI team tenant
     [TestClass]
-    public class ClientCredentialsMtlsPopTests 
+    public class ClientCredentialsMtlsPopTests
     {
         private const string MsiAllowListedAppIdforSNI = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
         private const string TokenExchangeUrl = "api://AzureADTokenExchange/.default";
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3") //test slice region 
-                .WithCertificate(cert, true)  
+                .WithCertificate(cert, true)
                 .WithTestLogging()
                 .Build();
 
@@ -87,8 +87,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task Sni_Gets_Pop_Token_WithGlobalEndpoint_TestAsync()
         {
-            // Arrange: Use LabResponseHelper to get app configuration
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            // Arrange: validate lab setup before executing the test flow.
+            _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
@@ -119,8 +119,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
 
             // Verify global mTLS endpoint was used (no region prefix)
-            StringAssert.Contains(authResult.AuthenticationResultMetadata.TokenEndpoint,
+            Assert.IsTrue(
+                System.Uri.TryCreate(
+                    authResult.AuthenticationResultMetadata.TokenEndpoint,
+                    System.UriKind.Absolute,
+                    out System.Uri tokenEndpointUri),
+                "Token endpoint should be a valid absolute URI.");
+            Assert.AreEqual(
                 "mtlsauth.microsoft.com",
+                tokenEndpointUri.Host,
                 "Should use global mtlsauth endpoint when no region is configured.");
 
             // Simulate cache retrieval to verify MTLS configuration is cached properly
@@ -388,7 +395,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
 
             // Verify global mTLS endpoint was used
-            StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com",
+            Assert.IsFalse(string.IsNullOrEmpty(requestUriSeen), "Expected token request URI to be captured.");
+            var requestUri = new System.Uri(requestUriSeen);
+            Assert.AreEqual("mtlsauth.microsoft.com", requestUri.Host,
                 "Should use global mtlsauth endpoint when no region is configured.");
         }
     }

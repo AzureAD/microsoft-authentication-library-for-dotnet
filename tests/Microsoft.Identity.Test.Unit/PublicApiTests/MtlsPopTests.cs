@@ -138,6 +138,8 @@ namespace Microsoft.Identity.Test.Unit
 
             using (var envContext = new EnvVariableContext())
             {
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+
                 using (var httpManager = new MockHttpManager())
                 {
                     httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
@@ -729,41 +731,46 @@ namespace Microsoft.Identity.Test.Unit
             string authorityUrl = $"https://{inputEnv}/{tenantId}";
             string expectedTokenEndpoint = $"https://{expectedMtlsEnv}/{tenantId}/oauth2/v2.0/token";
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var envContext = new EnvVariableContext())
             {
-                var tokenHttpCallHandler = new MockHttpMessageHandler()
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+
+                using (var harness = new MockHttpAndServiceBundle())
                 {
-                    ExpectedUrl = expectedTokenEndpoint,
-                    ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = CreateResponse(tokenType: "mtls_pop")
-                };
-                harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = expectedTokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop")
+                    };
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
 
-                var app = ConfidentialClientApplicationBuilder
-                                    .Create(TestConstants.ClientId)
-                                    .WithAuthority(authorityUrl)
-                                    .WithHttpManager(harness.HttpManager)
-                                    .WithCertificate(s_testCertificate)
-                                    .Build();
+                    var app = ConfidentialClientApplicationBuilder
+                                        .Create(TestConstants.ClientId)
+                                        .WithAuthority(authorityUrl)
+                                        .WithHttpManager(harness.HttpManager)
+                                        .WithCertificate(s_testCertificate)
+                                        .Build();
 
-                AuthenticationResult result = await app
-                    .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                    AuthenticationResult result = await app
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
 
-                Assert.AreEqual("header.payload.signature", result.AccessToken);
-                Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                    Assert.AreEqual("header.payload.signature", result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
 
-                // Second token acquisition - should retrieve from cache
-                AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                    // Second token acquisition - should retrieve from cache
+                    AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
 
-                Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource);
+                }
             }
         }
 
@@ -774,39 +781,44 @@ namespace Microsoft.Identity.Test.Unit
             string authorityUrl = $"https://login.microsoftonline.com/{tenantId}";
             string expectedTokenEndpoint = $"https://mtlsauth.microsoft.com/{tenantId}/oauth2/v2.0/token";
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var envContext = new EnvVariableContext())
             {
-                var tokenHttpCallHandler = new MockHttpMessageHandler()
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+
+                using (var harness = new MockHttpAndServiceBundle())
                 {
-                    ExpectedUrl = expectedTokenEndpoint,
-                    ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = CreateResponse(tokenType: "mtls_pop"),
-                    ExpectedPostData = new Dictionary<string, string>
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
                     {
-                        { OAuth2Parameter.ClientId, "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3" },
-                        { OAuth2Parameter.Scope, TestConstants.s_scope.AsSingleString() },
-                        { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
-                        { "token_type", "mtls_pop" }
-                    }
-                };
+                        ExpectedUrl = expectedTokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop"),
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3" },
+                            { OAuth2Parameter.Scope, TestConstants.s_scope.AsSingleString() },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
+                            { "token_type", "mtls_pop" }
+                        }
+                    };
 
-                harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
 
-                var app = ConfidentialClientApplicationBuilder
-                             .Create(TestConstants.ClientId)
-                             .WithAuthority(authorityUrl)
-                             .WithHttpManager(harness.HttpManager)
-                             .WithCertificate(s_testCertificate)
-                             .Build();
+                    var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority(authorityUrl)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithCertificate(s_testCertificate)
+                                 .Build();
 
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                    var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
 
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
-                Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                }
             }
         }
 
@@ -817,34 +829,39 @@ namespace Microsoft.Identity.Test.Unit
             string mtlsSubdomain = "mtlsauth";
             string expectedTokenEndpoint = $"https://{mtlsSubdomain}.mylocalaad.com/123456-1234-2345-1234561234/oauth2/v2.0/token";
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var envContext = new EnvVariableContext())
             {
-                var tokenHttpCallHandler = new MockHttpMessageHandler()
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+
+                using (var harness = new MockHttpAndServiceBundle())
                 {
-                    ExpectedUrl = expectedTokenEndpoint,
-                    ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = CreateResponse(tokenType: "mtls_pop")
-                };
-                harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = expectedTokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop")
+                    };
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
 
-                var app = ConfidentialClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .WithAuthority(nonStandardAuthority)
-                                .WithHttpManager(harness.HttpManager)
-                                .WithCertificate(s_testCertificate)
-                                .WithInstanceDiscovery(false)
-                                .Build();
+                    var app = ConfidentialClientApplicationBuilder
+                                    .Create(TestConstants.ClientId)
+                                    .WithAuthority(nonStandardAuthority)
+                                    .WithHttpManager(harness.HttpManager)
+                                    .WithCertificate(s_testCertificate)
+                                    .WithInstanceDiscovery(false)
+                                    .Build();
 
-                AuthenticationResult result = await app
-                    .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                    AuthenticationResult result = await app
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
 
-                Assert.IsNotNull(result);
-                Assert.AreEqual("header.payload.signature", result.AccessToken);
-                Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
-                Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                    Assert.IsNotNull(result);
+                    Assert.AreEqual("header.payload.signature", result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                }
             }
         }
 

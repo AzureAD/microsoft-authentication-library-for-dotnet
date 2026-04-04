@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Region
             }
 
             // Replace "login" with "mtlsauth" for mTLS scenarios
-            if (host.StartsWith("login"))
+            if (host.StartsWith("login.", StringComparison.OrdinalIgnoreCase))
             {
                 host = "mtlsauth" + host.Substring("login".Length);
             }
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Region
             if (requestContext.IsMtlsRequested)
             {
                 // Modify the host to replace "login" with "mtlsauth" for mTLS scenarios
-                if (host.StartsWith("login"))
+                if (host.StartsWith("login.", StringComparison.OrdinalIgnoreCase))
                 {
                     host = "mtlsauth" + host.Substring("login".Length);
                 }
