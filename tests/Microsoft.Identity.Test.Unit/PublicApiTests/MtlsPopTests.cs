@@ -139,6 +139,7 @@ namespace Microsoft.Identity.Test.Unit
             using (var envContext = new EnvVariableContext())
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable("MSAL_FORCE_REGION", null);
 
                 using (var httpManager = new MockHttpManager())
                 {
@@ -734,6 +735,7 @@ namespace Microsoft.Identity.Test.Unit
             using (var envContext = new EnvVariableContext())
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable("MSAL_FORCE_REGION", null);
 
                 using (var harness = new MockHttpAndServiceBundle())
                 {
@@ -784,6 +786,7 @@ namespace Microsoft.Identity.Test.Unit
             using (var envContext = new EnvVariableContext())
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable("MSAL_FORCE_REGION", null);
 
                 using (var harness = new MockHttpAndServiceBundle())
                 {
@@ -832,6 +835,7 @@ namespace Microsoft.Identity.Test.Unit
             using (var envContext = new EnvVariableContext())
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable("MSAL_FORCE_REGION", null);
 
                 using (var harness = new MockHttpAndServiceBundle())
                 {
