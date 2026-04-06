@@ -69,10 +69,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunPromptTestForUserAsync(user, app, Prompt.Consent, false).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.FederatedDisabled)]
         public async Task Interactive_Adfs_FederatedAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
@@ -136,11 +133,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.Contains(result.Account.Environment, app.Authority);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.FederatedDisabled)]
         public async Task Interactive_Adfs_DirectAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);

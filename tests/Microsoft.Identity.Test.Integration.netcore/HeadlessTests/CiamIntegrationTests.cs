@@ -81,12 +81,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual($"{user.LabName}{Constants.CiamAuthorityHostSuffix}".ToLower(), result.Account.Environment);
         }
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task ClientCredentialCiam_WithClientCredentials_ReturnsValidTokens()
         {
-#if ONEBRANCH_BUILD
-            Assert.Inconclusive("Skipped on OneBranch pipeline - login.msidlabsciam.com not reachable from 1ES agent network");
-#endif
             string authority;
             //Get lab details
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserCiam).ConfigureAwait(false);
@@ -147,12 +144,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
         }
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task OBOCiam_CustomDomain_ReturnsValidTokens()
         {
-#if ONEBRANCH_BUILD
-            Assert.Inconclusive("Skipped on OneBranch pipeline - login.msidlabsciam.com not reachable from 1ES agent network");
-#endif
             string authorityCud = "https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/";
             string ciamWebApi = "634de702-3173-4a71-b336-a4fab786a479";
 
@@ -212,12 +206,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.Cache, resultObo.AuthenticationResultMetadata.TokenSource);
         }
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task WithOidcAuthority_ValidatesIssuerSuccessfully()
         {
-#if ONEBRANCH_BUILD
-            Assert.Inconclusive("Skipped on OneBranch pipeline - login.msidlabsciam.com not reachable from 1ES agent network");
-#endif
             //Get lab details
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserCiam).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppCiam).ConfigureAwait(false);
