@@ -262,7 +262,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 app.ServiceBundle.ConfigureMockWebUI();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
-                var extraExpectedHeaders = new Dictionary<string, string>(TestConstants.s_extraHttpHeader);
+                var extraExpectedHeaders = new Dictionary<string, string>(
+                    TestConstants.s_extraHttpHeader,
+                    TestConstants.s_extraHttpHeader.Comparer);
                 extraExpectedHeaders.Add(Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHint(TestConstants.s_user.Username));
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant, null, null, false, null, extraExpectedHeaders);
 
