@@ -20,18 +20,26 @@ namespace Microsoft.Identity.Client.KeyAttestation
     /// </summary>
     internal static class PopKeyAttestor
     {
-        // In-process cache: maps "{endpoint}|{clientId}|{keyId}" → AttestationToken (JWT + expiry).
+        // In-process cache: maps "{endpoint}|{keyId}" → AttestationToken (JWT + expiry).
         //
         // Cache key design:
         //   endpoint  – included because the MAA service issues endpoint-specific tokens;
         //               eastus.attestation.azure.net and westus.attestation.azure.net issue
-        //               different tokens for the same key/client combination.
-        //   clientId  – included because it is sent in the attestation request body and
-        //               affects the claims in the issued token.
-        //   keyId     – the CNG key name (CngKey.KeyName), added so that if the same
-        //               endpoint+client ever uses two different CNG keys (e.g. after key
-        //               rotation), the stale token for the old key is not returned for the
-        //               new one. Null/empty for ephemeral (non-KSP) keys.
+        //               different tokens for the same CNG key.
+        //   keyId     – the CNG key name (CngKey.KeyName), included so that key rotation does
+        //               not cause a stale token for the old key to be returned for the new one.
+        //               Null/empty for ephemeral (non-KSP) keys.
+        //
+        //   clientId  – intentionally NOT included. MAA attests the CNG key itself; clientId is
+        //               forwarded to the service as metadata but does not change which attestation
+        //               token is valid for a given key. Different managed identities (SAMI vs UAMI)
+        //               sharing the same CNG key at the same endpoint correctly share the cached token.
+        //
+        //   Why a dictionary and not a single field?
+        //               A process could theoretically use multiple MAA endpoints (e.g. in multi-region
+        //               deployments) or multiple named CNG keys (e.g. during key rotation). A single
+        //               field would incorrectly return the wrong token for the second endpoint/key.
+        //               With endpoint+keyId as a compound key the cache correctly scopes each entry.
         private static readonly ConcurrentDictionary<string, AttestationToken> s_tokenCache =
             new ConcurrentDictionary<string, AttestationToken>(StringComparer.OrdinalIgnoreCase);
 
@@ -104,7 +112,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
             var safeNCryptKeyHandle = keyHandle as SafeNCryptKeyHandle
                 ?? throw new ArgumentException("keyHandle must be a SafeNCryptKeyHandle. Only Windows CNG keys are supported.", nameof(keyHandle));
 
-            string cacheKey = BuildCacheKey(endpoint, clientId, keyId);
+            string cacheKey = BuildCacheKey(endpoint, keyId);
 
             // Fast path: check cache without acquiring any lock.
             if (TryGetCachedToken(cacheKey, out AttestationToken cached))
@@ -193,9 +201,9 @@ namespace Microsoft.Identity.Client.KeyAttestation
             return false;
         }
 
-        private static string BuildCacheKey(string endpoint, string clientId, string keyId)
+        private static string BuildCacheKey(string endpoint, string keyId)
         {
-            return $"{endpoint}|{clientId ?? string.Empty}|{keyId ?? string.Empty}";
+            return $"{endpoint}|{keyId ?? string.Empty}";
         }
     }
 }
