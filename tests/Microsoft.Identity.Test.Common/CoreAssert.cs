@@ -9,23 +9,29 @@ using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Lab.Api.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Lab.Api.Helpers
+namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     /// <summary>
     /// Provides custom assertion helpers for MSAL.NET test scenarios.
     /// </summary>
-    internal static class CoreAssert
+    public static class CoreAssert
     {
         /// <summary>
         /// Asserts that two scope strings represent the same set of scopes.
         /// </summary>
+        /// <param name="scopesExpected">The expected scopes, formatted as a single string (e.g. space-delimited).</param>
+        /// <param name="scopesActual">The actual scopes, formatted as a single string (e.g. space-delimited).</param>
+        /// <remarks>
+        /// Scope comparison is performed as a set comparison (order-insensitive).
+        /// </remarks>
         public static void AreScopesEqual(string scopesExpected, string scopesActual)
         {
             var expectedScopes = ScopeHelper.ConvertStringToScopeSet(scopesExpected);
             var actualScopes = ScopeHelper.ConvertStringToScopeSet(scopesActual);
 
+            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
             Assert.HasCount(expectedScopes.Count, actualScopes);
             foreach (string expectedScope in expectedScopes)
             {
@@ -54,6 +60,10 @@ namespace Microsoft.Identity.Lab.Api.Helpers
         /// <summary>
         /// Asserts that three values are all equal to each other.
         /// </summary>
+        /// <typeparam name="T">The type of values to compare.</typeparam>
+        /// <param name="val1">The first value (used as the reference).</param>
+        /// <param name="val2">The second value.</param>
+        /// <param name="val3">The third value.</param>
         public static void AreEqual<T>(T val1, T val2, T val3)
         {
             Assert.AreEqual(val1, val2, "First and second values differ");
@@ -63,6 +73,9 @@ namespace Microsoft.Identity.Lab.Api.Helpers
         /// <summary>
         /// Asserts that two <see cref="DateTimeOffset"/> values are within one second of each other.
         /// </summary>
+        /// <param name="expected">The expected date/time value.</param>
+        /// <param name="actual">The actual date/time value.</param>
+        /// <param name="message">Optional prefix message to include in the assertion failure.</param>
         public static void AreWithinOneSecond(DateTimeOffset expected, DateTimeOffset actual, string message = "")
         {
             IsWithinRange(expected, actual, TimeSpan.FromSeconds(1), message);
@@ -71,6 +84,10 @@ namespace Microsoft.Identity.Lab.Api.Helpers
         /// <summary>
         /// Asserts that two <see cref="DateTimeOffset"/> values are within a specified range of each other.
         /// </summary>
+        /// <param name="expected">The expected date/time value.</param>
+        /// <param name="actual">The actual date/time value.</param>
+        /// <param name="range">The allowable difference between <paramref name="expected"/> and <paramref name="actual"/>.</param>
+        /// <param name="message">Optional prefix message to include in the assertion failure.</param>
         public static void IsWithinRange(DateTimeOffset expected, DateTimeOffset actual, TimeSpan range, string message = "")
         {
             TimeSpan t = expected - actual;
@@ -81,6 +98,14 @@ namespace Microsoft.Identity.Lab.Api.Helpers
         /// <summary>
         /// Asserts that two dictionaries are equal.
         /// </summary>
+        /// <typeparam name="TKey">The dictionary key type.</typeparam>
+        /// <typeparam name="TValue">The dictionary value type.</typeparam>
+        /// <param name="dict1">The first dictionary.</param>
+        /// <param name="dict2">The second dictionary.</param>
+        /// <param name="valueComparer">Comparer used to evaluate value equality.</param>
+        /// <remarks>
+        /// Dictionary equality is based on: same count, same keys, and values comparing equal via <paramref name="valueComparer"/>.
+        /// </remarks>
         public static void AssertDictionariesAreEqual<TKey, TValue>(
           IDictionary<TKey, TValue> dict1,
           IDictionary<TKey, TValue> dict2,
@@ -92,6 +117,12 @@ namespace Microsoft.Identity.Lab.Api.Helpers
         /// <summary>
         /// Asserts that the specified type is immutable.
         /// </summary>
+        /// <typeparam name="T">The type to validate for immutability.</typeparam>
+        /// <remarks>
+        /// A type is considered immutable if:
+        /// - It is a primitive, enum, or string; or
+        /// - All instance fields are readonly and their field types are also immutable (recursive check).
+        /// </remarks>
         public static void IsImmutable<T>()
         {
             Assert.IsTrue(IsImmutable(typeof(T)));
@@ -104,6 +135,9 @@ namespace Microsoft.Identity.Lab.Api.Helpers
                 return true;
             }
 
+            // Suppress trim-analysis warnings for this test-only helper because it uses
+            // recursive reflection over arbitrary runtime types to inspect instance fields.
+            // This pattern is intentional here and is not intended to be trim-safe.
             #pragma warning disable IL2070, IL2067
             var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             #pragma warning restore IL2070, IL2067
