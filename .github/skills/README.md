@@ -13,15 +13,15 @@ GitHub Copilot Agent Skills are specialized knowledge modules that help Copilot 
 
 ## Available Skills
 
-### 1. Confidential Client Authentication (`msal-confidential-auth/`)
+### 1. Confidential Client Authentication
 
-A comprehensive skill set for confidential client authentication patterns in MSAL.NET, covering three core flows with granularized, reusable credential setup patterns.
+Three individual skills for confidential client authentication patterns in MSAL.NET, with reusable credential setup patterns in `msal-shared/`.
 
 #### Authentication Flows
 
-- **[Authorization Code Flow](msal-confidential-auth/auth-code-flow/SKILL.md)** - Web applications with user sign-in
-- **[On-Behalf-Of (OBO) Flow](msal-confidential-auth/obo-flow/SKILL.md)** - Multi-tier services acting on behalf of users  
-- **[Client Credentials Flow](msal-confidential-auth/client-credentials/SKILL.md)** - Service-to-service daemon applications
+- **[Authorization Code Flow](msal-auth-code-flow/SKILL.md)** - Web applications with user sign-in
+- **[On-Behalf-Of (OBO) Flow](msal-obo-flow/SKILL.md)** - Multi-tier services acting on behalf of users  
+- **[Client Credentials Flow](msal-client-credentials/SKILL.md)** - Service-to-service daemon applications
 
 #### Shared Resources (DRY Principle)
 
@@ -141,9 +141,9 @@ Specialized skills for mTLS PoP authentication with Managed Identity and Confide
 
 | Scenario | Skill to Use |
 |----------|--------------|
-| Web app with user sign-in | [Authorization Code Flow](msal-confidential-auth/auth-code-flow/SKILL.md) |
-| API acting on behalf of user | [On-Behalf-Of Flow](msal-confidential-auth/obo-flow/SKILL.md) |
-| Daemon/background service | [Client Credentials Flow](msal-confidential-auth/client-credentials/SKILL.md) |
+| Web app with user sign-in | [Authorization Code Flow](msal-auth-code-flow/SKILL.md) |
+| API acting on behalf of user | [On-Behalf-Of Flow](msal-obo-flow/SKILL.md) |
+| Daemon/background service | [Client Credentials Flow](msal-client-credentials/SKILL.md) |
 | Direct mTLS PoP token (MSI/SNI) | [Vanilla mTLS PoP](msal-mtls-pop-vanilla/SKILL.md) |
 | FIC token exchange with mTLS PoP | [FIC Two-Leg mTLS PoP](msal-mtls-pop-fic-two-leg/SKILL.md) |
 
@@ -235,11 +235,12 @@ skill-name/
 │   ├── code-examples/            # Copy-paste code snippets
 │   ├── credential-setup/         # Setup guides by credential type
 │   └── patterns/                 # Common patterns, troubleshooting
-├── skill-set-name/
-│   ├── flow1/
-│   │   └── SKILL.md              # Flow-specific documentation
-│   └── flow2/
-│       └── SKILL.md
+├── msal-auth-code-flow/
+│   └── SKILL.md                  # Auth Code Flow skill
+├── msal-client-credentials/
+│   └── SKILL.md                  # Client Credentials Flow skill
+├── msal-obo-flow/
+│   └── SKILL.md                  # OBO Flow skill
 └── individual-skill-name/
     ├── SKILL.md                  # Main documentation with YAML frontmatter
     └── HelperClass.cs            # Optional production helper class
