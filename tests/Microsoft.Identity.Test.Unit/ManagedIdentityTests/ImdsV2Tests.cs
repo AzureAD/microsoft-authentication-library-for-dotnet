@@ -1113,7 +1113,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task MaaTokenCache_DifferentKeyIds_CachedSeparately()
         {
             // Validates that the keyId component of the cache key scopes entries per-CNG-key.
-            // Two different CNG keys sharing the same endpoint+clientId must NOT share a cache entry,
+            // Two different CNG keys sharing the same endpoint must NOT share a cache entry,
             // ensuring key rotation does not cause stale MAA tokens to be returned for the new key.
             //
             // Note: ephemeral RSACng keys have a null KeyName. We pass explicit named keyIds here
