@@ -497,6 +497,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("api-version", "2018-02-01");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("Metadata", "true");
+                    httpMessageHandler.PresentRequestHeaders = new List<string>
+                    {
+                        MsalIdParameter.Product,
+                        MsalIdParameter.Version,
+                        "client-request-id"
+                    };
                     break;
                 case ManagedIdentitySource.CloudShell:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Post;

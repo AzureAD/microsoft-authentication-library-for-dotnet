@@ -65,6 +65,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             ManagedIdentityRequest request = new(HttpMethod.Get, _imdsEndpoint);
 
             request.Headers.Add("Metadata", "true");
+            request.Headers.Add(MsalIdParameter.Product, _requestContext.ServiceBundle.PlatformProxy.GetProductName());
+            request.Headers.Add(MsalIdParameter.Version, MsalIdHelper.GetMsalVersion());
+            request.Headers.Add(OAuth2Header.CorrelationId, _requestContext.CorrelationId.ToString());
             request.QueryParameters[ApiVersionQueryParam] = ImdsApiVersion;
             request.QueryParameters["resource"] = resource;
 

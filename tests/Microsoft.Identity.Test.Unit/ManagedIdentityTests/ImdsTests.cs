@@ -2,13 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
@@ -424,6 +427,59 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // 3 retries (requestsMade would be 9 if retry policy was NOT per request)
                 requestsMade = Num504Errors - httpManager.QueueSize;
                 Assert.AreEqual(Num504Errors, requestsMade);
+            }
+        }
+        [TestMethod]
+        public async Task Imds_ClientMetadataHeaders_AreSentWithRequest_Async()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                var handler = httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.ImdsEndpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.Imds);
+
+                AuthenticationResult result = await mi
+                    .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
+
+                // Verify x-client-SKU header
+                Assert.IsTrue(handler.ActualRequestHeaders.Contains(MsalIdParameter.Product),
+                    $"Expected header '{MsalIdParameter.Product}' to be present on IMDS request.");
+                Assert.IsTrue(handler.ActualRequestHeaders.TryGetValues(MsalIdParameter.Product, out var skuValues));
+                string actualSku = skuValues.FirstOrDefault();
+                string expectedSku = MsalIdHelper.GetMsalIdParameters(null)[MsalIdParameter.Product];
+                Assert.AreEqual(expectedSku, actualSku,
+                    $"Header '{MsalIdParameter.Product}' value mismatch.");
+
+                // Verify x-client-Ver header
+                Assert.IsTrue(handler.ActualRequestHeaders.Contains(MsalIdParameter.Version),
+                    $"Expected header '{MsalIdParameter.Version}' to be present on IMDS request.");
+                Assert.IsTrue(handler.ActualRequestHeaders.TryGetValues(MsalIdParameter.Version, out var verValues));
+                string actualVer = verValues.FirstOrDefault();
+                string expectedVer = MsalIdHelper.GetMsalVersion();
+                Assert.AreEqual(expectedVer, actualVer,
+                    $"Header '{MsalIdParameter.Version}' value mismatch.");
+
+                // Verify client-request-id header is present and is a valid GUID
+                Assert.IsTrue(handler.ActualRequestHeaders.Contains(OAuth2Header.CorrelationId),
+                    $"Expected header '{OAuth2Header.CorrelationId}' to be present on IMDS request.");
+                Assert.IsTrue(handler.ActualRequestHeaders.TryGetValues(OAuth2Header.CorrelationId, out var corrIdValues));
+                string corrIdValue = corrIdValues.FirstOrDefault();
+                Assert.IsTrue(Guid.TryParse(corrIdValue, out _),
+                    $"Header '{OAuth2Header.CorrelationId}' should be a valid GUID, but was: '{corrIdValue}'.");
             }
         }
     }
