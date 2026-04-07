@@ -958,7 +958,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             // Arrange: track how many times the attestation provider is called
             int providerCallCount = 0;
-            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, ct) =>
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
             {
                 Interlocked.Increment(ref providerCallCount);
                 var fakeJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.sig";
@@ -1014,7 +1014,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             PopKeyAttestor.s_expirationBuffer = TimeSpan.Zero;
 
             int providerCallCount = 0;
-            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, ct) =>
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
             {
                 Interlocked.Increment(ref providerCallCount);
                 // Return a token that is already expired
@@ -1072,7 +1072,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             // Arrange: two providers for two different endpoints
             var callCounts = new ConcurrentDictionary<string, int>();
-            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, ct) =>
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
             {
                 callCounts.AddOrUpdate(endpoint, 1, (_, c) => c + 1);
                 var fakeJwt = $"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{Uri.EscapeDataString(endpoint)}.sig";
@@ -1087,18 +1087,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using var rsa2 = new RSACng(2048);
             var handle1 = rsa1.Key.Handle;
             var handle2 = rsa2.Key.Handle;
+            string keyId1 = rsa1.Key.KeyName;
+            string keyId2 = rsa2.Key.KeyName;
 
             // First calls: cache miss → MAA is invoked
             var result1a = await PopKeyAttestor.AttestCredentialGuardAsync(
-                endpoint1, handle1, "client1", cancellationToken: CancellationToken.None).ConfigureAwait(false);
+                endpoint1, handle1, "client1", keyId1, cancellationToken: CancellationToken.None).ConfigureAwait(false);
             var result2a = await PopKeyAttestor.AttestCredentialGuardAsync(
-                endpoint2, handle2, "client1", cancellationToken: CancellationToken.None).ConfigureAwait(false);
+                endpoint2, handle2, "client1", keyId2, cancellationToken: CancellationToken.None).ConfigureAwait(false);
 
-            // Second calls: cache hit — key handle still required but provider is not called again
+            // Second calls: cache hit — provider is not called again
             var result1b = await PopKeyAttestor.AttestCredentialGuardAsync(
-                endpoint1, handle1, "client1", cancellationToken: CancellationToken.None).ConfigureAwait(false);
+                endpoint1, handle1, "client1", keyId1, cancellationToken: CancellationToken.None).ConfigureAwait(false);
             var result2b = await PopKeyAttestor.AttestCredentialGuardAsync(
-                endpoint2, handle2, "client1", cancellationToken: CancellationToken.None).ConfigureAwait(false);
+                endpoint2, handle2, "client1", keyId2, cancellationToken: CancellationToken.None).ConfigureAwait(false);
 
             Assert.AreEqual(1, callCounts[endpoint1], "endpoint1 MAA should only be called once.");
             Assert.AreEqual(1, callCounts[endpoint2], "endpoint2 MAA should only be called once.");
@@ -1108,12 +1110,62 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task MaaTokenCache_DifferentKeyIds_CachedSeparately()
+        {
+            // Validates that the keyId component of the cache key scopes entries per-CNG-key.
+            // Two different CNG keys sharing the same endpoint+clientId must NOT share a cache entry,
+            // ensuring key rotation does not cause stale MAA tokens to be returned for the new key.
+            //
+            // Note: ephemeral RSACng keys have a null KeyName. We pass explicit named keyIds here
+            // to simulate two persistent keys with distinct names (as used in production KeyGuard flows).
+            var callCounts = new ConcurrentDictionary<string, int>();
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+            {
+                callCounts.AddOrUpdate(keyId, 1, (_, c) => c + 1);
+                var fakeJwt = $"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{Uri.EscapeDataString(keyId)}.sig";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
+            const string endpoint = "https://eastus.attestation.azure.net";
+            const string keyId1 = "TestCngKeyName-Primary";
+            const string keyId2 = "TestCngKeyName-Rotated";
+
+            // Use two RSACng keys to get valid handles; the actual cache isolation is driven by keyId.
+            using var rsa1 = new RSACng(2048);
+            using var rsa2 = new RSACng(2048);
+            var handle1 = rsa1.Key.Handle;
+            var handle2 = rsa2.Key.Handle;
+
+            // First calls: both are cache misses — provider must be invoked once per key
+            var result1a = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint, handle1, "client1", keyId1, cancellationToken: CancellationToken.None).ConfigureAwait(false);
+            var result2a = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint, handle2, "client1", keyId2, cancellationToken: CancellationToken.None).ConfigureAwait(false);
+
+            Assert.AreEqual(1, callCounts[keyId1], "key1 MAA should be called once on first acquire.");
+            Assert.AreEqual(1, callCounts[keyId2], "key2 MAA should be called once on first acquire.");
+            Assert.AreNotEqual(result1a.Jwt, result2a.Jwt, "Different keyIds should produce different cached tokens.");
+
+            // Second calls: both should be cache hits — provider must NOT be called again
+            var result1b = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint, handle1, "client1", keyId1, cancellationToken: CancellationToken.None).ConfigureAwait(false);
+            var result2b = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint, handle2, "client1", keyId2, cancellationToken: CancellationToken.None).ConfigureAwait(false);
+
+            Assert.AreEqual(1, callCounts[keyId1], "key1 MAA should NOT be called again on cache hit.");
+            Assert.AreEqual(1, callCounts[keyId2], "key2 MAA should NOT be called again on cache hit.");
+            Assert.AreEqual(result1a.Jwt, result1b.Jwt, "key1 cached JWT should match.");
+            Assert.AreEqual(result2a.Jwt, result2b.Jwt, "key2 cached JWT should match.");
+        }
+
+        [TestMethod]
         public async Task MaaTokenCache_ConcurrentCacheMiss_SingleFlightCallsProviderOnce()
         {
             // Arrange: provider has a delay so concurrent calls have time to pile up
             int providerCallCount = 0;
             var providerGate = new SemaphoreSlim(0, 5); // max 5 in case of regression
-            PopKeyAttestor.s_testAttestationProvider = async (endpoint, keyHandle, clientId, ct) =>
+            PopKeyAttestor.s_testAttestationProvider = async (endpoint, keyHandle, clientId, keyId, ct) =>
             {
                 Interlocked.Increment(ref providerCallCount);
                 await providerGate.WaitAsync(ct).ConfigureAwait(false);
@@ -1155,7 +1207,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // as long as the MAA token hasn't expired. The CNG key is persistent across cert re-mints,
             // so the existing MAA token remains valid.
             int providerCallCount = 0;
-            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, ct) =>
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
             {
                 Interlocked.Increment(ref providerCallCount);
                 var fakeJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.sig";

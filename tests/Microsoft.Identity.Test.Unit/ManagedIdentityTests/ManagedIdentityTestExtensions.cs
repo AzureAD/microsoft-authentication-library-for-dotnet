@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// </summary>
         public static AcquireTokenForManagedIdentityParameterBuilder WithAttestationProviderForTests(
             this AcquireTokenForManagedIdentityParameterBuilder builder,
-            Func<string, SafeHandle, string, ILoggerAdapter, CancellationToken, Task<string>> attestationTokenProvider)
+            Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> attestationTokenProvider)
         {
             builder.CommonParameters.AttestationTokenProvider = attestationTokenProvider;
             return builder;

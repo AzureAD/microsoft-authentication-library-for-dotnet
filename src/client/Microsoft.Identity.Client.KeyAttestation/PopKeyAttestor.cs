@@ -20,13 +20,18 @@ namespace Microsoft.Identity.Client.KeyAttestation
     /// </summary>
     internal static class PopKeyAttestor
     {
-        // In-process cache: maps "{endpoint}|{clientId}" → AttestationToken (JWT + expiry).
+        // In-process cache: maps "{endpoint}|{clientId}|{keyId}" → AttestationToken (JWT + expiry).
         //
-        // Cache key design: keyed by endpoint + clientId only (not by Key.ID / public-key hash)
-        // because SafeHandle does not expose key material and deriving a stable key ID would
-        // require platform-specific CNG API calls. In practice the same CNG key is reused for
-        // the lifetime of the cert (cert cache lifetime), so endpoint+clientId is sufficient.
-        // Tracking issue for adding Key.ID: include when the API is updated to accept it.
+        // Cache key design:
+        //   endpoint  – included because the MAA service issues endpoint-specific tokens;
+        //               eastus.attestation.azure.net and westus.attestation.azure.net issue
+        //               different tokens for the same key/client combination.
+        //   clientId  – included because it is sent in the attestation request body and
+        //               affects the claims in the issued token.
+        //   keyId     – the CNG key name (CngKey.KeyName), added so that if the same
+        //               endpoint+client ever uses two different CNG keys (e.g. after key
+        //               rotation), the stale token for the old key is not returned for the
+        //               new one. Null/empty for ephemeral (non-KSP) keys.
         private static readonly ConcurrentDictionary<string, AttestationToken> s_tokenCache =
             new ConcurrentDictionary<string, AttestationToken>(StringComparer.OrdinalIgnoreCase);
 
@@ -45,7 +50,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// This field is internal and accessible only via InternalsVisibleTo for test assemblies.
         /// Tests should not run in parallel when using this hook to avoid race conditions.
         /// </remarks>
-        internal static Func<string, SafeHandle, string, CancellationToken, Task<AttestationResult>> s_testAttestationProvider;
+        internal static Func<string, SafeHandle, string, string, CancellationToken, Task<AttestationResult>> s_testAttestationProvider;
 
         static PopKeyAttestor()
         {
@@ -74,12 +79,15 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// <param name="endpoint">Attestation service endpoint (required).</param>
         /// <param name="keyHandle">Valid SafeNCryptKeyHandle (must remain valid for duration of call).</param>
         /// <param name="clientId">Optional client identifier (may be null/empty).</param>
+        /// <param name="keyId">Optional CNG key name (<see cref="System.Security.Cryptography.CngKey.KeyName"/>).
+        /// Pass the key name to scope the cache entry to a specific key; null/empty for ephemeral keys.</param>
         /// <param name="logger">Optional logger for cache hit/miss diagnostics.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         public static async Task<AttestationResult> AttestCredentialGuardAsync(
             string endpoint,
             SafeHandle keyHandle,
             string clientId,
+            string keyId = null,
             ILoggerAdapter logger = null,
             CancellationToken cancellationToken = default)
         {
@@ -96,7 +104,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
             var safeNCryptKeyHandle = keyHandle as SafeNCryptKeyHandle
                 ?? throw new ArgumentException("keyHandle must be a SafeNCryptKeyHandle. Only Windows CNG keys are supported.", nameof(keyHandle));
 
-            string cacheKey = BuildCacheKey(endpoint, clientId);
+            string cacheKey = BuildCacheKey(endpoint, clientId, keyId);
 
             // Fast path: check cache without acquiring any lock.
             if (TryGetCachedToken(cacheKey, out AttestationToken cached))
@@ -124,7 +132,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
 
                 // Check for test provider to avoid loading native DLL in unit tests.
                 Task<AttestationResult> attestTask = s_testAttestationProvider != null
-                    ? s_testAttestationProvider(endpoint, keyHandle, clientId, cancellationToken)
+                    ? s_testAttestationProvider(endpoint, keyHandle, clientId, keyId, cancellationToken)
                     : Task.Run(() =>
                     {
                         try
@@ -185,9 +193,9 @@ namespace Microsoft.Identity.Client.KeyAttestation
             return false;
         }
 
-        private static string BuildCacheKey(string endpoint, string clientId)
+        private static string BuildCacheKey(string endpoint, string clientId, string keyId)
         {
-            return $"{endpoint}|{clientId ?? string.Empty}";
+            return $"{endpoint}|{clientId ?? string.Empty}|{keyId ?? string.Empty}";
         }
     }
 }
