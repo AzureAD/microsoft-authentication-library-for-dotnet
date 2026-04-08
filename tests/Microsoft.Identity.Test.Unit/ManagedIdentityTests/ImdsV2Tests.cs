@@ -1082,13 +1082,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             const string endpoint1 = "https://eastus.attestation.azure.net";
             const string endpoint2 = "https://westus.attestation.azure.net";
+            // Use explicit const keyIds (ephemeral RSACng keys have null KeyName).
+            const string keyId1 = "TestKeyEndpoint1";
+            const string keyId2 = "TestKeyEndpoint2";
 
             using var rsa1 = new RSACng(2048);
             using var rsa2 = new RSACng(2048);
             var handle1 = rsa1.Key.Handle;
             var handle2 = rsa2.Key.Handle;
-            string keyId1 = rsa1.Key.KeyName;
-            string keyId2 = rsa2.Key.KeyName;
 
             // First calls: cache miss → MAA is invoked
             var result1a = await PopKeyAttestor.AttestCredentialGuardAsync(
@@ -1175,13 +1176,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             };
 
             const string endpoint = "https://eastus.attestation.azure.net";
+            // Use an explicit keyId: ephemeral RSACng keys have null KeyName.
+            const string keyId = "TestKeyConcurrent";
             using var rsa = new RSACng(2048);
             var handle = rsa.Key.Handle;
 
             // Fire 5 concurrent attestation calls for the same key before any result is cached
             var tasks = new Task<AttestationResult>[5];
             for (int i = 0; i < tasks.Length; i++)
-                tasks[i] = PopKeyAttestor.AttestCredentialGuardAsync(endpoint, handle, "client1", cancellationToken: CancellationToken.None);
+                tasks[i] = PopKeyAttestor.AttestCredentialGuardAsync(endpoint, handle, "client1", keyId, cancellationToken: CancellationToken.None);
 
             // Release enough permits for all potential calls so that if the implementation
             // regresses and invokes the provider more than once, the test fails with an assertion

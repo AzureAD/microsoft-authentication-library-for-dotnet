@@ -44,6 +44,8 @@ namespace Microsoft.Identity.Client.KeyAttestation
             new ConcurrentDictionary<string, AttestationToken>(StringComparer.OrdinalIgnoreCase);
 
         // Per-key async gates to prevent concurrent in-flight attestation for the same cache key (single-flight).
+        // The pool is bounded in practice: ephemeral (unnamed) keys bypass the cache/semaphore entirely,
+        // so only named keys ever enter the pool. A typical process uses one named key per endpoint.
         private static readonly KeyedSemaphorePool s_keyLocks = new KeyedSemaphorePool();
 
         // Tokens within this window of expiry are considered stale and will be refreshed.
@@ -114,15 +116,22 @@ namespace Microsoft.Identity.Client.KeyAttestation
 
             string cacheKey = BuildCacheKey(endpoint, keyId);
 
+            // Note on null/empty keyId (ephemeral, non-KSP keys):
+            // When keyId is null, the cache key collapses to "{endpoint}|", which means all
+            // ephemeral keys at the same endpoint share one cache slot. In production, Credential
+            // Guard always uses persisted (named) CNG keys so keyId is never null. The degenerate
+            // case is accepted: a process can only have one in-flight attestation for the same
+            // endpoint, and the MAA token is bound to the endpoint, not the key itself.
+
             // Fast path: check cache without acquiring any lock.
             if (TryGetCachedToken(cacheKey, out AttestationToken cached))
             {
-                logger?.Info($"[PopKeyAttestor] MAA token cache hit for '{cacheKey}'.");
+                logger?.Info(() => $"[PopKeyAttestor] MAA token cache hit for '{cacheKey}'.");
                 return new AttestationResult(
                     AttestationStatus.Success, cached, cached.Token, 0, string.Empty);
             }
 
-            logger?.Info($"[PopKeyAttestor] MAA token cache miss for '{cacheKey}'. Acquiring semaphore.");
+            logger?.Info(() => $"[PopKeyAttestor] MAA token cache miss for '{cacheKey}'. Acquiring semaphore.");
 
             // Acquire per-key semaphore to ensure only one attestation call in-flight per cache key.
             await s_keyLocks.EnterAsync(cacheKey, cancellationToken).ConfigureAwait(false);
@@ -131,12 +140,12 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 // Double-check cache after acquiring the lock — a concurrent caller may have populated it.
                 if (TryGetCachedToken(cacheKey, out cached))
                 {
-                    logger?.Info($"[PopKeyAttestor] MAA token cache hit (post-lock) for '{cacheKey}'.");
+                    logger?.Info(() => $"[PopKeyAttestor] MAA token cache hit (post-lock) for '{cacheKey}'.");
                     return new AttestationResult(
                         AttestationStatus.Success, cached, cached.Token, 0, string.Empty);
                 }
 
-                logger?.Info($"[PopKeyAttestor] Calling attestation provider for '{cacheKey}'.");
+                logger?.Info(() => $"[PopKeyAttestor] Calling attestation provider for '{cacheKey}'.");
 
                 // Check for test provider to avoid loading native DLL in unit tests.
                 Task<AttestationResult> attestTask = s_testAttestationProvider != null
@@ -175,7 +184,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
             if (result.Status == AttestationStatus.Success && result.Token != null)
             {
                 s_tokenCache[cacheKey] = result.Token;
-                logger?.Info($"[PopKeyAttestor] MAA token cached for '{cacheKey}', expires {result.Token.ExpiresOn:O}.");
+                logger?.Info(() => $"[PopKeyAttestor] MAA token cached for '{cacheKey}', expires {result.Token.ExpiresOn:O}.");
             }
 
             return result;
@@ -203,7 +212,15 @@ namespace Microsoft.Identity.Client.KeyAttestation
 
         private static string BuildCacheKey(string endpoint, string keyId)
         {
-            return $"{endpoint}|{keyId ?? string.Empty}";
+            return $"{NormalizeEndpoint(endpoint)}|{keyId ?? string.Empty}";
+        }
+
+        /// <summary>
+        /// Strips a trailing slash so that "https://host/" and "https://host" map to the same cache key.
+        /// </summary>
+        private static string NormalizeEndpoint(string endpoint)
+        {
+            return endpoint?.TrimEnd('/') ?? string.Empty;
         }
     }
 }
