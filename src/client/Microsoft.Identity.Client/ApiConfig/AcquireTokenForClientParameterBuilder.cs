@@ -164,26 +164,13 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Specifies attribute tokens to include in the token request.
         /// The tokens are joined with spaces and sent as the <c>attribute_tokens</c> body parameter.
+        /// Null, empty, or whitespace-only token entries are ignored.
         /// </summary>
         /// <param name="attributeTokens">A list of attribute token strings to include in the request.</param>
         /// <returns>The builder to chain method calls.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="attributeTokens"/> is null or contains no elements.</exception>
         public AcquireTokenForClientParameterBuilder WithAttributeTokens(IEnumerable<string> attributeTokens)
         {
-            if (attributeTokens == null)
-            {
-                throw new ArgumentNullException(nameof(attributeTokens));
-            }
-
-            string joinedTokens = string.Join(" ", attributeTokens);
-
-            var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
-            {
-                { OAuth2Parameter.AttributeTokens, _ => Task.FromResult(joinedTokens) }
-            };
-
-            this.WithExtraBodyParameters(extraBodyParams);
-
+            this.WithAttributeTokensInternal(attributeTokens);
             return this;
         }
 

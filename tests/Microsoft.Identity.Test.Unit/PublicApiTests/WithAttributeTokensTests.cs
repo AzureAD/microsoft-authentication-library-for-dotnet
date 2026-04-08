@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
@@ -154,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithAttributeTokens_ForClient_Null_ThrowsException()
+        public async Task WithAttributeTokens_ForClient_Null_NoOp_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -167,10 +166,25 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
-                // Act & Assert - Null should throw
-                Assert.Throws<ArgumentNullException>(() =>
-                    app.AcquireTokenForClient(_scope)
-                        .WithAttributeTokens(null));
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    token: "token_without_attr_tokens");
+
+                handler.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.Scope, string.Join(" ", _scope) }
+                };
+
+                // Act
+                var result = await app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(null)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual("token_without_attr_tokens", result.AccessToken);
             }
         }
 
@@ -252,7 +266,78 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithAttributeTokens_OnBehalfOf_Null_ThrowsException()
+        public async Task WithAttributeTokens_OnBehalfOf_IncludedInCacheKey_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler1 = new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                        string.Join(" ", _scope),
+                        MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                        MockHelpers.CreateClientInfo()),
+                    ExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, "oboTokenA oboTokenB" }
+                    }
+                };
+                httpManager.AddMockHandler(handler1);
+
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                // Act - First request with tokens A,B
+                var result1 = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                    .WithAttributeTokens(new[] { "oboTokenA", "oboTokenB" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                // Act - Same tokens, should hit cache
+                var result2 = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                    .WithAttributeTokens(new[] { "oboTokenA", "oboTokenB" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
+
+                // Act - Different tokens, should NOT hit cache
+                var handler2 = new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                        string.Join(" ", _scope),
+                        MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                        MockHelpers.CreateClientInfo()),
+                    ExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, "oboTokenX oboTokenY" }
+                    }
+                };
+                httpManager.AddMockHandler(handler2);
+
+                var result3 = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                    .WithAttributeTokens(new[] { "oboTokenX", "oboTokenY" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result3.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithAttributeTokens_OnBehalfOf_Null_NoOp_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -264,12 +349,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
-                // Act & Assert - Null should throw
-                Assert.Throws<ArgumentNullException>(() =>
-                    app.AcquireTokenOnBehalfOf(
-                            _scope,
-                            new UserAssertion(TestConstants.DefaultAccessToken))
-                        .WithAttributeTokens(null));
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                    ExpectedPostData = new Dictionary<string, string>()
+                };
+
+                httpManager.AddMockHandler(handler);
+
+                // Act
+                var result = await app.AcquireTokenOnBehalfOf(
+                        _scope,
+                        new UserAssertion(TestConstants.DefaultAccessToken))
+                    .WithAttributeTokens(null)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -315,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithAttributeTokens_ByAuthCode_Null_ThrowsException()
+        public async Task WithAttributeTokens_ByAuthCode_NotServedFromCache_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -328,10 +429,87 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
-                // Act & Assert - Null should throw
-                Assert.Throws<ArgumentNullException>(() =>
-                    app.AcquireTokenByAuthorizationCode(_scope, "some_auth_code")
-                        .WithAttributeTokens(null));
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler1 = new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                    ExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, "authCodeTokenA authCodeTokenB" }
+                    }
+                };
+                httpManager.AddMockHandler(handler1);
+
+                // Act - First auth-code redemption
+                var result1 = await app.AcquireTokenByAuthorizationCode(
+                        _scope,
+                        "auth_code_1")
+                    .WithAttributeTokens(new[] { "authCodeTokenA", "authCodeTokenB" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+
+                var handler2 = new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                    ExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, "authCodeTokenA authCodeTokenB" }
+                    }
+                };
+                httpManager.AddMockHandler(handler2);
+
+                // Act - Second auth-code redemption with same attribute tokens should still go to IDP
+                var result2 = await app.AcquireTokenByAuthorizationCode(
+                        _scope,
+                        "auth_code_2")
+                    .WithAttributeTokens(new[] { "authCodeTokenA", "authCodeTokenB" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithAttributeTokens_ByAuthCode_Null_NoOp_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithRedirectUri("https://localhost")
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                    ExpectedPostData = new Dictionary<string, string>()
+                };
+
+                httpManager.AddMockHandler(handler);
+
+                // Act
+                var result = await app.AcquireTokenByAuthorizationCode(_scope, "some_auth_code")
+                    .WithAttributeTokens(null)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
     }
