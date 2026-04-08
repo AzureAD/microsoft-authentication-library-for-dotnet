@@ -1,4 +1,4 @@
-﻿const Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.TooManyRequestsContent = "Too many requests error" -> string
+const Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.TooManyRequestsContent = "Too many requests error" -> string
 const Microsoft.Identity.Test.Common.TestCategories.ADFS = "ADFS" -> string
 const Microsoft.Identity.Test.Common.TestCategories.Arlington = "Arlington" -> string
 const Microsoft.Identity.Test.Common.TestCategories.B2C = "B2C" -> string
@@ -267,68 +267,6 @@ Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.AuthorityWithExpect
 Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.ExpectedTenantId.get -> string
 Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.ExpectedTenantId.set -> void
 Microsoft.Identity.Test.Common.AuthorityWithExpectedTenantId.ToObjectArray() -> object[]
-Microsoft.Identity.Test.Common.Core.Helpers.AssertException
-Microsoft.Identity.Test.Common.Core.Helpers.CoreAssert
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnLinuxAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnLinuxAttribute.DoNotRunOnLinuxAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnPlatformAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnPlatformAttribute.DoNotRunOnPlatformAttribute(System.Runtime.InteropServices.OSPlatform platform, string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnWindowsAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnWindowsAttribute.DoNotRunOnWindowsAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.EnvVariableContext
-Microsoft.Identity.Test.Common.Core.Helpers.EnvVariableContext.Dispose() -> void
-Microsoft.Identity.Test.Common.Core.Helpers.EnvVariableContext.EnvVariableContext() -> void
-Microsoft.Identity.Test.Common.Core.Helpers.JsonTestUtils
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.AzureArc = 3 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.CloudShell = 4 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.Function = 1 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.ServiceFabric = 5 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.VM = 2 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.WebApp = 0 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.ClientId = 1 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.None = 0 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.ObjectId = 3 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
-Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.ResourceId = 2 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
-Microsoft.Identity.Test.Common.Core.Helpers.OsHelper
-Microsoft.Identity.Test.Common.Core.Helpers.OsHelper.OsHelper() -> void
-Microsoft.Identity.Test.Common.Core.Helpers.PerformanceValidator
-Microsoft.Identity.Test.Common.Core.Helpers.PerformanceValidator.Dispose() -> void
-Microsoft.Identity.Test.Common.Core.Helpers.PerformanceValidator.PerformanceValidator(long maxMilliseconds, string message) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RandomDataUtils
-Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider
-Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.CannonicalPublicKeyJwk.get -> string
-Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.CryptographicAlgorithm.get -> string
-Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.RSACertificatePopCryptoProvider(System.Security.Cryptography.X509Certificates.X509Certificate2 cert) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RSACertificatePopCryptoProvider.Sign(byte[] payload) -> byte[]
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnAzureDevOpsAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnAzureDevOpsAttribute.RunOnAzureDevOpsAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnLinuxAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnLinuxAttribute.RunOnLinuxAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnOSXAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnOSXAttribute.RunOnOSXAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnPlatformAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnPlatformAttribute.RunOnPlatformAttribute(System.Runtime.InteropServices.OSPlatform platform, string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnWindowsAttribute
-Microsoft.Identity.Test.Common.Core.Helpers.RunOnWindowsAttribute.RunOnWindowsAttribute(string filePath = null, int lineNumber = 0) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.TestIdentityLogger
-Microsoft.Identity.Test.Common.Core.Helpers.TestIdentityLogger.IsEnabled(Microsoft.IdentityModel.Abstractions.EventLogLevel eventLogLevel) -> bool
-Microsoft.Identity.Test.Common.Core.Helpers.TestIdentityLogger.Log(Microsoft.IdentityModel.Abstractions.LogEntry entry) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.TestIdentityLogger.StringBuilder.get -> System.Text.StringBuilder
-Microsoft.Identity.Test.Common.Core.Helpers.TestIdentityLogger.TestIdentityLogger(Microsoft.IdentityModel.Abstractions.EventLogLevel minLevel = Microsoft.IdentityModel.Abstractions.EventLogLevel.Verbose) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.AfterAccessTotalCount.get -> int
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.AfterAccessWriteCount.get -> int
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.AssertAccessCounts(int expectedReads, int expectedWrites) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.BeforeAccessCount.get -> int
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.BeforeWriteCount.get -> int
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.LastAfterAccessNotificationArgs.get -> Microsoft.Identity.Client.TokenCacheNotificationArgs
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.LastBeforeAccessNotificationArgs.get -> Microsoft.Identity.Client.TokenCacheNotificationArgs
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.LastBeforeWriteNotificationArgs.get -> Microsoft.Identity.Client.TokenCacheNotificationArgs
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.TokenCacheAccessRecorder(Microsoft.Identity.Client.TokenCache tokenCache, System.Action<Microsoft.Identity.Client.TokenCacheNotificationArgs> assertLogic = null) -> void
-Microsoft.Identity.Test.Common.Core.Helpers.TokenCacheAccessRecorder.WaitTo_AssertAcessCounts(int expectedReads, int expectedWrites, int maxTimeInMilliSec = 30000) -> void
 Microsoft.Identity.Test.Common.Core.Mocks.InMemoryTokenCache
 Microsoft.Identity.Test.Common.Core.Mocks.InMemoryTokenCache.AfterAccessNotification(Microsoft.Identity.Client.TokenCacheNotificationArgs args) -> void
 Microsoft.Identity.Test.Common.Core.Mocks.InMemoryTokenCache.BeforeAccessNotification(Microsoft.Identity.Client.TokenCacheNotificationArgs args) -> void
@@ -399,20 +337,8 @@ Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType.InvalidGrant = 3 -> 
 Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType.Invalid_AADUnavailable503 = 2 -> Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType
 Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType.Valid_ClientCredentials = 1 -> Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType
 Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType.Valid_UserFlows = 0 -> Microsoft.Identity.Test.Common.Core.Mocks.TokenResponseType
-Microsoft.Identity.Test.Common.HttpSnifferClientFactory
-Microsoft.Identity.Test.Common.HttpSnifferClientFactory.GetHttpClient() -> System.Net.Http.HttpClient
-Microsoft.Identity.Test.Common.HttpSnifferClientFactory.GetHttpClient(System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate2) -> System.Net.Http.HttpClient
-Microsoft.Identity.Test.Common.HttpSnifferClientFactory.HttpSnifferClientFactory() -> void
-Microsoft.Identity.Test.Common.HttpSnifferClientFactory.RequestsAndResponses.get -> System.Collections.Generic.IList<(System.Net.Http.HttpRequestMessage, System.Net.Http.HttpResponseMessage)>
-Microsoft.Identity.Test.Common.RecordingHandler
-Microsoft.Identity.Test.Common.RecordingHandler.RecordingHandler(System.Action<System.Net.Http.HttpRequestMessage, System.Net.Http.HttpResponseMessage> recordingAction) -> void
 Microsoft.Identity.Test.Common.TestCategories
 Microsoft.Identity.Test.Common.TestData
-Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider
-Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider.CannonicalPublicKeyJwk.get -> string
-Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider.CryptographicAlgorithm.get -> string
-Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider.ECDCertificatePopCryptoProvider() -> void
-Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider.Sign(byte[] payload) -> byte[]
 Microsoft.Identity.Test.LabInfrastructure.AppConfig
 Microsoft.Identity.Test.LabInfrastructure.AppConfig.AppConfig() -> void
 Microsoft.Identity.Test.LabInfrastructure.AppConfig.AppId.get -> string
@@ -475,34 +401,7 @@ Microsoft.Identity.Test.LabInfrastructure.UserConfig.UserType.set -> void
 Microsoft.Identity.Test.Unit.TestConstants
 Microsoft.Identity.Test.Unit.TestConstants.AuthorityType
 Microsoft.Identity.Test.Unit.TestConstants.AuthorityType.B2C = 0 -> Microsoft.Identity.Test.Unit.TestConstants.AuthorityType
-override Microsoft.Identity.Test.Common.Core.Helpers.DoNotRunOnPlatformAttribute.ExecuteAsync(Microsoft.VisualStudio.TestTools.UnitTesting.ITestMethod testMethod) -> System.Threading.Tasks.Task<Microsoft.VisualStudio.TestTools.UnitTesting.TestResult[]>
-override Microsoft.Identity.Test.Common.Core.Helpers.RunOnAzureDevOpsAttribute.ExecuteAsync(Microsoft.VisualStudio.TestTools.UnitTesting.ITestMethod testMethod) -> System.Threading.Tasks.Task<Microsoft.VisualStudio.TestTools.UnitTesting.TestResult[]>
-override Microsoft.Identity.Test.Common.Core.Helpers.RunOnPlatformAttribute.ExecuteAsync(Microsoft.VisualStudio.TestTools.UnitTesting.ITestMethod testMethod) -> System.Threading.Tasks.Task<Microsoft.VisualStudio.TestTools.UnitTesting.TestResult[]>
 override Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler.SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage>
-override Microsoft.Identity.Test.Common.RecordingHandler.SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage>
-static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.DoesNotThrow(System.Action testCode) -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.DoesNotThrow(System.Func<object> testCode) -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.TaskDoesNotThrow(System.Func<System.Threading.Tasks.Task> testCode) -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.TaskDoesNotThrow<T>(System.Func<System.Threading.Tasks.Task> testCode) -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.TaskThrowsAsync<T>(System.Func<System.Threading.Tasks.Task> testCode, bool allowDerived = false) -> System.Threading.Tasks.Task<T>
-static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.Throws<TException>(System.Action testCode) -> TException
-static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.Throws<TException>(System.Action testCode, bool allowDerived) -> TException
-static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.Throws<TException>(System.Func<object> testCode) -> TException
-static Microsoft.Identity.Test.Common.Core.Helpers.AssertException.Throws<TException>(System.Func<object> testCode, bool allowDerived) -> TException
-static Microsoft.Identity.Test.Common.Core.Helpers.CoreAssert.AreEqual<T>(T val1, T val2, T val3) -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.CoreAssert.AreScopesEqual(string scopesExpected, string scopesActual) -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.CoreAssert.AreWithinOneSecond(System.DateTimeOffset expected, System.DateTimeOffset actual, string message = "") -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.CoreAssert.AssertDictionariesAreEqual<TKey, TValue>(System.Collections.Generic.IDictionary<TKey, TValue> dict1, System.Collections.Generic.IDictionary<TKey, TValue> dict2, System.Collections.Generic.IEqualityComparer<TValue> valueComparer) -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.CoreAssert.IsImmutable<T>() -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.CoreAssert.IsWithinRange(System.DateTimeOffset expected, System.DateTimeOffset actual, System.TimeSpan range, string message = "") -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.JsonTestUtils.AddKeyValue(string json, string key, string value) -> string
-static Microsoft.Identity.Test.Common.Core.Helpers.JsonTestUtils.AssertJsonDeepEquals(string expectedJson, string actualJson) -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.CreateMIABuilder(string userAssignedId = "", Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.ClientId) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
-static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.SetEnvironmentVariables(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint") -> void
-static Microsoft.Identity.Test.Common.Core.Helpers.OsHelper.IsLinuxPlatform() -> bool
-static Microsoft.Identity.Test.Common.Core.Helpers.OsHelper.IsMacPlatform() -> bool
-static Microsoft.Identity.Test.Common.Core.Helpers.OsHelper.IsWindowsPlatform() -> bool
-static Microsoft.Identity.Test.Common.Core.Helpers.RandomDataUtils.GetRandomData(int size) -> byte[]
 static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateAdfsIdToken(string upn) -> string
 static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateAdfsOpenIdConfigurationResponse(string authority, string qp = "") -> System.Net.Http.HttpResponseMessage
 static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.CreateAdfsSuccessTokenResponseMessage() -> System.Net.Http.HttpResponseMessage
@@ -544,14 +443,8 @@ static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetMsiImdsErrorResp
 static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetMsiSuccessfulResponse(int expiresInHours = 1, bool useIsoFormat = false, bool imdsV2 = false) -> string
 static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetPopTokenResponse() -> string
 static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.GetTokenResponseWithNoOidClaim() -> string
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.MockCertificateRequestResponse(Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.None, string userAssignedId = null, string certificate = "MIIDATCCAemgAwIBAgIUSfjghyQB4FIS41rWfNcZHTLE/R4wDQYJKoZIhvcNAQELBQAwDzENMAsGA1UEAwwEVGVzdDAgFw0yNTA4MjgyMDIxMDBaGA8yMTI1MDgwNDIwMjEwMFowDzENMAsGA1UEAwwEVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALlc0S6TdwgQKGRl3Y/9uWNRpWo1WHiZtd1YdgCBt0rjxTqsbQUurU0B9Kdk7QQ9srxmjimxGHaUFypbb39awqIdQQcuQvIUj5+sQh9zzCyR35bGQp8vwbna5GlhAIbzsUi/y5kEGUMbuQN05XfoJSQrU35XZ8duQSDH5h9aDr6kuLcpDHo9/9vZiosPfqGPxZGtVjMvrJdVQGLJF35xD3LlX8xG2iJfVK/xYQVi3MgbRNQaL2lHtZaGAc1CToMUPO60xXrZkQE08hC907YTBcavUVQg4vrOaPpsCs+Fj6EJcasADAJeh1mGBn3kHFPCxBa2MKFraFPp53zOagTvYV0CAwEAAaNTMFEwHQYDVR0OBBYEFA9irQR/O6/V2JVyDEHFOdUDjAsyMB8GA1UdIwQYMBaAFA9irQR/O6/V2JVyDEHFOdUDjAsyMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAAOxtgYjtkUDVvWzq/lkjLTdcLjPvmH0hF34A3uvX4zcjmqF845lfvszTuhc1mx5J6YLEzKfr4TrO3D3g2BnDLvhupok0wEmJ9yVwbt1laim7zP09gZqnUqYM9hYKDhwgLZAaG3zGNocxDEAU7jazMGOGF7TweB7LdNuVI6CqgDOBQ8Cy2ObuZvzCI5Y7f+HucXpiJOu1xNa2ZZpMpQycYEvi5TD+CL5CBv2fcKQRn/+u5B3ZXCD2C9jT/RZ7rH46mIG7nC7dS4J2o4JjmlJIUAe2U6tRay5GvEmc/nZK8hd9y4BICzrykp9ENAoy9i+uaE1GGWeNgO+irrcrAcLwto=", string clientIdOverride = null, string tenantIdOverride = null, string mtlsEndpointOverride = null) -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.MockCsrResponse(System.Net.HttpStatusCode statusCode = System.Net.HttpStatusCode.OK, string responseServerHeader = "IMDS/150.870.65.1854", Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.None, string userAssignedId = null, string clientIdOverride = null, string tenantIdOverride = null, string attestationEndpointOverride = null) -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
-static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.MockCsrResponseFailure() -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
-static Microsoft.Identity.Test.Common.HttpSnifferClientFactory.LastHttpContentData.get -> string
-static Microsoft.Identity.Test.Common.HttpSnifferClientFactory.LastHttpContentData.set -> void
 static Microsoft.Identity.Test.Common.TestData.GetAuthorityWithExpectedTenantId() -> System.Collections.Generic.IEnumerable<object[]>
 static Microsoft.Identity.Test.Common.TestData.GetClaimsAndCapabilities() -> System.Collections.Generic.IEnumerable<object[]>
-static Microsoft.Identity.Test.Integration.Infrastructure.ECDCertificatePopCryptoProvider.Sign(System.Security.Cryptography.ECDsa ecdKey, byte[] payload) -> byte[]
 static Microsoft.Identity.Test.LabInfrastructure.CertificateHelper.FindCertificateByName(string subjectName) -> System.Security.Cryptography.X509Certificates.X509Certificate2
 static Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(string labAccessClientId) -> System.Threading.Tasks.Task<Azure.Core.AccessToken>
 static Microsoft.Identity.Test.LabInfrastructure.LabAuthenticationHelper.GetLabAccessTokenAsync(string authority, string[] scopes) -> System.Threading.Tasks.Task<Azure.Core.AccessToken>
@@ -563,6 +456,9 @@ static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.GetUserConfig
 static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.KeyVaultSecretsProviderMsal.get -> Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider
 static Microsoft.Identity.Test.LabInfrastructure.LabResponseHelper.KeyVaultSecretsProviderMsid.get -> Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecretsProvider
 static Microsoft.Identity.Test.Unit.TestConstants.AdditionalAssertionClaims.get -> System.Collections.Generic.Dictionary<string, string>
+static Microsoft.Identity.Test.Unit.TestConstants.CreateClientInfo(string uid = "my-uid", string utid = "my-utid", bool CreateClientInfoForS2S = false) -> string
+static Microsoft.Identity.Test.Unit.TestConstants.CreateIdToken(string uniqueId, string displayableId) -> string
+static Microsoft.Identity.Test.Unit.TestConstants.CreateIdToken(string uniqueId, string displayableId, string tenantId) -> string
 static Microsoft.Identity.Test.Unit.TestConstants.CreateUserIdentifier() -> string
 static Microsoft.Identity.Test.Unit.TestConstants.CreateUserIdentifier(string uid, string utid) -> string
 static Microsoft.Identity.Test.Unit.TestConstants.ExtraQueryParameters.get -> System.Collections.Generic.IDictionary<string, string>
@@ -581,3 +477,21 @@ static readonly Microsoft.Identity.Test.Unit.TestConstants.s_extraHttpHeader -> 
 static readonly Microsoft.Identity.Test.Unit.TestConstants.s_graphScopes -> string[]
 static readonly Microsoft.Identity.Test.Unit.TestConstants.s_scopeForAnotherResource -> System.Collections.Generic.SortedSet<string>
 static readonly Microsoft.Identity.Test.Unit.TestConstants.s_userIdentifier -> string
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.AzureArc = 3 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.CloudShell = 4 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.Function = 1 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.ServiceFabric = 5 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.VM = 2 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource.WebApp = 0 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.MsiAzureResource
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.ClientId = 1 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.None = 0 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.ObjectId = 3 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
+Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.ResourceId = 2 -> Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId
+static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.CreateMIABuilder(string userAssignedId = "", Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.ClientId) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.SetEnvironmentVariables(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint") -> void
+static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.MockCsrResponse(System.Net.HttpStatusCode statusCode = System.Net.HttpStatusCode.OK, string responseServerHeader = "IMDS/150.870.65.1854", Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.None, string userAssignedId = null, string clientIdOverride = null, string tenantIdOverride = null, string attestationEndpointOverride = null) -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
+static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.MockCsrResponseFailure() -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler
+static Microsoft.Identity.Test.Common.Core.Mocks.MockHelpers.MockCertificateRequestResponse(Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId userAssignedIdentityId = Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil.UserAssignedIdentityId.None, string userAssignedId = null, string certificate = "MIIDATCCAemgAwIBAgIUSfjghyQB4FIS41rWfNcZHTLE/R4wDQYJKoZIhvcNAQELBQAwDzENMAsGA1UEAwwEVGVzdDAgFw0yNTA4MjgyMDIxMDBaGA8yMTI1MDgwNDIwMjEwMFowDzENMAsGA1UEAwwEVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALlc0S6TdwgQKGRl3Y/9uWNRpWo1WHiZtd1YdgCBt0rjxTqsbQUurU0B9Kdk7QQ9srxmjimxGHaUFypbb39awqIdQQcuQvIUj5+sQh9zzCyR35bGQp8vwbna5GlhAIbzsUi/y5kEGUMbuQN05XfoJSQrU35XZ8duQSDH5h9aDr6kuLcpDHo9/9vZiosPfqGPxZGtVjMvrJdVQGLJF35xD3LlX8xG2iJfVK/xYQVi3MgbRNQaL2lHtZaGAc1CToMUPO60xXrZkQE08hC907YTBcavUVQg4vrOaPpsCs+Fj6EJcasADAJeh1mGBn3kHFPCxBa2MKFraFPp53zOagTvYV0CAwEAAaNTMFEwHQYDVR0OBBYEFA9irQR/O6/V2JVyDEHFOdUDjAsyMB8GA1UdIwQYMBaAFA9irQR/O6/V2JVyDEHFOdUDjAsyMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAAOxtgYjtkUDVvWzq/lkjLTdcLjPvmH0hF34A3uvX4zcjmqF845lfvszTuhc1mx5J6YLEzKfr4TrO3D3g2BnDLvhupok0wEmJ9yVwbt1laim7zP09gZqnUqYM9hYKDhwgLZAaG3zGNocxDEAU7jazMGOGF7TweB7LdNuVI6CqgDOBQ8Cy2ObuZvzCI5Y7f+HucXpiJOu1xNa2ZZpMpQycYEvi5TD+CL5CBv2fcKQRn/+u5B3ZXCD2C9jT/RZ7rH46mIG7nC7dS4J2o4JjmlJIUAe2U6tRay5GvEmc/nZK8hd9y4BICzrykp9ENAoy9i+uaE1GGWeNgO+irrcrAcLwto=", string clientIdOverride = null, string tenantIdOverride = null, string mtlsEndpointOverride = null) -> Microsoft.Identity.Test.Common.Core.Mocks.MockHttpMessageHandler

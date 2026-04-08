@@ -7,9 +7,9 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Lab.Api.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Lab.Api.Helpers
+namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     internal class AppAccessorWithPartitionAsserts : InMemoryPartitionedAppTokenCacheAccessor
     {

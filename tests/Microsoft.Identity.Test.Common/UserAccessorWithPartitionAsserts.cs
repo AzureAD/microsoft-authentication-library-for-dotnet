@@ -7,15 +7,13 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Lab.Api.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Lab.Api.Helpers
+namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
-    internal class AppAccessorWithPartitionAsserts : InMemoryPartitionedAppTokenCacheAccessor
+    internal class UserAccessorWithPartitionAsserts : InMemoryPartitionedUserTokenCacheAccessor
     {
-        public AppAccessorWithPartitionAsserts(
-            ILoggerAdapter logger, 
-            CacheOptions tokenCacheAccessorOptions) : base(logger, tokenCacheAccessorOptions)
+        public UserAccessorWithPartitionAsserts(ILoggerAdapter logger, CacheOptions tokenCacheAccessorOptions) : base(logger, tokenCacheAccessorOptions)
         {
 
         }
@@ -23,30 +21,25 @@ namespace Microsoft.Identity.Lab.Api.Helpers
         public override List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-            return base.GetAllAccessTokens(partitionKey, requestlogger);
+            return base.GetAllAccessTokens(partitionKey);
         }
 
         public override List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-            Assert.Fail("App token cache - do not call GetAllAccounts");
-            throw new InvalidOperationException();
+            return base.GetAllAccounts(partitionKey);
         }
 
         public override List<MsalIdTokenCacheItem> GetAllIdTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-
-            Assert.Fail("App token cache - do not call GetAllIdTokens");
-            throw new InvalidOperationException();
+            return base.GetAllIdTokens(partitionKey);
         }
 
         public override List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             Assert.IsNotNull(partitionKey);
-
-            Assert.Fail("App token cache - do not call GetAllRefreshTokens");
-            throw new InvalidOperationException();
+            return base.GetAllRefreshTokens(partitionKey);
         }
 
         public override bool HasAccessOrRefreshTokens()

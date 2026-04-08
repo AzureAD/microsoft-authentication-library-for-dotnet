@@ -1,3 +1,16 @@
+---
+name: msal-client-credentials
+description: Client Credentials Flow for service-to-service (daemon) authentication in MSAL.NET without user involvement
+tags:
+  - msal
+  - client-credentials
+  - daemon
+  - service-to-service
+  - confidential-client
+  - background-service
+  - machine-to-machine
+---
+
 # Client Credentials Flow Skill
 
 ## Overview
@@ -20,15 +33,15 @@ Client Credentials Flow is used for service-to-service authentication without us
 
 ### Generate Code Snippet
 Agent can show code for each credential type:
-- Standard Certificate: [with-certificate.cs](../../msal-shared/code-examples/with-certificate.cs)
-- Certificate with SNI: [with-certificate-sni.cs](../../msal-shared/code-examples/with-certificate-sni.cs)
-- Federated Identity Credentials: [with-federated-identity-credentials.cs](../../msal-shared/code-examples/with-federated-identity-credentials.cs)
+- Standard Certificate: [with-certificate.cs](../msal-shared/code-examples/with-certificate.cs)
+- Certificate with SNI: [with-certificate-sni.cs](../msal-shared/code-examples/with-certificate-sni.cs)
+- Federated Identity Credentials: [with-federated-identity-credentials.cs](../msal-shared/code-examples/with-federated-identity-credentials.cs)
 
 ### Setup Guidance
 Reference appropriate credential setup:
-- [Certificate Setup](../../msal-shared/credential-setup/certificate-setup.md)
-- [Certificate with SNI](../../msal-shared/credential-setup/certificate-sni-setup.md)
-- [Federated Identity Credentials](../../msal-shared/credential-setup/federated-identity-credentials.md)
+- [Certificate Setup](../msal-shared/credential-setup/certificate-setup.md)
+- [Certificate with SNI](../msal-shared/credential-setup/certificate-sni-setup.md)
+- [Federated Identity Credentials](../msal-shared/credential-setup/federated-identity-credentials.md)
 
 ### Example: Service with Certificate
 ```csharp
@@ -60,11 +73,11 @@ public class TokenAcquisitionService
 ```
 
 ### Error Resolution
-Refer to [Troubleshooting Guide](../../msal-shared/patterns/troubleshooting.md)
+Refer to [Troubleshooting Guide](../msal-shared/patterns/troubleshooting.md)
 
 ### Best Practices
-- Use [Token Caching Strategies](../../msal-shared/patterns/token-caching-strategies.md) - enable static token caching with `.WithCacheOptions(CacheOptions.EnableSharedCacheOptions)` for optimal performance
-- Implement [Error Handling Patterns](../../msal-shared/patterns/error-handling-patterns.md) 
+- Use [Token Caching Strategies](../msal-shared/patterns/token-caching-strategies.md) - enable static token caching with `.WithCacheOptions(CacheOptions.EnableSharedCacheOptions)` for optimal performance
+- Implement [Error Handling Patterns](../msal-shared/patterns/error-handling-patterns.md) 
 - Monitor token acquisition using `AuthenticationResultMetadata` for cache hit ratios
 - Rotate certificates periodically (if using certificate-based auth)
 - Use Federated Identity Credentials with Managed Identity for keyless authentication
