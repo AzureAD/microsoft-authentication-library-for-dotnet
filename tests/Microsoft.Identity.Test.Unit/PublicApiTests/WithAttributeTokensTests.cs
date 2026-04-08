@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -511,6 +512,200 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
+        }
+
+        [TestMethod]
+        public void WithAttributeTokens_ForClient_EmbeddedSpace_ThrowsArgumentException()
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+
+            var ex = AssertException.Throws<ArgumentException>(() =>
+                app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new[] { "valid", "invalid token", "another" }));
+
+            Assert.Contains("Attribute tokens must not contain whitespace", ex.Message);
+            Assert.Contains("invalid token", ex.Message);
+        }
+
+        [TestMethod]
+        public void WithAttributeTokens_ForClient_EmbeddedTab_ThrowsArgumentException()
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+
+            var ex = AssertException.Throws<ArgumentException>(() =>
+                app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new[] { "token\twith\ttab" }));
+
+            Assert.Contains("Attribute tokens must not contain whitespace", ex.Message);
+        }
+
+        [TestMethod]
+        public void WithAttributeTokens_ForClient_EmbeddedNewline_ThrowsArgumentException()
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+
+            AssertException.Throws<ArgumentException>(() =>
+                app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new[] { "token\nwith\nnewline" }));
+
+            AssertException.Throws<ArgumentException>(() =>
+                app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new[] { "token\rwith\rreturn" }));
+        }
+
+        [TestMethod]
+        public async Task WithAttributeTokens_ForClient_EmptyCollection_NoOp_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    token: "token_no_attr_tokens");
+
+                handler.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.Scope, string.Join(" ", _scope) }
+                };
+
+                // Act
+                var result = await app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new string[0])
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual("token_no_attr_tokens", result.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithAttributeTokens_ForClient_WhitespaceOnlyTokens_Skipped_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    token: "token_no_attr_tokens");
+
+                handler.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.Scope, string.Join(" ", _scope) }
+                };
+
+                // Act - all tokens are whitespace-only, should be skipped entirely
+                var result = await app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new[] { "", " ", "  ", "\t", "\n" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual("token_no_attr_tokens", result.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithAttributeTokens_ForClient_LeadingTrailingWhitespace_Trimmed_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    token: "trimmed_token");
+
+                handler.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.AttributeTokens, "tokenA tokenB tokenC" }
+                };
+
+                // Act - tokens with leading/trailing whitespace should be trimmed
+                var result = await app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new[] { "  tokenA  ", "\ttokenB\t", " tokenC " })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual("trimmed_token", result.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public void WithAttributeTokens_OnBehalfOf_EmbeddedSpace_ThrowsArgumentException()
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
+
+            var ex = AssertException.Throws<ArgumentException>(() =>
+                app.AcquireTokenOnBehalfOf(
+                        _scope,
+                        new UserAssertion(TestConstants.DefaultAccessToken))
+                    .WithAttributeTokens(new[] { "token with space" }));
+
+            Assert.Contains("Attribute tokens must not contain whitespace", ex.Message);
+        }
+
+        [TestMethod]
+        public void WithAttributeTokens_ByAuthCode_EmbeddedSpace_ThrowsArgumentException()
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                .WithRedirectUri("https://localhost")
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
+
+            var ex = AssertException.Throws<ArgumentException>(() =>
+                app.AcquireTokenByAuthorizationCode(_scope, "some_auth_code")
+                    .WithAttributeTokens(new[] { "token with space" }));
+
+            Assert.Contains("Attribute tokens must not contain whitespace", ex.Message);
         }
     }
 }

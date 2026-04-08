@@ -83,7 +83,15 @@ namespace Microsoft.Identity.Client.Extensibility
             {
                 if (!string.IsNullOrWhiteSpace(token))
                 {
-                    normalizedTokens.Add(token.Trim());
+                    string trimmed = token.Trim();
+                    if (trimmed.IndexOfAny(new[] { ' ', '\t', '\n', '\r' }) >= 0)
+                    {
+                        throw new ArgumentException(
+                            $"Attribute tokens must not contain whitespace. Invalid token: '{trimmed}'",
+                            nameof(attributeTokens));
+                    }
+
+                    normalizedTokens.Add(trimmed);
                 }
             }
 

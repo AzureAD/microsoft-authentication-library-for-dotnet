@@ -9,7 +9,6 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -159,8 +158,9 @@ namespace Microsoft.Identity.Client
         /// The tokens are joined with spaces and sent as the <c>attribute_tokens</c> body parameter.
         /// Null, empty, or whitespace-only token entries are ignored.
         /// </summary>
-        /// <param name="attributeTokens">A list of attribute token strings to include in the request.</param>
+        /// <param name="attributeTokens">A list of attribute token strings to include in the request. Individual tokens must not contain whitespace.</param>
         /// <returns>The builder to chain method calls.</returns>
+        /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
         public AcquireTokenByAuthorizationCodeParameterBuilder WithAttributeTokens(IEnumerable<string> attributeTokens)
         {
             this.WithAttributeTokensInternal(attributeTokens);
